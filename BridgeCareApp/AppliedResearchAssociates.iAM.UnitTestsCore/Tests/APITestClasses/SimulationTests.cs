@@ -36,17 +36,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public SimulationTests()
         {
             _testHelper = TestHelper.Instance;
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.CreateCalculatedAttributeLibrary();
-            _testHelper.SetupDefaultHttpContext();
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.CreateCalculatedAttributeLibrary();
+                _testHelper.SetupDefaultHttpContext();
+            }
             _simulationAnalysisService =
-                new SimulationAnalysisService(_testHelper.UnitOfWork, new());
-            /*_controller = new SimulationController(_simulationAnalysisSerivce,
-                _testHelper.MockEsecSecurityAuthorized.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);*/
+                new SimulationAnalysisService(_testHelper.UnitOfWork, new());            
         }
 
         private void CreateAuthorizedController() =>
@@ -63,17 +62,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateTestData()
         {
-            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
-            _testUserEntity = new UserEntity {Id = Guid.NewGuid(), Username = "Clone Tester"};
-            _testHelper.UnitOfWork.Context.AddEntity(_testUserEntity);
-            _testHelper.UnitOfWork.SetUser(_testUserEntity.Username);
-
-            var budgetId = Guid.NewGuid();
-            _testSimulationToClone = new SimulationEntity
+            if (!_testHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))
             {
-                Id = Guid.NewGuid(), Name = "Simulation", NumberOfYearsOfTreatmentOutlook = 1,
-                NetworkId = _testHelper.TestNetwork.Id,
-                SimulationUserJoins = new List<SimulationUserEntity>
+                _testUserEntity = new UserEntity { Id = Guid.NewGuid(), Username = "Clone Tester" };
+                _testHelper.UnitOfWork.Context.AddEntity(_testUserEntity);
+                _testHelper.UnitOfWork.SetUser(_testUserEntity.Username);
+                _testHelper.UnitOfWork.Context.SaveChanges();
+            }
+
+            if (!_testHelper.UnitOfWork.Context.Simulation.Any(s => s.Name == "Simulation"))
+            {
+                var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+                var budgetId = Guid.NewGuid();
+                _testSimulationToClone = new SimulationEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Simulation",
+                    NumberOfYearsOfTreatmentOutlook = 1,
+                    NetworkId = _testHelper.TestNetwork.Id,
+                    SimulationUserJoins = new List<SimulationUserEntity>
                 {
                     new SimulationUserEntity
                     {
@@ -84,27 +91,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         LastModifiedBy = _testHelper.UnitOfWork.UserEntity.Id
                     }
                 },
-                AnalysisMethod =
-                    new AnalysisMethodEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = attribute.Id,
-                        Benefit =
-                            new BenefitEntity {Id = Guid.NewGuid(), AttributeId = attribute.Id, Limit = 1},
-                        CriterionLibraryAnalysisMethodJoin = new CriterionLibraryAnalysisMethodEntity
+                    AnalysisMethod =
+                        new AnalysisMethodEntity
                         {
-                            CriterionLibrary = new CriterionLibraryEntity
+                            Id = Guid.NewGuid(),
+                            AttributeId = attribute.Id,
+                            Benefit =
+                                new BenefitEntity { Id = Guid.NewGuid(), AttributeId = attribute.Id, Limit = 1 },
+                            CriterionLibraryAnalysisMethodJoin = new CriterionLibraryAnalysisMethodEntity
                             {
-                                Id = Guid.NewGuid(),
-                                Name = "Analysis Method Criterion",
-                                MergedCriteriaExpression = "Analysis Method Criterion Expression",
-                                IsSingleUse = true
+                                CriterionLibrary = new CriterionLibraryEntity
+                                {
+                                    Id = Guid.NewGuid(),
+                                    Name = "Analysis Method Criterion",
+                                    MergedCriteriaExpression = "Analysis Method Criterion Expression",
+                                    IsSingleUse = true
+                                }
                             }
-                        }
-                    },
-                Budgets =
-                    new List<ScenarioBudgetEntity>
-                    {
+                        },
+                    Budgets =
+                        new List<ScenarioBudgetEntity>
+                        {
                         new ScenarioBudgetEntity
                         {
                             Id = budgetId,
@@ -128,8 +135,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                                 }
                             }
                         }
-                    },
-                BudgetPriorities = new List<ScenarioBudgetPriorityEntity>
+                        },
+                    BudgetPriorities = new List<ScenarioBudgetPriorityEntity>
                 {
                     new ScenarioBudgetPriorityEntity
                     {
@@ -154,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                             }
                     }
                 },
-                CashFlowRules = new List<ScenarioCashFlowRuleEntity>
+                    CashFlowRules = new List<ScenarioCashFlowRuleEntity>
                 {
                     new ScenarioCashFlowRuleEntity
                     {
@@ -183,18 +190,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                             }
                     }
                 },
-                InvestmentPlan =
-                    new InvestmentPlanEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        InflationRatePercentage = 3,
-                        MinimumProjectCostLimit = 500000,
-                        FirstYearOfAnalysisPeriod = DateTime.Now.Year,
-                        NumberOfYearsInAnalysisPeriod = 1
-                    },
-                CommittedProjects =
-                    new List<CommittedProjectEntity>
-                    {
+                    InvestmentPlan =
+                        new InvestmentPlanEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            InflationRatePercentage = 3,
+                            MinimumProjectCostLimit = 500000,
+                            FirstYearOfAnalysisPeriod = DateTime.Now.Year,
+                            NumberOfYearsInAnalysisPeriod = 1
+                        },
+                    CommittedProjects =
+                        new List<CommittedProjectEntity>
+                        {
                         new CommittedProjectEntity
                         {
                             Id = Guid.NewGuid(),
@@ -226,10 +233,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                                 }
                             }
                         }
-                    },
-                PerformanceCurves =
-                    new List<ScenarioPerformanceCurveEntity>
-                    {
+                        },
+                    PerformanceCurves =
+                        new List<ScenarioPerformanceCurveEntity>
+                        {
                         new ScenarioPerformanceCurveEntity
                         {
                             Id = Guid.NewGuid(),
@@ -257,10 +264,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                                     }
                                 }
                         }
-                    },
-                RemainingLifeLimits =
-                    new List<ScenarioRemainingLifeLimitEntity>
-                    {
+                        },
+                    RemainingLifeLimits =
+                        new List<ScenarioRemainingLifeLimitEntity>
+                        {
                         new ScenarioRemainingLifeLimitEntity
                         {
                             Id = Guid.NewGuid(),
@@ -279,10 +286,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                                     }
                                 }
                         }
-                    },
-                ScenarioDeficientConditionGoals =
-                    new List<ScenarioDeficientConditionGoalEntity>
-                    {
+                        },
+                    ScenarioDeficientConditionGoals =
+                        new List<ScenarioDeficientConditionGoalEntity>
+                        {
                         new ScenarioDeficientConditionGoalEntity
                         {
                             Id = Guid.NewGuid(),
@@ -303,8 +310,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                                     }
                                 }
                         }
-                    },
-                ScenarioTargetConditionalGoals = new List<ScenarioTargetConditionGoalEntity>
+                        },
+                    ScenarioTargetConditionalGoals = new List<ScenarioTargetConditionGoalEntity>
                 {
                     new ScenarioTargetConditionGoalEntity
                     {
@@ -326,7 +333,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                             }
                     }
                 },
-                SelectableTreatments = new List<ScenarioSelectableTreatmentEntity>
+                    SelectableTreatments = new List<ScenarioSelectableTreatmentEntity>
                 {
                     new ScenarioSelectableTreatmentEntity
                     {
@@ -435,238 +442,113 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         }
                     }
                 }
-            };
-            _testHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnGet()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-
-                // Act
-                var result = await _controller.GetSimulations();
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnPost()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-
-                // Act
-                var dto = _testHelper.TestSimulation.ToDto(null);
-                dto.Id = Guid.NewGuid();
-                var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, dto);
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnPut()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-
-                // Act
-                var result = await _controller.UpdateSimulation(_testHelper.TestSimulation.ToDto(null));
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnDelete()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-
-                // Act
-                var result = await _controller.DeleteSimulation(Guid.Empty);
-
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldGetAllSimulations()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-
-                // Act
-                var result = await _controller.GetSimulations();
-
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
-
-                var dtos = (List<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimulationDTO>));
-                Assert.Single(dtos);
-
-                Assert.Equal(_testHelper.TestSimulation.Id, dtos[0].Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldCreateSimulation()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
-
-                var newSimulationDTO = _testHelper.TestSimulation.ToDto(null);
-                newSimulationDTO.Id = Guid.NewGuid();
-                newSimulationDTO.Users = new List<SimulationUserDTO>
-                {
-                    new SimulationUserDTO
-                    {
-                        UserId = _testHelper.TestUser.Id,
-                        Username = _testHelper.TestUser.Username,
-                        CanModify = true,
-                        IsOwner = true
-                    }
                 };
-
-                // Act
-                var result =
-                    await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO) as OkObjectResult;
-                var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
-                        .Include(_ => _.SimulationUserJoins)
-                        .ThenInclude(_ => _.User)
-                        .SingleOrDefault(_ => _.Id == dto.Id);
-
-                    Assert.NotNull(simulationEntity);
-                    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy);
-
-                    var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-                    Assert.Single(simulationUsers);
-                    Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
-                };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldUpdateSimulation()
-        {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
-
-                var getResult = await _controller.GetSimulations();
-                var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(List<SimulationDTO>));
-
-                var simulationDTO = dtos[0];
-                simulationDTO.Name = "Updated Name";
-                simulationDTO.Users = new List<SimulationUserDTO>
-                {
-                    new SimulationUserDTO
-                    {
-                        UserId = _testHelper.TestUser.Id,
-                        Username = _testHelper.TestUser.Username,
-                        CanModify = true,
-                        IsOwner = true
-                    }
-                };
-
-                // Act
-                var result = await _controller.UpdateSimulation(simulationDTO);
-                var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
-
-                // Assert
-                var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
-                    .Include(_ => _.SimulationUserJoins)
-                    .ThenInclude(_ => _.User)
-                    .Single(_ => _.Id == dto.Id);
-
-                Assert.Equal(dto.Name, simulationEntity.Name);
-
-                var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-                Assert.Single(simulationUsers);
-                Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
+                _testHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
+                _testHelper.UnitOfWork.Context.SaveChanges();
             }
         }
 
         [Fact]
         public async void ShouldDeleteSimulation()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
+            // Arrange
+            CreateAuthorizedController();
 
-                var getResult = await _controller.GetSimulations();
-                var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(List<SimulationDTO>));
+            var getResult = await _controller.GetSimulations();
+            var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(List<SimulationDTO>));
 
-                var dto = dtos[0];
-                dto.Users = new List<SimulationUserDTO>
+            var dto = dtos[0];
+
+            // Act
+            await _controller.DeleteSimulation(dto.Id);
+
+            // Assert
+            Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id));
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnGet()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            // Act
+            var result = await _controller.GetSimulations();
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnPost()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            // Act
+            var dto = _testHelper.TestSimulation.ToDto(null);
+            dto.Id = Guid.NewGuid();
+            var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, dto);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnPut()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            // Act
+            var result = await _controller.UpdateSimulation(_testHelper.TestSimulation.ToDto(null));
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnDelete()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            // Act
+            var result = await _controller.DeleteSimulation(Guid.Empty);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async void ShouldGetAllSimulations()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            // Act
+            var result = await _controller.GetSimulations();
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dtos = (List<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimulationDTO>));
+            Assert.Single(dtos);
+
+            Assert.Equal(_testHelper.TestSimulation.Id, dtos[0].Id);
+        }
+
+        [Fact]
+        public async void ShouldCreateSimulation()
+        {
+            // Arrange
+            CreateAuthorizedController();
+
+            var newSimulationDTO = _testHelper.TestSimulation.ToDto(null);
+            newSimulationDTO.Id = Guid.NewGuid();
+            newSimulationDTO.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
                     {
@@ -677,308 +559,348 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 };
 
-                await _controller.UpdateSimulation(dto);
+            // Act
+            var result =
+                await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO) as OkObjectResult;
+            var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
-                // Act
-                await _controller.DeleteSimulation(dto.Id);
-
-                // Assert
-
-                Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.SimulationUser.Any(_ => _.UserId == dto.Users[0].UserId));
-            }
-            finally
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
+                    .Include(_ => _.SimulationUserJoins)
+                    .ThenInclude(_ => _.User)
+                    .SingleOrDefault(_ => _.Id == dto.Id);
+
+                Assert.NotNull(simulationEntity);
+                Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy);
+
+                var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+                Assert.Single(simulationUsers);
+                Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
+            };
+        }
+
+        [Fact]
+        public async void ShouldUpdateSimulation()
+        {
+            // Arrange
+            CreateAuthorizedController();
+            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+
+            var getResult = await _controller.GetSimulations();
+            var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(List<SimulationDTO>));
+
+            var simulationDTO = dtos[0];
+            simulationDTO.Name = "Updated Name";
+            simulationDTO.Users = new List<SimulationUserDTO>
+                {
+                    new SimulationUserDTO
+                    {
+                        UserId = _testHelper.TestUser.Id,
+                        Username = _testHelper.TestUser.Username,
+                        CanModify = true,
+                        IsOwner = true
+                    }
+                };
+
+            // Act
+            var result = await _controller.UpdateSimulation(simulationDTO);
+            var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
+
+            // Assert
+            var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Single(_ => _.Id == dto.Id);
+
+            Assert.Equal(dto.Name, simulationEntity.Name);
+
+            var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
+            Assert.Single(simulationUsers);
+            Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
         }
 
         [Fact]
         public async void ShouldCloneSimulation()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            CreateTestData();
+
+            // Act
+            var result = await _controller.CloneSimulation(_testSimulationToClone.Id);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+            var dto = (SimulationDTO)Convert.ChangeType(okObjResult.Value, typeof(SimulationDTO));
+
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                CreateAuthorizedController();
-                CreateTestData();
+                var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
+                    // analysis method
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.Benefit)
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // budgets
+                    .Include(_ => _.Budgets)
+                    .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                    .Include(_ => _.Budgets)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // budget priorities
+                    .Include(_ => _.BudgetPriorities)
+                    .ThenInclude(_ => _.BudgetPercentagePairs)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    .Include(_ => _.BudgetPriorities)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // cash flow rules
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // investment plan
+                    .Include(_ => _.InvestmentPlan)
+                    // committed projects
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.CommittedProjectConsequences)
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    // performance curves
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // remaining life limits
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // selectable treatments
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    // deficient condition goals
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // target condition goals
+                    .Include(_ => _.ScenarioTargetConditionalGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SimulationUserJoins)
+                    .Single(_ => _.Id == _testSimulationToClone.Id);
 
-                // Act
-                var result = await _controller.CloneSimulation(_testSimulationToClone.Id);
+                var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
+                    // analysis method
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.Benefit)
+                    .Include(_ => _.AnalysisMethod)
+                    .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // budgets
+                    .Include(_ => _.Budgets)
+                    .ThenInclude(_ => _.ScenarioBudgetAmounts)
+                    .Include(_ => _.Budgets)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // budget priorities
+                    .Include(_ => _.BudgetPriorities)
+                    .ThenInclude(_ => _.BudgetPercentagePairs)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    .Include(_ => _.BudgetPriorities)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // cash flow rules
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
+                    .Include(_ => _.CashFlowRules)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // investment plan
+                    .Include(_ => _.InvestmentPlan)
+                    // committed projects
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.CommittedProjectConsequences)
+                    .Include(_ => _.CommittedProjects)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    // performance curves
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.PerformanceCurves)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // remaining life limits
+                    .Include(_ => _.RemainingLifeLimits)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // selectable treatments
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SelectableTreatments)
+                    .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    // deficient condition goals
+                    .Include(_ => _.ScenarioDeficientConditionGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    // target condition goals
+                    .Include(_ => _.ScenarioTargetConditionalGoals)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.SimulationUserJoins)
+                    .Single(_ => _.Id == dto.Id);
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
-                var dto = (SimulationDTO)Convert.ChangeType(okObjResult.Value, typeof(SimulationDTO));
+                Assert.NotEqual(clonedSimulation.Id, originalSimulation.Id);
+                Assert.Equal(clonedSimulation.Name, originalSimulation.Name);
+                Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
+                Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
+                    originalSimulation.AnalysisMethod.Benefit.AttributeId);
+                Assert.Equal(clonedSimulation.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.CriterionLibraryId,
+                    originalSimulation.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.CriterionLibraryId);
+                Assert.NotEqual(clonedSimulation.InvestmentPlan.Id, originalSimulation.InvestmentPlan.Id);
+                Assert.Equal(clonedSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod,
+                    originalSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
+                var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
+                var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
+                Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);
+                Assert.NotEqual(clonedCommittedProjects[0].Id, originalCommittedProjects[0].Id);
+                Assert.Equal(clonedCommittedProjects[0].Name, originalCommittedProjects[0].Name);
+                var clonedCommittedProjectConsequences =
+                    clonedCommittedProjects[0].CommittedProjectConsequences.ToList();
+                var originalCommittedProjectConsequences =
+                    originalCommittedProjects[0].CommittedProjectConsequences.ToList();
+                Assert.Equal(clonedCommittedProjectConsequences.Count, originalCommittedProjectConsequences.Count);
+                Assert.NotEqual(clonedCommittedProjectConsequences[0].Id,
+                    originalCommittedProjectConsequences[0].Id);
+                Assert.Equal(clonedCommittedProjectConsequences[0].AttributeId,
+                    originalCommittedProjectConsequences[0].AttributeId);
+                var clonedSimulationUsers = clonedSimulation.SimulationUserJoins.ToList();
+                var originalSimulationUsers = originalSimulation.SimulationUserJoins.ToList();
+                Assert.Equal(clonedSimulationUsers.Count, originalSimulationUsers.Count);
+                Assert.NotEqual(clonedSimulationUsers[0].SimulationId, originalSimulationUsers[0].SimulationId);
+                Assert.Equal(clonedSimulationUsers[0].IsOwner, originalSimulationUsers[0].IsOwner);
 
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
-                        // analysis method
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.Benefit)
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // budgets
-                        .Include(_ => _.Budgets)
-                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                        .Include(_ => _.Budgets)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // budget priorities
-                        .Include(_ => _.BudgetPriorities)
-                        .ThenInclude(_ => _.BudgetPercentagePairs)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        .Include(_ => _.BudgetPriorities)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // cash flow rules
-                        .Include(_ => _.CashFlowRules)
-                        .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
-                        .Include(_ => _.CashFlowRules)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // investment plan
-                        .Include(_ => _.InvestmentPlan)
-                        // committed projects
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.CommittedProjectConsequences)
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        // performance curves
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // remaining life limits
-                        .Include(_ => _.RemainingLifeLimits)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // selectable treatments
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                        .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                        .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        // deficient condition goals
-                        .Include(_ => _.ScenarioDeficientConditionGoals)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // target condition goals
-                        .Include(_ => _.ScenarioTargetConditionalGoals)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SimulationUserJoins)
-                        .Single(_ => _.Id == _testSimulationToClone.Id);
+                Assert.Equal(clonedSimulation.PerformanceCurves.Count, originalSimulation.PerformanceCurves.Count);
+                var clonedCurveIds = clonedSimulation.PerformanceCurves.Select(_ => _.Id).ToList();
+                var originalCurveIds = originalSimulation.PerformanceCurves.Select(_ => _.Id).ToList();
+                var curveIdsDiff = clonedCurveIds.Except(originalCurveIds).ToList();
+                Assert.NotEmpty(curveIdsDiff);
+                Assert.Equal(curveIdsDiff.Count, clonedSimulation.PerformanceCurves.Count);
+                Assert.True(clonedSimulation.PerformanceCurves.All(_ => curveIdsDiff.Contains(_.Id)));
 
-                    var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
-                        // analysis method
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.Benefit)
-                        .Include(_ => _.AnalysisMethod)
-                        .ThenInclude(_ => _.CriterionLibraryAnalysisMethodJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // budgets
-                        .Include(_ => _.Budgets)
-                        .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                        .Include(_ => _.Budgets)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // budget priorities
-                        .Include(_ => _.BudgetPriorities)
-                        .ThenInclude(_ => _.BudgetPercentagePairs)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        .Include(_ => _.BudgetPriorities)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // cash flow rules
-                        .Include(_ => _.CashFlowRules)
-                        .ThenInclude(_ => _.ScenarioCashFlowDistributionRules)
-                        .Include(_ => _.CashFlowRules)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // investment plan
-                        .Include(_ => _.InvestmentPlan)
-                        // committed projects
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.CommittedProjectConsequences)
-                        .Include(_ => _.CommittedProjects)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        // performance curves
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.PerformanceCurves)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // remaining life limits
-                        .Include(_ => _.RemainingLifeLimits)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // selectable treatments
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                        .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentConsequences)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                        .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
-                        .ThenInclude(_ => _.Equation)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentCosts)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentSchedulings)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioTreatmentSupersessions)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentSupersessionJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SelectableTreatments)
-                        .ThenInclude(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
-                        .ThenInclude(_ => _.ScenarioBudget)
-                        // deficient condition goals
-                        .Include(_ => _.ScenarioDeficientConditionGoals)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioDeficientConditionGoalJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        // target condition goals
-                        .Include(_ => _.ScenarioTargetConditionalGoals)
-                        .ThenInclude(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
-                        .ThenInclude(_ => _.CriterionLibrary)
-                        .Include(_ => _.SimulationUserJoins)
-                        .Single(_ => _.Id == dto.Id);
+                var clonedCriteria =
+                    clonedSimulation.PerformanceCurves.Where(_ =>
+                            _.CriterionLibraryScenarioPerformanceCurveJoin != null)
+                        .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary).ToList();
+                var originalCriteria =
+                    originalSimulation.PerformanceCurves.Where(_ =>
+                            _.CriterionLibraryScenarioPerformanceCurveJoin != null)
+                        .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary).ToList();
+                Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
+                var clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
+                var originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
+                var criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
+                Assert.NotEmpty(criteriaIdsDiff);
+                Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
+                Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));
 
-                    Assert.NotEqual(clonedSimulation.Id, originalSimulation.Id);
-                    Assert.Equal(clonedSimulation.Name, originalSimulation.Name);
-                    Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
-                    Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
-                        originalSimulation.AnalysisMethod.Benefit.AttributeId);
-                    Assert.Equal(clonedSimulation.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.CriterionLibraryId,
-                        originalSimulation.AnalysisMethod.CriterionLibraryAnalysisMethodJoin.CriterionLibraryId);
-                    Assert.NotEqual(clonedSimulation.InvestmentPlan.Id, originalSimulation.InvestmentPlan.Id);
-                    Assert.Equal(clonedSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod,
-                        originalSimulation.InvestmentPlan.FirstYearOfAnalysisPeriod);
-                    var clonedCommittedProjects = clonedSimulation.CommittedProjects.ToList();
-                    var originalCommittedProjects = originalSimulation.CommittedProjects.ToList();
-                    Assert.Equal(clonedCommittedProjects.Count, originalCommittedProjects.Count);
-                    Assert.NotEqual(clonedCommittedProjects[0].Id, originalCommittedProjects[0].Id);
-                    Assert.Equal(clonedCommittedProjects[0].Name, originalCommittedProjects[0].Name);
-                    var clonedCommittedProjectConsequences =
-                        clonedCommittedProjects[0].CommittedProjectConsequences.ToList();
-                    var originalCommittedProjectConsequences =
-                        originalCommittedProjects[0].CommittedProjectConsequences.ToList();
-                    Assert.Equal(clonedCommittedProjectConsequences.Count, originalCommittedProjectConsequences.Count);
-                    Assert.NotEqual(clonedCommittedProjectConsequences[0].Id,
-                        originalCommittedProjectConsequences[0].Id);
-                    Assert.Equal(clonedCommittedProjectConsequences[0].AttributeId,
-                        originalCommittedProjectConsequences[0].AttributeId);
-                    var clonedSimulationUsers = clonedSimulation.SimulationUserJoins.ToList();
-                    var originalSimulationUsers = originalSimulation.SimulationUserJoins.ToList();
-                    Assert.Equal(clonedSimulationUsers.Count, originalSimulationUsers.Count);
-                    Assert.NotEqual(clonedSimulationUsers[0].SimulationId, originalSimulationUsers[0].SimulationId);
-                    Assert.Equal(clonedSimulationUsers[0].IsOwner, originalSimulationUsers[0].IsOwner);
+                var clonedEquations =
+                    clonedSimulation.PerformanceCurves.Where(_ =>
+                            _.ScenarioPerformanceCurveEquationJoin != null)
+                        .Select(_ => _.ScenarioPerformanceCurveEquationJoin.Equation).ToList();
+                var originalEquations =
+                    originalSimulation.PerformanceCurves.Where(_ =>
+                            _.ScenarioPerformanceCurveEquationJoin != null)
+                        .Select(_ => _.ScenarioPerformanceCurveEquationJoin.Equation).ToList();
+                Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
+                var clonedEquationIds = clonedEquations.Select(_ => _.Id).ToList();
+                var originalEquationIds = originalEquations.Select(_ => _.Id).ToList();
+                var equationIdsDiff = clonedEquationIds.Except(originalEquationIds).ToList();
+                Assert.NotEmpty(equationIdsDiff);
+                Assert.Equal(equationIdsDiff.Count, clonedCriteria.Count);
+                Assert.True(clonedEquations.All(_ => equationIdsDiff.Contains(_.Id)));
 
-                    Assert.Equal(clonedSimulation.PerformanceCurves.Count, originalSimulation.PerformanceCurves.Count);
-                    var clonedCurveIds = clonedSimulation.PerformanceCurves.Select(_ => _.Id).ToList();
-                    var originalCurveIds = originalSimulation.PerformanceCurves.Select(_ => _.Id).ToList();
-                    var curveIdsDiff = clonedCurveIds.Except(originalCurveIds).ToList();
-                    Assert.NotEmpty(curveIdsDiff);
-                    Assert.Equal(curveIdsDiff.Count, clonedSimulation.PerformanceCurves.Count);
-                    Assert.True(clonedSimulation.PerformanceCurves.All(_ => curveIdsDiff.Contains(_.Id)));
+                Assert.Equal(clonedSimulation.SelectableTreatments.Count,
+                    originalSimulation.SelectableTreatments.Count);
+                var clonedTreatmentIds = clonedSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
+                var originalTreatmentIds = originalSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
+                var TreatmentIdsDiff = clonedTreatmentIds.Except(originalTreatmentIds).ToList();
+                Assert.NotEmpty(TreatmentIdsDiff);
+                Assert.Equal(TreatmentIdsDiff.Count, clonedSimulation.SelectableTreatments.Count);
+                Assert.True(clonedSimulation.SelectableTreatments.All(_ => TreatmentIdsDiff.Contains(_.Id)));
 
-                    var clonedCriteria =
-                        clonedSimulation.PerformanceCurves.Where(_ =>
-                                _.CriterionLibraryScenarioPerformanceCurveJoin != null)
-                            .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary).ToList();
-                    var originalCriteria =
-                        originalSimulation.PerformanceCurves.Where(_ =>
-                                _.CriterionLibraryScenarioPerformanceCurveJoin != null)
-                            .Select(_ => _.CriterionLibraryScenarioPerformanceCurveJoin.CriterionLibrary).ToList();
-                    Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
-                    var clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
-                    var originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
-                    var criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
-                    Assert.NotEmpty(criteriaIdsDiff);
-                    Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
-                    Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));
+                clonedCriteria =
+                    clonedSimulation.SelectableTreatments.Where(_ =>
+                            _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                        .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
+                originalCriteria =
+                    originalSimulation.SelectableTreatments.Where(_ =>
+                            _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
+                        .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
+                Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
 
-                    var clonedEquations =
-                        clonedSimulation.PerformanceCurves.Where(_ =>
-                                _.ScenarioPerformanceCurveEquationJoin != null)
-                            .Select(_ => _.ScenarioPerformanceCurveEquationJoin.Equation).ToList();
-                    var originalEquations =
-                        originalSimulation.PerformanceCurves.Where(_ =>
-                                _.ScenarioPerformanceCurveEquationJoin != null)
-                            .Select(_ => _.ScenarioPerformanceCurveEquationJoin.Equation).ToList();
-                    Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
-                    var clonedEquationIds = clonedEquations.Select(_ => _.Id).ToList();
-                    var originalEquationIds = originalEquations.Select(_ => _.Id).ToList();
-                    var equationIdsDiff = clonedEquationIds.Except(originalEquationIds).ToList();
-                    Assert.NotEmpty(equationIdsDiff);
-                    Assert.Equal(equationIdsDiff.Count, clonedCriteria.Count);
-                    Assert.True(clonedEquations.All(_ => equationIdsDiff.Contains(_.Id)));
-
-                    Assert.Equal(clonedSimulation.SelectableTreatments.Count,
-                        originalSimulation.SelectableTreatments.Count);
-                    var clonedTreatmentIds = clonedSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
-                    var originalTreatmentIds = originalSimulation.SelectableTreatments.Select(_ => _.Id).ToList();
-                    var TreatmentIdsDiff = clonedTreatmentIds.Except(originalTreatmentIds).ToList();
-                    Assert.NotEmpty(TreatmentIdsDiff);
-                    Assert.Equal(TreatmentIdsDiff.Count, clonedSimulation.SelectableTreatments.Count);
-                    Assert.True(clonedSimulation.SelectableTreatments.All(_ => TreatmentIdsDiff.Contains(_.Id)));
-
-                    clonedCriteria =
-                        clonedSimulation.SelectableTreatments.Where(_ =>
-                                _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
-                            .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
-                    originalCriteria =
-                        originalSimulation.SelectableTreatments.Where(_ =>
-                                _.CriterionLibraryScenarioSelectableTreatmentJoin != null)
-                            .Select(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin.CriterionLibrary).ToList();
-                    Assert.Equal(clonedCriteria.Count, originalCriteria.Count);
-
-                    clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
-                    originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
-                    criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
-                    Assert.NotEmpty(criteriaIdsDiff);
-                    Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
-                    Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));
+                clonedCriteriaIds = clonedCriteria.Select(_ => _.Id).ToList();
+                originalCriteriaIds = originalCriteria.Select(_ => _.Id).ToList();
+                criteriaIdsDiff = clonedCriteriaIds.Except(originalCriteriaIds).ToList();
+                Assert.NotEmpty(criteriaIdsDiff);
+                Assert.Equal(criteriaIdsDiff.Count, clonedCriteria.Count);
+                Assert.True(clonedCriteria.All(_ => criteriaIdsDiff.Contains(_.Id)));
                     //[TODO]: add more scenarios for the treatment
                 };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
         }
     }
 }

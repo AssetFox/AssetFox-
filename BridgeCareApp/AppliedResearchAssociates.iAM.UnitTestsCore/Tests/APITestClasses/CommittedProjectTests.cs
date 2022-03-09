@@ -220,338 +220,242 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnGet()
         {
-            try
-            {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnPost()
         {
-            try
-            {
-                // Arrange
-                CreateRequestWithFormData();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            CreateRequestWithFormData();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.ImportCommittedProjects();
+            // Act
+            var result = await _controller.ImportCommittedProjects();
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnDelete()
         {
-            try
-            {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnUnauthorizedOnGet()
         {
-            try
-            {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityNotAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<UnauthorizedResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnUnauthorizedOnPost()
         {
-            try
-            {
-                // Arrange
-                CreateRequestWithFormData();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityNotAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            CreateRequestWithFormData();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.ImportCommittedProjects();
+            // Act
+            var result = await _controller.ImportCommittedProjects();
 
-                // Assert
-                Assert.IsType<UnauthorizedResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnUnauthorizedOnDelete()
         {
-            try
-            {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityNotAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act
-                var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
 
-                // assert
-                Assert.IsType<UnauthorizedResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // assert
+            Assert.IsType<UnauthorizedResult>(result);
         }
 
         [Fact]
         public async void ShouldImportCommittedProjectsFromFile()
         {
-            try
-            {
-                // Arrange
-                CreateRequestWithFormData();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            CreateRequestWithFormData();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
 
-                // Act
-                await _controller.ImportCommittedProjects();
+            // Act
+            await _controller.ImportCommittedProjects();
 
-                // Assert
-                AssertCommittedProjectsData();
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            AssertCommittedProjectsData();
         }
 
         [Fact]
         public async void ShouldExportCommittedProjectsToFile()
         {
-            try
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+
+            var fileInfo = (FileInfoDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(FileInfoDTO));
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
+            Assert.Equal("CommittedProjects_Test_Simulation.xlsx", fileInfo.FileName);
+
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += async delegate
             {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+                CreateRequestWithFormData(fileInfo);
+                await _controller.ImportCommittedProjects();
+            };
 
-                // Act
-                var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-
-                var fileInfo = (FileInfoDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(FileInfoDTO));
-                Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
-                Assert.Equal("CommittedProjects_Test_Simulation.xlsx", fileInfo.FileName);
-
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += async delegate
-                {
-                    CreateRequestWithFormData(fileInfo);
-                    await _controller.ImportCommittedProjects();
-                };
-
-                AssertCommittedProjectsData();
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            AssertCommittedProjectsData();
         }
 
         [Fact]
         public async void ShouldDeleteCommittedProjectData()
         {
-            try
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+                var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
+                    .Where(_ => _.SimulationId == _testHelper.TestSimulation.Id)
+                    .ToList();
+                Assert.Empty(committedProjects);
 
-                // Act
-                await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
-                        .Where(_ => _.SimulationId == _testHelper.TestSimulation.Id)
-                        .ToList();
-                    Assert.Empty(committedProjects);
-
-                    var consequences = _testHelper.UnitOfWork.Context.CommittedProjectConsequence
-                        .Where(_ => _.CommittedProjectId == _testProject.Id)
-                        .ToList();
-                    Assert.Empty(consequences);
-                };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var consequences = _testHelper.UnitOfWork.Context.CommittedProjectConsequence
+                    .Where(_ => _.CommittedProjectId == _testProject.Id)
+                    .ToList();
+                Assert.Empty(consequences);
+            };
         }
 
         [Fact]
         public async void ShouldThrowConstraintWhenNoMimeTypeWithBadRequestForImport()
         {
-            try
-            {
-                // Arrange
-                _testHelper.SetupDefaultHttpContext();
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
 
-                // Act + Asset
-                var result = await _controller.ImportCommittedProjects();                
-                Assert.IsType<BadRequestObjectResult>(result);
-                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request MIME type is invalid.");
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Act + Asset
+            var result = await _controller.ImportCommittedProjects();
+            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request MIME type is invalid.");
         }
 
         [Fact]
         public async void ShouldThrowConstraintWhenNoFilesWithBadRequestForImport()
         {
-            try
-            {
-                // Arrange
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
-                CreateRequestForExceptionTesting();
+            // Arrange
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            CreateRequestForExceptionTesting();
 
-                // Act + Asset
-                var result = await _controller.ImportCommittedProjects();
-                Assert.IsType<BadRequestObjectResult>(result);
-                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Committed project file not found.");
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Act + Asset
+            var result = await _controller.ImportCommittedProjects();
+            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Committed project file not found.");
         }
 
         [Fact]
         public async void ShouldThrowConstraintWhenNoSimulationIdWithBadRequestForImport()
         {
-            try
-            {
-                // Arrange
-                _controller = new CommittedProjectController(_service,
-                    _testHelper.MockEsecSecurityAuthorized.Object,
-                    _testHelper.UnitOfWork,
-                    _testHelper.MockHubService.Object,
-                    _testHelper.MockHttpContextAccessor.Object);
-                var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
-                    "dummy.txt");
-                CreateRequestForExceptionTesting(file);
+            // Arrange
+            _controller = new CommittedProjectController(_service,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
+                "dummy.txt");
+            CreateRequestForExceptionTesting(file);
 
-                // Act + Asset
-                var result = await _controller.ImportCommittedProjects();
-                Assert.IsType<BadRequestObjectResult>(result);
-                Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request contained no simulation id.");
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Act + Asset
+            var result = await _controller.ImportCommittedProjects();
+            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal(((BadRequestObjectResult)result).Value, "Committed Project error::Request contained no simulation id.");
         }
     }
 }

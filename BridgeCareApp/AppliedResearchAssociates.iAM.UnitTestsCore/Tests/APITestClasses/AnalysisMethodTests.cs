@@ -75,144 +75,104 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnGet()
         {
-            try
-            {
-                // Act
-                var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnPost()
         {
-            try
-            {
-                // Arrange
-                var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
-                var dto = TestAnalysis.ToDto();
-                TestBenefit.Attribute = attributeEntity;
-                dto.Benefit = TestBenefit.ToDto();
-                dto.Benefit.Attribute = attributeEntity.Name;
+            // Arrange
+            var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
+            var dto = TestAnalysis.ToDto();
+            TestBenefit.Attribute = attributeEntity;
+            dto.Benefit = TestBenefit.ToDto();
+            dto.Benefit.Attribute = attributeEntity.Name;
 
-                // Act
-                var result =
-                    await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
+            // Act
+            var result =
+                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldGetAnalysisMethod()
         {
-            try
-            {
-                // Arrange
-                SetupForGet();
+            // Arrange
+            SetupForGet();
 
-                // Act
-                var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dto = (AnalysisMethodDTO)Convert.ChangeType(okObjResult.Value, typeof(AnalysisMethodDTO));
+            var dto = (AnalysisMethodDTO)Convert.ChangeType(okObjResult.Value, typeof(AnalysisMethodDTO));
 
-                Assert.Equal(AnalysisMethodId, dto.Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(AnalysisMethodId, dto.Id);
         }
 
         [Fact]
         public async void ShouldCreateAnalysisMethod()
         {
-            try
+            // Arrange
+            var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(AnalysisMethodDTO));
+
+            analysisMethodDto.Benefit = new BenefitDTO
             {
-                // Arrange
-                var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
-                var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(AnalysisMethodDTO));
+                Id = Guid.NewGuid(),
+                Limit = 0.0,
+                Attribute = _testHelper.UnitOfWork.Context.Attribute.First().Name
+            };
 
-                analysisMethodDto.Benefit = new BenefitDTO
-                {
-                    Id = Guid.NewGuid(),
-                    Limit = 0.0,
-                    Attribute = _testHelper.UnitOfWork.Context.Attribute.First().Name
-                };
+            // Act
+            await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, analysisMethodDto);
 
-                // Act
-                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, analysisMethodDto);
+            // Assert
+            getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var upsertedAnalysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(AnalysisMethodDTO));
 
-                // Assert
-                getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
-                var upsertedAnalysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(AnalysisMethodDTO));
-
-                Assert.Equal(analysisMethodDto.Id, upsertedAnalysisMethodDto.Id);
-                Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(analysisMethodDto.Id, upsertedAnalysisMethodDto.Id);
+            Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
         }
 
         [Fact]
         public async void ShouldUpdateAnalysisMethod()
         {
-            try
-            {
-                // Arrange
-                SetupForUpsert();
-                var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
-                var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(AnalysisMethodDTO));
-                var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
-                dto.Attribute = attributeEntity.Name;
-                dto.CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
-                TestBenefit.Attribute = attributeEntity;
-                dto.Benefit = TestBenefit.ToDto();
-                dto.Benefit.Attribute = attributeEntity.Name;
+            // Arrange
+            SetupForUpsert();
+            var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(AnalysisMethodDTO));
+            var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
+            dto.Attribute = attributeEntity.Name;
+            dto.CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
+            TestBenefit.Attribute = attributeEntity;
+            dto.Benefit = TestBenefit.ToDto();
+            dto.Benefit.Attribute = attributeEntity.Name;
 
-                // Act
-                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
+            // Act
+            await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
 
-                // Assert
-                var analysisMethodDto =
-                    _testHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(_testHelper
-                        .TestSimulation.Id);
+            // Assert
+            var analysisMethodDto =
+                _testHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(_testHelper
+                    .TestSimulation.Id);
 
-                Assert.Equal(dto.Id, analysisMethodDto.Id);
-                Assert.Equal(dto.Attribute, analysisMethodDto.Attribute);
-                Assert.Equal(dto.CriterionLibrary.Id, analysisMethodDto.CriterionLibrary.Id);
-                Assert.Equal(dto.Benefit.Id, analysisMethodDto.Benefit.Id);
-                Assert.Equal(dto.Benefit.Attribute, analysisMethodDto.Benefit.Attribute);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(dto.Id, analysisMethodDto.Id);
+            Assert.Equal(dto.Attribute, analysisMethodDto.Attribute);
+            Assert.Equal(dto.CriterionLibrary.Id, analysisMethodDto.CriterionLibrary.Id);
+            Assert.Equal(dto.Benefit.Id, analysisMethodDto.Benefit.Id);
+            Assert.Equal(dto.Benefit.Attribute, analysisMethodDto.Benefit.Attribute);
         }
     }
 }

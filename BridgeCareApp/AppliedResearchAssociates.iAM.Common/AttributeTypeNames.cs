@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils
+﻿namespace AppliedResearchAssociates.iAM
 {
     public static class AttributeTypeNames
     {

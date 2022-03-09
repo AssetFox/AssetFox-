@@ -42,152 +42,104 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnGet()
         {
-            try
-            {
-                // Act
-                var result = await _controller.CriterionLibraries();
+            // Act
+            var result = await _controller.CriterionLibraries();
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnPost()
         {
-            try
-            {
-                // Act
-                var result = await _controller
-                    .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
+            // Act
+            var result = await _controller
+                .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnDelete()
         {
-            try
-            {
-                // Act
-                var result = await _controller.DeleteCriterionLibrary(Guid.Empty);
+            // Act
+            var result = await _controller.DeleteCriterionLibrary(Guid.Empty);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldGetAllCriterionLibraries()
         {
-            try
-            {
-                // Arrange
-                Setup();
+            // Arrange
+            Setup();
 
-                // Act
-                var result = await _controller.CriterionLibraries();
+            // Act
+            var result = await _controller.CriterionLibraries();
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                    typeof(List<CriterionLibraryDTO>));
-                Assert.True(dtos.Count() > 0);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<CriterionLibraryDTO>));
+            Assert.True(dtos.Count() > 0);
         }
 
         [Fact]
         public async void ShouldModifyCriterionLibraries()
         {
-            try
+            // Arrange
+            Setup();
+            var getResult = await _controller.CriterionLibraries();
+            var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(List<CriterionLibraryDTO>));
+
+            var criterionLibraryDTO = dtos[0];
+            criterionLibraryDTO.Description = "Updated Description";
+
+            var newCriterionLibraryDTO = new CriterionLibraryEntity
             {
-                // Arrange
-                Setup();
-                var getResult = await _controller.CriterionLibraries();
-                var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                    typeof(List<CriterionLibraryDTO>));
+                Id = Guid.NewGuid(),
+                Name = "New Name",
+                MergedCriteriaExpression = "New Expression"
+            }.ToDto();
 
-                var criterionLibraryDTO = dtos[0];
-                criterionLibraryDTO.Description = "Updated Description";
+            // Act
+            var updateResult = await _controller.UpsertCriterionLibrary(criterionLibraryDTO);
+            var addResult = await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
-                var newCriterionLibraryDTO = new CriterionLibraryEntity
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "New Name",
-                    MergedCriteriaExpression = "New Expression"
-                }.ToDto();
+            // Assert
+            Assert.IsType<OkObjectResult>(updateResult);
+            Assert.IsType<OkObjectResult>(addResult);
 
-                // Act
-                var updateResult = await _controller.UpsertCriterionLibrary(criterionLibraryDTO);
-                var addResult = await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
+            var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
+                .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);
+            Assert.Equal(criterionLibraryDTO.Description, updatedCriterionLibraryEntity.Description);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(updateResult);
-                Assert.IsType<OkObjectResult>(addResult);
-
-                var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
-                    .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);
-                Assert.Equal(criterionLibraryDTO.Description, updatedCriterionLibraryEntity.Description);
-
-                var newCriterionLibraryEntity =
-                    _testHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
-                        _.Id == newCriterionLibraryDTO.Id);
-                Assert.NotNull(newCriterionLibraryEntity);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            var newCriterionLibraryEntity =
+                _testHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
+                    _.Id == newCriterionLibraryDTO.Id);
+            Assert.NotNull(newCriterionLibraryEntity);
         }
 
         [Fact]
         public async void ShouldDeleteCriterionLibrary()
         {
-            try
-            {
-                // Arrange
-                Setup();
+            // Arrange
+            Setup();
 
-                // Act
-                var result = await _controller.DeleteCriterionLibrary(_testHelper.TestCriterionLibrary.Id);
+            // Act
+            var result = await _controller.DeleteCriterionLibrary(_testHelper.TestCriterionLibrary.Id);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
+            // Assert
+            Assert.IsType<OkResult>(result);
 
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
-                        _.Id == _testHelper.TestCriterionLibrary.Id));
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
+                    _.Id == _testHelper.TestCriterionLibrary.Id));
         }
     }
 }

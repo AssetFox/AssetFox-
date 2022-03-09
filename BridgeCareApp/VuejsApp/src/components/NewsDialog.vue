@@ -6,7 +6,7 @@
                 <v-layout justify-center>
                     <v-card class='announcement-dialog'>
                         <v-toolbar
-                        color="primary"
+                        color="#002E6C"
                         dark
                         >
                             <v-app-bar-nav-icon></v-app-bar-nav-icon>

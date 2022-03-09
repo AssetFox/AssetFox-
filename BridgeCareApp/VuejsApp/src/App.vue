@@ -126,6 +126,13 @@
                     >
                         Inventory
                     </v-btn>
+                     <v-btn
+                        @click="showNewsDialog = true"
+                        class="ara-blue-pantone-281"
+                        flat
+                    >
+                        News
+                    </v-btn>
                 </v-toolbar-items>
                 <v-spacer></v-spacer>
                 <v-toolbar-title class="white--text">

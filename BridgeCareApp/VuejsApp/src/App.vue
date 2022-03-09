@@ -292,6 +292,7 @@
             </v-footer>
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
+            <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
         </v-content>
     </v-app>
 </template>
@@ -334,9 +335,10 @@ import {
     onHandleLogout,
 } from '@/shared/utils/authentication-utils';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
+import NewsDialog from '@/components/NewsDialog.vue'
 
 @Component({
-    components: { Alert, Spinner, NotificationBell },
+    components: { Alert, Spinner, NotificationBell, NewsDialog },
 })
 export default class AppComponent extends Vue {
     @State(state => state.authenticationModule.authenticated)
@@ -390,6 +392,7 @@ export default class AppComponent extends Vue {
     ];
     esecSecurityType: string = SecurityTypes.esec;
     b2cSecurityType: string = SecurityTypes.b2c;
+    showNewsDialog: boolean = false;
 
     get container() {
         const container: any = {};
@@ -645,6 +648,10 @@ export default class AppComponent extends Vue {
 
     onRemoveNotification(id: number) {
         this.removeNotificationAction(id);
+    }
+
+    onCloseNewsDialog() {
+        this.showNewsDialog = false;
     }
 }
 </script>

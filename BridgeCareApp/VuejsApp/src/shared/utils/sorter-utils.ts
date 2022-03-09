@@ -21,7 +21,7 @@ const stringSorter = (string1: string, string2: string) => {
 };
 
 const dateSorter = (date1: Date, date2: Date) => {
-    return date1.getMilliseconds() - date2.getMilliseconds();
+    return date1.getTime() - date2.getTime();
 };
 
 export const sorter = (items: any[]) => {

@@ -106,6 +106,10 @@
     color: #000000 !important;
 }
 
+.navbar-gray {
+    color: #2c2c2c !important;
+}
+
 .edit-icon, .plus-icon {
     color: forestgreen !important;
 }
@@ -148,6 +152,12 @@ table.v-table tbody td {
     border-radius: 4pt;
     box-shadow: 0 3pt 5pt rgba(0, 0, 0, 0.25);
     font-size: 100%;
+}
+
+.scenario-status {
+    display: inline;
+    min-inline-size: 90%; 
+    padding: 2%;  
 }
 
 .notification-message {

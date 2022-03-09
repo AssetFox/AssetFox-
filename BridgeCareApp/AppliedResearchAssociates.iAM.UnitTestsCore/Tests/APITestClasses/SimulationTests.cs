@@ -32,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private UserEntity _testUserEntity;
         private SimulationEntity _testSimulationToClone;
+        private const string SimulationName = "Simulation";
 
         public SimulationTests()
         {
@@ -70,14 +71,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.UnitOfWork.Context.SaveChanges();
             }
 
-            if (!_testHelper.UnitOfWork.Context.Simulation.Any(s => s.Name == "Simulation"))
+            if (!_testHelper.UnitOfWork.Context.Simulation.Any(s => s.Name == SimulationName))
             {
                 var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
                 _testSimulationToClone = new SimulationEntity
                 {
                     Id = Guid.NewGuid(),
-                    Name = "Simulation",
+                    Name = SimulationName,
                     NumberOfYearsOfTreatmentOutlook = 1,
                     NetworkId = _testHelper.TestNetwork.Id,
                     SimulationUserJoins = new List<SimulationUserEntity>

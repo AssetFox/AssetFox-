@@ -38,7 +38,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetEntity _testBudget;
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
-        private readonly int year = 2022;
+        private const int Year = 2022;
+        private const string BudgetEntityName = "Budget";
 
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
 
@@ -81,12 +82,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testBudget = new BudgetEntity
             {
                 Id = Guid.NewGuid(),
-                Name = "Budget",
+                Name = BudgetEntityName,
                 BudgetLibraryId = _testBudgetLibrary.Id,
                 BudgetAmounts =
                 new List<BudgetAmountEntity>
                 {
-                        new BudgetAmountEntity {Id = Guid.NewGuid(), Year = year, Value = 500000}
+                        new BudgetAmountEntity {Id = Guid.NewGuid(), Year = Year, Value = 500000}
                 },
                 CriterionLibraryBudgetJoin = new CriterionLibraryBudgetEntity
                 {
@@ -108,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 Id = Guid.NewGuid(),
                 SimulationId = _testHelper.TestSimulation.Id,
-                FirstYearOfAnalysisPeriod = year,
+                FirstYearOfAnalysisPeriod = Year,
                 NumberOfYearsInAnalysisPeriod = 1,
                 MinimumProjectCostLimit = 500000,
                 InflationRatePercentage = 3
@@ -123,14 +124,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testScenarioBudget = new ScenarioBudgetEntity
             {
                 Id = Guid.NewGuid(),
-                Name = "Budget",
+                Name = BudgetEntityName,
                 SimulationId = _testHelper.TestSimulation.Id,
                 ScenarioBudgetAmounts =
                         new List<ScenarioBudgetAmountEntity>
                         {
                         new ScenarioBudgetAmountEntity
                         {
-                            Id = Guid.NewGuid(), Year = year, Value = 5000000
+                            Id = Guid.NewGuid(), Year = Year, Value = 5000000
                         }
                         },
                 CriterionLibraryScenarioBudgetJoin = new CriterionLibraryScenarioBudgetEntity
@@ -143,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            var scenarioBudget = _testHelper.UnitOfWork.Context.ScenarioBudget.FirstOrDefault(b => b.Name == "Budget");
+            var scenarioBudget = _testHelper.UnitOfWork.Context.ScenarioBudget.FirstOrDefault(b => b.Name == BudgetEntityName);
             if (scenarioBudget != null)
             {
                 _testHelper.UnitOfWork.Context.Remove(scenarioBudget);
@@ -553,7 +554,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .ToList();
 
                 Assert.Equal(2, budgetAmounts.Count);
-                Assert.True(budgetAmounts.All(_ => _.Year == year));
+                Assert.True(budgetAmounts.All(_ => _.Year == Year));
                 Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
                 var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
@@ -593,7 +594,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
 
             var budgetAmount = _testBudget.BudgetAmounts.ToList()[0];
-            budgetAmount.Year = year;
+            budgetAmount.Year = Year;
             budgetAmount.Value = 4000000;
             _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
@@ -607,7 +608,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var budgetAmounts =
                     _testHelper.UnitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(_testBudgetLibrary.Id);
                 Assert.Equal(2, budgetAmounts.Count);
-                Assert.True(budgetAmounts.All(_ => _.Year == year));
+                Assert.True(budgetAmounts.All(_ => _.Year == Year));
                 Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
                 var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
@@ -668,7 +669,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(4, worksheetBudgetNames.Count);
             Assert.True(worksheetBudgetNames.All(name => name.Contains("Sample Budget")));
 
-            var expectedYear = year;
+            var expectedYear = Year;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
                 .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
                 {
@@ -715,7 +716,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            Assert.Equal(year.ToString(), worksheetBudgetYearAndAmount[0]);
+            Assert.Equal(Year.ToString(), worksheetBudgetYearAndAmount[0]);
             Assert.Equal(_testBudget.BudgetAmounts.ToList()[0].Value.ToString(), worksheetBudgetYearAndAmount[1]);
         }
 
@@ -781,7 +782,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     .ToList();
 
                 Assert.Equal(2, budgetAmounts.Count);
-                Assert.True(budgetAmounts.All(_ => _.Year == year));
+                Assert.True(budgetAmounts.All(_ => _.Year == Year));
                 Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
                 var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
@@ -821,7 +822,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
 
             var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
-            budgetAmount.Year = year;
+            budgetAmount.Year = Year;
             budgetAmount.Value = 4000000;
             _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
@@ -835,7 +836,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 var budgetAmounts =
                     _testHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(_testHelper.TestSimulation.Id);
                 Assert.Equal(2, budgetAmounts.Count);
-                Assert.True(budgetAmounts.All(_ => _.Year == year));
+                Assert.True(budgetAmounts.All(_ => _.Year == Year));
                 Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
                 var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
@@ -894,9 +895,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             Assert.True(worksheetBudgetNames.Count >= 1);
-            Assert.True(worksheetBudgetNames.All(name => name.Contains("Budget")));
+            Assert.True(worksheetBudgetNames.All(name => name.Contains(BudgetEntityName)));
 
-            var expetedYear = year;
+            var expetedYear = Year;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
                 .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
                 {

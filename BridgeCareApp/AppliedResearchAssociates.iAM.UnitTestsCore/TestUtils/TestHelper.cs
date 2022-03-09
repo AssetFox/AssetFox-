@@ -173,11 +173,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 });
             }
         }
-
-        public virtual void CleanUp()
-        {
-            //UnitOfWork.Context.Database.EnsureDeleted();
-            //UnitOfWork.Dispose();
-        }
     }
 }

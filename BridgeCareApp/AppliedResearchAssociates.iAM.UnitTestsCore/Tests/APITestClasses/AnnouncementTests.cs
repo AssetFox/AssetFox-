@@ -79,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.NotNull(okObjResult.Value);
 
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
-            Assert.True(dtos.Count() > 0);
+            Assert.True(dtos.Any());
             Assert.Equal(AnnouncementId, dtos[0].Id);
         }
 

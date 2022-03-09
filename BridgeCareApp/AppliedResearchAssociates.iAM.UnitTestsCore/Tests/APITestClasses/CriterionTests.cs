@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<CriterionLibraryDTO>));
-            Assert.True(dtos.Count() > 0);
+            Assert.True(dtos.Any());
         }
 
         [Fact]

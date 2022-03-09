@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPercentagePairEntity _testBudgetPercentagePair;
         private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
         private BudgetPriorityEntity _testBudgetPriority;
+        private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
 
         public BudgetPriorityTests()
         {
@@ -51,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateLibraryTestData()
         {
-            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = "BudgetPriorityLibraryEntity" };
+            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = BudgetPriorityLibraryEntityName };
             _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriorityLibrary);
 
 
@@ -204,8 +205,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetPriorityLibraryDTO>));
-            Assert.True(dtos.Any(b => b.Name == "BudgetPriorityLibraryEntity"));
-            var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == "BudgetPriorityLibraryEntity" && b.Id == _testBudgetPriorityLibrary.Id);
+            Assert.True(dtos.Any(b => b.Name == BudgetPriorityLibraryEntityName));
+            var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
             Assert.True(dtos[0].BudgetPriorities.Count() > 0);
             Assert.Equal(_testBudgetPriority.PriorityLevel, budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel);
             Assert.Equal(_testBudgetPriority.Year, budgetPriorityLibraryDTO.BudgetPriorities[0].Year);

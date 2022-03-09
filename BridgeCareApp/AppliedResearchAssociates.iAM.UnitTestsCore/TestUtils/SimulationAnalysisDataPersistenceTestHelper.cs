@@ -210,11 +210,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             AddTreatmentSchedulings();
             AddTreatmentSupersessions();
         }
-
-        public override void CleanUp()
-        {
-            //UnitOfWork.Context.Database.EnsureDeleted();
-            //UnitOfWork.Dispose();
-        }
     }
 }

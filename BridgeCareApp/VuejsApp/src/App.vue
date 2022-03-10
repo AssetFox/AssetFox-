@@ -4,9 +4,9 @@
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img :src="require('@/assets/images/PennDOTLogo.svg')" />
-                    <v-divider class="mx-2" vertical color="#798899" style="display: inline; line-height: 100%;" />
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                     <img :src="require('@/assets/images/BridgeCareLogo.svg')" />
-                    <v-divider class="mx-2" vertical color="#798899" style="display: inline; line-height: 100%;"/>
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
                     <v-btn
@@ -148,7 +148,7 @@
                                 v-on="on"
                                 v-bind="attrs"
                                 @click="onNotificationMenuSelect"
-                                style="margin-top: 5px;"
+                                class="notification-icon"
                             >
                                 <notification-bell
                                     :size="30"
@@ -223,10 +223,10 @@
                     </v-menu>
                 </v-toolbar-title>
                 <v-toolbar-title>
-                    <v-divider class="mx-1" vertical color="#798899" style="display: inline; line-height: 100%;"/>
+                    <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-title class="navbar-gray" v-if="authenticated">
-                    <v-icon style="margin-right: 10px;">fas fa-user</v-icon>
+                    <v-icon class="navbar-user-icon">fas fa-user</v-icon>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
@@ -668,6 +668,23 @@ html {
     overflow: auto;
     overflow-x: hidden;
     overflow-y: scroll !important;
+}
+
+.navbar-divider {
+    display: inline !important;
+    line-height: 100% !important;
+}
+
+.navbar-gray {
+    color: #2c2c2c !important;
+}
+
+.navbar-user-icon {
+    margin-right: 10px;
+}
+
+.notification-icon {
+    margin-top: 5px;
 }
 
 .v-list__group__header__prepend-icon .v-icon {

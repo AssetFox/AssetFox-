@@ -87,19 +87,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Context.Database.EnsureCreated();
         }
-
-        private static TestHelper instance = null;
+                       
+        private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
         public static TestHelper Instance
         {
             get
             {
-                if (instance == null)
-                {
-                    instance = new TestHelper();
-                }
-                return instance;
+                return lazy.Value;
             }
-        }
+        }        
 
         public void SetupDefaultHttpContext()
         {

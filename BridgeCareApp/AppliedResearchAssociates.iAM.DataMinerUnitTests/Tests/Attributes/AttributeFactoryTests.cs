@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void CreateForStringTypeTest()
         {
             // Arrange
-            Init(AttributeTypeNames.StringType, string.Empty);
+            Init(AttributeTypeNames.String, string.Empty);
 
             // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void CreateForStringTypeWithValueTest()
         {
             // Arrange
-            Init(AttributeTypeNames.StringType, CommonTestParameterValues.StringValue);
+            Init(AttributeTypeNames.String, CommonTestParameterValues.StringValue);
 
             // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void CreateForNumberDoubleTypeTest()
         {
             // Arrange
-            Init(AttributeTypeNames.NumberType, CommonTestParameterValues.DoubleNumber);
+            Init(AttributeTypeNames.Number, CommonTestParameterValues.DoubleNumber);
 
             // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void CreateForNumberIntTypeTest()
         {
             // Arrange
-            Init(AttributeTypeNames.NumberType, CommonTestParameterValues.IntNumber);
+            Init(AttributeTypeNames.Number, CommonTestParameterValues.IntNumber);
 
             // Act
             var result = AttributeFactory.Create(attributeMetaDatum);
@@ -70,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void CreateForNumberInvalidValueTest()
         {
             // Arrange
-            Init(AttributeTypeNames.NumberType, string.Empty);
+            Init(AttributeTypeNames.Number, string.Empty);
 
             // Act, Assert
             Assert.Throws<InvalidCastException>(() => AttributeFactory.Create(attributeMetaDatum));

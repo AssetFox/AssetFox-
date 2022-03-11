@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
         public void CreateNumericRuleExceptionTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Other);
+            Init(OtherTypeName.Other);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateNumericRule(mockAttribute.Object));
@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
         public void CreateTextRuleExceptionTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Other);
+            Init(OtherTypeName.Other);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateTextRule(mockAttribute.Object));

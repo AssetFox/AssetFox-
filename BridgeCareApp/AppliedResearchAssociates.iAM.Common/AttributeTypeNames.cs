@@ -2,8 +2,8 @@
 {
     public static class AttributeTypeNames
     {
-        public static string NumberType => "NUMBER";
+        public static string Number => "NUMBER";
 
-        public static string StringType => "STRING";
+        public static string String => "STRING";
     }
 }

@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void GetDataWithStringTest()
         {
             // Arrange
-            Init(AttributeTypeNames.StringType, CommonTestParameterValues.NameColumn);
+            Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
             var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute.Object);
 
             // Act

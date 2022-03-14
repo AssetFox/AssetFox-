@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void GetDataForStringTypeTest()
         {
             // Arrange
-            Init(AttributeTypeNames.StringType);
+            Init(AttributeTypeNames.String);
 
             // Act
             var result = AttributeDataBuilder.GetData(mockAttributeConnection.Object);
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void GetDataForNumberTypeTest()
         {
             // Arrange
-            Init(AttributeTypeNames.NumberType);
+            Init(AttributeTypeNames.Number);
 
             var result = AttributeDataBuilder.GetData(mockAttributeConnection.Object);
             Assert.NotNull(result);

@@ -32,11 +32,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public TreatmentTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+            }
         }
 
         private void CreateAuthorizedController()
@@ -54,9 +57,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateLibraryTestData()
         {
-            _testTreatmentLibrary = new TreatmentLibraryEntity {Id = Guid.NewGuid(), Name = "Test Name"};
-            _testHelper.UnitOfWork.Context.AddEntity(_testTreatmentLibrary);
-
+            _testTreatmentLibrary = new TreatmentLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
+            _testHelper.UnitOfWork.Context.TreatmentLibrary.Add(_testTreatmentLibrary);
 
             _testTreatment = new SelectableTreatmentEntity
             {
@@ -68,18 +70,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testTreatment);
 
-
-            _testTreatmentCost = new TreatmentCostEntity {Id = Guid.NewGuid(), TreatmentId = _testTreatment.Id};
+            _testTreatmentCost = new TreatmentCostEntity { Id = Guid.NewGuid(), TreatmentId = _testTreatment.Id };
             _testHelper.UnitOfWork.Context.AddEntity(_testTreatmentCost);
-
 
             _testTreatmentConsequence = new ConditionalTreatmentConsequenceEntity
             {
-                Id = Guid.NewGuid(), SelectableTreatmentId = _testTreatment.Id, ChangeValue = "1",
+                Id = Guid.NewGuid(),
+                SelectableTreatmentId = _testTreatment.Id,
+                ChangeValue = "1",
                 AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testTreatmentConsequence);
-
 
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
@@ -88,7 +89,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testScenarioBudget = new ScenarioBudgetEntity
             {
-                Id = Guid.NewGuid(), SimulationId = _testHelper.TestSimulation.Id, Name = "Test Name"
+                Id = Guid.NewGuid(),
+                SimulationId = _testHelper.TestSimulation.Id,
+                Name = "Test Name"
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
 
@@ -104,19 +107,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
             _testHelper.UnitOfWork.Context.AddEntity(new ScenarioSelectableTreatmentScenarioBudgetEntity
             {
-                ScenarioBudgetId = _testScenarioBudget.Id, ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
+                ScenarioBudgetId = _testScenarioBudget.Id,
+                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
             });
 
             _testScenarioTreatmentCost = new ScenarioTreatmentCostEntity
             {
-                Id = Guid.NewGuid(), ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
+                Id = Guid.NewGuid(),
+                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentCost);
 
 
             _testScenarioTreatmentConsequence = new ScenarioConditionalTreatmentConsequenceEntity
             {
-                Id = Guid.NewGuid(), ScenarioSelectableTreatmentId = _testScenarioTreatment.Id, ChangeValue = "1",
+                Id = Guid.NewGuid(),
+                ScenarioSelectableTreatmentId = _testScenarioTreatment.Id,
+                ChangeValue = "1",
                 AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentConsequence);
@@ -129,363 +136,297 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnLibraryGet()
         {
-            try
-            {
-                // Act
-                CreateAuthorizedController();
-                var result = await _controller.GetTreatmentLibraries();
+            // Act
+            CreateAuthorizedController();
+            var result = await _controller.GetTreatmentLibraries();
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnScenarioGet()
         {
-            try
-            {
-                // Act
-                CreateAuthorizedController();
-                var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
+            // Act
+            CreateAuthorizedController();
+            var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnLibraryPost()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            var dto = new TreatmentLibraryDTO
             {
-                // Arrange
-                CreateAuthorizedController();
-                var dto = new TreatmentLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", Treatments = new List<TreatmentDTO>()
-                };
+                Id = Guid.NewGuid(),
+                Name = "",
+                Treatments = new List<TreatmentDTO>()
+            };
 
-                // Act
-                var result = await _controller.UpsertTreatmentLibrary(dto);
+            // Act
+            var result = await _controller.UpsertTreatmentLibrary(dto);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnScenarioPost()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                var dtos = new List<TreatmentDTO>();
+            // Arrange
+            CreateAuthorizedController();
+            var dtos = new List<TreatmentDTO>();
 
-                // Act
-                var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dtos);
+            // Act
+            var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dtos);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnLibraryDelete()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
+            // Arrange
+            CreateAuthorizedController();
 
-                // Act
-                var result = await _controller.DeleteTreatmentLibrary(Guid.Empty);
+            // Act
+            var result = await _controller.DeleteTreatmentLibrary(Guid.Empty);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldGetLibraryTreatmentData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
 
-                // Act
-                var result = await _controller.GetTreatmentLibraries();
+            // Act
+            var result = await _controller.GetTreatmentLibraries();
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                    typeof(List<TreatmentLibraryDTO>));
-                Assert.Single(dtos);
+            var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<TreatmentLibraryDTO>));
+            Assert.True(dtos.Any(t => t.Id == _testTreatmentLibrary.Id));
+            var resultTreatmentLibrary = dtos.FirstOrDefault(t => t.Id == _testTreatmentLibrary.Id);
+            Assert.Equal(_testTreatmentLibrary.Id, resultTreatmentLibrary.Id);
+            Assert.Single(resultTreatmentLibrary.Treatments);
 
-                Assert.Equal(_testTreatmentLibrary.Id, dtos[0].Id);
-                Assert.Single(dtos[0].Treatments);
+            Assert.Equal(_testTreatment.Id, resultTreatmentLibrary.Treatments[0].Id);
+            Assert.Single(resultTreatmentLibrary.Treatments[0].Consequences);
+            Assert.Single(resultTreatmentLibrary.Treatments[0].Costs);
 
-                Assert.Equal(_testTreatment.Id, dtos[0].Treatments[0].Id);
-                Assert.Single(dtos[0].Treatments[0].Consequences);
-                Assert.Single(dtos[0].Treatments[0].Costs);
-
-                Assert.Equal(_testTreatmentConsequence.Id, dtos[0].Treatments[0].Consequences[0].Id);
-                Assert.Equal(_testTreatmentCost.Id, dtos[0].Treatments[0].Costs[0].Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(_testTreatmentConsequence.Id, resultTreatmentLibrary.Treatments[0].Consequences[0].Id);
+            Assert.Equal(_testTreatmentCost.Id, resultTreatmentLibrary.Treatments[0].Costs[0].Id);
         }
 
         [Fact]
         public async void ShouldGetScenarioTreatmentData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateScenarioTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateScenarioTestData();
 
-                // Act
-                var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<TreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<TreatmentDTO>));
-                Assert.Single(dtos);
+            var dtos = (List<TreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<TreatmentDTO>));
+            Assert.Single(dtos);
 
-                Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
-                Assert.Single(dtos[0].Consequences);
-                Assert.Single(dtos[0].Costs);
-                Assert.Single(dtos[0].BudgetIds);
+            Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
+            Assert.Single(dtos[0].Consequences);
+            Assert.Single(dtos[0].Costs);
+            Assert.Single(dtos[0].BudgetIds);
 
-                Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
-                Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
-                Assert.True(dtos[0].BudgetIds.Contains(_testScenarioBudget.Id));
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
+            Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
+            Assert.True(dtos[0].BudgetIds.Contains(_testScenarioBudget.Id));
         }
 
         [Fact]
         public async void ShouldModifyLibraryTreatmentData()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
+
+            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+            var dtoLibrary = dto.Where(t => t.Name == "Test Name").FirstOrDefault();
+            dtoLibrary.Description = "Updated Description";
+            dtoLibrary.Treatments[0].Name = "Updated Name";
+            dtoLibrary.Treatments[0].CriterionLibrary = new CriterionLibraryDTO
             {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
-
-                var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries()[0];
-
-                dto.Description = "Updated Description";
-                dto.Treatments[0].Name = "Updated Name";
-                dto.Treatments[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto.Treatments[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto.Treatments[0].Costs[0].Equation = new EquationDTO {Id = Guid.NewGuid(), Expression = ""};
-                dto.Treatments[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto.Treatments[0].Consequences[0].Equation = new EquationDTO {Id = Guid.NewGuid(), Expression = ""};
-
-                // Act
-                await _controller.UpsertTreatmentLibrary(dto);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var modifiedDto =
-                        _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries()[0];
-                    Assert.Equal(dto.Description, modifiedDto.Description);
-                    Assert.Single(modifiedDto.AppliedScenarioIds);
-                    Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
-
-                    Assert.Equal(dto.Treatments[0].Name, modifiedDto.Treatments[0].Name);
-                    Assert.Equal(dto.Treatments[0].CriterionLibrary.Id,
-                        modifiedDto.Treatments[0].CriterionLibrary.Id);
-                    Assert.True(modifiedDto.Treatments[0].Costs.Any());
-
-                    Assert.Equal(dto.Treatments[0].Costs[0].CriterionLibrary.Id,
-                        modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
-                    Assert.Equal(dto.Treatments[0].Costs[0].Equation.Id,
-                        modifiedDto.Treatments[0].Costs[0].Equation.Id);
-
-                    Assert.Equal(dto.Treatments[0].Costs[0].CriterionLibrary.Id,
-                        modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
-                    Assert.Equal(dto.Treatments[0].Consequences[0].Equation.Id,
-                        modifiedDto.Treatments[0].Consequences[0].Equation.Id);
-                };
-            }
-            finally
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dtoLibrary.Treatments[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
             {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dtoLibrary.Treatments[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dtoLibrary.Treatments[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dtoLibrary.Treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+
+            // Act
+            await _controller.UpsertTreatmentLibrary(dtoLibrary);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var modifiedDto =
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries()[0];
+                Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
+                Assert.True(modifiedDto.AppliedScenarioIds.Any());
+                Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
+
+                Assert.Equal(dtoLibrary.Treatments[0].Name, modifiedDto.Treatments[0].Name);
+                Assert.Equal(dtoLibrary.Treatments[0].CriterionLibrary.Id,
+                    modifiedDto.Treatments[0].CriterionLibrary.Id);
+                Assert.True(modifiedDto.Treatments[0].Costs.Any());
+
+                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
+                    modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
+                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].Equation.Id,
+                    modifiedDto.Treatments[0].Costs[0].Equation.Id);
+
+                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
+                    modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
+                Assert.Equal(dtoLibrary.Treatments[0].Consequences[0].Equation.Id,
+                    modifiedDto.Treatments[0].Consequences[0].Equation.Id);
+            };
         }
 
         [Fact]
         public async void ShouldModifyScenarioTreatmentData()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            CreateScenarioTestData();
+
+            var scenarioBudget = new ScenarioBudgetEntity
             {
-                // Arrange
-                CreateAuthorizedController();
-                CreateScenarioTestData();
+                Id = Guid.NewGuid(),
+                Name = "",
+                SimulationId = _testHelper.TestSimulation.Id
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
+            _testHelper.UnitOfWork.Context.SaveChanges();
 
-                var scenarioBudget = new ScenarioBudgetEntity
-                {
-                    Id = Guid.NewGuid(), Name = "", SimulationId = _testHelper.TestSimulation.Id
-                };
-                _testHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
-                _testHelper.UnitOfWork.Context.SaveChanges();
+            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
 
-                var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+            dto[0].Description = "Updated Description";
+            dto[0].Name = "Updated Name";
+            dto[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].BudgetIds.Add(scenarioBudget.Id);
+
+            // Act
+            await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
                     .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
-
-                dto[0].Description = "Updated Description";
-                dto[0].Name = "Updated Name";
-                dto[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto[0].Costs[0].Equation = new EquationDTO {Id = Guid.NewGuid(), Expression = ""};
-                dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", MergedCriteriaExpression = "", IsSingleUse = true
-                };
-                dto[0].Consequences[0].Equation = new EquationDTO {Id = Guid.NewGuid(), Expression = ""};
-                dto[0].BudgetIds.Add(scenarioBudget.Id);
-
-                // Act
-                await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                        .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
-                    Assert.Equal(dto[0].Description, modifiedDto[0].Description);
-                    Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-                    Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
-                    Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
-                    Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
-                    Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
-                        modifiedDto[0].Consequences[0].CriterionLibrary.Id);
-                    Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
-                    Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-                    Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
-                };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                Assert.Equal(dto[0].Description, modifiedDto[0].Description);
+                Assert.Equal(dto[0].Name, modifiedDto[0].Name);
+                Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
+                Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
+                Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
+                Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
+                    modifiedDto[0].Consequences[0].CriterionLibrary.Id);
+                Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
+                Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+                Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
+            };
         }
 
         [Fact]
         public async void ShouldThrowUnauthorizedException()
         {
-            try
-            {
-                // Arrange
-                CreateUnauthorizedController();
-                CreateScenarioTestData();
+            // Arrange
+            CreateUnauthorizedController();
+            CreateScenarioTestData();
 
-                var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                    .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
+            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
 
-                // Act
-                var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
+            // Act
+            var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
 
-                // Assert
-                Assert.IsType<UnauthorizedResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
         }
 
         [Fact]
         public async void ShouldDeleteLibraryData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
 
-                // Act
-                var result = await _controller.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
+            // Act
+            var result = await _controller.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
+            // Assert
+            Assert.IsType<OkResult>(result);
 
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
-                        _.Id == _testTreatmentConsequence.Id));
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
+            Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
+            Assert.True(!_testHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
+                    _.Id == _testTreatmentConsequence.Id));
         }
     }
 }

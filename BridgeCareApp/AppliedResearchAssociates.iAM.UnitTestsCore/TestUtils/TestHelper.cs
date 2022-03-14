@@ -45,7 +45,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
-        public TestHelper()
+
+        protected TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -56,13 +57,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
-                    Name = "pdsystbamsusr01", Role = "PD-BAMS-Administrator", Email = "pdstseseca5@pa.gov"
+                    Name = "pdsystbamsusr01",
+                    Role = "PD-BAMS-Administrator",
+                    Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityNotAuthorized = new Mock<IEsecSecurity>();
             MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
-                    Name = "b-bamsadmin", Role = "PD-BAMS-DBEngineer", Email = "jmalmberg@ara.com"
+                    Name = "b-bamsadmin",
+                    Role = "PD-BAMS-DBEngineer",
+                    Email = "jmalmberg@ara.com"
                 });
 
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -82,6 +87,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Context.Database.EnsureCreated();
         }
+                       
+        private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
+        public static TestHelper Instance
+        {
+            get
+            {
+                return lazy.Value;
+            }
+        }        
 
         public void SetupDefaultHttpContext()
         {
@@ -154,12 +168,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     CreatedDate = DateTime.Now
                 });
             }
-        }
-
-        public virtual void CleanUp()
-        {
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Dispose();
         }
     }
 }

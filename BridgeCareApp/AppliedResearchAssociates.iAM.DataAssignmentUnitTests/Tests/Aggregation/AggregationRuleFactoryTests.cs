@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
     {
         private Mock<Attribute> mockAttribute;
         private readonly Guid guId = Guid.Empty;
+        private const string InvalidAggregationRuleType = "OTHER";
 
         [Fact]
         public void CreateNumericRuleTest()
@@ -29,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
         public void CreateNumericRuleExceptionTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Other);
+            Init(InvalidAggregationRuleType);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateNumericRule(mockAttribute.Object));
@@ -52,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
         public void CreateTextRuleExceptionTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Other);
+            Init(InvalidAggregationRuleType);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateTextRule(mockAttribute.Object));

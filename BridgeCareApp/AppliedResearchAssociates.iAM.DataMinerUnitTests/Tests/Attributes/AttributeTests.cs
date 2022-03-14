@@ -14,8 +14,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
         public AttributeTests()
         {            
-            mockAttribute = new Mock<Attribute>(guid, CommonTestParameterValues.Name, AttributeTypeNames.StringType, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
-            mockAttributeToCompare = new Mock<Attribute>(guid, CommonTestParameterValues.Name, AttributeTypeNames.StringType, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttribute = new Mock<Attribute>(guid, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttributeToCompare = new Mock<Attribute>(guid, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
         }
 
         [Fact]

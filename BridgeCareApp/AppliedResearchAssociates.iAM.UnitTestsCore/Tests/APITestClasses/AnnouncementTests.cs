@@ -16,13 +16,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class AnnouncementTests
     {
         private readonly TestHelper _testHelper;
-        private readonly AnnouncementController _controller;
-
-        private static readonly Guid AnnouncementId = Guid.Parse("afe4ebe4-b5fa-4d94-aaec-70a3f3979e4b");
+        private readonly AnnouncementController _controller;        
 
         public AnnouncementTests()
         {
-            _testHelper = new TestHelper();
+            _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
             _controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
@@ -30,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public AnnouncementEntity TestAnnouncement { get; } = new AnnouncementEntity
         {
-            Id = AnnouncementId,
+            Id = Guid.Empty,
             Title = "Test Title",
             Content = "Test Content"
         };
@@ -38,175 +36,123 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnGet()
         {
-            try
-            {
-                // Act
-                var result = await _controller.Announcements();
+            // Act
+            var result = await _controller.Announcements();
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnPost()
         {
-            try
-            {
-                // Act
-                var result = await _controller.UpsertAnnouncement(TestAnnouncement.ToDto());
+            // Act
+            var result = await _controller.UpsertAnnouncement(TestAnnouncement.ToDto());
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnDelete()
         {
-            try
-            {
-                // Act
-                var result = await _controller.DeleteAnnouncement(Guid.Empty);
+            // Act
+            var result = await _controller.DeleteAnnouncement(Guid.Empty);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldGetAllAnnouncements()
         {
-            try
-            {
-                // Arrange
-                _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            // Arrange
+            var AnnouncementId = Guid.NewGuid();
+            TestAnnouncement.Id = AnnouncementId;
+            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
 
-                // Act
-                var result = await _controller.Announcements();
+            // Act
+            var result = await _controller.Announcements();
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
-                Assert.Single(dtos);
-
-                Assert.Equal(AnnouncementId, dtos[0].Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
+            Assert.True(dtos.Any());
+            Assert.Equal(AnnouncementId, dtos[0].Id);
         }
 
         [Fact]
         public async void ShouldAddAnnouncementData()
         {
-            try
-            {
-                // Arrange
-                var dto = TestAnnouncement.ToDto();
+            // Arrange
+            TestAnnouncement.Id = Guid.NewGuid();
+            var dto = TestAnnouncement.ToDto();
 
-                // Act
-                await _controller.UpsertAnnouncement(dto);
+            // Act
+            await _controller.UpsertAnnouncement(dto);
 
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                    Assert.Equal(dto.Id, newDto.Id);
-                    Assert.Equal(dto.Title, newDto.Title);
-                    Assert.Equal(dto.Content, newDto.Content);
-                    Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
-                };
-            }
-            finally
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, newDto.Id);
+                Assert.Equal(dto.Title, newDto.Title);
+                Assert.Equal(dto.Content, newDto.Content);
+                Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
+            };
         }
 
         [Fact]
         public async void ShouldModifyAnnouncementData()
         {
-            try
+            // Arrange                
+            TestAnnouncement.Id = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var getResult = await _controller.Announcements();
+            var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
+
+            var dto = dtos[0];
+            dto.Title = "Updated Title";
+            dto.Content = "Updated Content";
+
+            // Act
+            await _controller.UpsertAnnouncement(dto);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
-                var getResult = await _controller.Announcements();
-                var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
-
-                var dto = dtos[0];
-                dto.Title = "Updated Title";
-                dto.Content = "Updated Content";
-
-                // Act
-                await _controller.UpsertAnnouncement(dto);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                    Assert.Equal(dto.Id, modifiedDto.Id);
-                    Assert.Equal(dto.Title, modifiedDto.Title);
-                    Assert.Equal(dto.Content, modifiedDto.Content);
-                    Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
-                };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, modifiedDto.Id);
+                Assert.Equal(dto.Title, modifiedDto.Title);
+                Assert.Equal(dto.Content, modifiedDto.Content);
+                Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
+            };
         }
 
         [Fact]
         public async void ShouldDeletePerformanceCurveData()
         {
-            try
+            // Arrange
+            TestAnnouncement.Id = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var getResult = await _controller.Announcements();
+            var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
+
+            // Act
+            var result = _controller.DeleteAnnouncement(dtos[0].Id);
+
+            // Assert
+            Assert.IsType<OkResult>(result.Result);
+
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
-                var getResult = await _controller.Announcements();
-                var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
-
-                // Act
-                var result = _controller.DeleteAnnouncement(dtos[0].Id);
-
-                // Assert
-                Assert.IsType<OkResult>(result.Result);
-
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
-                };
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
+            };
         }
     }
 }

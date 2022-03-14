@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Timers;
+using System.Threading;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -13,7 +13,6 @@ using BridgeCareCore.Logging;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Mvc;
-using NUnit.Framework.Internal;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -28,14 +27,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public ExpressionValidationTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            Thread.Sleep(2000);
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+                SetData();
+                AddTestData();
+            }
             _service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
             _controller = new ExpressionValidationController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+
         }
 
         private AttributeEntity NumericAttribute { get; set; }
@@ -60,15 +66,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             TextValue = "test"
         };
 
-        private void AddTestData()
+        private void SetData()
         {
-            TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
             TextAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeTextDataType);
+        }
+
+        private void AddTestData()
+        {
+            TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
+            _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
 
             TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
             TestTextAggregatedResult.AttributeId = TextAttribute.Id;
@@ -167,255 +176,183 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnEquationPost()
         {
-            try
+            // Arrange
+            var model = new EquationValidationParameters
             {
-                // Arrange
-                var model = new EquationValidationParameters
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = "(10,1)",
-                    IsPiecewise = true
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = "(10,1)",
+                IsPiecewise = true
+            };
 
-                // Act
-                var result = await _controller.GetEquationValidationResult(model);
+            // Act
+            var result = await _controller.GetEquationValidationResult(model);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
-        }
-
-        [Fact]
-        public async void ShouldReturnOkResultOnCriterionPost()
-        {
-            try
-            {
-                // Arrange
-                AddTestData();
-                var model = new ValidationParameter
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = $"[{NumericAttribute.Name}]='1'"
-                };
-
-                // Act
-                var result = await _controller.GetCriterionValidationResult(model);
-
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldValidateEquation()
         {
-            try
+            // Arrange
+            var model = new EquationValidationParameters
             {
-                // Arrange
-                var model = new EquationValidationParameters
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = "(10,1)",
-                    IsPiecewise = true
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = "(10,1)",
+                IsPiecewise = true
+            };
 
-                // Act
-                var result = await _controller.GetEquationValidationResult(model);
+            // Act
+            var result = await _controller.GetEquationValidationResult(model);
 
-                // Assert
-                var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                    typeof(ValidationResult));
-                Assert.True(validationResult.IsValid);
-                Assert.Equal("Success", validationResult.ValidationMessage);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
+                typeof(ValidationResult));
+            Assert.True(validationResult.IsValid);
+            Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact]
         public async void ShouldValidateNonPiecewiseEquation()
         {
-            try
+            // Arrange
+            NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
+                .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
+            var model = new EquationValidationParameters
             {
-                // Arrange
-                NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
-                    .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
-                var model = new EquationValidationParameters
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = $"[{NumericAttribute.Name}]*1",
-                    IsPiecewise = false
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = $"[{NumericAttribute.Name}]*1",
+                IsPiecewise = false
+            };
 
-                // Act
-                var result = await _controller.GetEquationValidationResult(model);
+            // Act
+            var result = await _controller.GetEquationValidationResult(model);
 
-                // Assert
-                var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                    typeof(ValidationResult));
-                Assert.True(validationResult.IsValid);
-                Assert.Equal("Success", validationResult.ValidationMessage);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
+                typeof(ValidationResult));
+            Assert.True(validationResult.IsValid);
+            Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact]
         public async void ShouldValidateCriterion()
         {
-            try
+            // Arrange
+            SetData();
+            var model = new ValidationParameter
             {
-                // Arrange
-                AddTestData();
-                var model = new ValidationParameter
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
+            };
 
-                // Act
-                var result = await _controller.GetCriterionValidationResult(model);
+            // Act
+            var result = await _controller.GetCriterionValidationResult(model);
 
-                // Assert
-                var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                    typeof(CriterionValidationResult));
-                Assert.True(validationResult.IsValid);
-                Assert.Equal(1, validationResult.ResultsCount);
-                Assert.Equal("Success", validationResult.ValidationMessage);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
+                typeof(CriterionValidationResult));
+            Assert.True(validationResult.IsValid);
+            Assert.Equal(1, validationResult.ResultsCount);
+            Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact]
         public void ShouldInvalidatePiecewiseEquations()
         {
-            try
-            {
-                // Act + Assert
-                var invalidPiecewiseEquationValidationData = GetInvalidPiecewiseEquationValidationData().ToList();
+            // Act + Assert
+            var invalidPiecewiseEquationValidationData = GetInvalidPiecewiseEquationValidationData().ToList();
 
-                foreach (var testDataSet in invalidPiecewiseEquationValidationData)
-                {
-                    var result = _controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
-                    var objectResult = (OkObjectResult)result.Result;
-                    var actualValidationResult = (ValidationResult)objectResult.Value;
-                    var expectedValidationResult = testDataSet[1] as ValidationResult;
-
-                    Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
-                    Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
-                };
-            }
-            finally
+            foreach (var testDataSet in invalidPiecewiseEquationValidationData)
             {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var result = _controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
+                var objectResult = (OkObjectResult)result.Result;
+                var actualValidationResult = (ValidationResult)objectResult.Value;
+                var expectedValidationResult = testDataSet[1] as ValidationResult;
+
+                Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
+                Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
+            };
         }
 
         [Fact]
         public async void ShouldInvalidateNonPiecewiseEquation()
         {
-            try
+            // Arrange
+            var model = new EquationValidationParameters
             {
-                // Arrange
-                var model = new EquationValidationParameters
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = "[FALSE_ATTRIBUTE]",
-                    IsPiecewise = false
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = "[FALSE_ATTRIBUTE]",
+                IsPiecewise = false
+            };
 
-                // Act
-                var result = await _controller.GetEquationValidationResult(model);
+            // Act
+            var result = await _controller.GetEquationValidationResult(model);
 
-                // Assert
-                var validationResult =
-                    (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(ValidationResult));
+            // Assert
+            var validationResult =
+                (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(ValidationResult));
 
-                Assert.False(validationResult.IsValid);
-                Assert.Equal("Unsupported Attribute FALSE_ATTRIBUTE", validationResult.ValidationMessage);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.False(validationResult.IsValid);
+            Assert.Equal("Unsupported Attribute FALSE_ATTRIBUTE", validationResult.ValidationMessage);
         }
 
         [Fact]
         public void ShouldThrowCalculateEvaluateExceptionOnInvalidEquation()
         {
-            try
+            // Arrange
+            var model = new EquationValidationParameters
             {
-                // Arrange
-                var model = new EquationValidationParameters
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = "",
-                    IsPiecewise = false
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = "",
+                IsPiecewise = false
+            };
 
-                // Act + Assert
-                Assert.ThrowsAsync<CalculateEvaluateException>(async () =>
-                    await _controller.GetEquationValidationResult(model));
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Act + Assert
+            Assert.ThrowsAsync<CalculateEvaluateException>(async () =>
+                await _controller.GetEquationValidationResult(model));
         }
 
         [Fact]
         public void ShouldInvalidateCriteria()
         {
-            try
+            var timer = new System.Timers.Timer { Interval = 5000 };
+            // Act + Assert
+            GetInvalidCriterionValidationData().ToList().ForEach(async testDataSet =>
             {
-                var timer = new Timer { Interval = 5000 };
-                // Act + Assert
-                GetInvalidCriterionValidationData().ToList().ForEach(async testDataSet =>
+                timer.Elapsed += async delegate
                 {
-                    timer.Elapsed += async delegate
-                    {
-                        var result =
-                            await _controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
+                    var result =
+                        await _controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
 
-                        var actualValidationResult =
-                            (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(CriterionValidationResult));
+                    var actualValidationResult =
+                        (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(CriterionValidationResult));
 
-                        var expectedValidationResult = testDataSet[1] as CriterionValidationResult;
+                    var expectedValidationResult = testDataSet[1] as CriterionValidationResult;
 
-                        Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
-                        Assert.Equal(expectedValidationResult.ResultsCount, actualValidationResult.ResultsCount);
-                        Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
-                    };
-                });
-            }
-            finally
+                    Assert.Equal(expectedValidationResult.IsValid, actualValidationResult.IsValid);
+                    Assert.Equal(expectedValidationResult.ResultsCount, actualValidationResult.ResultsCount);
+                    Assert.Equal(expectedValidationResult.ValidationMessage, actualValidationResult.ValidationMessage);
+                };
+            });
+        }
+
+        [Fact]
+        public async void ShouldReturnOkResultOnCriterionPost()
+        {
+            // Arrange                
+            SetData();
+            var model = new ValidationParameter
             {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = $"[{NumericAttribute.Name}]='1'"
+            };
+
+            // Act
+            var result = await _controller.GetCriterionValidationResult(model);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
     }
 }

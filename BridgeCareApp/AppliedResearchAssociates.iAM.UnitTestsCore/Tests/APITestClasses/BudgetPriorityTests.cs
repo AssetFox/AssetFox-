@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
@@ -27,14 +26,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPercentagePairEntity _testBudgetPercentagePair;
         private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
         private BudgetPriorityEntity _testBudgetPriority;
+        private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
 
         public BudgetPriorityTests()
         {
-            _testHelper = new TestHelper();
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
+            _testHelper = TestHelper.Instance;
+            if (!_testHelper.DbContext.Attribute.Any())
+            {
+                _testHelper.CreateAttributes();
+                _testHelper.CreateNetwork();
+                _testHelper.CreateSimulation();
+                _testHelper.SetupDefaultHttpContext();
+            }
         }
 
         private void CreateAuthorizedController() =>
@@ -49,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateLibraryTestData()
         {
-            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity {Id = Guid.NewGuid(), Name = "BudgetPriorityLibraryEntity"};
+            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = BudgetPriorityLibraryEntityName };
             _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriorityLibrary);
 
 
@@ -71,8 +74,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 }
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testBudgetPriority);
-
-
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
@@ -119,321 +120,231 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldReturnOkResultOnLibraryGet()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
+            // Arrange
+            CreateAuthorizedController();
 
-                // Act
-                var result = await _controller.GetBudgetPriorityLibraries();
+            // Act
+            var result = await _controller.GetBudgetPriorityLibraries();
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnScenarioGet()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
+            // Arrange
+            CreateAuthorizedController();
 
-                // Act
-                var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
 
-                // Assert
-                Assert.IsType<OkObjectResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnLibraryPost()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            var dto = new BudgetPriorityLibraryDTO
             {
-                // Arrange
-                CreateAuthorizedController();
-                var dto = new BudgetPriorityLibraryDTO
-                {
-                    Id = Guid.NewGuid(), Name = "", BudgetPriorities = new List<BudgetPriorityDTO>()
-                };
+                Id = Guid.NewGuid(),
+                Name = "",
+                BudgetPriorities = new List<BudgetPriorityDTO>()
+            };
 
-                // Act
-                var result = await _controller
-                    .UpsertBudgetPriorityLibrary(dto);
+            // Act
+            var result = await _controller
+                .UpsertBudgetPriorityLibrary(dto);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnScenarioPost()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                var dtos = new List<BudgetPriorityDTO>();
+            // Arrange
+            CreateAuthorizedController();
+            var dtos = new List<BudgetPriorityDTO>();
 
-                // Act
-                var result = await _controller
-                    .UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+            // Act
+            var result = await _controller
+                .UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldReturnOkResultOnDelete()
         {
-            try
-            {
-                // Act
-                CreateAuthorizedController();
-                var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
+            // Act
+            CreateAuthorizedController();
+            var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
         public async void ShouldGetLibraryData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
 
-                // Act
-                var result = await _controller.GetBudgetPriorityLibraries();
+            // Act
+            var result = await _controller.GetBudgetPriorityLibraries();
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-                    typeof(List<BudgetPriorityLibraryDTO>));
-                Assert.Single(dtos);
-
-                Assert.Equal(_testBudgetPriorityLibrary.Id, dtos[0].Id);
-                Assert.Single(dtos[0].BudgetPriorities);
-
-                Assert.Equal(_testBudgetPriority.Id, dtos[0].BudgetPriorities[0].Id);
-                Assert.Equal(_testBudgetPriority.PriorityLevel, dtos[0].BudgetPriorities[0].PriorityLevel);
-                Assert.Equal(_testBudgetPriority.Year, dtos[0].BudgetPriorities[0].Year);
-
-                Assert.Equal(_testBudgetPriority.CriterionLibraryBudgetPriorityJoin.CriterionLibraryId, dtos[0].BudgetPriorities[0].CriterionLibrary.Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<BudgetPriorityLibraryDTO>));
+            Assert.True(dtos.Any(b => b.Name == BudgetPriorityLibraryEntityName));
+            var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
+            Assert.True(dtos[0].BudgetPriorities.Count() > 0);
+            Assert.Equal(_testBudgetPriority.PriorityLevel, budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel);
+            Assert.Equal(_testBudgetPriority.Year, budgetPriorityLibraryDTO.BudgetPriorities[0].Year);
+            Assert.Equal(_testBudgetPriority.CriterionLibraryBudgetPriorityJoin.CriterionLibraryId, budgetPriorityLibraryDTO.BudgetPriorities[0].CriterionLibrary.Id);
         }
 
         [Fact]
         public async void ShouldGetScenarioData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateScenarioTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateScenarioTestData();
 
-                // Act
-                var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
+            // Act
+            var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
 
-                // Assert
-                var okObjResult = result as OkObjectResult;
-                Assert.NotNull(okObjResult.Value);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
 
-                var dtos = (List<BudgetPriorityDTO>)Convert.ChangeType(okObjResult.Value,
-                    typeof(List<BudgetPriorityDTO>));
-                Assert.Single(dtos);
-                Assert.Equal(_testScenarioBudgetPriority.Id, dtos[0].Id);
-                Assert.Equal(_testScenarioBudgetPriority.PriorityLevel, dtos[0].PriorityLevel);
-                Assert.Equal(_testScenarioBudgetPriority.Year, dtos[0].Year);
+            var dtos = (List<BudgetPriorityDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<BudgetPriorityDTO>));
+            Assert.Single(dtos);
+            Assert.Equal(_testScenarioBudgetPriority.Id, dtos[0].Id);
+            Assert.Equal(_testScenarioBudgetPriority.PriorityLevel, dtos[0].PriorityLevel);
+            Assert.Equal(_testScenarioBudgetPriority.Year, dtos[0].Year);
 
-                Assert.Single(dtos[0].BudgetPercentagePairs);
-                Assert.Equal(_testBudgetPercentagePair.Id, dtos[0].BudgetPercentagePairs[0].Id);
-                Assert.Equal(_testBudgetPercentagePair.Percentage, dtos[0].BudgetPercentagePairs[0].Percentage);
-                Assert.Equal(_testBudgetPercentagePair.ScenarioBudgetId, dtos[0].BudgetPercentagePairs[0].BudgetId);
-                Assert.Equal(_testScenarioBudget.Name, dtos[0].BudgetPercentagePairs[0].BudgetName);
+            Assert.Single(dtos[0].BudgetPercentagePairs);
+            Assert.Equal(_testBudgetPercentagePair.Id, dtos[0].BudgetPercentagePairs[0].Id);
+            Assert.Equal(_testBudgetPercentagePair.Percentage, dtos[0].BudgetPercentagePairs[0].Percentage);
+            Assert.Equal(_testBudgetPercentagePair.ScenarioBudgetId, dtos[0].BudgetPercentagePairs[0].BudgetId);
+            Assert.Equal(_testScenarioBudget.Name, dtos[0].BudgetPercentagePairs[0].BudgetName);
 
-                Assert.Equal(_testScenarioBudgetPriority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibraryId, dtos[0].CriterionLibrary.Id);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.Equal(_testScenarioBudgetPriority.CriterionLibraryScenarioBudgetPriorityJoin.CriterionLibraryId, dtos[0].CriterionLibrary.Id);
         }
 
         [Fact]
         public async void ShouldModifyLibraryData()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
+
+            // Arrange
+            _testBudgetPriorityLibrary.BudgetPriorities = new List<BudgetPriorityEntity> { _testBudgetPriority };
+
+            var dto = _testBudgetPriorityLibrary.ToDto();
+            dto.Description = "Updated Description";
+            dto.BudgetPriorities[0].PriorityLevel = 2;
+            dto.BudgetPriorities[0].Year = DateTime.Now.Year + 1;
+            dto.BudgetPriorities[0].CriterionLibrary = new CriterionLibraryDTO();
+
+            // Act
+            await _controller.UpsertBudgetPriorityLibrary(dto);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
+                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries()[0];
+                Assert.Equal(dto.Description, modifiedDto.Description);
 
-                // Arrange
-                _testBudgetPriorityLibrary.BudgetPriorities = new List<BudgetPriorityEntity> {_testBudgetPriority};
-
-                var dto = _testBudgetPriorityLibrary.ToDto();
-                dto.Description = "Updated Description";
-                dto.BudgetPriorities[0].PriorityLevel = 2;
-                dto.BudgetPriorities[0].Year = DateTime.Now.Year + 1;
-                dto.BudgetPriorities[0].CriterionLibrary = new CriterionLibraryDTO();
-
-                // Act
-                await _controller.UpsertBudgetPriorityLibrary(dto);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries()[0];
-                    Assert.Equal(dto.Description, modifiedDto.Description);
-
-                    Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
-                    Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
-                    Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
-                        modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
-                };
-                timer.Start();
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
+                Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
+                Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
+                    modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
+            };
+            timer.Start();
         }
 
         [Fact]
         public async void ShouldModifyScenarioData()
         {
-            try
+            // Arrange
+            CreateAuthorizedController();
+            CreateScenarioTestData();
+
+            // Arrange
+            _testScenarioBudgetPriority.BudgetPercentagePairs =
+                new List<BudgetPercentagePairEntity> { _testBudgetPercentagePair };
+            var dtos = new List<BudgetPriorityDTO> { _testScenarioBudgetPriority.ToDto() };
+
+            dtos[0].PriorityLevel = 2;
+            dtos[0].Year = DateTime.Now.Year + 1;
+            dtos[0].CriterionLibrary = new CriterionLibraryDTO();
+            dtos[0].BudgetPercentagePairs[0].Percentage = 90;
+
+            // Act
+            await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+
+            // Assert
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
             {
-                // Arrange
-                CreateAuthorizedController();
-                CreateScenarioTestData();
-
-                // Arrange
-                _testScenarioBudgetPriority.BudgetPercentagePairs =
-                    new List<BudgetPercentagePairEntity> {_testBudgetPercentagePair};
-                var dtos = new List<BudgetPriorityDTO> {_testScenarioBudgetPriority.ToDto()};
-
-                dtos[0].PriorityLevel = 2;
-                dtos[0].Year = DateTime.Now.Year + 1;
-                dtos[0].CriterionLibrary = new CriterionLibraryDTO();
-                dtos[0].BudgetPercentagePairs[0].Percentage = 90;
-
-                // Act
-                await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
-
-                // Assert
-                var timer = new Timer {Interval = 5000};
-                timer.Elapsed += delegate
-                {
-                    var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id)[0];
-                    Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
-                    Assert.Equal(dtos[0].Year, modifiedDto.Year);
-                    Assert.Equal(dtos[0].CriterionLibrary.Id, modifiedDto.CriterionLibrary.Id);
-                    Assert.Equal(dtos[0].BudgetPercentagePairs[0].Percentage, modifiedDto.BudgetPercentagePairs[0].Percentage);
-                };
-                timer.Start();
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id)[0];
+                Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
+                Assert.Equal(dtos[0].Year, modifiedDto.Year);
+                Assert.Equal(dtos[0].CriterionLibrary.Id, modifiedDto.CriterionLibrary.Id);
+                Assert.Equal(dtos[0].BudgetPercentagePairs[0].Percentage, modifiedDto.BudgetPercentagePairs[0].Percentage);
+            };
+            timer.Start();
         }
 
         [Fact]
         public async void ShouldDeleteLibraryData()
         {
-            try
-            {
-                // Arrange
-                CreateAuthorizedController();
-                CreateLibraryTestData();
+            // Arrange
+            CreateAuthorizedController();
+            CreateLibraryTestData();
 
-                // Act
-                var result = await _controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
+            // Act
+            var result = await _controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
 
-                // Assert
-                Assert.IsType<OkResult>(result);
+            // Assert
+            Assert.IsType<OkResult>(result);
 
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
-                Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
-                        _.BudgetPriorityId == _testBudgetPriority.Id));
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
+            Assert.True(!_testHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
+                    _.BudgetPriorityId == _testBudgetPriority.Id));
         }
 
         [Fact]
         public async void ShouldThrowUnauthorizedOnInvestmentPost()
         {
-            try
-            {
-                // Arrange
-                CreateUnauthorizedController();
-                CreateScenarioTestData();
+            // Arrange
+            CreateUnauthorizedController();
+            CreateScenarioTestData();
 
-                var dtos = new List<BudgetPriorityDTO>();
+            var dtos = new List<BudgetPriorityDTO>();
 
-                // Act
-                var result = await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+            // Act
+            var result = await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
 
-                // Assert
-                Assert.IsType<UnauthorizedResult>(result);
-            }
-            finally
-            {
-                // Cleanup
-                _testHelper.CleanUp();
-            }
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
         }
     }
 }

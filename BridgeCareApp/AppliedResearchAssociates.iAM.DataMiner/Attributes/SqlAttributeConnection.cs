@@ -25,12 +25,11 @@ namespace AppliedResearchAssociates.iAM.DataMiner.Attributes
 
                 while (dataReader.Read())
                 {
-                    if (!(dataReader["DATA_"] is DBNull || dataReader["DATE_"] is DBNull || dataReader["FACILITY"] is DBNull ||
-                        dataReader["SECTION"] is DBNull))
+                    if (!(dataReader[DataColumnName] is DBNull || dataReader[DateColumnName] is DBNull || dataReader[LocationIdentifierString] is DBNull))
                     {
-                        var value = (T)Convert.ChangeType(dataReader["DATA_"], typeof(T));
-                        var dateTime = Convert.ToDateTime(dataReader["DATE_"]);
-                        var locationIdentifier = $"{dataReader["FACILITY"]}-{dataReader["SECTION"]}";
+                        var value = (T)Convert.ChangeType(dataReader[DataColumnName], typeof(T));
+                        var dateTime = Convert.ToDateTime(dataReader[DateColumnName]);
+                        var locationIdentifier = dataReader[LocationIdentifierString].ToString();
 
                         yield return new AttributeDatum<T>(Guid.NewGuid(), Attribute, value,
                             LocationBuilder.CreateLocation(locationIdentifier, start, end, direction, wellKnownText),

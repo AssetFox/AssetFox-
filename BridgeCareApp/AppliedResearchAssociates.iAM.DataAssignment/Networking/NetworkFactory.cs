@@ -19,6 +19,11 @@ namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
         /// <returns></returns>
         public static Network CreateNetworkFromAttributeDataRecords(IEnumerable<IAttributeDatum> attributeData, string defaultEquation)
         {
+            var anyDuplicate = attributeData.GroupBy(datum => datum.Location.LocationIdentifier).Any(g => g.Count() > 1);
+            if(anyDuplicate)
+            {
+                throw new InvalidOperationException("Networks may not contain maintainable assets with non-unique location identifiers.");
+            }
             var networkId = Guid.NewGuid();
             var maintenanceAssets = (from attributeDatum in attributeData
                     let maintenanceAsset = new MaintainableAsset(Guid.NewGuid(), networkId, attributeDatum.Location, defaultEquation)

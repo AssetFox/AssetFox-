@@ -1,217 +1,140 @@
 <template>
     <v-app class="paper-white-bg">
         <v-content>
-            <v-navigation-drawer
-                :disable-resize-watcher="true"
-                app
-                class="paper-white-bg"
-                v-if="authenticatedWithRole"
-                v-model="drawer"
-            >
-                <v-list class="pt-0" dense>
-                    <v-list-tile
-                        @click="
-                            drawer = false;
-                            onNavigate('/Home/');
-                        "
-                    >
-                        <v-list-tile-action>
-                            <v-icon class="ara-dark-gray"
-                                >fas fa-newspaper</v-icon
-                            >
-                        </v-list-tile-action>
-                        <v-list-tile-title>Home</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="onNavigate('/Inventory/')">
-                        <v-list-tile-action>
-                            <v-icon class="ara-dark-gray"
-                                >fas fa-archive</v-icon
-                            >
-                        </v-list-tile-action>
-                        <v-list-tile-title>Inventory</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-tile @click="onNavigate('/Scenarios/')">
-                        <v-list-tile-action>
-                            <v-icon class="ara-dark-gray"
-                                >fas fa-project-diagram</v-icon
-                            >
-                        </v-list-tile-action>
-                        <v-list-tile-title>Scenarios</v-list-tile-title>
-                    </v-list-tile>
-                    <v-list-group prepend-icon="fas fa-book">
-                        <template slot="activator">
-                            <v-list-tile>
-                                <v-list-tile-title>Libraries</v-list-tile-title>
-                            </v-list-tile>
-                        </template>
-                        <v-list-tile
-                            @click="onNavigate('/InvestmentEditor/Library/')"
-                        >
-                            <v-list-tile-title>Investment</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate('/PerformanceCurveEditor/Library/')
-                            "
-                        >
-                            <v-list-tile-title
-                                >Performance Curve</v-list-tile-title
-                            >
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="onNavigate('/TreatmentEditor/Library/')"
-                        >
-                            <v-list-tile-title>Treatment</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate('/BudgetPriorityEditor/Library/')
-                            "
-                        >
-                            <v-list-tile-title
-                                >Budget Priority</v-list-tile-title
-                            >
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate(
-                                    '/TargetConditionGoalEditor/Library/',
-                                )
-                            "
-                        >
-                            <v-list-tile-title
-                                >Target Condition Goal</v-list-tile-title
-                            >
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate(
-                                    '/DeficientConditionGoalEditor/Library/',
-                                )
-                            "
-                        >
-                            <v-list-tile-title
-                                >Deficient Condition Goal</v-list-tile-title
-                            >
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate('/RemainingLifeLimitEditor/Library/')
-                            "
-                            v-if="isAdmin"
-                        >
-                            <v-list-tile-title
-                                >Remaining Life Limit</v-list-tile-title
-                            >
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="onNavigate('/CashFlowEditor/Library/')"
-                        >
-                            <v-list-tile-title>Cash Flow</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile
-                            @click="
-                                onNavigate('/CriterionLibraryEditor/Library/')
-                            "
-                        >
-                            <v-list-tile-title>Criterion</v-list-tile-title>
-                        </v-list-tile>
-                        <v-list-tile
-                            v-show="isAdmin"
-                            @click="
-                                onNavigate(
-                                    '/CalculatedAttributeEditor/Library/',
-                                )
-                            "
-                        >
-                            <v-list-tile-title
-                                >Calculated Attribute</v-list-tile-title
-                            >
-                        </v-list-tile>
-                    </v-list-group>
-                    <v-list-tile
-                        @click="onNavigate('/UserCriteria/')"
-                        v-if="isAdmin"
-                    >
-                        <v-list-tile-action>
-                            <v-icon class="ara-dark-gray">fas fa-lock</v-icon>
-                        </v-list-tile-action>
-                        <v-list-tile-title>Security</v-list-tile-title>
-                    </v-list-tile>
-                </v-list>
-            </v-navigation-drawer>
-            <v-toolbar app class="ara-blue-pantone-289-bg">
-                <v-toolbar-side-icon
-                    @click="drawer = !drawer"
-                    class="white--text"
-                    v-if="
-                        authenticatedWithRole &&
-                            $router.currentRoute.name !== 'Home'
-                    "
-                ></v-toolbar-side-icon>
-                <v-toolbar-title
-                    class="white--text"
-                    v-if="
-                        authenticatedWithRole &&
-                            $router.currentRoute.name === 'Home'
-                    "
-                >
-                    <v-btn
-                        @click="onNavigate('/Inventory/')"
-                        class="ara-blue-bg white--text"
-                        round
-                    >
-                        <v-icon style="padding-right: 12px"
-                            >fas fa-archive</v-icon
-                        >
-                        Inventory Lookup
-                    </v-btn>
+            <v-toolbar app class="paper-white-bg">
+                <v-toolbar-title>
+                    <img :src="require('@/assets/images/PennDOTLogo.svg')" />
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
+                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" />
+                    <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
+                </v-toolbar-title>
+                <v-toolbar-items>
                     <v-btn
                         @click="onNavigate('/Scenarios/')"
-                        class="ara-blue-bg white--text"
-                        round
+                        flat
+                        class="ara-blue-pantone-281"
                     >
-                        <v-icon style="padding-right: 12px"
-                            >fas fa-project-diagram</v-icon
-                        >
-                        BridgeCare Analysis
+                        Scenarios
                     </v-btn>
+                    <v-menu offset-y>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn flat v-on="on" v-bind="attrs" class="ara-blue-pantone-281">
+                                    Libraries
+                                </v-btn>
+                            </template>
+                        <v-list>    
+                            <v-list-item-group class="ara-blue-pantone-281">
+                                <v-list-tile
+                                    @click="onNavigate('/InvestmentEditor/Library/')"
+                                >
+                                    <v-list-tile-title>Investment</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate('/PerformanceCurveEditor/Library/')
+                                    "
+                                >
+                                    <v-list-tile-title
+                                        >Performance Curve</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="onNavigate('/TreatmentEditor/Library/')"
+                                >
+                                    <v-list-tile-title>Treatment</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate('/BudgetPriorityEditor/Library/')
+                                    "
+                                >
+                                    <v-list-tile-title
+                                        >Budget Priority</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate(
+                                            '/TargetConditionGoalEditor/Library/',
+                                        )
+                                    "
+                                >
+                                    <v-list-tile-title
+                                        >Target Condition Goal</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate(
+                                            '/DeficientConditionGoalEditor/Library/',
+                                        )
+                                    "
+                                >
+                                    <v-list-tile-title
+                                        >Deficient Condition Goal</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate('/RemainingLifeLimitEditor/Library/')
+                                    "
+                                    v-if="isAdmin"
+                                >
+                                    <v-list-tile-title
+                                        >Remaining Life Limit</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="onNavigate('/CashFlowEditor/Library/')"
+                                >
+                                    <v-list-tile-title>Cash Flow</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile
+                                    @click="
+                                        onNavigate('/CriterionLibraryEditor/Library/')
+                                    "
+                                >
+                                    <v-list-tile-title>Criterion</v-list-tile-title>
+                                </v-list-tile>
+                                <v-list-tile
+                                    v-show="isAdmin"
+                                    @click="
+                                        onNavigate(
+                                            '/CalculatedAttributeEditor/Library/',
+                                        )
+                                    "
+                                >
+                                    <v-list-tile-title
+                                        >Calculated Attribute</v-list-tile-title
+                                    >
+                                </v-list-tile>
+                            </v-list-item-group>
+                        </v-list> 
+                    </v-menu>
                     <v-btn
                         @click="onNavigate('/UserCriteria/')"
-                        class="ara-blue-bg white--text"
-                        round
+                        class="ara-blue-pantone-281"
+                        flat
                         v-if="isAdmin"
                     >
-                        <v-icon style="padding-right: 12px">fas fa-lock</v-icon>
                         Security
                     </v-btn>
                     <v-btn
-                        @click="showNewsDialog = true"
-                        class="ara-blue-bg white--text"
-                        round
+                        @click="onNavigate('/Inventory/')"
+                        class="ara-blue-pantone-281"
+                        flat
                     >
-                        <v-icon style="padding-right: 12px">fas fa-newspaper</v-icon>
+                        Inventory
+                    </v-btn>
+                     <v-btn
+                        @click="showNewsDialog = true"
+                        class="ara-blue-pantone-281"
+                        flat
+                    >
                         News
                     </v-btn>
-                </v-toolbar-title>
-                <v-toolbar-title class="white--text" v-if="hasSelectedScenario">
-                    <span class="font-weight-light">Scenario: </span>
-                    <span>{{ selectedScenario.name }}</span>
-                    <span
-                        v-if="selectedScenarioHasStatus"
-                        class="font-weight-light"
-                    >
-                        => Status:
-                    </span>
-                    <span v-if="selectedScenarioHasStatus">{{
-                        selectedScenario.status
-                    }}</span>
-                </v-toolbar-title>
+                </v-toolbar-items>
                 <v-spacer></v-spacer>
-                <v-toolbar-title class="white--text" v-if="authenticated">
-                    <span class="font-weight-light">Hello, </span>
-                    <span>{{ username }}</span>
-                </v-toolbar-title>
                 <v-toolbar-title class="white--text">
                     <v-menu
                         offset-y
@@ -225,6 +148,7 @@
                                 v-on="on"
                                 v-bind="attrs"
                                 @click="onNotificationMenuSelect"
+                                class="notification-icon"
                             >
                                 <notification-bell
                                     :size="30"
@@ -235,12 +159,12 @@
                                     counterStyle="roundRectangle"
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
-                                    iconColor="#FFFFFF"
+                                    iconColor="#002E6C"
                                 />
                             </button>
                         </template>
                         <v-card class="mx-auto" max-width="100%">
-                            <v-toolbar color="primary" dark>
+                            <v-toolbar color="#002E6C" dark>
                                 <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
                                 <v-toolbar-title>Notifications</v-toolbar-title>
@@ -298,39 +222,67 @@
                         </v-card>
                     </v-menu>
                 </v-toolbar-title>
+                <v-toolbar-title>
+                    <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
+                </v-toolbar-title>
+                <v-toolbar-title class="navbar-gray" v-if="authenticated">
+                    <v-icon class="navbar-user-icon">fas fa-user</v-icon>
+                    <span>{{ username }}</span>
+                </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
                     <v-btn
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogin"
-                        class="ara-blue-bg white--text"
+                        class="mx-2"
+                        icon
+                        color="#002E6C"
                     >
-                        Log In
+                        <v-icon small color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType"
                         @click="onNavigate('/AuthenticationStart/')"
-                        class="ara-blue-bg white--text"
+                        class="mx-2"
+                        icon
+                        color="#002E6C"
                     >
-                        Log In
+                        <v-icon small color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="authenticated">
                     <v-btn
                         v-if="securityType === b2cSecurityType"
                         @click="onAzureLogout"
-                        class="ara-blue-bg white--text"
+                        class="mx-2"
+                        icon
+                        color="#002E6C"
                     >
-                        Log Out
+                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                     <v-btn
                         v-if="securityType === esecSecurityType"
                         @click="onLogout"
-                        class="ara-blue-bg white--text"
+                        class="mx-2"
+                        icon                        
+                        color="#002E6C"
                     >
-                        Log Out
+                        <v-icon small color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                 </v-toolbar-title>
             </v-toolbar>
+            <div class="ara-blue-pantone-281 scenario-status" v-if="hasSelectedScenario">
+                <span class="font-weight-light">Scenario: </span>
+                    <span>{{ selectedScenario.name }}</span>
+                    <span
+                        v-if="selectedScenarioHasStatus"
+                        class="font-weight-light"
+                    >
+                        => Status:
+                    </span>
+                    <span v-if="selectedScenarioHasStatus">{{
+                        selectedScenario.status
+                    }}</span>
+            </div>
             <v-container fluid v-bind="container">
                 <router-view></router-view>
             </v-container>
@@ -718,6 +670,23 @@ html {
     overflow-y: scroll !important;
 }
 
+.navbar-divider {
+    display: inline !important;
+    line-height: 100% !important;
+}
+
+.navbar-gray {
+    color: #2c2c2c !important;
+}
+
+.navbar-user-icon {
+    margin-right: 10px;
+}
+
+.notification-icon {
+    margin-top: 5px;
+}
+
 .v-list__group__header__prepend-icon .v-icon {
     color: #798899;
 }
@@ -730,4 +699,5 @@ html {
     display: flex;
     justify-content: space-evenly;
 }
+
 </style>

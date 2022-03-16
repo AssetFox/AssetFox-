@@ -43,7 +43,7 @@
         <v-flex xs12>
             <v-layout justify-center>
                 <v-flex xs3>
-                    <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ara-blue-bg white--text'
+                    <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='primary white--text'
                            v-show='!hasScenario'>
                         New Library
                     </v-btn>

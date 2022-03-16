@@ -127,11 +127,12 @@
                         Inventory
                     </v-btn>
                      <v-btn
-                        @click="showNewsDialog = true"
+                        @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
                         flat
                     >
                         News
+                        <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
                     </v-btn>
                 </v-toolbar-items>
                 <v-spacer></v-spacer>
@@ -400,6 +401,7 @@ export default class AppComponent extends Vue {
     esecSecurityType: string = SecurityTypes.esec;
     b2cSecurityType: string = SecurityTypes.b2c;
     showNewsDialog: boolean = false;
+    hasUnreadNewsItem: boolean = true;
 
     get container() {
         const container: any = {};
@@ -657,6 +659,11 @@ export default class AppComponent extends Vue {
         this.removeNotificationAction(id);
     }
 
+    onShowNewsDialog() {
+        this.showNewsDialog = true;
+        this.hasUnreadNewsItem = false;
+    }
+
     onCloseNewsDialog() {
         this.showNewsDialog = false;
     }
@@ -681,6 +688,10 @@ html {
 
 .navbar-user-icon {
     margin-right: 10px;
+}
+
+.news-notification {
+    margin-bottom: 15px;
 }
 
 .notification-icon {

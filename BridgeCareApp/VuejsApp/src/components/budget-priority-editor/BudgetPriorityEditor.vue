@@ -482,8 +482,11 @@ export default class BudgetPriorityEditor extends Vue {
     onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
         this.createBudgetPriorityLibraryDialogData = {
             showDialog: true,
-            budgetPriorities: createAsNewLibrary ? this.selectedBudgetPriorityLibrary.budgetPriorities : [],
+            budgetPriorities: createAsNewLibrary ? this.budgetPriorities : [],
         };
+
+        console.log(this.createBudgetPriorityLibraryDialogData);
+        console.log(this.selectedBudgetPriorityLibrary.budgetPriorities);
     }
 
     onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {

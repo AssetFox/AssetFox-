@@ -611,7 +611,7 @@ export default class BudgetPriorityEditor extends Vue {
         if (this.hasSelectedLibrary) {
             return !(this.rules['generalRules'].valueIsNotEmpty(this.selectedBudgetPriorityLibrary.name) === true && allDataIsValid);
         }
-
+        this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
 }

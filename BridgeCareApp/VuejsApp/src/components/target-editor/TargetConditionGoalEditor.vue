@@ -600,6 +600,7 @@ export default class TargetConditionGoalEditor extends Vue {
         if (!isNil(library)) {
             this.upsertTargetConditionGoalLibraryAction({ library: library });
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = library.name;
         }
     }
 

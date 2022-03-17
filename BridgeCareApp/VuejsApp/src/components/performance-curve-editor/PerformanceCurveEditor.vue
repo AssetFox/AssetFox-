@@ -664,6 +664,7 @@ export default class PerformanceCurveEditor extends Vue {
         if (!isNil(performanceCurveLibrary)) {
             this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = performanceCurveLibrary.name;
         }
     }
 

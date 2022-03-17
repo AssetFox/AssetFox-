@@ -823,6 +823,7 @@ export default class CashFlowEditor extends Vue {
         if (!isNil(cashFlowRuleLibrary)) {
             this.upsertCashFlowRuleLibraryAction(cashFlowRuleLibrary);
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = cashFlowRuleLibrary.name;
         }
     }
 

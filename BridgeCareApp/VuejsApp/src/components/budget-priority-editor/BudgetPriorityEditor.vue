@@ -488,10 +488,10 @@ export default class BudgetPriorityEditor extends Vue {
 
     onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
         this.createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
-
         if (!isNil(budgetPriorityLibrary)) {
             this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = budgetPriorityLibrary.name;
         }
     }
 

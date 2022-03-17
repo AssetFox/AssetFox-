@@ -525,6 +525,7 @@ export default class InvestmentEditor extends Vue {
         if (!isNil(budgetLibrary)) {
             this.upsertBudgetLibraryAction(budgetLibrary);
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = budgetLibrary.name;
         }
     }
 

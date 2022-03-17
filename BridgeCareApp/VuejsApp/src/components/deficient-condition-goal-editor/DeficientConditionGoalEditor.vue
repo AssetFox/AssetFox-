@@ -647,6 +647,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         if (!isNil(library)) {
             this.upsertDeficientConditionGoalLibraryAction({ library: library});
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = library.name;
         }
     }
 

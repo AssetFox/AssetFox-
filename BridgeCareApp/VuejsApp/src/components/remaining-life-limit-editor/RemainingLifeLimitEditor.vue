@@ -509,6 +509,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         if (!isNil(library)) {
             this.upsertRemainingLifeLimitLibraryAction({library: library});
             this.hasCreatedLibrary = true;
+            this.selectItemValue = library.name;
         }
     }
 

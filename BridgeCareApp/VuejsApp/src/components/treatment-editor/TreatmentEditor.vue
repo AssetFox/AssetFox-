@@ -538,6 +538,7 @@ export default class TreatmentEditor extends Vue {
         if (!isNil(library)) {
             this.upsertTreatmentLibraryAction({ library: library });
             this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = library.name;
         }
     }
 

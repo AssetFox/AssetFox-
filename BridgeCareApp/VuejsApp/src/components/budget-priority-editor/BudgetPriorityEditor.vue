@@ -276,6 +276,7 @@ export default class BudgetPriorityEditor extends Vue {
                 }
 
                 vm.hasScenario = true;
+                vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId });
                 vm.getScenarioBudgetPrioritiesAction(vm.selectedScenarioId);
             }
         });

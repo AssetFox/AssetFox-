@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = entity.Name,
                 Description = entity.Description,
                 IsDefault = entity.IsDefault,
+                IsShared = entity.IsShared,
                 CalculatedAttributes = entity.CalculatedAttributes.Any()
                     ? entity.CalculatedAttributes.Select(_ => _.ToDto()).ToList()
                     : new List<CalculatedAttributeDTO>()
@@ -69,7 +70,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = dto.Id,
                 Name = dto.Name,
                 Description = dto.Description,
-                IsDefault = dto.IsDefault
+                IsDefault = dto.IsDefault,
+                IsShared = dto.IsShared
             };
 
         public static CalculatedAttributeEntity ToLibraryEntity(this CalculatedAttributeDTO dto, Guid libraryId, Guid attributeId) =>

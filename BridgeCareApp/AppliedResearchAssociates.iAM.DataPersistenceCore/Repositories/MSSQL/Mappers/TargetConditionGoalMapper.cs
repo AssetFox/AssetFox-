@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static TargetConditionGoalLibraryEntity ToEntity(this TargetConditionGoalLibraryDTO dto) =>
-            new TargetConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
+            new TargetConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
         public static void CreateTargetConditionGoal(this ScenarioTargetConditionGoalEntity entity, Simulation simulation)
         {
@@ -110,6 +110,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
+                Owner = entity.CreatedBy,
+                IsShared = entity.IsShared,
                 TargetConditionGoals = entity.TargetConditionGoals.Any()
                     ? entity.TargetConditionGoals.Select(_ => _.ToDto()).ToList()
                     : new List<TargetConditionGoalDTO>()

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class CRUDMethods<S, L>
-        where S : class
-        where L : class
+        where S : BaseDTO
+        where L : BaseLibraryDTO
     {
         public Action<Guid, List<S>> UpsertScenario { get; set; }
         public Func<Guid, List<S>> RetrieveScenario { get; set; }

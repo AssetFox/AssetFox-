@@ -37,6 +37,62 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetUserByUserName/{userName}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserByUserName( string userName)
+        {
+            try
+            {
+                var result = await UnitOfWork.UserRepo.GetUserByUserName(userName);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetUserById/{userName}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserById(Guid id)
+        {
+            try
+            {
+                var result = await UnitOfWork.UserRepo.GetUserById(id);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpdateLastNewsAccessDate")]
+        [Authorize]
+        public async Task<IActionResult> UpdateLastNewsAccessDate([FromBody] LastNewsAccessDateDTO dto)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.UserRepo.UpdateLastNewsAccessDate(dto.Id, dto.LastNewsAccessDate);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"User error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPut]
         [Route("UpdateUser")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]

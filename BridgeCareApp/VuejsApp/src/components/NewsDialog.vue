@@ -113,8 +113,7 @@ export default class NewsDialog extends Vue {
   
     @State(state => state.announcementModule.announcements) announcements: Announcement[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-
-    @Action('getAnnouncements') getAnnouncementsAction: any;
+    
     @Action('upsertAnnouncement') upsertAnnouncementAction: any;
     @Action('deleteAnnouncement') deleteAnnouncementAction: any;
 
@@ -131,10 +130,6 @@ export default class NewsDialog extends Vue {
 
     formatDate(announcementDate: Date) {
         return `${moment(announcementDate).format('dddd, MMMM Do, YYYY')}`;
-    }
-
-    mounted() {
-        this.getAnnouncementsAction();
     }
 
     closeDialog() {

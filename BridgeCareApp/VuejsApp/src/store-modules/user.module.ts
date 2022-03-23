@@ -1,4 +1,4 @@
-import { User } from '@/shared/models/iAM/user';
+import { User, UserNewsAccessDate, emptyUser } from '@/shared/models/iAM/user';
 import { clone, findIndex, propEq, reject, update } from 'ramda';
 import UserService from '@/services/user.service';
 import { AxiosResponse } from 'axios';
@@ -16,6 +16,7 @@ const state = {
     currentUserCriteriaFilter: clone(
         emptyUserCriteriaFilter,
     ) as UserCriteriaFilter,
+    currentUser: clone(emptyUser),
     checkedForCriteria: false,
 };
 
@@ -39,6 +40,9 @@ const mutations = {
         state.users = reject(propEq('id', id), state.users);
     },
     /////////////////////
+    currentUserMutator(state: any, currentUser: User) {
+        state.currentUser = currentUser;
+    },
     usersCriteriaFilterMutator(state: any, usersFilter: UserCriteriaFilter[]) {
         state.usersCriteriaFilter = clone(usersFilter);
     },
@@ -95,7 +99,7 @@ const mutations = {
     },
     checkedForCriteriaMutator(state: any, checked: boolean) {
         state.checkedForCriteria = checked;
-    },
+    }
 };
 
 const actions = {
@@ -212,9 +216,45 @@ const actions = {
             }
         });
     },
+    async updateUserLastNewsAccessDate({dispatch}: any, payload: any) {
+        let data: UserNewsAccessDate = {
+            id: payload.id,
+            lastNewsAccessDate: payload.accessDate
+        }
+
+        await UserService.updateLastNewsAccessDate(
+            data
+        ).then((response: AxiosResponse) => {
+            if (
+                !(hasValue(response, 'status') &&
+                http2XX.test(response.status.toString()))
+            ) {
+                dispatch('addErrorNotification', {
+                    message: 'Failed to update news notification to server.',
+                });
+            }
+        });
+    },
+    async getCurrentUserByUserName ({dispatch, commit}: any, userName: string) {
+        await UserService.getUserByUserName(userName).then(
+        (response: AxiosResponse<any>) => {
+            if (
+                hasValue(response, 'data') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit('currentUserMutator', response.data as User);
+            }
+            else {
+                dispatch('addErrorNotification', {
+                    message: 'Failed to get current user from server.',
+                });
+            }     
+        },)
+    },
 };
 
-const getters = {};
+const getters = {
+};
 
 export default {
     state,

@@ -35,6 +35,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.SaveChanges();
         }
 
+        public void UpdateLastNewsAccessDate(Guid id, DateTime accessDate)
+        {
+            var user = _unitOfWork.Context.User.Where(x => x.Id == id).FirstOrDefault();
+
+            if (user == null)
+            {
+                return;
+            }
+
+            user.LastNewsAccessDate = accessDate;
+            _unitOfWork.Context.User.Update(user);
+            _unitOfWork.Context.SaveChanges();
+        }
+
         public Task<List<UserDTO>> GetAllUsers()
         {
             if (!_unitOfWork.Context.User.Any())
@@ -47,6 +61,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Select(_ => _.ToDto())
                 .ToList());
+        }
+
+        public Task<UserDTO> GetUserByUserName(string userName)
+        {
+            if (!_unitOfWork.Context.User.Any())
+            {
+                return Task.Factory.StartNew(() => new UserDTO());
+            }
+
+            return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
+        }
+
+        public Task<UserDTO> GetUserById(Guid id)
+        {
+            if (!_unitOfWork.Context.User.Any())
+            {
+                return Task.Factory.StartNew(() => new UserDTO());
+            }
+
+            return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Id == id).FirstOrDefault().ToDto());
         }
     }
 }

@@ -1,0 +1,6 @@
+{
+  "ConnectionStrings": {
+    "BridgeCareConnex": "data source=localhost\\SQL2014;initial catalog=IAMv2Test;persist security info=True;user id=sa;password=001109;MultipleActiveResultSets=True;App=EntityFramework",
+    "BridgeCareLegacyConnex": "data source=157.55.199.126,1401;initial catalog=BridgeCare_New;persist security info=True;user id=ppator1;password=GaS3WHBZ9F5K;MultipleActiveResultSets=True;App=EntityFramework"
+  }
+}

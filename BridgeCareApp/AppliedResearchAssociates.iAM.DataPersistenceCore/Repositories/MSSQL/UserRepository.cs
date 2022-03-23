@@ -65,21 +65,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Task<UserDTO> GetUserByUserName(string userName)
         {
-            if (!_unitOfWork.Context.User.Any())
-            {
-                return Task.Factory.StartNew(() => new UserDTO());
-            }
-
             return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
         }
 
         public Task<UserDTO> GetUserById(Guid id)
         {
-            if (!_unitOfWork.Context.User.Any())
-            {
-                return Task.Factory.StartNew(() => new UserDTO());
-            }
-
             return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Id == id).FirstOrDefault().ToDto());
         }
     }

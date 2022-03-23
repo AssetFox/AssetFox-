@@ -20,5 +20,5 @@ export const emptyUser: User = {
     username: '',
     criterionLibrary: clone(emptyCriterionLibrary),
     hasInventoryAccess: false,
-    lastNewsAccessDate: Date.toString()
+    lastNewsAccessDate: new Date().toISOString()
 };

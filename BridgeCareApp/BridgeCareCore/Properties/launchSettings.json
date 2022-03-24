@@ -18,7 +18,7 @@
     },
     "BridgeCareCore": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "IAM",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

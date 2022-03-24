@@ -75,7 +75,7 @@ namespace BridgeCareCore.Controllers
                 }
                 else
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
                 }
             }
 
@@ -93,7 +93,7 @@ namespace BridgeCareCore.Controllers
                 }
                 else
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
                 }
             }
 

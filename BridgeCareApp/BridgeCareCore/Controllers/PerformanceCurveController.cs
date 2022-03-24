@@ -67,7 +67,8 @@ namespace BridgeCareCore.Controllers
 
             void UpsertPermittedForLibrary(PerformanceCurveLibraryDTO dto)
             {
-                if (dto.Owner == UserId || !UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries().Any(_ => _.Id == dto.Id))
+                var currentRecord = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                if (currentRecord?.Owner == UserId || currentRecord == null)
                 {
                     UpsertAnyForLibrary(dto);
                 }

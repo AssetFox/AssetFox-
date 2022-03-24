@@ -18,30 +18,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using SimulationDeleteMethod = Action<Guid>;
-    using SimulationRunMethod = Func<Guid, Guid, IQueuedWorkHandle>;
-    using SimulationUpdateMethod = Action<SimulationDTO>;
-
     [Route("api/[controller]")]
     [ApiController]
     public class SimulationController : BridgeCareCoreBaseController
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
 
-        private readonly IReadOnlyDictionary<string, SimulationUpdateMethod> _simulationUpdateMethods;
-        private readonly IReadOnlyDictionary<string, SimulationDeleteMethod> _simulationDeleteMethods;
-        private readonly IReadOnlyDictionary<string, SimulationRunMethod> _simulationRunMethods;
+        private readonly IReadOnlyDictionary<string, SimulationCRUDMethods> _simulationCRUDMethods;
 
         public SimulationController(ISimulationAnalysis simulationAnalysis, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
-            _simulationUpdateMethods = CreateUpdateMethods();
-            _simulationDeleteMethods = CreateDeleteMethods();
-            _simulationRunMethods = CreateRunMethods();
+            _simulationCRUDMethods = CreateCRUDMethods();
         }
 
-        private Dictionary<string, SimulationUpdateMethod> CreateUpdateMethods()
+        private Dictionary<string, SimulationCRUDMethods> CreateCRUDMethods()
         {
             void UpdateAnySimulation(SimulationDTO dto) => UnitOfWork.SimulationRepo.UpdateSimulation(dto);
 
@@ -51,17 +43,6 @@ namespace BridgeCareCore.Controllers
                 UpdateAnySimulation(dto);
             }
 
-            return new Dictionary<string, SimulationUpdateMethod>
-            {
-                [Role.Administrator] = UpdateAnySimulation,
-                [Role.Cwopa] = UpdatePermittedSimulation,
-                [Role.DistrictEngineer] = UpdatePermittedSimulation,
-                [Role.PlanningPartner] = UpdatePermittedSimulation
-            };
-        }
-
-        private Dictionary<string, SimulationDeleteMethod> CreateDeleteMethods()
-        {
             void DeleteAnySimulation(Guid simulationId) => UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
 
             void DeletePermittedSimulation(Guid simulationId)
@@ -70,17 +51,6 @@ namespace BridgeCareCore.Controllers
                 DeleteAnySimulation(simulationId);
             }
 
-            return new Dictionary<string, SimulationDeleteMethod>
-            {
-                [Role.Administrator] = DeleteAnySimulation,
-                [Role.Cwopa] = DeletePermittedSimulation,
-                [Role.DistrictEngineer] = DeletePermittedSimulation,
-                [Role.PlanningPartner] = DeletePermittedSimulation
-            };
-        }
-
-        private Dictionary<string, SimulationRunMethod> CreateRunMethods()
-        {
             IQueuedWorkHandle RunAnySimulation(Guid networkId, Guid simulationId) =>
                 _simulationAnalysis.CreateAndRun(networkId, simulationId);
 
@@ -90,12 +60,38 @@ namespace BridgeCareCore.Controllers
                 return RunAnySimulation(networkId, simulationId);
             }
 
-            return new Dictionary<string, SimulationRunMethod>
+            List<SimulationDTO> RetrieveAllSimulations() => UnitOfWork.SimulationRepo.GetAllScenario();
+
+            List<SimulationDTO> RetrievePermittedSimulations()
             {
-                [Role.Administrator] = RunAnySimulation,
-                [Role.Cwopa] = RunPermittedSimulation,
-                [Role.DistrictEngineer] = RunPermittedSimulation,
-                [Role.PlanningPartner] = RunPermittedSimulation
+                // TODO:  Replace with query to find all shared simulations
+                return RetrieveAllSimulations();
+            }
+
+            // TODO: Add another 2 methods in to controll simulation cloning (the user should only be able to clone scenarios that they have access to)
+
+            var AdminCRUDMethods = new SimulationCRUDMethods()
+            {
+                UpsertSimulation = UpdateAnySimulation,
+                RetrieveSimulation = RetrieveAllSimulations,
+                DeleteSimulation = DeleteAnySimulation,
+                RunSimulation = RunAnySimulation
+            };
+
+            var PermittedCRUDMethods = new SimulationCRUDMethods()
+            {
+                UpsertSimulation = UpdatePermittedSimulation,
+                RetrieveSimulation = RetrievePermittedSimulations,
+                DeleteSimulation = DeletePermittedSimulation,
+                RunSimulation = RunPermittedSimulation
+            };
+
+            return new Dictionary<string, SimulationCRUDMethods>
+            {
+                [Role.Administrator] = AdminCRUDMethods,
+                [Role.DistrictEngineer] = PermittedCRUDMethods,
+                [Role.Cwopa] = PermittedCRUDMethods,
+                [Role.PlanningPartner] = PermittedCRUDMethods
             };
         }
 
@@ -106,7 +102,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllScenario());
+                var result = await Task.Factory.StartNew(() => _simulationCRUDMethods[UserInfo.Role].RetrieveSimulation());
                 return Ok(result);
             }
             catch (Exception e)
@@ -180,7 +176,7 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _simulationUpdateMethods[UserInfo.Role](dto);
+                    _simulationCRUDMethods[UserInfo.Role].UpsertSimulation(dto);
                     UnitOfWork.Commit();
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
@@ -210,7 +206,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _simulationDeleteMethods[UserInfo.Role](simulationId);
+                    _simulationCRUDMethods[UserInfo.Role].DeleteSimulation(simulationId);
                     UnitOfWork.Commit();
                 });
 
@@ -236,8 +232,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var analysisHandle = _simulationRunMethods[UserInfo.Role](networkId, simulationId);
-
+                var analysisHandle = _simulationCRUDMethods[UserInfo.Role].RunSimulation(networkId, simulationId);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.
                 await Task.Delay(500);
@@ -264,5 +259,13 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+    }
+
+    internal class SimulationCRUDMethods
+    {
+        public Action<SimulationDTO> UpsertSimulation { get; set; }
+        public Func<Guid, List<SimulationDTO>> RetrieveSimulation { get; set; }
+        public Action<Guid> DeleteSimulation { get; set; }
+        public Func<Guid, Guid, IQueuedWorkHandle> RunSimulation { get; set; }
     }
 }

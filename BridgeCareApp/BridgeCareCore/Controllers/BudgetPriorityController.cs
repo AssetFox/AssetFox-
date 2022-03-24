@@ -69,7 +69,8 @@ namespace BridgeCareCore.Controllers
 
             void UpsertPermittedFromLibrary(BudgetPriorityLibraryDTO dto)
             {
-                if (dto.Owner == UserId)
+                var currentRecord = UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                if (currentRecord?.Owner == UserId || currentRecord == null)
                 {
                     UpsertAnyFromLibrary(dto);
                 }

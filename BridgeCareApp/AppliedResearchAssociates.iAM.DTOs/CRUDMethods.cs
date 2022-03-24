@@ -15,4 +15,11 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public Func<List<L>> RetrieveLibrary { get; set; }
         public Action<Guid> DeleteLibrary { get; set; }
     }
+
+    public class NoLibraryCRUDMethods<S> where S : BaseDTO
+    {
+        public Action<Guid, S> UpsertScenario { get; set; }
+        public Func<Guid, S> RetrieveScenario { get; set; }
+        public Action<Guid> DeleteScenario { get; set; }
+    }
 }

@@ -36,6 +36,7 @@ namespace BridgeCareCore.Controllers
         private static IInvestmentBudgetsService _investmentBudgetsService;
         private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
         private readonly IReadOnlyDictionary<string, InvestmentImportMethod> _investmentImportMethods;
+        private readonly IReadOnlyDictionary<string, InvestmentCRUDMethods> _investmentCRUDMethods;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
         public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -416,5 +417,17 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+    }
+
+    internal class InvestmentCRUDMethods
+    {
+        public Action<Guid, List<InvestmentDTO>> UpsertScenario { get; set; }
+        public Func<Guid, List<InvestmentDTO>> RetrieveScenario { get; set; }
+        public Action<Guid, List<InvestmentDTO>> DeleteScenario { get; set; }
+        public Action<BudgetLibraryDTO> UpsertLibrary { get; set; }
+        public Func<List<BudgetLibraryDTO>> RetrieveLibrary { get; set; }
+        public Action<Guid> DeleteLibrary { get; set; }
+        public InvestmentImportMethod ImportScenarioInvestment { get; set; }
+        public InvestmentImportMethod ImportLibraryInvestment { get; set; }
     }
 }

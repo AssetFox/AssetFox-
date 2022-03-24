@@ -27,7 +27,7 @@
                     </div>
                     <v-checkbox class='sharing' label='Shared'
                                 v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                                v-model='selectedBudgetPriorityLibrary.shared' />
+                                v-model='selectedBudgetPriorityLibrary.isShared' />
                 </v-flex>
             </v-layout>
             <v-flex v-show='hasSelectedLibrary || hasScenario' xs3>
@@ -130,12 +130,12 @@
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ara-blue-bg white--text'
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges || !isLibraryOwner'>
                     Save
                 </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary'
                        class='ara-blue-bg white--text'
-                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges || !isLibraryOwner'>
                     Update Library
                 </v-btn>
                 <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ara-blue-bg white--text'
@@ -143,7 +143,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text'
-                       v-show='!hasScenario' :disabled='!hasSelectedLibrary'>
+                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasSelectedLibrary || !isLibraryOwner'>
                     Delete Library
                 </v-btn>
                 <v-btn @click='onDiscardChanges' class='ara-orange-bg white--text'
@@ -255,6 +255,7 @@ export default class BudgetPriorityEditor extends Vue {
     budgetPriorities: BudgetPriority[] = [];
     disableCrudButtonsResult: boolean = false;
     checkBoxChanged: boolean = false;
+    isLibraryOwner: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -299,9 +300,14 @@ export default class BudgetPriorityEditor extends Vue {
         this.selectedBudgetPriorityLibrary = clone(this.stateSelectedBudgetPriorityLibrary);
     }
 
-    @Watch('selectedBudgetPriorityLibrary')
+    @Watch('selectedBudgetPriorityLibrary', {deep: true})
     onSelectedPriorityLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkUserIsLibraryOwner();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.budgetPriorities = this.selectedBudgetPriorityLibrary.budgetPriorities.map((priority: BudgetPriority) => ({
@@ -324,7 +330,6 @@ export default class BudgetPriorityEditor extends Vue {
     onBudgetPrioritiesChanged() {
         const allBudgetPercentagePairsMatchBudgets: boolean = this.budgetPriorities
             .every((budgetPriority: BudgetPriority) => this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority));
-
         if (!allBudgetPercentagePairsMatchBudgets) {
             this.syncBudgetPercentagePairsWithBudgets();
             return;
@@ -452,6 +457,25 @@ export default class BudgetPriorityEditor extends Vue {
 
             return row;
         });
+    }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkUserIsLibraryOwner() {
+        if ( this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName())
+        {
+            this.isLibraryOwner = true;
+            return;
+        }
+
+        this.isLibraryOwner = false;
     }
 
     onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {

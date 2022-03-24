@@ -151,7 +151,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                     //_analysisMethodGetMethods[UserInfo.Role](simulationId));
-                    _analysisMethodMethods[UserInfo.Role].RetrieveScenario(simulationId);
+                    _analysisMethodMethods[UserInfo.Role].RetrieveScenario(simulationId));
 
                 return Ok(result);
             }

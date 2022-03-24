@@ -50,8 +50,11 @@ export default class CreatePriorityLibraryDialog extends Vue {
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    this.dialogData.budgetPriorityLibrary.owner = undefined;
+    this.dialogData.budgetPriorityLibrary.id = getNewGuid();
+
     this.newBudgetPriorityLibrary = {
-      ...this.newBudgetPriorityLibrary,
+      ...this.dialogData.budgetPriorityLibrary,
       budgetPriorities: this.dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
         ...budgetPriority, id: getNewGuid(),
         budgetPercentagePairs: budgetPriority.budgetPercentagePairs.map((budgetPercentagePair: BudgetPercentagePair) => ({

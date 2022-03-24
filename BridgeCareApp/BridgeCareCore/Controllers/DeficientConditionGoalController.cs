@@ -16,8 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using ScenarioDeficientConditionGoalUpsertMethod = Action<Guid, List<DeficientConditionGoalDTO>>;
-
     [Route("api/[controller]")]
     [ApiController]
     public class DeficientConditionGoalController : BridgeCareCoreBaseController

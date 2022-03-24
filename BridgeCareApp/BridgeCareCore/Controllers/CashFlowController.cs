@@ -16,8 +16,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using CashFlowUpsertMethod = Action<Guid, List<CashFlowRuleDTO>>;
-
     [Route("api/[controller]")]
     [ApiController]
     public class CashFlowController : BridgeCareCoreBaseController

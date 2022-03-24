@@ -15,9 +15,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using AnalysisMethodGetMethod = Func<Guid, AnalysisMethodDTO>;
-    using AnalysisMethodUpsertMethod = Action<Guid, AnalysisMethodDTO>;
-
     [Route("api/[controller]")]
     [ApiController]
     public class AnalysisMethodController : BridgeCareCoreBaseController

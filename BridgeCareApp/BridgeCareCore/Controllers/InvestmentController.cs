@@ -25,71 +25,167 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
-    using InvestmentUpsertMethod = Action<Guid, InvestmentDTO>;
-    using InvestmentImportMethod = Func<bool, ExcelPackage, Guid, UserCriteriaDTO , ScenarioBudgetImportResultDTO>;
-
-
     [Route("api/[controller]")]
     [ApiController]
     public class InvestmentController : BridgeCareCoreBaseController
     {
         private static IInvestmentBudgetsService _investmentBudgetsService;
-        private readonly IReadOnlyDictionary<string, InvestmentUpsertMethod> _investmentUpsertMethods;
-        private readonly IReadOnlyDictionary<string, InvestmentImportMethod> _investmentImportMethods;
         private readonly IReadOnlyDictionary<string, InvestmentCRUDMethods> _investmentCRUDMethods;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
+
+        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
 
         public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _investmentBudgetsService = investmentBudgetsService ??
                                         throw new ArgumentNullException(nameof(investmentBudgetsService));
-            _investmentUpsertMethods = CreateUpsertMethods();
-            _investmentImportMethods = CreateImportMethods();
+            _investmentCRUDMethods = CreateCRUDMethods();
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
 
-        private Dictionary<string, InvestmentUpsertMethod> CreateUpsertMethods()
+        private Dictionary<string, InvestmentCRUDMethods> CreateCRUDMethods()
         {
-            void UpsertAny(Guid simulationId, InvestmentDTO data)
+            void UpsertAnyForScenario(Guid simulationId, InvestmentDTO data)
             {
                 UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(data.ScenarioBudgets, simulationId);
                 UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, InvestmentDTO data)
+            void UpsertPermittedForScenario(Guid simulationId, InvestmentDTO data)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, data);
+                UpsertAnyForScenario(simulationId, data);
             }
 
-            return new Dictionary<string, InvestmentUpsertMethod>
+            void UpsertAnyForLibrary(BudgetLibraryDTO dto)
             {
-                [Role.Administrator] = UpsertAny,
-                [Role.DistrictEngineer] = UpsertPermitted,
-                [Role.Cwopa] = UpsertPermitted,
-                [Role.PlanningPartner] = UpsertPermitted
-            };
-        }
+                UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
+                UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
+            }
 
-        private Dictionary<string, InvestmentImportMethod> CreateImportMethods()
-        {
-            ScenarioBudgetImportResultDTO UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
+            void UpsertPermittedForLibrary(BudgetLibraryDTO dto)
+            {
+                if (dto.Owner == UserId)
+                {
+                    UpsertAnyForLibrary(dto);
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                }
+            }
+
+            ScenarioBudgetImportResultDTO ImportAnyForScenario(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 return _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
             }
 
-            ScenarioBudgetImportResultDTO UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
+            ScenarioBudgetImportResultDTO ImportPermittedForScenario(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                return UpsertAny(overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter);
+                return ImportAnyForScenario(overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter);
             }
 
-            return new Dictionary<string, InvestmentImportMethod>
+            BudgetImportResultDTO ImportAnyForLibrary(bool overwriteBudgets, ExcelPackage excelPackage, Guid libraryId, UserCriteriaDTO currentUserCriteriaFilter) =>
+                _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(libraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
+
+            BudgetImportResultDTO ImportPermittedForLibrary(bool overwriteBudgets, ExcelPackage excelPackage, Guid libraryId, UserCriteriaDTO currentUserCriteriaFilter)
             {
-                [Role.Administrator] = UpsertAny,
-                [Role.DistrictEngineer] = UpsertPermitted,
-                [Role.Cwopa] = UpsertPermitted,
-                [Role.PlanningPartner] = UpsertPermitted
+                // If the budget already exists, do not allow the user to overwrite it if they are not the owneer
+                var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                if (existingBudgetLibrary != null)
+                {
+                    if (existingBudgetLibrary.Owner != UserId)
+                    {
+                        // The budget exists AND its owner is not the user.  This is the only time importing is not valid
+                        throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
+                    }
+                }
+
+                // This can be imported
+                return ImportAnyForLibrary(overwriteBudgets, excelPackage, libraryId, currentUserCriteriaFilter);
+            }
+
+            void DeleteAnyFromScenario(Guid scenarioId, InvestmentDTO dto)
+            {
+                // Do Nothing
+            }
+
+            void DeleteAnyFromLibrary(Guid libraryId) => UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
+
+            void DeletePermittedFromLibrary(Guid libraryId)
+            {
+                var budgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
+
+                if (budgetLibrary == null) return; // Mimic existing code that does not inform the user the library ID does not exist
+
+                if (budgetLibrary.Owner == UserId)
+                {
+                    DeleteAnyFromLibrary(libraryId);
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
+                }
+            }
+
+            InvestmentDTO GetAnyForScenario(Guid scenarioId)
+            {
+                var budgets = UnitOfWork.BudgetRepo.GetScenarioBudgets(scenarioId);
+
+                var scenarioInvestmentPlan = UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(scenarioId);
+                if (scenarioInvestmentPlan.Id == Guid.Empty)
+                {
+                    var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                    scenarioInvestmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
+                    scenarioInvestmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+                }
+
+                return new InvestmentDTO
+                {
+                    ScenarioBudgets = budgets,
+                    InvestmentPlan = scenarioInvestmentPlan
+                };
+            }
+
+            List<BudgetLibraryDTO> GetAnyForLibrary() => UnitOfWork.BudgetRepo.GetBudgetLibraries();
+
+            List<BudgetLibraryDTO> GetPermittedForLibrary()
+            {
+                var result = UnitOfWork.BudgetRepo.GetBudgetLibraries();
+                return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+            }
+
+            var AdminCRUDMethods = new InvestmentCRUDMethods()
+            {
+                UpsertScenario = UpsertAnyForScenario,
+                RetrieveScenario = GetAnyForScenario,
+                DeleteScenario = DeleteAnyFromScenario,
+                UpsertLibrary = UpsertAnyForLibrary,
+                RetrieveLibrary = GetAnyForLibrary,
+                DeleteLibrary = DeleteAnyFromLibrary,
+                ImportScenarioInvestment = ImportAnyForScenario,
+                ImportLibraryInvestment = ImportAnyForLibrary
+            };
+
+            var PermittedCRUDMethods = new InvestmentCRUDMethods()
+            {
+                UpsertScenario = UpsertPermittedForScenario,
+                RetrieveScenario = GetAnyForScenario,
+                DeleteScenario = DeleteAnyFromScenario,
+                UpsertLibrary = UpsertPermittedForLibrary,
+                RetrieveLibrary = GetAnyForLibrary,
+                DeleteLibrary = DeletePermittedFromLibrary,
+                ImportScenarioInvestment = ImportPermittedForScenario,
+                ImportLibraryInvestment = ImportPermittedForLibrary
+            };
+
+            return new Dictionary<string, InvestmentCRUDMethods>()
+            {
+                [Role.Administrator] = AdminCRUDMethods,
+                [Role.DistrictEngineer] = PermittedCRUDMethods,
+                [Role.Cwopa] = PermittedCRUDMethods,
+                [Role.PlanningPartner] = PermittedCRUDMethods
             };
         }
 
@@ -100,20 +196,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() =>
-                {
-                    var budgets = UnitOfWork.BudgetRepo
-                        .GetScenarioBudgets(simulationId);
-
-                    var scenarioInvestmentPlan = UnitOfWork.InvestmentPlanRepo
-                        .GetInvestmentPlan(simulationId);
-                    SetDefaultDataForNewScenario(scenarioInvestmentPlan);
-                    return new InvestmentDTO
-                    {
-                        ScenarioBudgets = budgets, InvestmentPlan = scenarioInvestmentPlan
-                    };
-                });
-
+                var result = await Task.Factory.StartNew(() => _investmentCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
 
                 return Ok(result);
             }
@@ -121,16 +204,6 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
-            }
-        }
-
-        private void SetDefaultDataForNewScenario(InvestmentPlanDTO scenarioInvestmentPlan)
-        {
-            if (scenarioInvestmentPlan.Id == Guid.Empty)
-            {
-                var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
-                scenarioInvestmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
-                scenarioInvestmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
             }
         }
 
@@ -144,7 +217,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _investmentUpsertMethods[UserInfo.Role](simulationId, data);
+                    _investmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, data);
                     UnitOfWork.Commit();
                 });
 
@@ -170,7 +243,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo.GetBudgetLibraries());
+                var result = await Task.Factory.StartNew(() => _investmentCRUDMethods[UserInfo.Role].RetrieveLibrary());
 
                 return Ok(result);
             }
@@ -191,8 +264,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data);
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.Budgets, data.Id);
+                    _investmentCRUDMethods[UserInfo.Role].UpsertLibrary(data);
                     UnitOfWork.Commit();
                 });
 
@@ -216,7 +288,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
+                    _investmentCRUDMethods[UserInfo.Role].DeleteLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 
@@ -293,7 +365,7 @@ namespace BridgeCareCore.Controllers
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
+                    return _investmentCRUDMethods[UserInfo.Role].ImportLibraryInvestment(overwriteBudgets, excelPackage, budgetLibraryId, currentUserCriteriaFilter);
                 });
 
                 if (result.WarningMessage != null)
@@ -353,7 +425,7 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var result = await Task.Factory.StartNew(() =>
-                    _investmentImportMethods[UserInfo.Role](overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter));
+                    _investmentCRUDMethods[UserInfo.Role].ImportScenarioInvestment(overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter));
 
                 if (result.WarningMessage != null)
                 {
@@ -421,13 +493,13 @@ namespace BridgeCareCore.Controllers
 
     internal class InvestmentCRUDMethods
     {
-        public Action<Guid, List<InvestmentDTO>> UpsertScenario { get; set; }
-        public Func<Guid, List<InvestmentDTO>> RetrieveScenario { get; set; }
-        public Action<Guid, List<InvestmentDTO>> DeleteScenario { get; set; }
+        public Action<Guid, InvestmentDTO> UpsertScenario { get; set; }
+        public Func<Guid, InvestmentDTO> RetrieveScenario { get; set; }
+        public Action<Guid, InvestmentDTO> DeleteScenario { get; set; }
         public Action<BudgetLibraryDTO> UpsertLibrary { get; set; }
         public Func<List<BudgetLibraryDTO>> RetrieveLibrary { get; set; }
         public Action<Guid> DeleteLibrary { get; set; }
-        public InvestmentImportMethod ImportScenarioInvestment { get; set; }
-        public InvestmentImportMethod ImportLibraryInvestment { get; set; }
+        public Func<bool, ExcelPackage, Guid, UserCriteriaDTO, ScenarioBudgetImportResultDTO> ImportScenarioInvestment { get; set; }
+        public Func<bool, ExcelPackage, Guid, UserCriteriaDTO, BudgetImportResultDTO> ImportLibraryInvestment { get; set; }
     }
 }

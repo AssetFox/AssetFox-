@@ -4,15 +4,8 @@ using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class UserDTO : BaseDTO
+    public class LastNewsAccessDateDTO : BaseDTO
     {
-        public string Username { get; set; }
-
-        public bool HasInventoryAccess { get; set; }
-
         public DateTime LastNewsAccessDate { get; set; }
-
-        public CriterionLibraryDTO CriterionLibrary { get; set; }
     }
 }
-

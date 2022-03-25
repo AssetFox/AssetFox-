@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {User} from '@/shared/models/iAM/user';
+import {User, UserNewsAccessDate} from '@/shared/models/iAM/user';
 import {API, axiosInstance, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
@@ -7,6 +7,18 @@ export default class UserService {
 
     static getAllUsers(): AxiosPromise {
         return coreAxiosInstance.get(`${API.User}/GetAllUsers`);
+    }
+
+    static getUserByUserName(userName: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.User}/GetUserByUserName/${userName}`);
+    }
+
+    static getUserById(id: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.User}/GetUserById/${id}`);
+    }
+
+    static updateLastNewsAccessDate(data: UserNewsAccessDate): AxiosPromise {
+        return coreAxiosInstance.post(`${API.User}/UpdateLastNewsAccessDate/`, data);
     }
 
     // static updateUser(userCriteria: User): AxiosPromise {

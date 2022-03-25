@@ -127,11 +127,12 @@
                         Inventory
                     </v-btn>
                      <v-btn
-                        @click="showNewsDialog = true"
+                        @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
                         flat
                     >
                         News
+                        <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
                     </v-btn>
                 </v-toolbar-items>
                 <v-spacer></v-spacer>
@@ -329,9 +330,11 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { clone } from 'ramda';
 import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { newsAccessDateComparison, getDateOnly, getCurrentDateOnly } from '@/shared/utils/date-utils';
 import { Hub } from '@/connectionHub';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { Notification } from '@/shared/models/iAM/notifications';
+import { User, emptyUser } from '@/shared/models/iAM/user';
 import { SecurityTypes } from '@/shared/utils/security-types';
 import {
     clearRefreshIntervalID,
@@ -343,6 +346,7 @@ import {
 } from '@/shared/utils/authentication-utils';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
 import NewsDialog from '@/components/NewsDialog.vue'
+import { Announcement, emptyAnnouncement } from '@/shared/models/iAM/announcement';
 
 @Component({
     components: { Alert, Spinner, NotificationBell, NewsDialog },
@@ -365,11 +369,14 @@ export default class AppComponent extends Vue {
     packageVersion: string;
     @State(state => state.authenticationModule.securityType)
     securityType: string;
+    @State(state => state.announcementModule.announcements) announcements: Announcement[];
+    @State(state => state.userModule.currentUser) currentUser: User;
 
     @Action('logOut') logOutAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
     @Action('getNetworks') getNetworksAction: any;
     @Action('getAttributes') getAttributesAction: any;
+    @Action('getAnnouncements') getAnnouncementsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -382,8 +389,12 @@ export default class AppComponent extends Vue {
     @Action('loadNotifications') loadNotificationsActions: any;
     @Action('azureB2CLogin') azureB2CLoginAction: any;
     @Action('azureB2CLogout') azureB2CLogoutAction: any;
+    @Action('getCurrentUserByUserName') getCurrentUserByUserNameAction: any;
+    @Action('updateUserLastNewsAccessDate') updateUserLastNewsAccessDateAction: any;
 
     drawer: boolean = false;
+    latestNewsDate: string = '0001-01-01';
+    currentUserLastNewsAccessDate: string = '0001-01-01';
     alertDialogData: AlertData = clone(emptyAlertData);
     pushRouteUpdate: boolean = false;
     route: any = {};
@@ -400,6 +411,7 @@ export default class AppComponent extends Vue {
     esecSecurityType: string = SecurityTypes.esec;
     b2cSecurityType: string = SecurityTypes.b2c;
     showNewsDialog: boolean = false;
+    hasUnreadNewsItem: boolean = false;
 
     get container() {
         const container: any = {};
@@ -453,6 +465,17 @@ export default class AppComponent extends Vue {
         ) {
             this.onAzureLogout();
         }*/
+    }
+
+    @Watch('announcements')
+    onAnnouncementsChange() {
+        this.latestNewsDate = getDateOnly(this.announcements[0].createdDate.toString()); 
+    }
+
+    @Watch('currentUser')
+    onCurrentUserChange() {
+        this.currentUserLastNewsAccessDate = getDateOnly(this.currentUser.lastNewsAccessDate);
+        this.checkLastNewsAccessDate();
     }
 
     created() {
@@ -612,7 +635,9 @@ export default class AppComponent extends Vue {
         this.getNetworksAction();
         this.getAttributesAction();
         this.getAllUsersAction();
+        this.getAnnouncementsAction();
         this.getUserCriteriaFilterAction();
+        this.getCurrentUserByUserNameAction(this.username);
     }
 
     /**
@@ -657,8 +682,18 @@ export default class AppComponent extends Vue {
         this.removeNotificationAction(id);
     }
 
+    onShowNewsDialog() {
+        this.showNewsDialog = true;
+        this.updateUserLastNewsAccessDateAction({id: this.currentUser.id, accessDate: this.latestNewsDate});
+        this.hasUnreadNewsItem = false;
+    }
+
     onCloseNewsDialog() {
         this.showNewsDialog = false;
+    }
+
+    checkLastNewsAccessDate () {
+        this.hasUnreadNewsItem = newsAccessDateComparison(this.latestNewsDate, this.currentUserLastNewsAccessDate);
     }
 }
 </script>
@@ -681,6 +716,10 @@ html {
 
 .navbar-user-icon {
     margin-right: 10px;
+}
+
+.news-notification {
+    margin-bottom: 15px;
 }
 
 .notification-icon {

@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Username = entity.Username,
                 HasInventoryAccess = entity.HasInventoryAccess,
+                LastNewsAccessDate = entity.LastNewsAccessDate,
                 CriterionLibrary = entity.CriterionLibraryUserJoin != null
                     ? entity.CriterionLibraryUserJoin.CriterionLibrary.ToDto()
                     : new CriterionLibraryDTO()

@@ -7,11 +7,18 @@ export interface User {
     username: string;
     criterionLibrary: CriterionLibrary;
     hasInventoryAccess: boolean;
+    lastNewsAccessDate: string;
+}
+
+export interface UserNewsAccessDate {
+    id: string;
+    lastNewsAccessDate: string;
 }
 
 export const emptyUser: User = {
     id: getBlankGuid(),
     username: '',
     criterionLibrary: clone(emptyCriterionLibrary),
-    hasInventoryAccess: false
+    hasInventoryAccess: false,
+    lastNewsAccessDate: new Date().toISOString()
 };

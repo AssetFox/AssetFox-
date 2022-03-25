@@ -150,6 +150,12 @@ table.v-table tbody td {
     font-size: 100%;
 }
 
+.scenario-status {
+    display: inline;
+    min-inline-size: 90%; 
+    padding: 2%;  
+}
+
 .notification-message {
     text-align: left;
 }

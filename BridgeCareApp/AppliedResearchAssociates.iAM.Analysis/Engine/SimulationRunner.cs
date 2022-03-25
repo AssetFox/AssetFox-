@@ -121,7 +121,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 #endif
                 .Select(section => new SectionContext(section, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
-                .ToSortedSet(SelectionComparer<SectionContext>.Create(context => (context.Section.Facility.Name, context.Section.Name)));
+                .ToSortedSet(SelectionComparer<SectionContext>.Create(context => context.Section.Id));
 
             if (SectionContexts.Count == 0)
             {

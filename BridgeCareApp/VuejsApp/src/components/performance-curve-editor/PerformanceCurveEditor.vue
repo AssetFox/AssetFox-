@@ -49,8 +49,8 @@
                     <v-checkbox
                         class="sharing"
                         label="Shared"
-                        v-if="hasSelectedLibrary && selectedScenarioId === '0'"
-                        v-model="selectedPerformanceCurveLibrary.shared"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedPerformanceCurveLibrary.isShared"
                     />
                 </v-flex>
             </v-layout>
@@ -291,20 +291,20 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertScenarioPerformanceCurves'
                        class='ara-blue-bg white--text'
                        v-show='hasScenario'>
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertPerformanceCurveLibrary'
                        class='ara-blue-bg white--text'
                        v-show='!hasScenario'>
                     Update Library
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton()"
+                    :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                     class="ara-blue-bg white--text"
                 >
@@ -314,7 +314,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
+                    :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
@@ -521,6 +521,9 @@ export default class PerformanceCurveEditor extends Vue {
     rules: InputValidationRules = clone(rules);
     uuidNIL: string = getBlankGuid();
     currentUrl: string = window.location.href;
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -573,10 +576,15 @@ export default class PerformanceCurveEditor extends Vue {
         );
     }
 
-    @Watch('selectedPerformanceCurveLibrary')
+    @Watch('selectedPerformanceCurveLibrary', {deep: true})
     onSelectedPerformanceCurveLibraryChanged() {
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
@@ -624,6 +632,14 @@ export default class PerformanceCurveEditor extends Vue {
                 }),
             );
         }
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner) == getUserName();
     }
 
     onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) {
@@ -810,7 +826,7 @@ export default class PerformanceCurveEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButtons() {
         const dataIsValid: boolean = this.performanceCurveGridData.every(
             (performanceCurve: PerformanceCurve) => {
                 return (
@@ -832,6 +848,7 @@ export default class PerformanceCurveEditor extends Vue {
                 dataIsValid);
         }
 
+        this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 }

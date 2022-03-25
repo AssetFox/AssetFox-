@@ -100,7 +100,7 @@ namespace BridgeCareCore.Controllers
                 DeleteScenario = DeleteAnyFromScenario,
                 UpsertLibrary = UpsertAnyFromLibrary,
                 RetrieveLibrary = GetAnyFromLibrary,
-                DeleteLibrary = DeletePermittedFromLibrary
+                DeleteLibrary = DeleteAnyFromLibrary
             };
 
             var PermittedCRUDAccess = new CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>()

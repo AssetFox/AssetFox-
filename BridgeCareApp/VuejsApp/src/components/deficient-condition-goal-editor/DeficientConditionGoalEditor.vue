@@ -50,7 +50,7 @@
                         class="sharing"
                         label="Shared"
                         v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedDeficientConditionGoalLibrary.shared"
+                        v-model="selectedDeficientConditionGoalLibrary.isShared"
                     />
                 </v-flex>
             </v-layout>
@@ -280,7 +280,7 @@
                     @click="onUpsertScenarioDeficientConditionGoals"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
                     Save
                 </v-btn>
@@ -288,14 +288,14 @@
                     @click="onUpsertDeficientConditionGoalLibrary"
                     class="ara-blue-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
                     Update Library
                 </v-btn>
                 <v-btn
                     @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
                     class="ara-blue-bg white--text"
-                    :disabled="disableCrudButton()"
+                    :disabled="disableCrudButtons()"
                 >
                     Create as New Library
                 </v-btn>
@@ -303,7 +303,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
+                    :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
@@ -512,6 +512,9 @@ export default class DeficientConditionGoalEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     hasScenario: boolean = false;
     currentUrl: string = window.location.href;
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -562,9 +565,14 @@ export default class DeficientConditionGoalEditor extends Vue {
         );
     }
 
-    @Watch('selectedDeficientConditionGoalLibrary')
+    @Watch('selectedDeficientConditionGoalLibrary', {deep: true})
     onSelectedDeficientConditionGoalLibraryChanged() {
         this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.deficientConditionGoalGridData = this.selectedDeficientConditionGoalLibrary.deficientConditionGoals
@@ -608,6 +616,23 @@ export default class DeficientConditionGoalEditor extends Vue {
                 {...clone(this.selectedDeficientConditionGoalLibrary), deficientConditionGoals: clone(this.deficientConditionGoalGridData)},
                 this.stateSelectedDeficientConditionGoalLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedDeficientConditionGoalLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedDeficientConditionGoalLibrary.owner) == getUserName();
     }
 
     onShowCreateDeficientConditionGoalLibraryDialog(createExistingLibraryAsNew: boolean) {
@@ -731,7 +756,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButtons() {
         const dataIsValid: boolean = this.deficientConditionGoalGridData.every(
             (deficientGoal: DeficientConditionGoal) => {
                 return (
@@ -753,7 +778,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                 dataIsValid
             );
         }
-
+        this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 }

@@ -23,7 +23,7 @@ export interface CashFlowRuleLibrary {
     cashFlowRules: CashFlowRule[];
     appliedScenarioIds: string[];
     owner?: string;
-    shared?: boolean;
+    isShared: boolean;
 }
 
 export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
@@ -31,7 +31,8 @@ export const emptyCashFlowRuleLibrary: CashFlowRuleLibrary = {
     name: '',
     description: '',
     cashFlowRules: [],
-    appliedScenarioIds: []
+    appliedScenarioIds: [],
+    isShared: false
 };
 
 export const emptyCashFlowRule: CashFlowRule = {

@@ -66,7 +66,7 @@
                     </div>
                     <v-checkbox class='sharing' label='Shared'
                                 v-if='hasSelectedLibrary && !hasScenario'
-                                v-model='selectedBudgetLibrary.shared' />
+                                v-model='selectedBudgetLibrary.isShared' />
                 </v-flex>
             </v-layout>
         </v-flex>
@@ -154,13 +154,13 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertInvestment()'
                        class='ara-blue-bg white--text'
                        v-show='selectedScenarioId !== uuidNIL'>
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertBudgetLibrary()'
                        class='ara-blue-bg white--text'
                        v-show='selectedScenarioId === uuidNIL'>
@@ -172,7 +172,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text' v-show='!hasScenario'
-                       :disabled='!hasSelectedLibrary'>
+                       :disabled='!hasLibraryEditPermission'>
                     Delete Library
                 </v-btn>
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' class='ara-orange-bg white--text'
@@ -305,6 +305,8 @@ export default class InvestmentEditor extends Vue {
     showImportExportInvestmentBudgetsDialog: boolean = false;
     hasScenario: boolean = false;
     budgets: Budget[] = [];
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
@@ -363,9 +365,14 @@ export default class InvestmentEditor extends Vue {
         this.selectedBudgetLibrary = clone(this.stateSelectedBudgetLibrary);
     }
 
-    @Watch('selectedBudgetLibrary')
+    @Watch('selectedBudgetLibrary', {deep: true})
     onSelectedBudgetLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.budgets = this.selectedBudgetLibrary.budgets.map((budget: Budget) => ({
@@ -525,6 +532,22 @@ export default class InvestmentEditor extends Vue {
         return nextYear;
     }
 
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedBudgetLibrary.owner) == getUserName();
+    }
 
     onAddBudgetYear() {
         const nextYear: number = this.getNextYear();
@@ -782,6 +805,7 @@ export default class InvestmentEditor extends Vue {
             return !(allBudgetDataIsValid && allInvestmentPlanDataIsValid);
         }
 
+        this.disableCrudButtonsResult = !allBudgetDataIsValid;
         return !allBudgetDataIsValid;
     }
 }

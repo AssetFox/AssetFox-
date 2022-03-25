@@ -102,7 +102,7 @@ namespace BridgeCareCore.Controllers
                 DeleteScenario = DeleteAnyForScenario,
                 UpsertLibrary = UpsertAnyForLibrary,
                 RetrieveLibrary = RetrieveAnyForLibraries,
-                DeleteLibrary = DeletePermittedForLibrary
+                DeleteLibrary = DeleteAnyForLibrary
             };
 
             var PermittedCRUDAccess = new CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>()

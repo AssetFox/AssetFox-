@@ -38,7 +38,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetSpecificCriteria/{libraryId}")]
-        [RestrictAccess]
+        [Authorize]
         public async Task<IActionResult> GetCriteriaForScenario(Guid libraryId)
         {
             var result = await UnitOfWork.CriterionLibraryRepo.CriteriaLibrary(libraryId);

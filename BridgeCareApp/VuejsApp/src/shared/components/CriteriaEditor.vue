@@ -697,6 +697,7 @@ export default class CriteriaEditor extends Vue {
                     );
                     this.resetCriteriaValidationProperties();
                     this.checkOutput = true;
+                    this.resetSubCriteriaValidationProperties();
 
                     if (this.criteriaEditorData.isLibraryContext) {
                         this.$emit('submitCriteriaEditorResult', {

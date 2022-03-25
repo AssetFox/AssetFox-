@@ -56,7 +56,7 @@ export default class CreatePriorityLibraryDialog extends Vue {
     let currentUser: string = getUserName();
 
     this.newBudgetPriorityLibrary = {
-      ...this.dialogData.budgetPriorityLibrary,
+      ...this.newBudgetPriorityLibrary,
       budgetPriorities: this.dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
         ...budgetPriority, id: getNewGuid(),
         budgetPercentagePairs: budgetPriority.budgetPercentagePairs.map((budgetPercentagePair: BudgetPercentagePair) => ({
@@ -64,7 +64,6 @@ export default class CreatePriorityLibraryDialog extends Vue {
         }))
       })),
       owner: this.getIdByUserNameGetter(currentUser),
-      id: getNewGuid()
     };
   }
 

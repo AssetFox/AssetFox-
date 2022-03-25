@@ -188,7 +188,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpPost]
         [Route("UpsertScenarioRemainingLifeLimits/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertScenarioRemainingLifeLimits(Guid simulationId, List<RemainingLifeLimitDTO> dtos)
         {
             try

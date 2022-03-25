@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertTreatmentLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertTreatmentLibrary(TreatmentLibraryDTO dto)
         {
             try
@@ -189,7 +189,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid SimulationId, List<TreatmentDTO> dtos)
         {
             try
@@ -217,7 +217,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteTreatmentLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> DeleteTreatmentLibrary(Guid libraryId)
         {
             try

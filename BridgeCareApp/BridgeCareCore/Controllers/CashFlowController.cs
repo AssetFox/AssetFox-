@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertCashFlowRuleLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto)
         {
             try
@@ -189,7 +189,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioCashFlowRules/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertScenarioCashFlowRules(Guid simulationId, List<CashFlowRuleDTO> dtos)
         {
             try
@@ -218,7 +218,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteCashFlowRuleLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> DeleteCashFlowRuleLibrary(Guid libraryId)
         {
             try

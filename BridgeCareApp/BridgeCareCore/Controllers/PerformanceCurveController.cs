@@ -162,7 +162,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
         {
             try
@@ -192,7 +192,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, List<PerformanceCurveDTO> dtos)
         {
             try
@@ -222,7 +222,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeletePerformanceCurveLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> DeletePerformanceCurveLibrary(Guid libraryId)
         {
             try

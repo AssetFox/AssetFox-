@@ -190,7 +190,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid SimulationId, List<TreatmentDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid simulationId, List<TreatmentDTO> dtos)
         {
             try
             {

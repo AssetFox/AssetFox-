@@ -264,7 +264,7 @@ namespace BridgeCareCore.Controllers
     internal class SimulationCRUDMethods
     {
         public Action<SimulationDTO> UpsertSimulation { get; set; }
-        public Func<Guid, List<SimulationDTO>> RetrieveSimulation { get; set; }
+        public Func<List<SimulationDTO>> RetrieveSimulation { get; set; }
         public Action<Guid> DeleteSimulation { get; set; }
         public Func<Guid, Guid, IQueuedWorkHandle> RunSimulation { get; set; }
     }

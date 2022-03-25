@@ -130,12 +130,12 @@
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ara-blue-bg white--text'
-                       v-show='hasScenario' :disabled='(disableCrudButtonsResult && !hasLibraryEditPermission) || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary'
                        class='ara-blue-bg white--text'
-                       v-show='!hasScenario' :disabled='(disableCrudButtonsResult && !hasLibraryEditPermission) || !hasUnsavedChanges'>
+                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>
                 <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ara-blue-bg white--text'
@@ -143,7 +143,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text'
-                       v-show='!hasScenario' :disabled='(disableCrudButtonsResult && !hasLibraryEditPermission) || !hasUnsavedChanges'>
+                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Delete Library
                 </v-btn>
                 <v-btn @click='onDiscardChanges' class='ara-orange-bg white--text'
@@ -468,22 +468,12 @@ export default class BudgetPriorityEditor extends Vue {
         return getUserName();
     }
 
-    checkLibraryEditPermission()
-    {
-        if (this.isAdmin || this.checkUserIsLibraryOwner()) {
-            this.hasLibraryEditPermission = true;
-        }
-
-        this.hasLibraryEditPermission = false;
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {
-        if (this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName())
-        {
-            return true;
-        }
-
-        return false;
+        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName();
     }
 
     onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {

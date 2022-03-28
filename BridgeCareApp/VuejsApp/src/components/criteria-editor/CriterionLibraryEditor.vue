@@ -342,7 +342,6 @@ export default class CriterionLibraryEditor extends Vue {
 
     checkUserIsLibraryOwner() {
         return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner) == getUserName();
-        }
     }
 
     getOwnerUserName(): string {

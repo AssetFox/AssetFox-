@@ -923,6 +923,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 mergedCriteriaExpression: '',
                 description: '',
                 isSingleUse: true,
+                isShared: false,
             };
         }
         if (!isNil(currentCriteria)) {

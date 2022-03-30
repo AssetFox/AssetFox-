@@ -222,37 +222,32 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Request contained no budget library id.");
                 }
 
-                var budgetLibraryId = Guid.Parse(libraryId.ToString());
+                var performanceCurveLibraryId = Guid.Parse(libraryId.ToString());
 
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-
-                var overwriteBudgets = false;
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("overwriteBudgets"))
-                {
-                    overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
-                }
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());              
 
                 var currentUserCriteriaFilter = new UserCriteriaDTO
                 {
                     HasCriteria = false
                 };
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
-                {
-                    currentUserCriteriaFilter =
-                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
-                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
-                }
+                // TODO: Is below needed here?
+                //if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                //{
+                //    currentUserCriteriaFilter =
+                //        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                //            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                //}
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _performanceCurvesService.ImportLibraryPerformanceCurvesFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter);
+                    return _performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter);
                 });
 
                 if (result.WarningMessage != null)
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                 }
-                return Ok(result.PerformanceCurveLibrary);
+                return Ok(result.PerformanceCurves);
             }
             catch (Exception e)
             {

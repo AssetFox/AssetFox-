@@ -463,8 +463,15 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeData
             {
                 rowNo++;
                 columnNo = 1;
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.SectionName;
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.FacilityName;
+                var splitIds = sectionSummary.FacilityName.Split('-');
+                var sectionId = "";
+                var facilityId = splitIds[0];
+                if (splitIds.Length == 2)
+                {
+                    sectionId = splitIds[1];
+                }
+                worksheet.Cells[rowNo, columnNo++].Value = sectionId;
+                worksheet.Cells[rowNo, columnNo++].Value = facilityId;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BRIDGE_TYPE"];

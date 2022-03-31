@@ -96,19 +96,18 @@ namespace BridgeCareCore.Services.SummaryReport
                     throw new KeyNotFoundException($"{item} was not found in sections");
                 }
             }
-
             // sorting the sections based on facility name. This is helpful throughout the report
             // generation process
             reportOutputData.InitialSectionSummaries.Sort(
-                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                    (a, b) => int.Parse(a.FacilityName.Split('-')[0]).CompareTo(int.Parse(b.FacilityName.Split('-')[0]))
                     );
-
             foreach (var yearlySectionData in reportOutputData.Years)
             {
                 yearlySectionData.Sections.Sort(
-                    (a, b) => int.Parse(a.FacilityName).CompareTo(int.Parse(b.FacilityName))
+                    (a, b) => int.Parse(a.FacilityName.Split('-')[0]).CompareTo(int.Parse(b.FacilityName.Split('-')[0]))
                     );
             }
+
             var simulationYears = new List<int>();
             foreach (var item in reportOutputData.Years)
             {

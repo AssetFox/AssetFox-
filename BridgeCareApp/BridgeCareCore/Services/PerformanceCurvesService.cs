@@ -39,6 +39,11 @@ namespace BridgeCareCore.Services
             {
                 var performanceEquationName = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 var attribute = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
+                if (performanceEquationName == null && attribute == null)
+                {
+                    continue;
+                }
+
                 var equationExpression = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 var criterionExpression = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 if(!string.IsNullOrEmpty(criterionExpression))
@@ -61,7 +66,9 @@ namespace BridgeCareCore.Services
                     Name = performanceEquationName,
                     Attribute = attribute,
                     Equation = string.IsNullOrEmpty(equationExpression) ? null : new EquationDTO { Id = Guid.NewGuid(), Expression = equationExpression },
-                    CriterionLibrary = string.IsNullOrEmpty(criterionExpression) ? null : new CriterionLibraryDTO { Id = Guid.NewGuid(), MergedCriteriaExpression = criterionExpression, IsSingleUse = true, Name = performanceEquationName + attribute + "Criterion" }
+                    CriterionLibrary = string.IsNullOrEmpty(criterionExpression)
+                                        ? null
+                                        : new CriterionLibraryDTO { Id = Guid.NewGuid(), MergedCriteriaExpression = criterionExpression, IsSingleUse = true, Name = performanceEquationName + " " + attribute + " " + "Criterion" }
                 });
             }
             // create dto here basically get perflobrarybyId

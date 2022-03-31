@@ -27,14 +27,14 @@ namespace BridgeCareCore.Services
             var performanceCurvesWorksheet = excelPackage.Workbook.Worksheets[0];
             var worksheetStart = performanceCurvesWorksheet.Dimension.Start;
             var worksheetEnd = performanceCurvesWorksheet.Dimension.End;
-
             var worksheetColumnNames = performanceCurvesWorksheet.Cells[1, 1, 1, worksheetEnd.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
             var startColumn = worksheetStart.Column;
             var existingPerformanceCurves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(performanceCurveLibraryId);
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
-            var missingAttributes = new List<string>();
-            var invalidCriteria = new List<string>();
+            var performanceCurvesWithMissingAttributes = new List<string>();
+            var performanceCurvesWithInvalidCriteria = new List<string>();
+            var warningSb = new StringBuilder();
             for (var dataRow = worksheetStart.Row + 1; dataRow <= worksheetEnd.Row; dataRow++)
             {
                 var performanceEquationName = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
@@ -51,13 +51,13 @@ namespace BridgeCareCore.Services
                     var validationResult = _expressionValidationService.ValidateCriterionWithoutResults(criterionExpression, currentUserCriteriaFilter);
                     if (!validationResult.IsValid)
                     {
-                        invalidCriteria.Add(criterionExpression);
+                        performanceCurvesWithInvalidCriteria.Add(performanceEquationName + ": " + criterionExpression);
                         criterionExpression = null;
                     }
                 }
                 if(string.IsNullOrEmpty(attribute))
                 {
-                    missingAttributes.Add(attribute);                
+                    performanceCurvesWithMissingAttributes.Add(performanceEquationName);                
                 }
 
                 performanceCurvesToImport.Add(new PerformanceCurveDTO
@@ -71,20 +71,29 @@ namespace BridgeCareCore.Services
                                         : new CriterionLibraryDTO { Id = Guid.NewGuid(), MergedCriteriaExpression = criterionExpression, IsSingleUse = true, Name = performanceEquationName + " " + attribute + " " + "Criterion" }
                 });
             }
-            // create dto here basically get perflobrarybyId
+            
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             var performanceCurveLibraryDto = performanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
             performanceCurveLibraryDto.PerformanceCurves.AddRange(performanceCurvesToImport);
             performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
-            performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurveLibraryDto.PerformanceCurves, performanceCurveLibraryId);
-            var warningSb = new StringBuilder();
-            if (missingAttributes.Any())            {
-                
-                warningSb.Append($"The following performace curves had no attributes: {string.Join(", ", missingAttributes)}. ");
-            }
-            if (invalidCriteria.Any())
+            try
             {
-                warningSb.Append($"The following performace curves had invalid criteria: {string.Join(", ", invalidCriteria)}");
+                performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurveLibraryDto.PerformanceCurves, performanceCurveLibraryId);
+            }
+            catch (Exception ex)
+            {
+                warningSb.Append($"Error occured in import of performance curve(s): {ex.Message}");
+            }
+            
+            if (performanceCurvesWithMissingAttributes.Any())
+            {
+                
+                warningSb.Append($"The following performace curves could not be imported due to missing attributes: {string.Join(", ", performanceCurvesWithMissingAttributes)}. ");
+            }
+
+            if (performanceCurvesWithInvalidCriteria.Any())
+            {
+                warningSb.Append($"The following performace curvescould not be imported due to invalid criteria: {string.Join(", ", performanceCurvesWithInvalidCriteria)}");
             }
 
             return new PerformanceCurvesImportResultDTO

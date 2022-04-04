@@ -1,10 +1,10 @@
 export const getCurrentDateOnly = () => {
     return getDateOnly(new Date().toISOString());
-}
+};
 
 export const getDateOnly = (date: string) => {
 	return date.toString().split('T')[0];
-}
+};
 
 export const newsAccessDateComparison = (latestNewsDate: string, userLastAccessDate: string) => {
     let latestNewsDateArray: string[] = latestNewsDate.split('-');
@@ -24,4 +24,4 @@ export const newsAccessDateComparison = (latestNewsDate: string, userLastAccessD
     }
 
     return false;
-}
+};

@@ -18,7 +18,7 @@ using OfficeOpenXml;
 namespace BridgeCareCore.Controllers
 {
     using ScenarioPerformanceCurveUpsertMethod = Action<Guid, List<PerformanceCurveDTO>>;
-    using ScenarioPerformanceCurveImportMethod = Func<bool, ExcelPackage, Guid, UserCriteriaDTO, ScenarioPerformanceCurvesImportResultDTO>;
+    using ScenarioPerformanceCurveImportMethod = Func<ExcelPackage, Guid, UserCriteriaDTO, ScenarioPerformanceCurvesImportResultDTO>;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -59,15 +59,15 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, ScenarioPerformanceCurveImportMethod> CreateImportMethods()
         {
-            ScenarioPerformanceCurvesImportResultDTO UpsertAny(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
+            ScenarioPerformanceCurvesImportResultDTO UpsertAny(ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 return _performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, currentUserCriteriaFilter);
             }
 
-            ScenarioPerformanceCurvesImportResultDTO UpsertPermitted(bool overwriteBudgets, ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
+            ScenarioPerformanceCurvesImportResultDTO UpsertPermitted(ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                return UpsertAny(overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter);
+                return UpsertAny(excelPackage, simulationId, currentUserCriteriaFilter);
             }
 
             return new Dictionary<string, ScenarioPerformanceCurveImportMethod>
@@ -201,9 +201,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("ImportLibraryPerformanceCurvesBudgetsExcelFile")]
+        [Route("ImportLibraryPerformanceCurvesExcelFile")]
         [Authorize]
-        public async Task<IActionResult> ImportLibraryPerformanceCurvesBudgetsExcelFile()
+        public async Task<IActionResult> ImportLibraryPerformanceCurvesExcelFile()
         {
             try
             {
@@ -214,18 +214,16 @@ namespace BridgeCareCore.Controllers
 
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
-                    throw new ConstraintException("PerformanceCurves budgets file not found.");
+                    throw new ConstraintException("PerformanceCurves file not found.");
                 }
 
                 if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var libraryId))
                 {
-                    throw new ConstraintException("Request contained no budget library id.");
+                    throw new ConstraintException("Request contained no performance curve library id.");
                 }
 
                 var performanceCurveLibraryId = Guid.Parse(libraryId.ToString());
-
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());              
-
                 var currentUserCriteriaFilter = new UserCriteriaDTO
                 {
                     HasCriteria = false
@@ -251,15 +249,15 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"PerformanceCurves error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance curves error::{e.Message}");
                 throw;
             }
         }
 
         [HttpPost]
-        [Route("ImportScenarioPerformanceCurvesBudgetsExcelFile")]
+        [Route("ImportScenarioPerformanceCurvesExcelFile")]
         [Authorize]
-        public async Task<IActionResult> ImportScenarioPerformanceCurvesBudgetsExcelFile()
+        public async Task<IActionResult> ImportScenarioPerformanceCurvesExcelFile()
         {
             try
             {
@@ -270,7 +268,7 @@ namespace BridgeCareCore.Controllers
 
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
-                    throw new ConstraintException("PerformanceCurves budgets file not found.");
+                    throw new ConstraintException("PerformanceCurves file not found.");
                 }
 
                 if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
@@ -279,28 +277,21 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var simulationId = Guid.Parse(id.ToString());
-
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-
-                var overwriteBudgets = false;
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("overwriteBudgets"))
-                {
-                    overwriteBudgets = ContextAccessor.HttpContext.Request.Form["overwriteBudgets"].ToString() == "1";
-                }
-
                 var currentUserCriteriaFilter = new UserCriteriaDTO
                 {
                     HasCriteria = false
                 };
-                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
-                {
-                    currentUserCriteriaFilter =
-                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
-                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
-                }
+                // TODO: Is below needed here?
+                //if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                //{
+                //    currentUserCriteriaFilter =
+                //        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                //            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                //}
 
                 var result = await Task.Factory.StartNew(() =>
-                    _scenarioPerformanceCurveImportMethods[UserInfo.Role](overwriteBudgets, excelPackage, simulationId, currentUserCriteriaFilter));
+                    _scenarioPerformanceCurveImportMethods[UserInfo.Role](excelPackage, simulationId, currentUserCriteriaFilter));
 
                 if (result.WarningMessage != null)
                 {
@@ -314,7 +305,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"PerformanceCurves error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance curves error::{e.Message}");
                 throw;
             }
         }

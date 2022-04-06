@@ -76,7 +76,7 @@ export default class CreateScenarioDialog extends Vue {
     shared: boolean = false;
     selectedNetworkId: string = getBlankGuid();
     isNetworkSelected: boolean = false;
-    networkMetaData: Network = {...emptyNetwork}
+    networkMetaData: Network = {...emptyNetwork};
     selectedNetworkName: string;
 
     @Watch('showDialog')

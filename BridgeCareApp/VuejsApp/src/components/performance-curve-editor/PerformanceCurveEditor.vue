@@ -65,6 +65,10 @@
                     >
                         Add
                     </v-btn>
+                    <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                        class='ara-blue-bg white--text'>
+                        Import/Export
+                    </v-btn>
                 </v-flex>
             </v-layout>
             <v-layout class="data-table" justify-center>
@@ -354,6 +358,8 @@
             :dialogData="criterionLibraryEditorDialogData"
             @submit="onSubmitCriterionLibraryEditorDialogResult"
         />
+        <ImportExportPerformanceCurvesDialog :showDialog='showImportExportPerformanceCurvesDialog'
+            @submit='onSubmitImportExportPerformanceCurvesDialogResult' />
     </v-layout>
 </template>
 
@@ -371,6 +377,7 @@ import {
     emptyPerformanceCurveLibrary,
     PerformanceCurve,
     PerformanceCurveLibrary,
+    PerformanceCurvesFileImport
 } from '@/shared/models/iAM/performance';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -411,9 +418,14 @@ import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import ImportExportPerformanceCurvesDialog
+    from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
+import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
+import PerformanceCurveService from '@/services/performance-curve.service';
 
 @Component({
     components: {
+        ImportExportPerformanceCurvesDialog,
         CreatePerformanceCurveLibraryDialog,
         CreatePerformanceCurveDialog,
         EquationEditorDialog,
@@ -521,6 +533,7 @@ export default class PerformanceCurveEditor extends Vue {
     rules: InputValidationRules = clone(rules);
     uuidNIL: string = getBlankGuid();
     currentUrl: string = window.location.href;
+    showImportExportPerformanceCurvesDialog: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -833,6 +846,50 @@ export default class PerformanceCurveEditor extends Vue {
         }
 
         return !dataIsValid;
+    }
+
+    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
+        this.showImportExportPerformanceCurvesDialog = false;
+
+        if (hasValue(result)) {
+            // if (result.isExport) {
+            //     const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
+            //     PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
+            //         .then((response: AxiosResponse) => {
+            //             if (hasValue(response, 'data')) {
+            //                 const fileInfo: FileInfo = response.data as FileInfo;
+            //                 FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+            //             }
+            //         });
+
+            // } else
+            if (hasValue(result.file)) {
+                const data: PerformanceCurvesFileImport = {
+                    file: result.file
+                };
+
+                if (this.hasScenario) {
+                    this.importScenarioPerformanceCurvesFileAction({
+                        ...data,
+                        id: this.selectedScenarioId,
+                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    })
+                    .then(() => {
+                            this.getCriterionLibrariesAction();
+                    });
+                } else {
+                    this.importLibraryPerformanceCurvesFileAction({
+                        ...data,
+                        id: this.selectedBudgetLibrary.id,
+                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    })
+                    .then(() => {
+                            this.getCriterionLibrariesAction();
+                    });
+                }
+
+            }
+        }
     }
 }
 </script>

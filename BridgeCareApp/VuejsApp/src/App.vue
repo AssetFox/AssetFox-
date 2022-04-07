@@ -1,7 +1,7 @@
 <template>
     <v-app class="paper-white-bg">
-        <v-main>
-            <v-app-bar app class="paper-white-bg">
+        <v-content>
+            <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
                     <img :src="require('@/assets/images/PennDOTLogo.svg')" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
@@ -11,14 +11,14 @@
                 <v-toolbar-items>
                     <v-btn
                         @click="onNavigate('/Scenarios/')"
-                        text
+                        flat
                         class="ara-blue-pantone-281"
                     >
                         Scenarios
                     </v-btn>
                     <v-menu offset-y>
                             <template v-slot:activator="{ on, attrs }">
-                                <v-btn text v-on="on" v-bind="attrs" class="ara-blue-pantone-281">
+                                <v-btn flat v-on="on" v-bind="attrs" class="ara-blue-pantone-281">
                                     Libraries
                                 </v-btn>
                             </template>
@@ -114,7 +114,7 @@
                     <v-btn
                         @click="onNavigate('/UserCriteria/')"
                         class="ara-blue-pantone-281"
-                        text
+                        flat
                         v-if="isAdmin"
                     >
                         Security
@@ -122,14 +122,14 @@
                     <v-btn
                         @click="onNavigate('/Inventory/')"
                         class="ara-blue-pantone-281"
-                        text
+                        flat
                     >
                         Inventory
                     </v-btn>
                      <v-btn
                         @click="onShowNewsDialog()"
                         class="ara-blue-pantone-281"
-                        text
+                        flat
                     >
                         News
                         <v-icon v-if="hasUnreadNewsItem" size="13" class="news-notification">fas fa-exclamation-circle</v-icon>
@@ -270,7 +270,7 @@
                         <v-icon small color="white">fas fa-sign-out-alt</v-icon>
                     </v-btn>
                 </v-toolbar-title>
-            </v-app-bar>
+            </v-toolbar>
             <div class="ara-blue-pantone-281 scenario-status" v-if="hasSelectedScenario">
                 <span class="font-weight-light">Scenario: </span>
                     <span>{{ selectedScenario.name }}</span>
@@ -301,7 +301,7 @@
             <Spinner />
             <Alert :dialog-data="alertDialogData" @submit="onAlertResult" />
             <NewsDialog :showDialog="showNewsDialog" @close="onCloseNewsDialog()" />
-        </v-main>
+        </v-content>
     </v-app>
 </template>
 

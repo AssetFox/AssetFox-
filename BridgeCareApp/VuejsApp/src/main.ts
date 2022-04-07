@@ -28,7 +28,7 @@ import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 Vue.use(Vuetify, {
     iconfont: 'fa',
 });
-const vuetify= new Vuetify({  });
+
 Vue.use(VueWorker);
 
 Vue.use(KendoChartInstaller);
@@ -69,7 +69,6 @@ fetch(process.env.BASE_URL + 'config.json')
         new Vue({
             store,
             router,
-            vuetify:vuetify,
             render: h => h(App),
         }).$mount('#app');
     });

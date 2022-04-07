@@ -220,7 +220,7 @@ const actions = {
         let data: UserNewsAccessDate = {
             id: payload.id,
             lastNewsAccessDate: payload.accessDate
-        };
+        }
 
         await UserService.updateLastNewsAccessDate(
             data
@@ -249,7 +249,7 @@ const actions = {
                     message: 'Failed to get current user from server.',
                 });
             }     
-        },);
+        },)
     },
 };
 

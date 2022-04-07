@@ -671,7 +671,7 @@ export default class InvestmentEditor extends Vue {
                     })
                     .then(() => {
                             this.getCriterionLibrariesAction();
-                    });
+                    });;
                 }
 
             }

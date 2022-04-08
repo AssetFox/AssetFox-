@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services
 
             return new PerformanceCurvesImportResultDTO
             {
-                PerformanceCurves = performanceCurveRepo.GetPerformanceCurvesForLibrary(performanceCurveLibraryId),
+                PerformanceCurveLibraryDTO = new PerformanceCurveLibraryDTO { Id = performanceCurveLibraryId, Name = performanceCurveLibraryDto.Name, PerformanceCurves = performanceCurveRepo.GetPerformanceCurvesForLibrary(performanceCurveLibraryId) },
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null
@@ -130,10 +130,10 @@ namespace BridgeCareCore.Services
         {
             var performanceCurvesWorksheet = excelPackage.Workbook.Worksheets[0];
             var worksheetStart = performanceCurvesWorksheet.Dimension.Start;
-            var worksheetEnd = performanceCurvesWorksheet.Dimension.End;
-            var startColumn = worksheetStart.Column;
+            var worksheetEnd = performanceCurvesWorksheet.Dimension.End;            
             for (var dataRow = worksheetStart.Row + 1; dataRow <= worksheetEnd.Row; dataRow++)
             {
+                var startColumn = worksheetStart.Column;
                 var performanceEquationName = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 var attribute = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 if (performanceEquationName == null && attribute == null)

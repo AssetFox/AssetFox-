@@ -59,9 +59,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             // Assert
             Assert.NotNull(result);
             Assert.Null(result.WarningMessage);
-            Assert.Equal(result.PerformanceCurves.Count, 1);
-            Assert.NotNull(result.PerformanceCurves[0].CriterionLibrary);
-            Assert.NotNull(result.PerformanceCurves[0].Equation);
+            Assert.Equal(result.PerformanceCurveLibraryDTO.PerformanceCurves.Count, 1);
+            Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary);
+            Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].Equation);
         }
 
         [Fact]

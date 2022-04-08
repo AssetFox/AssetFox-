@@ -422,6 +422,7 @@ import ImportExportPerformanceCurvesDialog
     from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import PerformanceCurveService from '@/services/performance-curve.service';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 @Component({
     components: {
@@ -447,6 +448,7 @@ export default class PerformanceCurveEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
@@ -463,6 +465,10 @@ export default class PerformanceCurveEditor extends Vue {
     getScenarioPerformanceCurvesAction: any;
     @Action('upsertScenarioPerformanceCurves')
     upsertScenarioPerformanceCurvesAction: any;
+    @Action('importScenarioPerformanceCurvesFile')
+    importScenarioPerformanceCurvesFileAction: any;
+    @Action('importLibraryPerformanceCurvesFile')
+    importLibraryPerformanceCurvesFileAction: any;
 
     gridSearchTerm = '';
     selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
@@ -853,7 +859,7 @@ export default class PerformanceCurveEditor extends Vue {
 
         if (hasValue(result)) {
             // if (result.isExport) {
-            //     const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
+            //     const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
             //     PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
             //         .then((response: AxiosResponse) => {
             //             if (hasValue(response, 'data')) {
@@ -874,18 +880,18 @@ export default class PerformanceCurveEditor extends Vue {
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     })
-                    .then(() => {
-                            this.getCriterionLibrariesAction();
-                    });
+                    // .then(() => {
+                    //         this.getScenarioPerformanceCurvesAction();
+                    // });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
                         ...data,
-                        id: this.selectedBudgetLibrary.id,
+                        id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     })
-                    .then(() => {
-                            this.getCriterionLibrariesAction();
-                    });
+                    // .then(() => {
+                    //         this.getPerformanceCurveLibrariesAction();
+                    // });
                 }
 
             }

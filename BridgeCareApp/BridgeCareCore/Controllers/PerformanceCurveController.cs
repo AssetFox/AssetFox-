@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -222,19 +223,20 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Request contained no performance curve library id.");
                 }
 
-                var performanceCurveLibraryId = Guid.Parse(libraryId.ToString());
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());              
+                var performanceCurveLibraryId = Guid.Parse(libraryId.ToString());                
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                
                 var currentUserCriteriaFilter = new UserCriteriaDTO
                 {
                     HasCriteria = false
                 };
                 // TODO: Is below needed here?
-                //if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
-                //{
-                //    currentUserCriteriaFilter =
-                //        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
-                //            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
-                //}
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                {
+                    currentUserCriteriaFilter =
+                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                }
 
                 var result = await Task.Factory.StartNew(() =>
                 {
@@ -245,7 +247,7 @@ namespace BridgeCareCore.Controllers
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                 }
-                return Ok(result.PerformanceCurves);
+                return Ok(result.PerformanceCurveLibraryDTO);
             }
             catch (Exception e)
             {
@@ -283,12 +285,12 @@ namespace BridgeCareCore.Controllers
                     HasCriteria = false
                 };
                 // TODO: Is below needed here?
-                //if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
-                //{
-                //    currentUserCriteriaFilter =
-                //        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
-                //            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
-                //}
+                if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
+                {
+                    currentUserCriteriaFilter =
+                        Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
+                            ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
+                }
 
                 var result = await Task.Factory.StartNew(() =>
                     _scenarioPerformanceCurveImportMethods[UserInfo.Role](excelPackage, simulationId, currentUserCriteriaFilter));

@@ -407,6 +407,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfWork.Context.PerformanceCurve.AsNoTracking()
+                .Where(_ => _.PerformanceCurveLibraryId == performanceCurveLibraryId)
                 .Include(_ => _.Attribute)
                 .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)

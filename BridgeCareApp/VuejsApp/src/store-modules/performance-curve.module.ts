@@ -205,7 +205,7 @@ const actions = {
             if (hasValue(response, 'data')) {
                 const library: PerformanceCurveLibrary = response.data as PerformanceCurveLibrary;
                 commit('performanceCurveLibraryMutator', library);
-                commit('selectedPerformanceCurveLibraryMutator', library.id);
+                commit('selectedPerformanceCurveLibraryMutator', library.id);               
                 dispatch('addSuccessNotification', {
                     message: 'Performance curves file imported',
                 });

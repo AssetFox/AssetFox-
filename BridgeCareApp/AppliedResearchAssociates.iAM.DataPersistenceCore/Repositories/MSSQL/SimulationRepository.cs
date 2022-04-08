@@ -168,16 +168,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return (selectedSimulation == null) ? null : selectedSimulation.Name;
         }
 
-        public SimulationCloningResultDTO CloneSimulation(Guid simulationId)
+        public SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
             var budgetsPreventingCloning = new List<string>();
             var numberOfCommittedProjectsAffected = 0;
-            
+
+            var newNetwork = _unitOfWork.Context.Network.AsNoTracking().AsSplitQuery()
+                .Single(_ => _.Id == networkId);
+
+
             var simulationToClone = _unitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                 .Include(_ => _.Network)
                 // analysis method
@@ -274,6 +283,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == simulationId);
 
             simulationToClone.Id = Guid.NewGuid();
+            var test = simulationToClone.Network;
+            simulationToClone.Network = newNetwork;
+            simulationToClone.NetworkId = networkId;
+            simulationToClone.Name = simulationName;
             _unitOfWork.Context.ReInitializeAllEntityBaseProperties(simulationToClone, _unitOfWork.UserEntity?.Id);
 
             if (simulationToClone.AnalysisMethod != null)

@@ -3,9 +3,9 @@
         <v-content>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
-                    <img :src="require('@/assets/images/PennDOTLogo.svg')" />
+                    <img :src="require('@/assets/images/PennDOTLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
-                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" />
+                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
@@ -730,5 +730,9 @@ html {
     display: flex;
     justify-content: space-evenly;
 }
+
+.pointer-for-image{
+        cursor: pointer;
+    }
 
 </style>

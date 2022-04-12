@@ -3,9 +3,9 @@
         <v-content>
             <v-toolbar app class="paper-white-bg">
                 <v-toolbar-title>
-                    <img :src="require('@/assets/images/PennDOTLogo.svg')" />
+                    <img :src="require('@/assets/images/PennDOTLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
-                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" />
+                    <img :src="require('@/assets/images/BridgeCareLogo.svg')" @click="onNavigate('/Scenarios/')" class="pointer-for-image" />
                     <v-divider class="mx-2 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-items>
@@ -241,7 +241,7 @@
                         <v-icon small color="white">fas fa-sign-in-alt</v-icon>
                     </v-btn>
                     <v-btn
-                        v-if="securityType === esecSecurityType"
+                        v-if="securityType === esecSecurityType && currentURL != 'AuthenticationStart'"
                         @click="onNavigate('/AuthenticationStart/')"
                         class="mx-2"
                         icon
@@ -412,6 +412,7 @@ export default class AppComponent extends Vue {
     b2cSecurityType: string = SecurityTypes.b2c;
     showNewsDialog: boolean = false;
     hasUnreadNewsItem: boolean = false;
+    currentURL: any = '';
 
     get container() {
         const container: any = {};
@@ -454,17 +455,7 @@ export default class AppComponent extends Vue {
     onAuthenticationChange() {
         if (this.authenticated) {
             this.onAuthenticate();
-        } /* else if (
-            !this.authenticated &&
-            this.securityType === SecurityTypes.esec
-        ) {
-            this.onLogout();
-        } else if (
-            !this.authenticated &&
-            this.securityType === SecurityTypes.b2c
-        ) {
-            this.onAzureLogout();
-        }*/
+        }
     }
 
     @Watch('announcements')
@@ -583,6 +574,7 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastWarningEvent,
             this.onAddWarningNotification,
         );
+        this.currentURL = this.$router.currentRoute.name;
     }
 
     beforeDestroy() {
@@ -738,5 +730,9 @@ html {
     display: flex;
     justify-content: space-evenly;
 }
+
+.pointer-for-image{
+        cursor: pointer;
+    }
 
 </style>

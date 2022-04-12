@@ -371,7 +371,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return Task.Factory.StartNew(() =>
-                _unitOfWork.Context.CriterionLibrary.Select(_ => _.ToDto()).ToList());
+                _unitOfWork.Context.CriterionLibrary.Where(_ => _.IsSingleUse == false).Select(_ => _.ToDto()).ToList());
+        }
+
+        public Task<CriterionLibraryDTO> CriteriaLibrary(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.CriterionLibrary.Any(_ => _.Id == libraryId))
+            {
+                return Task.Factory.StartNew(() => new CriterionLibraryDTO());
+            }
+
+            return Task.Factory.StartNew(() =>
+                _unitOfWork.Context.CriterionLibrary.First(_ => _.Id == libraryId).ToDto());
         }
 
         public Guid UpsertCriterionLibrary(CriterionLibraryDTO dto)

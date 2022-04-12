@@ -39,7 +39,7 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 export default class CreateCriterionLibraryDialog extends Vue {
   @Prop() dialogData: CreateCriterionLibraryDialogData;
 
-  newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid()};
+  newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};
 
   @Watch('dialogData')
   onDialogDataChanged() {

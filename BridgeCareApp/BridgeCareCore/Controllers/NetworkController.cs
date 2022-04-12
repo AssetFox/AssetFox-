@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
@@ -81,36 +79,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("GetCompatibleNetworks/{networkId}")]
-        [Authorize]
-        public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)
-        {
-            try
-            {
-                var attributesForOriginalNetwork = await UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
-                var networks = await UnitOfWork.NetworkRepo.Networks();
-
-                var compatibleNetworks = new List<NetworkDTO>();
-
-                foreach (var network in networks)
-                {
-                    var attributesForNetwork = await UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
-
-                    if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
-                        compatibleNetworks.Add(network);
-                    }
-                }
-
-                return Ok(compatibleNetworks);
-
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
-                throw;
-            }
-        }
         [HttpPost]
         [Route("UpsertBenefitQuantifier")]
         [Authorize]

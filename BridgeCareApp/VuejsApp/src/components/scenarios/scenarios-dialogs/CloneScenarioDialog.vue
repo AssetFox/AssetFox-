@@ -13,12 +13,11 @@
 
             <v-card-text>
               <v-select
-                    :items="stateCompatibleNetworks"
-                    label="Select a compatible network"
+                    :items="stateNetworks"
+                    label="Select a network"
                     item-text="name"
                     v-model="networkMetaData"
                     return-object
-                    v-if="hasCompatibleNetworks"
                     v-on:change="selectedNetwork(`${networkMetaData.name}`, `${networkMetaData.id}`)"
                     dense
                     outline
@@ -63,18 +62,16 @@ import {
 } from '@/shared/models/iAM/scenario';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { find, isNil, propEq, clone } from 'ramda';
+import { find, isNil, propEq } from 'ramda';
 import { emptyNetwork, Network } from '@/shared/models/iAM/network';
-import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data';
+import {CloneScenarioDialogData} from '@/shared/models/modals/clone-scenario-dialog-data'
 
 @Component
 export default class CloneScenarioDialog extends Vue {
     @Prop() dialogData: CloneScenarioDialogData;
 
     @State(state => state.userModule.users) stateUsers: User[];
-    @State(state => state.networkModule.compatibleNetworks) stateCompatibleNetworks: Network[];
-
-    @Action("getCompatibleNetworks") getCompatibleNetworksAction: any;
+    @State(state => state.networkModule.networks) stateNetworks: Network[];
 
     newScenario: Scenario = { ...emptyScenario, id: getNewGuid() };
     shared: boolean = false;
@@ -82,23 +79,10 @@ export default class CloneScenarioDialog extends Vue {
     isNetworkSelected: boolean = false;
     networkMetaData: Network = {...emptyNetwork}
     selectedNetworkName: string;
-    hasCompatibleNetworks: boolean = false;
 
     @Watch('dialogData')
     onDialogDataChanged() {
         this.onModifyScenarioUserAccess();
-    }
-
-    @Watch('stateCompatibleNetworks')
-    onStateCompatibleNetworksChanged() {
-
-        this.selectedNetworkId = this.dialogData.scenario.networkId;
-        this.selectedNetworkName = this.dialogData.scenario.networkName;
-        this.networkMetaData = this.stateCompatibleNetworks.find(_ => _.id == this.dialogData.scenario.networkId) || this.networkMetaData;
-        this.isNetworkSelected = true;
-
-
-        this.hasCompatibleNetworks = true;
     }
 
     @Watch('shared')
@@ -150,8 +134,6 @@ export default class CloneScenarioDialog extends Vue {
                       ]
                     : [owner]
             };
-
-            this.getCompatibleNetworksAction({networkId: this.dialogData.scenario.networkId});
         }
     }
 
@@ -166,7 +148,6 @@ export default class CloneScenarioDialog extends Vue {
 
         this.newScenario = { ...emptyScenario, id: getNewGuid() };
         this.shared = false;
-        this.hasCompatibleNetworks = false;
     }
 }
 </script>

@@ -170,7 +170,7 @@
                                         @click="onCheckSubCriteria"
                                         class="ara-blue-bg white--text"
                                     >
-                                        Check Criteria
+                                        Add subcriteria
                                     </v-btn>
                                 </div>
                                 <div class="validation-messages-container">
@@ -690,16 +690,6 @@ export default class CriteriaEditor extends Vue {
             currentUserCriteriaFilter: this.currentUserCriteriaFilter,
         } as ValidationParameter;
 
-        ValidationService.getCriterionValidationResult(
-            validationParameter,
-        ).then((response: AxiosResponse) => {
-            this.resetSubCriteriaValidationProperties();
-
-            if (hasValue(response, 'data')) {
-                const result: CriterionValidationResult = response.data as CriterionValidationResult;
-                const message = `${result.resultsCount} result(s) returned`;
-                if (result.isValid) {
-                    this.validSubCriteriaMessage = message;
                     this.subCriteriaClauses = update(
                         this.selectedSubCriteriaClauseIndex,
                         criteria,
@@ -707,6 +697,7 @@ export default class CriteriaEditor extends Vue {
                     );
                     this.resetCriteriaValidationProperties();
                     this.checkOutput = true;
+                    this.resetSubCriteriaValidationProperties();
 
                     if (this.criteriaEditorData.isLibraryContext) {
                         this.$emit('submitCriteriaEditorResult', {
@@ -714,23 +705,48 @@ export default class CriteriaEditor extends Vue {
                             criteria: null,
                         });
                     }
-                } else {
-                    if (result.resultsCount === 0) {
-                        this.invalidSubCriteriaMessage = message;
-                        this.subCriteriaClauses = update(
-                            this.selectedSubCriteriaClauseIndex,
-                            criteria,
-                            this.subCriteriaClauses,
-                        );
-                        this.resetCriteriaValidationProperties();
-                        this.checkOutput = true;
-                    } else {
-                        this.invalidSubCriteriaMessage =
-                            result.validationMessage;
-                    }
-                }
-            }
-        });
+
+        // ValidationService.getCriterionValidationResult(
+        //     validationParameter,
+        // ).then((response: AxiosResponse) => {
+        //     this.resetSubCriteriaValidationProperties();
+
+        //     if (hasValue(response, 'data')) {
+        //         const result: CriterionValidationResult = response.data as CriterionValidationResult;
+        //         const message = `${result.resultsCount} result(s) returned`;
+        //         if (result.isValid) {
+        //             this.validSubCriteriaMessage = message;
+        //             this.subCriteriaClauses = update(
+        //                 this.selectedSubCriteriaClauseIndex,
+        //                 criteria,
+        //                 this.subCriteriaClauses,
+        //             );
+        //             this.resetCriteriaValidationProperties();
+        //             this.checkOutput = true;
+
+        //             if (this.criteriaEditorData.isLibraryContext) {
+        //                 this.$emit('submitCriteriaEditorResult', {
+        //                     validated: false,
+        //                     criteria: null,
+        //                 });
+        //             }
+        //         } else {
+        //             if (result.resultsCount === 0) {
+        //                 this.invalidSubCriteriaMessage = message;
+        //                 this.subCriteriaClauses = update(
+        //                     this.selectedSubCriteriaClauseIndex,
+        //                     criteria,
+        //                     this.subCriteriaClauses,
+        //                 );
+        //                 this.resetCriteriaValidationProperties();
+        //                 this.checkOutput = true;
+        //             } else {
+        //                 this.invalidSubCriteriaMessage =
+        //                     result.validationMessage;
+        //             }
+        //         }
+        //     }
+        // });
     }
 
     getSubCriteriaValueToCheck() {

@@ -36,6 +36,15 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetSpecificCriteria/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCriteriaForScenario(Guid libraryId)
+        {
+            var result = await UnitOfWork.CriterionLibraryRepo.CriteriaLibrary(libraryId);
+            return Ok(result);
+        }
+
         [HttpPost]
         [Route("UpsertCriterionLibrary")]
         [Authorize]

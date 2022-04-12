@@ -14,4 +14,8 @@ export default class CriterionLibraryService {
     static deleteCriterionLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(`${API.CriterionLibrary}/DeleteCriterionLibrary/${libraryId}`);
     }
+
+    static getSelectedCriterionLibrary(libraryId: string): AxiosPromise{
+        return coreAxiosInstance.get(`${API.CriterionLibrary}/GetSpecificCriteria/${libraryId}`);
+    }
 }

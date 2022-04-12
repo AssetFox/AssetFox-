@@ -1,5 +1,5 @@
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
-import {any, append, clone, find, findIndex, propEq, reject, update} from 'ramda';
+import {any, append, clone, find, findIndex, isNil, propEq, reject, update} from 'ramda';
 import CriterionLibraryService from '@/services/criterion-library.service';
 import {AxiosResponse} from 'axios';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -17,12 +17,13 @@ const mutations = {
     criterionLibrariesMutator(state: any, criteriaLibraries: CriterionLibrary[]) {
         state.criterionLibraries = clone(criteriaLibraries);
     },
-    selectedCriterionLibraryMutator(state: any, libraryId: string) {
-        if (any(propEq('id', libraryId), state.criterionLibraries)) {
-            state.selectedCriterionLibrary = find(propEq('id', libraryId), state.criterionLibraries);
-        } else {
-            state.selectedCriterionLibrary = clone(emptyCriterionLibrary);
-        }
+    selectedCriterionLibraryMutator(state: any, criterionLibrary: CriterionLibrary) {
+        state.selectedCriterionLibrary = clone(criterionLibrary);
+        // if (any(propEq('id', libraryId), state.criterionLibraries)) {
+        //     state.selectedCriterionLibrary = find(propEq('id', libraryId), state.criterionLibraries);
+        // } else {
+        //     state.selectedCriterionLibrary = clone(emptyCriterionLibrary);
+        // }
     },
     addedOrUpdatedCriterionLibraryMutator(state: any, library: CriterionLibrary) {
         state.criterionLibraries = any(propEq('id', library.id), state.criterionLibraries)
@@ -36,12 +37,13 @@ const mutations = {
     selectedCriterionIsValidMutator(state: any, isValid: boolean) {
         state.selectedCriterionIsValid = isValid;
     },
-    scenarioRelatedCriterionMutator(state: any, libraryId: string){
-        if (any(propEq('id', libraryId), state.criterionLibraries)) {
-            state.scenarioRelatedCriteria = find(propEq('id', libraryId), state.criterionLibraries);
-        } else {
-            state.scenarioRelatedCriteria = clone(emptyCriterionLibrary);
-        }
+    scenarioRelatedCriterionMutator(state: any, library: CriterionLibrary){
+        state.scenarioRelatedCriteria = clone(library);
+        // if (any(propEq('id', libraryId), state.criterionLibraries)) {
+        //     state.scenarioRelatedCriteria = find(propEq('id', libraryId), state.criterionLibraries);
+        // } else {
+        //     state.scenarioRelatedCriteria = clone(emptyCriterionLibrary);
+        // }
     },
     upsertScenarioRelatedCriteriaMutator(state: any, library: CriterionLibrary){
         state.scenarioRelatedCriteria = clone(library);
@@ -52,8 +54,34 @@ const actions = {
     selectCriterionLibrary({commit}: any, payload: any) {
         commit('selectedCriterionLibraryMutator', payload.libraryId);
     },
-    selectScenarioRelatedCriterion({commit}: any, payload: any) {
-        commit('scenarioRelatedCriterionMutator', payload.libraryId);
+    async getSelectedCriterionLibrary({commit}: any, payload: any) {
+        if(!isNil(payload.libraryId) && payload.libraryId != getBlankGuid()){
+            await CriterionLibraryService.getSelectedCriterionLibrary(payload.libraryId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('selectedCriterionLibraryMutator', response.data as CriterionLibrary);
+                }
+            });
+        }
+        else{
+            var emptyData = clone(emptyCriterionLibrary) as CriterionLibrary;
+            commit('selectedCriterionLibraryMutator', emptyData);
+        }
+    },
+    async selectScenarioRelatedCriterion({commit}: any, payload: any) {
+        if(payload.libraryId != getBlankGuid()){
+            await CriterionLibraryService.getSelectedCriterionLibrary(payload.libraryId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('scenarioRelatedCriterionMutator', response.data as CriterionLibrary);
+                }
+            });
+        }
+        else{
+            var emptyData = clone(emptyCriterionLibrary) as CriterionLibrary;
+            commit('scenarioRelatedCriterionMutator', emptyData);
+        }
+        //commit('scenarioRelatedCriterionMutator', payload.libraryId);
     },
     setSelectedCriterionIsValid({commit}: any, payload: any) {
         commit('selectedCriterionIsValidMutator', payload.isValid);
@@ -79,13 +107,13 @@ const actions = {
                         : 'Added criterion library';
                     commit('addedOrUpdatedCriterionLibraryMutator', library);
                     if(!library.isSingleUse){
-                        commit('selectedCriterionLibraryMutator', library.id);
+                        commit('selectedCriterionLibraryMutator', library);
                     }
                     else{
 
-                        if(isExistingCriteria){
-                            commit('scenarioRelatedCriterionMutator', library.id);
-                        }
+                        //if(isExistingCriteria){
+                            commit('scenarioRelatedCriterionMutator', library);
+                        //}
                     }
                 dispatch('addSuccessNotification', { message: message });
                 returningId = response.data;

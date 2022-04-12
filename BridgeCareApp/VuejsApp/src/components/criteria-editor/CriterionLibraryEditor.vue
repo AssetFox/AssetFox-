@@ -176,6 +176,7 @@ export default class CriterionLibraryEditor extends Vue {
     selectScenarioRelatedCriterionAction: any;
     @Action('upsertSelectedScenarioRelatedCriterion')
     upsertSelectedScenarioRelatedCriterionAction: any;
+    @Action('getSelectedCriterionLibrary') getSelectedCriterionLibraryAction: any;
 
     hasSelectedCriterionLibrary: boolean = false;
     criterionLibrarySelectItems: SelectItem[] = [];
@@ -225,7 +226,10 @@ export default class CriterionLibraryEditor extends Vue {
                 value: library.id,
             }));
         if (!this.isLibraryContext && hasValue(this.librarySelectItemValue)) {
-            this.selectCriterionLibraryAction({
+            // this.selectCriterionLibraryAction({
+            //     libraryId: this.librarySelectItemValue,
+            // });
+            this.getSelectedCriterionLibraryAction({
                 libraryId: this.librarySelectItemValue,
             });
         }
@@ -243,9 +247,12 @@ export default class CriterionLibraryEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChanged() {
-        this.selectCriterionLibraryAction({
-            libraryId: this.librarySelectItemValue,
-        });
+        // this.selectCriterionLibraryAction({
+        //     libraryId: this.librarySelectItemValue,
+        // });
+        this.getSelectedCriterionLibraryAction({
+                libraryId: this.librarySelectItemValue,
+            });
     }
 
     @Watch('stateSelectedCriterionLibrary')
@@ -323,9 +330,12 @@ export default class CriterionLibraryEditor extends Vue {
                 (!this.isLibraryContext || !this.dialogIsFromLibrary) &&
                 hasValue(this.librarySelectItemValue)
             ) {
-                this.selectCriterionLibraryAction({
+                // this.selectCriterionLibraryAction({
+                //     libraryId: this.librarySelectItemValue,
+                // });
+                this.getSelectedCriterionLibraryAction({
                     libraryId: this.librarySelectItemValue,
-                });
+            });
             }
         }
     }
@@ -373,6 +383,10 @@ export default class CriterionLibraryEditor extends Vue {
         );
 
         if (!isNil(criterionLibrary)) {
+            // undefined dialogIsFromLibrary means, the call has come from none of the scenario related component
+            if(isNil(this.dialogIsFromLibrary) || this.dialogIsFromLibrary){
+                criterionLibrary.isSingleUse = false;
+            }
             this.upsertCriterionLibraryAction({
                 library: criterionLibrary,
             }).then(() => (this.librarySelectItemValue = criterionLibrary.id));

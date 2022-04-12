@@ -88,14 +88,14 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
+                var attributesForOriginalNetwork = await UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
                 var networks = await UnitOfWork.NetworkRepo.Networks();
 
                 var compatibleNetworks = new List<NetworkDTO>();
 
                 foreach (var network in networks)
                 {
-                    var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
+                    var attributesForNetwork = await UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
                     if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
                         compatibleNetworks.Add(network);

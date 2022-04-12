@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using MaintainableAsset = AppliedResearchAssociates.iAM.DataAssignment.Networking.MaintainableAsset;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {

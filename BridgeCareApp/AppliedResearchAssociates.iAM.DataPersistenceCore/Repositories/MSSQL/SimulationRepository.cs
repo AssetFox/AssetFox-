@@ -283,7 +283,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == simulationId);
 
             simulationToClone.Id = Guid.NewGuid();
-            var test = simulationToClone.Network;
             simulationToClone.Network = newNetwork;
             simulationToClone.NetworkId = networkId;
             simulationToClone.Name = simulationName;

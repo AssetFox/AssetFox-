@@ -12,7 +12,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using MaintainableAsset = AppliedResearchAssociates.iAM.DataAssignment.Networking.MaintainableAsset;
 
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL

@@ -48,14 +48,6 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                        <v-btn
-                                            @click="
-                                                createNetwork()
-                                            "
-                                            color="blue darken-2 white--text"
-                                        >
-                                            Create Network
-                                        </v-btn>
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
@@ -507,7 +499,7 @@ export default class Scenarios extends Vue {
     @Action('selectScenario') selectScenarioAction: any;
 
     //@Action('rollupNetwork') rollupNetworkAction: any;
-    @Action('createNetwork') createNetworkAction: any;
+    //@Action('createNetwork') createNetworkAction: any;
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
 
@@ -641,10 +633,6 @@ export default class Scenarios extends Vue {
     showMigrateLegacySimulationDialog: boolean = false;
 
     aggragateDialogData: any = { showDialog: false };
-
-    createNetwork() {
-        this.createNetworkAction("testNetwork");
-    }
 
     @Watch('stateNetworks')
     onStateNetworksChanged() {

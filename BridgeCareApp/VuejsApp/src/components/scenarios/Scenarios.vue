@@ -48,14 +48,6 @@
                                         >
                                             Create new scenario
                                         </v-btn>
-                                        <v-btn
-                                            @click="
-                                                createNetwork()
-                                            "
-                                            color="blue darken-2 white--text"
-                                        >
-                                            Create Network
-                                        </v-btn>
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
@@ -405,11 +397,6 @@
             @submit="onCreateScenarioDialogSubmit"
         />
 
-        <CloneScenarioDialog
-            :dialogData="cloneScenarioDialogData"
-            @submit="onCloneScenarioDialogSubmit"
-        />
-
         <MigrateLegacySimulationDialog
             :showDialog="showMigrateLegacySimulationDialog"
             @submit="onMigrateLegacySimulationSubmit"
@@ -439,8 +426,6 @@ import {
     emptyReportsDownloadDialogData,
     ReportsDownloaderDialogData,
 } from '@/shared/models/modals/reports-downloader-dialog-data';
-import CloneScenarioDialog from '@/components/scenarios/scenarios-dialogs/CloneScenarioDialog.vue'
-import { CloneScenarioDialogData, emptyCloneScenarioDialogData } from '@/shared/models/modals/clone-scenario-dialog-data'
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
@@ -469,7 +454,6 @@ import { Hub } from '@/connectionHub';
         ConfirmAnalysisRunAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
-        CloneScenarioDialog,
         CreateNetworkDialog,
         ShareScenarioDialog,
         ShowAggregationDialog,
@@ -506,8 +490,8 @@ export default class Scenarios extends Vue {
     @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
     @Action('selectScenario') selectScenarioAction: any;
 
-    //@Action('rollupNetwork') rollupNetworkAction: any;
-    @Action('createNetwork') createNetworkAction: any;
+    /*@Action('rollupNetwork') rollupNetworkAction: any;
+    @Action('createNetwork') createNetworkAction: any;*/
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
 
@@ -632,7 +616,6 @@ export default class Scenarios extends Vue {
         emptyShareScenarioDialogData,
     );
     confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
-    cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
@@ -641,10 +624,6 @@ export default class Scenarios extends Vue {
     showMigrateLegacySimulationDialog: boolean = false;
 
     aggragateDialogData: any = { showDialog: false };
-
-    createNetwork() {
-        this.createNetworkAction("testNetwork");
-    }
 
     @Watch('stateNetworks')
     onStateNetworksChanged() {
@@ -727,7 +706,7 @@ export default class Scenarios extends Vue {
                 icon: 'fas fa-edit',
             },
             {
-                title: 'Clone',
+                title: 'Copy',
                 action: this.availableActions.clone,
                 icon: 'fas fa-paste',
             },
@@ -912,33 +891,12 @@ export default class Scenarios extends Vue {
         };
     }
 
-    onShowCloneScenarioDialog(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
-
-        this.cloneScenarioDialogData = {
-            showDialog: true,
-            scenario: this.selectedScenario
-        };
-    }
-
     onConfirmCloneScenarioAlertSubmit(submit: boolean) {
         this.confirmCloneScenarioAlertData = clone(emptyAlertData);
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.cloneScenarioAction({
                 scenarioId: this.selectedScenario.id,
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
-        }
-    }
-
-    onCloneScenarioDialogSubmit(scenario: Scenario) {
-        this.cloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
-
-        if (!isNil(scenario)) {
-            this.cloneScenarioAction({
-                scenarioId: scenario.id,
-                networkId: scenario.networkId,
-                scenarioName: scenario.name
             }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
@@ -1038,7 +996,7 @@ export default class Scenarios extends Vue {
                 this.onShowShareScenarioDialog(scenario);
                 break;
             case this.availableActions.clone:
-                this.onShowCloneScenarioDialog(scenario);
+                this.onShowConfirmCloneScenarioAlert(scenario);
                 break;
             case this.availableActions.delete:
                 this.onShowConfirmDeleteAlert(scenario);

@@ -142,16 +142,16 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("CloneScenario/")]
+        [Route("CloneScenario/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> CloneSimulation([FromBody] CloneSimulationDTO dto)
+        public async Task<IActionResult> CloneSimulation(Guid simulationId)
         {
             try
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(dto.scenarioId, dto.networkId, dto.scenarioName);
+                    var cloneResult = UnitOfWork.SimulationRepo.CloneSimulation(simulationId);
                     UnitOfWork.Commit();
                     return cloneResult;
                 });

@@ -1,4 +1,4 @@
-import {CloneScenarioData, emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+import {emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
@@ -117,13 +117,7 @@ const actions = {
             });
     },
     async cloneScenario({dispatch, commit}: any, payload: any) {
-        let cloneScenarioData: CloneScenarioData = {
-            scenarioId: payload.scenarioId,
-            networkId: payload.networkId,
-            scenarioName: payload.scenarioName
-        }
-
-        return await ScenarioService.cloneScenario(cloneScenarioData)
+        return await ScenarioService.cloneScenario(payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('createdScenarioMutator', response.data as Scenario);

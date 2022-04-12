@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         SimulationDTO GetSimulation(Guid simulationId);
 
-        SimulationCloningResultDTO CloneSimulation(Guid simulationId, Guid networkId, string simulationName);
+        SimulationCloningResultDTO CloneSimulation(Guid simulationId);
 
         void UpdateSimulation(SimulationDTO dto);
 

@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {CloneScenarioData, Scenario} from '@/shared/models/iAM/scenario';
+import {Scenario} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 
 export default class ScenarioService {
@@ -15,8 +15,8 @@ export default class ScenarioService {
         return coreAxiosInstance.put(`${API.Scenario}/UpdateScenario`, data);
     }
 
-    static cloneScenario(data: CloneScenarioData): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Scenario}/CloneScenario/`, data);
+    static cloneScenario(scenarioId: number): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/CloneScenario/${scenarioId}`);
     }
 
     static deleteScenario(scenarioId: number): AxiosPromise {

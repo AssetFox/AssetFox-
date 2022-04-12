@@ -21,11 +21,15 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class TreatmentController : BridgeCareCoreBaseController
     {
+        private readonly ITreatmentService _treatmentService;
         private readonly IReadOnlyDictionary<string, ScenarioTreatmentUpsertMethod> _scenarioTreatmentUpsertMethods;
 
-        public TreatmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+            _treatmentService = treatmentService;
             _scenarioTreatmentUpsertMethods = CreateScenarioUpsertMethods();
+        }
 
         private Dictionary<string, ScenarioTreatmentUpsertMethod> CreateScenarioUpsertMethods()
         {
@@ -109,6 +113,28 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("ExportScenarioTreatmentsExcelFile/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportScenarioTreatmentsExcelFile(Guid libraryId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _treatmentService.GenerateExcelFile(libraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }

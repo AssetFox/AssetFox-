@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using MaintainableAsset = AppliedResearchAssociates.iAM.DataAssignment.Networking.MaintainableAsset;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -13,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
         Explorer GetExplorer();
+
+        List<Guid> GetAttributeIdsInNetwork(Guid networkId);
 
         Task<List<AttributeDTO>> Attributes();
 

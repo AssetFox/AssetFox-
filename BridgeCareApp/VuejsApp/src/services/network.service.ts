@@ -11,6 +11,10 @@ export default class NetworkService {
         return coreAxiosInstance.post(`${API.Network}/CreateNetwork/${networkName}`);
     }
 
+    static getCompatibleNetworks(networkId: any): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Network}/GetCompatibleNetworks/${networkId}`)
+    }
+
     static upsertBenefitQuantifier(data: BenefitQuantifier): AxiosPromise {
         return coreAxiosInstance.post(`${API.Network}/UpsertBenefitQuantifier`, data);
     }

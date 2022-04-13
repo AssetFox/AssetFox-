@@ -28,26 +28,27 @@ namespace BridgeCareCore.Services
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();
             var warningSb = new StringBuilder();
-
-            CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
-
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             var performanceCurveLibraryDto = performanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
-            var existingPerformanceCurves = performanceCurveLibraryDto.PerformanceCurves;
-            // Update ids if curves exists
-            foreach (var performanceCurveToImport in performanceCurvesToImport)
-            {
-                var existingCurve = existingPerformanceCurves.FirstOrDefault(_ => _.Name == performanceCurveToImport.Name);
-                performanceCurveToImport.Id = existingCurve != null ? existingCurve.Id : performanceCurveToImport.Id;
-            }
-
-            var curvesNamesToImport = performanceCurvesToImport.Select(_ => _.Name);
-            existingPerformanceCurves.RemoveAll(_ => curvesNamesToImport.Contains(_.Name));
-            // Combine curves to be imported
-            performanceCurvesToImport.AddRange(existingPerformanceCurves);
-            performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
             try
             {
+                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
+
+                #region Commented update of existing and keeping existing curves
+                //var existingPerformanceCurves = performanceCurveLibraryDto.PerformanceCurves;
+                //// Update ids if curves exists
+                //foreach (var performanceCurveToImport in performanceCurvesToImport)
+                //{
+                //    var existingCurve = existingPerformanceCurves.FirstOrDefault(_ => _.Name == performanceCurveToImport.Name);
+                //    performanceCurveToImport.Id = existingCurve != null ? existingCurve.Id : performanceCurveToImport.Id;
+                //}
+                //var curvesNamesToImport = performanceCurvesToImport.Select(_ => _.Name);
+                //existingPerformanceCurves.RemoveAll(_ => curvesNamesToImport.Contains(_.Name));
+                //// Combine curves to be imported
+                //performanceCurvesToImport.AddRange(existingPerformanceCurves);
+                #endregion
+
+                performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
                 performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurvesToImport, performanceCurveLibraryId);
             }
             catch (Exception ex)
@@ -65,7 +66,7 @@ namespace BridgeCareCore.Services
                     ? warningSb.ToString()
                     : null
             };
-        }        
+        }
 
         public ScenarioPerformanceCurvesImportResultDTO ImportScenarioPerformanceCurvesFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter)
         {
@@ -73,23 +74,25 @@ namespace BridgeCareCore.Services
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();
             var warningSb = new StringBuilder();
-
-            CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
-            var existingPerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            // Update ids if curves exists
-            foreach (var performanceCurveToImport in performanceCurvesToImport)
-            {
-                var existingCurve = existingPerformanceCurves.FirstOrDefault(_ => _.Name == performanceCurveToImport.Name);
-                performanceCurveToImport.Id = existingCurve != null ? existingCurve.Id : performanceCurveToImport.Id;
-            }
-
-            var curvesNamesToImport = performanceCurvesToImport.Select(_ => _.Name);
-            existingPerformanceCurves.RemoveAll(_ => curvesNamesToImport.Contains(_.Name));
-            // Combine curves to be imported
-            performanceCurvesToImport.AddRange(existingPerformanceCurves);            
             try
             {
+                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
+
+                #region Commented update of existing and keeping existing curves
+                //var existingPerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+                //// Update ids if curves exists
+                //foreach (var performanceCurveToImport in performanceCurvesToImport)
+                //{
+                //    var existingCurve = existingPerformanceCurves.FirstOrDefault(_ => _.Name == performanceCurveToImport.Name);
+                //    performanceCurveToImport.Id = existingCurve != null ? existingCurve.Id : performanceCurveToImport.Id;
+                //}
+                //var curvesNamesToImport = performanceCurvesToImport.Select(_ => _.Name);
+                //existingPerformanceCurves.RemoveAll(_ => curvesNamesToImport.Contains(_.Name));
+                //// Combine curves to be imported
+                //performanceCurvesToImport.AddRange(existingPerformanceCurves);
+                #endregion
+
                 performanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurvesToImport, simulationId);
             }
             catch (Exception ex)

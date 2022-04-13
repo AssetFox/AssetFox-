@@ -229,8 +229,7 @@ namespace BridgeCareCore.Controllers
                 var currentUserCriteriaFilter = new UserCriteriaDTO
                 {
                     HasCriteria = false
-                };
-                // TODO: Is below needed here?
+                };                
                 if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
                 {
                     currentUserCriteriaFilter =
@@ -284,7 +283,6 @@ namespace BridgeCareCore.Controllers
                 {
                     HasCriteria = false
                 };
-                // TODO: Is below needed here?
                 if (ContextAccessor.HttpContext.Request.Form.ContainsKey("currentUserCriteriaFilter"))
                 {
                     currentUserCriteriaFilter =

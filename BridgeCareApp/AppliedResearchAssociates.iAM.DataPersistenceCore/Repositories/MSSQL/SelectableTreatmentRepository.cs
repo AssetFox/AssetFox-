@@ -161,6 +161,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList().ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
 
+        public TreatmentLibraryDTO GetTreatmentLibary(Guid libraryId)
+        {
+            var entity = _unitOfWork.Context.TreatmentLibrary.AsNoTracking()
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .SingleOrDefault(_ => _.Id == libraryId);
+            var r = entity == null
+                ? null : entity.ToDto();
+            return r;
+        } 
+
+        
+
         public List<TreatmentLibraryDTO> GetTreatmentLibraries()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())

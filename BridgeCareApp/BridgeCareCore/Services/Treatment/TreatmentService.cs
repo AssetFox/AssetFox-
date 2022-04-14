@@ -1,7 +1,10 @@
 ﻿using System;
+using System.IO;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services.Treatment;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
 {
@@ -21,11 +24,17 @@ namespace BridgeCareCore.Services
             var found = library != null;
             var dummyName = $"Dummy treatments export";
             var filename = found ? dummyName : $"{dummyName} (library not found)";
+            var fileInfo = new FileInfo(filename);
+            var package = new ExcelPackage(fileInfo);
+            var workbook = package.Workbook;
+            TreatmentWorksheetGenerator.Fill(workbook, library);
+            var bytes = package.GetAsByteArray();
+            var fileData = Convert.ToBase64String(bytes);
             var r = new FileInfoDTO
             {
-                FileData = libraryId.ToString(),
-                MimeType = "text",
+                FileData = fileData,
                 FileName = filename,
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             };
             return r;
         }

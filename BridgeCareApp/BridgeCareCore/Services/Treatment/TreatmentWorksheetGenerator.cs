@@ -1,20 +1,20 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
+﻿using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Services.SummaryReport.Visitors;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment
 {
     public static class TreatmentWorksheetGenerator
     {
-        public static ExcelWorksheetModel ExportModelForTreatment(TreatmentDTO treatment)
+        public static void Fill(ExcelWorkbook workbook, TreatmentLibraryDTO dto)
         {
-            var tabName = treatment.Name;
-            var rows = TreatmentGeneralSectionGenerator.GeneralSectionRows(treatment);
-            var r = new ExcelWorksheetModel
+            foreach (var treatment in dto.Treatments)
             {
-                TabName = tabName,
-                Content = rows,
-            };
-            return r;
+                var worksheetModel = ExcelTreatmentModels.TreatmentWorksheet(treatment);
+                ExcelWorksheetAdder.AddWorksheet(workbook, worksheetModel);
+            }
         }
     }
 }

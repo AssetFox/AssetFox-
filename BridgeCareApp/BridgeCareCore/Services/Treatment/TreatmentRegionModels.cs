@@ -12,6 +12,11 @@ namespace BridgeCareCore.Services.Treatment
             {
                 TreatmentRowModels.TreatmentNameRow(dto),
                 TreatmentRowModels.CriteriaRow(dto),
+                TreatmentRowModels.CategoryRow(dto),
+                TreatmentRowModels.AssetTypeRow(dto),
+                TreatmentRowModels.YearsBeforeAnyRow(dto),
+                TreatmentRowModels.YearsBeforeSameRow(dto),
+                TreatmentRowModels.TreatmentDescriptionRow(dto),
             };
             return RowBasedExcelRegionModels.WithRows(rows);
         }

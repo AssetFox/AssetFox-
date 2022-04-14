@@ -11,6 +11,7 @@ namespace BridgeCareCore.Services.Treatment
             var rows = new List<ExcelRowModel>
             {
                 TreatmentRowModels.TreatmentNameRow(dto),
+                TreatmentRowModels.CriteriaRow(dto),
             };
             return RowBasedExcelRegionModels.WithRows(rows);
         }

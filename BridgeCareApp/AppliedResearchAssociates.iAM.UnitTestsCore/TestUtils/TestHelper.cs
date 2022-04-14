@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Hubs;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
@@ -36,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IEsecSecurity> MockEsecSecurityAuthorized { get; }
         public Mock<IEsecSecurity> MockEsecSecurityNotAuthorized { get; }
-
+        public Mock<ITreatmentService> MockTreatmentService { get; }
         public ILog Logger { get; }
 
         public Mock<HubService> MockHubService { get; }
@@ -52,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
-
+            MockTreatmentService = new Mock<ITreatmentService>();
             MockEsecSecurityAuthorized = new Mock<IEsecSecurity>();
             MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo

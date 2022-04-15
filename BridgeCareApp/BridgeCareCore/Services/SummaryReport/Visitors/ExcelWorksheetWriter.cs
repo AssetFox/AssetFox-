@@ -28,6 +28,14 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             return worksheet;
         }
 
+        public ExcelWorksheet Visit(SpecifiedColumnWidthExcelWorksheetModel model, ExcelWorksheet worksheet)
+        {
+            var column = worksheet.Column(model.ColumnNumber);
+            var newWidth = model.Width;
+            column.Width = newWidth;
+            return worksheet;
+        }
+
         public static ExcelWorksheet VisitList(ExcelWorksheet worksheet, List<IExcelWorksheetContentModel> contents)
         {
             var writer = new ExcelWorksheetWriter();

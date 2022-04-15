@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
 
 namespace BridgeCareCore.Services.Treatment
 {
@@ -33,7 +34,13 @@ namespace BridgeCareCore.Services.Treatment
             var content = TreatmentContent(dto);
             var r = new ExcelWorksheetModel
             {
-                Content = new List<IExcelWorksheetContentModel> { content },
+                Content = new List<IExcelWorksheetContentModel> {
+                    content,
+                    ExcelWorksheetContentModels.ColumnWidth(1, 32.27),
+                    ExcelWorksheetContentModels.ColumnWidth(2, 30.4),
+                    ExcelWorksheetContentModels.ColumnWidth(3, 32.53),
+                    ExcelWorksheetContentModels.ColumnWidth(4, 23.4),
+                },
                 TabName = tabName,
             };
             return r;

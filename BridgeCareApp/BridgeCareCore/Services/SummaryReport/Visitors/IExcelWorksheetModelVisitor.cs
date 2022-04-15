@@ -11,5 +11,6 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         TOutput Visit(AnchoredExcelRegionModel model, THelper helper);
         TOutput Visit(AutoFitColumnsExcelWorksheetContentModel model, THelper helper);
         TOutput Visit(SpecificColumnWidthChangeExcelWorksheetModel model, THelper helper);
+        TOutput Visit(SpecifiedColumnWidthExcelWorksheetModel model, THelper helper);
     }
 }

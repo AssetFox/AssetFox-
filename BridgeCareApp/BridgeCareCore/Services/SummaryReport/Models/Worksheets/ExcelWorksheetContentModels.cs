@@ -18,5 +18,15 @@ namespace BridgeCareCore.Services.SummaryReport.Models.Worksheets
                 ColumnNumber = columnNumber,
                 WidthChange = columnWidthChange,
             };
+
+        internal static IExcelWorksheetContentModel ColumnWidth(int oneBasedColumnIndex, double width)
+        {
+            var r = new SpecifiedColumnWidthExcelWorksheetModel
+            {
+                ColumnNumber = oneBasedColumnIndex,
+                Width = width,
+            };
+            return r;
+        }
     }
 }

@@ -30,17 +30,19 @@
                           <div>
                             <v-list>
                               <template>
-                                <v-subheader>Attributes: Click to add</v-subheader>
+                                <v-subheader class="equation-list-subheader">Attributes: Click to add</v-subheader>
                                 <div class="attributes-list-container">
-                                  <v-list-tile :key="attribute"
-                                               @click="onAddValueToExpression(`[${attribute}]`)" class="list-tile"
-                                               ripple
-                                               v-for="attribute in attributesList">
-                                    <v-list-tile-content>
-                                      <v-list-tile-title>{{ attribute }}
-                                      </v-list-tile-title>
-                                    </v-list-tile-content>
-                                  </v-list-tile>
+                                  <template v-for="(attribute, index) in attributesList">
+                                    <v-list-tile :key="attribute"
+                                                @click="onAddValueToExpression(`[${attribute}]`)" class="list-tile"
+                                                ripple>
+                                      <v-list-tile-content>
+                                        <v-list-tile-title>{{ attribute }}
+                                        </v-list-tile-title>
+                                      </v-list-tile-content>
+                                    </v-list-tile>
+                                     <v-divider v-if="index + 1 < attributesList.length" :key="`divider-${index}`"></v-divider>
+                                  </template>
                                 </div>
                               </template>
                             </v-list>
@@ -48,17 +50,20 @@
                           <div>
                             <v-list>
                               <template>
-                                <v-subheader>Formulas: Click to add</v-subheader>
+                                <v-subheader class="equation-list-subheader">Formulas: Click to add</v-subheader>
                                 <div class="formulas-list-container">
-                                  <v-list-tile :key="formula"
-                                               @click="onAddFormulaToEquation(formula)" class="list-tile"
-                                               ripple
-                                               v-for="formula in formulasList">
-                                    <v-list-tile-content>
-                                      <v-list-tile-title>{{ formula }}
-                                      </v-list-tile-title>
-                                    </v-list-tile-content>
-                                  </v-list-tile>
+                                  <template v-for="(formula, index) in formulasList">
+                                    <v-list-tile :key="formula"
+                                                @click="onAddFormulaToEquation(formula)" class="list-tile"
+                                                ripple
+                                                >
+                                      <v-list-tile-content>
+                                        <v-list-tile-title>{{ formula }}
+                                        </v-list-tile-title>
+                                      </v-list-tile-content>
+                                    </v-list-tile>
+                                    <v-divider v-if="index + 1 < formulasList.length" :key="`divider-${index}`"></v-divider>
+                                  </template>
                                 </div>
                               </template>
                             </v-list>
@@ -1051,9 +1056,11 @@ export default class EquationEditorDialog extends Vue {
 }
 
 .attributes-list-container, .formulas-list-container {
-  width: 205px;
+  width: 425px;
   height: 250px;
   overflow: auto;
+  border: thin solid rgba(0,0,0,.12);
+  border-radius: 5px;
 }
 
 .list-tile {
@@ -1121,6 +1128,8 @@ export default class EquationEditorDialog extends Vue {
   border-top: thin solid rgba(0,0,0,.12) ;
   border-left: thin solid rgba(0,0,0,.12);
   border-right: thin solid rgba(0,0,0,.12);
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 }
 
 .v-tabs__item{
@@ -1131,4 +1140,16 @@ export default class EquationEditorDialog extends Vue {
   color: lightgray !important;
 }
 
+.equation-list-subheader{
+  padding-left: 0;
+  padding-top: 25px;
+}
+
+.attributes-list-container .v-divider, .formulas-list-container .v-divider{
+  width: 90%;
+  position: relative;
+  left: 5%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
 </style>

@@ -20,7 +20,9 @@ namespace BridgeCareCore.Services.Treatment
             var r = RowBasedExcelRegionModels.Concat(
                 TreatmentDetailsRegion.DetailsRegion(dto),
                 RowBasedExcelRegionModels.BlankLine,
-                TreatmentCostsRegion.CostsRegion(dto)
+                TreatmentCostsRegion.CostsRegion(dto),
+                RowBasedExcelRegionModels.BlankLine,
+                TreatmentConsequencesRegion.ConsequencesRegion(dto)
                 );
             return r;
         }

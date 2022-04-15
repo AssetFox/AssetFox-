@@ -24,7 +24,7 @@ namespace BridgeCareCore.Services.Treatment
 
         public static ExcelRowModel TitleThenContent(string title, string content)
         {
-            var firstCell = ExcelValueModels.RichString(title, true);
+            var firstCell = StackedExcelModels.BoldText(title);
             var nameCell = ExcelValueModels.String(content);
             return ExcelRowModels.WithEntries(firstCell, nameCell);
         }

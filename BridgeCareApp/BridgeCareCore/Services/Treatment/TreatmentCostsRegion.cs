@@ -40,8 +40,8 @@ namespace BridgeCareCore.Services.Treatment
         }
         private static ExcelRowModel CostsHeaderRow()
         {
-            var equationCell = ExcelValueModels.RichString("Equation", true);
-            var criteriaCell = ExcelValueModels.RichString("Criteria", true);
+            var equationCell = StackedExcelModels.BoldText("Equation");
+            var criteriaCell = StackedExcelModels.BoldText("Criteria");
             var r = ExcelRowModels.WithEntries(equationCell, criteriaCell);
             return r;
         }

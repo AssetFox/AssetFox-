@@ -90,6 +90,12 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             return Unit.Default;
         }
 
+        public Unit Visit(ExcelFontSizeModel model, ExcelRange cells)
+        {
+            cells.Style.Font.Size = model.FontSize;
+            return Unit.Default;
+        }
+
         public Unit Visit(ExcelNumberFormatModel model, ExcelRange cells)
         {
             cells.Style.Numberformat.Format = model.Format;
@@ -100,6 +106,10 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         {
             var richText = cells.RichText.Add(model.Text);
             richText.Bold = model.Bold;
+            if (model.FontSize.HasValue)
+            {
+                richText.Size = model.FontSize.Value;
+            }
             return Unit.Default;
         }
 

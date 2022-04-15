@@ -105,6 +105,12 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 Color = color,
             };
 
+        public static ExcelFontSizeModel FontSize(float fontSize)
+            => new ExcelFontSizeModel
+            {
+                FontSize = fontSize,
+            };
+
         public static ExcelFontColorModel WhiteText
             => FontColor(Color.White);
 

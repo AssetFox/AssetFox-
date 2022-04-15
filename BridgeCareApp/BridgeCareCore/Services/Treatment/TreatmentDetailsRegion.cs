@@ -21,16 +21,27 @@ namespace BridgeCareCore.Services.Treatment
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 
+        public static ExcelRowModel SizedTitleThenContent(string title, string content, int fontSize)
+        {
+            var firstCell = StackedExcelModels.Stacked(
+                StackedExcelModels.BoldText(title),
+                ExcelStyleModels.FontSize(fontSize));
+            var nameCell = StackedExcelModels.Stacked(
+                ExcelValueModels.String(content),
+                ExcelStyleModels.FontSize(fontSize));
+            return ExcelRowModels.WithEntries(firstCell, nameCell);
+        }
 
         public static ExcelRowModel TitleThenContent(string title, string content)
         {
-            var firstCell = StackedExcelModels.BoldText(title);
+            var firstCell = ExcelValueModels.RichString(title, true);
             var nameCell = ExcelValueModels.String(content);
             return ExcelRowModels.WithEntries(firstCell, nameCell);
         }
+
         public static ExcelRowModel TreatmentNameRow(TreatmentDTO dto)
         {
-            return TitleThenContent(TreatmentExportStringConstants.TreatmentName, dto.Name);
+            return SizedTitleThenContent(TreatmentExportStringConstants.TreatmentName, dto.Name, 18);
         }
 
         public static ExcelRowModel CriteriaRow(TreatmentDTO dto)
@@ -56,6 +67,7 @@ namespace BridgeCareCore.Services.Treatment
             var yearsBeforeAny = dto.ShadowForAnyTreatment.ToString();
             return TitleThenContent(TreatmentExportStringConstants.YearsBeforeAny, yearsBeforeAny);
         }
+
         public static ExcelRowModel YearsBeforeSameRow(TreatmentDTO dto)
         {
             var yearsBeforeSame = dto.ShadowForSameTreatment.ToString();

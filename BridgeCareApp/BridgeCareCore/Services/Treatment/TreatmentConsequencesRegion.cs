@@ -38,7 +38,7 @@ namespace BridgeCareCore.Services.Treatment
 
         private static ExcelRowModel ConsequencesTitleRow()
         {
-            var cell = StackedExcelModels.BoldText("Consequences");
+            var cell = ExcelValueModels.RichString("Consequences", true, 14);
             var r = ExcelRowModels.WithEntries(cell);
             return r;
         }

@@ -34,7 +34,7 @@ namespace BridgeCareCore.Services.Treatment
 
         private static ExcelRowModel CostsTitleRow()
         {
-            var cell = ExcelValueModels.RichString("Costs", true);
+            var cell = ExcelValueModels.RichString("Costs", true, 14);
             var r = ExcelRowModels.WithEntries(cell);
             return r;
         }

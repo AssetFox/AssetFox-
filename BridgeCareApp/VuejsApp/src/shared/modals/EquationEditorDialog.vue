@@ -1106,4 +1106,29 @@ export default class EquationEditorDialog extends Vue {
 .edit-data-point-span {
   cursor: pointer;
 }
+
+/* This is to change how tabbing looks -BCT */
+.v-tabs__slider-wrapper{
+  opacity: 0;
+}
+
+.v-tabs__container{
+  border-bottom: thin solid rgba(0,0,0,.12);
+}
+
+.v-tabs__div .v-tabs__item--active{
+  background: white ;
+  border-top: thin solid rgba(0,0,0,.12) ;
+  border-left: thin solid rgba(0,0,0,.12);
+  border-right: thin solid rgba(0,0,0,.12);
+}
+
+.v-tabs__item{
+  color: black !important;
+}
+
+.v-tabs__item--active{
+  color: lightgray !important;
+}
+
 </style>

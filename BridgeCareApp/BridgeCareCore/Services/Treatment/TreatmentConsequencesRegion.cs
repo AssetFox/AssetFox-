@@ -38,16 +38,16 @@ namespace BridgeCareCore.Services.Treatment
 
         private static ExcelRowModel ConsequencesTitleRow()
         {
-            var cell = ExcelValueModels.RichString("Consequences", true, 14);
+            var cell = ExcelValueModels.RichString(TreatmentExportStringConstants.Consequences, true, 14);
             var r = ExcelRowModels.WithEntries(cell);
             return r;
         }
         private static ExcelRowModel ConsequencesHeaderRow()
         {
-            var attributeCell = StackedExcelModels.BoldText("Attribute");
-            var changeValueCell = StackedExcelModels.BoldText("ChangeVal");
-            var equationCell = StackedExcelModels.BoldText("Equation");
-            var criteriaCell = StackedExcelModels.BoldText("Criteria");
+            var attributeCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Attribute);
+            var changeValueCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ChangeVal);
+            var equationCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Equation);
+            var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Criteria);
             var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
             r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;

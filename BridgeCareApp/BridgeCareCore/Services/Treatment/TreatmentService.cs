@@ -22,25 +22,29 @@ namespace BridgeCareCore.Services
         {
             var library = _unitOfWork.SelectableTreatmentRepo.GetTreatmentLibary(libraryId);
             var found = library != null;
-            var dummyName = $"Dummy treatments export";
-            var filename = found ? dummyName : $"{dummyName} (library not found)";
-            var fileInfo = new FileInfo(filename);
-            using var package = new ExcelPackage(fileInfo);
-            var workbook = package.Workbook;
-            TreatmentWorksheetGenerator.Fill(workbook, library);
-            var bytes = package.GetAsByteArray();
-            var fileData = Convert.ToBase64String(bytes);
-            var r = new FileInfoDTO
-            {
-                FileData = fileData,
-                FileName = filename,
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            };
-            var hackFolder = @"C:\Users\WilliamJockusch\Desktop";
-            var filePath = Path.Combine(hackFolder, filename);
-            var filePathWithExtension = Path.ChangeExtension(filePath, ".xlsx");
-            File.WriteAllBytes(filePathWithExtension, bytes);
-            return r;
+            if (found) {
+                var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
+                var filename = $"Export treatment library {library.Name} {dateString}";
+                var fileInfo = new FileInfo(filename);
+                using var package = new ExcelPackage(fileInfo);
+                var workbook = package.Workbook;
+                TreatmentWorksheetGenerator.Fill(workbook, library);
+                var bytes = package.GetAsByteArray();
+                var fileData = Convert.ToBase64String(bytes);
+                var r = new FileInfoDTO
+                {
+                    FileData = fileData,
+                    FileName = filename,
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                };
+                var hackFolder = @"C:\Users\WilliamJockusch\Desktop";
+                var filePath = Path.Combine(hackFolder, filename);
+                var filePathWithExtension = Path.ChangeExtension(filePath, ".xlsx");
+                File.WriteAllBytes(filePathWithExtension, bytes);
+                return r;
+            } else { 
+                return null;
+            }
         }
     }
 }

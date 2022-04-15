@@ -80,6 +80,13 @@ namespace BridgeCareCore.Services.SummaryReport.Models
                 BorderStyle = ExcelBorderStyle.Medium,
             };
 
+        public static ExcelSingleBorderModel ThinBottomBorder()
+            => new()
+            {
+                BorderStyle = ExcelBorderStyle.Thin,
+                Edge = RectangleEdge.Bottom,
+            };
+
         public static ExcelHorizontalAlignmentModel HorizontalCenter
             => new ExcelHorizontalAlignmentModel
             {

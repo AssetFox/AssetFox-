@@ -49,6 +49,7 @@ namespace BridgeCareCore.Services.Treatment
             var equationCell = StackedExcelModels.BoldText("Equation");
             var criteriaCell = StackedExcelModels.BoldText("Criteria");
             var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
+            r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;
         }
     }

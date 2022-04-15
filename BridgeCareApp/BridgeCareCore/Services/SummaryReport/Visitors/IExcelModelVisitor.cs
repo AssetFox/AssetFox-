@@ -8,6 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
         TOutput Visit(ExcelMoneyValueModel model, THelper helper);
         TOutput Visit(ExcelFormulaModel model, THelper helper);
         TOutput Visit(ExcelBoldModel excelBoldModel, THelper helper);
+        TOutput Visit(ExcelSingleBorderModel excelSingleBorderModel, THelper helper);
         TOutput Visit(ExcelItalicModel excelItalicModel, THelper helper);
         TOutput Visit(ExcelIntegerValueModel model, THelper helper);
         TOutput Visit(ExcelNothingModel nothing, THelper helper);

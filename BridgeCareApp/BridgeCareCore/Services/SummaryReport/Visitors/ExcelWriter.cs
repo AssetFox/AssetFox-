@@ -65,6 +65,25 @@ namespace BridgeCareCore.Services.SummaryReport.Visitors
             cells.Style.Border.Left.Style = model.BorderStyle;
             return Unit.Default;
         }
+        public Unit Visit(ExcelSingleBorderModel model, ExcelRange cells)
+        {
+            switch(model.Edge)
+            {
+            case RectangleEdge.Top:
+                cells.Style.Border.Top.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Left:
+                cells.Style.Border.Left.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Right:
+                cells.Style.Border.Right.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Bottom:
+                cells.Style.Border.Bottom.Style = model.BorderStyle;
+                break;
+            }
+            return Unit.Default;
+        }
 
         public Unit Visit(ExcelHorizontalAlignmentModel model, ExcelRange cells)
         {

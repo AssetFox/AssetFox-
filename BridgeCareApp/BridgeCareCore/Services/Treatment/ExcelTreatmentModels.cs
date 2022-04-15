@@ -10,8 +10,18 @@ namespace BridgeCareCore.Services.Treatment
         {
             var r = new AnchoredExcelRegionModel
             {
-                Region = TreatmentRegionModels.GeneralRegion(dto),
+                Region = CombinedRegion(dto),
             };
+            return r;
+        }
+
+        public static RowBasedExcelRegionModel CombinedRegion(TreatmentDTO dto)
+        {
+            var r = RowBasedExcelRegionModels.Concat(
+                TreatmentDetailsRegion.DetailsRegion(dto),
+                RowBasedExcelRegionModels.BlankLine,
+                TreatmentCostsRegion.CostsRegion(dto)
+                );
             return r;
         }
 

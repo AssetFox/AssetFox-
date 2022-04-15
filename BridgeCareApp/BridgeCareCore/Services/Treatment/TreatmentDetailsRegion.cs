@@ -4,8 +4,24 @@ using BridgeCareCore.Services.SummaryReport.Models;
 
 namespace BridgeCareCore.Services.Treatment
 {
-    public static class TreatmentRowModels
+    public static class TreatmentDetailsRegion
     {
+        internal static RowBasedExcelRegionModel DetailsRegion(TreatmentDTO dto)
+        {
+            var rows = new List<ExcelRowModel>
+            {
+                TreatmentNameRow(dto),
+                CriteriaRow(dto),
+                CategoryRow(dto),
+                AssetTypeRow(dto),
+                YearsBeforeAnyRow(dto),
+                YearsBeforeSameRow(dto),
+                TreatmentDescriptionRow(dto),
+            };
+            return RowBasedExcelRegionModels.WithRows(rows);
+        }
+
+
         public static ExcelRowModel TitleThenContent(string title, string content)
         {
             var firstCell = ExcelValueModels.RichString(title, true);

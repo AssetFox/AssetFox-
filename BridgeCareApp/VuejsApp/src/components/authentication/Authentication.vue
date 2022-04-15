@@ -44,8 +44,8 @@
                 // The ESEC login will always redirect the browser to the iam-deploy site.
                 // If the state is set, we know the authentication was started by a local client,
                 // and so we should send the browser back to that client.
-                if (state === 'localhost8080') {
-                    window.location.href = `http://localhost:8080/Authentication/?code=${code}`;
+                if (state === 'localhost' + process.env.PORT) {
+                    window.location.href = `http://localhost:${process.env.PORT}/Authentication/?code=${code}`;
                     return;
                 }
 

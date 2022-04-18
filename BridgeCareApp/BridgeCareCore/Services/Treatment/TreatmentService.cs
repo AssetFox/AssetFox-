@@ -42,9 +42,16 @@ namespace BridgeCareCore.Services
                 var filePathWithExtension = Path.ChangeExtension(filePath, ".xlsx");
                 File.WriteAllBytes(filePathWithExtension, bytes);
                 return r;
-            } else { 
+            } else {
                 return null;
             }
+        }
+
+
+        public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
+            Guid treatmentLibraryId,
+            ExcelPackage excelPackage) {
+            return null;
         }
     }
 }

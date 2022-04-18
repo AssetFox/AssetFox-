@@ -218,7 +218,16 @@ namespace BridgeCareCore.Controllers
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                return Ok();
+
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
+                });
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.TreatmentLibrary);
             }
             catch (UnauthorizedAccessException)
             {

@@ -190,5 +190,14 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+
+        [HttpPost]
+        [Route("ImportLibraryTreatmentsFile")]
+        [Authorize]
+        public async Task<IActionResult> ImportLibraryTreatmentsFile()
+        {
+            return Ok();
+        }
     }
 }

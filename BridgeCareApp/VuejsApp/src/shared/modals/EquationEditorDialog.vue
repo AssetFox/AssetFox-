@@ -3,9 +3,14 @@
     <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
       <v-card class="equation-container-card">
         <v-card-title>
-          <v-layout justify-center>
-            <h3>Equation Editor</h3>
-          </v-layout>
+          <v-flex xs12>
+            <v-layout justify-space-between >
+              <h4 class="header-title">Equation Editor</h4>
+              <v-btn @click="onSubmit(false)" flat class="header-cancel">
+                <h4>X</h4>
+              </v-btn>
+            </v-layout>
+          </v-flex>
         </v-card-title>
         <v-card-text>
           <v-layout column>
@@ -74,27 +79,27 @@
                         <v-layout justify-center>
                           <div class="math-buttons-container">
                             <v-layout justify-space-between row>
-                              <v-btn @click="onAddValueToExpression('+')" class="math-button add" fab
+                              <v-btn @click="onAddValueToExpression('+')" class="math-button add circular-button" fab
                                      small>
                                 <span>+</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract" fab
+                              <v-btn @click="onAddValueToExpression('-')" class="math-button subtract circular-button" fab
                                      small>
                                 <span>-</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply" fab
+                              <v-btn @click="onAddValueToExpression('*')" class="math-button multiply circular-button" fab
                                      small>
                                 <span>*</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide" fab
+                              <v-btn @click="onAddValueToExpression('/')" class="math-button divide circular-button" fab
                                      small>
                                 <span>/</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses" fab
+                              <v-btn @click="onAddValueToExpression('(')" class="math-button parentheses circular-button" fab
                                      small>
                                 <span>(</span>
                               </v-btn>
-                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses" fab
+                              <v-btn @click="onAddValueToExpression(')')" class="math-button parentheses circular-button" fab
                                      small>
                                 <span>)</span>
                               </v-btn>
@@ -259,12 +264,14 @@
           <v-layout>
             <v-flex xs12>
               <div>
-                <v-layout justify-space-between row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" class="ara-blue-bg white--text">Check</v-btn>
+                 <v-layout justify-center row>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="check-eq">Check Equation</v-btn>
+                </v-layout>
+                <v-layout justify-center row>
+                  <v-btn @click="onSubmit(false)" outline>Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
                          class="ara-blue-bg white--text">Save
-                  </v-btn>
-                  <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+                  </v-btn>                  
                 </v-layout>
               </div>
             </v-flex>
@@ -1141,8 +1148,8 @@ export default class EquationEditorDialog extends Vue {
 }
 
 .equation-list-subheader{
-  padding-left: 0;
-  padding-top: 25px;
+  padding-left: 0 !important;
+  padding-top: 25px !important;
 }
 
 .attributes-list-container .v-divider, .formulas-list-container .v-divider{
@@ -1151,5 +1158,24 @@ export default class EquationEditorDialog extends Vue {
   left: 5%;
   margin-top: 5px;
   margin-bottom: 5px;
+}
+
+.circular-button{
+  border-radius: 50% !important;
+  height: 30px !important;
+  width: 30px !important;
+  font-size: 1.25em !important;
+}
+
+.header-cancel{
+  padding-top: 8px;
+}
+
+.header-title{
+  padding-top: 12px;
+}
+
+.check-eq{
+  margin-bottom: 5px !important;
 }
 </style>

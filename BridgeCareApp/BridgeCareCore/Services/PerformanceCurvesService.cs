@@ -5,6 +5,7 @@ using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models.Validation;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
@@ -27,12 +28,13 @@ namespace BridgeCareCore.Services
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();
+            var performanceCurvesWithInvalidEquation = new List<string>();
             var warningSb = new StringBuilder();
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             var performanceCurveLibraryDto = performanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
             try
             {
-                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
+                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesWithInvalidEquation, performanceCurvesToImport);
 
                 #region Commented update of existing and keeping existing curves
                 //var existingPerformanceCurves = performanceCurveLibraryDto.PerformanceCurves;
@@ -58,7 +60,8 @@ namespace BridgeCareCore.Services
 
             UpdateWarningForMissingAttributes(performanceCurvesWithMissingAttributes, warningSb);
             UpdateWarningForInvalidCriteria(performanceCurvesWithInvalidCriteria, warningSb);
-
+            UpdateWarningForInvalidEquation(performanceCurvesWithInvalidEquation, warningSb);
+            
             return new PerformanceCurvesImportResultDTO
             {
                 PerformanceCurveLibraryDTO = new PerformanceCurveLibraryDTO { Id = performanceCurveLibraryId, Name = performanceCurveLibraryDto.Name, PerformanceCurves = performanceCurveRepo.GetPerformanceCurvesForLibrary(performanceCurveLibraryId) },
@@ -73,11 +76,12 @@ namespace BridgeCareCore.Services
             var performanceCurvesToImport = new List<PerformanceCurveDTO>();
             var performanceCurvesWithMissingAttributes = new List<string>();
             var performanceCurvesWithInvalidCriteria = new List<string>();
+            var performanceCurvesWithInvalidEquation = new List<string>();
             var warningSb = new StringBuilder();
             var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
             try
             {
-                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesToImport);
+                CreatePerformanceCurvesDtos(excelPackage, currentUserCriteriaFilter, performanceCurvesWithMissingAttributes, performanceCurvesWithInvalidCriteria, performanceCurvesWithInvalidEquation, performanceCurvesToImport);
 
                 #region Commented update of existing and keeping existing curves
                 //var existingPerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -102,6 +106,7 @@ namespace BridgeCareCore.Services
 
             UpdateWarningForMissingAttributes(performanceCurvesWithMissingAttributes, warningSb);
             UpdateWarningForInvalidCriteria(performanceCurvesWithInvalidCriteria, warningSb);
+            UpdateWarningForInvalidEquation(performanceCurvesWithInvalidEquation, warningSb);
 
             return new ScenarioPerformanceCurvesImportResultDTO
             {
@@ -110,6 +115,14 @@ namespace BridgeCareCore.Services
                     ? warningSb.ToString()
                     : null
             };
+        }
+
+        private static void UpdateWarningForInvalidEquation(List<string> performanceCurvesWithInvalidEquation, StringBuilder warningSb)
+        {
+            if (performanceCurvesWithInvalidEquation.Any())
+            {
+                warningSb.Append($"The following performace curves are imported without equation due to invalid values: {string.Join(", ", performanceCurvesWithInvalidEquation)}");
+            }
         }
 
         private static void UpdateWarningForInvalidCriteria(List<string> performanceCurvesWithInvalidCriteria, StringBuilder warningSb)
@@ -129,7 +142,7 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private void CreatePerformanceCurvesDtos(ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, List<string> performanceCurvesWithMissingAttributes, List<string> performanceCurvesWithInvalidCriteria, List<PerformanceCurveDTO> performanceCurvesToImport)
+        private void CreatePerformanceCurvesDtos(ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter, List<string> performanceCurvesWithMissingAttributes, List<string> performanceCurvesWithInvalidCriteria, List<string> performanceCurvesWithInvalidEquation, List<PerformanceCurveDTO> performanceCurvesToImport)
         {
             var performanceCurvesWorksheet = excelPackage.Workbook.Worksheets[0];
             var worksheetStart = performanceCurvesWorksheet.Dimension.Start;
@@ -148,6 +161,7 @@ namespace BridgeCareCore.Services
                 var criterionExpression = performanceCurvesWorksheet.GetValue<string>(dataRow, startColumn++);
                 if (!string.IsNullOrEmpty(criterionExpression))
                 {
+                    // Validate criterion
                     var validationResult = _expressionValidationService.ValidateCriterionWithoutResults(criterionExpression, currentUserCriteriaFilter);
                     if (!validationResult.IsValid)
                     {
@@ -159,6 +173,15 @@ namespace BridgeCareCore.Services
                 {
                     performanceCurvesWithMissingAttributes.Add(performanceEquationName);
                     continue;
+                }
+
+                // Validate equation
+                var isPiecewise = !string.IsNullOrEmpty(equationExpression) && equationExpression.Contains(")(");
+                var validateEquationResult = _expressionValidationService.ValidateEquation(new EquationValidationParameters { Expression = equationExpression, IsPiecewise = isPiecewise });
+                if (!validateEquationResult.IsValid)
+                {
+                    performanceCurvesWithInvalidEquation.Add(performanceEquationName + ": " + equationExpression);
+                    equationExpression   = null;
                 }
 
                 performanceCurvesToImport.Add(new PerformanceCurveDTO

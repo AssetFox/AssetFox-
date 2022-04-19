@@ -54,6 +54,7 @@
                                     :headers="scenarioGridHeaders"
                                     :items="userScenarios"
                                     :search="searchMine"
+                                    calculate-widths
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
@@ -103,6 +104,13 @@
                                                 props.item.owner
                                                     ? props.item.owner
                                                     : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.networkName
+                                                    ? props.item.networkName
+                                                    : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
@@ -260,6 +268,13 @@
                                                 props.item.owner
                                                     ? props.item.owner
                                                     : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.networkName
+                                                    ? props.item.networkName
+                                                    : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
@@ -501,6 +516,14 @@ export default class Scenarios extends Vue {
         {
             text: 'Owner',
             value: 'owner',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Network',
+            value: 'network',
             align: 'left',
             sortable: false,
             class: 'header-border',

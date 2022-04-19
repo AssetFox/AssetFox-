@@ -78,7 +78,7 @@
             // The 'state' query parameter that is sent to ESEC will be sent back to
             // the /Authentication page of the iam-deploy app.
             if (process.env.VUE_APP_IS_PRODUCTION !== 'true') {
-                href += '&state=localhost8080';
+                href += '&state=localhost' + process.env.PORT;
             }
 
             window.location.href = href;

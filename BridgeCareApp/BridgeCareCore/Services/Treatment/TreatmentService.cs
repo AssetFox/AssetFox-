@@ -6,8 +6,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.Treatment;
+using BridgeCareCore.Utils;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
@@ -26,7 +28,8 @@ namespace BridgeCareCore.Services
         {
             var library = _unitOfWork.SelectableTreatmentRepo.GetTreatmentLibary(libraryId);
             var found = library != null;
-            if (found) {
+            if (found)
+            {
                 var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
                 var filename = $"Export treatment library {library.Name} {dateString}";
                 var fileInfo = new FileInfo(filename);
@@ -46,7 +49,9 @@ namespace BridgeCareCore.Services
                 var filePathWithExtension = Path.ChangeExtension(filePath, ".xlsx");
                 File.WriteAllBytes(filePathWithExtension, bytes);
                 return r;
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }
@@ -55,7 +60,7 @@ namespace BridgeCareCore.Services
         {
             Dictionary<string, string> r = new Dictionary<string, string>();
             var costsRowIndex = 2;
-            while (costsRowIndex< 100 && worksheet.Cells[costsRowIndex, 1].Text.ToLower()!=TreatmentExportStringConstants.Costs.ToLower())
+            while (costsRowIndex < 100 && worksheet.Cells[costsRowIndex, 1].Text.ToLower() != TreatmentExportStringConstants.Costs.ToLower())
             {
                 costsRowIndex++;
             }
@@ -63,10 +68,10 @@ namespace BridgeCareCore.Services
             {
                 throw new Exception("Costs header cell not found!");
             }
-            for (int i=2; i<costsRowIndex; i++)
+            for (int i = 2; i < costsRowIndex; i++)
             {
-                var name = worksheet.Cells[costsRowIndex, 1].Text.ToLower();
-                var value = worksheet.Cells[costsRowIndex, 2].Text;
+                var name = worksheet.Cells[i, 1].Text.ToLower();
+                var value = worksheet.Cells[i, 2].Text;
                 r[name] = value;
             }
             return r;
@@ -83,28 +88,47 @@ namespace BridgeCareCore.Services
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
-            ExcelPackage excelPackage) {
+            ExcelPackage excelPackage)
+        {
             _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(t => t.TreatmentLibraryId == treatmentLibraryId);
-
+            var library = new TreatmentLibraryDTO
+            {
+                Treatments = new List<TreatmentDTO>()
+            };
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var worksheetName = worksheet.Name;
-                var dictionary = DetailsSectionAsDictionary(worksheet);
-                var description = dictionary.GetValueOrDefault(TreatmentExportStringConstants.TreatmentDescription.ToLowerInvariant());
-                var yearsBeforeSame = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeSame.ToLowerInvariant());
-                var yearsBeforeAny = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeAny.ToLowerInvariant());
-                var category = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Category.ToLowerInvariant());
-                var assetType = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
-                var newTreatment = new TreatmentDTO
-                {
-                    Name = worksheetName,
-                    Id = Guid.NewGuid(),
-                    Description = description,
-                    ShadowForAnyTreatment = ParseInt(yearsBeforeAny),
-                    ShadowForSameTreatment = ParseInt(yearsBeforeSame),
-                };
+                var newTreatment = CreateTreatmentDTO(worksheet);
+                library.Treatments.Add(newTreatment);
             }
             return null;
+        }
+
+        private TreatmentDTO CreateTreatmentDTO(ExcelWorksheet worksheet)
+        {
+            var worksheetName = worksheet.Name;
+            var dictionary = DetailsSectionAsDictionary(worksheet);
+            var description = dictionary.GetValueOrDefault(TreatmentExportStringConstants.TreatmentDescription.ToLowerInvariant());
+            var yearsBeforeSame = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeSame.ToLowerInvariant());
+            var yearsBeforeAny = dictionary.GetValueOrDefault(TreatmentExportStringConstants.YearsBeforeAny.ToLowerInvariant());
+            var categoryString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.Category.ToLowerInvariant());
+            var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentCategory>(categoryString);
+            var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
+            var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
+            var costs = new List<TreatmentCostDTO>();
+            var consequences = new List<TreatmentConsequenceDTO>();
+            var newTreatment = new TreatmentDTO
+            {
+                Name = worksheetName,
+                Id = Guid.NewGuid(),
+                Description = description,
+                Category = treatmentCategory,
+                AssetType = assetType,
+                ShadowForAnyTreatment = ParseInt(yearsBeforeAny),
+                ShadowForSameTreatment = ParseInt(yearsBeforeSame),
+                Costs = costs,
+                Consequences = consequences,
+            };
+            return newTreatment;
         }
     }
 }

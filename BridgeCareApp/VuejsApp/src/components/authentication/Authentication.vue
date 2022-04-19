@@ -77,7 +77,7 @@
     }
 
     onAuthenticationSuccess() {
-        this.$router.push('/Home/');
+        this.$router.push('/Scenarios/');
     }
 
     onAuthenticationFailure() {

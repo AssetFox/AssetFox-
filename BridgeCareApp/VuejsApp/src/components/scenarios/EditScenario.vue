@@ -25,10 +25,10 @@
                     </v-list-item-group>
                 </v-list>
                 <div style="margin: auto; width: 75%;">
-                    <v-btn @click="onShowRunSimulationAlert" depressed block>
+                    <v-btn class="ara-white-bg blue--text" @click="onShowRunSimulationAlert" depressed block>
                         Run Scenario
                     </v-btn>
-                    <v-btn @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                    <v-btn class="ara-white-bg blue--text" @click="showImportExportCommittedProjectsDialog = true" depressed block>
                         Committed Projects
                     </v-btn>
                 </div>

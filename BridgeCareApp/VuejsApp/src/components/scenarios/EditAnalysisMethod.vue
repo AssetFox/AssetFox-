@@ -1,10 +1,11 @@
 ﻿<template>
     <v-form ref="form" v-model="valid" lazy-validation>
         <v-layout column>
-            <v-flex xs12>
+            <v-flex xs6>
                 <v-layout column>
                     <v-layout justify-center>
                         <v-flex xs2>
+                            <v-subheader class="control-label">Weighting</v-subheader>
                             <v-select
                                 :items="weightingAttributes"
                                 @change="
@@ -13,7 +14,6 @@
                                         $event,
                                     )
                                 "
-                                label="Weighting"
                                 outline
                                 clearable
                                 :value="analysisMethod.attribute"
@@ -22,7 +22,8 @@
                             </v-select>
                         </v-flex>
                         <v-flex xs2>
-                            <v-select
+                            <v-subheader class="control-label">Optimization Strategy</v-subheader>
+                            <v-select class="vertcenter"
                                 :items="optimizationStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -30,7 +31,6 @@
                                         $event,
                                     )
                                 "
-                                label="Optimization Strategy"
                                 outline
                                 :value="analysisMethod.optimizationStrategy"
                                 :disabled="!isAdmin"
@@ -38,6 +38,7 @@
                             </v-select>
                         </v-flex>
                         <v-flex xs2>
+                            <v-subheader class="control-label">Spending Strategy</v-subheader>
                             <v-select
                                 :items="spendingStrategy"
                                 @change="
@@ -46,7 +47,6 @@
                                         $event,
                                     )
                                 "
-                                label="Spending Strategy"
                                 outline
                                 :value="analysisMethod.spendingStrategy"
                             >
@@ -55,31 +55,23 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />
-                        <v-flex xs2>
-                            <v-text-field
-                                v-model="networkName"
-                                label="Network name"
-                                outline
-                                disabled
-                            ></v-text-field>
-                        </v-flex>
-                        <v-flex xs2>
+                         <v-flex xs3>
+                            <v-subheader class="control-label">Benefit Attribute</v-subheader>
                             <v-select
                                 :items="benefitAttributes"
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
                                 "
-                                label="Benefit Attribute"
                                 outline
                                 :value="analysisMethod.benefit.attribute"
                                 :disabled="!isAdmin"
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
+                        <v-flex xs3>
+                            <v-subheader class="control-label">Benefit Limit</v-subheader>
                             <v-text-field
                                 @input="onSetBenefitProperty('limit', $event)"
-                                label="Benefit limit"
                                 outline
                                 type="number"
                                 min="0"
@@ -98,7 +90,8 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer></v-spacer>
-                        <v-flex xs6>
+                        <v-flex xs3>
+                            <v-subheader class="control-label">Description</v-subheader>
                             <v-textarea
                                 @input="
                                     onSetAnalysisMethodProperty(
@@ -106,7 +99,6 @@
                                         $event,
                                     )
                                 "
-                                label="Description"
                                 no-resize
                                 outline
                                 rows="5"
@@ -114,22 +106,8 @@
                             >
                             </v-textarea>
                         </v-flex>
-                        <v-spacer></v-spacer>
-                    </v-layout>
-                    <v-layout justify-center>
-                        <v-spacer></v-spacer>
-                        <v-flex xs6>
-                            <v-textarea
-                                label="Criteria"
-                                no-resize
-                                outline
-                                readonly
-                                rows="5"
-                                v-model="
-                                    analysisMethod.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                            >
+                        <v-flex xs3>
+                            <v-subheader class="control-label">
                                 <template slot="append-outer">
                                     <v-btn
                                         @click="
@@ -140,7 +118,18 @@
                                     >
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
-                                </template>
+                                </template>                               
+                                Criteria (NEEDS ICON)</v-subheader>
+                            <v-textarea
+                                no-resize
+                                outline
+                                readonly
+                                rows="5"
+                                v-model="
+                                    analysisMethod.criterionLibrary
+                                        .mergedCriteriaExpression
+                                "
+                            >
                             </v-textarea>
                         </v-flex>
                         <v-spacer></v-spacer>
@@ -148,18 +137,18 @@
                 </v-layout>
             </v-flex>
 
-            <v-flex xs12>
-                <v-layout justify-end row>
+            <v-flex xs6>
+                <v-layout justify-center row>
+                    <v-btn
+                        @click="onDiscardChanges"
+                        class="ara-white-bg blue--text"
+                        >Cancel</v-btn
+                    >
                     <v-btn
                         @click="onUpsertAnalysisMethod"
                         :disabled="!valid"
                         class="ara-blue-bg white--text"
                         >Save</v-btn
-                    >
-                    <v-btn
-                        @click="onDiscardChanges"
-                        class="ara-orange-bg white--text"
-                        >Discard Changes</v-btn
                     >
                 </v-layout>
             </v-flex>

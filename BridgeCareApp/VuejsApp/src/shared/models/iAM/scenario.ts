@@ -30,6 +30,7 @@ export interface ScenarioActions {
 export interface TabItems {
     name: string;
     icon: string;
+    count: number;
 }
 export const emptyScenario: Scenario = {
     id: getBlankGuid(),

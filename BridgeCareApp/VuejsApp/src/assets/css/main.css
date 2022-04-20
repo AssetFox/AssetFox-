@@ -6,15 +6,6 @@
     background-color: #fff;
 }
 
-.v-subheader.control-label {
-    height: 24px;
-    padding: 0px;
-}
-
-.v-select__selections.vertcenter {
-    padding-top: 0px;
-}
-
 .fixed-header {
     display: flex;
     flex-direction: column;
@@ -115,6 +106,90 @@
     color: #000000 !important;
 }
 
+
+
+.ghd-white-bg {
+    color: #FFFFFF !important;
+} 
+
+.ghd-white-bg {
+    background-color: #FFFFFF !important;
+} 
+
+.ghd-blue-bg {
+    background-color: #2A578D !important;
+}
+
+.ghd-white {
+    color: #FFFFFF !important;
+}
+
+.ghd-blue {
+    color: #2A578D !important;
+}
+
+.ghd-lt-gray {
+    color: #999999 !important;
+}
+
+.ghd-md-gray {
+    color: #666666 !important;
+}
+
+.ghd-dk-gray {
+    color: #333333 !important;
+}
+
+.ghd-control-label {
+    height: 22px !important;
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+}
+
+.ghd-control-border .v-input__slot {
+    border: 1px solid #999999 !important;
+    border-radius: 4px !important;    
+}
+
+.ghd-button-border {
+    border: 1px solid #99999980 !important;
+}
+
+.ghd-control-text {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    padding-top: 0px !important;
+}
+
+.ghd-control-text .v-select__selections {
+    padding-top: 0px !important;
+    vertical-align: middle !important;
+}
+
+.ghd-control-text .v-text-field--box input, .v-text-field--full-width input, .v-text-field--outline input
+{
+    margin-top: 11px !important;
+    vertical-align: middle !important;
+}
+
+.ghd-control-text .v-textarea.v-text-field--box .v-text-field__prefix, .v-textarea.v-text-field--enclosed .v-text-field__prefix, .v-textarea.v-text-field--box textarea, .v-textarea.v-text-field--enclosed textarea {
+    margin-top: 0px !important;
+}
+
+.ghd-button-text {
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
+
+
+
+
+
 .edit-icon, .plus-icon {
     color: forestgreen !important;
 }
@@ -145,7 +220,9 @@ table.v-table tbody td {
     display: block; 
     color:rgb(59, 57, 65);
   }
-  .v-btn{
+  
+  
+  .v-btn {
     border-radius: 6px !important;
   }
 

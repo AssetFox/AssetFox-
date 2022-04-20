@@ -8,7 +8,7 @@
             >
                 <v-list>
                     <v-list-item-group
-                        class="settings-list"
+                        class="settings-list ghd-white-bg ghd-lt-gray ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
@@ -25,16 +25,21 @@
                     </v-list-item-group>
                 </v-list>
                 <div style="margin: auto; width: 75%;">
-                    <v-btn class="ara-white-bg blue--text" @click="onShowRunSimulationAlert" depressed block>
+                    <v-btn
+                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
+                        @click="onShowRunSimulationAlert"
+                        depressed
+                        block
+                        outlined>
                         Run Scenario
                     </v-btn>
-                    <v-btn class="ara-white-bg blue--text" @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                    <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
                         Committed Projects
                     </v-btn>
                 </div>
             </v-card>
             <v-flex xs12>
-                <v-container fluid grid-list-xs>
+                <v-container fluid grid-list-xs style="padding-left:8px;padding-right:0px;">
                     <router-view></router-view>
                 </v-container>
             </v-flex>

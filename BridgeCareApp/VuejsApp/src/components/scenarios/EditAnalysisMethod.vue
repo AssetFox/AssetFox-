@@ -4,9 +4,10 @@
             <v-flex xs6>
                 <v-layout column>
                     <v-layout justify-center>
-                        <v-flex xs2>
-                            <v-subheader class="control-label">Weighting</v-subheader>
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label">Weighting</v-subheader>
                             <v-select
+                                class="ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -21,9 +22,9 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
-                            <v-subheader class="control-label">Optimization Strategy</v-subheader>
-                            <v-select class="vertcenter"
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label">Optimization Strategy</v-subheader>
+                            <v-select class="ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -37,9 +38,10 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
-                            <v-subheader class="control-label">Spending Strategy</v-subheader>
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label">Spending Strategy</v-subheader>
                             <v-select
+                                class="ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -55,9 +57,10 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />
-                         <v-flex xs3>
-                            <v-subheader class="control-label">Benefit Attribute</v-subheader>
+                         <v-flex xs6>
+                            <v-subheader class="ghd-control-label ghd-gray">Benefit Attribute</v-subheader>
                             <v-select
+                                class="ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
@@ -68,9 +71,11 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs3>
-                            <v-subheader class="control-label">Benefit Limit</v-subheader>
+                        <v-flex xs6>
+                            <v-subheader class="ghd-control-label">Benefit Limit</v-subheader>
                             <v-text-field
+                                style="margin:0px"
+                                class="ghd-control-text ghd-control-border"
                                 @input="onSetBenefitProperty('limit', $event)"
                                 outline
                                 type="number"
@@ -90,9 +95,10 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer></v-spacer>
-                        <v-flex xs3>
-                            <v-subheader class="control-label">Description</v-subheader>
+                        <v-flex xs6>
+                            <v-subheader class="ghd-control-label">Description</v-subheader>
                             <v-textarea
+                                class="ghd-control-text ghd-control-border"
                                 @input="
                                     onSetAnalysisMethodProperty(
                                         'description',
@@ -106,8 +112,8 @@
                             >
                             </v-textarea>
                         </v-flex>
-                        <v-flex xs3>
-                            <v-subheader class="control-label">
+                        <v-flex xs6>
+                            <v-subheader class="ghd-control-label">
                                 <template slot="append-outer">
                                     <v-btn
                                         @click="
@@ -121,6 +127,7 @@
                                 </template>                               
                                 Criteria (NEEDS ICON)</v-subheader>
                             <v-textarea
+                                class="ghd-control-text ghd-control-border"
                                 no-resize
                                 outline
                                 readonly
@@ -141,13 +148,15 @@
                 <v-layout justify-center row>
                     <v-btn
                         @click="onDiscardChanges"
-                        class="ara-white-bg blue--text"
+                        class="ghd-white-bg ghd-blue ghd-button-text"
+                        depressed
                         >Cancel</v-btn
                     >
                     <v-btn
                         @click="onUpsertAnalysisMethod"
                         :disabled="!valid"
-                        class="ara-blue-bg white--text"
+                        depressed
+                        class="ghd-blue-bg ghd-white ghd-button-text"
                         >Save</v-btn
                     >
                 </v-layout>

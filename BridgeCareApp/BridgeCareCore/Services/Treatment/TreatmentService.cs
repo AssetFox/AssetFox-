@@ -100,7 +100,11 @@ namespace BridgeCareCore.Services
                 var newTreatment = CreateTreatmentDTO(worksheet);
                 library.Treatments.Add(newTreatment);
             }
-            return null;
+            var r = new TreatmentImportResultDTO
+            {
+                TreatmentLibrary = library,
+            };
+            return r;
         }
 
         private TreatmentDTO CreateTreatmentDTO(ExcelWorksheet worksheet)

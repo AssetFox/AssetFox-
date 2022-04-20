@@ -2,7 +2,7 @@
   <v-layout>
     <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
       <v-card class="equation-container-card">
-        <v-card-title>
+        <v-card-title class="equation-title">
           <v-flex xs12>
             <v-layout justify-space-between >
               <h4 class="header-title">Equation Editor</h4>
@@ -12,7 +12,7 @@
             </v-layout>
           </v-flex>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="equation-content">
           <v-layout column>
             <v-flex xs12>
               <div class="validation-message-div">
@@ -122,7 +122,7 @@
                 </v-tab-item>
                 <v-tab-item>
                   <div class="equation-container-div">
-                    <v-layout row>
+                    <v-layout>
                       <v-flex xs4>
                         <div>
                           <v-layout justify-space-between row>
@@ -192,7 +192,7 @@
                 </v-tab-item>
                 <v-tab-item>
                   <div class="equation-container-div">
-                    <v-layout row>
+                    <v-layout>
                       <v-flex xs4>
                         <div>
                           <v-layout justify-space-between row>
@@ -260,17 +260,17 @@
             </v-flex>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions class="equation-footer">
           <v-layout>
             <v-flex xs12>
               <div>
                  <v-layout justify-center row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="check-eq">Check Equation</v-btn>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="check-eq" color="#2A578D">Check Equation</v-btn>
                 </v-layout>
                 <v-layout justify-center row>
-                  <v-btn @click="onSubmit(false)" outline>Cancel</v-btn>
-                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
-                         class="ara-blue-bg white--text">Save
+                  <v-btn @click="onSubmit(false)" outline color="#2A578D">Cancel</v-btn>
+                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)" color="#2A578D"
+                         class="ara-blue-new white--text">Save
                   </v-btn>                  
                 </v-layout>
               </div>
@@ -1063,7 +1063,7 @@ export default class EquationEditorDialog extends Vue {
 }
 
 .attributes-list-container, .formulas-list-container {
-  width: 425px;
+  width: 400px;
   height: 250px;
   overflow: auto;
   border: thin solid rgba(0,0,0,.12);
@@ -1140,7 +1140,7 @@ export default class EquationEditorDialog extends Vue {
 }
 
 .v-tabs__item{
-  color: black !important;
+  color: #2A578D !important;
 }
 
 .v-tabs__item--active{
@@ -1177,5 +1177,21 @@ export default class EquationEditorDialog extends Vue {
 
 .check-eq{
   margin-bottom: 5px !important;
+}
+
+.equation-title{
+  padding-bottom: 0;
+  padding-top: 18px;
+  padding-left: 30px;
+}
+
+.equation-content{
+  overflow: hidden !important;
+  padding-left: 30px;
+  padding-right: 30px;
+}
+
+.equation-footer{
+  padding-bottom: 30px;
 }
 </style>

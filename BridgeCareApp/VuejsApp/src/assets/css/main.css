@@ -187,7 +187,20 @@
 }
 
 
+.ghd-navigation-list .primary--text {
+    background-color: #2A578D !important;
+    color: #FFFFFF !important;
+}
 
+.ghd-navigation-list .primary--text .v-icon {
+    background-color: #2A578D !important;
+    color: #FFFFFF !important;
+}
+
+.ghd-navigation-list .v-icon {
+    background-color: #FFFFFF !important;
+    color: #999999 ! important;
+}
 
 
 .edit-icon, .plus-icon {

@@ -113,19 +113,23 @@
                             </v-textarea>
                         </v-flex>
                         <v-flex xs6>
-                            <v-subheader class="ghd-control-label">
-                                <template slot="append-outer">
+                            <v-layout row style="height=12px;padding-bottom:0px;">
+                                <v-flex xs12 style="height=12px;padding-bottom:0px">
+                                    <v-subheader class="ghd-control-label">                             
+                                        Criteria</v-subheader>
+                                </v-flex>
+                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
                                         @click="
                                             onShowCriterionLibraryEditorDialog
                                         "
-                                        class="edit-icon"
+                                        class="edit-icon ghd-control-label"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
-                                </template>                               
-                                Criteria (NEEDS ICON)</v-subheader>
+                                </v-flex>
+                            </v-layout>
                             <v-textarea
                                 class="ghd-control-text ghd-control-border"
                                 no-resize

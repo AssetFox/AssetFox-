@@ -7,6 +7,9 @@ namespace BridgeCareCore.Services.Treatment
 {
     public static class ExcelTreatmentModels
     {
+        // Jake says --
+        // When exporting treatments, don't export any ids or criteria. On re-import, we will delete all existing treatments
+        // and forget their ids. They will be recreated from scratch with new ids and freshly-created criteria..
         public static AnchoredExcelRegionModel TreatmentContent(TreatmentDTO dto)
         {
             var r = new AnchoredExcelRegionModel

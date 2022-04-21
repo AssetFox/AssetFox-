@@ -32,13 +32,7 @@ namespace BridgeCareCore.Services.Treatment
             var equationCell = ExcelValueModels.String(equation);
             var criteria = consequence.CriterionLibrary.MergedCriteriaExpression;
             var criteriaCell = ExcelValueModels.String(criteria);
-            var name = consequence.CriterionLibrary.Name;
-            var nameCell = ExcelValueModels.String(name);
-            var description = consequence.CriterionLibrary.Description;
-            var descriptionCell = ExcelValueModels.String(description);
-            var id = consequence.CriterionLibrary.Id.ToString();
-            var idCell = ExcelValueModels.String(id);
-            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell, nameCell, descriptionCell, idCell);
+            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
             return r;
         }
 
@@ -54,10 +48,7 @@ namespace BridgeCareCore.Services.Treatment
             var changeValueCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ChangeVal);
             var equationCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Equation);
             var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterion);
-            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionName);
-            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionDescription);
-            var idCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionId);
-            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell, nameCell, descriptionCell, idCell);
+            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
             r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;
         }

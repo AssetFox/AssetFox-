@@ -1,11 +1,11 @@
 <template>
   <v-layout>
     <v-dialog max-width="900px" persistent scrollable v-model="dialogData.showDialog">
-      <v-card class="equation-container-card">
+      <v-card class="equation-container-card Montserrat-font-family">
         <v-card-title class="equation-title">
           <v-flex xs12>
             <v-layout justify-space-between >
-              <h4 class="header-title">Equation Editor</h4>
+              <p class="header-title ghd-title">Equation Editor</p>
               <v-btn @click="onSubmit(false)" flat class="header-cancel">
                 <h4>X</h4>
               </v-btn>
@@ -113,7 +113,7 @@
                                       id="equation_textarea"
                                       no-resize outline
                                       spellcheck="false"
-                                      v-model="expression">
+                                      v-model="expression" class="ara-text-field-border">
                           </v-textarea>
                         </v-layout>
                       </div>
@@ -123,18 +123,8 @@
                 <v-tab-item>
                   <div class="equation-container-div">
                     <v-layout>
-                      <v-flex xs4>
-                        <div>
-                          <v-layout justify-space-between row>
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                                   class="ara-blue-bg white--text">
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                   class="ara-blue-bg white--text">
-                              Add Multi
-                            </v-btn>
-                          </v-layout>
+                      <v-flex xs5 >
+                        <div>                 
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
@@ -162,9 +152,19 @@
                               </template>
                             </v-data-table>
                           </div>
+                          <v-layout justify-space-between class="add-addmulti-container">
+                            <v-btn @click="onAddTimeAttributeDataPoint"
+                                    flat  color="#2A578D">
+                              Add
+                            </v-btn>
+                            <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                    flat color="#2A578D">
+                              Add Multi
+                            </v-btn>
+                          </v-layout>
                         </div>
                       </v-flex>
-                      <v-flex xs8>
+                      <v-flex xs7 >
                         <div class="kendo-chart-container">
                           <kendo-chart :data-source="piecewiseGridData"
                                        :pannable-lock="'y'"
@@ -193,18 +193,8 @@
                 <v-tab-item>
                   <div class="equation-container-div">
                     <v-layout>
-                      <v-flex xs4>
+                      <v-flex xs5>
                         <div>
-                          <v-layout justify-space-between row>
-                            <v-btn @click="onAddTimeAttributeDataPoint"
-                                   class="ara-blue-bg white--text">
-                              Add
-                            </v-btn>
-                            <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                   class="ara-blue-bg white--text">
-                              Add Multi
-                            </v-btn>
-                          </v-layout>
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
@@ -228,9 +218,19 @@
                               </template>
                             </v-data-table>
                           </div>
+                          <v-layout justify-space-between class="add-addmulti-container">
+                            <v-btn @click="onAddTimeAttributeDataPoint"
+                                    flat color="#2A578D" >
+                              Add
+                            </v-btn>
+                            <v-btn @click="showAddMultipleDataPointsPopup = true"
+                                    flat color="#2A578D">
+                              Add Multi
+                            </v-btn>
+                          </v-layout>
                         </div>
                       </v-flex>
-                      <v-flex xs8>
+                      <v-flex xs7 >
                         <div class="kendo-chart-container">
                           <kendo-chart :data-source="piecewiseGridData"
                                        :pannable-lock="'y'"
@@ -270,7 +270,7 @@
                 <v-layout justify-center row>
                   <v-btn @click="onSubmit(false)" outline color="#2A578D">Cancel</v-btn>
                   <v-btn :disabled="cannotSubmit" @click="onSubmit(true)" color="#2A578D"
-                         class="ara-blue-new white--text">Save
+                         class="white--text">Save
                   </v-btn>                  
                 </v-layout>
               </div>
@@ -281,93 +281,112 @@
     </v-dialog>
 
     <v-dialog max-width="250px" persistent v-model="showAddDataPointPopup">
-      <v-card>
-        <v-card-text>
+      <v-card class="Montserrat-font-family">
+        <v-card-text class="input-field-header">
           <v-layout column justify-center>
             <div>
+              <v-flex xs12>
+                <v-layout justify-space-between >
+                  <h6 class="header-title">Time Value</h6>
+                </v-layout>
+              </v-flex>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
-                            label="Time Value"
                             outline
                             type="number"
-                            v-model="newDataPoint.timeValue">
+                            v-model="newDataPoint.timeValue" class="ara-text-field ara-text-field-border">
               </v-text-field>
             </div>
             <div>
-              <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" label="Condition Value" outline
-                            type="number" v-model="newDataPoint.conditionValue">
+              <v-flex xs12>
+                <v-layout justify-space-between >
+                  <h6 class="header-title">Condition Value</h6>
+                </v-layout>
+              </v-flex>
+              <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
+                            type="number" v-model="newDataPoint.conditionValue" class="ara-text-field ara-text-field-border">
               </v-text-field>
             </div>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-layout justify-space-between row>
+        <v-card-actions class="input-field-footer">
+          <v-layout justify-center row>
+            <v-btn @click="onSubmitNewDataPoint(false)" flat small color="#2A578D">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
-                   class="ara-blue-bg white--text">
+                   outline
+                   small color="#2A578D">
               Save
-            </v-btn>
-            <v-btn @click="onSubmitNewDataPoint(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+            </v-btn>            
           </v-layout>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog max-width="200px" persistent v-model="showAddMultipleDataPointsPopup">
-      <v-card>
-        <v-card-text>
+    <v-dialog max-width="400px" persistent v-model="showAddMultipleDataPointsPopup">
+      <v-card class="Montserrat-font-family">
+        <v-card-text class="input-field-header">
           <v-layout column justify-center>
-            <p>Data point entries must follow the format <span
-                class="format-span"><strong>#,#</strong></span> (time,attribute) with each entry on a
+            <p>Data point entries must follow the format <strong>#,#</strong> (time,attribute) with each entry on a
               separate line.</p>
             <v-flex xs2>
               <v-textarea
                   :rules="[multipleDataPointsFormIsNotEmpty, isCorrectMultipleDataPointsFormat, timeValueIsGreaterThanZero, multipleDataPointsAreNew]"
-                  no-resize outline rows="20"
-                  v-model="multipleDataPoints">
+                  no-resize outline rows="10"
+                  v-model="multipleDataPoints" class="ara-text-field-border">
               </v-textarea>
             </v-flex>
 
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-layout justify-space-between row>
+        <v-card-actions class="input-field-footer">
+          <v-layout justify-center row>
+            <v-btn @click="onSubmitNewDataPointMulti(false)" flat small color="#2A578D">Cancel
+            </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
-                   class="ara-blue-bg white--text">
+                   outline
+                   small color="#2A578D">
               Save
-            </v-btn>
-            <v-btn @click="onSubmitNewDataPointMulti(false)" class="ara-orange-bg white--text">Cancel
-            </v-btn>
+            </v-btn>           
           </v-layout>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <v-dialog max-width="250px" persistent v-model="showEditDataPointPopup">
-      <v-card>
-        <v-card-text>
-          <v-layout justify-center>
-            <div v-if="editedDataPointProperty === 'timeValue'">
+      <v-card class="Montserrat-font-family">
+        <v-card-text class="input-field-header">
+          <v-layout column justify-center>
+            <div>
+              <v-flex xs12>
+                <v-layout justify-space-between >
+                  <h6 class="header-title">Time Value</h6>
+                </v-layout>
+              </v-flex>
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
-                            label="Time Value"
                             outline
                             type="number"
-                            v-model="editedDataPoint.timeValue">
+                            v-model="editedDataPoint.timeValue" class="ara-text-field ara-text-field-border">
               </v-text-field>
             </div>
-            <div v-else>
-              <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" label="Attribute Value" outline
-                            type="number" v-model="editedDataPoint.conditionValue">
+            <div>
+              <v-flex xs12>
+                <v-layout justify-space-between >
+                  <h6 class="header-title">Condition Value</h6>
+                </v-layout>
+              </v-flex>
+              <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
+                            type="number" v-model="editedDataPoint.conditionValue" class="ara-text-field ara-text-field-border">
               </v-text-field>
             </div>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-layout justify-space-between row>
+        <v-card-actions class="input-field-footer">
+          <v-layout justify-center row>
+            <v-btn @click="onSubmitEditedDataPointValue(false)" flat small color="#2A578D">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
-                   class="ara-blue-bg white--text">
+                   outline
+                   small color="#2A578D">
               Save
-            </v-btn>
-            <v-btn @click="onSubmitEditedDataPointValue(false)" class="ara-orange-bg white--text">Cancel
-            </v-btn>
+            </v-btn>            
           </v-layout>
         </v-card-actions>
       </v-card>
@@ -418,12 +437,12 @@ export default class EquationEditorDialog extends Vue {
   piecewiseGridHeaders: DataTableHeader[] = [
     {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: '', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
   timeInRatingGridHeaders: DataTableHeader[] = [
     {text: 'Condition', value: 'conditionValue', align: 'left', sortable: false, class: '', width: '10px'},
     {text: 'Time', value: 'timeValue', align: 'left', sortable: false, class: '', width: '10px'},
-    {text: '', value: '', align: 'left', sortable: false, class: '', width: '10px'}
+    {text: 'Action', value: '', align: 'left', sortable: false, class: '', width: '10px'}
   ];
   piecewiseGridData: TimeConditionDataPoint[] = [];
   timeInRatingGridData: TimeConditionDataPoint[] = [];
@@ -918,14 +937,13 @@ export default class EquationEditorDialog extends Vue {
    * data point's modified value is not valid.
    */
   disableEditDataPointSubmit() {
-    if (this.editedDataPointProperty === 'timeValue') {
-      return this.timeValueIsNotEmpty(this.editedDataPoint.timeValue.toString()) !== true ||
+
+      return (this.timeValueIsNotEmpty(this.editedDataPoint.timeValue.toString()) !== true ||
           this.timeValueIsGreaterThanZero(this.editedDataPoint.timeValue.toString()) !== true ||
-          this.timeValueIsNew(this.editedDataPoint.timeValue.toString()) !== true;
-    } else {
-      return this.conditionValueIsNotEmpty(this.editedDataPoint.conditionValue.toString()) !== true ||
-          this.conditionValueIsNew(this.editedDataPoint.conditionValue.toString()) !== true;
-    }
+          this.timeValueIsNew(this.editedDataPoint.timeValue.toString()) !== true) &&
+       (this.conditionValueIsNotEmpty(this.editedDataPoint.conditionValue.toString()) !== true ||
+          this.conditionValueIsNew(this.editedDataPoint.conditionValue.toString()) !== true);
+    
   }
 
   /**
@@ -1121,31 +1139,20 @@ export default class EquationEditorDialog extends Vue {
   cursor: pointer;
 }
 
-/* This is to change how tabbing looks -BCT */
-.v-tabs__slider-wrapper{
-  opacity: 0;
+.add-addmulti-container{
+  width:300px;
 }
 
-.v-tabs__container{
-  border-bottom: thin solid rgba(0,0,0,.12);
+.input-field-header{
+  padding-top: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
-.v-tabs__div .v-tabs__item--active{
-  background: white ;
-  border-top: thin solid rgba(0,0,0,.12) ;
-  border-left: thin solid rgba(0,0,0,.12);
-  border-right: thin solid rgba(0,0,0,.12);
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+.input-field-footer{
+  padding-bottom: 30px;
 }
 
-.v-tabs__item{
-  color: #2A578D !important;
-}
-
-.v-tabs__item--active{
-  color: lightgray !important;
-}
 
 .equation-list-subheader{
   padding-left: 0 !important;

@@ -26,8 +26,7 @@ namespace BridgeCareCore.Services.Treatment
         private static ExcelRowModel CostsContentRow(TreatmentCostDTO cost)
         {
             var models = TreatmentCostHeaderWithContentModels.TreatmentCostExport();
-            var entries = models.Select(m => m.Content(cost)).ToList();
-            var r = ExcelRowModels.WithEntries(entries);
+            var r = ExcelTableRowModels.ContentRow(models, cost);
             return r;
         }
 
@@ -40,9 +39,8 @@ namespace BridgeCareCore.Services.Treatment
         private static ExcelRowModel CostsHeaderRow()
         {
             var models = TreatmentCostHeaderWithContentModels.TreatmentCostExport();
-            var entries = models.Select(m => m.Header).ToList();
-            var r = ExcelRowModels.WithEntries(entries);
-            r.EveryCell = ExcelStyleModels.ThinBottomBorder();
+            var style = ExcelStyleModels.ThinBottomBorder();
+            var r = ExcelTableRowModels.HeaderRow(models, style);
             return r;
         }
     }

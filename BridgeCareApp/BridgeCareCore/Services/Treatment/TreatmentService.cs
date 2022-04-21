@@ -90,10 +90,10 @@ namespace BridgeCareCore.Services
             Guid treatmentLibraryId,
             ExcelPackage excelPackage)
         {
-            _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(t => t.TreatmentLibraryId == treatmentLibraryId);
             var library = new TreatmentLibraryDTO
             {
-                Treatments = new List<TreatmentDTO>()
+                Treatments = new List<TreatmentDTO>(),
+                Id = treatmentLibraryId,
             };
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
@@ -104,7 +104,16 @@ namespace BridgeCareCore.Services
             {
                 TreatmentLibrary = library,
             };
+            SaveToDatabase(r);
             return r;
+        }
+
+        private void SaveToDatabase(
+            TreatmentImportResultDTO importResult)
+        {
+            var libraryId = importResult.TreatmentLibrary.Id;
+            var importedTreatments = importResult.TreatmentLibrary.Treatments;
+            _unitOfWork.SelectableTreatmentRepo.HandleImportCompletion(importedTreatments, libraryId);
         }
 
         private TreatmentDTO CreateTreatmentDTO(ExcelWorksheet worksheet)

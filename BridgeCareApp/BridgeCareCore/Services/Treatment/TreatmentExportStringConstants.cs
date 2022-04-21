@@ -14,5 +14,10 @@
         public const string Consequences = "Consequences";
         public const string Attribute = "Attribute";
         public const string ChangeVal = "ChangeVal";
+        public const string ConsequenceName = "Name";
+        public const string ConsequenceDescription = "Description";
+        public const string Id = "Id";
+        public const string CostName = "Name";
+        public const string CostDescription = "Description";
     }
 }

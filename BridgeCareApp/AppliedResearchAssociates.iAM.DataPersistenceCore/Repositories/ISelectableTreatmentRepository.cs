@@ -23,5 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void UpsertOrDeleteScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId);
         TreatmentLibraryDTO GetTreatmentLibary(Guid libraryId);
+        void HandleImportCompletion(List<TreatmentDTO> treatments, Guid libraryId);
     }
 }

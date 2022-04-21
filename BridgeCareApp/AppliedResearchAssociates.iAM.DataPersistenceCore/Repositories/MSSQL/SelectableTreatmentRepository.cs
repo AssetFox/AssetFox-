@@ -315,6 +315,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public void HandleImportCompletion(List<TreatmentDTO> treatments, Guid libraryId)
+        {
+
+        }
+
         public void DeleteTreatmentLibrary(Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))

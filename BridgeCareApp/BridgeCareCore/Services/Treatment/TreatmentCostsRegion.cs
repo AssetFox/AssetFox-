@@ -28,7 +28,13 @@ namespace BridgeCareCore.Services.Treatment
             var equationCell = ExcelValueModels.String(equation);
             var criteria = cost.CriterionLibrary.MergedCriteriaExpression;
             var criteriaCell = ExcelValueModels.String(criteria);
-            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell);
+            var name = cost.CriterionLibrary.Name;
+            var nameCell = ExcelValueModels.String(name);
+            var description = cost.CriterionLibrary.Description;
+            var descriptionCell = ExcelValueModels.String(description);
+            var id = cost.CriterionLibrary.Id.ToString();
+            var idCell = ExcelValueModels.String(id);
+            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell, nameCell, descriptionCell, idCell);
             return r;
         }
 
@@ -40,15 +46,13 @@ namespace BridgeCareCore.Services.Treatment
         }
         private static ExcelRowModel CostsHeaderRow()
         {
-            var equationCell = StackedExcelModels.Stacked(
-                StackedExcelModels.BoldText("Equation"),
-                ExcelStyleModels.ThinBottomBorder()
-                );
-            var criteriaCell = StackedExcelModels.Stacked(
-                StackedExcelModels.BoldText("Criteria"),
-                ExcelStyleModels.ThinBottomBorder()
-                );
-            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell);
+            var equationCell = StackedExcelModels.BoldText("Equation");
+            var criteriaCell = StackedExcelModels.BoldText("Criteria");
+            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostName);
+            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostDescription);
+            var idCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Id);
+            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell, nameCell, descriptionCell, idCell);
+            r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;
         }
     }

@@ -47,7 +47,7 @@ namespace BridgeCareCore.Services.Treatment
         public static ExcelRowModel CriteriaRow(TreatmentDTO dto)
         {
             var criteria = dto.CriterionLibrary.MergedCriteriaExpression;
-            return TitleThenContent(TreatmentExportStringConstants.Criteria, criteria);
+            return TitleThenContent(TreatmentExportStringConstants.Criterion, criteria);
         }
 
         public static ExcelRowModel CategoryRow(TreatmentDTO dto)

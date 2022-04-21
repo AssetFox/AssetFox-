@@ -39,7 +39,12 @@ namespace BridgeCareCore.Services.Treatment
                     ExcelWorksheetContentModels.ColumnWidth(1, 32.27),
                     ExcelWorksheetContentModels.ColumnWidth(2, 30.4),
                     ExcelWorksheetContentModels.ColumnWidth(3, 32.53),
-                    ExcelWorksheetContentModels.ColumnWidth(4, 23.4),
+                    ExcelWorksheetContentModels.ColumnWidth(4, 80),
+                    ExcelWorksheetContentModels.ColumnWidth(5, 40),
+                    ExcelWorksheetContentModels.ColumnWidth(6, 40),
+                    ExcelWorksheetContentModels.ColumnWidth(7, 40),
+                    ExcelWorksheetContentModels.ColumnWidth(8, 40),
+                    ExcelWorksheetContentModels.ColumnWidth(9, 40),
                 },
                 TabName = tabName,
             };

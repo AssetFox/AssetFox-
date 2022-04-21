@@ -26,6 +26,8 @@ namespace BridgeCareCore.Services.Treatment
         {
             var equation = cost.Equation.Expression;
             var equationCell = ExcelValueModels.String(equation);
+            var equationId = cost.Equation.Id.ToString();
+            var equationIdCell = ExcelValueModels.String(equationId);
             var criteria = cost.CriterionLibrary.MergedCriteriaExpression;
             var criteriaCell = ExcelValueModels.String(criteria);
             var name = cost.CriterionLibrary.Name;
@@ -33,8 +35,10 @@ namespace BridgeCareCore.Services.Treatment
             var description = cost.CriterionLibrary.Description;
             var descriptionCell = ExcelValueModels.String(description);
             var id = cost.CriterionLibrary.Id.ToString();
-            var idCell = ExcelValueModels.String(id);
-            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell, nameCell, descriptionCell, idCell);
+            var criterionIdCell = ExcelValueModels.String(id);
+            var costId = cost.Id;
+            var costIdCell = ExcelValueModels.String(costId.ToString());
+            var r = ExcelRowModels.WithEntries(equationCell, equationIdCell, criteriaCell, nameCell, descriptionCell, criterionIdCell, costIdCell);
             return r;
         }
 
@@ -47,11 +51,13 @@ namespace BridgeCareCore.Services.Treatment
         private static ExcelRowModel CostsHeaderRow()
         {
             var equationCell = StackedExcelModels.BoldText("Equation");
-            var criteriaCell = StackedExcelModels.BoldText("Criteria");
-            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostName);
-            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostDescription);
-            var idCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Id);
-            var r = ExcelRowModels.WithEntries(equationCell, criteriaCell, nameCell, descriptionCell, idCell);
+            var equationIdCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostEquationId);
+            var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostCriterion);
+            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostCriterionName);
+            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostCriterionDescription);
+            var criterionIdCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostCriterionId);
+            var costIdCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.CostId);
+            var r = ExcelRowModels.WithEntries(equationCell, equationIdCell, criteriaCell, nameCell, descriptionCell, criterionIdCell, costIdCell);
             r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;
         }

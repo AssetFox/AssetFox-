@@ -53,10 +53,10 @@ namespace BridgeCareCore.Services.Treatment
             var attributeCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Attribute);
             var changeValueCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ChangeVal);
             var equationCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Equation);
-            var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Criteria);
-            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceName);
-            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceDescription);
-            var idCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Id);
+            var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterion);
+            var nameCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionName);
+            var descriptionCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionDescription);
+            var idCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterionId);
             var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell, nameCell, descriptionCell, idCell);
             r.EveryCell = ExcelStyleModels.ThinBottomBorder();
             return r;

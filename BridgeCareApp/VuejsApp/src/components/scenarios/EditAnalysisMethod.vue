@@ -5,7 +5,7 @@
                 <v-layout column>
                     <v-layout justify-center>
                         <v-flex xs4>
-                            <v-subheader class="ghd-control-label">Weighting</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
@@ -23,7 +23,7 @@
                             </v-select>
                         </v-flex>
                         <v-flex xs4>
-                            <v-subheader class="ghd-control-label">Optimization Strategy</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select class="ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
                                 @change="
@@ -39,7 +39,7 @@
                             </v-select>
                         </v-flex>
                         <v-flex xs4>
-                            <v-subheader class="ghd-control-label">Spending Strategy</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
@@ -58,7 +58,7 @@
                     <v-layout justify-center>
                         <v-spacer />
                          <v-flex xs6>
-                            <v-subheader class="ghd-control-label ghd-gray">Benefit Attribute</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
                                 class="ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
@@ -72,7 +72,7 @@
                             </v-select>
                         </v-flex>
                         <v-flex xs6>
-                            <v-subheader class="ghd-control-label">Benefit Limit</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
                                 style="margin:0px"
                                 class="ghd-control-text ghd-control-border"
@@ -96,7 +96,7 @@
                     <v-layout justify-center>
                         <v-spacer></v-spacer>
                         <v-flex xs6>
-                            <v-subheader class="ghd-control-label">Description</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                             <v-textarea
                                 class="ghd-control-text ghd-control-border"
                                 @input="
@@ -107,7 +107,7 @@
                                 "
                                 no-resize
                                 outline
-                                rows="5"
+                                rows="6"
                                 :value="analysisMethod.description"
                             >
                             </v-textarea>
@@ -115,11 +115,12 @@
                         <v-flex xs6>
                             <v-layout row style="height=12px;padding-bottom:0px;">
                                 <v-flex xs12 style="height=12px;padding-bottom:0px">
-                                    <v-subheader class="ghd-control-label">                             
+                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
                                         Criteria</v-subheader>
                                 </v-flex>
                                 <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
                                     <v-btn
+                                        style="padding-right:20px !important;"
                                         @click="
                                             onShowCriterionLibraryEditorDialog
                                         "
@@ -132,16 +133,23 @@
                             </v-layout>
                             <v-textarea
                                 class="ghd-control-text ghd-control-border"
+                                style="padding-bottom: 0px; height: 90px;"
                                 no-resize
                                 outline
                                 readonly
-                                rows="5"
+                                rows="4"
                                 v-model="
                                     analysisMethod.criterionLibrary
                                         .mergedCriteriaExpression
                                 "
                             >
                             </v-textarea>
+                            <v-checkbox
+                              style="padding-top: 0px; margin-top: 4px"
+                              class="ghd-checkbox ghd-md-gray"
+                              label="Criteria is empty"
+                            >
+                            </v-checkbox>
                         </v-flex>
                         <v-spacer></v-spacer>
                     </v-layout>

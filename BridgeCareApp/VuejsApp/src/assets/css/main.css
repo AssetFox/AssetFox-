@@ -107,6 +107,7 @@
 }
 
 
+/* Colors for UI update design by GHD */
 
 .ghd-white-bg {
     color: #FFFFFF !important;
@@ -140,6 +141,8 @@
     color: #333333 !important;
 }
 
+
+/* Controls (general) */
 .ghd-control-label {
     height: 22px !important;
     padding: 0px !important;
@@ -151,10 +154,6 @@
 .ghd-control-border .v-input__slot {
     border: 1px solid #999999 !important;
     border-radius: 4px !important;    
-}
-
-.ghd-button-border {
-    border: 1px solid #99999980 !important;
 }
 
 .ghd-control-text {
@@ -178,6 +177,12 @@
     margin-top: 0px !important;
 }
 
+
+/* Button */
+.ghd-button-border {
+    border: 1px solid #99999980 !important;
+}
+
 .ghd-button-text {
     padding: 0px !important;
     font-family: 'Montserrat', sans-serif !important;
@@ -187,6 +192,37 @@
 }
 
 
+/* Checkbox */
+/* checkbox text */
+.ghd-checkbox .v-label {
+    height: 14px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    padding-top: 6px !important;
+}
+
+.ghd-md-gray .v-label {
+    color: #666666 !important;
+}
+
+/* checkbox icon */
+.ghd-checkbox .v-checkbox {
+    padding-top: 0px !important;
+    margin-top: 0px !important;    
+}
+
+.ghd-md-gray .v-checkbox {
+    color: #666666 !important;
+}
+
+.ghd-checkbox .accent--text {
+    color: #666666 !important;
+    caret-color: #666666 !important;
+}
+
+
+/* Navigation List */
 .ghd-navigation-list .primary--text {
     background-color: #2A578D !important;
     color: #FFFFFF !important;

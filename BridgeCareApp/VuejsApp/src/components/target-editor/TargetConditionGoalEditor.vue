@@ -60,6 +60,7 @@
                 </v-card-title>
                 <v-spacer/>
             <v-flex v-show="hasSelectedLibrary || hasScenario" xs4>
+                <v-layout>
                 <v-btn outline
                     @click="showCreateTargetConditionGoalDialog = true"
                     class="paper-white-bg blue--text"
@@ -74,6 +75,7 @@
                     >
                         Create New Library
                     </v-btn>
+                </v-layout>
                 <!-- <v-btn
                     :disabled="selectedTargetConditionGoalIds.length === 0"
                     @click="onRemoveTargetConditionGoals"
@@ -435,8 +437,9 @@ export default class TargetConditionGoalEditor extends Vue {
     selectedTargetConditionGoalLibrary: TargetConditionGoalLibrary = clone(
         emptyTargetConditionGoalLibrary,
     );
+    itemsPerPage:number = 5;
     totalDataFound: number = 0;
-    dataPerPage: number = 5;
+    dataPerPage: number = this.itemsPerPage;
     hasSelectedLibrary: boolean = false;
     targetConditionGoalGridData: TargetConditionGoal[] = [];
     targetConditionGoalGridHeaders: DataTableHeader[] = [
@@ -570,7 +573,6 @@ export default class TargetConditionGoalEditor extends Vue {
         } else {
             this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
         }
-
         /*if (this.numericAttributeNames.length === 0) {
             this.numericAttributeNames = getPropertyValues(
                 'name',
@@ -604,6 +606,10 @@ export default class TargetConditionGoalEditor extends Vue {
                 {...clone(this.selectedTargetConditionGoalLibrary), targetConditionGoals: clone(this.targetConditionGoalGridData)},
                 this.stateSelectedTargetConditionLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+
+        // Update total data found and "showing results portion"
+        this.totalDataFound = this.targetConditionGoalGridData.length;
+        (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
     onShowCreateTargetConditionGoalLibraryDialog(createAsNewLibrary: boolean) {

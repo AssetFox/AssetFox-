@@ -56,19 +56,11 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private Dictionary<string, string> DetailsSectionAsDictionary(ExcelWorksheet worksheet)
+        private static Dictionary<string, string> DetailsSectionAsDictionary(ExcelWorksheet worksheet)
         {
-            Dictionary<string, string> r = new Dictionary<string, string>();
-            var costsRowIndex = 2;
-            while (costsRowIndex < 100 && worksheet.Cells[costsRowIndex, 1].Text.ToLower() != TreatmentExportStringConstants.Costs.ToLower())
-            {
-                costsRowIndex++;
-            }
-            if (costsRowIndex == 100)
-            {
-                throw new Exception("Costs header cell not found!");
-            }
-            for (int i = 2; i < costsRowIndex; i++)
+            var r = new Dictionary<string, string>();
+            var costsRowIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
+            for (var i = 2; i < costsRowIndex; i++)
             {
                 var name = worksheet.Cells[i, 1].Text.ToLower();
                 var value = worksheet.Cells[i, 2].Text;
@@ -77,13 +69,30 @@ namespace BridgeCareCore.Services
             return r;
         }
 
+        private static int FindRowWithFirstColumnContent(ExcelWorksheet worksheet, string content, int startIndex)
+        {
+            var r = startIndex;
+            var endIndex = worksheet.Dimension.End.Row;
+            var lowerCaseContent = content.ToLowerInvariant();
+            while (r <= endIndex && worksheet.Cells[r, 1].Text.ToLowerInvariant() != lowerCaseContent)
+            {
+                r++;
+            }
+            if (r == endIndex+1)
+            {
+                throw new Exception($"Cell with content {content} not found!");
+            }
+
+            return r;
+        }
+
         private static int ParseInt(string s, int defaultValue = 0)
         {
-            if (int.TryParse(s, out int r))
+            if (int.TryParse(s, out var r))
             {
                 return r;
             }
-            return 0;
+            return defaultValue;
         }
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
@@ -116,6 +125,49 @@ namespace BridgeCareCore.Services
             _unitOfWork.SelectableTreatmentRepo.HandleImportCompletion(importedTreatments, libraryId);
         }
 
+        private static List<TreatmentCostDTO> LoadCosts(ExcelWorksheet worksheet)
+        {
+            var r = new List<TreatmentCostDTO>();
+            var costsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
+            var consequencesLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, costsLineIndex);
+            for (var i=costsLineIndex+2; i<consequencesLineIndex; i++)
+            {
+                var equation = worksheet.Cells[i, 1].Text;
+                var criterion = worksheet.Cells[i, 2].Text;
+                if (!string.IsNullOrWhiteSpace(equation))
+                {
+                    var equationDto = new EquationDTO
+                    {
+                        Expression = equation,
+                    };
+                    CriterionLibraryDTO criterionLibrary = null;
+                    if (criterion != null)
+                    {
+                        criterionLibrary = new CriterionLibraryDTO
+                        {
+                            MergedCriteriaExpression = criterion,
+                            IsSingleUse = true,
+                        };
+                    }
+                    var cost = new TreatmentCostDTO
+                    {
+                        Equation = equationDto,
+                        CriterionLibrary = criterionLibrary,
+                    };
+                    r.Add(cost);
+                }
+            }
+            return r;
+        }
+
+        private static List<TreatmentConsequenceDTO> LoadConsequences(ExcelWorksheet worksheet)
+        {
+            var r = new List<TreatmentConsequenceDTO>();
+            var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
+            var height = worksheet.Dimension.End.Row;
+            return r;
+        }
+
         private TreatmentDTO CreateTreatmentDTO(ExcelWorksheet worksheet)
         {
             var worksheetName = worksheet.Name;
@@ -127,8 +179,8 @@ namespace BridgeCareCore.Services
             var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
-            var costs = new List<TreatmentCostDTO>();
-            var consequences = new List<TreatmentConsequenceDTO>();
+            var costs = LoadCosts(worksheet);
+            var consequences = LoadConsequences(worksheet);
             var newTreatment = new TreatmentDTO
             {
                 Name = worksheetName,

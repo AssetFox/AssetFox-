@@ -4,15 +4,16 @@
             <v-card
                 class="mx-auto"
                 height="100%"
-                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px;"
+                elevation="0"
+                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
             >
-                <v-list>
+                <v-list class="ghd-navigation-list">
                     <v-list-item-group
-                        class="settings-list"
+                        class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
                         v-for="navigationTab in visibleNavigationTabs()"
                     >
-                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid grey;">
+                        <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
                                     <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
@@ -24,17 +25,22 @@
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
-                <div style="margin: auto; width: 75%;">
-                    <v-btn @click="onShowRunSimulationAlert" depressed block>
+                <div style="margin: auto; width: 85%;">
+                    <v-btn
+                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
+                        @click="onShowRunSimulationAlert"
+                        depressed
+                        block
+                        outlined>
                         Run Scenario
                     </v-btn>
-                    <v-btn @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                    <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
                         Committed Projects
                     </v-btn>
                 </div>
             </v-card>
             <v-flex xs12>
-                <v-container fluid grid-list-xs>
+                <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
             </v-flex>

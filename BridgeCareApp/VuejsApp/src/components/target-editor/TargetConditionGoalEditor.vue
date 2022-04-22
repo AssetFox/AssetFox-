@@ -28,7 +28,10 @@
                                     </v-btn>
                                 </template>
                             </v-text-field>
-                            <v-divider vertical>
+                            <v-divider vertical 
+                                class="mx-3"
+                                v-if="hasSelectedLibrary && !hasScenario"
+                            >
                             </v-divider>
                             <div v-if="hasSelectedLibrary && !hasScenario" class="sharing">
                                 Owner:
@@ -38,7 +41,10 @@
                                         : '[ No Owner ]'
                                 }}
                             </div>
-                            <v-divider vertical>
+                            <v-divider vertical 
+                                class="mx-3"
+                                v-if="hasSelectedLibrary && !hasScenario"
+                            >
                             </v-divider>
                             <!-- <v-checkbox
                                 class="sharing"
@@ -54,16 +60,16 @@
                 </v-card-title>
                 <v-spacer/>
             <v-flex v-show="hasSelectedLibrary || hasScenario" xs4>
-                <v-btn
+                <v-btn outline
                     @click="showCreateTargetConditionGoalDialog = true"
-                    class="ara-blue-bg white--text"
+                    class="paper-white-bg blue--text"
                     >Add Target Condition Goal</v-btn
                 >
-                <v-btn
+                <v-btn outline
                         @click="
                             onShowCreateTargetConditionGoalLibraryDialog(false)
                         "
-                        class="ara-blue-bg white--text"
+                        class="paper-white-bg blue--text"
                         v-show="!hasScenario"
                     >
                         Create New Library
@@ -82,12 +88,23 @@
             <div class="targets-data-table">
                 <v-data-table
                     :headers="targetConditionGoalGridHeaders"
-                    :items="targetConditionGoalGridData"
+                    :items="targetConditionGoalGridData"                    
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
                     select-all
                     v-model="selectedGridRows"
                 >
+                    <template v-slot:actions-prepend>
+                    <v-card-title>
+                        <span v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</span>
+                        <span v-else>No results found!</span>
+                        <v-divider vertical class="mx-3"/>
+                        <v-btn flat right
+                            @click="onRemoveTargetConditionGoals"
+                        > Delete Selected 
+                        </v-btn>
+                    </v-card-title>
+                    </template>
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
@@ -132,6 +149,26 @@
                                                 .valueIsNotEmpty,
                                         ]"
                                     />
+                                    <v-card-actions
+                                        v-if="header.value === 'actions'"
+                                        label="Actions"
+                                    >
+                                        <v-btn                                       
+                                            @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                            class="edit-icon"
+                                            icon
+                                        >
+                                            <v-icon>fa-solid fa-edit</v-icon>
+                                        </v-btn>
+                                        <v-btn
+                                            @click="onRemoveTargetConditionGoals"
+                                            class="edit-icon"
+                                            icon
+                                        >
+                                            <v-icon>fas fa-trash</v-icon>
+                                        </v-btn>
+                                    </v-card-actions>
+
                                     <template slot="input">
                                         <v-select
                                             v-if="header.value === 'attribute'"
@@ -216,17 +253,6 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog(
-                                                props.item,
-                                            )
-                                        "
-                                        class="edit-icon"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
                                 </v-layout>
                             </div>
                         </td>
@@ -255,7 +281,7 @@
                 >
                     Save
                 </v-btn>
-                <v-btn text
+                <v-btn flat
                     @click="onShowConfirmDeleteAlert"
                     class="paper-white-bg blue--text"
                     v-show="!hasScenario"
@@ -263,7 +289,7 @@
                 >
                     Delete Library
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class="paper-white-bg blue--text"
                     :disabled="disableCrudButton()"
@@ -409,6 +435,8 @@ export default class TargetConditionGoalEditor extends Vue {
     selectedTargetConditionGoalLibrary: TargetConditionGoalLibrary = clone(
         emptyTargetConditionGoalLibrary,
     );
+    totalDataFound: number = 0;
+    dataPerPage: number = 5;
     hasSelectedLibrary: boolean = false;
     targetConditionGoalGridData: TargetConditionGoal[] = [];
     targetConditionGoalGridHeaders: DataTableHeader[] = [
@@ -452,6 +480,14 @@ export default class TargetConditionGoalEditor extends Vue {
             class: '',
             width: '50%',
         },
+        {
+            text: 'Actions',
+            value: 'actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        }
     ];
     numericAttributeNames: string[] = [];
     selectedGridRows: TargetConditionGoal[] = [];

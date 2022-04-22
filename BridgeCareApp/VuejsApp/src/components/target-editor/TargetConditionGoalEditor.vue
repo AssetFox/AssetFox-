@@ -63,14 +63,14 @@
                 <v-layout>
                 <v-btn outline
                     @click="showCreateTargetConditionGoalDialog = true"
-                    class="paper-white-bg blue--text"
+                    class="paper-white-bg ghd-blue"
                     >Add Target Condition Goal</v-btn
                 >
                 <v-btn outline
                         @click="
                             onShowCreateTargetConditionGoalLibraryDialog(false)
                         "
-                        class="paper-white-bg blue--text"
+                        class="paper-white-bg ghd-blue"
                         v-show="!hasScenario"
                     >
                         Create New Library
@@ -157,14 +157,14 @@
                                     >
                                         <v-btn                                       
                                             @click="onShowCriterionLibraryEditorDialog(props.item)"
-                                            class="edit-icon"
+                                            class="ghd-blue"
                                             icon
                                         >
                                             <v-icon>fa-solid fa-edit</v-icon>
                                         </v-btn>
                                         <v-btn
                                             @click="onRemoveTargetConditionGoals"
-                                            class="edit-icon"
+                                            class="ghd-blue"
                                             icon
                                         >
                                             <v-icon>fas fa-trash</v-icon>
@@ -285,7 +285,7 @@
                 </v-btn>
                 <v-btn flat
                     @click="onShowConfirmDeleteAlert"
-                    class="paper-white-bg blue--text"
+                    class="paper-white-bg ghd-blue"
                     v-show="!hasScenario"
                     :disabled="!hasSelectedLibrary"
                 >
@@ -293,7 +293,7 @@
                 </v-btn>
                 <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class="paper-white-bg blue--text"
+                    class="paper-white-bg ghd-blue"
                     :disabled="disableCrudButton()"
                 >
                     Create as New Library

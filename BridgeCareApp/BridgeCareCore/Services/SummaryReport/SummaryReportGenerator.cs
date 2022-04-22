@@ -158,18 +158,18 @@ namespace BridgeCareCore.Services.SummaryReport
             // unfunded tab will be uncommented and redone in a future release
 
             //// Unfunded Treatment - Final List TAB
-            //reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
-            //UpdateSimulationAnalysisDetail(reportDetailDto);
-            //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-            //var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
-            //_unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
+            reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
+            _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
 
             //// Unfunded Treatment - Time TAB
-            //reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
-            //UpdateSimulationAnalysisDetail(reportDetailDto);
-            //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
-            //var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
-            //_unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
+            reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
+            _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);

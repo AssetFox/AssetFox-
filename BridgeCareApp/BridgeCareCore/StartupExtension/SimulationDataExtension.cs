@@ -6,6 +6,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services;
 using BridgeCareCore.Services.SummaryReport.BridgeData;
+using BridgeCareCore.Services.Treatment;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.StartupExtension
@@ -28,7 +29,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();
             services.AddScoped<IInvestmentBudgetsService, InvestmentBudgetsService>();
             services.AddScoped<ITreatmentService, TreatmentService>();
-
+            services.AddScoped<ExcelTreatmentLoader>();
             services.AddScoped<UnitOfDataPersistenceWork>();
         }
     }

@@ -86,13 +86,7 @@ namespace BridgeCareCore.Services.Treatment
                 var criterion = worksheet.Cells[i, 2].Text;
                 if (!string.IsNullOrWhiteSpace(equation))
                 {
-                    var equationValidationParameters = new EquationValidationParameters
-                    {
-                        Expression = equation,
-                        CurrentUserCriteriaFilter = validationCriteria,
-                        IsPiecewise = false,
-                    };
-                    var equationValidationResult = _expressionValidationService.ValidateEquation(equationValidationParameters);
+                    var equationValidationResult = ValidateEquation(validationCriteria, equation);
                     if (!equationValidationResult.IsValid)
                     {
                         validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: { equationValidationResult.ValidationMessage}");
@@ -135,9 +129,22 @@ namespace BridgeCareCore.Services.Treatment
             return r;
         }
 
-        private static TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet)
+        private ValidationResult ValidateEquation(UserCriteriaDTO validationCriteria, string equation)
+        {
+            var equationValidationParameters = new EquationValidationParameters
+            {
+                Expression = equation,
+                CurrentUserCriteriaFilter = validationCriteria,
+                IsPiecewise = false,
+            };
+            var equationValidationResult = _expressionValidationService.ValidateEquation(equationValidationParameters);
+            return equationValidationResult;
+        }
+
+        private TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet)
         {
             var consequences = new List<TreatmentConsequenceDTO>();
+            var validationCriteria = new UserCriteriaDTO();
             var validationMessages = new List<string>();
             var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
             var height = worksheet.Dimension.End.Row;
@@ -149,6 +156,11 @@ namespace BridgeCareCore.Services.Treatment
                 EquationDTO equationDto = null;
                 if (!string.IsNullOrWhiteSpace(equation))
                 {
+                    var validateEquation = ValidateEquation(validationCriteria, equation);
+                    if (!validateEquation.IsValid)
+                    {
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 3)}: {validateEquation}");
+                    }
                     equationDto = new EquationDTO
                     {
                         Id = Guid.NewGuid(),
@@ -158,6 +170,11 @@ namespace BridgeCareCore.Services.Treatment
                 CriterionLibraryDTO criterionLibraryDto = null;
                 if (!string.IsNullOrWhiteSpace(criterionString))
                 {
+                    var validateCriterion = _expressionValidationService.ValidateCriterion(criterionString, validationCriteria);
+                    if (!validateCriterion.IsValid)
+                    {
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 4)}: {validateCriterion.ValidationMessage}");
+                    }
                     criterionLibraryDto = new CriterionLibraryDTO
                     {
                         Id = Guid.NewGuid(),

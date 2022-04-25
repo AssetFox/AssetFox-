@@ -34,19 +34,14 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div v-if="hasSelectedLibrary && !hasScenario">
-                        Owner:
-                        {{
-                            selectedCashFlowRuleLibrary.owner
-                                ? selectedCashFlowRuleLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class="sharing"
                         label="Shared"
                         v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedCashFlowRuleLibrary.shared"
+                        v-model="selectedCashFlowRuleLibrary.isShared"
                     />
                 </v-flex>
             </v-layout>
@@ -444,7 +439,7 @@
                 v-show="hasSelectedLibrary || hasScenario"
             >
                 <v-btn
-                    :disabled="disableSubmitAction() || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"
@@ -452,7 +447,7 @@
                     Save
                 </v-btn>
                 <v-btn
-                    :disabled="disableSubmitAction() || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
                     class="ara-blue-bg white--text"
                     v-show="!hasScenario"
@@ -460,7 +455,7 @@
                     Update Library
                 </v-btn>
                 <v-btn
-                    :disabled="disableSubmitAction()"
+                    :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
                     class="ara-blue-bg white--text"
                 >
@@ -470,7 +465,7 @@
                     @click="onDeleteCashFlowRuleLibrary"
                     class="ara-orange-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
+                    :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
@@ -506,7 +501,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
     append,
@@ -551,6 +546,7 @@ import {
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -578,8 +574,10 @@ export default class CashFlowEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
     @Action('upsertScenarioCashFlowRules')
-    upsertScenarioCashFlowRulesAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
+    upsertScenarioCashFlowRulesAction: any;
     hasSelectedLibrary: boolean = false;
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
@@ -672,6 +670,9 @@ export default class CashFlowEditor extends Vue {
     rules: InputValidationRules = clone(rules);
     uuidNIL: string = getBlankGuid();
     hasScenario: boolean = false;
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -721,10 +722,15 @@ export default class CashFlowEditor extends Vue {
         console.log('message');
     }
 
-    @Watch('selectedCashFlowRuleLibrary')
+    @Watch('selectedCashFlowRuleLibrary', {deep: true})
     onSelectedCashFlowRuleLibraryChanged() {
         this.hasSelectedLibrary =
             this.selectedCashFlowRuleLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.cashFlowRuleGridData = this.selectedCashFlowRuleLibrary.cashFlowRules.map(
@@ -816,6 +822,8 @@ export default class CashFlowEditor extends Vue {
 
         if (!isNil(cashFlowRuleLibrary)) {
             this.upsertCashFlowRuleLibraryAction(cashFlowRuleLibrary);
+            this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = cashFlowRuleLibrary.name;
         }
     }
 
@@ -890,6 +898,23 @@ export default class CashFlowEditor extends Vue {
                 yearlyPercentages: yearlyPercentages,
             };
         }
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedCashFlowRuleLibrary.owner) == getUserName();
+    }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedCashFlowRuleLibrary.owner);
+        }
+        
+        return getUserName();
     }
 
     getNewCashFlowDistributionRuleYearlyPercentages(durationInYears: number) {
@@ -1065,7 +1090,7 @@ export default class CashFlowEditor extends Vue {
         return null;
     }
 
-    disableSubmitAction() {
+    disableCrudButtons() {
         const allDataIsValid = this.cashFlowRuleGridData.every(
             (rule: CashFlowRule) => {
                 const allSubDataIsValid = rule.cashFlowDistributionRules.every(
@@ -1124,7 +1149,7 @@ export default class CashFlowEditor extends Vue {
                 ) === true && allDataIsValid
             );
         }
-
+        this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
 

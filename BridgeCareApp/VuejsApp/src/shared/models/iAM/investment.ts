@@ -32,7 +32,7 @@ export interface BudgetLibrary {
     budgets: Budget[];
     appliedScenarioIds: string[];
     owner?: string;
-    shared?: boolean;
+    isShared: boolean;
 }
 
 export interface InvestmentPlan {
@@ -74,6 +74,7 @@ export const emptyBudgetLibrary: BudgetLibrary = {
     description: '',
     budgets: [],
     appliedScenarioIds: [],
+    isShared: false
 };
 
 export const emptyBudget: Budget = {

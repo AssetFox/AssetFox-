@@ -34,7 +34,7 @@ export interface CriterionLibrary {
     mergedCriteriaExpression: string | null;
     description: string;
     owner?: string;
-    shared?: boolean;
+    isShared: boolean;
     isSingleUse: boolean;
 }
 
@@ -58,6 +58,7 @@ export const emptyCriterionLibrary: CriterionLibrary = {
     name: '',
     description: '',
     mergedCriteriaExpression: '',
+    isShared: false,
     isSingleUse: true,
 };
 

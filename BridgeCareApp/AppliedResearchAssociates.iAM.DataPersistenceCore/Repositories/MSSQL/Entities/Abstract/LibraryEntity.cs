@@ -9,5 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Name { get; set; }
 
         public string Description { get; set; }
+
+        public bool IsShared { get; set; }
     }
 }

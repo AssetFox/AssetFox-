@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static PerformanceCurveLibraryEntity ToEntity(this PerformanceCurveLibraryDTO dto) =>
-            new PerformanceCurveLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
+            new PerformanceCurveLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
         public static void CreatePerformanceCurve(this ScenarioPerformanceCurveEntity entity, Simulation simulation)
         {
@@ -62,7 +62,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 Name = entity.Name,
+                Owner = entity.CreatedBy,
                 Description = entity.Description,
+                IsShared = entity.IsShared,
                 PerformanceCurves = entity.PerformanceCurves.Any()
                     ? entity.PerformanceCurves.Select(_ => _.ToDto()).ToList()
                     : new List<PerformanceCurveDTO>()

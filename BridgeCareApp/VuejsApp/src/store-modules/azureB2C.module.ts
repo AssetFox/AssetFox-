@@ -36,7 +36,7 @@ const actions = {
                                 // @ts-ignore
                                 store.state.authenticationModule.authenticated
                             ) {
-                                router.push('/Home/');
+                                router.push('/Scenarios/');
                             }
                         }),
                     );

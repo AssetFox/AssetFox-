@@ -2,6 +2,7 @@ var webpack = require('webpack');
 const fs = require('fs')
 const packageJson = fs.readFileSync('./package.json')
 const version = JSON.parse(packageJson).version || 0
+const port = JSON.parse(packageJson).port || 8080
 
 module.exports = {
     configureWebpack: {
@@ -9,7 +10,8 @@ module.exports = {
         plugins: [
             new webpack.DefinePlugin({
                 'process.env': {
-                    PACKAGE_VERSION: '"' + version + '"'
+                    PACKAGE_VERSION: '"' + version + '"',
+                    PORT: '"' + port + '"'
                 }
             })
         ],

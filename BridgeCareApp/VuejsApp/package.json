@@ -1,6 +1,7 @@
 {
     "name": "bridge-care",
     "version": "v2.2.1",
+    "port": "8080",
     "private": true,
     "description": "BridgeCare",
     "security": "ESEC",

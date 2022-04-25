@@ -248,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private ILookup<Budget, BudgetCondition> ConditionsPerBudget;
 
-        private IReadOnlyCollection<ConditionActual> DeficientConditionActuals;
+        private IReadOnlyCollection<ConditionActual> DeficientConditionActuals = Array.Empty<ConditionActual>();
 
         private SimulationMessageBuilder MessageBuilder;
 
@@ -262,7 +262,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private int StatusCode;
 
-        private IReadOnlyCollection<ConditionActual> TargetConditionActuals;
+        private IReadOnlyCollection<ConditionActual> TargetConditionActuals = Array.Empty<ConditionActual>();
 
         private enum CostCoverage
         {

@@ -21,13 +21,12 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                        Owner:
-                        {{ selectedBudgetPriorityLibrary.owner ? selectedBudgetPriorityLibrary.owner : '[ No Owner ]' }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox class='sharing' label='Shared'
                                 v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                                v-model='selectedBudgetPriorityLibrary.shared' />
+                                v-model='selectedBudgetPriorityLibrary.isShared' />
                 </v-flex>
             </v-layout>
             <v-flex v-show='hasSelectedLibrary || hasScenario' xs3>
@@ -130,12 +129,12 @@
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ara-blue-bg white--text'
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary'
                        class='ara-blue-bg white--text'
-                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
+                       v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>
                 <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ara-blue-bg white--text'
@@ -143,7 +142,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' class='ara-orange-bg white--text'
-                       v-show='!hasScenario' :disabled='!hasSelectedLibrary'>
+                       v-show='!hasScenario' :disabled='!hasLibraryEditPermission'>
                     Delete Library
                 </v-btn>
                 <v-btn @click='onDiscardChanges' class='ara-orange-bg white--text'
@@ -169,7 +168,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import {
     BudgetPercentagePair,
     BudgetPriority,
@@ -206,6 +205,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { getAppliedLibraryId, hasAppliedLibrary } from '@/shared/utils/library-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 const ObjectID = require('bson-objectid');
 
@@ -231,6 +231,8 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
@@ -255,6 +257,8 @@ export default class BudgetPriorityEditor extends Vue {
     budgetPriorities: BudgetPriority[] = [];
     disableCrudButtonsResult: boolean = false;
     checkBoxChanged: boolean = false;
+    hasLibraryEditPermission: boolean = false;
+    hasCreatedLibrary: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -272,6 +276,7 @@ export default class BudgetPriorityEditor extends Vue {
                 }
 
                 vm.hasScenario = true;
+                vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId });
                 vm.getScenarioBudgetPrioritiesAction(vm.selectedScenarioId);
             }
         });
@@ -299,9 +304,14 @@ export default class BudgetPriorityEditor extends Vue {
         this.selectedBudgetPriorityLibrary = clone(this.stateSelectedBudgetPriorityLibrary);
     }
 
-    @Watch('selectedBudgetPriorityLibrary')
+    @Watch('selectedBudgetPriorityLibrary', {deep: true})
     onSelectedPriorityLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetPriorityLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.budgetPriorities = this.selectedBudgetPriorityLibrary.budgetPriorities.map((priority: BudgetPriority) => ({
@@ -324,7 +334,6 @@ export default class BudgetPriorityEditor extends Vue {
     onBudgetPrioritiesChanged() {
         const allBudgetPercentagePairsMatchBudgets: boolean = this.budgetPriorities
             .every((budgetPriority: BudgetPriority) => this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority));
-
         if (!allBudgetPercentagePairsMatchBudgets) {
             this.syncBudgetPercentagePairsWithBudgets();
             return;
@@ -454,18 +463,36 @@ export default class BudgetPriorityEditor extends Vue {
         });
     }
 
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedBudgetPriorityLibrary.owner) == getUserName();
+    }
+
     onShowCreateBudgetPriorityLibraryDialog(createAsNewLibrary: boolean) {
         this.createBudgetPriorityLibraryDialogData = {
             showDialog: true,
-            budgetPriorities: createAsNewLibrary ? this.selectedBudgetPriorityLibrary.budgetPriorities : [],
+            budgetPriorities: createAsNewLibrary ? this.budgetPriorities : [],
         };
     }
 
     onSubmitCreateBudgetPriorityLibraryDialogResult(budgetPriorityLibrary: BudgetPriorityLibrary) {
         this.createBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
-
         if (!isNil(budgetPriorityLibrary)) {
             this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
+            this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = budgetPriorityLibrary.name;
         }
     }
 
@@ -561,7 +588,6 @@ export default class BudgetPriorityEditor extends Vue {
             ...clone(this.selectedBudgetPriorityLibrary),
             budgetPriorities: clone(this.budgetPriorities),
         };
-
         this.upsertBudgetPriorityLibraryAction(budgetPriorityLibrary);
     }
 

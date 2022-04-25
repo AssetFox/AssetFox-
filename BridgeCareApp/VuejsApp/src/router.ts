@@ -4,7 +4,6 @@ import './register-hooks';
 import EditAnalysisMethod from '@/components/scenarios/EditAnalysisMethod.vue';
 import UnderConstruction from '@/components/UnderConstruction.vue';
 import Logout from '@/components/Logout.vue';
-import Home from '@/components/Home.vue';
 import AuthenticationStart from '@/components/authentication/AuthenticationStart.vue';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { UnsecuredRoutePathNames } from '@/shared/utils/route-paths';
@@ -330,11 +329,6 @@ const router = new VueRouter({
             path: '/iAM/',
             name: 'iAM',
             component: Logout,
-        },
-        {
-            path: '/Home/',
-            name: 'Home',
-            component: Home,
         },
         {
             path: '/UserCriteria/',

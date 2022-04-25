@@ -36,21 +36,14 @@
                             </v-btn>
                         </template>
                     </v-text-field>
-                    <div
-                        v-if="hasSelectedLibrary && selectedScenarioId === '0'"
-                    >
-                        Owner:
-                        {{
-                            selectedPerformanceCurveLibrary.owner
-                                ? selectedPerformanceCurveLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class="sharing"
                         label="Shared"
-                        v-if="hasSelectedLibrary && selectedScenarioId === '0'"
-                        v-model="selectedPerformanceCurveLibrary.shared"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedPerformanceCurveLibrary.isShared"
                     />
                 </v-flex>
             </v-layout>
@@ -295,20 +288,20 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertScenarioPerformanceCurves'
                        class='ara-blue-bg white--text'
                        v-show='hasScenario'>
                     Save
                 </v-btn>
-                <v-btn :disabled='disableCrudButton() || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertPerformanceCurveLibrary'
                        class='ara-blue-bg white--text'
                        v-show='!hasScenario'>
                     Update Library
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton()"
+                    :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
                     class="ara-blue-bg white--text"
                 >
@@ -318,7 +311,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
+                    :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
@@ -367,7 +360,7 @@
 import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
@@ -418,6 +411,7 @@ import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportPerformanceCurvesDialog
     from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
@@ -469,6 +463,8 @@ export default class PerformanceCurveEditor extends Vue {
     importScenarioPerformanceCurvesFileAction: any;
     @Action('importLibraryPerformanceCurvesFile')
     importLibraryPerformanceCurvesFileAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     gridSearchTerm = '';
     selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
@@ -539,6 +535,9 @@ export default class PerformanceCurveEditor extends Vue {
     rules: InputValidationRules = clone(rules);
     uuidNIL: string = getBlankGuid();
     currentUrl: string = window.location.href;
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
     showImportExportPerformanceCurvesDialog: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
@@ -592,10 +591,15 @@ export default class PerformanceCurveEditor extends Vue {
         );
     }
 
-    @Watch('selectedPerformanceCurveLibrary')
+    @Watch('selectedPerformanceCurveLibrary', {deep: true})
     onSelectedPerformanceCurveLibraryChanged() {
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
@@ -645,6 +649,21 @@ export default class PerformanceCurveEditor extends Vue {
         }
     }
 
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner) == getUserName();
+    }
+
+    getOwnerUserName(): string {
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedPerformanceCurveLibrary.owner);
+        }
+        return getUserName();
+    }
+
     onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) {
         this.createPerformanceCurveLibraryDialogData = {
             showDialog: true,
@@ -663,6 +682,8 @@ export default class PerformanceCurveEditor extends Vue {
 
         if (!isNil(performanceCurveLibrary)) {
             this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
+            this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = performanceCurveLibrary.name;
         }
     }
 
@@ -829,7 +850,7 @@ export default class PerformanceCurveEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButtons() {
         const dataIsValid: boolean = this.performanceCurveGridData.every(
             (performanceCurve: PerformanceCurve) => {
                 return (
@@ -851,6 +872,7 @@ export default class PerformanceCurveEditor extends Vue {
                 dataIsValid);
         }
 
+        this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 

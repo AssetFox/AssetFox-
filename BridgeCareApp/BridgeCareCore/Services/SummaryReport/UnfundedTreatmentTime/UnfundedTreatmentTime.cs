@@ -39,18 +39,29 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
         {
             // facilityId, year, section, treatment
             var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>>();
+            var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
+            var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections =
-                    year.Sections.Where(
-                        sect => sect.TreatmentCause == TreatmentCause.NoSelection &&
-                        sect.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
-                        sect.TreatmentOptions.Count > 0
-                        ).ToList();
+                var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
+
+                if (firstYear)
+                {
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0])));
+                    firstYear = false;
+                    if (simulationOutput.Years.Count > 1)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0]))).ToList();
+                }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = int.Parse(section.FacilityName);
+                    var facilityId = int.Parse(section.FacilityName.Split('-')[0]);
 
                     var treatmentOptions = section.TreatmentOptions.
                         Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
@@ -60,13 +71,24 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
                     if (chosenTreatment != null)
                     {
                         var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
-                        if (!treatmentsPerSection.ContainsKey(facilityId))
+
+                        if (!validFacilityIds.Contains(facilityId))
                         {
-                            treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
+                            if (treatmentsPerSection.ContainsKey(facilityId))
+                            {
+                                treatmentsPerSection.Remove(facilityId);
+                            }
                         }
                         else
                         {
-                            treatmentsPerSection[facilityId].Add(newTuple);
+                            if (!treatmentsPerSection.ContainsKey(facilityId))
+                            {
+                                treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
+                            }
+                            else
+                            {
+                                treatmentsPerSection[facilityId].Add(newTuple);
+                            }
                         }
                     }
                 }
@@ -75,6 +97,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentTime
             currentCell.Row += 1; // Data starts here
             currentCell.Column = 1;
 
+            var totalYears = simulationOutput.Years.Count;
             foreach (var facilityList in treatmentsPerSection.Values)
             {
                 foreach (var facilityTuple in facilityList)

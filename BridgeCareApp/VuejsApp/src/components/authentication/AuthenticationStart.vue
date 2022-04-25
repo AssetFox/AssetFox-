@@ -56,11 +56,11 @@
                 isAuthenticatedUser()
                     .then((isAuthenticated: boolean | void) => {
                         if (isAuthenticated) {
-                            this.$router.push('/Home/')
+                            this.$router.push('/Scenarios/')
                         }
                     });
             } else if (this.authenticated && hasAuthInfo) {
-                this.$router.push('/Home/');
+                this.$router.push('/Scenarios/');
             } else {
                 if (this.securityType === SecurityTypes.esec) {
                     this.onRedirect();

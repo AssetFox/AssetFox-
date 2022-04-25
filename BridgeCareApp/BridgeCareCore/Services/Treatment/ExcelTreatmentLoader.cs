@@ -2,13 +2,32 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Utils;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment
 {
-    public static class ExcelTreatmentLoader
+    public class ExcelTreatmentLoader
     {
+        private readonly IExpressionValidationService _expressionValidationService;
+        public ExcelTreatmentLoader(IExpressionValidationService expressionValidationService )
+        {
+            _expressionValidationService = expressionValidationService;
+        }
+
+
+        public object Validate(TreatmentDTO treatment)
+        {
+            var criteria = new UserCriteriaDTO();
+            foreach (var cost in treatment.Costs)
+            {
+
+
+            }
+            return null;
+        }
         private static Dictionary<string, string> DetailsSectionAsDictionary(ExcelWorksheet worksheet)
         {
             var r = new Dictionary<string, string>();
@@ -48,9 +67,17 @@ namespace BridgeCareCore.Services.Treatment
             return defaultValue;
         }
 
-        private static List<TreatmentCostDTO> LoadCosts(ExcelWorksheet worksheet)
+        private static string ValidationLocation(string worksheetName, int row, int column)
         {
-            var r = new List<TreatmentCostDTO>();
+            var r = $"{worksheetName} row {row} column {column}";
+            return r;
+        }
+
+        private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet)
+        {
+            var costs = new List<TreatmentCostDTO>();
+            var validationMessages = new List<string>();
+            var validationCriteria = new UserCriteriaDTO();
             var costsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
             var consequencesLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, costsLineIndex);
             for (var i = costsLineIndex + 2; i < consequencesLineIndex; i++)
@@ -59,6 +86,17 @@ namespace BridgeCareCore.Services.Treatment
                 var criterion = worksheet.Cells[i, 2].Text;
                 if (!string.IsNullOrWhiteSpace(equation))
                 {
+                    var equationValidationParameters = new EquationValidationParameters
+                    {
+                        Expression = equation,
+                        CurrentUserCriteriaFilter = validationCriteria,
+                        IsPiecewise = false,
+                    };
+                    var equationValidationResult = _expressionValidationService.ValidateEquation(equationValidationParameters);
+                    if (!equationValidationResult.IsValid)
+                    {
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: { equationValidationResult.ValidationMessage}");
+                    }
                     var equationDto = new EquationDTO
                     {
                         Id = Guid.NewGuid(),
@@ -67,6 +105,11 @@ namespace BridgeCareCore.Services.Treatment
                     CriterionLibraryDTO criterionLibrary = null;
                     if (criterion != null)
                     {
+                        var validateCriterion = _expressionValidationService.ValidateCriterion(criterion, validationCriteria);
+                        if (!validateCriterion.IsValid)
+                        {
+                            validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 2)}: {validateCriterion.ValidationMessage}");
+                        }
                         criterionLibrary = new CriterionLibraryDTO
                         {
                             Id = Guid.NewGuid(),
@@ -81,15 +124,21 @@ namespace BridgeCareCore.Services.Treatment
                         Equation = equationDto,
                         CriterionLibrary = criterionLibrary,
                     };
-                    r.Add(cost);
+                    costs.Add(cost);
                 }
             }
+            var r = new TreatmentCostLoadResult
+            {
+                Costs = costs,
+                ValidationMessages = validationMessages,
+            };
             return r;
         }
 
-        private static List<TreatmentConsequenceDTO> LoadConsequences(ExcelWorksheet worksheet)
+        private static TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet)
         {
-            var r = new List<TreatmentConsequenceDTO>();
+            var consequences = new List<TreatmentConsequenceDTO>();
+            var validationMessages = new List<string>();
             var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
             var height = worksheet.Dimension.End.Row;
             for (int i = consequencesRow + 2; i <= height; i++)
@@ -129,13 +178,18 @@ namespace BridgeCareCore.Services.Treatment
                         Equation = equationDto,
                         CriterionLibrary = criterionLibraryDto,
                     };
-                    r.Add(consequence);
+                    consequences.Add(consequence);
                 }
             }
+            var r = new TreatmentConsequenceLoadResult
+            {
+                Consequences = consequences,
+                ValidationMessages = validationMessages,
+            };
             return r;
         }
 
-        public static TreatmentDTO CreateTreatmentDTO(ExcelWorksheet worksheet)
+        public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
         {
             var worksheetName = worksheet.Name;
             var dictionary = DetailsSectionAsDictionary(worksheet);
@@ -146,8 +200,8 @@ namespace BridgeCareCore.Services.Treatment
             var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
-            var costs = LoadCosts(worksheet);
-            var consequences = LoadConsequences(worksheet);
+            var loadCosts = LoadCosts(worksheet);
+            var loadConsequences = LoadConsequences(worksheet);
             var newTreatment = new TreatmentDTO
             {
                 Name = worksheetName,
@@ -157,10 +211,18 @@ namespace BridgeCareCore.Services.Treatment
                 AssetType = assetType,
                 ShadowForAnyTreatment = ParseInt(yearsBeforeAny),
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
-                Costs = costs,
-                Consequences = consequences,
+                Costs = loadCosts.Costs,
+                Consequences = loadConsequences.Consequences,
             };
-            return newTreatment;
+            var validationMessages = new List<string>();
+            validationMessages.AddRange(loadCosts.ValidationMessages);
+            validationMessages.AddRange(loadConsequences.ValidationMessages);
+            var r = new TreatmentLoadResult
+            {
+                Treatment = newTreatment,
+                ValidationMessages = validationMessages,
+            };
+            return r;
         }
     }
 }

@@ -13,15 +13,15 @@ namespace BridgeCareCore.Services
     public class TreatmentService : ITreatmentService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly IExpressionValidationService _expressionValidationService;
+        private readonly ExcelTreatmentLoader _treatmentLoader;
 
         public TreatmentService(
             UnitOfDataPersistenceWork unitOfWork,
-            IExpressionValidationService expressionValidationService
+            ExcelTreatmentLoader treatmentLoader
             )
         {
             _unitOfWork = unitOfWork;
-            _expressionValidationService = expressionValidationService;
+            _treatmentLoader = treatmentLoader;
         }
         public FileInfoDTO GenerateExcelFile(Guid libraryId)
         {
@@ -55,26 +55,12 @@ namespace BridgeCareCore.Services
             }
         }
 
-        public object Validate(TreatmentDTO treatment)
-        {
-            var criteria = new UserCriteriaDTO();
-            foreach (var cost in treatment.Costs) {
-                var equationValidationParameters = new EquationValidationParameters
-                {
-                    Expression = cost.Equation.Expression,
-                    CurrentUserCriteriaFilter = criteria,
-                    IsPiecewise = false,
-                };
-                var validationResult = _expressionValidationService.ValidateEquation(equationValidationParameters);
-
-            }
-            return null;
-        }
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage)
         {
+            var validationMessages = new List<string>();
             var library = new TreatmentLibraryDTO
             {
                 Treatments = new List<TreatmentDTO>(),
@@ -82,13 +68,14 @@ namespace BridgeCareCore.Services
             };
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var newTreatment = ExcelTreatmentLoader.CreateTreatmentDTO(worksheet);
-                var validation = Validate(newTreatment);
-                library.Treatments.Add(newTreatment);
+                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet);
+                library.Treatments.Add(loadTreatment.Treatment);
+                validationMessages.AddRange(loadTreatment.ValidationMessages);
             }
             var r = new TreatmentImportResultDTO
             {
                 TreatmentLibrary = library,
+                
             };
             SaveToDatabase(r);
             return r;

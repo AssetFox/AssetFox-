@@ -36,6 +36,9 @@
                             </v-btn>
                         </template>
                     </v-text-field>
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
                     <v-checkbox
                         v-if="hasSelectedLibrary && !hasScenario"
                         class="sharing"
@@ -299,7 +302,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
 import CriterionLibraryEditorDialog from '../../shared/modals/CriterionLibraryEditorDialog.vue';
@@ -356,6 +359,7 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { emptySelectItem } from '@/shared/models/vue/select-item';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -403,6 +407,8 @@ export default class CalculatedAttributeEditor extends Vue {
     @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
     rules: InputValidationRules = clone(rules);
@@ -439,6 +445,7 @@ export default class CalculatedAttributeEditor extends Vue {
     calculatedAttributeGridData: CalculatedAttribute[] = [];
     activeCalculatedAttributeId: string = getBlankGuid();
     selectedGridItem: CalculatedAttribute = clone(emptyCalculatedAttribute);
+    hasCreatedLibrary: boolean = false;
 
     calculatedAttributeGridHeaders: DataTableHeader[] = [
         {
@@ -767,6 +774,16 @@ export default class CalculatedAttributeEditor extends Vue {
     setTiming(selectedItem: number) {
         this.setTimingsMultiSelect(selectedItem);
     }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedCalculatedAttributeLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
     onUpsertScenarioCalculatedAttribute() {
         this.upsertScenarioCalculatedAttributeAction({
             scenarioCalculatedAttribute: this.calculatedAttributeGridData,
@@ -818,6 +835,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 calculatedAttributeLibrary,
             );
             this.librarySelectItemValue = calculatedAttributeLibrary.id;
+            this.hasCreatedLibrary = true;
         }
     }
     onSubmitCreateCalculatedAttributeDialogResult(
@@ -905,6 +923,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 mergedCriteriaExpression: '',
                 description: '',
                 isSingleUse: true,
+                isShared: false,
             };
         }
         if (!isNil(currentCriteria)) {

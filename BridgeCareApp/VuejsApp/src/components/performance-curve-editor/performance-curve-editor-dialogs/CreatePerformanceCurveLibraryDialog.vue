@@ -40,6 +40,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {emptyPerformanceCurveLibrary, PerformanceCurve, PerformanceCurveLibrary} from '@/shared/models/iAM/performance';
 import {CreatePerformanceCurveLibraryDialogData} from '@/shared/models/modals/create-performance-curve-library-dialog-data';
@@ -53,11 +54,15 @@ import {hasValue} from '@/shared/utils/has-value-util';
 export default class CreatePerformanceCurveLibraryDialog extends Vue {
   @Prop() dialogData: CreatePerformanceCurveLibraryDialogData;
 
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
   newPerformanceCurveLibrary: PerformanceCurveLibrary = {...emptyPerformanceCurveLibrary, id: getNewGuid()};
   rules: InputValidationRules = clone(rules);
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newPerformanceCurveLibrary = {
       ...this.newPerformanceCurveLibrary,
       performanceCurves: this.dialogData.performanceCurves.map((performanceCurve: PerformanceCurve) => {
@@ -67,7 +72,7 @@ export default class CreatePerformanceCurveLibraryDialog extends Vue {
         }
         return performanceCurve;
       }),
-      owner: getUserName()
+      owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

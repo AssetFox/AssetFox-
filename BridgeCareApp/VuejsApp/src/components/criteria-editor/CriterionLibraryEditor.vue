@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <v-flex>
+        <v-flex v-if="false">
             <v-layout justify-center>
                 <v-flex xs3>
                     <v-btn
@@ -33,16 +33,11 @@
                         </template>
                     </v-text-field>
                     <div v-if="hasSelectedCriterionLibrary">
-                        Owner:
-                        {{
-                            selectedCriterionLibrary.owner
-                                ? selectedCriterionLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         v-if="hasSelectedCriterionLibrary"
-                        v-model="selectedCriterionLibrary.shared"
+                        v-model="selectedCriterionLibrary.isShared"
                         class="sharing"
                         label="Shared"
                         @change="canUpdateOrCreate = true"
@@ -83,7 +78,7 @@
                 <v-btn
                     @click="onUpsertCriterionLibrary(selectedCriterionLibrary)"
                     class="ara-blue-bg white--text"
-                    :disabled="!canUpdateOrCreate"
+                    :disabled="!canUpdateOrCreate || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>
@@ -97,6 +92,7 @@
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
                     class="ara-orange-bg white--text"
+                    :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
@@ -118,7 +114,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import { Prop, Watch } from 'vue-property-decorator';
 import CriteriaEditor from '@/shared/components/CriteriaEditor.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -144,6 +140,7 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -178,6 +175,8 @@ export default class CriterionLibraryEditor extends Vue {
     upsertSelectedScenarioRelatedCriterionAction: any;
     @Action('getSelectedCriterionLibrary') getSelectedCriterionLibraryAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
     hasSelectedCriterionLibrary: boolean = false;
     criterionLibrarySelectItems: SelectItem[] = [];
     librarySelectItemValue: string | null = null;
@@ -199,6 +198,8 @@ export default class CriterionLibraryEditor extends Vue {
     selectedScenarioRelatedCriteria: CriterionLibrary = clone(
         emptyCriterionLibrary,
     );
+    hasCreatedLibrary: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -281,10 +282,15 @@ export default class CriterionLibraryEditor extends Vue {
     @Watch('canUpdateOrCreate')
     onCanUpdateOrCreateChanged() {}
 
-    @Watch('selectedCriterionLibrary')
+    @Watch('selectedCriterionLibrary', {deep: true})
     onSelectedCriterionLibraryChanged() {
         this.hasSelectedCriterionLibrary =
             this.selectedCriterionLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedCriterionLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (
             (this.callFromScenario || this.dialogIsFromLibrary) &&
@@ -340,6 +346,23 @@ export default class CriterionLibraryEditor extends Vue {
         }
     }
 
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner) == getUserName();
+    }
+
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedCriterionLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
     onShowCreateCriterionLibraryDialog(createAsNew: boolean) {
         this.createCriterionLibraryDialogData = {
             showDialog: true,
@@ -390,6 +413,8 @@ export default class CriterionLibraryEditor extends Vue {
             this.upsertCriterionLibraryAction({
                 library: criterionLibrary,
             }).then(() => (this.librarySelectItemValue = criterionLibrary.id));
+
+            this.hasCreatedLibrary = true;
         }
     }
 

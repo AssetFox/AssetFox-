@@ -254,6 +254,22 @@ const actions = {
 };
 
 const getters = {
+    getUserNameById: (state: any) => (id: string) => {
+        var userIndex = findIndex(
+            propEq('id', id),
+            state.users,
+        );
+
+        return state.users[userIndex].username;
+    },
+    getIdByUserName: (state: any) => (username: string) => {
+        var userIndex = findIndex(
+            propEq('username', username),
+            state.users,
+        );
+
+        return state.users[userIndex].id;
+    },
 };
 
 export default {

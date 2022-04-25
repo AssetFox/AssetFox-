@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static RemainingLifeLimitLibraryEntity ToEntity(this RemainingLifeLimitLibraryDTO dto) =>
-            new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
+            new RemainingLifeLimitLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
         public static void CreateRemainingLifeLimit(this ScenarioRemainingLifeLimitEntity entity, Simulation simulation)
         {
@@ -99,6 +99,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
+                Owner = entity.CreatedBy,
+                IsShared = entity.IsShared,
                 RemainingLifeLimits = entity.RemainingLifeLimits.Any()
                     ? entity.RemainingLifeLimits.Select(_ => _.ToDto()).ToList()
                     : new List<RemainingLifeLimitDTO>()

@@ -39,6 +39,9 @@
                             </v-btn>
                         </template>
                     </v-text-field>
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>                    
                 </v-flex>
             </v-layout>
             <v-flex
@@ -246,7 +249,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import {
     emptyRemainingLifeLimit,
@@ -285,6 +288,7 @@ import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -324,6 +328,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     getScenarioRemainingLifeLimitsAction: any;
     @Action('upsertScenarioRemainingLifeLimits')
     upsertScenarioRemainingLifeLimitsAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     remainingLifeLimitLibraries: RemainingLifeLimitLibrary[] = [];
     selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(
@@ -378,6 +384,7 @@ export default class RemainingLifeLimitEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     hasScenario: boolean = false;
     currentUrl: string = window.location.href;
+    hasCreatedLibrary: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -478,6 +485,15 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
     }
 
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedRemainingLifeLimitLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
     onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
         this.createRemainingLifeLimitLibraryDialogData = {
             showDialog: true,
@@ -492,6 +508,8 @@ export default class RemainingLifeLimitEditor extends Vue {
 
         if (!isNil(library)) {
             this.upsertRemainingLifeLimitLibraryAction({library: library});
+            this.hasCreatedLibrary = true;
+            this.selectItemValue = library.name;
         }
     }
 

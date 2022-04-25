@@ -28,6 +28,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateDeficientConditionGoalLibraryDialogData} from '@/shared/models/modals/create-deficient-condition-goal-library-dialog-data';
 import {
@@ -44,6 +45,8 @@ import {hasValue} from '@/shared/utils/has-value-util';
 export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
   @Prop() dialogData: CreateDeficientConditionGoalLibraryDialogData;
 
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
   newDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = {
     ...emptyDeficientConditionGoalLibrary,
     id: getNewGuid()
@@ -52,6 +55,8 @@ export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newDeficientConditionGoalLibrary = {
       ...this.newDeficientConditionGoalLibrary,
       deficientConditionGoals: hasValue(this.dialogData.deficientConditionGoals)
@@ -60,7 +65,7 @@ export default class CreateDeficientConditionGoalLibraryDialog extends Vue {
             id: getNewGuid()
           }))
           : [],
-      owner: getUserName()
+        owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

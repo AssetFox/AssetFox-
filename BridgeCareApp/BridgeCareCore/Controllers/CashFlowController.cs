@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -15,35 +16,109 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
-    using CashFlowUpsertMethod = Action<Guid, List<CashFlowRuleDTO>>;
-
     [Route("api/[controller]")]
     [ApiController]
     public class CashFlowController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, CashFlowUpsertMethod> _cashFlowUpsertMethods;
+        private readonly IReadOnlyDictionary<string, CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>> _cashFlowCRUDMethods;
+        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
 
         public CashFlowController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _cashFlowUpsertMethods = CreateUpsertMethods();
+            _cashFlowCRUDMethods = CreateCRUDOperations();
 
-        private Dictionary<string, CashFlowUpsertMethod> CreateUpsertMethods()
+        private Dictionary<string, CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>> CreateCRUDOperations()
         {
-            void UpsertAny(Guid simulationId, List<CashFlowRuleDTO> dtos)
+            List<CashFlowRuleDTO> GetAnyFromScenario(Guid simulationId) => UnitOfWork.CashFlowRuleRepo
+                    .GetScenarioCashFlowRules(simulationId);
+
+            void UpsertAnyFromScenario(Guid simulationId, List<CashFlowRuleDTO> dtos)
             {
                 UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteScenarioCashFlowRules(dtos, simulationId);
             }
 
-            void UpsertPermitted(Guid simulationId, List<CashFlowRuleDTO> dtos)
+            void UpsertPermittedFromScenario(Guid simulationId, List<CashFlowRuleDTO> dtos)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAny(simulationId, dtos);
+                UpsertAnyFromScenario(simulationId, dtos);
             }
 
-            return new Dictionary<string, CashFlowUpsertMethod>
+            void DeleteAnyFromScenario(Guid simulationId, List<CashFlowRuleDTO> dtos)
             {
-                [Role.Administrator] = UpsertAny,
-                [Role.DistrictEngineer] = UpsertPermitted
+                // Do Nothing
+            }
+
+            List<CashFlowRuleLibraryDTO> GetAnyFromLibrary() => UnitOfWork.CashFlowRuleRepo
+                    .GetCashFlowRuleLibraries();
+
+            List<CashFlowRuleLibraryDTO> GetPermittedFromLibrary()
+            {
+                var result = UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries();
+                return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+            }
+
+            void UpsertAnyFromLibrary(CashFlowRuleLibraryDTO dto)
+            {
+                UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
+                UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+            }
+
+            void UpsertPermittedFromLibrary(CashFlowRuleLibraryDTO dto)
+            {
+                if (dto.Owner == UserId)
+                {
+                    UpsertAnyFromLibrary(dto);
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                }
+            }
+
+            void DeleteAnyFromLibrary(Guid libraryId) => UnitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(libraryId);
+
+            void DeletePermittedFromLibrary(Guid libraryId)
+            {
+                var dto = UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().FirstOrDefault(_ => _.Id == libraryId);
+
+                if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
+
+                if (dto.Owner == UserId)
+                {
+                    DeleteAnyFromLibrary(libraryId);
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                }
+            }
+
+            var AllCRUDAccess = new CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>()
+            {
+                UpsertScenario = UpsertAnyFromScenario,
+                RetrieveScenario = GetAnyFromScenario,
+                DeleteScenario = DeleteAnyFromScenario,
+                UpsertLibrary = UpsertAnyFromLibrary,
+                RetrieveLibrary = GetAnyFromLibrary,
+                DeleteLibrary = DeleteAnyFromLibrary
+            };
+
+            var PermittedCRUDAccess = new CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>()
+            {
+                UpsertScenario = UpsertPermittedFromScenario,
+                RetrieveScenario = GetAnyFromScenario,
+                DeleteScenario = DeleteAnyFromScenario,
+                UpsertLibrary = UpsertPermittedFromLibrary,
+                RetrieveLibrary = GetPermittedFromLibrary,
+                DeleteLibrary = DeleteAnyFromLibrary
+            };
+
+            return new Dictionary<string, CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>>()
+            {
+                [Role.Administrator] = AllCRUDAccess,
+                [Role.DistrictEngineer] = PermittedCRUDAccess,
+                [Role.Cwopa] = PermittedCRUDAccess,
+                [Role.PlanningPartner] = PermittedCRUDAccess
             };
         }
 
@@ -54,8 +129,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.CashFlowRuleRepo
-                    .GetCashFlowRuleLibraries());
+                var result = await Task.Factory.StartNew(() => _cashFlowCRUDMethods[UserInfo.Role].RetrieveLibrary());
 
                 return Ok(result);
             }
@@ -73,8 +147,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.CashFlowRuleRepo
-                    .GetScenarioCashFlowRules(simulationId));
+                var result = await Task.Factory.StartNew(() => _cashFlowCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
 
                 return Ok(result);
             }
@@ -87,7 +160,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertCashFlowRuleLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto)
         {
             try
@@ -95,8 +168,7 @@ namespace BridgeCareCore.Controllers
                  await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
-                    UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
+                    _cashFlowCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
                     UnitOfWork.Commit();
                 });
 
@@ -117,7 +189,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioCashFlowRules/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> UpsertScenarioCashFlowRules(Guid simulationId, List<CashFlowRuleDTO> dtos)
         {
             try
@@ -125,7 +197,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _cashFlowUpsertMethods[UserInfo.Role](simulationId, dtos);
+                    _cashFlowCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
                     UnitOfWork.Commit();
                 });
 
@@ -146,7 +218,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteCashFlowRuleLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.AdminOrDistrictEngineer)]
+        [Authorize]
         public async Task<IActionResult> DeleteCashFlowRuleLibrary(Guid libraryId)
         {
             try
@@ -154,7 +226,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(libraryId);
+                    _cashFlowCRUDMethods[UserInfo.Role].DeleteLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 

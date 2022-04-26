@@ -42,3 +42,17 @@ export const emptyPerformanceCurveLibrary: PerformanceCurveLibrary = {
     appliedScenarioIds: [],
     isShared: false
 };
+
+export interface PerformanceCurvesFileImport {
+    file: File;
+}
+
+export interface LibraryPerformanceCurvesFileImport
+    extends PerformanceCurvesFileImport {
+    libraryId: string;
+}
+
+export interface ScenarioPerformanceCurvesFileImport
+    extends PerformanceCurvesFileImport {
+    scenarioId: string;
+}

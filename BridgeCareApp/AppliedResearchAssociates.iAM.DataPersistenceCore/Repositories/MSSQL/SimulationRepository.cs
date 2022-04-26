@@ -177,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
+                throw new RowNotInTableException($"No network found having id {networkId}");
             }
 
             var budgetsPreventingCloning = new List<string>();

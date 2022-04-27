@@ -58,16 +58,21 @@
     <None Update="TestData\Files\TestInvestmentBudgets.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestUtils\Files\TestImportPerformanceCurve.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestUtils\Files\TestImportPerformanceCurveInvalidAttribute.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="TestUtils\Files\TestImportScenarioPerformanceCurve.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestUtils\Files\TestInvestmentBudgets.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestUtils\Files\TestCommittedProjects.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="TestUtils\Files" />
   </ItemGroup>
 
 </Project>

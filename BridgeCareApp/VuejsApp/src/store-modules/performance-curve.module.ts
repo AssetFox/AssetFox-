@@ -173,6 +173,45 @@ const actions = {
             }
         });
     },
+    async importScenarioPerformanceCurvesFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await PerformanceCurveService.importPerformanceCurves(
+            payload.file,
+            payload.id,
+            true,
+            payload.currentUserCriteriaFilter,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const performanceCurves: PerformanceCurve[] = response.data as PerformanceCurve[];
+                commit('scenarioPerformanceCurvesMutator', performanceCurves);
+                dispatch('addSuccessNotification', {
+                    message: 'Performance curves file imported',
+                });
+            }
+        });
+    },
+    async importLibraryPerformanceCurvesFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await PerformanceCurveService.importPerformanceCurves(
+            payload.file,
+            payload.id,
+            false,
+            payload.currentUserCriteriaFilter,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const library: PerformanceCurveLibrary = response.data as PerformanceCurveLibrary;
+                commit('performanceCurveLibraryMutator', library);
+                commit('selectedPerformanceCurveLibraryMutator', library.id);               
+                dispatch('addSuccessNotification', {
+                    message: 'Performance curves file imported',
+                });
+            }
+        });
+    },
 };
 
 const getters = {};

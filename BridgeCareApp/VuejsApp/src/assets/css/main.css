@@ -370,3 +370,19 @@ table.v-table tbody td {
  .ghd-select .v-input__control .v-input__slot .v-select__slot .v-select__selections{
      padding-top: 0;
  }
+
+/* Dialog box padding */
+
+.ghd-dialog-box-padding-top{
+    padding-top: 30px;
+    padding-left: 30px;
+}
+
+.ghd-dialog-box-padding-center{
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.ghd-dialog-box-padding-bottom{
+    padding-bottom: 30px;
+}

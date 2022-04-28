@@ -5,7 +5,7 @@
         <v-card-title class="equation-title">
           <v-flex xs12>
             <v-layout justify-space-between >
-              <p class="header-title ghd-title">Equation Editor</p>
+              <p class="header-title ghd-control-dialog-header">Equation Editor</p>
               <v-btn @click="onSubmit(false)" flat class="header-cancel">
                 <h4>X</h4>
               </v-btn>
@@ -154,7 +154,7 @@
                           </div>
                           <v-layout justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat  color="#2A578D">
+                                    flat  class='ghd-blue'>
                               Add
                             </v-btn>
                             <v-btn @click="showAddMultipleDataPointsPopup = true"
@@ -220,11 +220,11 @@
                           </div>
                           <v-layout justify-space-between class="add-addmulti-container">
                             <v-btn @click="onAddTimeAttributeDataPoint"
-                                    flat color="#2A578D" >
+                                    flat class='ghd-blue' >
                               Add
                             </v-btn>
                             <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat color="#2A578D">
+                                    flat class='ghd-blue'>
                               Add Multi
                             </v-btn>
                           </v-layout>
@@ -265,12 +265,12 @@
             <v-flex xs12>
               <div>
                  <v-layout justify-center row>
-                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="check-eq" color="#2A578D">Check Equation</v-btn>
+                  <v-btn :disabled="disableEquationCheck()" @click="onCheckEquation" flat class="ghd-blue check-eq">Check Equation</v-btn>
                 </v-layout>
                 <v-layout justify-center row>
-                  <v-btn @click="onSubmit(false)" outline color="#2A578D">Cancel</v-btn>
-                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)" color="#2A578D"
-                         class="white--text">Save
+                  <v-btn @click="onSubmit(false)" outline class='ghd-blue'>Cancel</v-btn>
+                  <v-btn :disabled="cannotSubmit" @click="onSubmit(true)"
+                         class="white--text ghd-blue">Save
                   </v-btn>                  
                 </v-layout>
               </div>
@@ -310,10 +310,10 @@
         </v-card-text>
         <v-card-actions class="input-field-footer">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPoint(false)" flat small color="#2A578D">Cancel</v-btn>
+            <v-btn @click="onSubmitNewDataPoint(false)" flat small class="ghd-blue">Cancel</v-btn>
             <v-btn :disabled="disableNewDataPointSubmit()" @click="onSubmitNewDataPoint(true)"
                    outline
-                   small color="#2A578D">
+                   small class="ghd-blue">
               Save
             </v-btn>            
           </v-layout>
@@ -339,11 +339,11 @@
         </v-card-text>
         <v-card-actions class="input-field-footer">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitNewDataPointMulti(false)" flat small color="#2A578D">Cancel
+            <v-btn @click="onSubmitNewDataPointMulti(false)" flat small class="ghd-blue">Cancel
             </v-btn>
             <v-btn :disabled="disableMultipleDataPointsSubmit()" @click="onSubmitNewDataPointMulti(true)"
                    outline
-                   small color="#2A578D">
+                   small class="ghd-blue">
               Save
             </v-btn>           
           </v-layout>
@@ -381,10 +381,10 @@
         </v-card-text>
         <v-card-actions class="input-field-footer">
           <v-layout justify-center row>
-            <v-btn @click="onSubmitEditedDataPointValue(false)" flat small color="#2A578D">Cancel</v-btn>
+            <v-btn @click="onSubmitEditedDataPointValue(false)" flat small class="ghd-blue">Cancel</v-btn>
             <v-btn :disabled="disableEditDataPointSubmit()" @click="onSubmitEditedDataPointValue(true)"
                    outline
-                   small color="#2A578D">
+                   small class="ghd-blue">
               Save
             </v-btn>            
           </v-layout>

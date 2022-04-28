@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title>
         <v-layout justify-space-between align-center>
-          <h3>New Budget Priority Library</h3>
+          <h3 class="ghd-control-dialog-header">New Budget Priority Library</h3>
           <v-btn @click="onSubmit(false)" flat class="header-cancel">
                 <h4>X</h4>
           </v-btn>
@@ -12,21 +12,21 @@
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-subheader class="ghd-subheader">Name</v-subheader>
+          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline v-model="newBudgetPriorityLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
-          <v-subheader class="ghd-subheader">Description</v-subheader>
-          <v-textarea no-resize outline rows="3"
+          <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
+          <v-textarea no-resize outline :rows="5"
                       v-model="newBudgetPriorityLibrary.description"
-                      class="ghd-text-field-border ghd-text-field"/>
+                      class="ghd-text-field-border"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
         <v-layout justify-center row>       
-          <v-btn @click="onSubmit(false)" flat color="#2A578D">Cancel </v-btn>
+          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text'>Cancel </v-btn>
           <v-btn :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
-                 outline color="#2A578D">
+                 outline class='ghd-blue ghd-button-text ghd-outline-button-padding'>
             Save
           </v-btn>
         </v-layout>

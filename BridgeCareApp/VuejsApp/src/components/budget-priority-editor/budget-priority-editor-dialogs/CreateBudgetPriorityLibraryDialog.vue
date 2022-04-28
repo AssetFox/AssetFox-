@@ -2,25 +2,33 @@
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-layout justify-space-between align-center>
           <h3>New Budget Priority Library</h3>
+          <v-btn @click="onSubmit(false)" flat class="header-cancel">
+                <h4>X</h4>
+          </v-btn>
         </v-layout>
+
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-text-field label="Name" outline v-model="newBudgetPriorityLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-          <v-textarea label="Description" no-resize outline rows="3"
-                      v-model="newBudgetPriorityLibrary.description"/>
+          <v-subheader class="ghd-subheader">Name</v-subheader>
+          <v-text-field outline v-model="newBudgetPriorityLibrary.name"
+                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ara-text-field-border ara-text-field"/>
+          <v-subheader class="ghd-subheader">Description</v-subheader>
+          <v-textarea no-resize outline rows="3"
+                      v-model="newBudgetPriorityLibrary.description"
+                      class="ara-text-field-border ara-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
+        <v-layout justify-center row>       
+          <v-btn @click="onSubmit(false)" flat color="#2A578D">Cancel </v-btn>
           <v-btn :disabled="newBudgetPriorityLibrary.name === ''" @click="onSubmit(true)"
-                 class="ara-blue-bg white--text">
+                 outline color="#2A578D">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

@@ -335,7 +335,7 @@ table.v-table tbody td {
 } 
   
 .ara-text-field .v-input__control .v-input__slot .v-text-field__slot input{
-    margin-top: 5px;
+    margin-top: 5px !important;
 }
 
 .Montserrat-font-family{
@@ -357,5 +357,14 @@ table.v-table tbody td {
     font-size: 18px !important;
     color: #444444 !important
 }
+
+.ghd-subheader{
+    padding-left: 0 !important;
+    height: 30px !important; 
+ }
+
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-select__selections{
+     padding-top: 0;
+ }
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');

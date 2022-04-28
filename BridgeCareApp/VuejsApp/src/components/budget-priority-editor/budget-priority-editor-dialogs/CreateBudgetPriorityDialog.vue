@@ -2,26 +2,32 @@
   <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
+        <v-layout justify-space-between align-center>
           <h3>New Budget Priority</h3>
+          <v-btn @click="onSubmit(false)" flat class="header-cancel">
+                <h4>X</h4>
+          </v-btn>
         </v-layout>
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-text-field label="Priority Level" outline v-model.number="newBudgetPriority.priorityLevel"
-                        :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-          <v-text-field label="Year" outline v-model.number="newBudgetPriority.year"
-                        :mask="'####'"/>
+          <v-subheader class="ghd-subheader">Priority Level</v-subheader>
+          <v-text-field outline v-model.number="newBudgetPriority.priorityLevel"
+                        :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ara-text-field-border ara-text-field"/>
+          <v-subheader class="ghd-subheader">Year</v-subheader>
+          <v-text-field outline v-model.number="newBudgetPriority.year"
+                        :mask="'####'" class="ara-text-field-border ara-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ara-blue-bg white--text">
-            Save
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+        <v-layout justify-center row>
+          <v-btn @click="onSubmit(false)" flat color="#2A578D">
             Cancel
-          </v-btn>
+          </v-btn >
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline color="#2A578D">
+            Save
+          </v-btn>         
         </v-layout>
       </v-card-actions>
     </v-card>

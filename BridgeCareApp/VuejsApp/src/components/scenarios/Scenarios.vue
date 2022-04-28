@@ -10,7 +10,8 @@
                         class="tab-theme"
                     >
                         <v-icon left>{{ item.icon }}</v-icon>
-                        {{ item.name }}</v-tab
+                        {{ item.name }}
+                        ( {{ item.count }} )</v-tab
                     >
                     <v-spacer></v-spacer>
                     <v-btn v-if="isAdmin"
@@ -654,6 +655,9 @@ export default class Scenarios extends Vue {
                 this.isCWOPA ||
                 any(scenarioUserCanModify, scenario.users));
         this.sharedScenarios = this.scenarios.filter(sharedScenarioFilter);
+
+        this.tabItems[0].count = this.userScenarios.length;
+        this.tabItems[1].count = this.sharedScenarios.length;
     }
 
     mounted() {
@@ -723,8 +727,8 @@ export default class Scenarios extends Vue {
             icon: 'fas fa-users',
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: 'star' },
-            { name: 'Shared with me', icon: 'share' },
+            { name: 'My scenarios', icon: 'star', count: 0 },
+            { name: 'Shared with me', icon: 'share', count: 0 },
         );
         this.tab = 'My scenarios';
     }

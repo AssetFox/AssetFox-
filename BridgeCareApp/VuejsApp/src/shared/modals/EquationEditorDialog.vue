@@ -113,7 +113,7 @@
                                       id="equation_textarea"
                                       no-resize outline
                                       spellcheck="false"
-                                      v-model="expression" class="ara-text-field-border">
+                                      v-model="expression" class="ghd-text-field-border">
                           </v-textarea>
                         </v-layout>
                       </div>
@@ -158,7 +158,7 @@
                               Add
                             </v-btn>
                             <v-btn @click="showAddMultipleDataPointsPopup = true"
-                                    flat color="#2A578D">
+                                    flat class="ghd-blue">
                               Add Multi
                             </v-btn>
                           </v-layout>
@@ -293,7 +293,7 @@
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
-                            v-model="newDataPoint.timeValue" class="ara-text-field ara-text-field-border">
+                            v-model="newDataPoint.timeValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
             <div>
@@ -303,7 +303,7 @@
                 </v-layout>
               </v-flex>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
-                            type="number" v-model="newDataPoint.conditionValue" class="ara-text-field ara-text-field-border">
+                            type="number" v-model="newDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
           </v-layout>
@@ -331,7 +331,7 @@
               <v-textarea
                   :rules="[multipleDataPointsFormIsNotEmpty, isCorrectMultipleDataPointsFormat, timeValueIsGreaterThanZero, multipleDataPointsAreNew]"
                   no-resize outline rows="10"
-                  v-model="multipleDataPoints" class="ara-text-field-border">
+                  v-model="multipleDataPoints" class="ghd-text-field-border">
               </v-textarea>
             </v-flex>
 
@@ -364,7 +364,7 @@
               <v-text-field :rules="[timeValueIsNotEmpty, timeValueIsGreaterThanZero, timeValueIsNew]"
                             outline
                             type="number"
-                            v-model="editedDataPoint.timeValue" class="ara-text-field ara-text-field-border">
+                            v-model="editedDataPoint.timeValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
             <div>
@@ -374,7 +374,7 @@
                 </v-layout>
               </v-flex>
               <v-text-field :rules="[conditionValueIsNotEmpty, conditionValueIsNew]" outline
-                            type="number" v-model="editedDataPoint.conditionValue" class="ara-text-field ara-text-field-border">
+                            type="number" v-model="editedDataPoint.conditionValue" class="ghd-text-field ghd-text-field-border">
               </v-text-field>
             </div>
           </v-layout>

@@ -15,11 +15,11 @@
           <v-subheader class="ghd-subheader">Name</v-subheader>
           <v-text-field outline v-model="newBudgetPriorityLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        class="ara-text-field-border ara-text-field"/>
+                        class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-subheader">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
                       v-model="newBudgetPriorityLibrary.description"
-                      class="ara-text-field-border ara-text-field"/>
+                      class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>

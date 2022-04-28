@@ -11,7 +11,7 @@
                             <v-layout row>
                                 <v-select :items='librarySelectItems' 
                                         outline                           
-                                        v-model='librarySelectItemValue' class="ghd-select ara-text-field-border">
+                                        v-model='librarySelectItemValue' class="ghd-select ghd-text-field-border">
                                 </v-select>
                                 <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
                                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -137,7 +137,7 @@
                 xs12>
             <v-layout justify-center>
                 <v-flex >
-                    <v-subheader class="ghd-subheader ara-text-field-border">Description</v-subheader>
+                    <v-subheader class="ghd-subheader ghd-text-field-border">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetPriorityLibrary.description'
                                 @input='selectedBudgetPriorityLibrary = {...selectedBudgetPriorityLibrary, description: $event}'>

@@ -14,10 +14,10 @@
           <v-subheader class="ghd-subheader">Priority Level</v-subheader>
           <v-text-field outline v-model.number="newBudgetPriority.priorityLevel"
                         :mask="'##########'" :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        class="ara-text-field-border ara-text-field"/>
+                        class="ghd-text-field-border ghd-text-field"/>
           <v-subheader class="ghd-subheader">Year</v-subheader>
           <v-text-field outline v-model.number="newBudgetPriority.year"
-                        :mask="'####'" class="ara-text-field-border ara-text-field"/>
+                        :mask="'####'" class="ghd-text-field-border ghd-text-field"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>

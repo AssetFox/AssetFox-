@@ -102,10 +102,6 @@
     color: #002E6C !important;
 }
 
-.ara-blue-new {
-    color: #2A578D !important;
-}
-
 .ara-black {
     color: #000000 !important;
 }
@@ -325,16 +321,16 @@ table.v-table tbody td {
     color: lightgray !important;
 }
 
-.ara-text-field-border .v-input__control .v-input__slot{
+.ghd-text-field-border .v-input__control .v-input__slot{
     border: solid 1px #999999 !important;
 }
   
-.ara-text-field .v-input__control .v-input__slot{
+.ghd-text-field .v-input__control .v-input__slot{
     min-height: 40px;
     height: 40px;
 } 
   
-.ara-text-field .v-input__control .v-input__slot .v-text-field__slot input{
+.ghd-text-field .v-input__control .v-input__slot .v-text-field__slot input{
     margin-top: 5px !important;
 }
 

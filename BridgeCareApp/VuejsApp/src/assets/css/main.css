@@ -166,13 +166,28 @@
     padding-top: 0px !important;
 }
 
+
+/* Select */
+v-input.ghd-control-text  {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;    
+}
+
+v-list-item.ghd-control-text {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;    
+    font-weight: 600 !important;
+    color: #333333 !important;
+}
+
 .ghd-control-text .v-select__selections {
     padding-top: 0px !important;
     vertical-align: middle !important;
 }
 
-.ghd-control-text .v-text-field--box input, .v-text-field--full-width input, .v-text-field--outline input
-{
+
+/* Text Field/Area */
+.ghd-control-text .v-input__slot input {
     margin-top: 11px !important;
     vertical-align: middle !important;
 }
@@ -235,6 +250,16 @@
 .ghd-navigation-list .primary--text .v-icon {
     background-color: #2A578D !important;
     color: #FFFFFF !important;
+}
+
+
+.ghd-dialog-title {
+    color: #444444 !important;
+    font-family: 'Montserrat';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 22px;    
 }
 
 .ghd-navigation-list .v-icon {

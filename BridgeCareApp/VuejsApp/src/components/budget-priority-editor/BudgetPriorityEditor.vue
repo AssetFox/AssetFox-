@@ -11,7 +11,7 @@
                             <v-layout row>
                                 <v-select :items='librarySelectItems' 
                                         outline                           
-                                        v-model='librarySelectItemValue' class="ghd-select ghd-text-field-border">
+                                        v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                                 </v-select>
                                 <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
                                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -19,7 +19,7 @@
                                 <v-divider
                                     class="budget-divider" inset vertical>
                                 </v-divider>
-                                <v-checkbox class='sharing header-text-content shared-padding' label='Shared'
+                                <v-checkbox class='sharing header-text-content' label='Shared'
                                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
                                             v-model='selectedBudgetPriorityLibrary.shared' />
                                 
@@ -699,7 +699,7 @@ export default class BudgetPriorityEditor extends Vue {
 }
 
 .owner-padding{
-    padding-top: 17px;
+    padding-top: 9px;
 }
 
 .shared-padding{
@@ -712,7 +712,7 @@ export default class BudgetPriorityEditor extends Vue {
 
 .budget-divider{
     height: 22px;
-    margin-top: 16px !important;
+    margin-top: 6px !important;
 }
 
 

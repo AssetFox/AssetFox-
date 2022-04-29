@@ -371,6 +371,14 @@ table.v-table tbody td {
      padding-top: 0;
  }
 
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-select__selections input{
+     margin-top: 0;
+ }
+
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-input__append-inner{
+    margin-top: 8px;
+}
+
 /* Dialog box padding */
 
 .ghd-dialog-box-padding-top{

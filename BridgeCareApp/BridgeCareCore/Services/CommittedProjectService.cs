@@ -154,14 +154,18 @@ namespace BridgeCareCore.Services
         /**
          * Gets a Dictionary of MaintainableAssetEntity Id per MaintainableAssetLocationEntity LocationIdentifier
          */
-        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier()
+        private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
         {
             if (!_unitOfWork.Context.MaintainableAsset.Any())
             {
                 throw new RowNotInTableException("There are no maintainable assets in the database.");
             }
 
+            var maintainableAssetsInNetwork = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.NetworkId == networkId);
+
             return _unitOfWork.Context.MaintainableAssetLocation
+                .Where(_ => maintainableAssetsInNetwork.Any(__ => __.Id == _.MaintainableAssetId))
                 .Select(maintainableAssetLocation => new MaintainableAssetEntity
                 {
                     Id = maintainableAssetLocation.MaintainableAssetId,
@@ -190,6 +194,7 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException("Simulation has no budgets.");
             }
 
+            var networkId = simulationEntity.NetworkId;
             var worksheet = excelPackage.Workbook.Worksheets[0];
             var end = worksheet.Dimension.End;
 
@@ -200,7 +205,7 @@ namespace BridgeCareCore.Services
             var attributeIdsPerAttributeName =
                 GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
 
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier();
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(networkId);
 
             var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), CommittedProjectEntity>();
 

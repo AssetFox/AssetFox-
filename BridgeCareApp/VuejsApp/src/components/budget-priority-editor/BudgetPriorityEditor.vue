@@ -228,6 +228,7 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('upsertBudgetPriorityLibrary') upsertBudgetPriorityLibraryAction: any;
     @Action('deleteBudgetPriorityLibrary') deleteBudgetPriorityLibraryAction: any;
     @Action('getScenarioBudgetPriorities') getScenarioBudgetPrioritiesAction: any;
+    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 

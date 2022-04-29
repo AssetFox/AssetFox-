@@ -97,7 +97,7 @@ namespace BridgeCareCore.Services.Treatment
                         Expression = equation,
                     };
                     CriterionLibraryDTO criterionLibrary = null;
-                    if (criterion != null)
+                    if (!string.IsNullOrWhiteSpace(criterion))
                     {
                         var validateCriterion = _expressionValidationService.ValidateCriterion(criterion, validationCriteria);
                         if (!validateCriterion.IsValid)

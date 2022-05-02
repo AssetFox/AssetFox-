@@ -8,7 +8,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -383,6 +382,52 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Performance curves error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportScenarioPerformanceCurvesExcelFile/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportScenarioPerformanceCurvesExcelFile(Guid simulationId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _performanceCurvesService.ExportScenarioPerformanceCurvesFile(simulationId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("ExportLibraryPerformanceCurvesExcelFile/{performanceCurveLibraryId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportLibraryPerformanceCurvesExcelFile(Guid performanceCurveLibraryId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _performanceCurvesService.ExportLibraryPerformanceCurvesFile(performanceCurveLibraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }

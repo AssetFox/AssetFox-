@@ -2,11 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using OfficeOpenXml;
+using MoreLinq;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace BridgeCareCore.Services
 {
@@ -195,6 +199,62 @@ namespace BridgeCareCore.Services
                                         : new CriterionLibraryDTO { Id = Guid.NewGuid(), MergedCriteriaExpression = criterionExpression }
                 });
             }
+        }
+
+        public FileInfoDTO ExportScenarioPerformanceCurvesFile(Guid simulationId)
+        {
+            var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
+            var PerformanceCurves = performanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationName = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
+                    .Select(_ => new SimulationEntity { Name = _.Name }).AsNoTracking().Single().Name;
+            var fileName = $"{simulationName.Trim().Replace(" ", "_")}_performance_curves.xlsx";
+            
+            return CreateExportFile(PerformanceCurves, fileName);
+        }        
+
+        public FileInfoDTO ExportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId)
+        {
+            var performanceCurveRepo = _unitOfWork.PerformanceCurveRepo;
+            var PerformanceCurves = performanceCurveRepo.GetPerformanceCurvesForLibrary(performanceCurveLibraryId);
+            var libraryName = performanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId).Name;
+            var fileName = $"{libraryName.Trim().Replace(" ", "_")}_performance_curves.xlsx";
+            
+            return CreateExportFile(PerformanceCurves, fileName);
+        }
+
+        private static FileInfoDTO CreateExportFile(List<PerformanceCurveDTO> PerformanceCurves, string fileName)
+        {
+            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
+            var worksheet = excelPackage.Workbook.Worksheets.Add("Performance Curves");
+
+            // headers
+            var startRow = worksheet.Cells.Start.Row;
+            var startColumn = worksheet.Cells.Start.Column;
+            var headerColumn = startColumn;
+            worksheet.Cells[startRow, headerColumn++].Value = "Performance_Equation_Name";
+            worksheet.Cells[startRow, headerColumn++].Value = "Attribute";
+            worksheet.Cells[startRow, headerColumn++].Value = "Equation_Expression";
+            worksheet.Cells[startRow, headerColumn++].Value = "Criterion_Expression";
+
+            // data rows
+            var dataRow = startRow + 1;
+            foreach (var performanceCurve in PerformanceCurves)
+            {
+                var dataColumn = startColumn;
+                worksheet.Cells[dataRow, dataColumn++].Value = performanceCurve.Name;
+                worksheet.Cells[dataRow, dataColumn++].Value = performanceCurve.Attribute;
+                worksheet.Cells[dataRow, dataColumn++].Value = performanceCurve.Equation?.Expression;
+                worksheet.Cells[dataRow, dataColumn++].Value = performanceCurve.CriterionLibrary?.MergedCriteriaExpression;
+                dataRow++;
+            }
+            worksheet.Cells.AutoFitColumns();
+
+            return new FileInfoDTO
+            {
+                FileName = fileName,
+                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            };
         }
     }
 }

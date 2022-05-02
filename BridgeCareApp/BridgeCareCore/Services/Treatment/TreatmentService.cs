@@ -53,12 +53,6 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private UserCriteriaDTO GetValidationCriteria(UserInfoDTO userInfo, string adminCheckConst)
-        {
-            var r = _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo, adminCheckConst);
-            return r;
-        }
-
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage)

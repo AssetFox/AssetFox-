@@ -77,6 +77,48 @@
                     </v-btn>
                 </v-layout>
                 <!-- <v-btn
+                    <v-select
+                        :items="librarySelectItems"
+                        label="Select a Target Condition Goal Library"
+                        outline
+                        v-if="!hasSelectedLibrary || hasScenario"
+                        v-model="librarySelectItemValue"
+                    >
+                    </v-select>
+                    <v-text-field
+                        label="Library Name"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedTargetConditionGoalLibrary.name"
+                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                    >
+                        <template slot="append">
+                            <v-btn
+                                @click="librarySelectItemValue = null"
+                                class="ara-orange"
+                                icon
+                            >
+                                <v-icon>fas fa-caret-left</v-icon>
+                            </v-btn>
+                        </template>
+                    </v-text-field>
+                    <div v-if='hasSelectedLibrary && !hasScenario'>
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
+                    <v-checkbox
+                        class="sharing"
+                        label="Shared"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedTargetConditionGoalLibrary.isShared"
+                    />
+                </v-flex>
+            </v-layout>
+            <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
+                <v-btn
+                    @click="showCreateTargetConditionGoalDialog = true"
+                    class="ara-blue-bg white--text"
+                    >Add</v-btn
+                >
+                <v-btn
                     :disabled="selectedTargetConditionGoalIds.length === 0"
                     @click="onRemoveTargetConditionGoals"
                     class="ara-orange-bg white--text"
@@ -279,7 +321,7 @@
                     @click="onUpsertScenarioTargetConditionGoals"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
                     Save
                 </v-btn>
@@ -287,7 +329,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="paper-white-bg ghd-blue"
                     v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || !hasSelectedLibrary"
                 >
                     Delete Library
                 </v-btn>
@@ -302,7 +344,7 @@
                     @click="onUpsertTargetConditionGoalLibrary"
                     class="ara-blue-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>
@@ -390,6 +432,7 @@ import {
     CriterionLibrary,
 } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -430,6 +473,7 @@ export default class TargetConditionGoalEditor extends Vue {
     @Action('upsertScenarioTargetConditionGoals') upsertScenarioTargetConditionGoalsAction: any;
 
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
@@ -510,6 +554,9 @@ export default class TargetConditionGoalEditor extends Vue {
     uuidNIL: string = getBlankGuid();
     hasScenario: boolean = false;
     currentUrl: string = window.location.href;
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -560,9 +607,14 @@ export default class TargetConditionGoalEditor extends Vue {
         );
     }
 
-    @Watch('selectedTargetConditionGoalLibrary')
+    @Watch('selectedTargetConditionGoalLibrary', {deep: true})
     onSelectedTargetConditionGoalLibraryChanged() {
         this.hasSelectedLibrary = this.selectedTargetConditionGoalLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.targetConditionGoalGridData = this.selectedTargetConditionGoalLibrary.targetConditionGoals
@@ -612,6 +664,23 @@ export default class TargetConditionGoalEditor extends Vue {
         (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedTargetConditionGoalLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedTargetConditionGoalLibrary.owner) == getUserName();
+    }
+
     onShowCreateTargetConditionGoalLibraryDialog(createAsNewLibrary: boolean) {
         this.createTargetConditionGoalLibraryDialogData = {
             showDialog: true,
@@ -626,6 +695,8 @@ export default class TargetConditionGoalEditor extends Vue {
 
         if (!isNil(library)) {
             this.upsertTargetConditionGoalLibraryAction({ library: library });
+            this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = library.name;
         }
     }
 
@@ -736,7 +807,7 @@ export default class TargetConditionGoalEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButtons() {
         const dataIsValid: boolean = this.targetConditionGoalGridData.every(
             (targetGoal: TargetConditionGoal) => {
                 return (
@@ -759,6 +830,7 @@ export default class TargetConditionGoalEditor extends Vue {
             );
         }
 
+        this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
     }
 }

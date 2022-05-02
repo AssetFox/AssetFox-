@@ -29,6 +29,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateTargetConditionGoalLibraryDialogData} from '@/shared/models/modals/create-target-condition-goal-library-dialog-data';
 import {
@@ -45,11 +46,15 @@ import {hasValue} from '@/shared/utils/has-value-util';
 export default class CreateTargetConditionGoalLibraryDialog extends Vue {
   @Prop() dialogData: CreateTargetConditionGoalLibraryDialogData;
 
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
   newTargetConditionGoalLibrary: TargetConditionGoalLibrary = {...emptyTargetConditionGoalLibrary, id: getNewGuid()};
   rules: InputValidationRules = rules;
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newTargetConditionGoalLibrary = {
       ...this.newTargetConditionGoalLibrary,
       targetConditionGoals: hasValue(this.dialogData.targetConditionGoals)
@@ -58,7 +63,7 @@ export default class CreateTargetConditionGoalLibraryDialog extends Vue {
             id: getNewGuid()
           }))
           : [],
-      owner: getUserName()
+        owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

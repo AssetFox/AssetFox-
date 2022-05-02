@@ -4,6 +4,7 @@ import {
     PerformanceCurveLibrary,
 } from '@/shared/models/iAM/performance';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 
 export default class PerformanceCurveService {
     static getPerformanceCurveLibraries(): AxiosPromise {
@@ -41,5 +42,46 @@ export default class PerformanceCurveService {
             `${API.PerformanceCurve}/UpsertScenarioPerformanceCurves/${scenarioId}`,
             data,
         );
+    }
+
+    static importPerformanceCurves(
+        file: File,
+        id: string,
+        forScenario: boolean,
+        currentUserCriteriaFilter: UserCriteriaFilter,
+    ) {
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+        formData.append(
+            'currentUserCriteriaFilter',
+            JSON.stringify(currentUserCriteriaFilter),
+        );
+
+        return forScenario
+            ? coreAxiosInstance.post(
+                  `${API.PerformanceCurve}/ImportScenarioPerformanceCurvesExcelFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              )
+            : coreAxiosInstance.post(
+                  `${API.PerformanceCurve}/ImportLibraryPerformanceCurvesExcelFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              );
+    }
+
+    static exportPerformanceCurves(
+        id: string,
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ? coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportScenarioPerformanceCurvesExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportLibraryPerformanceCurvesExcelFile/${id}`,
+              );
     }
 }

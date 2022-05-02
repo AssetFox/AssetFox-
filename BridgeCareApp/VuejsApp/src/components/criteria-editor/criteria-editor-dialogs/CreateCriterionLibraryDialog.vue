@@ -29,6 +29,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateCriterionLibraryDialogData} from '@/shared/models/modals/create-criterion-library-dialog-data';
 import {CriterionLibrary, emptyCriterionLibrary} from '@/shared/models/iAM/criteria';
@@ -39,14 +40,18 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 export default class CreateCriterionLibraryDialog extends Vue {
   @Prop() dialogData: CreateCriterionLibraryDialogData;
 
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
   newCriterionLibrary: CriterionLibrary = {...emptyCriterionLibrary, id: getNewGuid(), isSingleUse: false};
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newCriterionLibrary = {
       ...this.newCriterionLibrary,
       mergedCriteriaExpression: this.dialogData.mergedCriteriaExpression,
-      owner: getUserName()
+      owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

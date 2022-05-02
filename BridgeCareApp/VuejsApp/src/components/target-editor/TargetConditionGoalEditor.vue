@@ -144,6 +144,7 @@
                         <span v-else>No results found!</span>
                         <v-divider vertical class="mx-3"/>
                         <v-btn flat right
+                            class="ghd-blue"
                             @click="onRemoveTargetConditionGoals"
                         > Delete Selected 
                         </v-btn>
@@ -336,15 +337,15 @@
                 <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class="paper-white-bg ghd-blue"
-                    :disabled="disableCrudButton()"
+                    :disabled="disableCrudButtons()"
                 >
                     Create as New Library
                 </v-btn>
                 <v-btn
                     @click="onUpsertTargetConditionGoalLibrary"
-                    class="ara-blue-bg white--text"
+                    class="ghd-blue-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges || !hasLibraryEditPermission"
+                    :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >
                     Update Library
                 </v-btn>

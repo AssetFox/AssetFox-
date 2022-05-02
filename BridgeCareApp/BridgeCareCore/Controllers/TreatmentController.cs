@@ -23,16 +23,18 @@ namespace BridgeCareCore.Controllers
     public class TreatmentController : BridgeCareCoreBaseController
     {
         private readonly ITreatmentService _treatmentService;
-        private readonly IReadOnlyDictionary<string, ScenarioTreatmentUpsertMethod> _scenarioTreatmentUpsertMethods;
+        private readonly IReadOnlyDictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> _treatmentCRUDMethods;
 
-        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+
+        public TreatmentController(IEsecSecurity esecSecurity, ITreatmentService treatmentService, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
+            _treatmentCRUDMethods = CreateCRUDMethods();
             _treatmentService = treatmentService;
-            _scenarioTreatmentUpsertMethods = CreateScenarioUpsertMethods();
         }
 
-        private Dictionary<string, CRUDMethods<TreatmentDTO,TreatmentLibraryDTO>> CreateCRUDMethods()
+        private Dictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> CreateCRUDMethods()
         {
             void UpsertAnyForScenario(Guid simulationId, List<TreatmentDTO> dtos)
             {

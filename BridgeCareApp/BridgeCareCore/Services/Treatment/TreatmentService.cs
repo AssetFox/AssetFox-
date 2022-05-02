@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
@@ -63,9 +65,7 @@ namespace BridgeCareCore.Services
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
-            ExcelPackage excelPackage,
-            UserInfoDTO userInfo,
-            string adminCheckConst)
+            ExcelPackage excelPackage)
         {
             var validationMessages = new List<string>();
             var library = new TreatmentLibraryDTO
@@ -73,19 +73,30 @@ namespace BridgeCareCore.Services
                 Treatments = new List<TreatmentDTO>(),
                 Id = treatmentLibraryId,
             };
-            var userCriteria = GetValidationCriteria(userInfo, adminCheckConst);
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet, userCriteria);
+                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet);
                 library.Treatments.Add(loadTreatment.Treatment);
                 validationMessages.AddRange(loadTreatment.ValidationMessages);
+            }
+            var combinedValidationMessage = "";
+            if (validationMessages.Any())
+            {
+                var combinedValidationMessageBuilder = new StringBuilder();
+                foreach (var message in validationMessages) {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
             var r = new TreatmentImportResultDTO
             {
                 TreatmentLibrary = library,
-                
+                WarningMessage = combinedValidationMessage,
             };
-            SaveToDatabase(r);
+            if (combinedValidationMessage.Length == 0)
+            {
+                SaveToDatabase(r);
+            }
             return r;
         }
 

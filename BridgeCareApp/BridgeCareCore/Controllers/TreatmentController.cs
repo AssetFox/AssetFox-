@@ -292,12 +292,10 @@ namespace BridgeCareCore.Controllers
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                var userInfo = UserInfo.ToDto();
-                var adminCheckConst = SecurityConstants.Role.BAMSAdmin;
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage, userInfo, adminCheckConst);
+                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
                 });
                 if (result.WarningMessage != null)
                 {

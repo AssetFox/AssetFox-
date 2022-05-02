@@ -69,12 +69,14 @@ namespace BridgeCareCore.Services.Treatment
 
         private static string ValidationLocation(string worksheetName, int row, int column)
         {
-            var r = $"{worksheetName} row {row} column {column}";
+            var columnName = ExcelCellAddress.GetColumnLetter(column);
+            var r = $"Worksheet {worksheetName} cell {columnName}{row}";
             return r;
         }
 
-        private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
+        private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet)
         {
+            var newCriteria = NewCriteria();
             var costs = new List<TreatmentCostDTO>();
             var validationMessages = new List<string>();
             var costsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
@@ -85,7 +87,7 @@ namespace BridgeCareCore.Services.Treatment
                 var criterion = worksheet.Cells[i, 2].Text;
                 if (!string.IsNullOrWhiteSpace(equation))
                 {
-                    var equationValidationResult = ValidateEquation(validationCriteria, equation);
+                    var equationValidationResult = ValidateEquation(equation);
                     if (!equationValidationResult.IsValid)
                     {
                         validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: { equationValidationResult.ValidationMessage}");
@@ -98,7 +100,7 @@ namespace BridgeCareCore.Services.Treatment
                     CriterionLibraryDTO criterionLibrary = null;
                     if (!string.IsNullOrWhiteSpace(criterion))
                     {
-                        var validateCriterion = _expressionValidationService.ValidateCriterion(criterion, validationCriteria);
+                        var validateCriterion = _expressionValidationService.ValidateCriterion(criterion, newCriteria);
                         if (!validateCriterion.IsValid)
                         {
                             validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 2)}: {validateCriterion.ValidationMessage}");
@@ -128,20 +130,28 @@ namespace BridgeCareCore.Services.Treatment
             return r;
         }
 
-        private ValidationResult ValidateEquation(UserCriteriaDTO validationCriteria, string equation)
+        private UserCriteriaDTO NewCriteria()
         {
+            var r = new UserCriteriaDTO() { UserId = Guid.Empty, CriteriaId = Guid.Empty, Criteria = null, HasCriteria = false };
+            return r;
+        }
+
+        private ValidationResult ValidateEquation(string equation)
+        {
+            var newCriteria = NewCriteria();
             var equationValidationParameters = new EquationValidationParameters
             {
                 Expression = equation,
-                CurrentUserCriteriaFilter = validationCriteria,
+                CurrentUserCriteriaFilter = newCriteria,
                 IsPiecewise = false,
             };
             var equationValidationResult = _expressionValidationService.ValidateEquation(equationValidationParameters);
             return equationValidationResult;
         }
 
-        private TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
+        private TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet)
         {
+            var newCriteria = NewCriteria();
             var consequences = new List<TreatmentConsequenceDTO>();
             var validationMessages = new List<string>();
             var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
@@ -154,7 +164,7 @@ namespace BridgeCareCore.Services.Treatment
                 EquationDTO equationDto = null;
                 if (!string.IsNullOrWhiteSpace(equation))
                 {
-                    var validateEquation = ValidateEquation(validationCriteria, equation);
+                    var validateEquation = ValidateEquation(equation);
                     if (!validateEquation.IsValid)
                     {
                         validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 3)}: {validateEquation}");
@@ -168,7 +178,7 @@ namespace BridgeCareCore.Services.Treatment
                 CriterionLibraryDTO criterionLibraryDto = null;
                 if (!string.IsNullOrWhiteSpace(criterionString))
                 {
-                    var validateCriterion = _expressionValidationService.ValidateCriterion(criterionString, validationCriteria);
+                    var validateCriterion = _expressionValidationService.ValidateCriterion(criterionString, newCriteria);
                     if (!validateCriterion.IsValid)
                     {
                         validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 4)}: {validateCriterion.ValidationMessage}");
@@ -204,7 +214,7 @@ namespace BridgeCareCore.Services.Treatment
             return r;
         }
 
-        public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
+        public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
         {
             var worksheetName = worksheet.Name;
             var dictionary = DetailsSectionAsDictionary(worksheet);
@@ -215,8 +225,8 @@ namespace BridgeCareCore.Services.Treatment
             var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
-            var loadCosts = LoadCosts(worksheet, validationCriteria);
-            var loadConsequences = LoadConsequences(worksheet, validationCriteria);
+            var loadCosts = LoadCosts(worksheet);
+            var loadConsequences = LoadConsequences(worksheet);
             var newTreatment = new TreatmentDTO
             {
                 Name = worksheetName,

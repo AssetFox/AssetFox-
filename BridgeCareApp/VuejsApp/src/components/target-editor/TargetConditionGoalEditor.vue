@@ -3,16 +3,7 @@
         <v-flex xs12>
             <v-layout justify-center align-center>
                 <v-card-title>
-                            <!-- <v-select
-                                :items="librarySelectItems"
-                                label="Select a Target Condition Goal Library"
-                                outline
-                                v-if="!hasSelectedLibrary || hasScenario"
-                                v-model="librarySelectItemValue"
-                                outlined
-                            >
-                            </v-select> -->
-                            <v-flex xs4>
+                            <v-flex xs6>
                             <v-subheader class="ghd-control-label ghd-md-gray">Library Name</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"
@@ -23,21 +14,6 @@
                                 outlined
                             >
                             </v-select>
-                            <!-- <v-text-field
-                                v-if="hasSelectedLibrary && !hasScenario"
-                                v-model="selectedTargetConditionGoalLibrary.name"
-                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                            >
-                                <template slot="append">
-                                    <v-btn
-                                        @click="librarySelectItemValue = null"
-                                        class="ara-orange"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-caret-left</v-icon>
-                                    </v-btn>
-                                </template>
-                            </v-text-field> -->
                             </v-flex>
                             <v-divider vertical 
                                 class="mx-3"
@@ -278,7 +254,7 @@
             <v-layout justify-center row>
                 <v-btn
                     @click="onUpsertScenarioTargetConditionGoals"
-                    class="ara-blue-bg white--text"
+                    class="ghd-blue-bg ghd-white"
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
@@ -286,7 +262,7 @@
                 </v-btn>
                 <v-btn flat
                     @click="onShowConfirmDeleteAlert"
-                    class="paper-white-bg ghd-blue"
+                    class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || !hasSelectedLibrary"
                 >
@@ -301,7 +277,7 @@
                 </v-btn>
                 <v-btn
                     @click="onUpsertTargetConditionGoalLibrary"
-                    class="ghd-blue-bg white--text"
+                    class="ghd-blue-bg ghd-white"
                     v-show="!hasScenario"
                     :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
                 >

@@ -142,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Select(_ => _.ToDto())
                 .ToList();
-        }
+        }        
 
         public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
@@ -397,6 +397,44 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+        }
+
+        public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId)
+        {
+            if (!_unitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId))
+            {
+                return new List<PerformanceCurveDTO>();
+            }
+
+            return _unitOfWork.Context.PerformanceCurve.AsNoTracking()
+                .Where(_ => _.PerformanceCurveLibraryId == performanceCurveLibraryId)
+                .Include(_ => _.Attribute)
+                .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.PerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public PerformanceCurveLibraryDTO GetPerformanceCurveLibrary(Guid performanceCurveLibraryId)
+        {
+            if (!_unitOfWork.Context.PerformanceCurveLibrary.Any())
+            {
+                return new PerformanceCurveLibraryDTO();
+            }
+
+            return _unitOfWork.Context.PerformanceCurveLibrary.AsNoTracking()
+                .Where(_ => _.Id == performanceCurveLibraryId)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.CriterionLibraryPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.PerformanceCurves)
+                .ThenInclude(_ => _.PerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .FirstOrDefault()?.ToDto();
         }
     }
 }

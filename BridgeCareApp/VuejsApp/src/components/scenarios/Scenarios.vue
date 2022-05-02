@@ -10,7 +10,8 @@
                         class="tab-theme"
                     >
                         <v-icon left>{{ item.icon }}</v-icon>
-                        {{ item.name }}</v-tab
+                        {{ item.name }}
+                        ( {{ item.count }} )</v-tab
                     >
                     <v-spacer></v-spacer>
                     <v-btn v-if="isAdmin"
@@ -54,6 +55,7 @@
                                     :headers="scenarioGridHeaders"
                                     :items="userScenarios"
                                     :search="searchMine"
+                                    calculate-widths
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
@@ -103,6 +105,13 @@
                                                 props.item.owner
                                                     ? props.item.owner
                                                     : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.networkName
+                                                    ? props.item.networkName
+                                                    : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
@@ -264,6 +273,13 @@
                                         </td>
                                         <td>
                                             {{
+                                                props.item.networkName
+                                                    ? props.item.networkName
+                                                    : '[ Unknown ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
                                                 formatDate(
                                                     props.item.createdDate,
                                                 )
@@ -382,6 +398,11 @@
             @submit="onCreateScenarioDialogSubmit"
         />
 
+        <CloneScenarioDialog
+            :dialogData="cloneScenarioDialogData"
+            @submit="onCloneScenarioDialogSubmit"
+        />
+
         <MigrateLegacySimulationDialog
             :showDialog="showMigrateLegacySimulationDialog"
             @submit="onMigrateLegacySimulationSubmit"
@@ -411,6 +432,8 @@ import {
     emptyReportsDownloadDialogData,
     ReportsDownloaderDialogData,
 } from '@/shared/models/modals/reports-downloader-dialog-data';
+import CloneScenarioDialog from '@/components/scenarios/scenarios-dialogs/CloneScenarioDialog.vue'
+import { CloneScenarioDialogData, emptyCloneScenarioDialogData } from '@/shared/models/modals/clone-scenario-dialog-data'
 import CreateScenarioDialog from '@/components/scenarios/scenarios-dialogs/CreateScenarioDialog.vue';
 import ShareScenarioDialog from '@/components/scenarios/scenarios-dialogs/ShareScenarioDialog.vue';
 import { Network } from '@/shared/models/iAM/network';
@@ -439,6 +462,7 @@ import { Hub } from '@/connectionHub';
         ConfirmAnalysisRunAlert: Alert,
         ReportsDownloaderDialog,
         CreateScenarioDialog,
+        CloneScenarioDialog,
         CreateNetworkDialog,
         ShareScenarioDialog,
         ShowAggregationDialog,
@@ -475,8 +499,8 @@ export default class Scenarios extends Vue {
     @Action('updateNetworkRollupDetail') updateNetworkRollupDetailAction: any;
     @Action('selectScenario') selectScenarioAction: any;
 
-    /*@Action('rollupNetwork') rollupNetworkAction: any;
-    @Action('createNetwork') createNetworkAction: any;*/
+    //@Action('rollupNetwork') rollupNetworkAction: any;
+    //@Action('createNetwork') createNetworkAction: any;
     @Action('upsertBenefitQuantifier') upsertBenefitQuantifierAction: any;
     @Action('aggregateNetworkData') aggregateNetworkDataAction: any;
 
@@ -501,6 +525,14 @@ export default class Scenarios extends Vue {
         {
             text: 'Owner',
             value: 'owner',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Network',
+            value: 'network',
             align: 'left',
             sortable: false,
             class: 'header-border',
@@ -593,6 +625,7 @@ export default class Scenarios extends Vue {
         emptyShareScenarioDialogData,
     );
     confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
+    cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
@@ -631,6 +664,9 @@ export default class Scenarios extends Vue {
                 this.isCWOPA ||
                 any(scenarioUserCanModify, scenario.users));
         this.sharedScenarios = this.scenarios.filter(sharedScenarioFilter);
+
+        this.tabItems[0].count = this.userScenarios.length;
+        this.tabItems[1].count = this.sharedScenarios.length;
     }
 
     mounted() {
@@ -683,7 +719,7 @@ export default class Scenarios extends Vue {
                 icon: 'fas fa-edit',
             },
             {
-                title: 'Copy',
+                title: 'Clone',
                 action: this.availableActions.clone,
                 icon: 'fas fa-paste',
             },
@@ -700,8 +736,8 @@ export default class Scenarios extends Vue {
             icon: 'fas fa-users',
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: 'star' },
-            { name: 'Shared with me', icon: 'share' },
+            { name: 'My scenarios', icon: 'star', count: 0 },
+            { name: 'Shared with me', icon: 'share', count: 0 },
         );
         this.tab = 'My scenarios';
     }
@@ -868,12 +904,33 @@ export default class Scenarios extends Vue {
         };
     }
 
+    onShowCloneScenarioDialog(scenario: Scenario) {
+        this.selectedScenario = clone(scenario);
+
+        this.cloneScenarioDialogData = {
+            showDialog: true,
+            scenario: this.selectedScenario
+        };
+    }
+
     onConfirmCloneScenarioAlertSubmit(submit: boolean) {
         this.confirmCloneScenarioAlertData = clone(emptyAlertData);
 
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.cloneScenarioAction({
                 scenarioId: this.selectedScenario.id,
+            }).then(() => (this.selectedScenario = clone(emptyScenario)));
+        }
+    }
+
+    onCloneScenarioDialogSubmit(scenario: Scenario) {
+        this.cloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
+
+        if (!isNil(scenario)) {
+            this.cloneScenarioAction({
+                scenarioId: scenario.id,
+                networkId: scenario.networkId,
+                scenarioName: scenario.name
             }).then(() => (this.selectedScenario = clone(emptyScenario)));
         }
     }
@@ -973,7 +1030,7 @@ export default class Scenarios extends Vue {
                 this.onShowShareScenarioDialog(scenario);
                 break;
             case this.availableActions.clone:
-                this.onShowConfirmCloneScenarioAlert(scenario);
+                this.onShowCloneScenarioDialog(scenario);
                 break;
             case this.availableActions.delete:
                 this.onShowConfirmDeleteAlert(scenario);

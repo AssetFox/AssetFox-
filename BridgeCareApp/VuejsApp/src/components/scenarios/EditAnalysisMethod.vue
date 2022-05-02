@@ -1,11 +1,13 @@
 ﻿<template>
     <v-form ref="form" v-model="valid" lazy-validation>
         <v-layout column>
-            <v-flex xs12>
+            <v-flex xs6>
                 <v-layout column>
                     <v-layout justify-center>
-                        <v-flex xs2>
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
+                                class="ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -13,7 +15,6 @@
                                         $event,
                                     )
                                 "
-                                label="Weighting"
                                 outline
                                 clearable
                                 :value="analysisMethod.attribute"
@@ -21,8 +22,9 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
-                            <v-select
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
+                            <v-select class="ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -30,15 +32,16 @@
                                         $event,
                                     )
                                 "
-                                label="Optimization Strategy"
                                 outline
                                 :value="analysisMethod.optimizationStrategy"
                                 :disabled="!isAdmin"
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
+                        <v-flex xs4>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
+                                class="ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -46,7 +49,6 @@
                                         $event,
                                     )
                                 "
-                                label="Spending Strategy"
                                 outline
                                 :value="analysisMethod.spendingStrategy"
                             >
@@ -55,31 +57,26 @@
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />
-                        <v-flex xs2>
-                            <v-text-field
-                                v-model="networkName"
-                                label="Network name"
-                                outline
-                                disabled
-                            ></v-text-field>
-                        </v-flex>
-                        <v-flex xs2>
+                         <v-flex xs6>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
+                                class="ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
                                 "
-                                label="Benefit Attribute"
                                 outline
                                 :value="analysisMethod.benefit.attribute"
                                 :disabled="!isAdmin"
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs2>
+                        <v-flex xs6>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Benefit Limit</v-subheader>
                             <v-text-field
+                                style="margin:0px"
+                                class="ghd-control-text ghd-control-border"
                                 @input="onSetBenefitProperty('limit', $event)"
-                                label="Benefit limit"
                                 outline
                                 type="number"
                                 min="0"
@@ -99,67 +96,82 @@
                     <v-layout justify-center>
                         <v-spacer></v-spacer>
                         <v-flex xs6>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                             <v-textarea
+                                class="ghd-control-text ghd-control-border"
                                 @input="
                                     onSetAnalysisMethodProperty(
                                         'description',
                                         $event,
                                     )
                                 "
-                                label="Description"
                                 no-resize
                                 outline
-                                rows="5"
+                                rows="6"
                                 :value="analysisMethod.description"
                             >
                             </v-textarea>
                         </v-flex>
-                        <v-spacer></v-spacer>
-                    </v-layout>
-                    <v-layout justify-center>
-                        <v-spacer></v-spacer>
                         <v-flex xs6>
+                            <v-layout row style="height=12px;padding-bottom:0px;">
+                                <v-flex xs12 style="height=12px;padding-bottom:0px">
+                                    <v-subheader class="ghd-control-label ghd-md-gray">                             
+                                        Criteria</v-subheader>
+                                </v-flex>
+                                <v-flex xs1 style="height=12px;padding-bottom:0px;padding-top:0px;">
+                                    <v-btn
+                                        style="padding-right:20px !important;"
+                                        @click="
+                                            onShowCriterionLibraryEditorDialog
+                                        "
+                                        class="edit-icon ghd-control-label"
+                                        icon
+                                    >
+                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                    </v-btn>
+                                </v-flex>
+                            </v-layout>
                             <v-textarea
-                                label="Criteria"
+                                class="ghd-control-text ghd-control-border"
+                                style="padding-bottom: 0px; height: 90px;"
                                 no-resize
                                 outline
                                 readonly
-                                rows="5"
+                                :rows="criteriaRows()"
                                 v-model="
                                     analysisMethod.criterionLibrary
                                         .mergedCriteriaExpression
                                 "
                             >
-                                <template slot="append-outer">
-                                    <v-btn
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog
-                                        "
-                                        class="edit-icon"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                </template>
                             </v-textarea>
+                            <v-checkbox
+                              style="padding-top: 0px; margin-top: 4px;"
+                              class="ghd-checkbox ghd-md-gray"
+                              label="Criteria is intentionally empty (MUST check to Save)" 
+                              v-model="criteriaIsIntentionallyEmpty"
+                              v-show="criteriaIsEmpty()"
+                            >
+                            </v-checkbox>
                         </v-flex>
                         <v-spacer></v-spacer>
                     </v-layout>
                 </v-layout>
             </v-flex>
 
-            <v-flex xs12>
-                <v-layout justify-end row>
-                    <v-btn
-                        @click="onUpsertAnalysisMethod"
-                        :disabled="!valid"
-                        class="ara-blue-bg white--text"
-                        >Save</v-btn
-                    >
+            <v-flex xs6>
+                <v-layout justify-center row>
                     <v-btn
                         @click="onDiscardChanges"
-                        class="ara-orange-bg white--text"
-                        >Discard Changes</v-btn
+                        class="ghd-white-bg ghd-blue ghd-button-text"
+                        depressed
+                        >Cancel</v-btn
+                    >
+                    <v-btn
+                        @click="onUpsertAnalysisMethod"
+                        :disabled="criteriaIsInvalid() || !valid"
+                        depressed
+                        class="ghd-blue-bg ghd-white ghd-button-text"
+                        >Save</v-btn
                     >
                 </v-layout>
             </v-flex>
@@ -258,6 +270,7 @@ export default class EditAnalysisMethod extends Vue {
     );
     rules: InputValidationRules = rules;
     valid: boolean = true;
+    criteriaIsIntentionallyEmpty: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -380,6 +393,23 @@ export default class EditAnalysisMethod extends Vue {
             };
         }
     }
+
+    criteriaIsEmpty()
+    {
+        return (isNil(this.analysisMethod.criterionLibrary) ||
+                isNil(this.analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
+                this.analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
+                );
+    }
+
+    criteriaRows()
+    {
+        return this.criteriaIsEmpty() ? 4 : 6;
+    }
+
+    criteriaIsInvalid() {
+        return this.criteriaIsEmpty() && !this.criteriaIsIntentionallyEmpty;
+    }    
 
     onUpsertAnalysisMethod() {
         const form: any = this.$refs.form;

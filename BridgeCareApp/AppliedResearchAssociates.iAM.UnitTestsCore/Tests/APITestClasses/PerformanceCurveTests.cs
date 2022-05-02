@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 mockedEsecSecurity.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object, null);
 
         private void SetupForGet()
         {

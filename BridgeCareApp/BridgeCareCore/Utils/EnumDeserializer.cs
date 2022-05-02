@@ -16,7 +16,8 @@ namespace BridgeCareCore.Utils
                     return t;
                 }
             };
-            throw new InvalidOperationException();
+            var errorMessage = $"Failed to deserialize {serialized} to type {typeof(T).Name}";
+            throw new InvalidOperationException(errorMessage);
         }
     }
 }

@@ -3,7 +3,7 @@
         <v-flex xs12>
             <v-layout justify-center align-center>
                 <v-card-title>
-                            <v-flex xs6>
+                            <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Library Name</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"

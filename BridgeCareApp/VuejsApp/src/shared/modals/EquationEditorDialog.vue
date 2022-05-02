@@ -142,7 +142,7 @@
                                     </div>
                                   </div>
                                   <div v-else>
-                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ara-orange"
+                                    <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon
                                            v-if="props.item.timeValue !== 0">
                                       <v-icon>fas fa-trash</v-icon>

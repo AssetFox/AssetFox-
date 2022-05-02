@@ -9,6 +9,8 @@ namespace BridgeCareCore.Interfaces
         FileInfoDTO GenerateExcelFile(Guid libraryId);
         TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
-            ExcelPackage excelPackage);
+            ExcelPackage excelPackage,
+            UserInfoDTO userInfo,
+            string adminCheckConst);
     }
 }

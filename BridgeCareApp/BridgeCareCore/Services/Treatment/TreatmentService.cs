@@ -55,10 +55,17 @@ namespace BridgeCareCore.Services
             }
         }
 
+        private UserCriteriaDTO GetValidationCriteria(UserInfoDTO userInfo, string adminCheckConst)
+        {
+            var r = _unitOfWork.UserCriteriaRepo.GetOwnUserCriteria(userInfo, adminCheckConst);
+            return r;
+        }
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
-            ExcelPackage excelPackage)
+            ExcelPackage excelPackage,
+            UserInfoDTO userInfo,
+            string adminCheckConst)
         {
             var validationMessages = new List<string>();
             var library = new TreatmentLibraryDTO
@@ -66,9 +73,10 @@ namespace BridgeCareCore.Services
                 Treatments = new List<TreatmentDTO>(),
                 Id = treatmentLibraryId,
             };
+            var userCriteria = GetValidationCriteria(userInfo, adminCheckConst);
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
-                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet);
+                var loadTreatment = _treatmentLoader.LoadTreatment(worksheet, userCriteria);
                 library.Treatments.Add(loadTreatment.Treatment);
                 validationMessages.AddRange(loadTreatment.ValidationMessages);
             }

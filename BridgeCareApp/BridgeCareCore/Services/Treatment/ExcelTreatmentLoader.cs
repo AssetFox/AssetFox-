@@ -73,11 +73,10 @@ namespace BridgeCareCore.Services.Treatment
             return r;
         }
 
-        private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet)
+        private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
         {
             var costs = new List<TreatmentCostDTO>();
             var validationMessages = new List<string>();
-            var validationCriteria = new UserCriteriaDTO();
             var costsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
             var consequencesLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, costsLineIndex);
             for (var i = costsLineIndex + 2; i < consequencesLineIndex; i++)
@@ -141,10 +140,9 @@ namespace BridgeCareCore.Services.Treatment
             return equationValidationResult;
         }
 
-        private TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet)
+        private TreatmentConsequenceLoadResult LoadConsequences(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
         {
             var consequences = new List<TreatmentConsequenceDTO>();
-            var validationCriteria = new UserCriteriaDTO();
             var validationMessages = new List<string>();
             var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
             var height = worksheet.Dimension.End.Row;
@@ -206,7 +204,7 @@ namespace BridgeCareCore.Services.Treatment
             return r;
         }
 
-        public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
+        public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet, UserCriteriaDTO validationCriteria)
         {
             var worksheetName = worksheet.Name;
             var dictionary = DetailsSectionAsDictionary(worksheet);
@@ -217,8 +215,8 @@ namespace BridgeCareCore.Services.Treatment
             var treatmentCategory = EnumDeserializer.Deserialize<TreatmentDTOEnum.TreatmentCategory>(categoryString);
             var assetTypeString = dictionary.GetValueOrDefault(TreatmentExportStringConstants.AssetType.ToLowerInvariant());
             var assetType = EnumDeserializer.Deserialize<TreatmentDTOEnum.AssetType>(assetTypeString);
-            var loadCosts = LoadCosts(worksheet);
-            var loadConsequences = LoadConsequences(worksheet);
+            var loadCosts = LoadCosts(worksheet, validationCriteria);
+            var loadConsequences = LoadConsequences(worksheet, validationCriteria);
             var newTreatment = new TreatmentDTO
             {
                 Name = worksheetName,

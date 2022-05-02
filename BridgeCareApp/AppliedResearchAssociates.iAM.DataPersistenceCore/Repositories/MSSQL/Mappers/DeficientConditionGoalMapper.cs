@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static DeficientConditionGoalLibraryEntity ToEntity(this DeficientConditionGoalLibraryDTO dto) =>
-            new DeficientConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
+            new DeficientConditionGoalLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
         public static void CreateDeficientConditionGoal(this ScenarioDeficientConditionGoalEntity entity, Simulation simulation)
         {
@@ -102,6 +102,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
+                Owner = entity.CreatedBy,
+                IsShared = entity.IsShared,
                 DeficientConditionGoals = entity.DeficientConditionGoals.Any()
                     ? entity.DeficientConditionGoals.Select(_ => _.ToDto()).ToList()
                     : new List<DeficientConditionGoalDTO>()

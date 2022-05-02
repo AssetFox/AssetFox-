@@ -24,7 +24,7 @@ export interface BudgetPriorityLibrary {
     budgetPriorities: BudgetPriority[];
     appliedScenarioIds: string[];
     owner?: string;
-    shared?: boolean;
+    isShared: boolean;
 }
 
 export const emptyBudgetPriority: BudgetPriority = {
@@ -40,7 +40,8 @@ export const emptyBudgetPriorityLibrary: BudgetPriorityLibrary = {
     name: '',
     description: '',
     budgetPriorities: [],
-    appliedScenarioIds: []
+    appliedScenarioIds: [],
+    isShared: false,
 };
 
 export interface BudgetPriorityGridDatum {

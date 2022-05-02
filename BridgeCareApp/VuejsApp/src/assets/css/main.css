@@ -102,6 +102,10 @@
     color: #002E6C !important;
 }
 
+.ara-blue-new {
+    color: #2A578D !important;
+}
+
 .ara-black {
     color: #000000 !important;
 }
@@ -258,7 +262,7 @@ html {
   .modal-pop-up-padding {padding: 15px;}
 
   table.v-table thead th {
-    font-size: 20px !important;
+    font-size: 14px !important;
 
 }
 table.v-table tbody td {
@@ -294,3 +298,64 @@ table.v-table tbody td {
 .notification-message {
     text-align: left;
 }
+
+/* This is to change how tabbing looks -BCT */
+.v-tabs__slider-wrapper{
+    opacity: 0;
+}
+  
+.v-tabs__container{
+    border-bottom: thin solid rgba(0,0,0,.12);
+}
+  
+.v-tabs__div .v-tabs__item--active{
+    background: white ;
+    border-top: thin solid rgba(0,0,0,.12) ;
+    border-left: thin solid rgba(0,0,0,.12);
+    border-right: thin solid rgba(0,0,0,.12);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+  
+.v-tabs__item{
+    color: #2A578D !important;
+}
+  
+.v-tabs__item--active{
+    color: lightgray !important;
+}
+
+.ara-text-field-border .v-input__control .v-input__slot{
+    border: solid 1px #999999 !important;
+}
+  
+.ara-text-field .v-input__control .v-input__slot{
+    min-height: 40px;
+    height: 40px;
+} 
+  
+.ara-text-field .v-input__control .v-input__slot .v-text-field__slot input{
+    margin-top: 5px;
+}
+
+.Montserrat-font-family{
+    font-family: 'Montserrat' !important;
+}
+
+.v-btn {
+    text-transform: unset !important;
+}
+
+.v-tabs__item{
+    text-transform: unset !important;
+}
+.v-tabs__div{
+    text-transform: unset !important;
+}
+.ghd-title{
+    font-family: 'Montserrat' !important;
+    font-size: 18px !important;
+    color: #444444 !important
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');

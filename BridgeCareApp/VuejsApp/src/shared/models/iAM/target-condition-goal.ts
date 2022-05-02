@@ -17,7 +17,7 @@ export interface TargetConditionGoalLibrary {
     description: string;
     targetConditionGoals: TargetConditionGoal[];
     owner?: string;
-    shared?: boolean;
+    isShared: boolean;
 }
 
 export const emptyTargetConditionGoal: TargetConditionGoal = {
@@ -34,4 +34,5 @@ export const emptyTargetConditionGoalLibrary: TargetConditionGoalLibrary = {
     name: '',
     description: '',
     targetConditionGoals: [],
+    isShared: false
 };

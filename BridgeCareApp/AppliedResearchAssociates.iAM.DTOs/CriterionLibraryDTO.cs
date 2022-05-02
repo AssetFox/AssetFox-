@@ -2,12 +2,8 @@
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class CriterionLibraryDTO : BaseDTO
+    public class CriterionLibraryDTO : BaseLibraryDTO
     {
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-
         public string MergedCriteriaExpression { get; set; }
 
         public bool IsSingleUse { get; set; }

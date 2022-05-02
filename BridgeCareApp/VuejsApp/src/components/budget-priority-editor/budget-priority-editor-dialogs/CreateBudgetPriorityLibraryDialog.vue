@@ -30,6 +30,7 @@
 <script lang="ts">
 import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
+import {Getter} from 'vuex-class';
 import {CreateBudgetPriorityLibraryDialogData} from '@/shared/models/modals/create-budget-priority-library-dialog-data';
 import {
   BudgetPercentagePair,
@@ -45,11 +46,15 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 export default class CreatePriorityLibraryDialog extends Vue {
   @Prop() dialogData: CreateBudgetPriorityLibraryDialogData;
 
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
   newBudgetPriorityLibrary: BudgetPriorityLibrary = {...emptyBudgetPriorityLibrary, id: getNewGuid()};
   rules: InputValidationRules = rules;
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newBudgetPriorityLibrary = {
       ...this.newBudgetPriorityLibrary,
       budgetPriorities: this.dialogData.budgetPriorities.map((budgetPriority: BudgetPriority) => ({
@@ -58,7 +63,7 @@ export default class CreatePriorityLibraryDialog extends Vue {
           ...budgetPercentagePair, id: getNewGuid()
         }))
       })),
-      owner: getUserName()
+      owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

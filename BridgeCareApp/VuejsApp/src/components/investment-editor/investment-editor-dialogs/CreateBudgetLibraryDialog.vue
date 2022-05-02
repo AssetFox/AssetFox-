@@ -31,22 +31,27 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {CreateBudgetLibraryDialogData} from '@/shared/models/modals/create-budget-library-dialog-data';
 import {Budget, BudgetAmount, BudgetLibrary, emptyBudgetLibrary} from '@/shared/models/iAM/investment';
-import {getUserName} from '@/shared/utils/get-user-info';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component
 export default class CreateBudgetLibraryDialog extends Vue {
   @Prop() dialogData: CreateBudgetLibraryDialogData;
+
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
   newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
   rules: InputValidationRules = rules;
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newBudgetLibrary = {
       ...this.newBudgetLibrary,
       budgets: this.dialogData.budgets.map((budget: Budget) => ({
@@ -57,7 +62,7 @@ export default class CreateBudgetLibraryDialog extends Vue {
           id: getNewGuid()
         }))
       })),
-      owner: getUserName()
+      owner: this.getIdByUserNameGetter(currentUser)
     };
   }
 

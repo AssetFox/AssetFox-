@@ -137,7 +137,7 @@
                                 no-resize
                                 outline
                                 readonly
-                                rows="4"
+                                :rows="criteriaRows()"
                                 v-model="
                                     analysisMethod.criterionLibrary
                                         .mergedCriteriaExpression
@@ -145,9 +145,11 @@
                             >
                             </v-textarea>
                             <v-checkbox
-                              style="padding-top: 0px; margin-top: 4px"
+                              style="padding-top: 0px; margin-top: 4px;"
                               class="ghd-checkbox ghd-md-gray"
-                              label="Criteria is empty"
+                              label="Criteria is intentionally empty (MUST check to Save)" 
+                              v-model="criteriaIsIntentionallyEmpty"
+                              v-show="criteriaIsEmpty()"
                             >
                             </v-checkbox>
                         </v-flex>
@@ -166,7 +168,7 @@
                     >
                     <v-btn
                         @click="onUpsertAnalysisMethod"
-                        :disabled="!valid"
+                        :disabled="criteriaIsInvalid() || !valid"
                         depressed
                         class="ghd-blue-bg ghd-white ghd-button-text"
                         >Save</v-btn
@@ -268,6 +270,7 @@ export default class EditAnalysisMethod extends Vue {
     );
     rules: InputValidationRules = rules;
     valid: boolean = true;
+    criteriaIsIntentionallyEmpty: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -390,6 +393,23 @@ export default class EditAnalysisMethod extends Vue {
             };
         }
     }
+
+    criteriaIsEmpty()
+    {
+        return (isNil(this.analysisMethod.criterionLibrary) ||
+                isNil(this.analysisMethod.criterionLibrary.mergedCriteriaExpression) ||
+                this.analysisMethod.criterionLibrary.mergedCriteriaExpression == ""
+                );
+    }
+
+    criteriaRows()
+    {
+        return this.criteriaIsEmpty() ? 4 : 6;
+    }
+
+    criteriaIsInvalid() {
+        return this.criteriaIsEmpty() && !this.criteriaIsIntentionallyEmpty;
+    }    
 
     onUpsertAnalysisMethod() {
         const form: any = this.$refs.form;

@@ -45,10 +45,6 @@ namespace BridgeCareCore.Services
                     FileName = filename,
                     MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 };
-                var hackFolder = @"C:\Users\WilliamJockusch\Desktop";
-                var filePath = Path.Combine(hackFolder, filename);
-                var filePathWithExtension = Path.ChangeExtension(filePath, ".xlsx");
-                File.WriteAllBytes(filePathWithExtension, bytes);
                 return r;
             }
             else

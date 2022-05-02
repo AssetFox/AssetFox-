@@ -8,12 +8,16 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 
 const state = {
-    networks: [] as Network[]
+    networks: [] as Network[],
+    compatibleNetworks: [] as Network[]
 };
 
 const mutations = {
     networksMutator(state: any, networks: Network[]) {
         state.networks = clone(networks);
+    },
+    compatibleNetworksMutator(state: any, compatibleNetworks: Network[]) {
+        state.compatibleNetworks = clone(compatibleNetworks);
     },
     createdNetworkMutator(state: any, createdNetwork: Network) {
         state.newNetworks = prepend(createdNetwork, state.networks);
@@ -37,6 +41,14 @@ const actions = {
             .then((response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('networksMutator', response.data as Network[]);
+                }
+            });
+    },
+    async getCompatibleNetworks({commit}: any, payload: any) {
+        await NetworkService.getCompatibleNetworks(payload.networkId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('compatibleNetworksMutator', response.data as Network[]);
                 }
             });
     },

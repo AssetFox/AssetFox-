@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
 
+
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class AttributeRepository : IAttributeRepository
@@ -181,6 +182,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
 
             return explorer;
+        }
+
+        public List<Guid> GetAttributeIdsInNetwork(Guid networkId)
+        {
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException($"No network found having id {networkId}");
+            }
+
+            var maintainableAssets = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.NetworkId == networkId);
+
+            var attributes = _unitOfWork.Context.AggregatedResult
+                .Where(_ => maintainableAssets.Any(__ => __.Id == _.MaintainableAssetId))
+                .Select(_ => _.AttributeId)
+                .Distinct()
+                .ToList();
+
+            return attributes;
         }
 
         public Task<List<AttributeDTO>> Attributes()

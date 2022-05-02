@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import Component from 'vue-class-component';
 import {Prop, Watch} from 'vue-property-decorator';
 import {CreateCashFlowRuleLibraryDialogData} from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
@@ -50,12 +51,16 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 @Component
 export default class CreateCashFlowRuleLibraryDialog extends Vue {
   @Prop() dialogData: CreateCashFlowRuleLibraryDialogData;
+  
+  @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
   newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
   rules: InputValidationRules = clone(rules);
 
   @Watch('dialogData')
   onDialogDataChanged() {
+    let currentUser: string = getUserName();
+
     this.newCashFlowRuleLibrary = {
       ...this.newCashFlowRuleLibrary,
       cashFlowRules: hasValue(this.dialogData.cashFlowRules)
@@ -70,7 +75,7 @@ export default class CreateCashFlowRuleLibraryDialog extends Vue {
                 : []
           }))
           : [],
-      owner: getUserName()
+        owner: this.getIdByUserNameGetter(currentUser),
     };
   }
 

@@ -56,15 +56,10 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
-                var untreatedSections =
-                    year.Sections.Where(
-                        sect => sect.TreatmentCause == TreatmentCause.NoSelection &&
-                        sect.ValuePerNumericAttribute["RISK_SCORE"] > 15000 &&
-                        sect.TreatmentOptions.Count > 0
-                        ).ToList();
+                var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName)));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0])));
                     firstYear = false;
                     if(simulationOutput.Years.Count > 1)
                     {
@@ -73,12 +68,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0]))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = int.Parse(section.FacilityName);
+                    var facilityId = int.Parse(section.FacilityName.Split('-')[0]);
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.
@@ -90,15 +85,18 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                         {
                             var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
 
-                            if (validFacilityIds.Contains(facilityId))
-                            {
-                                treatmentsPerSection.Add(facilityId, newTuple);
-                            }
-                            else
+                            if (!validFacilityIds.Contains(facilityId))
                             {
                                 if (treatmentsPerSection.ContainsKey(facilityId))
                                 {
                                     treatmentsPerSection.Remove(facilityId);
+                                }
+                            }
+                            else
+                            {
+                                if (!treatmentsPerSection.ContainsKey(facilityId))
+                                {
+                                    treatmentsPerSection.Add(facilityId, newTuple);
                                 }
                             }
                         }

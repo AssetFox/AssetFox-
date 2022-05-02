@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
 
         public static CashFlowRuleLibraryEntity ToEntity(this CashFlowRuleLibraryDTO dto) =>
-            new CashFlowRuleLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description };
+            new CashFlowRuleLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
         public static CashFlowRuleLibraryDTO ToDto(this CashFlowRuleLibraryEntity entity) =>
             new CashFlowRuleLibraryDTO
@@ -62,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
+                Owner = entity.CreatedBy,
+                IsShared = entity.IsShared,
                 CashFlowRules = entity.CashFlowRules.Any()
                     ? entity.CashFlowRules.Select(_ => _.ToDto()).ToList()
                     : new List<CashFlowRuleDTO>(),

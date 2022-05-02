@@ -30,7 +30,15 @@ export interface ScenarioActions {
 export interface TabItems {
     name: string;
     icon: string;
+    count: number;
 }
+
+export interface CloneScenarioData {
+    scenarioId: string;
+    networkId: string;
+    scenarioName: string;
+}
+
 export const emptyScenario: Scenario = {
     id: getBlankGuid(),
     name: '',

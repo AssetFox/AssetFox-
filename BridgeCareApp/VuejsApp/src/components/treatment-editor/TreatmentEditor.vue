@@ -36,18 +36,13 @@
                         </template>
                     </v-text-field>
                     <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner:
-                        {{
-                            selectedTreatmentLibrary.owner
-                                ? selectedTreatmentLibrary.owner
-                                : '[ No Owner ]'
-                        }}
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
                     <v-checkbox
                         class='sharing'
                         label='Shared'
                         v-if='hasSelectedLibrary && !hasScenario'
-                        v-model='selectedTreatmentLibrary.shared'
+                        v-model='selectedTreatmentLibrary.isShared'
                     />
                 </v-flex>
             </v-layout>
@@ -178,21 +173,21 @@
                     @click='onUpsertScenarioTreatments'
                     class='ara-blue-bg white--text'
                     v-show='hasScenario'
-                    :disabled='disableCrudButton() || !hasUnsavedChanges'>
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn
                     @click='onUpsertTreatmentLibrary'
                     class='ara-blue-bg white--text'
                     v-show='!hasScenario'
-                    :disabled='disableCrudButton() || !hasUnsavedChanges'
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >
                     Update Library
                 </v-btn>
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
                     class='ara-blue-bg white--text'
-                    :disabled='disableCrudButton()'
+                    :disabled='disableCrudButtons()'
                 >
                     Create as New Library
                 </v-btn>
@@ -200,7 +195,7 @@
                     @click='onShowConfirmDeleteAlert'
                     class='ara-orange-bg white--text'
                     v-show='!hasScenario'
-                    :disabled='!hasSelectedLibrary'
+                    :disabled='!hasLibraryEditPermission'
                 >
                     Delete Library
                 </v-btn>
@@ -235,7 +230,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter } from 'vuex-class';
 import CreateTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentLibraryDialog.vue';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import {
@@ -281,6 +276,7 @@ import { SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -321,6 +317,8 @@ export default class TreatmentEditor extends Vue {
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
 
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+
     selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
     treatments: Treatment[] = [];
     selectedScenarioId: string = getBlankGuid();
@@ -344,6 +342,9 @@ export default class TreatmentEditor extends Vue {
     keepActiveTab: boolean = false;
     hasScenario: boolean = false;
     budgets: SimpleBudgetDetail[] = [];
+    hasCreatedLibrary: boolean = false;
+    disableCrudButtonsResult: boolean = false;
+    hasLibraryEditPermission: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -403,9 +404,14 @@ export default class TreatmentEditor extends Vue {
         );
     }
 
-    @Watch('selectedTreatmentLibrary')
+    @Watch('selectedTreatmentLibrary', {deep: true})
     onSelectedTreatmentLibraryChanged() {
         this.hasSelectedLibrary = this.selectedTreatmentLibrary.id !== this.uuidNIL;
+
+        if (this.hasSelectedLibrary) {
+            this.checkLibraryEditPermission();
+            this.hasCreatedLibrary = false;
+        }
 
         if (this.hasScenario) {
             this.treatments = this.selectedTreatmentLibrary.treatments
@@ -488,6 +494,23 @@ export default class TreatmentEditor extends Vue {
         return isEqual(this.treatmentSelectItemValue, treatmentId.toString());
     }
 
+    getOwnerUserName(): string {
+
+        if (!this.hasCreatedLibrary) {
+        return this.getUserNameByIdGetter(this.selectedTreatmentLibrary.owner);
+        }
+        
+        return getUserName();
+    }
+
+    checkLibraryEditPermission() {
+        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    }
+
+    checkUserIsLibraryOwner() {
+        return this.getUserNameByIdGetter(this.selectedTreatmentLibrary.owner) == getUserName();
+    }
+
     onSetTreatmentSelectItemValue(treatmentId: string | number) {
         if (!isEqual(this.treatmentSelectItemValue, treatmentId.toString())) {
             this.treatmentSelectItemValue = treatmentId.toString();
@@ -514,6 +537,8 @@ export default class TreatmentEditor extends Vue {
 
         if (!isNil(library)) {
             this.upsertTreatmentLibraryAction({ library: library });
+            this.hasCreatedLibrary = true;
+            this.librarySelectItemValue = library.name;
         }
     }
 
@@ -660,7 +685,7 @@ export default class TreatmentEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButtons() {
         const allDataIsValid: boolean = this.treatments.every((treatment: Treatment) => {
             const allSubDataIsValid: boolean = treatment.consequences.every((consequence: TreatmentConsequence) => {
                     return (this.rules['generalRules'].valueIsNotEmpty(consequence.attribute,) === true &&
@@ -680,6 +705,7 @@ export default class TreatmentEditor extends Vue {
                 allDataIsValid);
         }
 
+        this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
 }

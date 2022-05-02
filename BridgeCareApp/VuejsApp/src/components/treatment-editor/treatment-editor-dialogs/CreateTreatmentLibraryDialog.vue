@@ -45,6 +45,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
+import {Getter} from 'vuex-class';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { CreateTreatmentLibraryDialogData } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
@@ -61,6 +62,8 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 export default class CreateTreatmentLibraryDialog extends Vue {
     @Prop() dialogData: CreateTreatmentLibraryDialogData;
 
+    @Getter('getIdByUserName') getIdByUserNameGetter: any;
+
     newTreatmentLibrary: TreatmentLibrary = {
         ...emptyTreatmentLibrary,
         id: getNewGuid(),
@@ -68,6 +71,8 @@ export default class CreateTreatmentLibraryDialog extends Vue {
 
     @Watch('dialogData')
     onDialogDataChanged() {
+        let currentUser: string = getUserName();
+
         this.newTreatmentLibrary = {
             ...this.newTreatmentLibrary,
             treatments: this.dialogData.selectedTreatmentLibraryTreatments.map(
@@ -86,7 +91,7 @@ export default class CreateTreatmentLibraryDialog extends Vue {
                     ),
                 }),
             ),
-            owner: getUserName(),
+            owner: this.getIdByUserNameGetter(currentUser),
         };
     }
 

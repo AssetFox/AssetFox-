@@ -27,16 +27,16 @@
             </v-card>
         </v-dialog>
 
-        <v-dialog max-width='260px' persistent v-model='showReminder'>
+        <v-dialog max-width='400px' persistent v-model='showReminder'>
             <v-card>
-                <v-card-title>
+                <v-card-title class="title-padding">
                     <v-layout justify-center>
-                        <h6>Budgets have been replaced.  Please update budget priorities</h6>
+                        <h6 class="ghd-control-label">Budgets have been replaced.  Please update budget priorities</h6>
                     </v-layout>
                 </v-card-title>
-                <v-card-actions>
+                <v-card-actions class="bottom-portion-padding">
                     <v-layout justify-space-between row>
-                        <v-btn @click="showReminder = false" outline>Ok</v-btn>
+                        <v-btn @click="showReminder = false" outline class="ghd-blue ghd-button-text">Ok</v-btn>
                     </v-layout>
                 </v-card-actions>
                 
@@ -116,3 +116,14 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
     }
 }
 </script>
+<style>
+    .title-padding{
+        padding-top: 30px;
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+
+    .bottom-portion-padding{
+        padding-bottom: 30px;
+    }
+</style>

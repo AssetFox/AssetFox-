@@ -161,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList().ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
 
-        public TreatmentLibraryDTO GetTreatmentLibary(Guid libraryId)
+        public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)
         {
             var entity = _unitOfWork.Context.TreatmentLibrary.AsNoTracking()
                 .Include(_ => _.Treatments)
@@ -194,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         
 
-        public List<TreatmentLibraryDTO> GetTreatmentLibraries()
+        public List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())
             {
@@ -315,7 +315,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void HandleImportCompletion(Guid libraryId, List<TreatmentDTO> treatments)
+        public void ReplaceTreatmentLibrary(Guid libraryId, List<TreatmentDTO> treatments)
         {
 
             _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>

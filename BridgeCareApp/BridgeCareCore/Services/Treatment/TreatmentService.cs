@@ -27,7 +27,7 @@ namespace BridgeCareCore.Services
         }
         public FileInfoDTO GenerateExcelFile(Guid libraryId)
         {
-            var library = _unitOfWork.SelectableTreatmentRepo.GetTreatmentLibary(libraryId);
+            var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
             var found = library != null;
             if (found)
             {
@@ -95,7 +95,7 @@ namespace BridgeCareCore.Services
         {
             var libraryId = importResult.TreatmentLibrary.Id;
             var importedTreatments = importResult.TreatmentLibrary.Treatments;
-            _unitOfWork.SelectableTreatmentRepo.HandleImportCompletion(libraryId, importedTreatments);
+            _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
         }
     }
 }

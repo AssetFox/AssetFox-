@@ -264,7 +264,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateAuthorizedController();
             CreateLibraryTestData();
 
-            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
             var dtoLibrary = dto.Where(t => t.Name == "Test Name").FirstOrDefault();
             dtoLibrary.Description = "Updated Description";
             dtoLibrary.Treatments[0].Name = "Updated Name";
@@ -300,7 +300,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             timer.Elapsed += delegate
             {
                 var modifiedDto =
-                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries()[0];
+                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries()[0];
                 Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
                 Assert.True(modifiedDto.AppliedScenarioIds.Any());
                 Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);

@@ -56,11 +56,11 @@ namespace BridgeCareCore.Controllers
             }
 
             List<TreatmentLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+                UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
 
             List<TreatmentLibraryDTO> RetrievePermittedForLibraries()
             {
-                var result = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+                var result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
                 return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
             }
 
@@ -72,7 +72,7 @@ namespace BridgeCareCore.Controllers
 
             void UpsertPermittedForLibrary(TreatmentLibraryDTO dto)
             {
-                var currentRecord = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                var currentRecord = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
                 if (currentRecord?.Owner == UserId || currentRecord == null)
                 {
                     UpsertAnyForLibrary(dto);
@@ -87,7 +87,7 @@ namespace BridgeCareCore.Controllers
 
             void DeletePermittedForLibrary(Guid libraryId)
             {
-                var dto = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                var dto = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
 
                 if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
 

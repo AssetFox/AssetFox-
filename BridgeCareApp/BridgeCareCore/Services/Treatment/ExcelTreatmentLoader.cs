@@ -17,17 +17,6 @@ namespace BridgeCareCore.Services.Treatment
             _expressionValidationService = expressionValidationService;
         }
 
-
-        public object Validate(TreatmentDTO treatment)
-        {
-            var criteria = new UserCriteriaDTO();
-            foreach (var cost in treatment.Costs)
-            {
-
-
-            }
-            return null;
-        }
         private static Dictionary<string, string> DetailsSectionAsDictionary(ExcelWorksheet worksheet)
         {
             var r = new Dictionary<string, string>();

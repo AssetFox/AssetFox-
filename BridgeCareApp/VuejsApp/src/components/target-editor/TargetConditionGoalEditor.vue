@@ -42,9 +42,6 @@
                             />
                             </v-layout>
                 </v-card-title>
-            <!-- </v-layout>
-            <v-layout justify-right> -->
-                <!-- <v-layout row> -->
                 <v-spacer />
                 <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
                     <v-btn outline
@@ -61,8 +58,6 @@
                     </v-btn>
                 </v-flex>
             </v-layout>
-                <!-- </v-layout> -->
-            <!-- </v-layout> -->
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
@@ -271,7 +266,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn
-                    @click="onUpsertScenarioTargetConditionGoals"
+                    @click="onUpsertTargetConditionGoalLibrary"
                     class="ghd-blue-bg ghd-white"
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"

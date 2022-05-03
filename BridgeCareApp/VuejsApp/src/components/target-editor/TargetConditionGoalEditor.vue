@@ -22,12 +22,7 @@
                             >
                             </v-divider>
                             <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
-                                Owner:
-                                {{
-                                    selectedTargetConditionGoalLibrary.owner
-                                        ? selectedTargetConditionGoalLibrary.owner
-                                        : '[ No Owner ]'
-                                }}
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                             </div>
                             <v-divider vertical 
                                 class="mx-3"

@@ -45,10 +45,7 @@
                     <v-layout row align-end class="left-buttons-padding" v-show='hasSelectedLibrary || hasScenario'>
                         <v-spacer></v-spacer>
                         <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding'>Add Budget Priority</v-btn>
-                        <!-- <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
-                            class='ara-orange-bg white--text'>
-                            Delete
-                        </v-btn> -->
+                        
                         <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
                             v-show='(hasSelectedLibrary || hasScenario) && (selectedScenarioId === uuidNIL)' class='ghd-blue ghd-button-text ghd-outline-button-padding'>
                             New Library
@@ -138,6 +135,10 @@
                         </td>
                     </template>
                 </v-data-table>
+                <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
+                    class='ghd-blue' flat>
+                    Delete Selected
+                </v-btn>
             </div>
         </v-flex>
         <v-flex v-show='hasSelectedLibrary && selectedScenarioId === uuidNIL'

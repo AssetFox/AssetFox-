@@ -18,7 +18,7 @@ using OfficeOpenXml;
 namespace BridgeCareCore.Controllers
 {
     using CommittedProjectGetMethod = Func<Guid, FileInfoDTO>;
-    using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, bool>;
+    using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, string, bool>;
     using CommittedProjectDeleteMethod = Action<Guid>;
 
     [Route("api/[controller]")]
@@ -66,15 +66,15 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, CommittedProjectCreateMethod> CreateImportMethods()
         {
-            void CreateAny(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
+            void CreateAny(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
             {
-                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, applyNoTreatment);
+                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
             }
 
-            void CreatePermitted(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
+            void CreatePermitted(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
             {
                 CheckUserSimulationModifyAuthorization(simulationId);
-                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, applyNoTreatment);
+                _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
             }
 
             return new Dictionary<string, CommittedProjectCreateMethod>
@@ -133,6 +133,7 @@ namespace BridgeCareCore.Controllers
                 var simulationId = Guid.Parse(id.ToString());
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+                var filename = ContextAccessor.HttpContext.Request.Form.Files[0].FileName;
 
                 var applyNoTreatment = false;
                 if (ContextAccessor.HttpContext.Request.Form.ContainsKey("applyNoTreatment"))
@@ -143,7 +144,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackage, applyNoTreatment);
+                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackage, filename, applyNoTreatment);
                     UnitOfWork.Commit();
                 });
 

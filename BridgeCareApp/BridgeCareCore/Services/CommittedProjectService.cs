@@ -181,7 +181,7 @@ namespace BridgeCareCore.Services
          * Creates CommittedProjectEntity data for Committed Project Import
          */
         private List<CommittedProjectEntity> CreateCommittedProjectEntitiesForImport(Guid simulationId,
-            ExcelPackage excelPackage, bool applyNoTreatment)
+            ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
 
@@ -215,11 +215,13 @@ namespace BridgeCareCore.Services
                 var brKey = worksheet.GetCellValue<string>(row, 1);
                 var bmsId = worksheet.GetCellValue<string>(row, 2);
                 var projectYear = worksheet.GetCellValue<int>(row, 4);
-                var searchList = projectsPerLocationIdentifierAndYearTuple.Keys.Where(key => key.Item2 == projectYear).Select(key => key.Item1).ToList();
+                var searchList = maintainableAssetIdsPerLocationIdentifier.Keys.ToList();
                 var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
+                var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
                 if (locationSearchResult.Message!=null)
                 {
-                    throw new Exception(locationSearchResult.Message);
+                    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: {locationSearchResult.Message}";
+                    throw new Exception(exceptionMessage);
                 }
                 var locationIdentifier = locationSearchResult.LocationIdentifier;
 
@@ -315,10 +317,10 @@ namespace BridgeCareCore.Services
             return projectsPerLocationIdentifierAndYearTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var committedProjectEntities =
-                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, applyNoTreatment);
+                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 

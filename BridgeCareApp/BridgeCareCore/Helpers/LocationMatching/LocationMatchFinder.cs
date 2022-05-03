@@ -40,7 +40,7 @@ namespace BridgeCareCore.Helpers
                     0 => new LocationMatchSearchResult
                     {
                         LocationIdentifier = null,
-                        Message = $"There is no entry with a BMSID of {requestedAfterHyphen}",
+                        Message = $"There is no location with a BMSID of {requestedAfterHyphen}",
                     },
                     1 => new LocationMatchSearchResult
                     {
@@ -49,7 +49,7 @@ namespace BridgeCareCore.Helpers
                     _ => new LocationMatchSearchResult
                     {
                         LocationIdentifier = null,
-                        Message = $"There are {matchingKeys.Count} entries with a BMSID of {requestedAfterHyphen}.",
+                        Message = $"There are {matchingKeys.Count} locations with a BMSID of {requestedAfterHyphen}.",
                     },
                 };
             }
@@ -61,7 +61,7 @@ namespace BridgeCareCore.Helpers
                     0 => new LocationMatchSearchResult
                     {
                         LocationIdentifier = null,
-                        Message = $"There are no entries with a BMSID of {requestedAfterHyphen}",
+                        Message = $"There are no locations with a BMSID of {requestedAfterHyphen}",
                     },
                     1 => new LocationMatchSearchResult
                     {
@@ -83,6 +83,12 @@ namespace BridgeCareCore.Helpers
                     return new LocationMatchSearchResult
                     {
                         LocationIdentifier = fullRequestedString,
+                    };
+                } else
+                {
+                    return new LocationMatchSearchResult {
+                        LocationIdentifier = null,
+                        Message = $"No location found with a BRKEY of {requestedBeforeHyphen} and a BMSID of {requestedAfterHyphen}",
                     };
                 }
             }

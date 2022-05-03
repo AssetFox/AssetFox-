@@ -6,6 +6,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Helpers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -213,9 +214,14 @@ namespace BridgeCareCore.Services
             {
                 var brKey = worksheet.GetCellValue<string>(row, 1);
                 var bmsId = worksheet.GetCellValue<string>(row, 2);
-                var locationIdentifier = $"{brKey}-{bmsId}";
-
                 var projectYear = worksheet.GetCellValue<int>(row, 4);
+                var searchList = projectsPerLocationIdentifierAndYearTuple.Keys.Where(key => key.Item2 == projectYear).Select(key => key.Item1).ToList();
+                var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
+                if (locationSearchResult.Message!=null)
+                {
+                    throw new Exception(locationSearchResult.Message);
+                }
+                var locationIdentifier = locationSearchResult.LocationIdentifier;
 
                 if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
                 {

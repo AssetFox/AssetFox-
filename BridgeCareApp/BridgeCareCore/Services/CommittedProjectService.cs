@@ -20,6 +20,8 @@ namespace BridgeCareCore.Services
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
 
+        public const string UnknownBudgetName = "Unknown";
+
         private static readonly List<string> InitialHeaders = new List<string>
         {
             "BRKEY",
@@ -71,7 +73,12 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = project.Year;
                         worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
                         worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        worksheet.Cells[row, column++].Value = project.ScenarioBudget.Name;
+                        var budgetName = project.ScenarioBudget.Name;
+                        if (budgetName == UnknownBudgetName)
+                        {
+                            budgetName = "";
+                        }
+                        worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         project.CommittedProjectConsequences.OrderBy(_ => _.Attribute.Name).ForEach(consequence =>
@@ -232,10 +239,14 @@ namespace BridgeCareCore.Services
                 }
 
                 var budgetName = worksheet.GetCellValue<string>(row, 7);
-                var budgetNameIsNonempty = !string.IsNullOrWhiteSpace(budgetName);
+                var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
                 ScenarioBudgetEntity budgetEntity = null;
 
-                if (budgetNameIsNonempty)
+                if (budgetNameIsEmpty)
+                {
+                    budgetEntity = _unitOfWork.BudgetRepo.EnsureExistenceOfUnknownBudgetForSimulation(simulationId);
+                }
+                else 
                 {
                     if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
                     {
@@ -243,13 +254,13 @@ namespace BridgeCareCore.Services
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
                     budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
-                }
+                } 
 
                 var project = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
                     SimulationId = simulationEntity.Id,
-                    ScenarioBudgetId = budgetEntity?.Id ?? Guid.Empty,
+                    ScenarioBudgetId = budgetEntity.Id,
                     MaintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier],
                     Name = worksheet.GetCellValue<string>(row, 3),
                     Year = projectYear,

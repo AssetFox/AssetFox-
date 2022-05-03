@@ -278,7 +278,7 @@
                     class="ghd-blue-bg ghd-white"
                     v-show="hasScenario"
                 >
-                    Discard Changes
+                    Cancel
                 </v-btn>
                 <v-btn
                     @click="onUpsertTargetConditionGoalLibrary"

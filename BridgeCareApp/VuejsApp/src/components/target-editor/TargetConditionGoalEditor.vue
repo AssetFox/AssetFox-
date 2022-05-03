@@ -42,9 +42,11 @@
                             />
                             </v-layout>
                 </v-card-title>
-                <v-spacer/>
+            <!-- </v-layout>
+            <v-layout justify-right> -->
                 <!-- <v-layout row> -->
-                <v-flex v-show="hasSelectedLibrary || hasScenario" xs4>
+                <v-spacer />
+                <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
                     <v-btn outline
                         @click="showCreateTargetConditionGoalDialog = true"
                         class="ghd-control-border ghd-blue"
@@ -58,8 +60,9 @@
                         Create New Library
                     </v-btn>
                 </v-flex>
-                <!-- </v-layout> -->
             </v-layout>
+                <!-- </v-layout> -->
+            <!-- </v-layout> -->
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">

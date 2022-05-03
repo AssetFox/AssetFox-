@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Helpers;
@@ -86,7 +87,7 @@ namespace BridgeCareCore.Services
             var committedProjectEntities = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
 
             var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                .Select(simulation => new SimulationEntity {Name = simulation.Name}).Single();
+                .Select(simulation => new SimulationEntity { Name = simulation.Name }).Single();
             var fileName = $"CommittedProjects_{simulationEntity.Name.Trim().Replace(" ", "_")}.xlsx";
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
@@ -218,7 +219,7 @@ namespace BridgeCareCore.Services
                 var searchList = maintainableAssetIdsPerLocationIdentifier.Keys.ToList();
                 var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
                 var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
-                if (locationSearchResult.Message!=null)
+                if (locationSearchResult.Message != null)
                 {
                     var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: {locationSearchResult.Message}";
                     throw new Exception(exceptionMessage);
@@ -231,20 +232,24 @@ namespace BridgeCareCore.Services
                 }
 
                 var budgetName = worksheet.GetCellValue<string>(row, 7);
+                var budgetNameIsNonempty = !string.IsNullOrWhiteSpace(budgetName);
+                ScenarioBudgetEntity budgetEntity = null;
 
-                if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                if (budgetNameIsNonempty)
                 {
-                    throw new RowNotInTableException(
-                        $"Budget {budgetName} does not exist in the applied budget library.");
+                    if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                    {
+                        throw new RowNotInTableException(
+                            $"Budget {budgetName} does not exist in the applied budget library.");
+                    }
+                    budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
                 }
-
-                var budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
 
                 var project = new CommittedProjectEntity
                 {
                     Id = Guid.NewGuid(),
                     SimulationId = simulationEntity.Id,
-                    ScenarioBudgetId = budgetEntity.Id,
+                    ScenarioBudgetId = budgetEntity?.Id ?? Guid.Empty,
                     MaintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier],
                     Name = worksheet.GetCellValue<string>(row, 3),
                     Year = projectYear,

@@ -5,7 +5,7 @@
                 <v-card-title>
                             <v-layout row align-center>
                             <v-flex xs12>
-                            <v-subheader class="ghd-control-border ghd-md-gray">Target Condition Goal Library</v-subheader>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"
                                 :items="librarySelectItems"
@@ -261,7 +261,7 @@
                     Create as New Library
                 </v-btn>
                 <v-btn
-                    @click="onUpsertTargetConditionGoalLibrary"
+                    @click="onUpsertScenarioTargetConditionGoals"
                     class="ghd-blue-bg ghd-white"
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"

@@ -166,6 +166,13 @@
     padding-top: 0px !important;
 }
 
+.ghd-control-text .v-label {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    padding-top: 0px !important;
+    font-weight: normal;
+}
+
 .ghd-control-text .v-select__selections {
     padding-top: 0px !important;
     vertical-align: middle !important;

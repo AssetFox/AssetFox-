@@ -8,20 +8,24 @@
                         bottom
                         min-height="500px"
                         min-width="800px"
-                    >
-                        <template slot="activator">
-                            <v-text-field
-                                readonly
-                                full-width
-                                class="sm-txt"
-                                label="Treatment Criteria"
-                                :value="
-                                    selectedTreatmentDetails.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                            >
-                                <template slot="append-outer">
-                                    <v-layout align-center fill-height row>
+                    >                    
+                        <template slot="activator">                                                    
+                            <v-layout column>  
+                                <v-layout align-center row style="height:50px;" class="dhg-text-padding">
+                                    
+                                        <v-flex xs10>
+                                            <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
+                                        </v-flex>
+                                        <v-flex xs2>                                 
+                                        <v-btn
+                                            @click="
+                                                onRemoveTreatmentCriterionLibrary
+                                            "
+                                            class="ghd-white-bg ghd-blue ghd-button-text"
+                                            icon
+                                        >
+                                            Clear
+                                        </v-btn>
                                         <v-btn
                                             @click="
                                                 onShowTreatmentCriterionLibraryEditorDialog
@@ -29,20 +33,26 @@
                                             class="edit-icon"
                                             icon
                                         >
-                                            <v-icon>fas fa-edit</v-icon>
-                                        </v-btn>
-                                        <v-btn
-                                            @click="
-                                                onRemoveTreatmentCriterionLibrary
+                                            <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        </v-btn>   
+                                    </v-flex> 
+                                </v-layout>       
+                                <v-layout align-center row style="padding-left:5px;">  
+                                    <v-flex xs11>
+                                        <v-textarea
+                                            class="ghd-control-border sm-txt"                                            
+                                            no-resize
+                                            outline
+                                            readonly                                            
+                                            :value="
+                                                selectedTreatmentDetails.criterionLibrary
+                                                    .mergedCriteriaExpression
                                             "
-                                            class="ara-orange"
-                                            icon
                                         >
-                                            <v-icon>fas fa-minus-square</v-icon>
-                                        </v-btn>
-                                    </v-layout>
-                                </template>
-                            </v-text-field>
+                                        </v-textarea>         
+                                    </v-flex>      
+                                </v-layout>
+                            </v-layout>
                         </template>
                         <v-card>
                             <v-card-text>
@@ -63,7 +73,7 @@
                     </v-menu>
                 </v-flex>
 
-                <div class="shadow-inputs-div">
+                <!-- <div class="shadow-inputs-div">
                     <v-spacer></v-spacer>
                     <v-layout justify-space-between row>
                         <v-flex xs3>
@@ -149,7 +159,7 @@
                             )
                         "
                     />
-                </v-flex>
+                </v-flex> -->
             </v-layout>
         </v-flex>
 

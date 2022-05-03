@@ -6,6 +6,7 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using System.Linq;
+using BridgeCareCore.Helpers.Excel;
 
 namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
 {

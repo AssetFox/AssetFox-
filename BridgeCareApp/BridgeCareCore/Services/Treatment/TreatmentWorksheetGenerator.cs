@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Services.SummaryReport.Models;
-using BridgeCareCore.Services.SummaryReport.Visitors;
+﻿using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Helpers.Excel.Visitors;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.Treatment

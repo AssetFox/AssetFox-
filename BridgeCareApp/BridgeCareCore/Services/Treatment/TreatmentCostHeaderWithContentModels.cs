@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using BridgeCareCore.Services.SummaryReport.Models;
-using TModel = BridgeCareCore.Services.SummaryReport.Models.Tables.ExcelHeaderWithContentModel<AppliedResearchAssociates.iAM.DTOs.TreatmentCostDTO>;
+using BridgeCareCore.Helpers.Excel;
+using TModel = BridgeCareCore.Helpers.Excel.Tables.ExcelHeaderWithContentModel<AppliedResearchAssociates.iAM.DTOs.TreatmentCostDTO>;
 
 namespace BridgeCareCore.Services.Treatment
 {

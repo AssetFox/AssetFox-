@@ -101,6 +101,7 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\Inventory\" />
+    <Folder Include="Services\SummaryReport\Models\" />
   </ItemGroup>
 
 

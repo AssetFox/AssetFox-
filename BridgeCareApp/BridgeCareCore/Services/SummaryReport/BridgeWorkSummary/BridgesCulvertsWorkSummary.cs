@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Helpers.Excel;
 using BridgeCareCore.Models.SummaryReport;
 using OfficeOpenXml;
 

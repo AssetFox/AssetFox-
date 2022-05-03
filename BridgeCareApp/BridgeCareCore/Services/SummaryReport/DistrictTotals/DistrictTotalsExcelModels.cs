@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Helpers.Excel;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals

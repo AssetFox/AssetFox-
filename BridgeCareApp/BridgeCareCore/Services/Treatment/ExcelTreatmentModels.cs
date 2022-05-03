@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Services.SummaryReport.Models;
-using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
+using BridgeCareCore.Helpers.Excel;
 
 namespace BridgeCareCore.Services.Treatment
 {

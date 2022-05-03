@@ -1,5 +1,5 @@
 ﻿using BridgeCareCore.Services.SummaryReport.BridgeData;
-using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Helpers.Excel;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 {

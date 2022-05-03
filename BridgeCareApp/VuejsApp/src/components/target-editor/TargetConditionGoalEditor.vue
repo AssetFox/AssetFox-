@@ -3,8 +3,9 @@
         <v-flex xs12>
             <v-layout justify-center align-center>
                 <v-card-title>
-                            <v-flex xs4>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Library Name</v-subheader>
+                            <v-layout row align-center>
+                            <v-flex xs12>
+                            <v-subheader class="ghd-control-border ghd-md-gray">Target Condition Goal Library</v-subheader>
                             <v-select
                                 class="ghd-control-border ghd-control-text"
                                 :items="librarySelectItems"
@@ -39,26 +40,25 @@
                                 v-if="hasSelectedLibrary && !hasScenario"
                                 v-model="selectedTargetConditionGoalLibrary.shared"
                             />
+                            </v-layout>
                 </v-card-title>
                 <v-spacer/>
-            <v-flex v-show="hasSelectedLibrary || hasScenario" xs4>
-                <v-layout>
-                <v-btn outline
-                    @click="showCreateTargetConditionGoalDialog = true"
-                    class="ghd-control-border ghd-blue"
-                    >Add Target Condition Goal</v-btn
-                >
-                <v-btn outline
-                        @click="
-                            onShowCreateTargetConditionGoalLibraryDialog(false)
-                        "
+                <!-- <v-layout row> -->
+                <v-flex v-show="hasSelectedLibrary || hasScenario" xs4>
+                    <v-btn outline
+                        @click="showCreateTargetConditionGoalDialog = true"
+                        class="ghd-control-border ghd-blue"
+                        >Add Target Condition Goal</v-btn
+                    >
+                    <v-btn outline
+                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
                         class="ghd-control-border ghd-blue"
                         v-show="!hasScenario"
                     >
                         Create New Library
                     </v-btn>
-                </v-layout>
-            </v-flex>
+                </v-flex>
+                <!-- </v-layout> -->
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
@@ -252,14 +252,6 @@
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>
-                <v-btn
-                    @click="onUpsertScenarioTargetConditionGoals"
-                    class="ghd-blue-bg ghd-white"
-                    v-show="hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
-                >
-                    Save
-                </v-btn>
                 <v-btn flat
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
@@ -276,6 +268,21 @@
                     Create as New Library
                 </v-btn>
                 <v-btn
+                    @click="onUpsertScenarioTargetConditionGoals"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="hasScenario"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                >
+                    Save
+                </v-btn>
+                <v-btn :disabled='!hasUnsavedChanges'
+                    @click="onDiscardChanges"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="hasScenario"
+                >
+                    Discard Changes
+                </v-btn>
+                <v-btn
                     @click="onUpsertTargetConditionGoalLibrary"
                     class="ghd-blue-bg ghd-white"
                     v-show="!hasScenario"
@@ -283,13 +290,6 @@
                 >
                     Update Library
                 </v-btn>
-                <!-- <v-btn :disabled='!hasUnsavedChanges'
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
-                >
-                    Discard Changes
-                </v-btn> -->
             </v-layout>
         </v-flex>
 

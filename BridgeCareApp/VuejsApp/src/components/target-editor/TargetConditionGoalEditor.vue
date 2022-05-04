@@ -37,7 +37,7 @@
                         />
                     </v-layout>
                 </v-card-title>
-                <v-layout justify-end align-center v-show="hasSelectedLibrary || hasScenario">
+                <v-layout justify-end align-center v-show="hasSelectedLibrary || hasScenario" class="my-2">
                     <v-btn outline
                         @click="showCreateTargetConditionGoalDialog = true"
                         class="ghd-control-border ghd-blue"

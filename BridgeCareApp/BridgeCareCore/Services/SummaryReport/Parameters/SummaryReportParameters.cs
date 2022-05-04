@@ -5,6 +5,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Models.SummaryReport;
+using BridgeCareCore.Helpers.Excel;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 

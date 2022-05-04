@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Helpers.Excel;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
@@ -59,8 +59,8 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var bottomAddress = ExcelRangeFunctions.StartOffset(-1, yOffset, false, true);
             Func<ExcelRange, string> ratio = (ExcelRange range) =>
             {
-                var r = $@"IFERROR({localAddress(range)}/{bottomAddress(range)},0)";
-                return r;
+                var returnValue = $@"IFERROR({localAddress(range)}/{bottomAddress(range)},0)";
+                return returnValue;
             };
             return StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(ratio),

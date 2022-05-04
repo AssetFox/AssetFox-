@@ -1,5 +1,5 @@
 ﻿
-using BridgeCareCore.Services.SummaryReport.Visitors;
+using BridgeCareCore.Helpers.Excel.Visitors;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary

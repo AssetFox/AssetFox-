@@ -54,6 +54,7 @@
     white-space: nowrap;
 }
 
+/*old Colors */
 .paper-white-bg {
     background-color: #FFFFFF !important;
 }
@@ -100,10 +101,6 @@
 
 .ara-blue-pantone-281 {
     color: #002E6C !important;
-}
-
-.ara-blue-new {
-    color: #2A578D !important;
 }
 
 .ara-black {
@@ -181,6 +178,13 @@
     margin-top: 0px !important;
 }
 
+.ghd-control-dialog-header{
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 500;
+    font-size: 18px; 
+    color: #444444;
+}
+
 
 /* Button */
 .ghd-button-border {
@@ -193,6 +197,11 @@
     font-size: 14px !important;
     font-weight: 600 !important;
     text-transform: none !important;
+}
+
+.ghd-outline-button-padding .v-btn__content{
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 
@@ -299,7 +308,7 @@ table.v-table tbody td {
     text-align: left;
 }
 
-/* This is to change how tabbing looks -BCT */
+/* Tabbing */
 .v-tabs__slider-wrapper{
     opacity: 0;
 }
@@ -325,17 +334,17 @@ table.v-table tbody td {
     color: lightgray !important;
 }
 
-.ara-text-field-border .v-input__control .v-input__slot{
+.ghd-text-field-border .v-input__control .v-input__slot{
     border: solid 1px #999999 !important;
 }
   
-.ara-text-field .v-input__control .v-input__slot{
+.ghd-text-field .v-input__control .v-input__slot{
     min-height: 40px;
     height: 40px;
 } 
   
-.ara-text-field .v-input__control .v-input__slot .v-text-field__slot input{
-    margin-top: 5px;
+.ghd-text-field .v-input__control .v-input__slot .v-text-field__slot input{
+    margin-top: 5px !important;
 }
 
 .Montserrat-font-family{
@@ -352,10 +361,36 @@ table.v-table tbody td {
 .v-tabs__div{
     text-transform: unset !important;
 }
-.ghd-title{
-    font-family: 'Montserrat' !important;
-    font-size: 18px !important;
-    color: #444444 !important
+
+.ghd-subheader{
+    padding-left: 0 !important;
+    height: 30px !important; 
+ }
+
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-select__selections{
+     padding-top: 0;
+ }
+
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-select__selections input{
+     margin-top: 0;
+ }
+
+ .ghd-select .v-input__control .v-input__slot .v-select__slot .v-input__append-inner{
+    margin-top: 8px;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+/* Dialog box padding */
+
+.ghd-dialog-box-padding-top{
+    padding-top: 30px;
+    padding-left: 30px;
+}
+
+.ghd-dialog-box-padding-center{
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.ghd-dialog-box-padding-bottom{
+    padding-bottom: 30px;
+}

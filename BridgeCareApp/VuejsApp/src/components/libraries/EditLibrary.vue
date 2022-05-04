@@ -69,13 +69,6 @@ export default class EditLibrary extends Vue {
     networkName: string = '';
     navigationTabs: NavigationTab[] = [
         {
-            tabName: 'Analysis Method',
-            tabIcon: 'fas fa-chart-bar',
-            navigation: {
-                path: '/',
-            },
-        },
-        {
             tabName: 'Investment',
             tabIcon: 'fas fa-dollar-sign',
             navigation: {

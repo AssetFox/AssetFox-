@@ -102,10 +102,6 @@
     color: #002E6C !important;
 }
 
-.ara-blue-new {
-    color: #2A578D !important;
-}
-
 .ara-black {
     color: #000000 !important;
 }
@@ -165,7 +161,6 @@
     font-size: 14px !important;
     padding-top: 0px !important;
 }
-
 
 /* Select */
 v-input.ghd-control-text  {
@@ -252,14 +247,29 @@ v-list-item.ghd-control-text {
     color: #FFFFFF !important;
 }
 
+.ghd-dialog {
+    padding:30px !important;
+}
 
-.ghd-dialog-title {
+.v-card__text.ghd-dialog {
+    padding-right:0px !important;
+    padding-left:0px !important;      
+}
+
+h3.ghd-dialog {
     color: #444444 !important;
-    font-family: 'Montserrat';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 22px;    
+    font-family: 'Montserrat' !important;
+    font-style: normal !important;
+    font-weight: 500 !important;
+    font-size: 18px !important;
+    line-height: 22px !important;
+    padding:0px !important;
+}
+
+.v-card__title.ghd-dialog  {
+    padding-right:0px !important;
+    padding-left:0px !important;
+    padding:0px !important;
 }
 
 .ghd-navigation-list .v-icon {
@@ -288,11 +298,17 @@ html {
 
   table.v-table thead th {
     font-size: 14px !important;
+    font-weight:500 !important;
+    color: #4A4A4A;
+}
+table.v-table tbody td input {
+  font-size: 14px !important;
+  font-weight:400 !important;
+  color: #333333;
+  padding-bottom:0px;
+}
 
-}
-table.v-table tbody td {
-  font-size: 15px !important;
-}
+
 
 .dialog-header{
     display: block; 
@@ -323,64 +339,3 @@ table.v-table tbody td {
 .notification-message {
     text-align: left;
 }
-
-/* This is to change how tabbing looks -BCT */
-.v-tabs__slider-wrapper{
-    opacity: 0;
-}
-  
-.v-tabs__container{
-    border-bottom: thin solid rgba(0,0,0,.12);
-}
-  
-.v-tabs__div .v-tabs__item--active{
-    background: white ;
-    border-top: thin solid rgba(0,0,0,.12) ;
-    border-left: thin solid rgba(0,0,0,.12);
-    border-right: thin solid rgba(0,0,0,.12);
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-}
-  
-.v-tabs__item{
-    color: #2A578D !important;
-}
-  
-.v-tabs__item--active{
-    color: lightgray !important;
-}
-
-.ara-text-field-border .v-input__control .v-input__slot{
-    border: solid 1px #999999 !important;
-}
-  
-.ara-text-field .v-input__control .v-input__slot{
-    min-height: 40px;
-    height: 40px;
-} 
-  
-.ara-text-field .v-input__control .v-input__slot .v-text-field__slot input{
-    margin-top: 5px;
-}
-
-.Montserrat-font-family{
-    font-family: 'Montserrat' !important;
-}
-
-.v-btn {
-    text-transform: unset !important;
-}
-
-.v-tabs__item{
-    text-transform: unset !important;
-}
-.v-tabs__div{
-    text-transform: unset !important;
-}
-.ghd-title{
-    font-family: 'Montserrat' !important;
-    font-size: 18px !important;
-    color: #444444 !important
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');

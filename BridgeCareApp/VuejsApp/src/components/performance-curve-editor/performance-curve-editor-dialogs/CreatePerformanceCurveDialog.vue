@@ -3,13 +3,13 @@
     <v-dialog v-model="showDialog"
               max-width="434px"
               persistent>
-      <v-card>
-        <v-card-title>
+      <v-card  height="411px" class="ghd-dialog">
+        <v-card-title class="ghd-dialog">
           <v-layout justify-left>
-            <h3 class="ghd-dialog-title">Add New Performance Equation</h3>
+            <h3  class="ghd-dialog">Add New Performance Equation</h3>
           </v-layout>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="ghd-dialog">
           <v-layout column>
             <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
             <v-text-field class="ghd-control-text ghd-control-border"

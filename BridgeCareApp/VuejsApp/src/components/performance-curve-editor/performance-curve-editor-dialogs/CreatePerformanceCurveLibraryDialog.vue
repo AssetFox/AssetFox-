@@ -1,38 +1,44 @@
 <template>
   <v-dialog v-model="dialogData.showDialog"
-            max-width="450px"
+            max-width="444px"
             persistent>
-    <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>New Performance Curve Library</h3>
+    <v-card height="437px" class="ghd-dialog">
+      <v-card-title class="ghd-dialog">
+        <v-layout justify-left>
+          <h3 class="ghd-dialog">Create New<br/>Performance Curve Library</h3>
         </v-layout>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="ghd-dialog">
         <v-layout column>
-          <v-text-field v-model="newPerformanceCurveLibrary.name"
+          <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>             
+          <v-text-field class="ghd-control-text ghd-control-border"
+                        v-model="newPerformanceCurveLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        label="Name"
                         outline/>
-          <v-textarea v-model="newPerformanceCurveLibrary.description"
-                      label="Description"
+          <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>             
+          <v-textarea class="ghd-control-text ghd-control-border"
+                      v-model="newPerformanceCurveLibrary.description"
                       no-resize
                       outline
                       rows="3"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn :disabled="newPerformanceCurveLibrary.name === ''"
-                 class="ara-blue-bg white--text"
-                 @click="onSubmit(true)">
-            Save
-          </v-btn>
-          <v-btn class="ara-orange-bg white--text"
-                 @click="onSubmit(false)">
-            Cancel
-          </v-btn>
-        </v-layout>
+          <v-layout justify-center row>
+            <v-btn
+                   class="ghd-white-bg ghd-blue ghd-button-text"
+                   depressed
+                   @click="onSubmit(false)">
+              Cancel
+            </v-btn>
+            <v-btn :disabled="newPerformanceCurveLibrary.name === ''"
+                   class="ghd-blue-bg ghd-white ghd-button-text"
+                   @click="onSubmit(true)"
+                   depressed                   
+                   >
+              Save
+            </v-btn>
+          </v-layout>
       </v-card-actions>
     </v-card>
   </v-dialog>

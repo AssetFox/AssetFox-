@@ -62,20 +62,6 @@
                     select-all
                     v-model="selectedGridRows"
                 >
-                    <!-- <template v-slot:actions-prepend>
-                    <v-layout justify-start align-center>
-                        <v-card-title>
-                            <v-text v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
-                            <v-text v-else>No results found!</v-text>
-                            <v-divider vertical class="mx-3"/>
-                            <v-btn flat right
-                                class="ghd-control-label ghd-blue"
-                                @click="onRemoveTargetConditionGoals"
-                            > Delete Selected 
-                            </v-btn>
-                        </v-card-title>
-                    </v-layout>
-                    </template> -->
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
@@ -231,30 +217,26 @@
             </div>
         </v-flex>
 
-        <v-layout justify-start align-center>
-            <!-- <v-card-title> -->
-                <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
-                <v-text class="ghd-control-text" v-else>No results found!</v-text>
-                <v-divider vertical class="mx-3"/>
-                <v-btn flat right
-                    class="ghd-control-label ghd-blue"
-                    @click="onRemoveTargetConditionGoals"
-                > Delete Selected 
-                </v-btn>
-            <!-- </v-card-title> -->
+        <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
+            <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+            <v-text class="ghd-control-text" v-else>No results found!</v-text>
+            <v-divider vertical class="mx-3"/>
+            <v-btn flat right
+                class="ghd-control-label ghd-blue"
+                @click="onRemoveTargetConditionGoals"
+            > Delete Selected 
+            </v-btn>
         </v-layout>
 
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <!-- <v-layout justify-center> -->
-                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
-                    <v-textarea
-                        class="ghd-control-text ghd-control-border"
-                        outline
-                        v-model="selectedTargetConditionGoalLibrary.description"
-                        @input='selectedTargetConditionGoalLibrary = {...selectedTargetConditionGoalLibrary, description: $event}'
-                    >
-                    </v-textarea>
-            <!-- </v-layout> -->
+            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+            <v-textarea
+                class="ghd-control-text ghd-control-border"
+                outline
+                v-model="selectedTargetConditionGoalLibrary.description"
+                @input='selectedTargetConditionGoalLibrary = {...selectedTargetConditionGoalLibrary, description: $event}'
+            >
+            </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <v-layout justify-center row>

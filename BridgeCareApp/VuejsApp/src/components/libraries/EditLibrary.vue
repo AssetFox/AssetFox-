@@ -113,7 +113,7 @@ export default class EditLibrary extends Vue {
             tabName: 'Analysis Method',
             tabIcon: 'fas fa-chart-bar',
             navigation: {
-                path: '/EditAnalysisMethod/',
+                path: '/',
             },
         },
         {

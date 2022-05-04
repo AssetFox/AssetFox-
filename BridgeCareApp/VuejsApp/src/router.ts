@@ -23,6 +23,10 @@ const EditScenario = () =>
     import(
         /* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue'
     );
+    const EditLibrary = () =>
+        import(
+            /* webpackChunkName: "editLibrary" */ '@/components/libraries/EditLibrary.vue'
+        );
 const InvestmentEditor = () =>
     import(
         /* webpackChunkName: "investmentModule" */ '@/components/investment-editor/InvestmentEditor.vue'
@@ -171,6 +175,72 @@ const router = new VueRouter({
             name: 'Scenarios',
             component: Scenario,
             beforeEnter: beforeEnterFunc,
+        },
+        {
+            path: '/EditLibrary/',
+            name: 'EditLibrary',
+            component: EditLibrary,
+            children: [
+                {
+                    path: '/EditAnalysisMethod/',
+                    name: 'EditAnalysisMethod',
+                    component: AnalysisMethodEditor,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/InvestmentEditor/Scenario/',
+                    component: InvestmentEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/PerformanceCurveEditor/Scenario/',
+                    component: PerformanceCurveEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/CalculatedAttributeEditor/Scenario/',
+                    component: CalculatedAttributeEditor,
+                    props: true,
+                },
+                {
+                    path: '/TreatmentEditor/Scenario/',
+                    component: TreatmentEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/BudgetPriorityEditor/Scenario/',
+                    component: BudgetPriorityEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/TargetConditionGoalEditor/Scenario/',
+                    component: TargetConditionGoalEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/DeficientConditionGoalEditor/Scenario/',
+                    component: DeficientConditionGoalEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/RemainingLifeLimitEditor/Scenario/',
+                    component: RemainingLifeLimitEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+                {
+                    path: '/CashFlowEditor/Scenario',
+                    component: CashFlowEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc,
+                },
+            ],
         },
         {
             path: '/EditScenario/',

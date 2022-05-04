@@ -25,19 +25,6 @@
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
-                <div style="margin: auto; width: 85%;">
-                    <v-btn
-                        class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border"
-                        @click="onShowRunSimulationAlert"
-                        depressed
-                        block
-                        outlined>
-                        Run Scenario
-                    </v-btn>
-                    <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
-                        Committed Projects
-                    </v-btn>
-                </div>
             </v-card>
             <v-flex xs12>
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
@@ -45,18 +32,6 @@
                 </v-container>
             </v-flex>
         </v-layout>
-        <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
-
-        <Alert
-            :dialogData="alertDataForDeletingCommittedProjects"
-            @submit="onDeleteCommittedProjectsSubmit"
-        />
-
-        <CommittedProjectsFileUploaderDialog
-            :showDialog="showImportExportCommittedProjectsDialog"
-            @submit="onSubmitImportExportCommittedProjectsDialogResult"
-            @delete="onDeleteCommittedProjects"
-        />
     </v-layout>
 </template>
 
@@ -83,31 +58,15 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 
 @Component({
-    components: {
-        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        Alert,
-    },
 })
 export default class EditLibrary extends Vue {
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    @State(state => state.scenarioModule.selectedScenario)
-    stateSelectedScenario: Scenario;
-    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
 
-    @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
-    @Action('selectScenario') selectScenarioAction: any;
-    @Action('runSimulation') runSimulationAction: any;
-    @Action('runNewSimulation') runNewSimulationAction: any;
-
-    selectedScenarioId: string = getBlankGuid();
-    showImportExportCommittedProjectsDialog: boolean = false;
     networkId: string = getBlankGuid();
     networkName: string = '';
-    selectedScenario: Scenario = clone(emptyScenario);
     navigationTabs: NavigationTab[] = [
         {
             tabName: 'Analysis Method',
@@ -180,204 +139,12 @@ export default class EditLibrary extends Vue {
             },
         },
     ];
-    alertData: AlertData = clone(emptyAlertData);
-    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
-
-    beforeRouteEnter(to: any, from: any, next: any) {
-        next((vm: any) => {
-            // set selectedScenarioId
-            vm.selectedScenarioId = to.query.scenarioId;
-            vm.networkId = to.query.networkId;
-            vm.simulationName = to.query.scenarioName;
-            vm.networkName = to.query.networkName;
-
-            // check that selectedScenarioId is set
-            if (vm.selectedScenarioId === getBlankGuid()) {
-                // set 'no selected scenario' error message, then redirect user to Scenarios UI
-                vm.addErrorNotificationAction({
-                    message: 'Found no selected scenario for edit',
-                });
-                vm.$router.push('/Scenarios/');
-            } else {
-                vm.navigationTabs = vm.navigationTabs.map(
-                    (navTab: NavigationTab) => {
-                        const navigationTab = {
-                            ...navTab,
-                            navigation: {
-                                ...navTab.navigation,
-                                query: {
-                                    scenarioName: vm.simulationName,
-                                    scenarioId: vm.selectedScenarioId,
-                                    networkId: vm.networkId,
-                                    networkName: vm.networkName,
-                                },
-                            },
-                        };
-
-                        if (navigationTab.tabName === 'Remaining Life Limit' 
-                            || navigationTab.tabName === 'Target Condition Goal' 
-                            || navigationTab.tabName === 'Deficient Condition Goal' 
-                            || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.isAdmin;
-                        }
-
-                        return navigationTab;
-                    },
-                );
-
-                // get the window href
-                const href = window.location.href;
-                // check each NavigationTab object to see if it has a matching navigation path with the href
-                const hasChildPath = any(
-                    (navigationTab: NavigationTab) =>
-                        href.indexOf(navigationTab.navigation.path) !== -1,
-                    vm.navigationTabs,
-                );
-                // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
-                if (!hasChildPath) {
-                    vm.$router.push(vm.navigationTabs[0].navigation);
-                }
-            }
-        });
-    }
-
-    @Watch('stateSelectedScenario')
-    onStateSelectedScenarioChanged() {
-        this.selectedScenario = clone(this.stateSelectedScenario);
-    }
-
-    @Watch('stateScenarios')
-    onStateScenariosChanged() {
-        if (any(propEq('id', this.selectedScenario.id))) {
-            this.selectScenarioAction({
-                scenarioId: this.selectedScenario.id,
-            });
-        }
-    }
-
-    mounted() {
-        if (this.selectedScenarioId !== getBlankGuid()) {
-            this.selectScenarioAction({
-                scenarioId: this.selectedScenarioId,
-            });
-        }
-    }
-
-    beforeDestroy() {
-        this.selectScenarioAction({ scenarioId: getBlankGuid() });
-    }
-
-    onSubmitImportExportCommittedProjectsDialogResult(
-        result: ImportExportCommittedProjectsDialogResult,
-    ) {
-        this.showImportExportCommittedProjectsDialog = false;
-
-        if (hasValue(result)) {
-            if (result.isExport) {
-                CommittedProjectsService.exportCommittedProjects(
-                    this.selectedScenarioId,
-                ).then((response: AxiosResponse) => {
-                    if (hasValue(response, 'data')) {
-                        const fileInfo: FileInfo = response.data as FileInfo;
-                        FileDownload(
-                            convertBase64ToArrayBuffer(fileInfo.fileData),
-                            fileInfo.fileName,
-                            fileInfo.mimeType,
-                        );
-                    }
-                });
-            } else {
-                if (hasValue(result.file)) {
-                    CommittedProjectsService.importCommittedProjects(
-                        result.file,
-                        result.applyNoTreatment,
-                        this.selectedScenarioId,
-                    ).then((response: AxiosResponse) => {
-                        if (
-                            hasValue(response, 'status') &&
-                            http2XX.test(response.status.toString())
-                        ) {
-                            this.addSuccessNotificationAction({
-                                message: 'Successful upload.',
-                                longMessage:
-                                    'Successfully uploaded committed projects.',
-                            });
-                        }
-                    });
-                } else {
-                    this.addErrorNotificationAction({
-                        message: 'No file selected.',
-                        longMessage:
-                            'No file selected to upload the committed projects.',
-                    });
-                }
-            }
-        }
-    }
-
-    onDeleteCommittedProjects() {
-        this.alertDataForDeletingCommittedProjects = {
-            showDialog: true,
-            heading: 'Are you sure?',
-            message:
-                "You are about to delete all of this scenario's committed projects.",
-            choice: true,
-        };
-    }
-
-    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
-        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
-
-        if (doDelete) {
-            CommittedProjectsService.deleteCommittedProjects(
-                this.selectedScenarioId,
-            ).then((response: AxiosResponse) => {
-                if (
-                    hasValue(response) &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    this.addSuccessNotificationAction({
-                        message: 'Committed projects have been deleted.',
-                    });
-                }
-            });
-        }
-    }
 
     visibleNavigationTabs() {
         return this.navigationTabs.filter(
             navigationTab =>
                 navigationTab.visible === undefined || navigationTab.visible,
         );
-    }
-
-    /**
-     * Shows the Alert
-     */
-    onShowRunSimulationAlert() {
-        this.alertData = {
-            showDialog: true,
-            heading: 'Warning',
-            choice: true,
-            message:
-                'Only one simulation can be run at a time. The model run you are about to queue will be ' +
-                'executed in the order in which it was received.',
-        };
-    }
-
-    /**
-     * Takes in a boolean parameter from the AppPopupModal to determine if a scenario's simulation should be executed
-     * @param runScenarioSimulation Alert result
-     */
-    onSubmitAlertResult(runScenarioSimulation: boolean) {
-        this.alertData = clone(emptyAlertData);
-
-        if (runScenarioSimulation) {
-            this.runSimulationAction({
-                networkId: this.networkId,
-                scenarioId: this.selectedScenarioId,
-            });
-        }
     }
 }
 </script>

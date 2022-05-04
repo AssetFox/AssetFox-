@@ -15,103 +15,111 @@
                         class="ara-blue-pantone-281"
                     >
                         Scenarios
+                    </v-btn>                   
+                     <v-btn
+                        @click="onNavigate('/EditLibrary/')"
+                        class="ara-blue-pantone-281"
+                        flat
+                    >
+                        Libraries
                     </v-btn>
-                    <v-menu offset-y>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn flat v-on="on" v-bind="attrs" class="ara-blue-pantone-281">
-                                    Libraries
-                                </v-btn>
-                            </template>
-                        <v-list>    
-                            <v-list-item-group class="ara-blue-pantone-281">
-                                <v-list-tile
-                                    @click="onNavigate('/InvestmentEditor/Library/')"
-                                >
-                                    <v-list-tile-title>Investment</v-list-tile-title>
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate('/PerformanceCurveEditor/Library/')
-                                    "
-                                >
-                                    <v-list-tile-title
-                                        >Performance Curve</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="onNavigate('/TreatmentEditor/Library/')"
-                                >
-                                    <v-list-tile-title>Treatment</v-list-tile-title>
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate('/BudgetPriorityEditor/Library/')
-                                    "
-                                >
-                                    <v-list-tile-title
-                                        >Budget Priority</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate(
-                                            '/TargetConditionGoalEditor/Library/',
-                                        )
-                                    "
-                                >
-                                    <v-list-tile-title
-                                        >Target Condition Goal</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate(
-                                            '/DeficientConditionGoalEditor/Library/',
-                                        )
-                                    "
-                                >
-                                    <v-list-tile-title
-                                        >Deficient Condition Goal</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate('/RemainingLifeLimitEditor/Library/')
-                                    "
-                                    v-if="isAdmin"
-                                >
-                                    <v-list-tile-title
-                                        >Remaining Life Limit</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="onNavigate('/CashFlowEditor/Library/')"
-                                >
-                                    <v-list-tile-title>Cash Flow</v-list-tile-title>
-                                </v-list-tile>
-                                <v-list-tile
-                                    @click="
-                                        onNavigate('/CriterionLibraryEditor/Library/')
-                                    "
-                                    v-if="false"
-                                >
-                                    <v-list-tile-title>Criterion</v-list-tile-title>
-                                </v-list-tile>
-                                <v-list-tile
-                                    v-if="isAdmin"
-                                    @click="
-                                        onNavigate(
-                                            '/CalculatedAttributeEditor/Library/',
-                                        )
-                                    "
-                                >
-                                    <v-list-tile-title
-                                        >Calculated Attribute</v-list-tile-title
-                                    >
-                                </v-list-tile>
-                            </v-list-item-group>
-                        </v-list> 
-                    </v-menu>
+                        <v-menu offset-y> 
+                            <template v-slot:activator="{ on, attrs }"> 
+                                <v-btn flat v-on="on" v-bind="attrs" class="ara-blue-pantone-281"> 
+                                    Libraries 
+                                </v-btn> 
+                            </template> 
+                        <v-list>     
+                            <v-list-item-group class="ara-blue-pantone-281"> 
+                                <v-list-tile 
+                                    @click="onNavigate('/InvestmentEditor/Library/')" 
+                                > 
+                                    <v-list-tile-title>Investment</v-list-tile-title> 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate('/PerformanceCurveEditor/Library/') 
+                                    " 
+                                > 
+                                    <v-list-tile-title 
+                                        >Performance Curve</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click="onNavigate('/TreatmentEditor/Library/')" 
+                                > 
+                                    <v-list-tile-title>Treatment</v-list-tile-title> 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate('/BudgetPriorityEditor/Library/') 
+                                    " 
+                                > 
+                                    <v-list-tile-title 
+                                        >Budget Priority</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate( 
+                                            '/TargetConditionGoalEditor/Library/', 
+                                        ) 
+                                    " 
+                                > 
+                                    <v-list-tile-title 
+                                        >Target Condition Goal</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate( 
+                                            '/DeficientConditionGoalEditor/Library/', 
+                                        ) 
+                                    " 
+                                > 
+                                    <v-list-tile-title 
+                                        >Deficient Condition Goal</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate('/RemainingLifeLimitEditor/Library/') 
+                                    " 
+                                    v-if="isAdmin" 
+                                > 
+                                    <v-list-tile-title 
+                                        >Remaining Life Limit</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click="onNavigate('/CashFlowEditor/Library/')" 
+                                > 
+                                    <v-list-tile-title>Cash Flow</v-list-tile-title> 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    @click=" 
+                                        onNavigate('/CriterionLibraryEditor/Library/') 
+                                    " 
+                                    v-if="false" 
+                                > 
+                                    <v-list-tile-title>Criterion</v-list-tile-title> 
+                                </v-list-tile> 
+                                <v-list-tile 
+                                    v-if="isAdmin" 
+                                    @click=" 
+                                        onNavigate( 
+                                            '/CalculatedAttributeEditor/Library/', 
+                                        ) 
+                                    " 
+                                > 
+                                    <v-list-tile-title 
+                                        >Calculated Attribute</v-list-tile-title 
+                                    > 
+                                </v-list-tile> 
+                            </v-list-item-group> 
+                        </v-list>  
+                    </v-menu> 
+                  
                     <v-btn
                         @click="onNavigate('/UserCriteria/')"
                         class="ara-blue-pantone-281"

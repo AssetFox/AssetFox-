@@ -32,15 +32,15 @@ namespace BridgeCareCore.Services.Treatment
             var equationCell = ExcelValueModels.String(equation);
             var criteria = consequence.CriterionLibrary.MergedCriteriaExpression;
             var criteriaCell = ExcelValueModels.String(criteria);
-            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
-            return r;
+            var returnValue = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
+            return returnValue;
         }
 
         private static ExcelRowModel ConsequencesTitleRow()
         {
             var cell = ExcelValueModels.RichString(TreatmentExportStringConstants.Consequences, true, 14);
-            var r = ExcelRowModels.WithEntries(cell);
-            return r;
+            var returnValue = ExcelRowModels.WithEntries(cell);
+            return returnValue;
         }
         private static ExcelRowModel ConsequencesHeaderRow()
         {
@@ -48,9 +48,9 @@ namespace BridgeCareCore.Services.Treatment
             var changeValueCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ChangeVal);
             var equationCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.Equation);
             var criteriaCell = StackedExcelModels.BoldText(TreatmentExportStringConstants.ConsequenceCriterion);
-            var r = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
-            r.EveryCell = ExcelStyleModels.ThinBottomBorder();
-            return r;
+            var returnValue = ExcelRowModels.WithEntries(attributeCell, changeValueCell, equationCell, criteriaCell);
+            returnValue.EveryCell = ExcelStyleModels.ThinBottomBorder();
+            return returnValue;
         }
     }
 }

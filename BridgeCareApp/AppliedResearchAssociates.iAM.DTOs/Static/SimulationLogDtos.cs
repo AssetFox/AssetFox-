@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Static
     {
         public static SimulationLogDTO GenericException(Guid simulationId, Exception exception)
         {
-            var r = new SimulationLogDTO
+            var returnValue = new SimulationLogDTO
             {
                 Id = Guid.NewGuid(),
                 Message = $"An exception was thrown. {exception.Message}. This log entry does not include the stack trace, as it might contain sensitive information.",
@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Static
                 Status = (int)SimulationLogStatus.Error,
                 Subject = (int)SimulationLogSubject.ExceptionThrown,
             };
-            return r;
+            return returnValue;
         }
     }
 }

@@ -22,22 +22,22 @@ namespace BridgeCareCore.Helpers.Excel
             {
                 int x = 666;
             }
-            var r = new string(address.Where(x => x != '$').ToArray());
+            var returnValue = new string(address.Where(x => x != '$').ToArray());
             if (absoluteRow)
             {
                 var firstNumberIndex = 0;
-                while (char.IsLetter(r[firstNumberIndex]))
+                while (char.IsLetter(returnValue[firstNumberIndex]))
                 {
                     firstNumberIndex++;
                 }
-                r = $"{r.Substring(0, firstNumberIndex)}${r.Substring(firstNumberIndex)}";
+                returnValue = $"{returnValue.Substring(0, firstNumberIndex)}${returnValue.Substring(firstNumberIndex)}";
 
             }
             if (absoluteColumn)
             {
-                r = $"${r}";
+                returnValue = $"${returnValue}";
             }
-            return r;
+            return returnValue;
         }
     }
 }

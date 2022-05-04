@@ -11,30 +11,30 @@ namespace BridgeCareCore.Services.Treatment
         // and forget their ids. They will be recreated from scratch with new ids and freshly-created criteria..
         public static AnchoredExcelRegionModel TreatmentContent(TreatmentDTO dto)
         {
-            var r = new AnchoredExcelRegionModel
+            var returnValue = new AnchoredExcelRegionModel
             {
                 Region = CombinedRegion(dto),
             };
-            return r;
+            return returnValue;
         }
 
         public static RowBasedExcelRegionModel CombinedRegion(TreatmentDTO dto)
         {
-            var r = RowBasedExcelRegionModels.Concat(
+            var returnValue = RowBasedExcelRegionModels.Concat(
                 TreatmentDetailsRegion.DetailsRegion(dto),
                 RowBasedExcelRegionModels.BlankLine,
                 TreatmentCostsRegion.CostsRegion(dto),
                 RowBasedExcelRegionModels.BlankLine,
                 TreatmentConsequencesRegion.ConsequencesRegion(dto)
                 );
-            return r;
+            return returnValue;
         }
 
         public static ExcelWorksheetModel TreatmentWorksheet(TreatmentDTO dto)
         {
             var tabName = dto.Name;
             var content = TreatmentContent(dto);
-            var r = new ExcelWorksheetModel
+            var returnValue = new ExcelWorksheetModel
             {
                 Content = new List<IExcelWorksheetContentModel> {
                     content,
@@ -50,7 +50,7 @@ namespace BridgeCareCore.Services.Treatment
                 },
                 TabName = tabName,
             };
-            return r;
+            return returnValue;
         }
     }
 }

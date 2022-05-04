@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         internal static SimulationLogDTO ToDTO(SimulationLogEntity entity)
         {
-            var r = new SimulationLogDTO
+            var returnValue = new SimulationLogDTO
             {
                 Id = entity.Id,
                 Message = entity.Message,
@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Subject = entity.Subject,
                 TimeStamp = entity.CreatedDate,
             };
-            return r;
+            return returnValue;
         }
 
         public static SimulationLogDTO ToDTO(SimulationLogMessageBuilder builder)

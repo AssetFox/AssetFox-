@@ -7,13 +7,13 @@ namespace BridgeCareCore.Helpers.Excel.Visitors
         public static ExcelWorksheet AddWorksheet(ExcelWorkbook workbook, ExcelWorksheetModel model)
         {
             var writer = new ExcelWorksheetWriter();
-            var r = workbook.Worksheets.Add(model.TabName);
+            var returnValue = workbook.Worksheets.Add(model.TabName);
             foreach (var content in model.Content)
             {
-                content.Accept(writer, r);
+                content.Accept(writer, returnValue);
             }
-            r.Cells.Calculate();
-            return r;
+            returnValue.Cells.Calculate();
+            return returnValue;
         }
     }
 }

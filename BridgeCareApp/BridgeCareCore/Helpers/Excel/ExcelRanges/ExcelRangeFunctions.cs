@@ -15,8 +15,8 @@ namespace BridgeCareCore.Helpers.Excel
                 var start = range.Start;
                 var offsetStart = ExcelCellAddressFunctions.Offset(start, columnDelta, rowDelta);
                 var address = offsetStart.Address;
-                var r = ExcelAddressFunctions.ChangeAbsolute(address, absoluteColumn, absoluteRow);
-                return r;
+                var returnValue = ExcelAddressFunctions.ChangeAbsolute(address, absoluteColumn, absoluteRow);
+                return returnValue;
             };
 
         /// <summary>
@@ -27,8 +27,8 @@ namespace BridgeCareCore.Helpers.Excel
             range =>
                 {
                     var start = range.Start;
-                    var r = ExcelCellAddressFunctions.Left(start).Address;
-                    return r;
+                    var returnValue = ExcelCellAddressFunctions.Left(start).Address;
+                    return returnValue;
                 };
         /// <summary>Always returns the text, regardless of the range</summary>
         public static Func<ExcelRange, string> Constant(string text)
@@ -44,8 +44,8 @@ namespace BridgeCareCore.Helpers.Excel
                     {
                         builder.Append(func(range));
                     }
-                    var r = builder.ToString();
-                    return r;
+                    var returnValue = builder.ToString();
+                    return returnValue;
                 };
         public static Func<ExcelRange, string> Plus(params Func<ExcelRange, string>[] summands)
         {
@@ -60,8 +60,8 @@ namespace BridgeCareCore.Helpers.Excel
                         builder.Append("+");
                         builder.Append(summands[i](range));
                     }
-                    var r = builder.ToString();
-                    return r;
+                    var returnValue = builder.ToString();
+                    return returnValue;
                 };
             }
             return Empty;
@@ -87,8 +87,8 @@ namespace BridgeCareCore.Helpers.Excel
                     }
                 }
                 builder.Append(")");
-                var r = builder.ToString();
-                return r;
+                var returnValue = builder.ToString();
+                return returnValue;
             };
 
         public static Func<ExcelRange, string> BuildExcelFunctionWithOptionalArguments(

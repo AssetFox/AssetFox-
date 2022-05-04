@@ -187,9 +187,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .SingleOrDefault(_ => _.Id == libraryId);
-            var r = entity == null
+            var returnValue = entity == null
                 ? null : entity.ToDto();
-            return r;
+            return returnValue;
         } 
 
         

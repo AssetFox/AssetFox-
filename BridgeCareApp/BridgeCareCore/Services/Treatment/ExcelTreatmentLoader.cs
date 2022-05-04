@@ -19,39 +19,39 @@ namespace BridgeCareCore.Services.Treatment
 
         private static Dictionary<string, string> DetailsSectionAsDictionary(ExcelWorksheet worksheet)
         {
-            var r = new Dictionary<string, string>();
+            var returnValue = new Dictionary<string, string>();
             var costsRowIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Costs, 2);
             for (var i = 2; i < costsRowIndex; i++)
             {
                 var name = worksheet.Cells[i, 1].Text.ToLower();
                 var value = worksheet.Cells[i, 2].Text;
-                r[name] = value;
+                returnValue[name] = value;
             }
-            return r;
+            return returnValue;
         }
 
         private static int FindRowWithFirstColumnContent(ExcelWorksheet worksheet, string content, int startIndex)
         {
-            var r = startIndex;
+            var returnValue = startIndex;
             var endIndex = worksheet.Dimension.End.Row;
             var lowerCaseContent = content.ToLowerInvariant();
-            while (r <= endIndex && worksheet.Cells[r, 1].Text.ToLowerInvariant() != lowerCaseContent)
+            while (returnValue <= endIndex && worksheet.Cells[returnValue, 1].Text.ToLowerInvariant() != lowerCaseContent)
             {
-                r++;
+                returnValue++;
             }
-            if (r == endIndex + 1)
+            if (returnValue == endIndex + 1)
             {
                 throw new Exception($"Cell with content {content} not found!");
             }
 
-            return r;
+            return returnValue;
         }
 
         private static int ParseInt(string s, int defaultValue = 0)
         {
-            if (int.TryParse(s, out var r))
+            if (int.TryParse(s, out var returnValue))
             {
-                return r;
+                return returnValue;
             }
             return defaultValue;
         }
@@ -59,8 +59,8 @@ namespace BridgeCareCore.Services.Treatment
         private static string ValidationLocation(string worksheetName, int row, int column)
         {
             var columnName = ExcelCellAddress.GetColumnLetter(column);
-            var r = $"Worksheet {worksheetName} cell {columnName}{row}";
-            return r;
+            var returnValue = $"Worksheet {worksheetName} cell {columnName}{row}";
+            return returnValue;
         }
 
         private TreatmentCostLoadResult LoadCosts(ExcelWorksheet worksheet)
@@ -111,18 +111,18 @@ namespace BridgeCareCore.Services.Treatment
                     costs.Add(cost);
                 }
             }
-            var r = new TreatmentCostLoadResult
+            var returnValue = new TreatmentCostLoadResult
             {
                 Costs = costs,
                 ValidationMessages = validationMessages,
             };
-            return r;
+            return returnValue;
         }
 
         private UserCriteriaDTO NewCriteria()
         {
-            var r = new UserCriteriaDTO() { UserId = Guid.Empty, CriteriaId = Guid.Empty, Criteria = null, HasCriteria = false };
-            return r;
+            var returnValue = new UserCriteriaDTO() { UserId = Guid.Empty, CriteriaId = Guid.Empty, Criteria = null, HasCriteria = false };
+            return returnValue;
         }
 
         private ValidationResult ValidateEquation(string equation)
@@ -195,12 +195,12 @@ namespace BridgeCareCore.Services.Treatment
                     consequences.Add(consequence);
                 }
             }
-            var r = new TreatmentConsequenceLoadResult
+            var returnValue = new TreatmentConsequenceLoadResult
             {
                 Consequences = consequences,
                 ValidationMessages = validationMessages,
             };
-            return r;
+            return returnValue;
         }
 
         public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
@@ -231,12 +231,12 @@ namespace BridgeCareCore.Services.Treatment
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);
             validationMessages.AddRange(loadConsequences.ValidationMessages);
-            var r = new TreatmentLoadResult
+            var returnValue = new TreatmentLoadResult
             {
                 Treatment = newTreatment,
                 ValidationMessages = validationMessages,
             };
-            return r;
+            return returnValue;
         }
     }
 }

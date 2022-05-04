@@ -21,12 +21,12 @@ namespace BridgeCareCore.Helpers.Excel
 
         internal static IExcelWorksheetContentModel ColumnWidth(int oneBasedColumnIndex, double width)
         {
-            var r = new SpecifiedColumnWidthExcelWorksheetModel
+            var returnValue = new SpecifiedColumnWidthExcelWorksheetModel
             {
                 ColumnNumber = oneBasedColumnIndex,
                 Width = width,
             };
-            return r;
+            return returnValue;
         }
     }
 }

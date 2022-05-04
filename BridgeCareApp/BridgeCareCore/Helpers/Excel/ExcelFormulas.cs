@@ -25,8 +25,8 @@ namespace BridgeCareCore.Helpers.Excel
                 builder.Append(address);
             }
             builder.Append(")");
-            var r = builder.ToString();
-            return r;
+            var returnValue = builder.ToString();
+            return returnValue;
         }
         public static string Sum(params ExcelRange[] ranges)
         {

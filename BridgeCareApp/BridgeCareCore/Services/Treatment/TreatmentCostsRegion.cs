@@ -26,22 +26,22 @@ namespace BridgeCareCore.Services.Treatment
         private static ExcelRowModel CostsContentRow(TreatmentCostDTO cost)
         {
             var models = TreatmentCostHeaderWithContentModels.TreatmentCostExport();
-            var r = ExcelTableRowModels.ContentRow(models, cost);
-            return r;
+            var returnValue = ExcelTableRowModels.ContentRow(models, cost);
+            return returnValue;
         }
 
         private static ExcelRowModel CostsTitleRow()
         {
             var cell = ExcelValueModels.RichString(TreatmentExportStringConstants.Costs, true, 14);
-            var r = ExcelRowModels.WithEntries(cell);
-            return r;
+            var returnValue = ExcelRowModels.WithEntries(cell);
+            return returnValue;
         }
         private static ExcelRowModel CostsHeaderRow()
         {
             var models = TreatmentCostHeaderWithContentModels.TreatmentCostExport();
             var style = ExcelStyleModels.ThinBottomBorder();
-            var r = ExcelTableRowModels.HeaderRow(models, style);
-            return r;
+            var returnValue = ExcelTableRowModels.HeaderRow(models, style);
+            return returnValue;
         }
     }
 }

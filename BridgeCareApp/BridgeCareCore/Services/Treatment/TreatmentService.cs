@@ -39,13 +39,13 @@ namespace BridgeCareCore.Services
                 TreatmentWorksheetGenerator.Fill(workbook, library);
                 var bytes = package.GetAsByteArray();
                 var fileData = Convert.ToBase64String(bytes);
-                var r = new FileInfoDTO
+                var returnValue = new FileInfoDTO
                 {
                     FileData = fileData,
                     FileName = filename,
                     MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 };
-                return r;
+                return returnValue;
             }
             else
             {
@@ -78,16 +78,16 @@ namespace BridgeCareCore.Services
                 }
                 combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
-            var r = new TreatmentImportResultDTO
+            var returnValue = new TreatmentImportResultDTO
             {
                 TreatmentLibrary = library,
                 WarningMessage = combinedValidationMessage,
             };
             if (combinedValidationMessage.Length == 0)
             {
-                SaveToDatabase(r);
+                SaveToDatabase(returnValue);
             }
-            return r;
+            return returnValue;
         }
 
         private void SaveToDatabase(

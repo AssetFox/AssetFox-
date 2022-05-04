@@ -8,7 +8,7 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 
         public static RowBasedExcelRegionModel TreatmentsRows()
         {
-            var r = RowBasedExcelRegionModels.WithRows(
+            var returnValue = RowBasedExcelRegionModels.WithRows(
                     ExcelRowModels.WithEntries(
                         StackedExcelModels.LeftHeaderWrap("Bridge Care Work Type"),
                         StackedExcelModels.LeftHeaderWrap("Short Bridge Care Work type"))
@@ -20,9 +20,9 @@ namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
                     ExcelValueModels.String(treatment.Key),
                     ExcelValueModels.String(treatment.Value));
                 row.EveryCell = ExcelStyleModels.ThinBorder;
-                r.Rows.Add(row);
+                returnValue.Rows.Add(row);
             }
-            return r;
+            return returnValue;
         }
     }
 }

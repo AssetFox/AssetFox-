@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BridgeCareCore.Helpers
+namespace BridgeCareCore.Services.CommittedProjects
 {
     public static class LocationMatchFinder
     {

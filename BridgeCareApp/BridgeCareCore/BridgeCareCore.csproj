@@ -100,6 +100,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Helpers\LocationMatching\" />
     <Folder Include="Interfaces\Inventory\" />
   </ItemGroup>
 

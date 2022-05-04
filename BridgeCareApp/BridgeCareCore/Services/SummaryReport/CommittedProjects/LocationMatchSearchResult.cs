@@ -1,4 +1,4 @@
-﻿namespace BridgeCareCore.Helpers
+﻿namespace BridgeCareCore.Services.CommittedProjects
 {
     public class LocationMatchSearchResult
     {

@@ -127,56 +127,56 @@ export default class EditLibrary extends Vue {
             tabName: 'Performance Curve',
             tabIcon: 'fas fa-chart-line',
             navigation: {
-                path: '/PerformanceCurveEditor/Scenario/',
+                path: '/PerformanceCurveEditor/Library/',
             },
         },
         {
             tabName: 'Calculated Attribute',
             tabIcon: 'fas fa-plus-square',
             navigation: {
-                path: '/CalculatedAttributeEditor/Scenario/',
+                path: '/CalculatedAttributeEditor/Library/',
             },
         },
         {
             tabName: 'Treatment',
             tabIcon: 'fas fa-tools',
             navigation: {
-                path: '/TreatmentEditor/Scenario/',
+                path: '/TreatmentEditor/Library/',
             },
         },
         {
             tabName: 'Budget Priority',
             tabIcon: 'fas fa-copy',
             navigation: {
-                path: '/BudgetPriorityEditor/Scenario/',
+                path: '/BudgetPriorityEditor/Library/',
             },
         },
         {
             tabName: 'Target Condition Goal',
             tabIcon: 'fas fa-bullseye',
             navigation: {
-                path: '/TargetConditionGoalEditor/Scenario/',
+                path: '/TargetConditionGoalEditor/Library/',
             },
         },
         {
             tabName: 'Deficient Condition Goal',
             tabIcon: 'fas fa-level-down-alt',
             navigation: {
-                path: '/DeficientConditionGoalEditor/Scenario/',
+                path: '/DeficientConditionGoalEditor/Library/',
             },
         },
         {
             tabName: 'Remaining Life Limit',
             tabIcon: 'fas fa-business-time',
             navigation: {
-                path: '/RemainingLifeLimitEditor/Scenario/',
+                path: '/RemainingLifeLimitEditor/Library/',
             },
         },
         {
             tabName: 'Cash Flow',
             tabIcon: 'fas fa-money-bill-wave',
             navigation: {
-                path: '/CashFlowEditor/Scenario/',
+                path: '/CashFlowEditor/Library/',
             },
         },
     ];

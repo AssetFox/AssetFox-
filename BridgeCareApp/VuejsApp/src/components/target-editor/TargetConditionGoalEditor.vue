@@ -1,72 +1,62 @@
 <template>
+
     <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreateTargetConditionGoalLibraryDialog(false)
-                        "
-                        class="ara-blue-bg white--text"
+        <!-- <v-flex xs12> -->
+           <v-layout justify-start align-center>
+                <v-card-title>
+                    <v-layout row align-center>
+                        <v-layout column>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                            <v-select
+                                class="ghd-control-border ghd-control-text"
+                                :items="librarySelectItems"
+                                outline
+                                v-model="librarySelectItemValue"
+                                outlined
+                            >
+                            </v-select>
+                        </v-layout>
+                        <v-divider vertical 
+                            class="mx-3"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                        >
+                        </v-divider>
+                        <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider vertical 
+                            class="mx-3"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                        >
+                        </v-divider>
+                        <v-switch
+                            label="Shared"
+                            class="ghd-control-label ghd-md-gray my-2"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                            v-model="selectedTargetConditionGoalLibrary.shared"
+                        />
+                    </v-layout>
+                </v-card-title>
+                <v-layout justify-end align-center v-show="hasSelectedLibrary || hasScenario" class="my-2">
+                    <v-btn outline
+                        @click="showCreateTargetConditionGoalDialog = true"
+                        class="ghd-control-border ghd-blue"
+                    >Add Target Condition Goal</v-btn>
+                    <v-btn outline
+                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                        class="ghd-control-border ghd-blue"
                         v-show="!hasScenario"
                     >
-                        New Library
+                    Create New Library
                     </v-btn>
-                    <v-select
-                        :items="librarySelectItems"
-                        label="Select a Target Condition Goal Library"
-                        outline
-                        v-if="!hasSelectedLibrary || hasScenario"
-                        v-model="librarySelectItemValue"
-                    >
-                    </v-select>
-                    <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedTargetConditionGoalLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
-                        <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class="sharing"
-                        label="Shared"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedTargetConditionGoalLibrary.isShared"
-                    />
-                </v-flex>
+                </v-layout>
             </v-layout>
-            <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
-                <v-btn
-                    @click="showCreateTargetConditionGoalDialog = true"
-                    class="ara-blue-bg white--text"
-                    >Add</v-btn
-                >
-                <v-btn
-                    :disabled="selectedTargetConditionGoalIds.length === 0"
-                    @click="onRemoveTargetConditionGoals"
-                    class="ara-orange-bg white--text"
-                >
-                    Delete
-                </v-btn>
-            </v-flex>
-        </v-flex>
+        <!-- </v-flex> -->
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table
                     :headers="targetConditionGoalGridHeaders"
-                    :items="targetConditionGoalGridData"
+                    :items="targetConditionGoalGridData"                    
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
                     select-all
@@ -116,6 +106,26 @@
                                                 .valueIsNotEmpty,
                                         ]"
                                     />
+                                    <v-card-actions
+                                        v-if="header.value === 'actions'"
+                                        label="Actions"
+                                    >
+                                        <v-btn                                       
+                                            @click="onShowCriterionLibraryEditorDialog(props.item)"
+                                            class="ghd-blue"
+                                            icon
+                                        >
+                                            <v-icon>fa-solid fa-edit</v-icon>
+                                        </v-btn>
+                                        <v-btn
+                                            @click="onRemoveTargetConditionGoalsIcon(props.item)"
+                                            class="ghd-blue"
+                                            icon
+                                        >
+                                            <v-icon>fas fa-trash</v-icon>
+                                        </v-btn>
+                                    </v-card-actions>
+
                                     <template slot="input">
                                         <v-select
                                             v-if="header.value === 'attribute'"
@@ -161,7 +171,6 @@
                                         />
                                     </template>
                                 </v-edit-dialog>
-
                                 <v-layout
                                     v-else
                                     align-center
@@ -200,17 +209,6 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog(
-                                                props.item,
-                                            )
-                                        "
-                                        class="edit-icon"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
                                 </v-layout>
                             </div>
                         </td>
@@ -218,60 +216,67 @@
                 </v-data-table>
             </div>
         </v-flex>
+
+        <v-layout justify-start align-center v-show="hasSelectedLibrary || hasScenario">
+            <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+            <v-text class="ghd-control-text" v-else>No results found!</v-text>
+            <v-divider vertical class="mx-3"/>
+            <v-btn flat right
+                class="ghd-control-label ghd-blue"
+                @click="onRemoveTargetConditionGoals"
+            > Delete Selected 
+            </v-btn>
+        </v-layout>
+
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
-                <v-flex xs6>
-                    <v-textarea
-                        label="Description"
-                        no-resize
-                        outline
-                        rows="4"
-                        v-model="selectedTargetConditionGoalLibrary.description"
-                        @input='selectedTargetConditionGoalLibrary = {...selectedTargetConditionGoalLibrary, description: $event}'
-                    >
-                    </v-textarea>
-                </v-flex>
-            </v-layout>
+            <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+            <v-textarea
+                class="ghd-control-text ghd-control-border"
+                outline
+                v-model="selectedTargetConditionGoalLibrary.description"
+                @input='selectedTargetConditionGoalLibrary = {...selectedTargetConditionGoalLibrary, description: $event}'
+            >
+            </v-textarea>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-end row>
-                <v-btn
-                    @click="onUpsertScenarioTargetConditionGoals"
-                    class="ara-blue-bg white--text"
-                    v-show="hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
-                >
-                    Save
-                </v-btn>
-                <v-btn
-                    @click="onUpsertTargetConditionGoalLibrary"
-                    class="ara-blue-bg white--text"
+            <v-layout justify-center row>
+                <v-btn flat
+                    @click="onShowConfirmDeleteAlert"
+                    class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || !hasSelectedLibrary"
                 >
-                    Update Library
+                    Delete Library
                 </v-btn>
-                <v-btn
+                <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
+                    class="ghd-control-border ghd-blue"
                     :disabled="disableCrudButtons()"
                 >
                     Create as New Library
                 </v-btn>
                 <v-btn
-                    @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
-                    v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission"
+                    @click="onUpsertScenarioTargetConditionGoals"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="hasScenario"
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
-                    Delete Library
+                    Save
                 </v-btn>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="hasScenario"
                 >
-                    Discard Changes
+                    Cancel
+                </v-btn>
+                <v-btn
+                    @click="onUpsertTargetConditionGoalLibrary"
+                    class="ghd-blue-bg ghd-white"
+                    v-show="!hasScenario"
+                    :disabled="disableCrudButtons() || !hasUnsavedChanges || !hasLibraryEditPermission"
+                >
+                    Update Library
                 </v-btn>
             </v-layout>
         </v-flex>
@@ -399,6 +404,9 @@ export default class TargetConditionGoalEditor extends Vue {
     selectedTargetConditionGoalLibrary: TargetConditionGoalLibrary = clone(
         emptyTargetConditionGoalLibrary,
     );
+    itemsPerPage:number = 5;
+    totalDataFound: number = 0;
+    dataPerPage: number = this.itemsPerPage;
     hasSelectedLibrary: boolean = false;
     targetConditionGoalGridData: TargetConditionGoal[] = [];
     targetConditionGoalGridHeaders: DataTableHeader[] = [
@@ -442,6 +450,14 @@ export default class TargetConditionGoalEditor extends Vue {
             class: '',
             width: '50%',
         },
+        {
+            text: 'Actions',
+            value: 'actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '',
+        }
     ];
     numericAttributeNames: string[] = [];
     selectedGridRows: TargetConditionGoal[] = [];
@@ -532,7 +548,6 @@ export default class TargetConditionGoalEditor extends Vue {
         } else {
             this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
         }
-
         /*if (this.numericAttributeNames.length === 0) {
             this.numericAttributeNames = getPropertyValues(
                 'name',
@@ -566,6 +581,10 @@ export default class TargetConditionGoalEditor extends Vue {
                 {...clone(this.selectedTargetConditionGoalLibrary), targetConditionGoals: clone(this.targetConditionGoalGridData)},
                 this.stateSelectedTargetConditionLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+
+        // Update total data found and "showing results portion"
+        this.totalDataFound = this.targetConditionGoalGridData.length;
+        (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
     getOwnerUserName(): string {
@@ -690,7 +709,11 @@ export default class TargetConditionGoalEditor extends Vue {
             !contains(goal.id, this.selectedTargetConditionGoalIds),
         );
     }
-
+    onRemoveTargetConditionGoalsIcon(targetConditionGoal: TargetConditionGoal) {
+        this.targetConditionGoalGridData = this.targetConditionGoalGridData.filter((goal: TargetConditionGoal) =>
+            !contains(goal.id, targetConditionGoal.id),
+        );
+    }
     onShowConfirmDeleteAlert() {
         this.confirmDeleteAlertData = {
             showDialog: true,
@@ -758,6 +781,7 @@ export default class TargetConditionGoalEditor extends Vue {
 
 .sharing {
     padding-top: 0;
-    margin: 0;
+    padding-left: 10;
+    margin: 10;
 }
 </style>

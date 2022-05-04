@@ -1,58 +1,57 @@
 <template>
 
     <v-layout column>
-        <v-layout justify-end v-show="hasSelectedLibrary || hasScenario">
-            <v-btn outline
-                @click="showCreateTargetConditionGoalDialog = true"
-                class="ghd-control-border ghd-blue"
-            >Add Target Condition Goal</v-btn>
-            <v-btn outline
-                @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                class="ghd-control-border ghd-blue"
-                v-show="!hasScenario"
-            >
-            Create New Library
-            </v-btn>
-        </v-layout>
-        <v-flex xs6>
+        <!-- <v-flex xs12> -->
            <v-layout justify-start align-center>
                 <v-card-title>
                     <v-layout row align-center>
-                    <v-flex xs12>
-                    <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                    <v-select
-                        class="ghd-control-border ghd-control-text"
-                        :items="librarySelectItems"
-                        outline
-                                
-                        v-model="librarySelectItemValue"
-                        outlined
-                    >
-                    </v-select>
-                    </v-flex>
-                    <v-divider vertical 
-                        class="mx-3"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                    >
-                    </v-divider>
-                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-divider vertical 
-                        class="mx-3"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                    >
-                    </v-divider>
-                    <v-switch
-                        label="Shared"
-                        class="ghd-control-label ghd-md-gray"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedTargetConditionGoalLibrary.shared"
-                    />
+                        <v-layout column>
+                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                            <v-select
+                                class="ghd-control-border ghd-control-text"
+                                :items="librarySelectItems"
+                                outline
+                                v-model="librarySelectItemValue"
+                                outlined
+                            >
+                            </v-select>
+                        </v-layout>
+                        <v-divider vertical 
+                            class="mx-3"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                        >
+                        </v-divider>
+                        <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider vertical 
+                            class="mx-3"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                        >
+                        </v-divider>
+                        <v-switch
+                            label="Shared"
+                            class="ghd-control-label ghd-md-gray"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                            v-model="selectedTargetConditionGoalLibrary.shared"
+                        />
                     </v-layout>
                 </v-card-title>
+                <v-layout justify-end align-center v-show="hasSelectedLibrary || hasScenario">
+                    <v-btn outline
+                        @click="showCreateTargetConditionGoalDialog = true"
+                        class="ghd-control-border ghd-blue"
+                    >Add Target Condition Goal</v-btn>
+                    <v-btn outline
+                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                        class="ghd-control-border ghd-blue"
+                        v-show="!hasScenario"
+                    >
+                    Create New Library
+                    </v-btn>
+                </v-layout>
             </v-layout>
-        </v-flex>
+        <!-- </v-flex> -->
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="targets-data-table">
                 <v-data-table

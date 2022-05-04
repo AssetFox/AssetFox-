@@ -1,57 +1,56 @@
 <template>
+
     <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-center align-center>
+        <v-layout justify-end v-show="hasSelectedLibrary || hasScenario">
+            <v-btn outline
+                @click="showCreateTargetConditionGoalDialog = true"
+                class="ghd-control-border ghd-blue"
+            >Add Target Condition Goal</v-btn>
+            <v-btn outline
+                @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
+                class="ghd-control-border ghd-blue"
+                v-show="!hasScenario"
+            >
+            Create New Library
+            </v-btn>
+        </v-layout>
+        <v-flex xs6>
+           <v-layout justify-start align-center>
                 <v-card-title>
-                            <v-layout row align-center>
-                            <v-flex xs12>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                            <v-select
-                                class="ghd-control-border ghd-control-text"
-                                :items="librarySelectItems"
-                                outline
+                    <v-layout row align-center>
+                    <v-flex xs12>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                    <v-select
+                        class="ghd-control-border ghd-control-text"
+                        :items="librarySelectItems"
+                        outline
                                 
-                                v-model="librarySelectItemValue"
-                                outlined
-                            >
-                            </v-select>
-                            </v-flex>
-                            <v-divider vertical 
-                                class="mx-3"
-                                v-if="hasSelectedLibrary && !hasScenario"
-                            >
-                            </v-divider>
-                            <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                            </div>
-                            <v-divider vertical 
-                                class="mx-3"
-                                v-if="hasSelectedLibrary && !hasScenario"
-                            >
-                            </v-divider>
-                            <v-switch
-                                label="Shared"
-                                class="ghd-control-label ghd-md-gray"
-                                v-if="hasSelectedLibrary && !hasScenario"
-                                v-model="selectedTargetConditionGoalLibrary.shared"
-                            />
-                            </v-layout>
+                        v-model="librarySelectItemValue"
+                        outlined
+                    >
+                    </v-select>
+                    </v-flex>
+                    <v-divider vertical 
+                        class="mx-3"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                    >
+                    </v-divider>
+                    <div v-if="hasSelectedLibrary && !hasScenario" class="ghd-control-label ghd-md-gray">
+                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
+                    <v-divider vertical 
+                        class="mx-3"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                    >
+                    </v-divider>
+                    <v-switch
+                        label="Shared"
+                        class="ghd-control-label ghd-md-gray"
+                        v-if="hasSelectedLibrary && !hasScenario"
+                        v-model="selectedTargetConditionGoalLibrary.shared"
+                    />
+                    </v-layout>
                 </v-card-title>
-                <v-spacer />
-                <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
-                    <v-btn outline
-                        @click="showCreateTargetConditionGoalDialog = true"
-                        class="ghd-control-border ghd-blue"
-                        >Add Target Condition Goal</v-btn
-                    >
-                    <v-btn outline
-                        @click="onShowCreateTargetConditionGoalLibraryDialog(false)"
-                        class="ghd-control-border ghd-blue"
-                        v-show="!hasScenario"
-                    >
-                        Create New Library
-                    </v-btn>
-                </v-flex>
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
@@ -64,18 +63,20 @@
                     select-all
                     v-model="selectedGridRows"
                 >
-                    <template v-slot:actions-prepend>
-                    <v-card-title>
-                        <span v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</span>
-                        <span v-else>No results found!</span>
-                        <v-divider vertical class="mx-3"/>
-                        <v-btn flat right
-                            class="ghd-control-label ghd-blue"
-                            @click="onRemoveTargetConditionGoals"
-                        > Delete Selected 
-                        </v-btn>
-                    </v-card-title>
-                    </template>
+                    <!-- <template v-slot:actions-prepend>
+                    <v-layout justify-start align-center>
+                        <v-card-title>
+                            <v-text v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+                            <v-text v-else>No results found!</v-text>
+                            <v-divider vertical class="mx-3"/>
+                            <v-btn flat right
+                                class="ghd-control-label ghd-blue"
+                                @click="onRemoveTargetConditionGoals"
+                            > Delete Selected 
+                            </v-btn>
+                        </v-card-title>
+                    </v-layout>
+                    </template> -->
                     <template slot="items" slot-scope="props">
                         <td>
                             <v-checkbox
@@ -185,7 +186,6 @@
                                         />
                                     </template>
                                 </v-edit-dialog>
-
                                 <v-layout
                                     v-else
                                     align-center
@@ -231,6 +231,20 @@
                 </v-data-table>
             </div>
         </v-flex>
+
+        <v-layout justify-start align-center>
+            <!-- <v-card-title> -->
+                <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+                <v-text class="ghd-control-text" v-else>No results found!</v-text>
+                <v-divider vertical class="mx-3"/>
+                <v-btn flat right
+                    class="ghd-control-label ghd-blue"
+                    @click="onRemoveTargetConditionGoals"
+                > Delete Selected 
+                </v-btn>
+            <!-- </v-card-title> -->
+        </v-layout>
+
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
             <!-- <v-layout justify-center> -->
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>

@@ -700,11 +700,6 @@ export default class BudgetPriorityEditor extends Vue {
     margin: 0;
 }
 
-.header-text-content{
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 .row-padding{
     padding-top: 0px;
     padding-left: 0px;
@@ -726,11 +721,4 @@ export default class BudgetPriorityEditor extends Vue {
 .left-buttons-padding{
     padding-top: 18px;
 }
-
-.budget-divider{
-    height: 22px;
-    margin-top: 6px !important;
-}
-
-
 </style>

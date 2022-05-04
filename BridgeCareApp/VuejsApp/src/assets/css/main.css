@@ -394,3 +394,13 @@ table.v-table tbody td {
 .ghd-dialog-box-padding-bottom{
     padding-bottom: 30px;
 }
+
+.budget-divider{
+    height: 22px;
+    margin-top: 6px !important;
+}
+
+.header-text-content{
+    padding-left: 10px;
+    padding-right: 10px;
+}

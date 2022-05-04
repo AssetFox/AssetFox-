@@ -120,7 +120,7 @@ export default class EditLibrary extends Vue {
             tabName: 'Investment',
             tabIcon: 'fas fa-dollar-sign',
             navigation: {
-                path: '/InvestmentEditor/Scenario/',
+                path: '/InvestmentEditor/Library',
             },
         },
         {

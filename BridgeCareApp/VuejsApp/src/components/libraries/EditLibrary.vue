@@ -60,7 +60,6 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 @Component({
 })
 export default class EditLibrary extends Vue {
-    @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.userId) userId: string;

@@ -134,7 +134,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            var debugMe = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId).ToList();
             return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
                 .Select(project => new CommittedProjectEntity
                 {

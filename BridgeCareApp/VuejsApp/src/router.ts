@@ -177,9 +177,9 @@ const router = new VueRouter({
             beforeEnter: beforeEnterFunc,
         },
         {
-            path: '/EditLibrary/',
-            name: 'EditLibrary',
-            component: EditLibrary,
+            path: '/EditScenario/',
+            name: 'EditScenario',
+            component: EditScenario,
             children: [
                 {
                     path: '/EditAnalysisMethod/',
@@ -243,9 +243,9 @@ const router = new VueRouter({
             ],
         },
         {
-            path: '/EditScenario/',
-            name: 'EditScenario',
-            component: EditScenario,
+            path: '/EditLibrary/',
+            name: 'EditLibrary',
+            component: EditLibrary,
             children: [
                 {
                     path: '/EditAnalysisMethod/',

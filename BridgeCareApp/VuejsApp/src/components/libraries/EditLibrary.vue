@@ -38,29 +38,15 @@
 <script lang="ts">
 import Vue from 'vue';
 import Component from 'vue-class-component';
-import { Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
-import { emptyScenario, Scenario } from '@/shared/models/iAM/scenario';
-import ImportExportCommittedProjectsDialog from '@/components/scenarios/scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import { any, clone, isNil, propEq } from 'ramda';
-import { AxiosResponse } from 'axios';
-import CommittedProjectsService from '@/services/committed-projects.service';
 import { Network } from '@/shared/models/iAM/network';
-import FileDownload from 'js-file-download';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
-import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
-import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
-import Alert from '@/shared/modals/Alert.vue';
-import { hasValue } from '@/shared/utils/has-value-util';
-import { http2XX } from '@/shared/utils/http-utils';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
-import { FileInfo } from '@/shared/models/iAM/file-info';
-import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 
 @Component({
 })
 export default class EditLibrary extends Vue {
-    @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
 

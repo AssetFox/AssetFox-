@@ -2,6 +2,95 @@
     <v-layout class="treatment-details-tab-content">
         <v-flex xs12>
             <v-layout column justify-center>
+                
+                <v-flex xs6 class="treatment-description-flex">
+                    <v-textarea
+                        label="Treatment Description"
+                        no-resize
+                        outline
+                        rows="2"
+                        v-model="selectedTreatmentDetails.description"
+                        @input="
+                            onEditTreatmentDetails(
+                                'description',
+                                selectedTreatmentDetails.description,
+                            )
+                        "
+                    />
+                </v-flex>
+
+                <div class="shadow-inputs-div">
+                    <v-spacer></v-spacer>
+                    <v-layout justify-space-between row>
+                        <v-flex xs3>
+                            <v-select
+                                :items="Array.from(treatmentCategoryMap.keys())"
+                                @input="
+                                    onEditTreatmentType(
+                                        'category',
+                                        treatmentCategoryBinding,
+                                    )
+                                "
+                                label="Category"
+                                outline
+                                v-model="treatmentCategoryBinding"
+                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            />
+                        </v-flex>
+                        <v-flex xs3>
+                            <v-select
+                            :items="Array.from(assetTypeMap.keys())"
+                                @input="
+                                    onEditAssetType(
+                                        'assetType',
+                                        assetTypeBinding,
+                                    )
+                                "
+                                label="Asset type"
+                                outline
+                                v-model="assetTypeBinding"
+                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            />
+                        </v-flex>
+                        <v-flex xs2>
+                            <v-text-field
+                                :mask="'####'"
+                                @input="
+                                    onEditTreatmentDetails(
+                                        'shadowForAnyTreatment',
+                                        selectedTreatmentDetails.shadowForAnyTreatment,
+                                    )
+                                "
+                                label="Years Before Any"
+                                outline
+                                v-model="
+                                    selectedTreatmentDetails.shadowForAnyTreatment
+                                "
+                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            />
+                        </v-flex>
+                        <v-flex xs2>
+                            <v-text-field
+                                :mask="'####'"
+                                rows="4"
+                                @input="
+                                    onEditTreatmentDetails(
+                                        'shadowForSameTreatment',
+                                        selectedTreatmentDetails.shadowForSameTreatment,
+                                    )
+                                "
+                                label="Years Before Same"
+                                outline
+                                v-model="
+                                    selectedTreatmentDetails.shadowForSameTreatment
+                                "
+                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            />
+                        </v-flex>
+                    </v-layout>
+                    <v-spacer></v-spacer>
+                </div>
+                
                 <v-flex xs10 class="criteria-flex">
                     <v-menu
                         full-width
@@ -9,96 +98,8 @@
                         min-height="500px"
                         min-width="800px"
                     >   
-                        <template slot="activator">                                                                                
+                        <template slot="activator">                                                                                       
                             <v-layout column>  
-                                <v-flex xs6 class="treatment-description-flex">
-                                    <v-textarea
-                                        label="Treatment Description"
-                                        no-resize
-                                        outline
-                                        rows="2"
-                                        v-model="selectedTreatmentDetails.description"
-                                        @input="
-                                            onEditTreatmentDetails(
-                                                'description',
-                                                selectedTreatmentDetails.description,
-                                            )
-                                        "
-                                    />
-                                </v-flex>   
-
-                                <div class="shadow-inputs-div">
-                                    <v-spacer></v-spacer>
-                                    <v-layout justify-space-between row>
-                                        <v-flex xs3>
-                                            <v-select
-                                                :items="Array.from(treatmentCategoryMap.keys())"
-                                                @input="
-                                                    onEditTreatmentType(
-                                                        'category',
-                                                        treatmentCategoryBinding,
-                                                    )
-                                                "
-                                                label="Category"
-                                                outline
-                                                v-model="treatmentCategoryBinding"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                            />
-                                        </v-flex>
-                                        <v-flex xs3>
-                                            <v-select
-                                            :items="Array.from(assetTypeMap.keys())"
-                                                @input="
-                                                    onEditAssetType(
-                                                        'assetType',
-                                                        assetTypeBinding,
-                                                    )
-                                                "
-                                                label="Asset type"
-                                                outline
-                                                v-model="assetTypeBinding"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                            />
-                                        </v-flex>
-                                        <v-flex xs2>
-                                            <v-text-field
-                                                :mask="'####'"
-                                                @input="
-                                                    onEditTreatmentDetails(
-                                                        'shadowForAnyTreatment',
-                                                        selectedTreatmentDetails.shadowForAnyTreatment,
-                                                    )
-                                                "
-                                                label="Years Before Any"
-                                                outline
-                                                v-model="
-                                                    selectedTreatmentDetails.shadowForAnyTreatment
-                                                "
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                            />
-                                        </v-flex>
-                                        <v-flex xs2>
-                                            <v-text-field
-                                                :mask="'####'"
-                                                rows="4"
-                                                @input="
-                                                    onEditTreatmentDetails(
-                                                        'shadowForSameTreatment',
-                                                        selectedTreatmentDetails.shadowForSameTreatment,
-                                                    )
-                                                "
-                                                label="Years Before Same"
-                                                outline
-                                                v-model="
-                                                    selectedTreatmentDetails.shadowForSameTreatment
-                                                "
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                                            />
-                                        </v-flex>
-                                    </v-layout>
-                                    <v-spacer></v-spacer>
-                                </div>
-
                                 <v-layout align-center row style="height:50px;" class="dhg-text-padding">                                    
                                         <v-flex xs10>
                                             <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
@@ -138,9 +139,9 @@
                                         >
                                         </v-textarea>         
                                     </v-flex>      
-                                </v-layout>
-                            </v-layout>
-                        </template>
+                                </v-layout>                            
+                            </v-layout>        
+                        </template>                
                         <v-card>
                             <v-card-text>
                                 <v-textarea
@@ -158,7 +159,8 @@
                             </v-card-text>
                         </v-card>
                     </v-menu>
-                </v-flex>                
+                </v-flex>
+
             </v-layout>
         </v-flex>
 

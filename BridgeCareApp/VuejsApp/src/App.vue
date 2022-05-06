@@ -17,7 +17,7 @@
                         Scenarios
                     </v-btn>                   
                      <v-btn
-                        @click="onNavigate('/EditLibrary/')"
+                        @click="onNavigate('/InvestmentEditor/Library')"
                         class="ara-blue-pantone-281"
                         flat
                     >

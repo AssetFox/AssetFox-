@@ -365,4 +365,22 @@ table.v-table tbody td {
     color: #444444 !important
 }
 
+.ghd-blue-border
+{
+    border-color: #2A578D !important;
+    border-style: solid !important;
+}
+
+.dhg-text-padding{
+    padding: 5px !important;
+}
+
+.ghd-control-width{
+    width: 250px !important;
+}
+
+.v-label--active{
+display: none !important;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');

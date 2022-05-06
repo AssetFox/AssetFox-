@@ -70,6 +70,7 @@
                     <v-flex xs2>
                         <v-btn
                             @click='showCreateTreatmentDialog = true'
+                            depressed
                             class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border dhg-text-padding'
                         >
                             Add Treatment

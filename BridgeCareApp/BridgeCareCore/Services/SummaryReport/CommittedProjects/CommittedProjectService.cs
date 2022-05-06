@@ -4,9 +4,11 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -17,6 +19,8 @@ namespace BridgeCareCore.Services
     public class CommittedProjectService : ICommittedProjectService
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
+
+        public const string UnknownBudgetName = "Unknown";
 
         private static readonly List<string> InitialHeaders = new List<string>
         {
@@ -69,7 +73,12 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = project.Year;
                         worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
                         worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        worksheet.Cells[row, column++].Value = project.ScenarioBudget.Name;
+                        var budgetName = project.ScenarioBudget.Name;
+                        if (budgetName == UnknownBudgetName)
+                        {
+                            budgetName = "";
+                        }
+                        worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
                         project.CommittedProjectConsequences.OrderBy(_ => _.Attribute.Name).ForEach(consequence =>
@@ -85,7 +94,7 @@ namespace BridgeCareCore.Services
             var committedProjectEntities = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
 
             var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                .Select(simulation => new SimulationEntity {Name = simulation.Name}).Single();
+                .Select(simulation => new SimulationEntity { Name = simulation.Name }).Single();
             var fileName = $"CommittedProjects_{simulationEntity.Name.Trim().Replace(" ", "_")}.xlsx";
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
@@ -180,7 +189,7 @@ namespace BridgeCareCore.Services
          * Creates CommittedProjectEntity data for Committed Project Import
          */
         private List<CommittedProjectEntity> CreateCommittedProjectEntitiesForImport(Guid simulationId,
-            ExcelPackage excelPackage, bool applyNoTreatment)
+            ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
 
@@ -213,9 +222,16 @@ namespace BridgeCareCore.Services
             {
                 var brKey = worksheet.GetCellValue<string>(row, 1);
                 var bmsId = worksheet.GetCellValue<string>(row, 2);
-                var locationIdentifier = $"{brKey}-{bmsId}";
-
                 var projectYear = worksheet.GetCellValue<int>(row, 4);
+                var searchList = maintainableAssetIdsPerLocationIdentifier.Keys.ToList();
+                var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
+                var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
+                if (locationSearchResult.Message != null)
+                {
+                    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: {locationSearchResult.Message}";
+                    throw new Exception(exceptionMessage);
+                }
+                var locationIdentifier = locationSearchResult.LocationIdentifier;
 
                 if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
                 {
@@ -223,14 +239,22 @@ namespace BridgeCareCore.Services
                 }
 
                 var budgetName = worksheet.GetCellValue<string>(row, 7);
+                var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
+                ScenarioBudgetEntity budgetEntity = null;
 
-                if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                if (budgetNameIsEmpty)
                 {
-                    throw new RowNotInTableException(
-                        $"Budget {budgetName} does not exist in the applied budget library.");
+                    budgetEntity = _unitOfWork.BudgetRepo.EnsureExistenceOfUnknownBudgetForSimulation(simulationId);
                 }
-
-                var budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
+                else 
+                {
+                    if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
+                    {
+                        throw new RowNotInTableException(
+                            $"Budget {budgetName} does not exist in the applied budget library.");
+                    }
+                    budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
+                } 
 
                 var project = new CommittedProjectEntity
                 {
@@ -309,10 +333,10 @@ namespace BridgeCareCore.Services
             return projectsPerLocationIdentifierAndYearTuple.Values.ToList();
         }
 
-        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, bool applyNoTreatment)
+        public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var committedProjectEntities =
-                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, applyNoTreatment);
+                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 

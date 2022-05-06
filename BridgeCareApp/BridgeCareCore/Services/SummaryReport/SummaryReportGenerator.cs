@@ -11,7 +11,7 @@ using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.DistrictTotals;
 using BridgeCareCore.Services.SummaryReport.Parameters;
 using BridgeCareCore.Services.SummaryReport.ShortNameGlossary;
-using BridgeCareCore.Services.SummaryReport.Visitors;
+using BridgeCareCore.Helpers.Excel.Visitors;
 using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 

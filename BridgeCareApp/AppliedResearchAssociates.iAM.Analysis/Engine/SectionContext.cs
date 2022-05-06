@@ -145,14 +145,14 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public double GetSpatialWeight()
         {
-            var r = Section.SpatialWeighting.Compute(this);
-            if (double.IsNaN(r) || double.IsInfinity(r))
+            var returnValue = Section.SpatialWeighting.Compute(this);
+            if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
             {
-                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, r);
+                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, returnValue);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
                 SimulationRunner.Send(messageBuilder);
             }
-            return r;
+            return returnValue;
         }
 
         public void MarkTreatmentProgress(Treatment treatment)

@@ -100,7 +100,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Helpers\LocationMatching\" />
     <Folder Include="Interfaces\Inventory\" />
+    <Folder Include="Services\SummaryReport\Models\" />
   </ItemGroup>
 
 

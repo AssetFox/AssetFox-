@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
@@ -13,6 +14,7 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
@@ -20,15 +22,19 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class TreatmentController : BridgeCareCoreBaseController
     {
+        private readonly ITreatmentService _treatmentService;
         private readonly IReadOnlyDictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> _treatmentCRUDMethods;
 
         private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
 
-        public TreatmentController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+        public TreatmentController(IEsecSecurity esecSecurity, ITreatmentService treatmentService, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _treatmentCRUDMethods = CreateCRUDMethods();
+            _treatmentService = treatmentService;
+        }
 
-        private Dictionary<string, CRUDMethods<TreatmentDTO,TreatmentLibraryDTO>> CreateCRUDMethods()
+        private Dictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> CreateCRUDMethods()
         {
             void UpsertAnyForScenario(Guid simulationId, List<TreatmentDTO> dtos)
             {
@@ -50,11 +56,11 @@ namespace BridgeCareCore.Controllers
             }
 
             List<TreatmentLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+                UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
 
             List<TreatmentLibraryDTO> RetrievePermittedForLibraries()
             {
-                var result = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries();
+                var result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
                 return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
             }
 
@@ -66,7 +72,7 @@ namespace BridgeCareCore.Controllers
 
             void UpsertPermittedForLibrary(TreatmentLibraryDTO dto)
             {
-                var currentRecord = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                var currentRecord = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
                 if (currentRecord?.Owner == UserId || currentRecord == null)
                 {
                     UpsertAnyForLibrary(dto);
@@ -81,7 +87,7 @@ namespace BridgeCareCore.Controllers
 
             void DeletePermittedForLibrary(Guid libraryId)
             {
-                var dto = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                var dto = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
 
                 if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
 
@@ -186,6 +192,28 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+        [HttpGet]
+        [Route("ExportScenarioTreatmentsExcelFile/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportScenarioTreatmentsExcelFile(Guid libraryId)
+        {
+            try
+            {
+                var result =
+                    await Task.Factory.StartNew(() => _treatmentService.GenerateExcelFile(libraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
 
         [HttpPost]
         [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
@@ -207,7 +235,7 @@ namespace BridgeCareCore.Controllers
                 UnitOfWork.Rollback();
                 return Unauthorized();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
@@ -235,6 +263,53 @@ namespace BridgeCareCore.Controllers
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+
+        [HttpPost]
+        [Route("ImportLibraryTreatmentsFile")]
+        [Authorize]
+        public async Task<IActionResult> ImportLibraryTreatmentsFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Investment budgets file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var libraryId))
+                {
+                    throw new ConstraintException("Request contained no treatment library id.");
+                }
+                var treatmentLibraryId = Guid.Parse(libraryId.ToString());
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
+                });
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.TreatmentLibrary);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 throw;
             }
         }

@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using BridgeCareCore.Services.SummaryReport.Models;
+using BridgeCareCore.Helpers.Excel;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
@@ -15,7 +14,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 
         public static ExcelRowModel IndexingRow(int numberOfYears)
         {
-            var r = ExcelRowModels.WithEntries(
+            var returnValue = ExcelRowModels.WithEntries(
                 BridgeCountPlusSix,
                 ExcelValueModels.Integer(103)
                 );
@@ -24,9 +23,9 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 var function = ExcelRangeFunctions.Plus(
                     ExcelRangeFunctions.Left,
                     ExcelRangeFunctions.Constant("17"));
-                r.AddCells(ExcelFormulaModels.FromFunction(function));
+                returnValue.AddCells(ExcelFormulaModels.FromFunction(function));
             }
-            return r;
+            return returnValue;
         }
 
         internal static ExcelRowModel DistrictAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
@@ -154,7 +153,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         public static ExcelRowModel PercentOverallDollarsTotalsRow(SimulationOutput output)
         {
             var totalText = StackedExcelModels.BoldText("Total");
-            var r = ExcelRowModels.WithEntries(totalText);
+            var returnValue = ExcelRowModels.WithEntries(totalText);
             var sumFunction = ExcelRangeFunctions.StartOffsetRangeSum(0, -12, 0, -1);
             var sumEntry = StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(sumFunction),
@@ -163,8 +162,8 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
                 ExcelStyleModels.Right,
                 ExcelStyleModels.MediumBorder,
                 ExcelStyleModels.PercentageFormat(0));
-            r.AddRepeated(output.Years.Count, sumEntry);
-            return r;
+            returnValue.AddRepeated(output.Years.Count, sumEntry);
+            return returnValue;
         }
 
     }

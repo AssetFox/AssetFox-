@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using BridgeCareCore.Services.SummaryReport.Models;
-using BridgeCareCore.Services.SummaryReport.Models.Worksheets;
+using BridgeCareCore.Helpers.Excel;
 
 namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
 {

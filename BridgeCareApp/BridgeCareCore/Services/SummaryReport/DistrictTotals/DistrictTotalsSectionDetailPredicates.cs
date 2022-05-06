@@ -11,22 +11,22 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         public static bool IsTurnpike(SectionDetail section)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
-            bool r = ownerCode.Trim() == "31";
-            return r;
+            var returnValue = ownerCode.Trim() == "31";
+            return returnValue;
         }
 
         public static bool IsCommittedProject(SectionDetail section)
         {
-            bool r = section.TreatmentCause == TreatmentCause.CommittedProject;
-            return r;
+            var returnValue = section.TreatmentCause == TreatmentCause.CommittedProject;
+            return returnValue;
         }
 
         public static bool IsDistrictNotTurnpike(SectionDetail section, int districtNumber)
         {
             var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
-            bool isTurnpike = IsTurnpike(section);
-            bool r = !isTurnpike && int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == districtNumber;
-            return r;
+            var isTurnpike = IsTurnpike(section);
+            var returnValue = !isTurnpike && int.TryParse(actualDistrict, out var sectionDistrict) && sectionDistrict == districtNumber;
+            return returnValue;
         }
 
         public static bool IsNumberedDistrictMpmsTable(SectionDetail section, int districtNumber)

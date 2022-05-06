@@ -12,8 +12,8 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
             var maxKeyLength = dictionary.Keys.Select(x => x.ToString().Length).DefaultIfEmpty(0).Max();
             var lines = dictionary.Select(x =>
             $"{x.Key.ToString().PadRight(maxKeyLength)} {x.Value}").ToList();
-            var r = string.Join(Environment.NewLine, lines.OrderBy(x => x));
-            return r;
+            var returnValue = string.Join(Environment.NewLine, lines.OrderBy(x => x));
+            return returnValue;
         }
     }
 }

@@ -132,6 +132,47 @@ export default class EditLibrary extends Vue {
         },
     ];
 
+    
+    beforeRouteEnter(to: any, from: any, next: any) {
+        next((vm: any) => {
+                vm.navigationTabs = vm.navigationTabs.map(
+                    (navTab: NavigationTab) => {
+                        const navigationTab = {
+                            ...navTab,
+                            navigation: {
+                                ...navTab.navigation,
+                                query: {
+                                },
+                            },
+                        };
+
+                        if (navigationTab.tabName === 'Remaining Life Limit' 
+                            || navigationTab.tabName === 'Target Condition Goal' 
+                            || navigationTab.tabName === 'Deficient Condition Goal' 
+                            || navigationTab.tabName === 'Calculated Attribute') {
+                            navigationTab['visible'] = vm.isAdmin;
+                        }
+
+                        return navigationTab;
+                    },
+                );
+
+                // get the window href
+                const href = window.location.href;
+                // check each NavigationTab object to see if it has a matching navigation path with the href
+                const hasChildPath = any(
+                    (navigationTab: NavigationTab) =>
+                        href.indexOf(navigationTab.navigation.path) !== -1,
+                    vm.navigationTabs,
+                );
+                // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
+                if (!hasChildPath) {
+                    vm.$router.push(vm.navigationTabs[0].navigation);
+                }
+        });
+    }
+
+
     visibleNavigationTabs() {
         return this.navigationTabs.filter(
             navigationTab =>

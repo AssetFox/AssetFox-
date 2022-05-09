@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -64,6 +65,31 @@ namespace BridgeCareCore.Controllers
         [Route("CreateAttributes")]
         [Authorize]
         public async Task<IActionResult> CreateAttributes()
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var configurableAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateAttribute")]
+        [Authorize]
+        public async Task<IActionResult> CreateAttribute(AttributeDTO attributeDto)
         {
             try
             {

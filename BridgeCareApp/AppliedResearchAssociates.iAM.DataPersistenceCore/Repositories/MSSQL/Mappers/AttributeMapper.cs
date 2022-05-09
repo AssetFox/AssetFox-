@@ -94,6 +94,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>
-            new AttributeDTO { Name = entity.Name, Type = entity.DataType };
+            new()
+            {
+                Name = entity.Name,
+                Type = entity.DataType,
+                Id = entity.Id,
+                IsAscending = entity.IsAscending,
+                IsCalculated = entity.IsCalculated,
+                AggregationRuleType = entity.AggregationRuleType,
+                Command = entity.Command,
+                DefaultValue = entity.DefaultValue,
+                Maximum = entity.Maximum,
+                Minimum = entity.Minimum,
+            };
     }
 }

@@ -66,10 +66,20 @@
                             :headers="performanceCurveGridHeaders"
                             :items="performanceCurveGridData"
                             :search="gridSearchTerm"
+                            select-all
+                            v-model='selectedPerformanceEquations'
                             class="fixed-header v-table__overflow ghd-button-border"
-                            item-key="performanceLibraryEquationId"
+                            item-key="id"
                         >
                             <template slot="items" slot-scope="props">
+                                <td>
+                                    <v-checkbox class="ghd-checkbox"
+                                        hide-details
+                                        primary
+                                        v-model='props.selected'
+                                    >
+                                    </v-checkbox>
+                                </td>                                
                                 <td class="text-xs-left">
                                     <v-edit-dialog
                                         :return-value.sync="props.item.name"
@@ -250,6 +260,10 @@
                                 </td>
                             </template>
                         </v-data-table>
+                        <v-btn :disabled='selectedPerformanceEquationIds.length === 0' @click='onRemovePerformanceEquations'
+                            class='ghd-blue' flat>
+                            Delete Selected
+                        </v-btn>                        
                     </v-card>
                 </v-flex>
             </v-layout>
@@ -397,6 +411,7 @@ import {
     any,
     prepend,
     clone,
+    contains,
     find,
     findIndex,
     isNil,
@@ -431,8 +446,7 @@ import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
-import ImportExportPerformanceCurvesDialog
-    from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
+import ImportExportPerformanceCurvesDialog from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
@@ -440,6 +454,7 @@ import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { getPropertyValues } from '@/shared/utils/getter-utils';
 
 @Component({
     components: {
@@ -544,6 +559,10 @@ export default class PerformanceCurveEditor extends Vue {
     attributeSelectItems: SelectItem[] = [];
     selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
     hasSelectedPerformanceCurve: boolean = false;
+
+    selectedPerformanceEquations: PerformanceCurve[] = [];
+    selectedPerformanceEquationIds: string[] = [];
+
     createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
         emptyCreatePerformanceLibraryDialogData,
     );
@@ -591,6 +610,16 @@ export default class PerformanceCurveEditor extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+
+    @Watch('selectedPerformanceEquations')
+    onSelectedPerformanceEquationsChanged() {
+        this.selectedPerformanceEquationIds = getPropertyValues('id', this.selectedPerformanceEquations) as string[];
+    } 
+    
+    onRemovePerformanceEquations() {
+        this.performanceCurveGridData = this.performanceCurveGridData
+            .filter((performanceCurve: PerformanceCurve) => !contains(performanceCurve.id, this.selectedPerformanceEquationIds));
+    }    
 
     @Watch('statePerformanceCurveLibraries')
     onStatePerformanceCurveLibrariesChanged() {
@@ -924,13 +953,13 @@ export default class PerformanceCurveEditor extends Vue {
                         ...data,
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
-                    })
+                    });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
                         ...data,
                         id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
-                    })
+                    });
                 }
 
             }

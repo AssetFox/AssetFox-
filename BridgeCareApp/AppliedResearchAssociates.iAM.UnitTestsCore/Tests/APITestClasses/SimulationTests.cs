@@ -631,9 +631,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             CreateAuthorizedController();
             CreateTestData();
+            var simulationDto = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(_testSimulationToClone.Id);
+            var cloneSimulationDto = new CloneSimulationDTO
+            {
+                networkId = _testSimulationToClone.NetworkId,
+                Id = _testSimulationToClone.Id,
+            };
 
             // Act
-            var result = await _controller.CloneSimulation(_testSimulationToClone.Id);
+            var result = await _controller.CloneSimulation(cloneSimulationDto);
 
             // Assert
             var okObjResult = result as OkObjectResult;

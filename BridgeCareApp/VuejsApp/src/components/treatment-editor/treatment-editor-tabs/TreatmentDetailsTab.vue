@@ -1,14 +1,14 @@
 <template>
     <v-layout class="treatment-details-tab-content">
         <v-flex xs12>
-            <v-layout column justify-center>
-                
-                <v-flex xs6 class="treatment-description-flex">
-                    <v-textarea
-                        label="Treatment Description"
+            <v-layout column>                
+                <v-flex>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment Description</v-subheader>
+                    <v-textarea                        
+                        class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
-                        rows="2"
+                        rows="4"
                         v-model="selectedTreatmentDetails.description"
                         @input="
                             onEditTreatmentDetails(
@@ -17,81 +17,83 @@
                             )
                         "
                     />
-                </v-flex>
-
-                <div class="shadow-inputs-div">
-                    <v-spacer></v-spacer>
-                    <v-layout justify-space-between row>
-                        <v-flex xs3>
-                            <v-select
-                                :items="Array.from(treatmentCategoryMap.keys())"
-                                @input="
-                                    onEditTreatmentType(
-                                        'category',
-                                        treatmentCategoryBinding,
-                                    )
-                                "
-                                label="Category"
-                                outline
-                                v-model="treatmentCategoryBinding"
-                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                            />
-                        </v-flex>
-                        <v-flex xs3>
-                            <v-select
-                            :items="Array.from(assetTypeMap.keys())"
-                                @input="
-                                    onEditAssetType(
-                                        'assetType',
-                                        assetTypeBinding,
-                                    )
-                                "
-                                label="Asset type"
-                                outline
-                                v-model="assetTypeBinding"
-                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                            />
-                        </v-flex>
-                        <v-flex xs2>
-                            <v-text-field
-                                :mask="'####'"
-                                @input="
-                                    onEditTreatmentDetails(
-                                        'shadowForAnyTreatment',
-                                        selectedTreatmentDetails.shadowForAnyTreatment,
-                                    )
-                                "
-                                label="Years Before Any"
-                                outline
-                                v-model="
-                                    selectedTreatmentDetails.shadowForAnyTreatment
-                                "
-                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                            />
-                        </v-flex>
-                        <v-flex xs2>
-                            <v-text-field
-                                :mask="'####'"
-                                rows="4"
-                                @input="
-                                    onEditTreatmentDetails(
-                                        'shadowForSameTreatment',
-                                        selectedTreatmentDetails.shadowForSameTreatment,
-                                    )
-                                "
-                                label="Years Before Same"
-                                outline
-                                v-model="
-                                    selectedTreatmentDetails.shadowForSameTreatment
-                                "
-                                :rules="[rules['generalRules'].valueIsNotEmpty]"
-                            />
-                        </v-flex>
-                    </v-layout>
-                    <v-spacer></v-spacer>
-                </div>
-                
-                <v-flex xs10 class="criteria-flex">
+                </v-flex>                
+                <v-layout xs12 row class="ghd-left-padding ghd-right-padding">
+                    <v-flex xs3>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
+                        <v-select
+                        class='ghd-control-border ghd-control-text ghd-control-width'
+                            :items="Array.from(treatmentCategoryMap.keys())"
+                            @input="
+                                onEditTreatmentType(
+                                    'category',
+                                    treatmentCategoryBinding,
+                                )
+                            "
+                            label="Category"
+                            outline
+                            v-model="treatmentCategoryBinding"
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        />
+                    </v-flex>
+                    <v-flex xs3>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
+                        <v-select
+                        class='ghd-control-border ghd-control-text ghd-control-width'
+                        :items="Array.from(assetTypeMap.keys())"
+                            @input="
+                                onEditAssetType(
+                                    'assetType',
+                                    assetTypeBinding,
+                                )
+                            "
+                            label="Asset type"
+                            outline
+                            v-model="assetTypeBinding"
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        />
+                    </v-flex>
+                    <v-flex xs3>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Years Before Any</v-subheader>
+                        <v-text-field
+                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
+                            :mask="'####'"
+                            @input="
+                                onEditTreatmentDetails(
+                                    'shadowForAnyTreatment',
+                                    selectedTreatmentDetails.shadowForAnyTreatment,
+                                )
+                            "
+                            label="Years Before Any"
+                            outline
+                            v-model="
+                                selectedTreatmentDetails.shadowForAnyTreatment
+                            "
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        />
+                    </v-flex>
+                    <v-flex xs3>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Years Before Same</v-subheader>
+                        <v-text-field
+                            class='ghd-control-border ghd-control-text ghd-control-width-sm'
+                            :mask="'####'"
+                            rows="4"
+                            @input="
+                                onEditTreatmentDetails(
+                                    'shadowForSameTreatment',
+                                    selectedTreatmentDetails.shadowForSameTreatment,
+                                )
+                            "
+                            label="Years Before Same"
+                            outline
+                            v-model="
+                                selectedTreatmentDetails.shadowForSameTreatment
+                            "
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        />
+                    </v-flex>
+                </v-layout>                
+                <v-flex class="criteria-flex">
                     <v-menu
                         full-width
                         bottom
@@ -99,12 +101,12 @@
                         min-width="800px"
                     >   
                         <template slot="activator">                                                                                       
-                            <v-layout column>  
-                                <v-layout align-center row style="height:50px;" class="dhg-text-padding">                                    
-                                        <v-flex xs10>
-                                            <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
-                                        </v-flex>
-                                        <v-flex xs2>                                 
+                            <v-layout column class="ghd-left-padding">  
+                                <v-layout xs12 align-center row style="height:50px;">                                    
+                                    <v-flex xs11>
+                                        <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
+                                    </v-flex>
+                                    <v-flex xs2>                                 
                                         <v-btn
                                             @click="
                                                 onRemoveTreatmentCriterionLibrary
@@ -123,14 +125,15 @@
                                         >
                                             <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                         </v-btn>   
-                                    </v-flex> 
+                                    </v-flex>                                    
                                 </v-layout>       
-                                <v-layout align-center row style="padding-left:5px;">  
-                                    <v-flex xs11>
+                                <v-layout align-center row class="ghd-right-padding">  
+                                    <v-flex>
                                         <v-textarea
                                             class="ghd-control-border sm-txt"                                            
                                             no-resize
                                             outline
+                                            rows="5"
                                             readonly                                            
                                             :value="
                                                 selectedTreatmentDetails.criterionLibrary
@@ -145,6 +148,7 @@
                         <v-card>
                             <v-card-text>
                                 <v-textarea
+                                    class="ghd-card-width"
                                     :value="
                                         selectedTreatmentDetails
                                             .criterionLibrary
@@ -159,8 +163,7 @@
                             </v-card-text>
                         </v-card>
                     </v-menu>
-                </v-flex>
-
+                </v-flex>      
             </v-layout>
         </v-flex>
 
@@ -288,19 +291,7 @@ export default class TreatmentDetailsTab extends Vue {
 </script>
 
 <style>
-.treatment-details-content {
-    height: 185px;
-}
-
 .criteria-flex {
-    padding-bottom: 0px !important;
-}
-
-.shadow-inputs-div {
-    height: 78px;
-}
-
-.treatment-description-flex {
     padding-bottom: 0px !important;
 }
 </style>

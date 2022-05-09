@@ -371,12 +371,32 @@ table.v-table tbody td {
     border-style: solid !important;
 }
 
-.dhg-text-padding{
+.ghd-text-padding{
     padding: 5px !important;
+}
+
+.ghd-padding{
+    padding: 10px !important;
+}
+
+.ghd-left-padding{
+    padding-left: 10px !important;
+}
+
+.ghd-right-padding{
+    padding-right: 10px !important;
 }
 
 .ghd-control-width{
     width: 250px !important;
+}
+
+.ghd-control-width-sm{
+    width: 200px !important;
+}
+
+.ghd-card-width{
+    min-width: 1000px !important;
 }
 
 .v-label--active{

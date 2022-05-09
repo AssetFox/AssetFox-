@@ -124,7 +124,7 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Deterioration',
+            tabName: 'Deterioration Model',
             tabIcon: 'fas fa-chart-line',
             navigation: {
                 path: '/PerformanceCurveEditor/Scenario/',

@@ -12,7 +12,7 @@
                     >
                         New Library
                     </v-btn>
-                    <v-subheader class="ghd-control-label ghd-md-gray">Performance Library</v-subheader>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
                     <v-select
                         class="ghd-control-border ghd-control-text"
                         :items="librarySelectItems"
@@ -50,7 +50,7 @@
                         class="ghd-control-border ghd-control-text"
                         append-icon="fas fa-search"
                         hide-details
-                        label="Search Performance Equation"
+                        label="Search Deterioration Equations"
                         single-line
                         v-model="gridSearchTerm"
                     >
@@ -263,7 +263,7 @@
                         block
                         outlined
                     >
-                        Add Performance Curve
+                        Add Deterioration Model
                     </v-btn>
                     <v-btn v-show='false' :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
                         class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border"

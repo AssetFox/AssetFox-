@@ -2,22 +2,22 @@
     <v-layout column>
         <v-layout row  >
             <!-- text boxes for scenario only -->
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario'>
-                        <v-subheader class="ghd-md-gray ghd-control-label">First Year of Analysis Period</v-subheader>
+                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
                         <v-text-field readonly outline
                                       @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
                                       v-model='investmentPlan.firstYearOfAnalysisPeriod' 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario'>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Number of Years in Analysis Period</v-subheader>
+                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Number of Years in Analysis Period</span></v-subheader>
                         <v-text-field readonly outline
                                       @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
                                       v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
                                       class="ghd-text-field-border ghd-text-field" />
                     </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario'>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Minimum Project Cost Limit</v-subheader>
+                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Minimum Project Cost Limit</span></v-subheader>
                         <v-text-field outline id='min-proj-cost-limit-txt'                                      
                                       @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
                                       v-model='investmentPlan.minimumProjectCostLimit'
@@ -26,8 +26,8 @@
                                       :disabled="!isAdmin" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario'>
-                        <v-subheader class="ghd-md-gray ghd-control-label">Inflation Rate Percentage</v-subheader>
+                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Inflation Rate Percentage</span></v-subheader>
                         <v-text-field outline
                                       v-model='investmentPlan.inflationRatePercentage'
                                       @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
@@ -37,8 +37,8 @@
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
                     <!-- this shows up everywhere -->
-                    <v-flex xs4>
-                         <v-subheader class="ghd-md-gray ghd-control-label">Select an Investment library</v-subheader>
+                    <v-flex xs4 class="ghd-constant-header">
+                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                         <v-select :items='librarySelectItems'
                               outline 
                               v-model='librarySelectItemValue'
@@ -46,7 +46,7 @@
                         </v-select>
                     </v-flex>
                     <!-- these are only in library -->
-                    <v-flex xs4 v-if='!hasScenario'>
+                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
                         <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
                             <div class="header-text-content invest-owner-padding">                            
                                 Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -56,7 +56,7 @@
                             <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />
                         </v-layout>
                     </v-flex>
-                    <v-flex xs4 v-if='!hasScenario'> 
+                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header"> 
                         <v-layout row align-end class="header-alignment-padding-right">
                             <v-spacer></v-spacer>
                             <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
@@ -931,11 +931,11 @@ export default class InvestmentEditor extends Vue {
 }
 
 .header-alignment-padding-center{
-    padding-top: 35px
+    padding-top: 54px
 }
 
 .header-alignment-padding-right{
-    padding-top: 28px
+    padding-top: 48px
 }
 
 .investment-divider{

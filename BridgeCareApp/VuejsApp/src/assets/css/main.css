@@ -152,6 +152,19 @@
     font-weight: 400 !important;
 }
 
+.ghd-control-subheader{
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    position: relative;
+}
+
+.ghd-control-subheader span{
+    position: absolute !important;
+    bottom: 0 !important;
+}
+
 .ghd-control-border .v-input__slot {
     border: 1px solid #999999 !important;
     border-radius: 4px !important;    
@@ -469,4 +482,14 @@ table.v-table tbody td {
 .header-text-content{
     padding-left: 10px;
     padding-right: 10px;
+}
+
+.ghd-constant-header{
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+.ghd-constant-header .layout{
+    margin-top: -4px !important;
+    margin-bottom: -4px !important;
 }

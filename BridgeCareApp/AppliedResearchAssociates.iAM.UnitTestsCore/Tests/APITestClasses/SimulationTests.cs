@@ -635,7 +635,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var cloneSimulationDto = new CloneSimulationDTO
             {
                 networkId = _testSimulationToClone.NetworkId,
-                Id = _testSimulationToClone.Id,
+                scenarioId = _testSimulationToClone.Id,
+                Id = Guid.NewGuid(),
+                scenarioName = _testSimulationToClone.Name,
             };
 
             // Act

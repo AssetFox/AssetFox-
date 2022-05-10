@@ -161,7 +161,40 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList().ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
 
-        public List<TreatmentLibraryDTO> GetTreatmentLibraries()
+        public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)
+        {
+            var entity = _unitOfWork.Context.TreatmentLibrary.AsNoTracking()
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Treatments)
+                .ThenInclude(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .SingleOrDefault(_ => _.Id == libraryId);
+            var returnValue = entity == null
+                ? null : entity.ToDto();
+            return returnValue;
+        } 
+
+        
+
+        public List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             if (!_unitOfWork.Context.SelectableTreatment.Any())
             {
@@ -280,6 +313,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+        }
+
+        public void ReplaceTreatmentLibrary(Guid libraryId, List<TreatmentDTO> treatments)
+        {
+
+            _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
+                _.TreatmentLibraryId == libraryId);
+
+            UpsertOrDeleteTreatments(treatments, libraryId);
+
         }
 
         public void DeleteTreatmentLibrary(Guid libraryId)

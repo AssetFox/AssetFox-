@@ -142,10 +142,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private double getCost(TreatmentCost cost, SectionContext scope)
         {
-            var r = cost.Equation.Compute(scope);
-            if (double.IsNaN(r) || double.IsInfinity(r))
+            var returnValue = cost.Equation.Compute(scope);
+            if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
             {
-                var errorMessage = SimulationLogMessages.TreatmentCostReturned(scope.Section, cost, this, r);
+                var errorMessage = SimulationLogMessages.TreatmentCostReturned(scope.Section, cost, this, returnValue);
                 var message = new SimulationLogMessageBuilder
                 {
                     SimulationId = scope.SimulationRunner.Simulation.Id,
@@ -155,7 +155,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 };
                 scope.SimulationRunner.Send(message);
             }
-            return r;
+            return returnValue;
         }
 
         internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts)

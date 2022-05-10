@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using BridgeCareCore.Services.SummaryReport.Models;
+﻿using System.Collections.Generic;
+using BridgeCareCore.Helpers.Excel;
 
 namespace BridgeCareCore.Services.SummaryReport.ShortNameGlossary
 {

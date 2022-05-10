@@ -31,7 +31,7 @@
                         </v-divider>
                         <v-switch
                             label="Shared"
-                            class="ghd-control-label ghd-md-gray"
+                            class="ghd-control-label ghd-md-gray my-2"
                             v-if="hasSelectedLibrary && !hasScenario"
                             v-model="selectedTargetConditionGoalLibrary.shared"
                         />

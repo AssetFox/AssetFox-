@@ -162,7 +162,7 @@
                 <v-layout justify-center row>
                     <v-btn
                         @click="onDiscardChanges"
-                        class="ghd-white-bg ghd-blue ghd-button-text"
+                        class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
                         depressed
                         >Cancel</v-btn
                     >
@@ -170,7 +170,7 @@
                         @click="onUpsertAnalysisMethod"
                         :disabled="criteriaIsInvalid() || !valid"
                         depressed
-                        class="ghd-blue-bg ghd-white ghd-button-text"
+                        class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
                     >
                 </v-layout>

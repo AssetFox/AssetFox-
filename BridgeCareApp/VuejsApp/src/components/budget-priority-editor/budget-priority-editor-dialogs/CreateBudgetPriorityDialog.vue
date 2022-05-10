@@ -3,10 +3,10 @@
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
-          <h3 class="ghd-control-dialog-header">New Budget Priority</h3>
-          <v-btn @click="onSubmit(false)" flat class="header-cancel">
-                <h4>X</h4>
-          </v-btn>
+          <div class="ghd-control-dialog-header">New Budget Priority</div>
+          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>
         </v-layout>
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
@@ -22,10 +22,10 @@
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
         <v-layout justify-center row>
-          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text'>
+          <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn >
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding'>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Save
           </v-btn>         
         </v-layout>

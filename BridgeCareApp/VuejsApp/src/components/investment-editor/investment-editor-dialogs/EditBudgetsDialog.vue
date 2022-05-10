@@ -2,33 +2,24 @@
     <v-layout>
         <v-dialog max-width='800px' persistent scrollable v-model='dialogData.showDialog'>
             <v-card>
-                <v-card-title>
-                    <v-layout justify-center>
-                        <h3>Edit Budget Criteria</h3>
+                <v-card-title class="ghd-dialog-box-padding-top">
+                    <v-layout justify-space-between align-center>
+                        <div class="ghd-control-dialog-header">Edit Budget Criteria</div>
+                        <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                            X
+                        </v-btn>
                     </v-layout>
                 </v-card-title>
-                <v-toolbar>
-                    <v-layout justify-center row>
-                        <v-btn @click='onAddBudget' class='ara-blue' icon>
-                            <v-icon>fas fa-plus</v-icon>
-                        </v-btn>
-                        <v-btn :disabled='disableDeleteButton()' @click='onRemoveBudgets' class='ara-orange' icon>
-                            <v-icon>fas fa-trash</v-icon>
-                        </v-btn>
-                    </v-layout>
-                </v-toolbar>
-                <v-card-text style='height: 500px;'>
+                <div style='height: 500px; max-width:800px' class="ghd-dialog-box-padding-center">
+                    <div style='max-height: 450px; overflow-y:auto;'>
                     <v-data-table :headers='editBudgetsDialogGridHeaders'
                                   :items='editBudgetsDialogGridData'
-                                  class='elevation-1'
+                                  
                                   hide-actions
                                   item-key='id'
-                                  select-all
-                                  v-model='selectedGridRows'>
+                                  v-model='selectedGridRows'
+                                  class="ghd-table">
                         <template slot='items' slot-scope='props'>
-                            <td>
-                                <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
-                            </td>
                             <td>
                                 <v-edit-dialog :return-value.sync='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' large lazy>
@@ -45,22 +36,34 @@
                                               :value='props.item.criterionLibrary.mergedCriteriaExpression'>
                                     <template slot='append-outer'>
                                         <v-icon @click='onShowCriterionLibraryEditorDialog(props.item)'
-                                                class='edit-icon'>
+                                                class='ghd-blue'>
                                             fas fa-edit
                                         </v-icon>
                                     </template>
                                 </v-text-field>
                             </td>
+                            <td>
+                                <v-btn @click="onRemoveBudget(props.item.id)"  class="ghd-blue" icon>
+                                    <v-icon>fas fa-trash</v-icon>
+                                </v-btn>
+                            </td>
                         </template>
                     </v-data-table>
-                </v-card-text>
-                <v-card-actions>
-                    <v-layout justify-space-between>
-                        <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'
+                    </div>
+                    <v-layout row align-end style="margin:0 !important">
+                        <v-btn @click='onAddBudget' class='ghd-blue ghd-button' flat>
+                            Add
+                        </v-btn>
+                    </v-layout>
+                </div>
+                
+                <v-card-actions class="ghd-dialog-box-padding-bottom">
+                    <v-layout justify-center>
+                        <v-btn @click='onSubmit(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>Cancel</v-btn>
+                        <v-btn @click='onSubmit(true)' class='ghd-blue hd-button-text ghd-button' flat
                                :disabled='disableSubmitButton()'>
                             Save
-                        </v-btn>
-                        <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
+                        </v-btn>                        
                     </v-layout>
                 </v-card-actions>
             </v-card>
@@ -102,8 +105,9 @@ export default class EditBudgetsDialog extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
     editBudgetsDialogGridHeaders: DataTableHeader[] = [
-        { text: 'Budget', value: 'name', sortable: false, align: 'center', class: '', width: '' },
-        { text: 'Criteria', value: 'criterionLibrary', sortable: false, align: 'center', class: '', width: '' },
+        { text: 'Budget', value: 'name', sortable: false, align: 'left', class: '', width: '' },
+        { text: 'Criteria', value: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '' },
+        { text: 'Actions', value: 'actions', sortable: false, align: 'left', class: '', width: '' }
     ];
     editBudgetsDialogGridData: Budget[] = [];
     selectedGridRows: Budget[] = [];
@@ -146,6 +150,11 @@ export default class EditBudgetsDialog extends Vue {
             .filter((budget: Budget) => !any(propEq('id', budget.id), this.selectedGridRows));
 
         this.selectedGridRows = [];
+    }
+
+    onRemoveBudget(id: string){
+        this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
+            .filter((budget: Budget) => budget.id != id);
     }
 
     onShowCriterionLibraryEditorDialog(budget: Budget) {

@@ -1,21 +1,24 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog width="444px" height="437px" persistent v-model="dialogData.showDialog">
     <v-card>
       <v-card-title>
         <v-layout justify-start>
-          <div class="ghd-control-text"><h5>Create New Target Condition Goal Library</h5></div>
+          <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
+        <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+        </v-btn>
       </v-card-title>
-      <v-card-text>
+      <v-card-text padding="30px;30px;30px;30px">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field  outline v-model="newTargetConditionGoalLibrary.name"
-                        class="ghd-control-text ghd-control-border"
-                        
+                        class="ghd-text-field"
+                        width="384px" height="40px"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
-                      class="ghd-control-text ghd-control-border"
+                      class="ghd-text-field" height="100px"
                       v-model="newTargetConditionGoalLibrary.description"/>
         </v-layout>
       </v-card-text>

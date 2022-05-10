@@ -5,12 +5,15 @@
         <v-layout justify-start>
           <div class="ghd-control-text"><h5>Add New Target Condition Goal</h5></div>
         </v-layout>
+                <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+        </v-btn>
       </v-card-title>
       <v-card-text>
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field outline v-model="newTargetConditionGoal.name"
-                        class="ghd-control-text ghd-control-border"
+                        class="ghd-dialog-box-padding-center"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
           <v-select :items="numericAttributeNames"

@@ -144,7 +144,7 @@
                 </v-btn>  
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
                        class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' flat

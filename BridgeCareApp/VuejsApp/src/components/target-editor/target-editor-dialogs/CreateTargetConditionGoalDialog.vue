@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title>
         <v-layout justify-start>
-          <h3 class="ghd-control-text">Add New Target Condition Goal</h3>
+          <div class="ghd-control-text"><h5>Add New Target Condition Goal</h5></div>
         </v-layout>
       </v-card-title>
       <v-card-text>

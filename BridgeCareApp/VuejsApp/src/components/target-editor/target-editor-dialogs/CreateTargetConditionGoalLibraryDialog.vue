@@ -3,7 +3,7 @@
     <v-card>
       <v-card-title>
         <v-layout justify-start>
-          <h3 class="ghd-control-text">Create New Target Condition Goal Library</h3>
+          <div class="ghd-control-text"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
       </v-card-title>
       <v-card-text>
@@ -11,6 +11,7 @@
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field  outline v-model="newTargetConditionGoalLibrary.name"
                         class="ghd-control-text ghd-control-border"
+                        
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
           <v-textarea no-resize outline rows="3"

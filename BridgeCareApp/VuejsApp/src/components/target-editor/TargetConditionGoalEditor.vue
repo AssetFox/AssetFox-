@@ -248,6 +248,13 @@
                 >
                     Delete Library
                 </v-btn>
+                <v-btn :disabled='!hasUnsavedChanges' flat
+                    @click="onDiscardChanges"
+                    class="ghd-white-bg ghd-blue"
+                    v-show="hasScenario"
+                >
+                    Cancel
+                </v-btn>
                 <v-btn outline
                     @click="onShowCreateTargetConditionGoalLibraryDialog(true)"
                     class="ghd-control-border ghd-blue"
@@ -262,13 +269,6 @@
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                 >
                     Save
-                </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges'
-                    @click="onDiscardChanges"
-                    class="ghd-blue-bg ghd-white"
-                    v-show="hasScenario"
-                >
-                    Cancel
                 </v-btn>
                 <v-btn
                     @click="onUpsertTargetConditionGoalLibrary"

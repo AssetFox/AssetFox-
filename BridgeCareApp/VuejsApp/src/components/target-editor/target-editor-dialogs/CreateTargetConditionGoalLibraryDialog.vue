@@ -1,7 +1,7 @@
 <template>
   <v-dialog width="444px" height="437px" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title>
+      <v-card-title class="ghd-text-field-padding">
         <v-layout justify-start>
           <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
@@ -9,12 +9,12 @@
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
-      <v-card-text padding="30px;30px;30px;30px">
+      <v-card-text  class="ghd-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field  outline v-model="newTargetConditionGoalLibrary.name"
                         class="ghd-text-field"
-                        width="384px" height="40px"
+                        
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
@@ -22,8 +22,8 @@
                       v-model="newTargetConditionGoalLibrary.description"/>
         </v-layout>
       </v-card-text>
-      <v-card-actions>
-        <v-layout justify-center row>
+      <v-card-actions class="py-0">
+        <v-layout justify-center row class="ghd-text-field-padding-custom1">
           <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
           <v-btn :disabled="newTargetConditionGoalLibrary.name ===''" @click="onSubmit(true)" outline
                  class="ghd-white-bg ghd-blue">

@@ -197,7 +197,14 @@
     font-size: 18px; 
     color: #444444;
 }
+.ghd-text-field-padding{
+    padding-left: 30px;
+    padding-right: 30px;
 
+}
+.ghd-text-field-padding-custom1{
+    padding-bottom: 40px;
+}
 .ghd-text-field-border .v-input__control .v-input__slot{
     border: solid 1px #999999 !important;
 }

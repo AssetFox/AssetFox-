@@ -1,7 +1,7 @@
 <template>
   <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
-      <v-card-title>
+      <v-card-title class="ghd-dialog-padding-top-title">
         <v-layout justify-start>
           <div class="dialog-header"><h5>Add New Target Condition Goal</h5></div>
         </v-layout>
@@ -9,11 +9,11 @@
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
-      <v-card-text class="ghd-text-field-padding">
+      <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
           <v-text-field outline v-model="newTargetConditionGoal.name"
-                        class="ghd-dialog-box-padding-center"
+                        class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
           <v-select :items="numericAttributeNames"
@@ -29,7 +29,7 @@
         </v-layout>
       </v-card-text>
       <v-card-actions class="py-0">
-        <v-layout justify-center row class="ghd-text-field-padding-custom1">
+        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" flat>
             Cancel
           </v-btn>

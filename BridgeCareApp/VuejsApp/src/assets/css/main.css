@@ -202,6 +202,13 @@
     text-transform: none !important;
 }
 
+.ghd-button-text-sm {
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+}
 
 /* Checkbox */
 /* checkbox text */

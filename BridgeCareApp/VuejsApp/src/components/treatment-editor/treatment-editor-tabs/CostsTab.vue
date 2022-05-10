@@ -1,30 +1,20 @@
 <template>
     <v-layout class="costs-tab-content">
-        <v-flex xs12>
-            <v-btn @click="onAddCost" class="ara-blue-bg white--text"
-                >Add Cost</v-btn
-            >
-            <div class="costs-data-table">
-                <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
-                    Equation - Use Max(,) to enforce minimum costs
-                </v-chip>
-                <v-data-table
+        <v-flex xs12>              
+            <div class="costs-data-table">                
+                <v-data-table                    
                     :headers="costsGridHeaders"
                     :items="costsGridData"
-                    class="elevation-1 fixed-header v-table__overflow"
+                    class="elevation-1 v-table__overflow"
                     hide-actions
+                    hide-default-header
+                    hide-default-footer
                 >
                     <template slot="items" slot-scope="props">
-                        <td>
-                            <v-textarea
-                                full-width
-                                no-resize
-                                outline
-                                readonly
-                                rows="3"
-                                v-model="props.item.equation.expression"
-                            >
-                                <template slot="append-outer">
+                        <tr style="border:none">
+                            <td>                            
+                                <v-layout row xs6 align-center>                                
+                                    <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Equation</v-subheader>
                                     <v-btn
                                         @click="
                                             onShowCostEquationEditorDialog(
@@ -34,24 +24,25 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
-                                    </v-btn>
-                                </template>
-                            </v-textarea>
-                        </td>
-                        <td>
-                            <v-textarea
-                                full-width
-                                no-resize
-                                outline
-                                readonly
-                                rows="3"
-                                v-model="
-                                    props.item.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                            >
-                                <template slot="append-outer">
+                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                    </v-btn>                                
+                                </v-layout>
+                                <v-layout row xs6 align-center>  
+                                    <v-textarea
+                                        class="ghd-control-border ghd-control-text"
+                                        full-width
+                                        no-resize
+                                        outline
+                                        readonly
+                                        rows="3"
+                                        v-model="props.item.equation.expression"
+                                    >                                
+                                    </v-textarea>  
+                                </v-layout>                          
+                            </td>
+                            <td>
+                                <v-layout row xs6 align-center>
+                                <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Criteria</v-subheader>
                                     <v-btn
                                         @click="
                                             onShowCostCriterionLibraryEditorDialog(
@@ -61,25 +52,43 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
-                                </template>
-                            </v-textarea>
-                        </td>
-                        <td>
-                            <v-layout align-start>
-                                <v-btn
-                                    @click="onRemoveCost(props.item.id)"
-                                    class="ara-orange"
-                                    icon
-                                >
-                                    <v-icon>fas fa-trash</v-icon>
-                                </v-btn>
-                            </v-layout>
-                        </td>
+                                </v-layout> 
+                                <v-layout row xs6 align-center>              
+                                    <v-textarea
+                                        class="ghd-control-border ghd-control-text"
+                                        full-width
+                                        no-resize
+                                        outline
+                                        readonly
+                                        rows="3"
+                                        v-model="
+                                            props.item.criterionLibrary
+                                                .mergedCriteriaExpression
+                                        "
+                                    >                                
+                                    </v-textarea>
+                                </v-layout>
+                            </td>     
+                            <td>
+                                <v-layout align-start>
+                                    <v-btn
+                                        @click="onRemoveCost(props.item.id)"
+                                        icon
+                                    >
+                                        <v-icon class="ghd-blue">fas fa-trash</v-icon>
+                                    </v-btn>
+                                </v-layout>                   
+                            </td>
+                        </tr>
                     </template>
                 </v-data-table>
             </div>
+            <v-btn @click="onAddCost" class="ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border" >Add Cost</v-btn>
+            <v-chip class="ma-2 ara-blue" @click="showExampleFunction">
+                Equation - Use Max(,) to enforce minimum costs
+            </v-chip>            
         </v-flex>
 
         <CostEquationEditorDialog
@@ -134,7 +143,7 @@ export default class CostsTab extends Vue {
 
     costsGridHeaders: DataTableHeader[] = [
         {
-            text: 'Equation',
+            text: '',
             value: 'equation',
             align: 'left',
             sortable: false,
@@ -142,7 +151,7 @@ export default class CostsTab extends Vue {
             width: '',
         },
         {
-            text: 'Criteria',
+            text: '',
             value: 'criterionLibrary',
             align: 'left',
             sortable: false,
@@ -277,5 +286,6 @@ export default class CostsTab extends Vue {
 .costs-data-table {
     height: 215px;
     overflow-y: auto;
+    border: 1px solid #999999 !important;
 }
 </style>

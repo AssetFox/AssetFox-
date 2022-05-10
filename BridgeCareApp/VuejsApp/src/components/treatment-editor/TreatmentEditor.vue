@@ -8,8 +8,7 @@
                         :items='librarySelectItems'
                         class='ghd-control-border ghd-control-text ghd-control-width'
                         label='Select a Treatment Library'
-                        outline
-                        v-if='hasSelectedLibrary || hasScenario'
+                        outline                        
                         v-model='librarySelectItemValue'
                     >
                     </v-select>
@@ -38,8 +37,7 @@
                         :items='treatmentSelectItems'
                         class='ghd-control-border ghd-control-text ghd-control-width'
                         label='Select'
-                        outline
-                        v-if='hasSelectedLibrary || hasScenario'
+                        outline                        
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
@@ -161,9 +159,10 @@
         <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
         <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
             <v-layout justify-center>
-                <v-flex xs6>
-                    <v-textarea
-                        label='Description'
+                <v-flex xs12>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                    <v-textarea                        
+                        class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
                         rows='4'
@@ -179,9 +178,18 @@
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
                     depressed
-                    v-show='hasSelectedLibrary || hasScenario'
+                    v-show='hasScenario'
                 >
                     Cancel
+                </v-btn>
+                <v-btn
+                    @click='onShowConfirmDeleteAlert'
+                    class='ghd-white-bg ghd-blue ghd-button-text'
+                    depressed
+                    v-show='!hasScenario'
+                    :disabled='!hasLibraryEditPermission'
+                >
+                    Delete Library
                 </v-btn>
                 <v-btn
                     @click='onShowCreateTreatmentLibraryDialog(true)'
@@ -198,22 +206,15 @@
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Save
                 </v-btn>
-                <!-- <v-btn
+                <v-btn
                     @click='onUpsertTreatmentLibrary'
-                    class='ara-blue-bg white--text'
+                    class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
+                    depressed
                     v-show='!hasScenario'
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >
                     Update Library
-                </v-btn> -->                
-                <!-- <v-btn
-                    @click='onShowConfirmDeleteAlert'
-                    class='ara-orange-bg white--text'
-                    v-show='!hasScenario'
-                    :disabled='!hasLibraryEditPermission'
-                >
-                    Delete Library
-                </v-btn>-->
+                </v-btn>
             </v-layout>
         </v-flex>
 

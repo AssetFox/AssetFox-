@@ -2,32 +2,36 @@
   <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
-          <h3>New Target Condition Goal</h3>
+        <v-layout justify-start>
+          <h3 class="ghd-control-text">Add New Target Condition Goal</h3>
         </v-layout>
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-text-field label="Name" outline v-model="newTargetConditionGoal.name"
+          <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
+          <v-text-field outline v-model="newTargetConditionGoal.name"
+                        class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-          <v-select :items="numericAttributeNames" label="Select Attribute"
+          <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
+          <v-select :items="numericAttributeNames"
+                    class="ghd-control-text ghd-control-border"
                     outline v-model="newTargetConditionGoal.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-          <v-text-field :mask="'####'" label="Year" outline v-model.number="newTargetConditionGoal.year"/>
-
-          <v-text-field label="Target" outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
+          <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
+          <v-text-field :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>
+          <v-subheader class="ghd-control-label ghd-md-gray">Target</v-subheader>
+          <v-text-field outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
+                        class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ara-blue-bg white--text">
-            Save
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+        <v-layout justify-center row>
+          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" flat>
             Cancel
+          </v-btn>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" outline>
+            Save
           </v-btn>
         </v-layout>
       </v-card-actions>

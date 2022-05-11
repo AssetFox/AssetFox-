@@ -728,11 +728,11 @@ export default class TreatmentEditor extends Vue {
 }
 
 .treatments-div {
-    height: 550px;
+    height: 475px;
 }
 
 .card-tab-content {
-    height: 500px;
+    height: 450px;
     overflow-x: hidden;
     overflow-y: auto;
     border: none;

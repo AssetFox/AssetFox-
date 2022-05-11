@@ -386,6 +386,10 @@ table.v-table tbody td {
     padding: 10px !important;
 }
 
+.ghd-padding-top{
+    padding-top: 10px !important;
+}
+
 .ghd-left-padding{
     padding-left: 10px !important;
 }

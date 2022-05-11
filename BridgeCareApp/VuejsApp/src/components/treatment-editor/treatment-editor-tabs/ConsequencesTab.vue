@@ -1,7 +1,6 @@
 <template>
     <v-layout class='consequences-tab-content'>
-        <v-flex xs12>
-            <v-btn @click='onAddConsequence' class='ara-blue-bg white--text'>Add Consequence</v-btn>
+        <v-flex xs12>            
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               class='elevation-1 fixed-header v-table__overflow'
@@ -30,37 +29,80 @@
                                 </template>
                             </v-edit-dialog>
 
-                            <v-textarea v-if="header.value === 'equation'" full-width no-resize outline readonly
-                                        rows='3'
-                                        v-model='props.item.equation.expression'>
-                                <template slot='append-outer'>
-                                    <v-btn @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
-                                           icon>
-                                        <v-icon>fas fa-edit</v-icon>
+                            <v-menu
+                                left
+                                min-height="500px"
+                                min-width="500px"
+                                v-show="header.value === 'equation'"
+                            >
+                                <template slot="activator">
+                                    <v-btn class="ghd-blue" icon>
+                                        <v-icon>fas fa-eye</v-icon>
                                     </v-btn>
                                 </template>
-                            </v-textarea>
+                                <v-card>
+                                    <v-card-text>
+                                        <v-textarea
+                                            class="sm-txt"
+                                            :value="
+                                                props.item.equation.expression
+                                            "
+                                            full-width
+                                            no-resize
+                                            outline
+                                            readonly
+                                            rows="3"
+                                        />
+                                    </v-card-text>
+                                </v-card>
+                            </v-menu>     
+                             <v-btn v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
+                                    icon>
+                                <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                            </v-btn>                       
 
-                            <v-textarea v-if="header.value === 'criterionLibrary'" full-width no-resize outline readonly
-                                        rows='3'
-                                        v-model='props.item.criterionLibrary.mergedCriteriaExpression'>
-                                <template slot='append-outer'>
-                                    <v-btn @click='onShowConsequenceCriterionLibraryEditorDialog(props.item)'
-                                           class='edit-icon' icon>
-                                        <v-icon>fas fa-edit</v-icon>
+<v-menu
+                                left
+                                min-height="500px"
+                                min-width="500px"
+                                v-show="header.value === 'criterionLibrary'"
+                            >
+                                <template slot="activator">
+                                    <v-btn class="ghd-blue" icon>
+                                        <v-icon>fas fa-eye</v-icon>
                                     </v-btn>
                                 </template>
-                            </v-textarea>
+                                <v-card>
+                                    <v-card-text>
+                                        <v-textarea
+                                            class="sm-txt"
+                                            :value="
+                                                props.item.criterionLibrary.mergedCriteriaExpression
+                                            "
+                                            full-width
+                                            no-resize
+                                            outline
+                                            readonly
+                                            rows="3"
+                                        />
+                                    </v-card-text>
+                                </v-card>
+                            </v-menu>
+                            <v-btn v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionLibraryEditorDialog(props.item)'
+                                    class='edit-icon' icon>
+                                <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                            </v-btn>
 
                             <v-layout v-if="header.value === ''" align-start>
-                                <v-btn @click='onRemoveConsequence(props.item.id)' class='ara-orange' icon>
-                                    <v-icon>fas fa-trash</v-icon>
+                                <v-btn @click='onRemoveConsequence(props.item.id)' icon>
+                                    <v-icon class="ghd-blue">fas fa-trash</v-icon>
                                 </v-btn>
                             </v-layout>
                         </td>
                     </template>
                 </v-data-table>
             </div>
+            <v-btn @click='onAddConsequence' class='ghd-white-bg ghd-blue ghd-button-text-sm ghd-blue-border ghd-text-padding'>Add Consequence</v-btn>
         </v-flex>
 
         <ConsequenceEquationEditorDialog :dialogData='consequenceEquationEditorDialogData'
@@ -117,7 +159,7 @@ export default class ConsequencesTab extends Vue {
         { text: 'Change Value', value: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
         { text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: '' },
         { text: 'Criteria', value: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '' },
-        { text: '', value: '', align: 'left', sortable: false, class: '', width: '100px' },
+        { text: 'Actions', value: '', align: 'left', sortable: false, class: '', width: '100px' },
     ];
     consequencesGridData: TreatmentConsequence[] = [];
     consequenceEquationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
@@ -212,5 +254,6 @@ export default class ConsequencesTab extends Vue {
 .consequences-data-table {
     height: 215px;
     overflow-y: auto;
+    font-family: 'Montserrat', sans-serif;
 }
 </style>

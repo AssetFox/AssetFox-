@@ -2,13 +2,12 @@
     <v-layout class="costs-tab-content">
         <v-flex xs12>              
             <div class="costs-data-table">                
-                <v-data-table                    
+                <v-data-table
+                    hide-default-header             
                     :headers="costsGridHeaders"
                     :items="costsGridData"
-                    class="elevation-1 v-table__overflow"
+                    class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
-                    hide-default-header
-                    hide-default-footer
                 >
                     <template slot="items" slot-scope="props">
                         <tr style="border:none">
@@ -284,8 +283,12 @@ export default class CostsTab extends Vue {
 }
 
 .costs-data-table {
-    height: 215px;
     overflow-y: auto;
     border: 1px solid #999999 !important;
+}
+
+.costs-data-table table.v-table thead tr{
+    height: 0px !important;
+    border: none !important;
 }
 </style>

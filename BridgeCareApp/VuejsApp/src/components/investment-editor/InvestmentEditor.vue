@@ -234,7 +234,7 @@
                        v-show='selectedScenarioId === uuidNIL'>
                     Update Library
                 </v-btn>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                        @click='onUpsertInvestment()'
                        class='ghd-blue-bg white--text ghd-button-text ghd-button'
                        v-show='selectedScenarioId !== uuidNIL'>

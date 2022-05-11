@@ -8,7 +8,7 @@
                             <v-layout column>
                                 <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
                                 <v-select
-                                    class="ghd-control-border ghd-control-text"
+                                    class="ghd-select ghd-text-field ghd-text-field-border"
                                     :items="librarySelectItems"
                                     outline
                                     v-model="librarySelectItemValue"

@@ -89,7 +89,6 @@ import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
     },
 })
 export default class EditScenario extends Vue {
-    @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.scenarioModule.selectedScenario)

@@ -23,6 +23,10 @@ const EditScenario = () =>
     import(
         /* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue'
     );
+    const EditLibrary = () =>
+        import(
+            /* webpackChunkName: "editLibrary" */ '@/components/libraries/EditLibrary.vue'
+        );
 const InvestmentEditor = () =>
     import(
         /* webpackChunkName: "investmentModule" */ '@/components/investment-editor/InvestmentEditor.vue'
@@ -235,6 +239,49 @@ const router = new VueRouter({
                     component: CashFlowEditor,
                     props: true,
                     beforeEnter: beforeEnterFunc,
+                },
+            ],
+        },
+        {
+            path: '/EditLibrary/',
+            name: 'EditLibrary',
+            component: EditLibrary,
+            children: [
+                {
+                    path: '/InvestmentEditor/Library/',
+                    component: InvestmentEditor,
+                },
+                {
+                    path: '/PerformanceCurveEditor/Library/',
+                    component: PerformanceCurveEditor,
+                },
+                {
+                    path: '/CalculatedAttributeEditor/Library/',
+                    component: CalculatedAttributeEditor,
+                },
+                {
+                    path: '/TreatmentEditor/Library/',
+                    component: TreatmentEditor,
+                },
+                {
+                    path: '/BudgetPriorityEditor/Library/',
+                    component: BudgetPriorityEditor,
+                },
+                {
+                    path: '/TargetConditionGoalEditor/Library/',
+                    component: TargetConditionGoalEditor,
+                },
+                {
+                    path: '/DeficientConditionGoalEditor/Library/',
+                    component: DeficientConditionGoalEditor,
+                },
+                {
+                    path: '/RemainingLifeLimitEditor/Library/',
+                    component: RemainingLifeLimitEditor,
+                },
+                {
+                    path: '/CashFlowEditor/Library',
+                    component: CashFlowEditor,
                 },
             ],
         },

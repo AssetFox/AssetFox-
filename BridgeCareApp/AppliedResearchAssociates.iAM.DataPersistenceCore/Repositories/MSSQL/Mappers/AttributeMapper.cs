@@ -60,7 +60,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Command = dto.Command,
                 ConnectionType = connectionType,
                 IsCalculated = dto.IsCalculated,
-                IsAscending = dto.IsAscending
+                IsAscending = dto.IsAscending,
+                Maximum = dto.Maximum,
+                Minimum = dto.Minimum,
+                DefaultValue = dto.DefaultValue,
             };
             return entity;
         }

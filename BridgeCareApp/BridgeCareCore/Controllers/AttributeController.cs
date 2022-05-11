@@ -18,8 +18,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AttributeController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-
         private readonly AttributeService _attributeService;
 
         public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
@@ -95,9 +93,9 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var configurableAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                    var attributeToAdd = new List<AttributeDTO> { attributeDto };
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeToAdd);
                     UnitOfWork.Commit();
                 });
 

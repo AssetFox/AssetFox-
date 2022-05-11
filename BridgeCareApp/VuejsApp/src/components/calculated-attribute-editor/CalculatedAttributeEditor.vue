@@ -237,6 +237,7 @@
                     @click="onUpsertScenarioCalculatedAttribute"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario && isAdmin"
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
                 >
                     Save
                 </v-btn>

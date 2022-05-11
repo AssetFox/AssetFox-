@@ -311,7 +311,7 @@
                 v-show='hasSelectedLibrary || hasScenario'
             >
                 <v-btn
-                    :disabled="!hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue ghd-button-text"
                     depressed
@@ -339,7 +339,7 @@
                 >
                     Create as New Library
                 </v-btn>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                        @click='onUpsertScenarioPerformanceCurves'
                        class="ghd-blue-bg ghd-white ghd-button-text"
                        depressed

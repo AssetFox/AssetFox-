@@ -64,11 +64,9 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
 
-    foo: boolean = false;
     investmentBudgetsFile: File | null = null;
     overwriteBudgets: boolean = true;
     closed: boolean = false;
-    // showReminder: boolean = false;
 
     @Watch('showDialog')
     onShowDialogChanged() {

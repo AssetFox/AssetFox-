@@ -800,7 +800,6 @@ export default class InvestmentEditor extends Vue {
                     })
                     .then(() => {
                             this.getCriterionLibrariesAction();
-                            this.showReminder = this.isSuccessfulImport
                     });
                 }
 

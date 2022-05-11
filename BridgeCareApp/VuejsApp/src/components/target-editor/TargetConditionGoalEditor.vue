@@ -548,6 +548,8 @@ export default class TargetConditionGoalEditor extends Vue {
         } else {
             this.targetConditionGoalGridData = clone(this.selectedTargetConditionGoalLibrary.targetConditionGoals);
         }
+        this.numericAttributeNames = getPropertyValues('name', this.getNumericAttributesGetter);
+
         /*if (this.numericAttributeNames.length === 0) {
             this.numericAttributeNames = getPropertyValues(
                 'name',

@@ -28,6 +28,8 @@ namespace BridgeCareCore.Controllers
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
             _generator = generator ?? throw new ArgumentNullException(nameof(generator));
 
+        #region "API functions"
+
         [HttpPost]
         [Route("GetHTML/{reportName}")]
         [Authorize]
@@ -38,6 +40,12 @@ namespace BridgeCareCore.Controllers
             //SendRealTimeMessage($"Starting to process {reportName}.");
 
             var report = await GenerateReport(reportName, ReportType.HTML);
+
+            if (report == null)
+            {
+                var message = new List<string>() { $"Failed to generate report object for '{reportName}'" };
+                return CreateErrorListing(message);
+            }
 
             // Handle a completed run with errors
             if (report.Errors.Any())
@@ -66,6 +74,12 @@ namespace BridgeCareCore.Controllers
         {
             var report = await GenerateReport(reportName, ReportType.File);
 
+            if (report == null)
+            {
+                var message = new List<string>() { $"Failed to generate report object for '{reportName}'" };
+                return CreateErrorListing(message);
+            }
+
             // Handle a completed run with errors
             if (report.Errors.Any())
             {
@@ -85,6 +99,11 @@ namespace BridgeCareCore.Controllers
             return validResult;
         }
 
+        #endregion
+
+
+        #region "Internal functions"
+
         private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType)
         {
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
@@ -95,27 +114,37 @@ namespace BridgeCareCore.Controllers
                 parameters = await reader.ReadToEndAsync();
             }
 
-            var report = await _generator.Generate(reportName);
+            //generate report
+            var reportObject = await _generator.Generate(reportName);
 
-            // Return an error if the report type does not match the expected type
-            if (report.Type != expectedReportType)
+            if (reportObject == null)
             {
                 // Set the error string before creating the FailureReport output object as the report type will be overwritten
-                var errorMessage = $"A {expectedReportType} type was expected, but {reportName} is a {report.Type} type report.";
-                report = new FailureReport();
-                await report.Run(errorMessage);
+                var errorMessage = $"Failed to generate specified report '{reportName}'";
+                reportObject = new FailureReport();
+                await reportObject.Run(errorMessage);
+            }
+
+            // Return an error if the report type does not match the expected type
+            if (reportObject.Type != expectedReportType)
+            {
+                // Set the error string before creating the FailureReport output object as the report type will be overwritten
+                var errorMessage = $"A {expectedReportType} type was expected, but {reportName} is a {reportObject.Type} type report.";
+                reportObject = new FailureReport();
+                await reportObject.Run(errorMessage);
             }
 
             // Run the report as long as it does not have any existing errors (i.e., failure on generation)
             // Note:  If report was switched to a FailureReport previously, this will not run again
-            if (!report.Errors.Any())
+            if (!reportObject.Errors.Any())
             {
                 //SendRealTimeMessage($"Running {reportName}.");
-                await report.Run(parameters);
+                await reportObject.Run(parameters);
                 //SendRealTimeMessage($"Completed running {reportName}");
             }
 
-            return report;
+            //return object
+            return reportObject;
         }
 
         private void SendRealTimeMessage(string message) =>
@@ -136,5 +165,7 @@ namespace BridgeCareCore.Controllers
             returnValue.StatusCode = (int?)HttpStatusCode.BadRequest;
             return returnValue;
         }
+
+        #endregion
     }
 }

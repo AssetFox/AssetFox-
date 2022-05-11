@@ -5,17 +5,17 @@
            <v-layout justify-start align-center>
                 <v-card-title>
                     <v-layout row align-center class="px-4">
-                        <v-layout column>
-                            <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
-                            <v-select
-                                class="ghd-control-border ghd-control-text"
-                                :items="librarySelectItems"
-                                outline
-                                v-model="librarySelectItemValue"
-                                outlined
-                            >
-                            </v-select>
-                        </v-layout>
+                            <v-layout column>
+                                <v-subheader class="ghd-control-label ghd-md-gray">Target Condition Goal Library</v-subheader>
+                                <v-select
+                                    class="ghd-control-border ghd-control-text"
+                                    :items="librarySelectItems"
+                                    outline
+                                    v-model="librarySelectItemValue"
+                                    outlined
+                                >
+                                </v-select>
+                            </v-layout>
                         <v-divider vertical 
                             class="mx-3"
                             v-if="hasSelectedLibrary && !hasScenario"
@@ -37,10 +37,11 @@
                         />
                     </v-layout>
                 </v-card-title>
-                <v-layout justify-end align-center v-show="hasSelectedLibrary || hasScenario" class="ma-2">
+                <v-layout justify-end align-center class="ma-2">
                     <v-btn outline
                         @click="showCreateTargetConditionGoalDialog = true"
                         class="ghd-control-border ghd-blue"
+                        v-show="hasSelectedLibrary || hasScenario" 
                     >Add Target Condition Goal</v-btn>
                     <v-btn outline
                         @click="onShowCreateTargetConditionGoalLibraryDialog(false)"

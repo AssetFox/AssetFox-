@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void UpsertAttributes(List<Attribute> attributes);
 
+        void UpsertAttributes(List<AttributeDTO> attributeDtos);
+
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
         Explorer GetExplorer();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -46,6 +47,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
+        }
+
+        public static AttributeEntity ToEntity(AttributeDTO dto, ConnectionType connectionType)
+        {
+            var entity = new AttributeEntity
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                DataType = dto.Type,
+                AggregationRuleType = dto.AggregationRuleType,
+                Command = dto.Command,
+                ConnectionType = connectionType,
+                IsCalculated = dto.IsCalculated,
+                IsAscending = dto.IsAscending
+            };
+            return entity;
         }
 
         public static AttributeEntity ToEntity(this Attribute domain)

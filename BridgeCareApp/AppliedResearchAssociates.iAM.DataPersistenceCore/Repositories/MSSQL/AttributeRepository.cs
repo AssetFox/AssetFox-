@@ -24,9 +24,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
+
+
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
             var attributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            UpsertAttributeEntities(attributeEntities);
+        }
+
+        private void UpsertAttributeEntities(List<AttributeEntity> attributeEntities)
+        {
             var existingAttributeIds = _unitOfWork.Context.Attribute.Select(_ => _.Id).ToList();
 
             var entitiesToUpdate = attributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
@@ -34,6 +41,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);
+        }
+
+        public void UpsertAttributes(List<AttributeDTO> attributeDtos)
+        {
+            var attributeEntities = new List<AttributeEntity>();
+            foreach (var attributeDto in attributeDtos)
+            {
+                var entity = AttributeMapper.ToEntity(attributeDto, DataMiner.ConnectionType.MSSQL);
+                attributeEntities.Add(entity);
+            }
+            UpsertAttributeEntities(attributeEntities);
         }
 
         public void JoinAttributesWithEquationsAndCriteria(Explorer explorer)

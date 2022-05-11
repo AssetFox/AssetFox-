@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        public static bool TryParsePiecewise(string expression, out double[] xValues, out double[] yValues)
+        public static bool ParseIfPiecewise(string expression, out double[] xValues, out double[] yValues)
         {
             var match = PiecewisePattern.Match(expression);
             if (match.Success)
@@ -128,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 throw ExpressionCouldNotBeCompiled("Expression is blank.");
             }
 
-            if (TryParsePiecewise(Expression, out var xValues, out var yValues))
+            if (ParseIfPiecewise(Expression, out var xValues, out var yValues))
             {
                 ValueVersusAge = LinearSpline.InterpolateSorted(xValues, yValues);
                 AgeVersusValue = LinearSpline.Interpolate(yValues, xValues);

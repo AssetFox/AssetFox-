@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
@@ -140,8 +139,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            var sections = StandAloneSimulation.Network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
-            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, StandAloneSimulation.Network.Id);
+            //var sections = StandAloneSimulation.Network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
+            var maintainableAssets = UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(StandAloneSimulation.Network.Id);
+            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(maintainableAssets, StandAloneSimulation.Network.Id);
         }
 
         public void CreateAttributeCriteriaAndEquationJoins() =>
@@ -157,18 +157,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 scheduling.OffsetToFutureYear = year;
                 scheduling.Treatment = selectableTreatment;
             });
-        }
-
-        public void SynchronizeLegacySimulation(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username);
-        }
-
-        public void SynchronizeLegacySimulationWithCommittedProjects(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username, true);
         }
 
         public void AddTreatmentSupersessions()

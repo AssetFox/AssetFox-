@@ -216,8 +216,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                             {
                                 Id = Guid.NewGuid(),
                                 NetworkId = _testHelper.TestNetwork.Id,
-                                FacilityName = "Facility",
-                                SectionName = "Section",
                                 SpatialWeighting = "SpatialWeighting",
                                 MaintainableAssetLocation = new MaintainableAssetLocationEntity
                                 {
@@ -633,7 +631,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateTestData();
 
             // Act
-            var result = await _controller.CloneSimulation(_testSimulationToClone.Id);
+            var result = await _controller.CloneSimulation(new CloneSimulationDTO()
+            {
+                Id = Guid.NewGuid(),
+                networkId = _testSimulationToClone.NetworkId,
+                scenarioId = _testSimulationToClone.Id,
+                scenarioName = _testSimulationToClone.Name
+            });
 
             // Assert
             var okObjResult = result as OkObjectResult;

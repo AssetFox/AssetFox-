@@ -44,15 +44,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateAuthorizedController()
         {
-            _controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            _controller = new TreatmentController(_testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockTreatmentService.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
         }
 
         private void CreateUnauthorizedController()
         {
-            _controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityNotAuthorized.Object,
+            _controller = new TreatmentController(_testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockTreatmentService.Object, 
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
         }
 
         private void CreateLibraryTestData()

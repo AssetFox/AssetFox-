@@ -43,20 +43,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = domain.Id,
                 NetworkId = networkId,
                 SpatialWeighting = domain.SpatialWeighting
-                //Area = domain.SpatialWeighting.Area,
-                //AreaUnit = domain.SpatialWeighting.AreaUnit
-            };
-
-        public static MaintainableAssetEntity ToEntity(this Section section, Guid networkId) =>
-            new MaintainableAssetEntity
-            {
-                Id = section.Id,
-                NetworkId = networkId,
-                SpatialWeighting = section.SpatialWeighting.Expression,
-                //Area = section.Area,
-                //AreaUnit = section.AreaUnit,
-                FacilityName = section.Facility.Name,
-                SectionName = section.Name
             };
     }
 }

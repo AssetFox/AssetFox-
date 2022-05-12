@@ -25,13 +25,14 @@
                     </v-layout>                               
                 </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
-                    <v-layout row align-end class="left-buttons-padding" v-show='hasSelectedLibrary || hasScenario'>
+                    <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
-                        <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>Add Budget Priority</v-btn>
+                        <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show='hasSelectedLibrary'>Add Budget Priority</v-btn>
                         
                         <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
-                            v-show='(hasSelectedLibrary || hasScenario) && (selectedScenarioId === uuidNIL)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                            New Library
+                            v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            Create New Library
                         </v-btn>
                     </v-layout>
                 </v-flex>

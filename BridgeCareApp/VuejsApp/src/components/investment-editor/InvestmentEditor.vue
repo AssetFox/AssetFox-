@@ -67,8 +67,8 @@
                     </v-flex>
 
         </v-layout>
-        <v-divider v-if='hasScenario && hasSelectedLibrary' />
-        <v-layout row justify-space-between v-show='hasSelectedLibrary'>
+        <v-divider v-if='hasScenario || hasSelectedLibrary' />
+        <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
             <v-flex xs4>
                 <v-layout row>
                     <v-btn @click='onShowEditBudgetsDialog' 
@@ -123,7 +123,7 @@
         </v-flex> -->
         <!-- visible on both pages -->
         <!-- <v-divider v-show='hasSelectedLibrary && hasScenario'></v-divider> -->
-        <v-flex v-show='hasSelectedLibrary' xs12>
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <!-- <v-layout justify-center>
                 <v-flex xs6>
                     <v-layout justify-space-between>
@@ -214,7 +214,7 @@
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-center row v-show='hasSelectedLibrary'>
+            <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'
                        v-show='hasScenario'>
                     Cancel
@@ -231,13 +231,13 @@
                 <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                        @click='onUpsertBudgetLibrary()'
                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
-                       v-show='selectedScenarioId === uuidNIL'>
+                       v-show='!hasScenario'>
                     Update Library
                 </v-btn>
                 <v-btn :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                        @click='onUpsertInvestment()'
                        class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                       v-show='selectedScenarioId !== uuidNIL'>
+                       v-show='hasScenario'>
                     Save
                 </v-btn>
             </v-layout>

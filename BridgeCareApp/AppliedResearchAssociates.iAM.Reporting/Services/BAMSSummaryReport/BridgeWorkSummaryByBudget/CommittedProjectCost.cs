@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 WorkTypeTotalHelper.FillWorkTypeTotals(item, workTypeTotal);
             }
 
-            worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.BridgeTotal;
+            worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.BridgeTotal;
 
             foreach (var totalCommittedBudget in totalBudgetPerYearForCommittedWork)
             {

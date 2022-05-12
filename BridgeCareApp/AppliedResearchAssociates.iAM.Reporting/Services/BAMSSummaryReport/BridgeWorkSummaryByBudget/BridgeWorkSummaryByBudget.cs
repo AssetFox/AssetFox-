@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     foreach (var section in yearData.Sections)
                     {
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                            section.AppliedTreatment.ToLower() != Properties.Resources.NoTreatment)
+                            section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                         {
                             var committedtTreatment = section.TreatmentConsiderations;
                             var budgetAmount = (double)committedtTreatment.Sum(_ =>
@@ -129,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                                 .FindAll(_ => _.AssetType == AssetCategory.Bridge && !_.isCommitted);
 
                 costForCommittedBudgets = summaryData.YearlyData
-                                                    .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != Properties.Resources.NoTreatment);
+                                                    .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != BAMSConstants.NoTreatment);
 
                 var totalBudgetPerYearForCulvert = new Dictionary<int, double>();
                 var totalBudgetPerYearForBridgeWork = new Dictionary<int, double>();
@@ -210,7 +210,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 currentCell.Row += 2;
                 currentCell.Column = 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.TotalBridgeCareBudget;
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.TotalBridgeCareBudget;
 
                 var budgetDetails = yearlyBudgetAmount[summaryData.Budget];
                 var yearTracker = 0;
@@ -261,9 +261,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 _bridgeWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "");
                 currentCell.Row += 1;
                 currentCell.Column = 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = Properties.Resources.RemainingBudget;
-                worksheet.Cells[currentCell.Row + 1, currentCell.Column].Value = Properties.Resources.PercentBudgetSpentMPMS;
-                worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = Properties.Resources.PercentBudgetSpentBAMS;
+                worksheet.Cells[currentCell.Row, currentCell.Column].Value = BAMSConstants.RemainingBudget;
+                worksheet.Cells[currentCell.Row + 1, currentCell.Column].Value = BAMSConstants.PercentBudgetSpentMPMS;
+                worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = BAMSConstants.PercentBudgetSpentBAMS;
 
                 yearTracker = 0;
                 foreach (var budgetData in budgetDetails.YearlyAmounts)
@@ -367,7 +367,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
                 totalBPNPerYear[item.Year] += item.costPerBPN.cost;
             }
-            worksheet.Cells[firstBPNRow + bpnNames.Count(), 1].Value = Properties.Resources.TotalBPNCost;
+            worksheet.Cells[firstBPNRow + bpnNames.Count(), 1].Value = BAMSConstants.TotalBPNCost;
 
             // Total BPN Cost
             foreach (var bpnCost in totalBPNPerYear)
@@ -417,7 +417,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             firstContentRow++;
             // Add data for BAMS Work Type Totals "Total Spent"
-            worksheet.Cells[firstContentRow, 1].Value = Properties.Resources.TotalSpent;
+            worksheet.Cells[firstContentRow, 1].Value = BAMSConstants.TotalSpent;
             foreach (var item in workTypeTotal.TotalCostPerYear)
             {
                 FillTheExcelColumns(startYear, item, firstContentRow, worksheet);

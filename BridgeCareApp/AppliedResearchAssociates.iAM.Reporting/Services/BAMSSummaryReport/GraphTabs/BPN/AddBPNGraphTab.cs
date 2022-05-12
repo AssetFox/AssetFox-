@@ -32,28 +32,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 
             void AddGraphDataDependentTab(string tabTitle, string graphTitle) => GraphDataDependentTabs.Add(tabTitle, new GraphDataTab(excelPackage.Workbook.Worksheets.Add(tabTitle), graphTitle));
 
-            AddGraphDataDependentTab(Properties.Resources.Graph_PoorDAByBPN_Tab, Properties.Resources.PoorDeckAreaByBPN);
-            AddGraphDataDependentTab(Properties.Resources.Graph_PostedBPNCount_Tab, Properties.Resources.PostedBridgeCountByBPN);
-            AddGraphDataDependentTab(Properties.Resources.Graph_PostedBPNDA_Tab, Properties.Resources.PostedBridgeDeckAreaByBPN);
-            AddGraphDataDependentTab(Properties.Resources.Graph_ClosedBPNCount_Tab, Properties.Resources.ClosedBridgeCountByBPN);
-            AddGraphDataDependentTab(Properties.Resources.Graph_ClosedBPNDA_Tab, Properties.Resources.ClosedBridgeDeckAreaByBPN);
-            AddGraphDataDependentTab(Properties.Resources.Graph_CombinedPostedandClosed_Tab, Properties.Resources.CombinedPostedAndClosed);
-            AddGraphDataDependentTab(Properties.Resources.Graph_DollarNeededDABPN_Tab, Properties.Resources.CashNeededByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_PoorDAByBPN_Tab, BAMSConstants.PoorDeckAreaByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_PostedBPNCount_Tab, BAMSConstants.PostedBridgeCountByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_PostedBPNDA_Tab, BAMSConstants.PostedBridgeDeckAreaByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_ClosedBPNCount_Tab, BAMSConstants.ClosedBridgeCountByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_ClosedBPNDA_Tab, BAMSConstants.ClosedBridgeDeckAreaByBPN);
+            AddGraphDataDependentTab(BAMSConstants.Graph_CombinedPostedandClosed_Tab, BAMSConstants.CombinedPostedAndClosed);
+            AddGraphDataDependentTab(BAMSConstants.Graph_DollarNeededDABPN_Tab, BAMSConstants.CashNeededByBPN);
 
-            GraphDataDependentTabs[Properties.Resources.Graph_PoorDAByBPN_Tab].DataColumn = chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_PoorDAByBPN_Tab].type = ChartType.AreaChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNCount_Tab].DataColumn = chartRowModel.TotalBridgePostedCountByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNCount_Tab].type = ChartType.CountChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNDA_Tab].DataColumn = chartRowModel.TotalPostedBridgeDeckAreaByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_PostedBPNDA_Tab].type = ChartType.AreaChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNCount_Tab].DataColumn = chartRowModel.TotalClosedBridgeCountByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNCount_Tab].type = ChartType.CountChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNDA_Tab].DataColumn = chartRowModel.TotalClosedBridgeDeckAreaByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_ClosedBPNDA_Tab].type = ChartType.AreaChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_CombinedPostedandClosed_Tab].DataColumn = chartRowModel.TotalPostedAndClosedByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_CombinedPostedandClosed_Tab].type = ChartType.CombinedChart;
-            GraphDataDependentTabs[Properties.Resources.Graph_DollarNeededDABPN_Tab].DataColumn = chartRowModel.TotalCashNeededByBPNYearsRow;
-            GraphDataDependentTabs[Properties.Resources.Graph_DollarNeededDABPN_Tab].type = ChartType.CashChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_PoorDAByBPN_Tab].DataColumn = chartRowModel.TotalPoorDeckAreaByBPNSectionYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_PoorDAByBPN_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_PostedBPNCount_Tab].DataColumn = chartRowModel.TotalBridgePostedCountByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_PostedBPNCount_Tab].type = ChartType.CountChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_PostedBPNDA_Tab].DataColumn = chartRowModel.TotalPostedBridgeDeckAreaByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_PostedBPNDA_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_ClosedBPNCount_Tab].DataColumn = chartRowModel.TotalClosedBridgeCountByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_ClosedBPNCount_Tab].type = ChartType.CountChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_ClosedBPNDA_Tab].DataColumn = chartRowModel.TotalClosedBridgeDeckAreaByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_ClosedBPNDA_Tab].type = ChartType.AreaChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_CombinedPostedandClosed_Tab].DataColumn = chartRowModel.TotalPostedAndClosedByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_CombinedPostedandClosed_Tab].type = ChartType.CombinedChart;
+            GraphDataDependentTabs[BAMSConstants.Graph_DollarNeededDABPN_Tab].DataColumn = chartRowModel.TotalCashNeededByBPNYearsRow;
+            GraphDataDependentTabs[BAMSConstants.Graph_DollarNeededDABPN_Tab].type = ChartType.CashChart;
 
             foreach (var graphDataTab in GraphDataDependentTabs.Values)
             {

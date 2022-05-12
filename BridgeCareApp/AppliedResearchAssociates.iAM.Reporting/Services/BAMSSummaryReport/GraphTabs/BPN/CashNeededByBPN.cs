@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalCashNeededByBPNYearsRow, int simulationYearsCount, string title)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
-            //var title = Properties.Resources.CashNeededByBPN;
+            //var title = BAMSConstants.CashNeededByBPN;
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
             _stackedColumnChartCommon.SetChartProperties(chart, title, 950, 700, 6, 7);
 
@@ -30,17 +30,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         }
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalCashNeededByBPNYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 1, Properties.Resources.BPN1, Color.FromArgb(68, 114, 196));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 2, Properties.Resources.BPN2, Color.FromArgb(237, 125, 49));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 3, Properties.Resources.BPN3, Color.FromArgb(165, 165, 165));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 4, Properties.Resources.BPN4, Color.FromArgb(255, 192, 0));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 5, Properties.Resources.BPND, Color.FromArgb(91, 155, 21));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 6, Properties.Resources.BPNH, Color.FromArgb(112, 173, 71));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 7, Properties.Resources.BPNL, Color.FromArgb(38, 68, 120));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 8, Properties.Resources.BPNN, Color.FromArgb(158, 72, 14));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 9, Properties.Resources.BPNT, Color.FromArgb(99, 99, 99));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 1, BAMSConstants.BPN1, Color.FromArgb(68, 114, 196));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 2, BAMSConstants.BPN2, Color.FromArgb(237, 125, 49));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 3, BAMSConstants.BPN3, Color.FromArgb(165, 165, 165));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 4, BAMSConstants.BPN4, Color.FromArgb(255, 192, 0));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 5, BAMSConstants.BPND, Color.FromArgb(91, 155, 21));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 6, BAMSConstants.BPNH, Color.FromArgb(112, 173, 71));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 7, BAMSConstants.BPNL, Color.FromArgb(38, 68, 120));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 8, BAMSConstants.BPNN, Color.FromArgb(158, 72, 14));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 9, BAMSConstants.BPNT, Color.FromArgb(99, 99, 99));
 
-            CreateLine(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 10, Properties.Resources.AnnualizedAmount, Color.Blue);
+            CreateLine(bridgeWorkSummaryWorkSheet, totalCashNeededByBPNYearsRow, count, chart, totalCashNeededByBPNYearsRow + 10, BAMSConstants.AnnualizedAmount, Color.Blue);
         }
 
         private void CreateLine(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalCashNeededByBPNYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

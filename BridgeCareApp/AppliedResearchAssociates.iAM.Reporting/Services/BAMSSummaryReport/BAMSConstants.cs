@@ -1,0 +1,87 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
+{
+    public static class BAMSConstants
+    {
+        public const string AnnualizedAmount = "AnnualizedAmount";
+        public const string BPN1 = "BPN1";
+        public const string BPN2 = "BPN2";
+        public const string BPN3 = "BPN3";
+        public const string BPN4 = "BPN4";
+        public const string BPND = "BPND";
+        public const string BPNH = "BPNH";
+        public const string BPNL = "BPNL";
+        public const string BPNN = "BPNN";
+        public const string BPNT = "BPNT";
+        public const string BridgeCare = "BridgeCare";
+        public const string BridgeTotal = "BridgeTotal";
+        public const string CashNeededByBPN = "CashNeededByBPN";
+        public const string Closed = "Closed";
+        public const string ClosedBridgeCountByBPN = "ClosedBridgeCountByBPN";
+        public const string ClosedBridgeDeckAreaByBPN = "ClosedBridgeDeckAreaByBPN";
+        public const string CombinedPostedAndClosed = "CombinedPostedAndClosed";
+        public const string CombineNHSNonNHSConditionByBridgeCount = "CombineNHSNonNHSConditionByBridgeCount";
+        public const string CombineNHSNonNHSConditionByDeckArea = "CombineNHSNonNHSConditionByDeckArea";
+        public const string CommittedTotal = "CommittedTotal";
+        public const string CulvDurationN = "CulvDurationN";
+        public const string Culvert = "Culvert";
+        public const string CulvertBridgeType = "CulvertBridgeType";
+        public const string CulvertNoTreatment = "CulvertNoTreatment";
+        public const string CulvertTotal = "CulvertTotal";
+        public const string CulvSeeded = "CulvSeeded";
+        public const string DeckDurationN = "DeckDurationN";
+        public const string DeckSeeded = "DeckSeeded";
+        public const string Fair = "Fair";
+        public const string Good = "Good";
+        public const string Graph_ClosedBPNCount_Tab = "Graph_ClosedBPNCount_Tab";
+        public const string Graph_ClosedBPNDA_Tab = "Graph_ClosedBPNDA_Tab";
+        public const string Graph_CombinedPostedandClosed_Tab = "Graph_CombinedPostedandClosed_Tab";
+        public const string Graph_CombineNHSNonNHSConditionByBridgeCount_Tab = "Graph_CombineNHSNonNHSConditionByBridgeCount_Tab";
+        public const string Graph_CombineNHSNonNHSConditionByBridgeCount_Title = "Graph_CombineNHSNonNHSConditionByBridgeCount_Title";
+        public const string Graph_CombineNHSNonNHSConditionByDeckArea_Tab = "Graph_CombineNHSNonNHSConditionByDeckArea_Tab";
+        public const string Graph_CombineNHSNonNHSConditionByDeckArea_Title = "Graph_CombineNHSNonNHSConditionByDeckArea_Title";
+        public const string Graph_DollarNeededDABPN_Tab = "Graph_DollarNeededDABPN_Tab";
+        public const string Graph_NHSConditionByBridgeCount_Tab = "Graph_NHSConditionByBridgeCount_Tab";
+        public const string Graph_NHSConditionByBridgeCount_Title = "Graph_NHSConditionByBridgeCount_Title";
+        public const string Graph_NHSConditionByDeckArea_Tab = "Graph_NHSConditionByDeckArea_Tab";
+        public const string Graph_NHSConditionByDeckArea_Title = "Graph_NHSConditionByDeckArea_Title";
+        public const string Graph_NonNHSConditionByBridgeCount_Tab = "Graph_NonNHSConditionByBridgeCount_Tab";
+        public const string Graph_NonNHSConditionByBridgeCount_Title = "Graph_NonNHSConditionByBridgeCount_Title";
+        public const string Graph_NonNHSConditionByDeckArea_Tab = "Graph_NonNHSConditionByDeckArea_Tab";
+        public const string Graph_NonNHSConditionByDeckArea_Title = "Graph_NonNHSConditionByDeckArea_Title";
+        public const string Graph_PoorCountGraph_Tab = "Graph_PoorCountGraph_Tab";
+        public const string Graph_PoorDAByBPN_Tab = "Graph_PoorDAByBPN_Tab";
+        public const string Graph_PoorDeckAreaGraph_Tab = "Graph_PoorDeckAreaGraph_Tab";
+        public const string Graph_PostedBPNCount_Tab = "Graph_PostedBPNCount_Tab";
+        public const string Graph_PostedBPNDA_Tab = "Graph_PostedBPNDA_Tab";
+        public const string NonCulvertBridgeType = "NonCulvertBridgeType";
+        public const string NonCulvertNoTreatment = "NonCulvertNoTreatment";
+        public const string NoTreatment = "NoTreatment";
+        public const string NoTreatmentForWorkSummary = "NoTreatmentForWorkSummary";
+        public const string Overall = "Overall";
+        public const string PercentBudgetSpentBAMS = "PercentBudgetSpentBAMS";
+        public const string PercentBudgetSpentMPMS = "PercentBudgetSpentMPMS";
+        public const string Poor = "Poor";
+        public const string PoorBridgeCompareBridgeCount = "PoorBridgeCompareBridgeCount";
+        public const string PoorBridgeCompareDeckArea = "PoorBridgeCompareDeckArea";
+        public const string PoorDeckAreaByBPN = "PoorDeckAreaByBPN";
+        public const string Posted = "Posted";
+        public const string PostedBridgeCountByBPN = "PostedBridgeCountByBPN";
+        public const string PostedBridgeDeckAreaByBPN = "PostedBridgeDeckAreaByBPN";
+        public const string RemainingBudget = "RemainingBudget";
+        public const string SubDurationN = "SubDurationN";
+        public const string SubSeeded = "SubSeeded";
+        public const string SupDurationN = "SupDurationN";
+        public const string SupSeeded = "SupSeeded";
+        public const string Total = "Total";
+        public const string TotalBPNCost = "TotalBPNCost";
+        public const string TotalBridgeCareBudget = "TotalBridgeCareBudget";
+        public const string TotalSpent = "TotalSpent";
+        public const string Work = "Work";
+    }
+}

@@ -45,11 +45,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // Getting list of treatments. It will be used in several places throughout this excel TAB
             var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
-            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
             foreach (var item in selectableTreatments)
             {
-                if (item.Name.ToLower() == Properties.Resources.NoTreatment) continue;
+                if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
                 simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
             }
             simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
 
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
-                        section.AppliedTreatment.ToLower() != Properties.Resources.NoTreatment)
+                        section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)
                     {
                         var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
@@ -167,8 +167,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
             {
-                var culvert = Properties.Resources.CulvertBridgeType;
-                var nonCulvert = Properties.Resources.NonCulvertBridgeType;
+                var culvert = BAMSConstants.CulvertBridgeType;
+                var nonCulvert = BAMSConstants.NonCulvertBridgeType;
                 // If Bridge type is culvert
                 if (section.ValuePerTextAttribute["BRIDGE_TYPE"] == culvert)
                 {
@@ -201,7 +201,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
             {
-                var culvert = Properties.Resources.CulvertBridgeType;
+                var culvert = BAMSConstants.CulvertBridgeType;
                 // If Bridge type is culvert
                 if (section.ValuePerTextAttribute["BRIDGE_TYPE"] == culvert)
                 {
@@ -210,7 +210,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 // If Bridge type is non culvert
                 else
                 {
-                    AddKeyValue(countForCompletedProject[year], Properties.Resources.NonCulvertBridgeType, section.AppliedTreatment);
+                    AddKeyValue(countForCompletedProject[year], BAMSConstants.NonCulvertBridgeType, section.AppliedTreatment);
                 }
             }
             else

@@ -11,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         public void CheckConditions(int parallelBridge, string treatment, string previousYearTreatment, TreatmentCause previousYearCause,
             TreatmentCause treatmentCause, int year, int index, ExcelWorksheet worksheet, int row, int column)
         {
-            if (treatment != null && treatment.ToLower() != Properties.Resources.NoTreatment)
+            if (treatment != null && treatment.ToLower() != BAMSConstants.NoTreatment)
             {
                 var range = worksheet.Cells[row, column, row, column + 1];
                 var rangeForCashFlow = worksheet.Cells[row, column - 2, row, column + 1];
@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 CashFlowedBridge(treatmentCause, rangeForCashFlow);
 
                 if (index != 1 && treatmentCause == TreatmentCause.CommittedProject
-                    && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != Properties.Resources.NoTreatment)
+                    && previousYearCause == TreatmentCause.CommittedProject && previousYearTreatment.ToLower() != BAMSConstants.NoTreatment)
                 {
                     var rangeWithPreviousColumn = worksheet.Cells[row, column - 1, row, column];
                     CommittedForConsecutiveYears(rangeWithPreviousColumn);

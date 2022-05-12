@@ -60,14 +60,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         {
             var requiredSections = new HashSet<string>()
             {
-                $"{Properties.Resources.DeckSeeded}",
-                $"{Properties.Resources.SupSeeded}",
-                $"{Properties.Resources.SubSeeded}",
-                $"{Properties.Resources.CulvSeeded}",
-                $"{Properties.Resources.DeckDurationN}",
-                $"{Properties.Resources.SupDurationN}",
-                $"{Properties.Resources.SubDurationN}",
-                $"{Properties.Resources.CulvDurationN}"
+                $"{BAMSConstants.DeckSeeded}",
+                $"{BAMSConstants.SupSeeded}",
+                $"{BAMSConstants.SubSeeded}",
+                $"{BAMSConstants.CulvSeeded}",
+                $"{BAMSConstants.DeckDurationN}",
+                $"{BAMSConstants.SupDurationN}",
+                $"{BAMSConstants.SubDurationN}",
+                $"{BAMSConstants.CulvDurationN}"
             };
 
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);

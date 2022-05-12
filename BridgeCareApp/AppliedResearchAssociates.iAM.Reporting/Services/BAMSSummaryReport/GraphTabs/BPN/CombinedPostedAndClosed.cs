@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPostedAndClosedByBPNYearsRow, int simulationYearsCount, string title)
         {
             _stackedColumnChartCommon.SetWorksheetProperties(worksheet);
-            //var title = Properties.Resources.CombinedPostedAndClosed;
+            //var title = BAMSConstants.CombinedPostedAndClosed;
             var chart = worksheet.Drawings.AddChart(title, eChartType.ColumnStacked);
             _stackedColumnChartCommon.SetChartProperties(chart, title, 950, 700, 6, 7);
 
@@ -31,8 +31,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
         }
         private void AddSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPostedAndClosedByBPNYearsRow, int count, ExcelChart chart)
         {
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPostedAndClosedByBPNYearsRow, count, chart, totalPostedAndClosedByBPNYearsRow + 1, Properties.Resources.Closed, Color.FromArgb(255, 0, 0));
-            CreateSeries(bridgeWorkSummaryWorkSheet, totalPostedAndClosedByBPNYearsRow, count, chart, totalPostedAndClosedByBPNYearsRow + 2, Properties.Resources.Posted, Color.FromArgb(255, 255, 0));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPostedAndClosedByBPNYearsRow, count, chart, totalPostedAndClosedByBPNYearsRow + 1, BAMSConstants.Closed, Color.FromArgb(255, 0, 0));
+            CreateSeries(bridgeWorkSummaryWorkSheet, totalPostedAndClosedByBPNYearsRow, count, chart, totalPostedAndClosedByBPNYearsRow + 2, BAMSConstants.Posted, Color.FromArgb(255, 255, 0));
         }
 
         private void CreateSeries(ExcelWorksheet bridgeWorkSummaryWorkSheet, int totalPostedAndClosedByBPNYearsRow, int count, ExcelChart chart, int fromRow, string header, Color color)

@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 // Add work done cells
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
-                var previousYearTreatment = Properties.Resources.NoTreatment;
+                var previousYearTreatment = BAMSConstants.NoTreatment;
                 var i = 0;
                 foreach (var section in yearlySectionData.Sections)
                 {
@@ -205,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     }
                     else
                     {
-                        range.Value = section.AppliedTreatment.ToLower() == Properties.Resources.NoTreatment ? "--" :
+                        range.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
@@ -650,7 +650,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 ExcelHelper.MergeCells(worksheet, row, ++column, row, ++column);
                 worksheet.Cells[row, column - 1].Value = HeaderConstText + year;
-                worksheet.Cells[row + 2, column -1].Value = Properties.Resources.Work;
+                worksheet.Cells[row + 2, column -1].Value = BAMSConstants.Work;
                 worksheet.Cells[row + 2, column].Value = "Cost";
                 ExcelHelper.ApplyStyle(worksheet.Cells[row + 2, column - 1, row + 2, column]);
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));

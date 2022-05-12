@@ -48,10 +48,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            worksheet.Cells[row++, column].Value = Properties.Resources.NoTreatmentForWorkSummary;
+            worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
 
-            simulationTreatments.Remove((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Remove((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Remove((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Remove((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
 
             foreach (var item in simulationTreatments)
             {
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 worksheet.Cells[row++, column].Value = item;
             }
-            worksheet.Cells[row++, column].Value = Properties.Resources.Total;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Total;
             column++;
             var fromColumn = column + 1;
 
@@ -72,8 +72,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var totalCount = 0;
 
                 // Getting count for No Treatment from Culvert and Non-culvert
-                var noTreatmentCount = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[Properties.Resources.CulvertNoTreatment + "_" + year], column].Value);
-                noTreatmentCount += Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[Properties.Resources.NonCulvertNoTreatment + "_" + year], column].Value);
+                var noTreatmentCount = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.CulvertNoTreatment + "_" + year], column].Value);
+                noTreatmentCount += Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.NonCulvertNoTreatment + "_" + year], column].Value);
                 worksheet.Cells[row++, column].Value = noTreatmentCount;
                 totalCount += noTreatmentCount;
                 foreach (var treatment in simulationTreatments)
@@ -102,8 +102,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[row + 2, startColumn, row + 2, column], Color.DimGray);
 
             // Adding back the two types of No treatments.
-            simulationTreatments.Add((Properties.Resources.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            simulationTreatments.Add((Properties.Resources.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
+            simulationTreatments.Add((BAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
         }
 
         private void FillMPMSCompletedProjectsCount(ExcelWorksheet worksheet, CurrentCell currentCell, Dictionary<int, Dictionary<string, int>> completedCommittedCount,
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 TotalCompletedCommittedCount.Add(yearlyItem.Key, committedTotalCount);
             }
             column = currentCell.Column;
-            worksheet.Cells[currentCell.Row, column].Value = Properties.Resources.Total;
+            worksheet.Cells[currentCell.Row, column].Value = BAMSConstants.Total;
             column++;
             var fromColumn = column + 1;
 
@@ -186,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             _bridgeWorkSummaryCommon.SetNonCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
-            worksheet.Cells[row++, column].Value = Properties.Resources.Total;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Total;
             column++;
             var fromColumn = column + 1;
 
@@ -198,7 +198,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetCategory.Bridge || treatment.Name == Properties.Resources.NonCulvertNoTreatment)
+                    if (treatment.AssetType == AssetCategory.Bridge || treatment.Name == BAMSConstants.NonCulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCount);
                         worksheet.Cells[row, column].Value = nonCulvertCount;
@@ -230,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
             _bridgeWorkSummaryCommon.SetCulvertSectionExcelString(worksheet, simulationTreatments, ref row, ref column);
-            worksheet.Cells[row++, column].Value = Properties.Resources.Total;
+            worksheet.Cells[row++, column].Value = BAMSConstants.Total;
             column++;
             var fromColumn = column + 1;
 
@@ -242,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 foreach (var treatment in simulationTreatments)
                 {
-                    if (treatment.AssetType == AssetCategory.Culvert || treatment.Name == Properties.Resources.CulvertNoTreatment)
+                    if (treatment.AssetType == AssetCategory.Culvert || treatment.Name == BAMSConstants.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCount);
                         worksheet.Cells[row, column].Value = culvertCount;

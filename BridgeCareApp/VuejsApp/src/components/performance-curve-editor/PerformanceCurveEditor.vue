@@ -21,6 +21,20 @@
                             v-if="!hasSelectedLibrary || hasScenario"
                             v-model="librarySelectItemValue"
                         >
+                            <template v-slot:selection="{ item }">
+                                <span class="ghd-control-text">{{ item.text }}</span>
+                            </template>
+                            <template v-slot:item="{ item }">
+                                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                    <v-row no-gutters align="center">
+                                    <span>{{ item.text }}</span>
+                                    </v-row>
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                                </v-list-item>
+                            </template>
                         </v-select>
                         <v-text-field
                             label="Library Name"
@@ -79,7 +93,7 @@
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout class="data-table ghd-control-text" justify-left>
+            <v-layout class="data-table" justify-left>
                 <v-flex xs12>
                     <v-card class="elevation-0">
                         <v-data-table
@@ -88,7 +102,7 @@
                             :search="gridSearchTerm"
                             select-all
                             v-model='selectedPerformanceEquations'
-                            class="fixed-header v-table__overflow ghd-button-border"
+                            class="fixed-header ghd-table v-table__overflow"
                             item-key="id"
                         >
                             <template slot="items" slot-scope="props">
@@ -194,7 +208,7 @@
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    class="sm-txt"
+                                                    class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item.equation
                                                             .expression
@@ -238,7 +252,7 @@
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    class="sm-txt"
+                                                    class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item
                                                             .criterionLibrary

@@ -197,7 +197,7 @@ v-list-item.ghd-control-text {
     min-height: 40px;
 }
 
-.ghd-control-text .v-input__control .v-input__slot .v-text-field__slot input{
+.ghd-control-text .v-input__control .v-input__slot .v-text-field__slot input {
     margin-top: 5px !important;
 }
 

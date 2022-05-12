@@ -218,7 +218,18 @@ v-list-item.ghd-control-text {
     font-size: 18px; 
     color: #444444;
 }
+.ghd-dialog-text-field-padding{
+    padding-left: 30px;
+    padding-right: 30px;
 
+}
+.ghd-dialog-padding-bottom-buttons{
+    padding-bottom: 40px;
+}
+.ghd-dialog-padding-top-title{
+    padding-top: 30px;
+    padding-left: 30px;
+}
 .ghd-text-field-border .v-input__control .v-input__slot{
     border: solid 1px #999999 !important;
 }

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Text.RegularExpressions;
+using NUnit.Framework;
 
 namespace AppliedResearchAssociates.CalculateEvaluate.Testing
 {
@@ -23,7 +24,26 @@ namespace AppliedResearchAssociates.CalculateEvaluate.Testing
         {
             const string input = @"((([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK1])>|50|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK1])>|50|)) AND ((([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CFLTJNT3])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CFLTJNT3])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CBRKSLB2])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CBRKSLB2])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CBRKSLB3])>|30|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CBRKSLB3])>|30|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNJNT3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNJNT3])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK2])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK2])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CTRNCRK3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CTRNCRK3])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CLNGCRK2])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CLNGCRK2])>|40|) OR (([SURFACEID]>|62|) AND (([BUSIPLAN]=|1|) OR ([BUSIPLAN]=|2| AND [EXP_IND]=|Y|))) AND (([CLNGCRK3])>|40|) OR (([SURFACEID]>|62|) AND ([BUSIPLAN]=|2| AND [EXP_IND]<>|Y|)) AND (([CLNGCRK3])>|40|))";
             var compiler = new CalculateEvaluateCompiler();
-            var e = Assert.Throws<CalculateEvaluateParsingException>(() => compiler.GetEvaluator(input));
+            var parsingException = Assert.Throws<CalculateEvaluateParsingException>(() => compiler.GetEvaluator(input));
+
+            const string parameterNamePattern = "[A-Za-z_][A-Za-z_0-9]*";
+            var parenthesizedParameterPattern = new Regex($@"\((\[{parameterNamePattern}\]|{parameterNamePattern})\)");
+            var fixedInput = parenthesizedParameterPattern.Replace(input, "$1");
+            var compilationException = Assert.Throws<CalculateEvaluateCompilationException>(() => compiler.GetEvaluator(fixedInput));
+
+            compiler.ParameterTypes["BUSIPLAN"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CBRKSLB2"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CBRKSLB3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CFLTJNT3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CLNGCRK2"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CLNGCRK3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CTRNCRK1"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CTRNCRK2"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CTRNCRK3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["CTRNJNT3"] = CalculateEvaluateParameterType.Number;
+            compiler.ParameterTypes["EXP_IND"] = CalculateEvaluateParameterType.Text;
+            compiler.ParameterTypes["SURFACEID"] = CalculateEvaluateParameterType.Number;
+            _ = compiler.GetEvaluator(fixedInput);
         }
     }
 }

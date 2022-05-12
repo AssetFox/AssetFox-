@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = RandomStrings.Length11();
-            var attribute = new NumericAttribute(2, 1, 3, resolvedId, randomName, "Number", "command", DataMiner.ConnectionType.MSSQL, "", true, false);
+            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "Number", "command", DataMiner.ConnectionType.MSSQL, "", true, false);
             return attribute;
         }
     }

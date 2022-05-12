@@ -37,6 +37,7 @@ const state = {
     investmentPlan: clone(emptyInvestmentPlan) as InvestmentPlan,
     scenarioSimpleBudgetDetails: [] as SimpleBudgetDetail[],
     scenarioBudgets: [] as Budget[],
+    isSuccessfulImport: false
 };
 
 const mutations = {
@@ -77,6 +78,9 @@ const mutations = {
     scenarioBudgetsMutator(state: any, budgets: Budget[]) {
         state.scenarioBudgets = clone(budgets);
     },
+    isSuccessfulImportMutator(State: any, isSuccessful: boolean){
+        state.isSuccessfulImport = isSuccessful;
+    }
 };
 
 const actions = {
@@ -213,10 +217,13 @@ const actions = {
             if (hasValue(response, 'data')) {
                 const budgets: Budget[] = response.data as Budget[];
                 commit('scenarioBudgetsMutator', budgets);
+                commit('isSuccessfulImportMutator', true);
                 dispatch('addSuccessNotification', {
                     message: 'Investment budgets file imported',
                 });
             }
+            else
+                commit('isSuccessfulImportMutator', false);
         });
     },
     async importLibraryInvestmentBudgetsFile(
@@ -234,10 +241,13 @@ const actions = {
                 const library: BudgetLibrary = response.data as BudgetLibrary;
                 commit('budgetLibraryMutator', library);
                 commit('selectedBudgetLibraryMutator', library.id);
+                commit('isSuccessfulImportMutator', true);
                 dispatch('addSuccessNotification', {
                     message: 'Investment budgets file imported',
                 });
             }
+            else
+                commit('isSuccessfulImportMutator', false);
         });
     },
 };

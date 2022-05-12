@@ -90,13 +90,13 @@
             <v-flex xs4>
                 <v-layout row align-end>
                     <v-spacer></v-spacer>
-                    <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true'
+                    <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true; showReminder = false'
                         flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                         Upload
                     </v-btn>
                     <v-divider class="investment-divider" inset vertical>
                     </v-divider>
-                    <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true'
+                    <v-btn :disabled='false' @click='exportInvestmentBudgets()'
                         flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                         Download
                     </v-btn>
@@ -260,6 +260,7 @@
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
 
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
+                                             :showReminder='showReminder'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-layout>
 </template>
@@ -331,6 +332,7 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
@@ -376,6 +378,7 @@ export default class InvestmentEditor extends Vue {
     budgets: Budget[] = [];
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    showReminder: boolean = false;
     range: number = 1;
 
     get addYearLabel() {
@@ -755,19 +758,23 @@ export default class InvestmentEditor extends Vue {
         }
     }
 
+    exportInvestmentBudgets()
+    {
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
+        InvestmentService.exportInvestmentBudgets(id, this.hasScenario)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const fileInfo: FileInfo = response.data as FileInfo;
+                FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+            }
+        });
+    }
     onSubmitImportExportInvestmentBudgetsDialogResult(result: ImportExportInvestmentBudgetsDialogResult) {
         this.showImportExportInvestmentBudgetsDialog = false;
 
         if (hasValue(result)) {
             if (result.isExport) {
-                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedBudgetLibrary.id;
-                InvestmentService.exportInvestmentBudgets(id, this.hasScenario)
-                    .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'data')) {
-                            const fileInfo: FileInfo = response.data as FileInfo;
-                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                        }
-                    });
+                
 
             } else if (hasValue(result.file)) {
                 const data: InvestmentBudgetFileImport = {
@@ -781,8 +788,9 @@ export default class InvestmentEditor extends Vue {
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     })
-                    .then(() => {
+                    .then((response: any) => {
                             this.getCriterionLibrariesAction();
+                            this.showReminder = this.isSuccessfulImport
                     });
                 } else {
                     this.importLibraryInvestmentBudgetsFileAction({

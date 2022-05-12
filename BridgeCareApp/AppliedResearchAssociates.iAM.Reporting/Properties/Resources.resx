@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AnnualizedAmount" xml:space="preserve">
+    <value>Annualized Amount</value>
+  </data>
+  <data name="BPN1" xml:space="preserve">
+    <value>BPN 1</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPN2" xml:space="preserve">
+    <value>BPN 2</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPN3" xml:space="preserve">
+    <value>BPN 3</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPN4" xml:space="preserve">
+    <value>BPN 4</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPND" xml:space="preserve">
+    <value>BPN D</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNH" xml:space="preserve">
+    <value>BPN H</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNL" xml:space="preserve">
+    <value>BPN L</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNN" xml:space="preserve">
+    <value>BPN N</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BPNT" xml:space="preserve">
+    <value>BPN T</value>
+    <comment>Bus plan network Label for Summary TABs</comment>
+  </data>
+  <data name="BridgeCare" xml:space="preserve">
+    <value>Bridge Care</value>
+  </data>
+  <data name="BridgeTotal" xml:space="preserve">
+    <value>Bridge Total</value>
+  </data>
+  <data name="CashNeededByBPN" xml:space="preserve">
+    <value>Cash Needed By BPN</value>
+  </data>
+  <data name="Closed" xml:space="preserve">
+    <value>Closed</value>
+    <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="ClosedBridgeCountByBPN" xml:space="preserve">
+    <value>Close BPN Count</value>
+  </data>
+  <data name="ClosedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Closed BPN DA</value>
+  </data>
+  <data name="CombinedPostedAndClosed" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
+  <data name="CombineNHSNonNHSConditionByBridgeCount" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
+  </data>
+  <data name="CombineNHSNonNHSConditionByDeckArea" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Without Committed Projects
+Combine NHS and Non-NHS Without Committed Projects
+Condition By Deck Area</value>
+  </data>
+  <data name="CommittedTotal" xml:space="preserve">
+    <value>Committed Total</value>
+  </data>
+  <data name="CulvDurationN" xml:space="preserve">
+    <value>CULV_DURATION_N</value>
+  </data>
+  <data name="Culvert" xml:space="preserve">
+    <value>culvert</value>
+  </data>
+  <data name="CulvertBridgeType" xml:space="preserve">
+    <value>C</value>
+  </data>
+  <data name="CulvertNoTreatment" xml:space="preserve">
+    <value>C_No Treatment</value>
+  </data>
+  <data name="CulvertTotal" xml:space="preserve">
+    <value>Culvert Total</value>
+  </data>
+  <data name="CulvSeeded" xml:space="preserve">
+    <value>CULV_SEEDED</value>
+  </data>
+  <data name="DeckDurationN" xml:space="preserve">
+    <value>DECK_DURATION_N</value>
+  </data>
+  <data name="DeckSeeded" xml:space="preserve">
+    <value>DECK_SEEDED</value>
+  </data>
+  <data name="Fair" xml:space="preserve">
+    <value>Fair</value>
+    <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="Good" xml:space="preserve">
+    <value>Good</value>
+    <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="Graph_ClosedBPNCount_Tab" xml:space="preserve">
+    <value>Close BPN Count</value>
+  </data>
+  <data name="Graph_ClosedBPNDA_Tab" xml:space="preserve">
+    <value>Closed BPN DA</value>
+  </data>
+  <data name="Graph_CombinedPostedandClosed_Tab" xml:space="preserve">
+    <value>Combined Posted and Closed</value>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Combined Count</value>
+    <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByBridgeCount_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS Condition By Bridge Count</value>
+    <comment>Graph Title for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Combined DA</value>
+    <comment>Tab label for Combine NHS and Non-NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_CombineNHSNonNHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>Combine NHS and Non-NHS With Committed Projects
+Condition By Deck Area</value>
+    <comment>Graph Title for Combine NHS and Non-NHS With Committed Projects
+Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_DollarNeededDABPN_Tab" xml:space="preserve">
+    <value>$ Needed DA BPN</value>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>NHS Count</value>
+    <comment>Tab label for NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByBridgeCount_Title" xml:space="preserve">
+    <value>NHS Condition By Bridge Count</value>
+    <comment>Graph Title for NHS Condition By Bridge Count TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>NHS DA</value>
+    <comment>Tab Label for NHS Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_NHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>NHS Condition By DA</value>
+    <comment>Graph Title for NHS Condition By Deck Area TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByBridgeCount_Tab" xml:space="preserve">
+    <value>Non NHS Count</value>
+    <comment>Tab Label for Non NHS Bridge Count graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByBridgeCount_Title" xml:space="preserve">
+    <value>Non-NHS Condition By Bridge Count</value>
+    <comment>Graph Title for Non NHS Bridge Count graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByDeckArea_Tab" xml:space="preserve">
+    <value>Non NHS DA</value>
+    <comment>Tab Label for Non NHS Condition By Deck Area graph TAB</comment>
+  </data>
+  <data name="Graph_NonNHSConditionByDeckArea_Title" xml:space="preserve">
+    <value>Non-NHS Condition By Deck Area</value>
+    <comment>Graph Title for Non NHS Condition y deck area graph TAB</comment>
+  </data>
+  <data name="Graph_PoorCountGraph_Tab" xml:space="preserve">
+    <value>Poor Count</value>
+  </data>
+  <data name="Graph_PoorDAByBPN_Tab" xml:space="preserve">
+    <value>Poor DA By BPN</value>
+  </data>
+  <data name="Graph_PoorDeckAreaGraph_Tab" xml:space="preserve">
+    <value>Poor DA</value>
+  </data>
+  <data name="Graph_PostedBPNCount_Tab" xml:space="preserve">
+    <value>Posted BPN Count</value>
+  </data>
+  <data name="Graph_PostedBPNDA_Tab" xml:space="preserve">
+    <value>Posted BPN DA</value>
+  </data>
+  <data name="NonCulvertBridgeType" xml:space="preserve">
+    <value>B</value>
+  </data>
+  <data name="NonCulvertNoTreatment" xml:space="preserve">
+    <value>B_No Treatment</value>
+  </data>
+  <data name="NoTreatment" xml:space="preserve">
+    <value>no treatment</value>
+  </data>
+  <data name="Overall" xml:space="preserve">
+    <value>Overall</value>
+  </data>
+  <data name="NoTreatmentForWorkSummary" xml:space="preserve">
+    <value>No Treatment</value>
+  </data>
+  <data name="PercentBudgetSpentBAMS" xml:space="preserve">
+    <value>Percent Budget Spent BAMS</value>
+  </data>
+  <data name="PercentBudgetSpentMPMS" xml:space="preserve">
+    <value>Percent Budget Spent MPMS</value>
+  </data>
+  <data name="Poor" xml:space="preserve">
+    <value>Poor</value>
+    <comment>Label for Summary TABs</comment>
+  </data>
+  <data name="PoorBridgeCompareBridgeCount" xml:space="preserve">
+    <value>Poor Bridge Compare Bridge Count</value>
+  </data>
+  <data name="PoorBridgeCompareDeckArea" xml:space="preserve">
+    <value>Poor Bridge Compare Deck Area</value>
+  </data>
+  <data name="PoorDeckAreaByBPN" xml:space="preserve">
+    <value>Poor Deck Area By BPN</value>
+  </data>
+  <data name="Posted" xml:space="preserve">
+    <value>Posted</value>
+  </data>
+  <data name="PostedBridgeCountByBPN" xml:space="preserve">
+    <value>Posted Bridge Count By BPN</value>
+  </data>
+  <data name="PostedBridgeDeckAreaByBPN" xml:space="preserve">
+    <value>Posted BPN DA</value>
+  </data>
+  <data name="RemainingBudget" xml:space="preserve">
+    <value>Remaining Budget</value>
+  </data>
+  <data name="SubDurationN" xml:space="preserve">
+    <value>SUB_DURATION_N</value>
+  </data>
+  <data name="SubSeeded" xml:space="preserve">
+    <value>SUB_SEEDED</value>
+  </data>
+  <data name="SupDurationN" xml:space="preserve">
+    <value>SUP_DURATION_N</value>
+  </data>
+  <data name="SupSeeded" xml:space="preserve">
+    <value>SUP_SEEDED</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+    <comment>Total number of Bridges (Culvert or non-culvert) in Work Summary TAB.</comment>
+  </data>
+  <data name="TotalBPNCost" xml:space="preserve">
+    <value>Total BPN Cost</value>
+  </data>
+  <data name="TotalBridgeCareBudget" xml:space="preserve">
+    <value>Total Bridge Care Budget</value>
+    <comment>Total Bridge Care Budget in Work Summary TAB</comment>
+  </data>
+  <data name="TotalSpent" xml:space="preserve">
+    <value>Total Spent</value>
+    <comment>Total budget spent in Work summary TAB</comment>
+  </data>
+  <data name="Work" xml:space="preserve">
+    <value>Work</value>
+    <comment>Sub header for Bridge Data report tab</comment>
+  </data>
+</root>

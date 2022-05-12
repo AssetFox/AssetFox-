@@ -28,7 +28,7 @@
                                 </v-layout>
                                 <v-layout row xs6 align-center>  
                                     <v-textarea
-                                        class="ghd-control-border ghd-control-text"
+                                        class="ghd-control-border ghd-control-text-sm"
                                         full-width
                                         no-resize
                                         outline
@@ -56,7 +56,7 @@
                                 </v-layout> 
                                 <v-layout row xs6 align-center>              
                                     <v-textarea
-                                        class="ghd-control-border ghd-control-text"
+                                        class="ghd-control-border ghd-control-text-sm"
                                         full-width
                                         no-resize
                                         outline

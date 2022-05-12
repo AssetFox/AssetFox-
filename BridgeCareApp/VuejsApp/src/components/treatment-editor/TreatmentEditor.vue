@@ -2,7 +2,7 @@
     <v-layout column>
         <v-flex>
             <v-layout>
-                <v-flex xs3>
+                <v-flex xs2>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'

@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <v-layout row>
+        <v-layout>
             <v-card
                 class="mx-auto"
                 height="100%"

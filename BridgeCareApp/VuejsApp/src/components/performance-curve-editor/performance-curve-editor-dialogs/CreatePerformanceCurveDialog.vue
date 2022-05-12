@@ -17,7 +17,7 @@
                           :rules="[rules['generalRules'].valueIsNotEmpty]"
                           outline/>
             <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
-            <v-select class="ghd-control-text ghd-control-border"
+            <v-select class="ghd-select ghd-control-text ghd-control-border"
                       v-model="newPerformanceCurve.attribute"
                       :items="attributeSelectItems"
                       :rules="[rules['generalRules'].valueIsNotEmpty]"

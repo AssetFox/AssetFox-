@@ -1,61 +1,81 @@
 <template>
     <v-layout column>
         <v-flex xs12>
-            <v-layout justify-left>
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreatePerformanceCurveLibraryDialog(false)
-                        "
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
-                    <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
-                    <v-select
-                        class="ghd-control-border ghd-control-text"
-                        :items="librarySelectItems"
-                        outline
-                        v-if="!hasSelectedLibrary || hasScenario"
-                        v-model="librarySelectItemValue"
-                    >
-                    </v-select>
-                    <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedPerformanceCurveLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
-                        <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
+            <v-layout column>
+                <v-layout justify-left>
+                    <v-flex xs5>
+                        <v-btn
+                            @click="
+                                onShowCreatePerformanceCurveLibraryDialog(false)
+                            "
+                            class="ara-blue-bg white--text"
+                            v-show="!hasScenario"
+                        >
+                            New Library
+                        </v-btn>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
+                        <v-select
+                            class="ghd-control-border ghd-control-text ghd-select"
+                            :items="librarySelectItems"
+                            outline
+                            v-if="!hasSelectedLibrary || hasScenario"
+                            v-model="librarySelectItemValue"
+                        >
+                        </v-select>
+                        <v-text-field
+                            label="Library Name"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                            v-model="selectedPerformanceCurveLibrary.name"
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        >
+                            <template slot="append">
+                                <v-btn
+                                    @click="librarySelectItemValue = null"
+                                    class="ara-orange"
+                                    icon
+                                >
+                                    <v-icon>fas fa-caret-left</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-text-field>
+                        <div v-if='hasSelectedLibrary && !hasScenario'>
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-checkbox
+                            class="sharing"
+                            label="Shared"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                            v-model="selectedPerformanceCurveLibrary.isShared"
+                        />
+                    </v-flex>
+                    <v-flex xs5>
+                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                        <v-text-field
+                            class="ghd-control-text ghd-control-border"
+                            prepend-inner-icon="fas fa-search"
+                            hide-details
+                            label="Search Deterioration Equations"
+                            single-line
+                            v-model="gridSearchTerm"
+                        >
+                        </v-text-field>
+                    </v-flex>
+                    <v-flex xs2>
+                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                        <v-layout row align-end>
+                            <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                                flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                                Upload
                             </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class="sharing"
-                        label="Shared"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedPerformanceCurveLibrary.isShared"
-                    />
-                    <v-text-field
-                        class="ghd-control-border ghd-control-text"
-                        append-icon="fas fa-search"
-                        hide-details
-                        label="Search Deterioration Equations"
-                        single-line
-                        v-model="gridSearchTerm"
-                    >
-                    </v-text-field>
-                </v-flex>
+                            <v-divider class="investment-divider" inset vertical>
+                            </v-divider>
+                            <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                                flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                                Download
+                            </v-btn>
+                        </v-layout>
+                    </v-flex>                    
+                </v-layout>
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
@@ -260,8 +280,11 @@
                                 </td>
                             </template>
                         </v-data-table>
-                        <v-btn :disabled='selectedPerformanceEquationIds.length === 0' @click='onRemovePerformanceEquations'
-                            class='ghd-blue' flat>
+                        <v-btn
+                            :disabled='selectedPerformanceEquationIds.length === 0 || !hasLibraryEditPermission'
+                            @click='onRemovePerformanceEquations'
+                            class='ghd-blue' flat
+                        >
                             Delete Selected
                         </v-btn>                        
                     </v-card>
@@ -272,17 +295,15 @@
                 <v-flex xs3>
                     <v-btn
                         @click="showCreatePerformanceCurveDialog = true"
-                        class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border"
-                        depressed
-                        block
+                        class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                        depressed                
                         outlined
                     >
                         Add Deterioration Model
                     </v-btn>
                     <v-btn v-show='false' :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
                         class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border"
-                        depressed
-                        block
+                        depressed                    
                         outlined
                     >
                         Import/Export
@@ -304,7 +325,7 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-flex xs6>
+        <v-flex xs12>
             <v-layout
                 justify-center
                 row
@@ -319,22 +340,21 @@
                 >
                     Cancel
                 </v-btn>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                       @click='onUpsertPerformanceCurveLibrary'
-                       class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border"
-                       depressed
-                       block
-                       outlined
-                       v-show='!hasScenario'
+                <v-btn
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                    @click='onUpsertPerformanceCurveLibrary'
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    depressed
+                    outlined
+                    v-show='!hasScenario'
                 >
                     Update Library
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border"
-                    depressed
-                    block
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    depressed                    
                     outlined
                 >
                     Create as New Library
@@ -347,15 +367,17 @@
                 >
                     Save
                 </v-btn>
+                <!-- <v-flex xs3>
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
+                    class="ghd-blue-bg ghd-white ghd-button-text"
                     depressed
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
                 </v-btn>
+                </v-flex> -->
             </v-layout>
         </v-flex>
 

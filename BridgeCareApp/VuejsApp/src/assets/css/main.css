@@ -111,16 +111,8 @@
 /* Colors for UI update design by GHD */
 
 .ghd-white-bg {
-    color: #FFFFFF !important;
-} 
-
-.ghd-white-bg {
     background-color: #FFFFFF !important;
 } 
-
-.ghd-blue-bg {
-    background-color: #2A578D !important;
-}
 
 .ghd-white {
     color: #FFFFFF !important;
@@ -128,6 +120,10 @@
 
 .ghd-blue {
     color: #2A578D !important;
+}
+
+.ghd-blue-bg {
+    background-color: #2A578D !important;
 }
 
 .ghd-lt-gray {
@@ -196,9 +192,20 @@ v-list-item.ghd-control-text {
 
 
 /* Text Field/Area */
-.ghd-control-text .v-input__slot input {
-    margin-top: 11px !important;
+.ghd-control-text .v-input__control .v-input__slot {
     vertical-align: middle !important;
+    min-height: 40px;
+}
+
+.ghd-control-text .v-input__control .v-input__slot .v-text-field__slot input{
+    margin-top: 5px !important;
+}
+
+.ghd-control-text label {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 13px !important; 
+    color: #999999;    
 }
 
 .ghd-control-text .v-textarea.v-text-field--box .v-text-field__prefix, .v-textarea.v-text-field--enclosed .v-text-field__prefix, .v-textarea.v-text-field--box textarea, .v-textarea.v-text-field--enclosed textarea {

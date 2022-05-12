@@ -49,23 +49,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
-        public static AttributeEntity ToEntity(AttributeDTO dto, ConnectionType connectionType)
+        private static TextAttribute ToText(AttributeDTO dto)
         {
-            var entity = new AttributeEntity
+            return new TextAttribute(
+                dto.DefaultValue,
+                dto.Id,
+                dto.Name,
+                dto.AggregationRuleType,
+                dto.Command,
+                ConnectionType.MSSQL,
+                "",
+                dto.IsCalculated,
+                dto.IsAscending);
+        }
+
+        private static NumericAttribute ToNumeric(AttributeDTO dto)
+        {
+            return double.TryParse(dto.DefaultValue, out double value)
+                ? new NumericAttribute(
+                    value,
+                    dto.Maximum,
+                    dto.Minimum,
+                    dto.Id,
+                    dto.Name,
+                    dto.AggregationRuleType,
+                    dto.Command,
+                    ConnectionType.MSSQL,
+                    "",
+                    dto.IsCalculated,
+                    dto.IsAscending)
+                : null;
+        }
+
+        public static Attribute ToDomain(AttributeDTO dto)
+        {
+            switch (dto.Type.ToLowerInvariant())
             {
-                Id = dto.Id,
-                Name = dto.Name,
-                DataType = dto.Type,
-                AggregationRuleType = dto.AggregationRuleType,
-                Command = dto.Command,
-                ConnectionType = connectionType,
-                IsCalculated = dto.IsCalculated,
-                IsAscending = dto.IsAscending,
-                Maximum = dto.Maximum,
-                Minimum = dto.Minimum,
-                DefaultValue = dto.DefaultValue,
-            };
-            return entity;
+            case "string":
+                return ToText(dto);
+            case "number":
+                return ToNumeric(dto);
+            }
+            return null;
         }
 
         public static AttributeEntity ToEntity(this Attribute domain)
@@ -105,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();
 
-            if(filteredAttribute == null)
+            if (filteredAttribute == null)
             {
                 throw new ArgumentNullException($"The attribute present in `Attribute entity` {entity.Name}, is not present in `Explorer.Network.Attribute` object");
             }

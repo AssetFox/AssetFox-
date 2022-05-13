@@ -61,7 +61,7 @@
                                 <v-icon class="ghd-blue">fas fa-edit</v-icon>
                             </v-btn>                       
 
-<v-menu
+                            <v-menu
                                 left
                                 min-height="500px"
                                 min-width="500px"
@@ -155,10 +155,10 @@ export default class ConsequencesTab extends Vue {
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
 
     consequencesGridHeaders: DataTableHeader[] = [
-        { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '200px' },
+        { text: 'Attribute', value: 'attribute', align: 'left', sortable: false, class: '', width: '175px' },
         { text: 'Change Value', value: 'changeValue', align: 'left', sortable: false, class: '', width: '125px' },
-        { text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: '' },
-        { text: 'Criteria', value: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '' },
+        { text: 'Equation', value: 'equation', align: 'left', sortable: false, class: '', width: '125px' },
+        { text: 'Criteria', value: 'criterionLibrary', align: 'left', sortable: false, class: '', width: '125px' },
         { text: 'Actions', value: '', align: 'left', sortable: false, class: '', width: '100px' },
     ];
     consequencesGridData: TreatmentConsequence[] = [];

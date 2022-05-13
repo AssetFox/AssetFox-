@@ -573,8 +573,12 @@ table.v-table tbody td {
     width: 400px !important;
 }
 
+.ghd-control-width-dd{
+    width: 340px !important;
+}
+
 .ghd-card-width{
-    min-width: 1000px !important;
+    min-width: 1200px !important;
 }
 
 .v-label--active{
@@ -596,10 +600,12 @@ display: none !important;
     caret-color: #2A578D !important;
 }
 
-/* .v-small-dialog__actions .v-btn:contains('Save'){
-    background-color:  #2A578D !important;
-    color: #FFFFFF !important;
-} */
+.ghd-title{
+    height: 22px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+}
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{

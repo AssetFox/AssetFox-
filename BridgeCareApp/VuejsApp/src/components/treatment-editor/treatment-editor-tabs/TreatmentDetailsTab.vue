@@ -8,7 +8,7 @@
                         class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
-                        rows="4"
+                        rows="3"
                         v-model="selectedTreatmentDetails.description"
                         @input="
                             onEditTreatmentDetails(
@@ -133,7 +133,7 @@
                                             class="ghd-control-border sm-txt"                                            
                                             no-resize
                                             outline
-                                            rows="5"
+                                            rows="3"
                                             readonly                                            
                                             :value="
                                                 selectedTreatmentDetails.criterionLibrary

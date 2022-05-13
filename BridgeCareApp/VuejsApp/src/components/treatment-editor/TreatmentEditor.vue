@@ -2,73 +2,54 @@
     <v-layout column>
         <v-flex>
             <v-layout>
-                <v-flex xs2>
+                <v-flex>
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'
-                        class='ghd-control-border ghd-control-text ghd-control-width'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd'
                         label='Select a Treatment Library'
                         outline                        
                         v-model='librarySelectItemValue'
                     >
                     </v-select>
-                </v-flex>                    
-                <!-- <v-flex>
-                    <v-text-field xs3
-                        v-if='hasSelectedLibrary && !hasScenario'
-                        label='Treatment Library Name'
-                        v-model='selectedTreatmentLibrary.name'
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
-                        <template slot='append'>
-                            <v-btn
-                                @click='librarySelectItemValue = null'
-                                class='ara-orange'
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                </v-flex> -->
-                <v-flex xs3>                       
+                </v-flex>
+                <v-flex>                       
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                         :items='treatmentSelectItems'
-                        class='ghd-control-border ghd-control-text ghd-control-width'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd'
                         label='Select'
                         outline                        
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
                 </v-flex>
-                <v-flex xs2 class="ara-text-field">
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: <v-label class="bold">{{ getOwnerUserName() || '[ No Owner ]' }}</v-label>
-                    </div>
-                </v-flex>
-                <v-flex xs2>
-                    <v-checkbox
-                        class='sharing'
-                        label='Shared'
-                        v-if='hasSelectedLibrary && !hasScenario'
-                        v-model='selectedTreatmentLibrary.isShared'
-                    />                    
+                <v-flex xs4>
+                    <v-layout row v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
+                        <div class="ghd-control-label" style="padding-top: 12px !important">
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
+                        </div>                       
+                        <v-checkbox
+                            class='sharing ghd-control-text ghd-padding'
+                            label='Shared'                            
+                            v-model='selectedTreatmentLibrary.isShared'
+                        />                                               
+                    </v-layout>
                 </v-flex>
                 <v-flex xs2>
                     <v-btn
                         @click='onShowCreateTreatmentLibraryDialog(false)'
-                        class='ara-blue-bg white--text'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
                         v-show='!hasScenario'
                     >
-                        New Library
-                    </v-btn>  
-                </v-flex>
-                <v-flex xs2>
+                        Create New Library
+                    </v-btn>                  
                     <v-btn
                         @click='showCreateTreatmentDialog = true'
                         depressed
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                        v-show='hasScenario'
                     >
                         Add Treatment
                     </v-btn>
@@ -78,8 +59,8 @@
         <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <div class='treatments-div'>
-                <v-layout row>
-                    <v-flex xs12>
+                <v-layout column>                    
+                    <v-flex xs12>                        
                         <div v-show='selectedTreatment.id !== uuidNIL'>
                             <v-tabs v-model='activeTab'>
                                 <v-tab
@@ -148,24 +129,33 @@
                                                             @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                             </v-card-text>
                                         </v-card>
-                                    </v-tab-item>
+                                    </v-tab-item>                                    
+                                    <v-btn
+                                        @click='showCreateTreatmentDialog = true'
+                                        depressed
+                                        class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'
+                                        style="margin-top: -930px;margin-left: 1030px;"
+                                        v-show='!hasScenario'
+                                    >
+                                        Add Treatment
+                                    </v-btn>                                      
                                 </v-tabs-items>
                             </v-tabs>
-                        </div>
-                    </v-flex>
+                        </div>                                             
+                    </v-flex>                    
                 </v-layout>
-            </div>
-        </v-flex>
-        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
-            <v-layout justify-center>
+            </div>            
+        </v-flex>        
+        <v-flex xs12>
+            <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
+            <v-layout justify-center v-show='hasSelectedLibrary && !hasScenario'>
                 <v-flex xs12>
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea                        
                         class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
-                        rows='4'
+                        rows='2'
                         :value='selectedTreatmentLibrary.description'
                         @input='selectedTreatmentLibrary = {...selectedTreatmentLibrary, description: $event}'
                     />
@@ -173,7 +163,7 @@
             </v-layout>
         </v-flex>
         <v-flex xs9>
-            <v-layout justify-center row v-show='(hasSelectedLibrary || hasScenario) && hasSelectedTreatment'>
+            <v-layout justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
                 <v-btn :disabled='!hasUnsavedChanges'
                     @click='onDiscardChanges'
                     class='ghd-white-bg ghd-blue ghd-button-text'
@@ -728,18 +718,18 @@ export default class TreatmentEditor extends Vue {
 }
 
 .treatments-div {
-    height: 475px;
+    height: 440px;
 }
 
 .card-tab-content {
-    height: 450px;
+    height: 430px;
     overflow-x: hidden;
     overflow-y: auto;
     border: none;
 }
 
 .sharing label {
-    padding-top: 0.5em;
+    padding-top: 0.7em;
 }
 
 .sharing {

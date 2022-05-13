@@ -3,9 +3,12 @@
     <v-dialog max-width="450px" persistent v-model="showDialog">
       <v-card class="ghd-padding">
         <v-card-title>
-          <v-layout justify-left>
-            <h3 class="ghd-title">Create New Treatment</h3>
-          </v-layout>
+            <v-layout justify-left>
+              <h3 class="ghd-title">Create New Treatment</h3>
+            </v-layout>
+            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>          
         </v-card-title>
         <v-card-text>
           <v-layout column>

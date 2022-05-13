@@ -10,11 +10,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
     public static class AttributeTestSetup
     {
-        public static NumericAttribute Numeric(Guid? id = null)
+        public static NumericAttribute Numeric(Guid? id = null, string name = null)
         {
             var resolvedId = id ?? Guid.NewGuid();
-            var randomName = RandomStrings.Length11();
-            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "Number", "command", DataMiner.ConnectionType.MSSQL, "", true, false);
+            var randomName = name ?? RandomStrings.Length11();
+            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "Number", "command", DataMiner.ConnectionType.MSSQL, "connectionString", true, false);
             return attribute;
         }
 
@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = RandomStrings.Length11();
-            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "ruleType", "command", DataMiner.ConnectionType.MSSQL, "", false, true);
+            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "ruleType", "command", DataMiner.ConnectionType.MSSQL, "connectionString", false, true);
             return attribute;
         }
     }

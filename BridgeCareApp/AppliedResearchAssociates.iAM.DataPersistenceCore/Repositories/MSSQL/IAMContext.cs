@@ -88,6 +88,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CommittedProjectConsequenceEntity> CommittedProjectConsequence { get; set; }
 
+        public virtual DbSet<CommittedProjectLocationEntity> CommittedProjectLocation { get; set; }
+
         public virtual DbSet<CriterionLibraryEntity> CriterionLibrary { get; set; }
 
         public virtual DbSet<CriterionLibraryAnalysisMethodEntity> CriterionLibraryAnalysisMethod { get; set; }
@@ -601,10 +603,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.HasIndex(e => e.SimulationId);
 
-                entity.HasIndex(e => e.ScenarioBudgetId);
-
-                entity.HasIndex(e => e.MaintainableAssetId);
-
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
@@ -615,12 +613,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Treatment).IsRequired();
 
-                entity.HasOne(d => d.MaintainableAsset)
-                    .WithMany(p => p.CommittedProjects)
-                    .HasForeignKey(d => d.MaintainableAssetId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
@@ -631,6 +626,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.ClientCascade);
+
+                entity.HasOne(d => d.CommittedProjectLocation)
+                    .WithOne(p => p.CommittedProject)
+                    .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(d => d.CommittedProjectConsequences)
+                    .WithOne(p => p.CommittedProject)
+                    .HasForeignKey(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CommittedProjectLocationEntity>(entity =>
+            {
+                entity.HasIndex(e => e.CommittedProjectId).IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Discriminator).IsRequired();
+
+                entity.Property(e => e.LocationIdentifier).IsRequired();
+
+                entity.HasOne(d => d.CommittedProject)
+                    .WithOne(p => p.CommittedProjectLocation)
+                    .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CommittedProjectConsequenceEntity>(entity =>

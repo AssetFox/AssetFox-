@@ -23,16 +23,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateCommittedProjects(List<CommittedProject> committedProjects, Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            var simulationEntity = _unitOfWork.Context.Simulation
+                .Include(s => s.Network)
+                .ThenInclude(n => n.MaintainableAssets)                    
+                .Include(s => s.Budgets)
+                .Where(_ => _.Id == simulationId)
+                .FirstOrDefault();
+
+            if (simulationEntity == null)
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
             }
-
-            var simulationEntity = _unitOfWork.Context.Simulation
-                    .Include(s => s.Network)
-                    .ThenInclude(n => n.MaintainableAssets)                    
-                    .Include(s => s.Budgets)
-                .Where(_ => _.Id == simulationId).Single();
 
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
@@ -51,6 +52,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToEntity(simulationEntity)).ToList();
 
             _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+
+            var committedProjectLocations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+            _unitOfWork.Context.AddAll(committedProjectLocations, _unitOfWork.UserEntity?.Id);
 
             if (committedProjects.Any(_ => _.Consequences.Any()))
             {
@@ -110,6 +114,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
                             }
                         },
+                    CommittedProjectLocation = project.CommittedProjectLocation,
                     ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -14,7 +11,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     /// and not consequences.  That may be changed in the future.  A constructor that creates this
     /// based on a TreatmentConsequenceDTO is provided
     /// </remarks>
-    public class CommittedProjectConsequenceDTO
+    public class CommittedProjectConsequenceDTO : BaseDTO
     {
         public CommittedProjectConsequenceDTO() { }
 
@@ -23,6 +20,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
             Attribute = fullConsequence.Attribute;
             ChangeValue = fullConsequence.ChangeValue;
         }
+
+        public Guid CommittedProjectId { get; set; }
 
         public string Attribute { get; set; }
 

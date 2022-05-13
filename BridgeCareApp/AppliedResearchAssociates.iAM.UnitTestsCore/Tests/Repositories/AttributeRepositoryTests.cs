@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attributes);
             var updateAttribute = new NumericAttribute(
                 20, 100, 10, attribute.Id, attribute.Name, "updatedRuleType",
-                "updatedCommand", DataMiner.ConnectionType.MONGO_DB, "connectionString",
+                "updatedCommand", DataMiner.ConnectionType.MSSQL, "connectionString",
                 !attribute.IsCalculated, !attribute.IsAscending);
             var updateAttributes = new List<DataMinerAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);

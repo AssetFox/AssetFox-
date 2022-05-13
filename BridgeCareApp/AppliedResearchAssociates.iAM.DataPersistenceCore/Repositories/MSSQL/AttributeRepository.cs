@@ -36,11 +36,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
-            var existingAttributes = _unitOfWork.Context.Attribute.Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
+            var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
 
             var entitiesToMaybeUpdate = upsertAttributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
-            var entitiesToUpdate = entitiesToMaybeUpdate.Where(e => OkToUpdate(upsertAttributeEntities, e)).ToList();
+            var entitiesToUpdate = entitiesToMaybeUpdate.Where(e => OkToUpdate(existingAttributes, e)).ToList();
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);

@@ -12,7 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-
+using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -32,9 +32,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return returnValue;
         }
 
+        private static bool IsValid(DataMinerAttribute attribute)
+        {
+            try
+            {
+                switch (attribute.DataType)
+                {
+                case "STRING":
+                    {
+                        var _ = AggregationRuleFactory.CreateTextRule(attribute);
+                        return true;
+                    }
+                case "NUMBER":
+                    {
+                        var _ = AggregationRuleFactory.CreateNumericRule(attribute);
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // ignore any exception.
+            }
+            return false;
+        }
+
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
-            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            var validAttributes = attributes.Where(IsValid).ToList();
+            var upsertAttributeEntities = validAttributes.Select(_ => _.ToEntity()).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();

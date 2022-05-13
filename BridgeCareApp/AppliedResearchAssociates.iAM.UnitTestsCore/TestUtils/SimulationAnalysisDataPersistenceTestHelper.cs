@@ -28,6 +28,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .AddJsonFile("testConnections.json")
                 .Build();
 
+            var connectionString = Config.GetConnectionString("BridgeCareConnexRealDb");
+
             DbContextForAnalysis = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(Config.GetConnectionString("BridgeCareConnexRealDb"))
                 .Options);

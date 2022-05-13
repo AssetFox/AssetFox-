@@ -1,33 +1,40 @@
 <template>
   <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>New Target Condition Goal</h3>
+      <v-card-title class="ghd-dialog-padding-top-title">
+        <v-layout justify-start>
+          <div class="dialog-header"><h5>Add New Target Condition Goal</h5></div>
         </v-layout>
+                <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+        </v-btn>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
-          <v-text-field label="Name" outline v-model="newTargetConditionGoal.name"
+          <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
+          <v-text-field outline v-model="newTargetConditionGoal.name"
+                        class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-          <v-select :items="numericAttributeNames" label="Select Attribute"
+          <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>
+          <v-select :items="numericAttributeNames"
+                    class="ghd-control-text ghd-control-border"
                     outline v-model="newTargetConditionGoal.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-          <v-text-field :mask="'####'" label="Year" outline v-model.number="newTargetConditionGoal.year"/>
-
-          <v-text-field label="Target" outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
+          <v-subheader class="ghd-control-label ghd-md-gray">Year</v-subheader>
+          <v-text-field :mask="'####'" class="ghd-control-text ghd-control-border" outline v-model.number="newTargetConditionGoal.year"/>
+          <v-subheader class="ghd-control-label ghd-md-gray">Target</v-subheader>
+          <v-text-field outline :mask="'##########'" v-model.number="newTargetConditionGoal.target"
+                        class="ghd-control-text ghd-control-border"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"/>
         </v-layout>
       </v-card-text>
-      <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ara-blue-bg white--text">
-            Save
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+      <v-card-actions class="py-0">
+        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
+          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue" flat>
             Cancel
+          </v-btn>
+          <v-btn :disabled="disableSubmitButton()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue" outline>
+            Save
           </v-btn>
         </v-layout>
       </v-card-actions>

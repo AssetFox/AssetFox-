@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -13,6 +14,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void JoinAttributesWithEquationsAndCriteria(Explorer explorer);
 
         Explorer GetExplorer();
+
+        List<Guid> GetAttributeIdsInNetwork(Guid networkId);
 
         Task<List<AttributeDTO>> Attributes();
 

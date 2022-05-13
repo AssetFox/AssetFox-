@@ -171,6 +171,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId)
+        {
+            var r = _unitOfWork.Context.ScenarioBudget.AsNoTracking().SingleOrDefault(b => b.SimulationId == simulationId && b.Name == "Unknown");
+            if (r == null)
+            {
+                r = new ScenarioBudgetEntity
+                {
+                    Name = "Unknown",
+                    Id = Guid.NewGuid(),
+                    SimulationId = simulationId,
+                };
+                _unitOfWork.Context.ScenarioBudget.Add(r);
+            }
+            return r;
+        }
+
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
         {
             if (!_unitOfWork.Context.BudgetLibrary.Any(_ => _.Id == libraryId))

@@ -9,5 +9,9 @@ namespace BridgeCareCore.Interfaces
         ScenarioPerformanceCurvesImportResultDTO ImportScenarioPerformanceCurvesFile(Guid simulationId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
 
         PerformanceCurvesImportResultDTO ImportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter);
+
+        FileInfoDTO ExportScenarioPerformanceCurvesFile(Guid simulationId);
+
+        FileInfoDTO ExportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId);
     }
 }

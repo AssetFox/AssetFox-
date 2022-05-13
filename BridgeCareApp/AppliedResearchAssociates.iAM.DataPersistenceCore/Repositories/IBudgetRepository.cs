@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -27,5 +28,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetDTO> GetScenarioBudgets(Guid simulationId);
 
         void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId);
+        ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId);
     }
 }

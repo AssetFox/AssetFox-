@@ -288,7 +288,7 @@
         </v-flex>
         <v-flex xs12>
             <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                <v-btn :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
                        @click='onUpsertScenarioPerformanceCurves'
                        class='ara-blue-bg white--text'
                        v-show='hasScenario'>
@@ -417,6 +417,10 @@ import ImportExportPerformanceCurvesDialog
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { AxiosResponse } from 'axios';
+import { FileInfo } from '@/shared/models/iAM/file-info';
+import FileDownload from 'js-file-download';
+import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 
 @Component({
     components: {
@@ -538,7 +542,7 @@ export default class PerformanceCurveEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
-    showImportExportPerformanceCurvesDialog: boolean = false;
+    showImportExportPerformanceCurvesDialog: boolean = false;    
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -634,7 +638,7 @@ export default class PerformanceCurveEditor extends Vue {
             ? hasUnsavedChangesCore('', this.performanceCurveGridData, this.stateScenarioPerformanceCurves)
             : hasUnsavedChangesCore('',
                 {...clone(this.selectedPerformanceCurveLibrary), performanceCurves: clone(this.performanceCurveGridData)},
-                this.stateSelectedPerformanceCurveLibrary);
+                this.stateSelectedPerformanceCurveLibrary); 
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -880,17 +884,17 @@ export default class PerformanceCurveEditor extends Vue {
         this.showImportExportPerformanceCurvesDialog = false;
 
         if (hasValue(result)) {
-            // if (result.isExport) {
-            //     const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
-            //     PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
-            //         .then((response: AxiosResponse) => {
-            //             if (hasValue(response, 'data')) {
-            //                 const fileInfo: FileInfo = response.data as FileInfo;
-            //                 FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-            //             }
-            //         });
+            if (result.isExport) {
+                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
+                PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
+                    .then((response: AxiosResponse) => {
+                        if (hasValue(response, 'data')) {
+                            const fileInfo: FileInfo = response.data as FileInfo;
+                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                        }
+                    });
 
-            // } else
+            } else
             if (hasValue(result.file)) {
                 const data: PerformanceCurvesFileImport = {
                     file: result.file
@@ -902,18 +906,12 @@ export default class PerformanceCurveEditor extends Vue {
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     })
-                    // .then(() => {
-                    //         this.getScenarioPerformanceCurvesAction();
-                    // });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
                         ...data,
                         id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
                     })
-                    // .then(() => {
-                    //         this.getPerformanceCurveLibrariesAction();
-                    // });
                 }
 
             }

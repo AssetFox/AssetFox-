@@ -1,28 +1,35 @@
 <template>
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>New Investment Library</h3>
-        </v-layout>
-      </v-card-title>
-      <v-card-text>
+      <v-card-title class="ghd-dialog-box-padding-top">
+         <v-layout justify-space-between align-center>
+            <div class="ghd-control-dialog-header">New Investment Library</div>
+            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>
+          </v-layout>
+        </v-card-title>           
+      <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
-          <v-text-field label="Name" outline v-model="newBudgetLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+          <v-subheader class="ghd-subheader ">Name</v-subheader>
+          <v-text-field outline v-model="newBudgetLibrary.name"
+                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ghd-text-field-border ghd-text-field"/>
 
-          <v-textarea label="Description" no-resize outline rows="3"
-                      v-model="newBudgetLibrary.description">
+          <v-subheader class="ghd-subheader ">Description</v-subheader>
+          <v-textarea no-resize outline rows="3"
+                      v-model="newBudgetLibrary.description"
+                      class="ghd-text-field-border">
           </v-textarea>
         </v-layout>
       </v-card-text>
-      <v-card-actions>
-        <v-layout justify-space-between row>
+      <v-card-actions class="ghd-dialog-box-padding-bottom">
+        <v-layout justify-center row>
+          <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-button' flat>Cancel</v-btn>
           <v-btn :disabled="newBudgetLibrary.name === ''" @click="onSubmit(true)"
-                 class="ara-blue-bg white--text">
+                 class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Save
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
+          </v-btn>          
         </v-layout>
       </v-card-actions>
     </v-card>

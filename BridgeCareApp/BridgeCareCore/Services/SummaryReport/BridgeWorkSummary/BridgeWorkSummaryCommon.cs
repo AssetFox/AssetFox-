@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Helpers.Excel;
 using BridgeCareCore.Models.SummaryReport;
 using BridgeCareCore.Services.SummaryReport.BridgeWorkSummary.StaticContent;
 using OfficeOpenXml;

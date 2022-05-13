@@ -71,4 +71,17 @@ export default class PerformanceCurveService {
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               );
     }
+
+    static exportPerformanceCurves(
+        id: string,
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ? coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportScenarioPerformanceCurvesExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportLibraryPerformanceCurvesExcelFile/${id}`,
+              );
+    }
 }

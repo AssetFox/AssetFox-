@@ -10,8 +10,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class Equation : CompilableExpression
     {
-        internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
-
         public EquationFormat Format =>
             Calculator is object ? EquationFormat.CalculationExpression :
             ValueVersusAge is object ? EquationFormat.PiecewiseExpression :
@@ -32,6 +30,52 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 return Calculator.ReferencedParameters;
             }
         }
+
+        public static bool ParseIfPiecewise(string expression, out double[] xValues, out double[] yValues)
+        {
+            var match = PiecewisePattern.Match(expression);
+            if (match.Success)
+            {
+                double parseValue(Capture capture) => double.TryParse(capture.Value, out var result) ? result : throw ExpressionCouldNotBeCompiled();
+                double[] parseGroup(int index) => match.Groups[index].Captures.Cast<Capture>().Select(parseValue).ToArray();
+
+                xValues = parseGroup(1);
+                yValues = parseGroup(2);
+
+                if (xValues.Length < 2)
+                {
+                    throw ExpressionCouldNotBeCompiled("Piecewise expression has less than two points.");
+                }
+
+                if (xValues.Distinct().Count() != xValues.Length)
+                {
+                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique x values.");
+                }
+
+                if (yValues.Distinct().Count() != yValues.Length)
+                {
+                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique y values.");
+                }
+
+                Array.Sort(xValues, yValues);
+
+                if (!yValues.IsSorted())
+                {
+                    throw ExpressionCouldNotBeCompiled("Piecewise function is not monotone.");
+                }
+
+                return true;
+            }
+            else
+            {
+                xValues = null;
+                yValues = null;
+
+                return false;
+            }
+        }
+
+        internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         internal double Compute(SectionContext scope) => Compute(scope, null);
 
@@ -78,34 +122,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             ValueVersusAge = null;
             AgeVersusValue = null;
             Calculator = null;
+
             if (ExpressionIsBlank)
             {
                 throw ExpressionCouldNotBeCompiled("Expression is blank.");
             }
-            var match = PiecewisePattern.Match(Expression);
-            if (match.Success)
+
+            if (ParseIfPiecewise(Expression, out var xValues, out var yValues))
             {
-                double parseValue(Capture capture) => double.TryParse(capture.Value, out var result) ? result : throw ExpressionCouldNotBeCompiled();
-                double[] parseGroup(int index) => match.Groups[index].Captures.Cast<Capture>().Select(parseValue).ToArray();
-                var xValues = parseGroup(1);
-                var yValues = parseGroup(2);
-                if (xValues.Length < 2)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has less than two points.");
-                }
-                if (xValues.Distinct().Count() != xValues.Length)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique x values.");
-                }
-                if (yValues.Distinct().Count() != yValues.Length)
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise expression has non-unique y values.");
-                }
-                Array.Sort(xValues, yValues);
-                if (!yValues.IsSorted())
-                {
-                    throw ExpressionCouldNotBeCompiled("Piecewise function is not monotone.");
-                }
                 ValueVersusAge = LinearSpline.InterpolateSorted(xValues, yValues);
                 AgeVersusValue = LinearSpline.Interpolate(yValues, xValues);
             }

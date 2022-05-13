@@ -560,3 +560,17 @@ table.v-table tbody td input {
     margin-top: -4px !important;
     margin-bottom: -4px !important;
 }
+
+.ghd-sidebar-libary{
+    position: absolute;
+    max-height: 468px;
+}
+
+.ghd-sidebar-scenario{
+    position: absolute;
+    max-height: 600px;
+}
+
+.ghd-content{
+    padding-left: 295px !important;
+}

@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
             if (!MethodPerSignature.TryGetValue((identifierText, arguments.Length), out var method))
             {
-                throw new CalculateEvaluateCompilationException("Unknown function or invalid number of arguments.");
+                throw new CalculateEvaluateCompilationException($"Unknown function \"{identifierText}\" or invalid number of arguments.");
             }
 
             var result = Expression.Call(method, arguments.Select(Visit));
@@ -119,7 +119,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
             if (!TryVisitNumberParameterReference(identifierText, out var result))
             {
-                throw UnknownReference;
+                throw UnknownReference(identifierText);
             }
 
             return result;
@@ -136,7 +136,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
             }
             else if (!TryVisitNumberParameterReference(identifierText, out result))
             {
-                throw UnknownReference;
+                throw UnknownReference(identifierText);
             }
 
             return result;
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
             if (parameterType != CalculateEvaluateParameterType.Number)
             {
-                throw new CalculateEvaluateCompilationException("Parameter is not a number.");
+                throw new CalculateEvaluateCompilationException($"Parameter \"{identifierText}\" is not a number.");
             }
 
             _ = ReferencedParameters.Add(identifierText);
@@ -262,7 +262,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
             if (!ParameterTypes.TryGetValue(identifierText, out var parameterType))
             {
-                throw UnknownReference;
+                throw UnknownReference(identifierText);
             }
 
             ScopeInfo argumentInfo;
@@ -304,7 +304,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
                 if (!ParameterTypes.TryGetValue(operandIdentifierText, out var operandType))
                 {
-                    throw UnknownReference;
+                    throw UnknownReference(operandIdentifierText);
                 }
 
                 if (operandType != parameterType)
@@ -354,7 +354,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
 
         private readonly IReadOnlyDictionary<string, CalculateEvaluateParameterType> ParameterTypes;
 
-        private static CalculateEvaluateCompilationException UnknownReference => new CalculateEvaluateCompilationException("Unknown reference.");
+        private static CalculateEvaluateCompilationException UnknownReference(string identifierText) => new CalculateEvaluateCompilationException($"Unknown reference \"{identifierText}\".");
 
         private static ScopeInfo GetScopeInfo<T>(string getterName, Func<string, T> parse)
         {
@@ -369,7 +369,7 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 }
                 catch (Exception e)
                 {
-                    throw new CalculateEvaluateCompilationException("Failed to parse literal.", e);
+                    throw new CalculateEvaluateCompilationException($"Failed to parse literal \"{literal}\".", e);
                 }
 
                 return Expression.Constant(value);

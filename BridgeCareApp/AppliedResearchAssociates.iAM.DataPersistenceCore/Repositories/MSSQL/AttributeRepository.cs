@@ -24,13 +24,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
+        private static bool OkToUpdate(List<AttributeEntity> oldEntities, AttributeEntity proposedNewEntity)
+        {
+            var compare = oldEntities.Single(e => e.Id == proposedNewEntity.Id);
+            var returnValue = proposedNewEntity.Name == compare.Name
+                             && proposedNewEntity.ConnectionType == compare.ConnectionType;
+            return returnValue;
+        }
+
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
-            var attributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
-            var existingAttributeIds = _unitOfWork.Context.Attribute.Select(_ => _.Id).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
+            var existingAttributes = _unitOfWork.Context.Attribute.Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
+            var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
 
-            var entitiesToUpdate = attributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
-            var entitiesToAdd = attributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
+            var entitiesToMaybeUpdate = upsertAttributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
+            var entitiesToUpdate = entitiesToMaybeUpdate.Where(e => OkToUpdate(upsertAttributeEntities, e)).ToList();
+            var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);

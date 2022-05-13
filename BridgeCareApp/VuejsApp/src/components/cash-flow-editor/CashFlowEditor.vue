@@ -439,7 +439,7 @@
                 v-show="hasSelectedLibrary || hasScenario"
             >
                 <v-btn
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
                     class="ara-blue-bg white--text"
                     v-show="hasScenario"

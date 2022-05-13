@@ -113,7 +113,7 @@
                             </v-textarea>
                         </v-flex>
                         <v-flex xs6>
-                            <v-layout row style="height=12px;padding-bottom:0px;">
+                            <v-layout style="height=12px;padding-bottom:0px;">
                                 <v-flex xs12 style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray">                             
                                         Criteria</v-subheader>
@@ -162,7 +162,7 @@
                 <v-layout justify-center row>
                     <v-btn
                         @click="onDiscardChanges"
-                        class="ghd-white-bg ghd-blue ghd-button-text"
+                        class="ghd-white-bg ghd-blue ghd-button-text ghd-button"
                         depressed
                         >Cancel</v-btn
                     >
@@ -170,7 +170,7 @@
                         @click="onUpsertAnalysisMethod"
                         :disabled="criteriaIsInvalid() || !valid"
                         depressed
-                        class="ghd-blue-bg ghd-white ghd-button-text"
+                        class="ghd-blue-bg ghd-white ghd-button-text ghd-button"
                         >Save</v-btn
                     >
                 </v-layout>

@@ -20,7 +20,6 @@
                 <v-card-actions>
                     <v-layout justify-space-between row>
                         <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                        <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
                         <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
                     </v-layout>
                 </v-card-actions>
@@ -60,6 +59,7 @@ import { watch } from 'fs';
 })
 export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Prop() showDialog: boolean;
+    @Prop() showReminder: boolean;
 
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -67,7 +67,6 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
     investmentBudgetsFile: File | null = null;
     overwriteBudgets: boolean = true;
     closed: boolean = false;
-    showReminder: boolean = false;
 
     @Watch('showDialog')
     onShowDialogChanged() {
@@ -77,18 +76,7 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
             this.investmentBudgetsFile = null;
             this.closed = true;
         }
-    }
-
-    @Watch('showReminder')
-    onShowReminderChanged() {
-        if (this.showDialog) {
-            this.closed = false;
-        } else {
-            this.investmentBudgetsFile = null;
-            this.closed = true;
-        }
-    }
-    
+    }   
 
     /**
      * FileSelector submit event handler
@@ -109,7 +97,6 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
                 isExport: isExport
             };
             this.$emit('submit', result);
-            this.showReminder = true
         } else {
             this.$emit('submit', null);
         }

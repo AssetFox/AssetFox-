@@ -1,64 +1,48 @@
 <template>
     <v-layout column class="Montserrat-font-family">
         <v-flex xs12>
-            
-            <v-container fluid >
-            <v-layout justify-space-between row >
-                
-                    <v-flex xs4>
-                        <v-layout column>
-                            <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
-
-                                <v-select :items='librarySelectItems' 
-                                        outline                           
-                                        v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
-                                </v-select>
-                        
-                        </v-layout>
-                        </v-flex>
-
-                        <v-flex xs4 class="shared-owner-flex-padding">
-                            <v-layout row v-show='hasSelectedLibrary || hasScenario' >
-                                <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
-                                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                                </div>
-                                <v-divider class="budget-divider" inset vertical
-                                    v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
-                                </v-divider>
-                                <v-checkbox class='sharing header-text-content' label='Shared'
-                                    v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                                    v-model='selectedBudgetPriorityLibrary.shared' />
-                            </v-layout>
-                                
-                        </v-flex>
-                        <!-- <v-text-field v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                                    v-model='selectedBudgetPriorityLibrary.name'
-                                    :rules="[rules['generalRules'].valueIsNotEmpty]">
-                            <template slot='append'>
-                                <v-btn @click='librarySelectItemValue = null' class='ara-orange' icon>
-                                    <v-icon>fas fa-caret-left</v-icon>
-                                </v-btn>
-                            </template>
-                        </v-text-field>  -->                        
-
-                <v-flex xs4>
-                    <v-layout row align-end class="left-buttons-padding" v-show='hasSelectedLibrary || hasScenario'>
+            <v-layout justify-space-between row >              
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout column>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
+                            <v-select :items='librarySelectItems' 
+                                outline                           
+                                v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
+                            </v-select>                           
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
+                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content owner-padding">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider class="owner-shared-divider" inset vertical
+                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+                        </v-divider>
+                        <v-checkbox class='sharing header-text-content' label='Shared'
+                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
+                            v-model='selectedBudgetPriorityLibrary.shared' />
+                    </v-layout>                               
+                </v-flex>                               
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
-                        <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding'>Add Budget Priority</v-btn>
+                        <v-btn @click='showCreateBudgetPriorityDialog = true' outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show='hasSelectedLibrary'>Add Budget Priority</v-btn>
                         
                         <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(false)' outline
-                            v-show='(hasSelectedLibrary || hasScenario) && (selectedScenarioId === uuidNIL)' class='ghd-blue ghd-button-text ghd-outline-button-padding'>
-                            New Library
+                            v-show='!hasScenario' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            Create New Library
                         </v-btn>
                     </v-layout>
                 </v-flex>
             </v-layout>
-            </v-container>
+
         </v-flex>
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <div class='priorities-data-table'>
                 <v-data-table :headers='budgetPriorityGridHeaders' :items='budgetPriorityGridRows'
-                              class='elevation-1 v-table__overflow' item-key='id' select-all
+                              class='v-table__overflow ghd-table' item-key='id' select-all
                               v-model='selectedBudgetPriorityGridRows' :must-sort='true'>
                     <template slot='items' slot-scope='props'>
                         <td>
@@ -107,7 +91,7 @@
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
-                                    <v-btn @click='onShowCriterionLibraryEditorDialog(props.item)' class='edit-icon ghd-button-text'
+                                    <v-btn @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
                                            icon>
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
@@ -136,7 +120,7 @@
                     </template>
                 </v-data-table>
                 <v-btn :disabled='selectedBudgetPriorityIds.length === 0' @click='onRemoveBudgetPriorities'
-                    class='ghd-blue' flat>
+                    class='ghd-blue ghd-button' flat>
                     Delete Selected
                 </v-btn>
             </div>
@@ -156,24 +140,24 @@
         <v-flex xs12>           
             <v-layout justify-center row v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn  flat @click='onDiscardChanges'
-                       v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text'>
+                       v-show='hasScenario' :disabled='!hasUnsavedChanges' class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn @click='onUpsertScenarioBudgetPriorities'
-                       class='ghd-blue-bg white--text ghd-button-text'
-                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
+                       class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                       v-show='hasScenario' :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn @click='onShowConfirmDeleteAlert' flat
-                       v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text'>
+                       v-show='!hasScenario' :disabled='!hasSelectedLibrary' class='ghd-blue ghd-button-text ghd-button'>
                     Delete Library
                 </v-btn>             
-                <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding' outline
+                <v-btn @click='onShowCreateBudgetPriorityLibraryDialog(true)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                        :disabled='disableCrudButtons()'>
                     Create as New Library
                 </v-btn>
                 <v-btn @click='onUpsertBudgetPriorityLibrary'
-                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding'
+                       class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                        v-show='!hasScenario' :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
                     Update Library
                 </v-btn>
@@ -258,7 +242,6 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
-    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedScenarioId: string = getBlankGuid();
@@ -700,11 +683,6 @@ export default class BudgetPriorityEditor extends Vue {
     margin: 0;
 }
 
-.header-text-content{
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
 .row-padding{
     padding-top: 0px;
     padding-left: 0px;
@@ -720,17 +698,10 @@ export default class BudgetPriorityEditor extends Vue {
 }
 
 .shared-owner-flex-padding{
-    padding-top: 30px !important;
+    padding-top: 22px !important;
 }
 
 .left-buttons-padding{
-    padding-top: 18px;
+    padding-top: 22px;
 }
-
-.budget-divider{
-    height: 22px;
-    margin-top: 6px !important;
-}
-
-
 </style>

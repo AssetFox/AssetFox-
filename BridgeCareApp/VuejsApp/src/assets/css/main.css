@@ -152,6 +152,19 @@
     font-weight: 400 !important;
 }
 
+.ghd-control-subheader{
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    position: relative;
+}
+
+.ghd-control-subheader span{
+    position: absolute !important;
+    bottom: 0 !important;
+}
+
 .ghd-control-border .v-input__slot {
     border: 1px solid #999999 !important;
     border-radius: 4px !important;    
@@ -184,9 +197,65 @@
     font-size: 18px; 
     color: #444444;
 }
+.ghd-dialog-text-field-padding{
+    padding-left: 30px;
+    padding-right: 30px;
+
+}
+.ghd-dialog-padding-bottom-buttons{
+    padding-bottom: 40px;
+}
+.ghd-dialog-padding-top-title{
+    padding-top: 30px;
+    padding-left: 30px;
+}
+.ghd-text-field-border .v-input__control .v-input__slot{
+    border: solid 1px #999999 !important;
+}
+  
+.ghd-text-field .v-input__control .v-input__slot{
+    min-height: 40px;
+    height: 40px;
+} 
+  
+.ghd-text-field .v-input__control .v-input__slot .v-text-field__slot input{
+    margin-top: 5px !important;
+}
+
+.ghd-blue-text-field .v-input__control .v-input__slot{
+    border-color: #2A578D !important;
+}
+
+.ghd-left-paired-textbox .v-input__control .v-input__slot{
+    margin-top: 6px;
+    min-height: 36px;
+    height: 36px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+    width: 50px;
+    min-width: 50px;
+}
+
+.ghd-left-paired-textbox .v-input__control .v-input__slot .v-text-field__slot input{
+    margin-top: 2px !important;
+}
+
+.ghd-right-paired-button{
+    margin-left: 4px;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 5px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 5px !important;
+}
 
 
 /* Button */
+.ghd-button{
+    border-radius: 5px;
+}
+
 .ghd-button-border {
     border: 1px solid #99999980 !important;
 }
@@ -204,6 +273,20 @@
     padding-right: 5px;
 }
 
+.ghd-close-button{
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+.ghd-close-button .v-btn__content{
+    font-size: 1.5rem;
+}
+
+.ghd-separated-button{
+    min-width: 0 !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
 
 /* Checkbox */
 /* checkbox text */
@@ -270,7 +353,8 @@ html {
 
   .modal-pop-up-padding {padding: 15px;}
 
-  table.v-table thead th {
+/* ghd table  */
+table.v-table thead th {
     font-size: 14px !important;
 
 }
@@ -278,15 +362,32 @@ table.v-table tbody td {
   font-size: 15px !important;
 }
 
+.ghd-table{
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+}
+
+.ghd-table td{
+    padding-left: 0 !important;
+}
+
+.ghd-table th{
+    padding-left: 0 !important;
+}
+
+.ghd-table thead tr th:first-child{
+    padding-left: 14px !important;
+}
+
+.ghd-table tbody tr td:first-child{
+    padding-left: 14px !important;
+}
+
 .dialog-header{
     display: block; 
     color:rgb(59, 57, 65);
-  }
-  
-  
-  .v-btn {
-    border-radius: 6px !important;
-  }
+}
 
 .notification-long-message {
     display: inline-block;
@@ -334,18 +435,6 @@ table.v-table tbody td {
     color: lightgray !important;
 }
 
-.ghd-text-field-border .v-input__control .v-input__slot{
-    border: solid 1px #999999 !important;
-}
-  
-.ghd-text-field .v-input__control .v-input__slot{
-    min-height: 40px;
-    height: 40px;
-} 
-  
-.ghd-text-field .v-input__control .v-input__slot .v-text-field__slot input{
-    margin-top: 5px !important;
-}
 
 .Montserrat-font-family{
     font-family: 'Montserrat' !important;
@@ -384,6 +473,7 @@ table.v-table tbody td {
 .ghd-dialog-box-padding-top{
     padding-top: 30px;
     padding-left: 30px;
+    padding-right: 30px;
 }
 
 .ghd-dialog-box-padding-center{
@@ -393,4 +483,24 @@ table.v-table tbody td {
 
 .ghd-dialog-box-padding-bottom{
     padding-bottom: 30px;
+}
+
+.owner-shared-divider{
+    height: 22px;
+    margin-top: 6px !important;
+}
+
+.header-text-content{
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.ghd-constant-header{
+    padding-top: 4px !important;
+    padding-bottom: 4px !important;
+}
+
+.ghd-constant-header .layout{
+    margin-top: -4px !important;
+    margin-bottom: -4px !important;
 }

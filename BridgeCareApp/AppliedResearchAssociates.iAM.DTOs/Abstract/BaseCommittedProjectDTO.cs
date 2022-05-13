@@ -25,6 +25,19 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public Dictionary<string, string> LocationKeys { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
+        /// Name of the treatment being applied as part of this committed project
+        /// </summary>
+        /// <remarks>
+        /// This treatment does NOT need to exist in a library
+        /// </remarks>
+        public string Treatment { get; set; }
+
+        /// <summary>
+        /// Collection of consequences applied to this specific committed project
+        /// </summary>
+        public List<CommittedProjectConsequenceDTO> Consequences { get; set; } = new List<CommittedProjectConsequenceDTO>();
+
+        /// <summary>
         /// The cost to apply the project
         /// </summary>
         /// <remarks>

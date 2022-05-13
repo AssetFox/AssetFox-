@@ -17,5 +17,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "Number", "command", DataMiner.ConnectionType.MSSQL, "", true, false);
             return attribute;
         }
+
+        public static TextAttribute Text(Guid? id = null)
+        {
+            var resolvedId = id ?? Guid.NewGuid();
+            var randomName = RandomStrings.Length11();
+            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "ruleType", "command", DataMiner.ConnectionType.MSSQL, "", false, true);
+            return attribute;
+        }
     }
 }

@@ -26,5 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         {
             repository.UpsertAttributes(dtos.ToList());
         }
+
+        public static void UpsertAttributes(this IAttributeRepository repo, params DataMinerAttribute[] attributes)
+            => repo.UpsertAttributes(attributes.ToList());
     }
 }

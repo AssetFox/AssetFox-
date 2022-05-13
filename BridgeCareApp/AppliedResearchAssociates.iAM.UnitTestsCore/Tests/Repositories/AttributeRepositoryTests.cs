@@ -101,8 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attributes = new List<DataMinerAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", DataMiner.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
-            var updateAttributes = new List<DataMinerAttribute> { updateAttribute };
-            repo.UpsertAttributes(updateAttributes);
+            repo.UpsertAttributes(updateAttribute);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Equal(attribute.Name, attributeAfter.Name);
@@ -116,9 +115,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attributeId = Guid.NewGuid();
             var invalidAttribute = new NumericAttribute(100, 1000, 0, attributeId, randomName, "Invalid ruleType",
                 "Command", DataMiner.ConnectionType.MSSQL, "", true, false);
+            repo.UpsertAttributes(invalidAttribute);
             var attributesAfter = await repo.Attributes();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);
+        }
+
+        public async Task AttributeInDb_CreateNewAttributeWithSameName_Fails()
+        {
+            var repo = attributeRepository;
+            var randomName = RandomStrings.Length11();
+            var attribute = AttributeTestSetup.Numeric(null, randomName);
+            repo.UpsertAttributes(attribute);
+            var attributesBefore = await repo.Attributes();
+            var attribute2 = AttributeTestSetup.Numeric(null, randomName);
+            repo.UpsertAttributes(attribute2);
+            var attributesAfter = await repo.Attributes();
+            Assert.Equal(attributesBefore.Count, attributesAfter.Count);
+            var addedAttribute2 = attributesAfter.SingleOrDefault(a => a.Id == attribute2.Id);
+            Assert.Null(addedAttribute2);
         }
     }
 }

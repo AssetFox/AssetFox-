@@ -4,7 +4,7 @@
             <v-card class="ghd-padding">
                 <v-card-title>
                     <v-layout justify-left>
-                        <h3 class="ghd-title">New Treatment Library</h3>
+                        <h3 class="ghd-title">Create New Treatment Library</h3>
                     </v-layout>
                 </v-card-title>
                 <v-card-text>
@@ -25,7 +25,7 @@
                     </v-layout>
                 </v-card-text>
                 <v-card-actions>
-                    <v-layout justify-space-between row>
+                    <v-layout row justify-center>
                         <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed
                             >Cancel</v-btn
                         >

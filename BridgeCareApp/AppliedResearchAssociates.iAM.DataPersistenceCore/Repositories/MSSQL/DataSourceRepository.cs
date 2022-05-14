@@ -20,9 +20,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = uow;
         }
 
-        public List<BaseDataSourceDTO> GetDataSources() =>
-            _unitOfWork.Context.DataSource.Select(_ => _.ToDTO()).ToList();
+        public List<BaseDataSourceDTO> GetDataSources()
+        {
+            var result = new List<BaseDataSourceDTO>();
+            foreach (var source in _unitOfWork.Context.DataSource.ToList())
+            {
+                try
+                {
+                    result.Add(source.ToDTO());
+                }
+                catch
+                {
+                    // Do nothing.  The data source was invalid
+                }
+            }
 
+            return result;
+        }
         public BaseDataSourceDTO GetDataSource(Guid id) =>
             _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO();
 
@@ -32,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The specified data source was not found.");
 
             // If an attribute uses this data source, do not delete the datasource
-            if (!_unitOfWork.Context.Attribute.Where(_ => _.DataSource != null).Any(_ => _.DataSource.Id == id))
+            if (_unitOfWork.Context.Attribute.Where(_ => _.DataSource != null).Any(_ => _.DataSource.Id == id))
                 throw new ArgumentException("The specified data source has an attribute associated with it and cannot be deleted");
 
             _unitOfWork.Context.DeleteEntity<DataSourceEntity>(_ => _.Id == id);
@@ -41,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 
         public void UpsertDatasource(BaseDataSourceDTO dataSource)
         {
-            if (!_unitOfWork.Context.DataSource.Any(_ => _.Id != dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
+            if (_unitOfWork.Context.DataSource.Any(_ => _.Id != dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
                 throw new ArgumentException("An existing data source with the same name already exists");
 
             if (!dataSource.Validate())

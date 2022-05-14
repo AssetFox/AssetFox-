@@ -17,5 +17,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         {
             ConnectionString = details;
         }
+
+        public override bool Validate() => true;
     }
 }

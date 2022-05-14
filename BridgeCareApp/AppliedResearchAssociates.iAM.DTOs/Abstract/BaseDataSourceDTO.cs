@@ -43,5 +43,13 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// Data source details provided as a string such as a connection string or JSON object
         /// </param>
         public abstract void PopulateDetails(string details);
+
+        /// <summary>
+        /// Validates the details on the datasource
+        /// </summary>
+        /// <returns>
+        /// True if the data source details are valid
+        /// </returns>
+        public abstract bool Validate();
     }
 }

@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {
@@ -95,7 +98,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             Assert.Equal(null, result);
         }
 
-        // We should test a successful delete here, but since it is an extension we cannot do that
+        [Fact]
+        public void SuccessfullyDeletesValid()
+        {
+            // Arrange
+            var repo = new DataSourceRepository(_testRepo);
+
+            // Act
+            repo.DeleteDataSource(new Guid("147cb3e1-e9fc-4fd6-a265-105d546d9ddb"));
+
+            // Assert
+            _mockedDataSourceSet.Verify(_ => _.Remove(It.IsAny<DataSourceEntity>()), Times.Once());
+            _mockedContext.Verify(_ => _.SaveChanges(), Times.Once());
+        }
 
         [Fact]
         public void DoesNotDeleteDataSourcesWithAttributes()
@@ -118,6 +133,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         }
 
         // We should test a successful addition here, but since it is an extension we cannot do that
+
         // We should test a successful update here, but since it is an extension we cannot do that
 
         [Fact]

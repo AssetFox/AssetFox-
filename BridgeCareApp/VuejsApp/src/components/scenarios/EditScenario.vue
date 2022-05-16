@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <v-layout column>
         <v-layout>
             <v-card
@@ -123,7 +123,7 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Performance Curve',
+            tabName: 'Deterioration Model',
             tabIcon: 'fas fa-chart-line',
             navigation: {
                 path: '/PerformanceCurveEditor/Scenario/',

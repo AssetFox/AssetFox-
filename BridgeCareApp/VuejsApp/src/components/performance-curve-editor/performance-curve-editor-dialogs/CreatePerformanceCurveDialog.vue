@@ -1,37 +1,59 @@
 <template>
   <v-layout>
     <v-dialog v-model="showDialog"
-              max-width="250px"
+              max-width="434px"
               persistent>
-      <v-card>
-        <v-card-title>
-          <v-layout justify-center>
-            <h3>New Equation</h3>
+      <v-card  height="411px" class="ghd-dialog">
+        <v-card-title class="ghd-dialog">
+          <v-layout justify-left>
+            <h3  class="ghd-dialog">Add New Deterioration Equation</h3>
           </v-layout>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="ghd-dialog">
           <v-layout column>
-            <v-text-field v-model="newPerformanceCurve.name"
+            <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
+            <v-text-field class="ghd-control-text ghd-control-border"
+                          v-model="newPerformanceCurve.name"
                           :rules="[rules['generalRules'].valueIsNotEmpty]"
-                          label="Name"
                           outline/>
-            <v-select v-model="newPerformanceCurve.attribute"
+            <v-subheader class="ghd-control-label ghd-md-gray">Select Attribute</v-subheader>            
+            <v-select class="ghd-select ghd-control-text ghd-control-border"
+                      v-model="newPerformanceCurve.attribute"
                       :items="attributeSelectItems"
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
-                      label="Select Attribute"
-                      outline/>
+                      outline
+            >
+              <template v-slot:selection="{ item }">
+                <span class="ghd-control-text">{{ item.text }}</span>
+              </template>
+              <template v-slot:item="{ item }">
+                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                  <v-list-item-content>
+                    <v-list-item-title>
+                      <v-row no-gutters align="center">
+                      <span>{{ item.text }}</span>
+                      </v-row>
+                    </v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
+            </v-select>                      
           </v-layout>
         </v-card-text>
         <v-card-actions>
-          <v-layout justify-space-between row>
-            <v-btn :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
-                   class="ara-blue-bg white--text"
-                   @click="onSubmit(true)">
-              Save
-            </v-btn>
-            <v-btn class="ara-orange-bg white--text"
+          <v-layout justify-center row>
+            <v-btn
+                   class="ghd-white-bg ghd-blue ghd-button-text"
+                   depressed
                    @click="onSubmit(false)">
               Cancel
+            </v-btn>
+            <v-btn :disabled="newPerformanceCurve.name === '' || newPerformanceCurve.attribute === ''"
+                   class="ghd-blue-bg ghd-white ghd-button-text"
+                   @click="onSubmit(true)"
+                   depressed                   
+                   >
+              Save
             </v-btn>
           </v-layout>
         </v-card-actions>

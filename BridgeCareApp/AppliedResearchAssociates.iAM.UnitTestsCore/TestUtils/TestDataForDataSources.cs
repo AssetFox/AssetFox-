@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -16,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Id = new Guid("72b3cca4-57f1-4e0d-ad13-37c2664f1299"),
                 Name = "SQL Server Data Source",
                 Secure = true,
-                Type = "SQL",
+                Type = DataSourceTypeStrings.SQL.ToString(),
                 Details = "data source=localhost\\SQL2014;initial catalog=maindb;persist security info=True;user id=an_admin;password=a_password;MultipleActiveResultSets=True;App=EntityFramework"
             });
             repo.Add(new DataSourceEntity
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Id = new Guid("147cb3e1-e9fc-4fd6-a265-105d546d9ddb"),
                 Name = "Some Excel File",
                 Secure = false,
-                Type = "Excel",
+                Type = DataSourceTypeStrings.Excel.ToString(),
                 Details = "{\"LocationColumn\":\"Location\",\"DateColumn\":\"Date\"}"
             });
             repo.Add(new DataSourceEntity

@@ -5,28 +5,27 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs.NHSConditionCharts;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs.BPN;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs
 {
     public class AddGraphsInTabs : IAddGraphsInTabs
     {
-        private readonly ConditionPercentageChart _conditionPercentageChart;
-        private readonly GraphData _graphData;
+        private ConditionPercentageChart _conditionPercentageChart;
+        private GraphData _graphData;
 
-        private readonly IAddBPNGraphTab _addBPNGraphTab;
-        private readonly IAddPoorCountGraphTab _addPoorCountGraphTab;
-        private readonly IAddPoorDeckAreaGraphTab _addPoorDeckAreaGraphTab;
+        private IAddBPNGraphTab _addBPNGraphTab;
+        private IAddPoorCountGraphTab _addPoorCountGraphTab;
+        private IAddPoorDeckAreaGraphTab _addPoorDeckAreaGraphTab;
 
-        public AddGraphsInTabs(GraphData graphData,
-            ConditionPercentageChart conditionPercentageChart,
-            IAddBPNGraphTab addBPNGraphTab, IAddPoorCountGraphTab addPoorCountGraphTab, IAddPoorDeckAreaGraphTab addPoorDeckAreaGraphTab)
+        public AddGraphsInTabs()
         {
-            _graphData = graphData ?? throw new ArgumentNullException(nameof(graphData));
-            _conditionPercentageChart = conditionPercentageChart ?? throw new ArgumentNullException(nameof(conditionPercentageChart));
+            _graphData = new GraphData();
+            _conditionPercentageChart = new ConditionPercentageChart();
 
-            _addBPNGraphTab = addBPNGraphTab ?? throw new ArgumentNullException(nameof(addBPNGraphTab));
-            _addPoorCountGraphTab = addPoorCountGraphTab ?? throw new ArgumentNullException(nameof(addPoorCountGraphTab));
-            _addPoorDeckAreaGraphTab = addPoorDeckAreaGraphTab ?? throw new ArgumentNullException(nameof(addPoorDeckAreaGraphTab));
+            _addBPNGraphTab = new AddBPNGraphTab();
+            _addPoorCountGraphTab = new AddPoorCountGraphTab();
+            _addPoorDeckAreaGraphTab = new AddPoorDeckAreaGraphTab();
         }
 
 

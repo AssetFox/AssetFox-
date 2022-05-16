@@ -11,13 +11,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class DeckAreaBridgeWorkSummary
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
 
-        public DeckAreaBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon, BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
+        public DeckAreaBridgeWorkSummary()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
         }
 
         internal ChartRowsModel FillPoorDeckArea(ExcelWorksheet worksheet, CurrentCell currentCell,

@@ -15,16 +15,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class PostedClosedBridgeWorkSummary
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
-        private readonly WorkSummaryModel _workSummaryModel;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private WorkSummaryModel _workSummaryModel;
 
-        public PostedClosedBridgeWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper, WorkSummaryModel workSummaryModel)
+        public PostedClosedBridgeWorkSummary()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryComputationHelper));
-            _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon(); 
+            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
+            _workSummaryModel = new WorkSummaryModel();
         }
 
         internal ChartRowsModel FillPostedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,

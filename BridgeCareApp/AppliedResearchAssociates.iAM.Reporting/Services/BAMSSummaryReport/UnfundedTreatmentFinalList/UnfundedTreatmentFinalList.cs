@@ -12,11 +12,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 {
     public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
     {
-        private readonly IUnfundedTreatmentCommon _unfundedTreatmentCommon;
+        private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
 
-        public UnfundedTreatmentFinalList(IUnfundedTreatmentCommon unfundedTreatmentCommon)
+        public UnfundedTreatmentFinalList()
         {
-            _unfundedTreatmentCommon = unfundedTreatmentCommon;
+            _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
+            if (_unfundedTreatmentCommon == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentCommon)); }
+
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)

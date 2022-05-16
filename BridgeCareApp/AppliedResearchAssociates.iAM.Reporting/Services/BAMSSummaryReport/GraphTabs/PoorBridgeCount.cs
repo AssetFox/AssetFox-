@@ -6,11 +6,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class PoorBridgeCount
     {
-        private readonly StackedColumnChartCommon _stackedColumnChartCommon;
+        private StackedColumnChartCommon _stackedColumnChartCommon;
 
-        public PoorBridgeCount(StackedColumnChartCommon stackedColumnChartCommon)
+        public PoorBridgeCount()
         {
-            _stackedColumnChartCommon = stackedColumnChartCommon;
+            _stackedColumnChartCommon = new StackedColumnChartCommon();
         }
 
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorBridgesCountSectionYearsRow, int simulationYearsCount)

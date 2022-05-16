@@ -10,10 +10,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class BridgeWorkCost
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        public BridgeWorkCost(BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+
+        public BridgeWorkCost()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
         }
 
         internal void FillCostOfBridgeWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,

@@ -10,11 +10,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class BPNCountChart
     {
-        private readonly StackedColumnChartCommon _stackedColumnChartCommon;
+        private StackedColumnChartCommon _stackedColumnChartCommon;
 
-        public BPNCountChart(StackedColumnChartCommon stackedColumnChartCommon)
+        public BPNCountChart()
         {
-            _stackedColumnChartCommon = stackedColumnChartCommon;
+            _stackedColumnChartCommon = new StackedColumnChartCommon();
         }
 
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int dataColumnRow, int simulationYearsCount, string title)

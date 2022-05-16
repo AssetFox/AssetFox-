@@ -10,10 +10,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class CombinedPostedAndClosed
     {
-        private readonly StackedColumnChartCommon _stackedColumnChartCommon;
-        public CombinedPostedAndClosed(StackedColumnChartCommon stackedColumnChartCommon)
+        private StackedColumnChartCommon _stackedColumnChartCommon;
+
+        public CombinedPostedAndClosed()
         {
-            _stackedColumnChartCommon = stackedColumnChartCommon;
+            _stackedColumnChartCommon = new StackedColumnChartCommon();
         }
 
         public void Fill(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPostedAndClosedByBPNYearsRow, int simulationYearsCount, string title)

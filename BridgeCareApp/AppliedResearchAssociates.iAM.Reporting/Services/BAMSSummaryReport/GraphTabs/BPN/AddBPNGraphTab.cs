@@ -11,20 +11,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class AddBPNGraphTab : IAddBPNGraphTab
     {
-        private readonly CombinedPostedAndClosed _combinedPostedAndClosed;
-        private readonly CashNeededByBPN _cashNeededByBPN;
+        private CombinedPostedAndClosed _combinedPostedAndClosed;
+        private CashNeededByBPN _cashNeededByBPN;
 
-        private readonly BPNAreaChart _bpnAreaChart;
-        private readonly BPNCountChart _bpnCountChart;
+        private BPNAreaChart _bpnAreaChart;
+        private BPNCountChart _bpnCountChart;
 
-        public AddBPNGraphTab(CombinedPostedAndClosed combinedPostedAndClosed, CashNeededByBPN cashNeededByBPN,
-                                BPNAreaChart bpnAreaChart, BPNCountChart bpnCountChart)
+        public AddBPNGraphTab()
         {
-            _combinedPostedAndClosed = combinedPostedAndClosed ?? throw new ArgumentNullException(nameof(combinedPostedAndClosed));
-            _cashNeededByBPN = cashNeededByBPN ?? throw new ArgumentNullException(nameof(cashNeededByBPN));
+            _combinedPostedAndClosed = new CombinedPostedAndClosed();
+            _cashNeededByBPN = new CashNeededByBPN();
 
-            _bpnAreaChart = bpnAreaChart ?? throw new ArgumentNullException(nameof(bpnAreaChart));
-            _bpnCountChart = bpnCountChart ?? throw new ArgumentNullException(nameof(bpnCountChart));
+            _bpnAreaChart = new BPNAreaChart();
+            _bpnCountChart = new BPNCountChart();
         }
         public void AddBPNTab(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, ChartRowsModel chartRowModel, int simulationYearsCount)
         {

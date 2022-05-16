@@ -12,27 +12,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class BridgeWorkSummary : IBridgeWorkSummary
     {
-        private readonly CostBudgetsWorkSummary _costBudgetsWorkSummary;
-        private readonly BridgesCulvertsWorkSummary _bridgesCulvertsWorkSummary;
-        private readonly BridgeRateDeckAreaWorkSummary _bridgeRateDeckAreaWorkSummary;
-        private readonly NHSBridgeDeckAreaWorkSummary _nhsBridgeDeckAreaWorkSummary;
-        private readonly DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
-        private readonly PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
-        private readonly ProjectsCompletedCount _projectsCompletedCount;
+        private CostBudgetsWorkSummary _costBudgetsWorkSummary;
+        private BridgesCulvertsWorkSummary _bridgesCulvertsWorkSummary;
+        private BridgeRateDeckAreaWorkSummary _bridgeRateDeckAreaWorkSummary;
+        private NHSBridgeDeckAreaWorkSummary _nhsBridgeDeckAreaWorkSummary;
+        private DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
+        private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
+        private ProjectsCompletedCount _projectsCompletedCount;
 
-        public BridgeWorkSummary(CostBudgetsWorkSummary costBudgetsWorkSummary,
-            BridgesCulvertsWorkSummary bridgesCulvertsWorkSummary, BridgeRateDeckAreaWorkSummary bridgeRateDeckAreaWorkSummary,
-            NHSBridgeDeckAreaWorkSummary nhsBridgeDeckAreaWorkSummary, DeckAreaBridgeWorkSummary deckAreaBridgeWorkSummary,
-            PostedClosedBridgeWorkSummary postedClosedBridgeWorkSummary, ProjectsCompletedCount projectsCompletedCount)
+        public BridgeWorkSummary()
         {
-            _bridgesCulvertsWorkSummary = bridgesCulvertsWorkSummary ?? throw new ArgumentNullException(nameof(bridgesCulvertsWorkSummary));
-            _costBudgetsWorkSummary = costBudgetsWorkSummary ?? throw new ArgumentNullException(nameof(costBudgetsWorkSummary));
-            _bridgeRateDeckAreaWorkSummary = bridgeRateDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(bridgeRateDeckAreaWorkSummary));
-            _nhsBridgeDeckAreaWorkSummary = nhsBridgeDeckAreaWorkSummary ?? throw new ArgumentNullException(nameof(nhsBridgeDeckAreaWorkSummary));
-            _deckAreaBridgeWorkSummary = deckAreaBridgeWorkSummary ?? throw new ArgumentNullException(nameof(deckAreaBridgeWorkSummary));
-            _postedClosedBridgeWorkSummary = postedClosedBridgeWorkSummary ?? throw new ArgumentNullException(nameof(postedClosedBridgeWorkSummary));
+            _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary();
+            if (_bridgesCulvertsWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgesCulvertsWorkSummary)); }
 
-            _projectsCompletedCount = projectsCompletedCount ?? throw new ArgumentNullException(nameof(projectsCompletedCount));
+            _costBudgetsWorkSummary = new CostBudgetsWorkSummary();
+            if (_costBudgetsWorkSummary == null) { throw new ArgumentNullException(nameof(_costBudgetsWorkSummary)); }
+
+            _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
+            if (_bridgeRateDeckAreaWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeRateDeckAreaWorkSummary)); }
+
+            _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary();
+            if (_nhsBridgeDeckAreaWorkSummary == null) { throw new ArgumentNullException(nameof(_nhsBridgeDeckAreaWorkSummary)); }
+
+            _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
+            if (_deckAreaBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_deckAreaBridgeWorkSummary)); }
+
+            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary();
+            if (_postedClosedBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_postedClosedBridgeWorkSummary)); }
+
+            _projectsCompletedCount = new ProjectsCompletedCount();
+            if (_projectsCompletedCount == null) { throw new ArgumentNullException(nameof(_projectsCompletedCount)); }
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

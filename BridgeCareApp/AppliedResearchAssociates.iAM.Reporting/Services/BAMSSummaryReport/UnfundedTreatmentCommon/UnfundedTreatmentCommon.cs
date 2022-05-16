@@ -13,11 +13,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 {
     public class UnfundedTreatmentCommon : IUnfundedTreatmentCommon
     {
-        private readonly ISummaryReportHelper _summaryReportHelper;
+        private ISummaryReportHelper _summaryReportHelper;
 
-        public UnfundedTreatmentCommon(ISummaryReportHelper summaryReportHelper)
+        public UnfundedTreatmentCommon()
         {
-            _summaryReportHelper = summaryReportHelper;
+            _summaryReportHelper = new SummaryReportHelper();
+            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail section, int Year, TreatmentOptionDetail treatment)

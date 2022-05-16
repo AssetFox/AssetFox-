@@ -14,20 +14,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class CostBudgetsWorkSummary
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private WorkSummaryModel _workSummaryModel;
+
         private Dictionary<int, decimal> TotalCulvertSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalBridgeSpent = new Dictionary<int, decimal>();
         private Dictionary<int, decimal> TotalCommittedSpent = new Dictionary<int, decimal>();
-        private readonly WorkSummaryModel _workSummaryModel;
+        
         private int BridgeTotalRow = 0;
         private int CulvertTotalRow = 0;
         private int CommittedTotalRow = 0;
 
-        public CostBudgetsWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            WorkSummaryModel workSummaryModel)
+        public CostBudgetsWorkSummary()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
-            _workSummaryModel = workSummaryModel ?? throw new ArgumentNullException(nameof(workSummaryModel));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _workSummaryModel = new WorkSummaryModel();
         }
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,

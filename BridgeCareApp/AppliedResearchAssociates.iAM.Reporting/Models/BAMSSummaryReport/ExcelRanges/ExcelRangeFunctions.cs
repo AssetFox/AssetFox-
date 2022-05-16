@@ -5,6 +5,7 @@ using System.Text;
 using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelRanges
 {

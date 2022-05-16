@@ -18,18 +18,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class BridgeWorkSummaryByBudget : IBridgeWorkSummaryByBudget
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly CulvertCost _culvertCost;
-        private readonly BridgeWorkCost _bridgeWorkCost;
-        private readonly CommittedProjectCost _committedProjectCost;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private CulvertCost _culvertCost;
+        private BridgeWorkCost _bridgeWorkCost;
+        private CommittedProjectCost _committedProjectCost;
 
-        public BridgeWorkSummaryByBudget(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            CulvertCost culvertCost, BridgeWorkCost bridgeWorkCost, CommittedProjectCost committedProjectCost)
+        public BridgeWorkSummaryByBudget()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
-            _culvertCost = culvertCost ?? throw new ArgumentNullException(nameof(culvertCost));
-            _bridgeWorkCost = bridgeWorkCost ?? throw new ArgumentNullException(nameof(bridgeWorkCost));
-            _committedProjectCost = committedProjectCost ?? throw new ArgumentNullException(nameof(committedProjectCost));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _culvertCost = new CulvertCost();
+            _bridgeWorkCost = new BridgeWorkCost();
+            _committedProjectCost = new CommittedProjectCost();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,

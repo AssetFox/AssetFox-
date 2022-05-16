@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
+using OfficeOpenXml;
+
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
-
 using AppliedResearchAssociates.iAM.Reporting.Hubs;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Visitors;
 using Microsoft.Extensions.Logging;
-using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {

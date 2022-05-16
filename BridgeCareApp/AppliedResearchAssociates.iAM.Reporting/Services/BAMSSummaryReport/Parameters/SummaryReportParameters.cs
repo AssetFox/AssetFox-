@@ -14,10 +14,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 {
     public class SummaryReportParameters
     {
-        private readonly ISummaryReportHelper _summaryReportHelper;
-        public SummaryReportParameters(ISummaryReportHelper summaryReportHelper)
+        private ISummaryReportHelper _summaryReportHelper;
+
+        public SummaryReportParameters()
         {
-            _summaryReportHelper = summaryReportHelper ?? throw new ArgumentNullException(nameof(summaryReportHelper));
+            _summaryReportHelper = new SummaryReportHelper();
         }
         internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation)
         {

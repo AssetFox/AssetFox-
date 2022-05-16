@@ -5,9 +5,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class AddPoorDeckAreaGraphTab : IAddPoorDeckAreaGraphTab
     {
-        private readonly PoorBridgeDeckArea _poorBridgeDeckArea;
+        private PoorBridgeDeckArea _poorBridgeDeckArea;
 
-        public AddPoorDeckAreaGraphTab(PoorBridgeDeckArea poorBridgeDeckArea) => _poorBridgeDeckArea = poorBridgeDeckArea;
+        public AddPoorDeckAreaGraphTab()
+        {
+            _poorBridgeDeckArea = new PoorBridgeDeckArea();
+        }
 
         public void AddPoorDeckAreaTab(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorBridgesDeckAreaSectionYearsRow, int simulationYearsCount)
         {

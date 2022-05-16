@@ -5,9 +5,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class AddPoorCountGraphTab: IAddPoorCountGraphTab
     {
-        private readonly PoorBridgeCount _poorBridgeCount;
+        private PoorBridgeCount _poorBridgeCount;
 
-        public AddPoorCountGraphTab(PoorBridgeCount poorBridgeCount) => _poorBridgeCount = poorBridgeCount;
+        public AddPoorCountGraphTab()
+        {
+            _poorBridgeCount = new PoorBridgeCount();
+        }
 
         public void AddPoorCountTab(ExcelWorksheet worksheet, ExcelWorksheet bridgeWorkSummaryWorksheet, int totalPoorBridgesCountSectionYearsRow, int simulationYearsCount)
         {

@@ -7,18 +7,18 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon;
 
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentTime
 {
     public class UnfundedTreatmentTime : IUnfundedTreatmentTime
     {
-        private readonly IUnfundedTreatmentCommon _unfundedTreatmentCommon;
+        private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
 
-        public UnfundedTreatmentTime(IUnfundedTreatmentCommon unfundedTreatmentCommon)
+        public UnfundedTreatmentTime()
         {
-            _unfundedTreatmentCommon = unfundedTreatmentCommon;
+            _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)

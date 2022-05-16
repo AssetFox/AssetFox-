@@ -14,10 +14,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     public class BridgeDataForSummaryReport : IBridgeDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
-        private readonly IHighlightWorkDoneCells _highlightWorkDoneCells;
+        private IHighlightWorkDoneCells _highlightWorkDoneCells;
         private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
-        private readonly ISummaryReportHelper _summaryReportHelper;
+        private ISummaryReportHelper _summaryReportHelper;
 
         // This is also used in Bridge Work Summary TAB
         private readonly List<double> _previousYearInitialMinC = new List<double>();
@@ -29,11 +29,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         // This will be used in Parameters TAB
         private readonly ParametersModel _parametersModel = new ParametersModel();
 
-        public BridgeDataForSummaryReport(IHighlightWorkDoneCells highlightWorkDoneCells,
-            ISummaryReportHelper summaryReportHelper)
+        public BridgeDataForSummaryReport()
         {
-            _highlightWorkDoneCells = highlightWorkDoneCells ?? throw new ArgumentNullException(nameof(highlightWorkDoneCells));
-            _summaryReportHelper = summaryReportHelper ?? throw new ArgumentNullException(nameof(summaryReportHelper));
+            _highlightWorkDoneCells = new HighlightWorkDoneCells();
+            if (_highlightWorkDoneCells == null) { throw new ArgumentNullException(nameof(_highlightWorkDoneCells)); }
+
+            _summaryReportHelper = new SummaryReportHelper();
+            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)

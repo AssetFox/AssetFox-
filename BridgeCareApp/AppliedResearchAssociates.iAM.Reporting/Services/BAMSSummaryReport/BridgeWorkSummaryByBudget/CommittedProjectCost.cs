@@ -12,9 +12,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
     {
         private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
 
-        public CommittedProjectCost(BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
+        public CommittedProjectCost()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon ?? throw new ArgumentNullException(nameof(bridgeWorkSummaryCommon));
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
         }
 
         internal void FillCostOfCommittedWork(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,

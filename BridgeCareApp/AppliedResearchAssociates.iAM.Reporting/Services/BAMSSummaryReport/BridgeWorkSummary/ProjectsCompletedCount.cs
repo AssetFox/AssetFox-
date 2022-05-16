@@ -11,13 +11,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class ProjectsCompletedCount
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+
         private Dictionary<int, decimal> TotalCompletedCommittedCount = new Dictionary<int, decimal>();
         private HashSet<string> MPMSTreatments = new HashSet<string>();
 
-        public ProjectsCompletedCount(BridgeWorkSummaryCommon bridgeWorkSummaryCommon)
+        public ProjectsCompletedCount()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
         }
 
         public void FillProjectCompletedCountSection(ExcelWorksheet worksheet, CurrentCell currentCell,

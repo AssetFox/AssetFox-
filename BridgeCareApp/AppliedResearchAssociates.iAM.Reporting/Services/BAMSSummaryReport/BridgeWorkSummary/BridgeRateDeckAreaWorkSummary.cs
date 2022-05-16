@@ -14,14 +14,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 {
     public class BridgeRateDeckAreaWorkSummary
     {
-        private readonly BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
-        private readonly BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
+        private BridgeWorkSummaryCommon _bridgeWorkSummaryCommon;
+        private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
 
-        public BridgeRateDeckAreaWorkSummary(BridgeWorkSummaryCommon bridgeWorkSummaryCommon,
-            BridgeWorkSummaryComputationHelper bridgeWorkSummaryComputationHelper)
+        public BridgeRateDeckAreaWorkSummary()
         {
-            _bridgeWorkSummaryCommon = bridgeWorkSummaryCommon;
-            _bridgeWorkSummaryComputationHelper = bridgeWorkSummaryComputationHelper;
+            _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
         }
 
         public ChartRowsModel FillBridgeRateDeckAreaWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,

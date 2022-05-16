@@ -7,11 +7,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
 {
     public class ConditionPercentageChart
     {
-        private readonly StackedColumnChartCommon _stackedColumnChartCommon;
+        private StackedColumnChartCommon _stackedColumnChartCommon;
 
-        public ConditionPercentageChart(StackedColumnChartCommon stackedColumnChartCommon)
+        public ConditionPercentageChart()
         {
-            _stackedColumnChartCommon = stackedColumnChartCommon ?? throw new ArgumentNullException(nameof(stackedColumnChartCommon));
+            _stackedColumnChartCommon = new StackedColumnChartCommon();
         }
 
 

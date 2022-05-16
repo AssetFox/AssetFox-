@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class ExcelDataSourceDTO : BaseDataSourceDTO
     {
-        public ExcelDataSourceDTO() : base("Excel")
+        public ExcelDataSourceDTO() : base(DataSourceTypeStrings.Excel.ToString())
         {
             Secure = false;
         }

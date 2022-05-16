@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -22,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (string.IsNullOrEmpty(entity.Type))
                 throw new InvalidOperationException($"Data source {entity.Name} (ID: {entity.Id}) does not have a specified type");
 
-            if (entity.Type == "SQL")
+            if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
                 var source = new SQLDataSourceDTO
                 {
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return source;
             }
 
-            if (entity.Type == "Excel")
+            if (entity.Type == DataSourceTypeStrings.Excel.ToString())
             {
                 var source = new ExcelDataSourceDTO
                 {

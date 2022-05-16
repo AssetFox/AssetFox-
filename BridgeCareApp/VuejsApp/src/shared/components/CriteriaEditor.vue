@@ -5,7 +5,7 @@
                 <v-flex xs5>
                     <v-card>
                         <v-card-title>
-                            <v-layout justify-center><h3>Output</h3></v-layout>
+                            <v-layout justify-left><h3>Output</h3></v-layout>
                         </v-card-title>
                         <div class="conjunction-and-messages-container">
                             <v-layout
@@ -113,7 +113,7 @@
                 <v-flex xs7>
                     <v-card class="criteria-editor-card">
                         <v-card-title>
-                            <v-layout justify-center
+                            <v-layout justify-left
                                 ><h3>Criteria Editor</h3></v-layout
                             >
                         </v-card-title>

@@ -26,7 +26,7 @@
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
-                <v-layout row align-end style="padding-top: 22px !important;">
+                <v-layout row align-end style="padding-top: 18px !important;">
                     <v-spacer></v-spacer>
                     <v-btn
                         @click="showCreateDeficientConditionGoalDialog = true"
@@ -62,7 +62,7 @@
                 <v-data-table
                     :headers="deficientConditionGoalGridHeaders"
                     :items="deficientConditionGoalGridData"
-                    class="elevation-1 ghd-table v-table__overflow"
+                    class=" ghd-table v-table__overflow"
                     item-key="id"
                     select-all
                     v-model="selectedGridRows"
@@ -77,7 +77,7 @@
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog v-if="header.value !== 'criterionLibrary'"
+                                <v-edit-dialog v-if="header.value !== 'criterionLibrary' && header.value !== 'action'"
                                     :return-value.sync="props.item[header.value]"
                                     @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
                                     large
@@ -129,9 +129,9 @@
                                                     props.item[header.value],[0, 100])]"/>
                                     </template>
                                 </v-edit-dialog>
-
+                                
                                 <v-layout
-                                    v-else
+                                    v-if="header.value === 'criterionLibrary'"
                                     align-center
                                     row
                                     style="flex-wrap:nowrap">
@@ -164,6 +164,11 @@
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-layout>
+                                <div v-if="header.value === 'action'">
+                                    <v-btn @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
+                                        <v-icon>fas fa-trash</v-icon>
+                                    </v-btn>
+                                </div>                               
                             </div>
                         </td>
                     </template>
@@ -206,7 +211,7 @@
                 </v-btn>
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue ghd-button-text ghd-button'
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
                     flat>
@@ -221,14 +226,14 @@
                 </v-btn>
                 <v-btn
                     @click="onUpsertScenarioDeficientConditionGoals"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
                     Save
                 </v-btn>
                 <v-btn
                     @click="onUpsertDeficientConditionGoalLibrary"
-                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
                     Update Library
@@ -411,8 +416,16 @@ export default class DeficientConditionGoalEditor extends Vue {
             align: 'left',
             sortable: false,
             class: '',
-            width: '50%',
+            width: '40%',
         },
+        {
+            text: 'Action',
+            value: 'action',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: '10%',
+        }
     ];
     deficientConditionGoalGridData: DeficientConditionGoal[] = [];
     numericAttributeNames: string[] = [];
@@ -657,6 +670,10 @@ export default class DeficientConditionGoalEditor extends Vue {
     onRemoveSelectedDeficientConditionGoals() {
         this.deficientConditionGoalGridData = this.deficientConditionGoalGridData
             .filter((goal: DeficientConditionGoal) => !contains(goal.id, this.selectedDeficientConditionGoalIds));
+    }
+
+    onRemoveSelectedDeficientConditionGoal(id: string){
+        this.deficientConditionGoalGridData = this.deficientConditionGoalGridData.filter((goal: DeficientConditionGoal) => goal.id !== id)
     }
 
     onShowConfirmDeleteAlert() {

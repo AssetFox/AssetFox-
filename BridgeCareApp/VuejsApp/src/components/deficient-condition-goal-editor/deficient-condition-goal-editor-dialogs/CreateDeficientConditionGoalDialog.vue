@@ -10,16 +10,16 @@
             </v-btn>
           </v-layout>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="ghd-dialog-box-padding-center">
           <v-layout column>
             <v-flex>
-              <v-subheader class="ghd-subheader ">Name</v-subheader>
+              <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
               <v-text-field outline v-model="newDeficientConditionGoal.name"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-subheader class="ghd-subheader ">Select Attribute</v-subheader>
+              <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select :items="numericAttributeNames"
                         outline
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
@@ -27,14 +27,14 @@
               </v-select>
             </v-flex>
             <v-flex>
-              <v-subheader class="ghd-subheader ">Deficient Limit</v-subheader>
+              <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
               <v-text-field outline
                             v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
                             :rules="[rules['generalRules'].valueIsNotEmpty]"
                             class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-subheader class="ghd-subheader ">Allowed Deficient Percentage</v-subheader>
+              <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
               <v-text-field outline
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
                             :mask="'###'"
@@ -44,14 +44,15 @@
             </v-flex>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-layout justify-space-between row>
-            <v-btn :disabled="disableSubmitBtn()" @click="onSubmit(true)" class="ara-blue-bg white--text">
-              Save
-            </v-btn>
-            <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+        <v-card-actions class="ghd-dialog-box-padding-bottom">
+          <v-layout justify-center row>
+            <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
               Cancel
             </v-btn>
+            <v-btn :disabled="disableSubmitBtn()" @click="onSubmit(true)" 
+              outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+              Save
+            </v-btn>           
           </v-layout>
         </v-card-actions>
       </v-card>

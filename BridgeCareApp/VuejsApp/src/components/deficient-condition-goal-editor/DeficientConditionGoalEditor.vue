@@ -1,75 +1,68 @@
 <template>
     <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreateDeficientConditionGoalLibraryDialog(
-                                false,
-                            )
-                        "
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
+        <v-layout row>
+            <v-flex xs4 class="ghd-constant-header">
+                <v-layout column>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
-                        label="Select a Deficient Condition Goal Library"
                         outline
-                        v-if="!hasSelectedLibrary || hasScenario"
                         v-model="librarySelectItemValue"
-                    >
+                        class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <v-text-field
+                </v-layout>
+                
+            </v-flex>
+            <v-flex xs4 class="ghd-constant-header">
+                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 24px">
+                    <div class="header-text-content owner-padding" style="padding-top: 7px;">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                    </div>
+                    <v-divider class="owner-shared-divider" inset vertical
+                        v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+                    </v-divider>
+                    <v-checkbox class='sharing header-text-content' label="Shared"
+                        v-model="selectedDeficientConditionGoalLibrary.isShared"/>      
+                </v-layout>
+            </v-flex>
+            <v-flex xs4 class="ghd-constant-header">
+                <v-layout row align-end style="padding-top: 22px !important;">
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        @click="showCreateDeficientConditionGoalDialog = true"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="hasSelectedLibrary"
+                        outline>
+                        Add Deficient Condition Goal
+                    </v-btn>
+                    <v-btn @click="onShowCreateDeficientConditionGoalLibraryDialog(false)"
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        v-show="!hasScenario"
+                        outline>    
+                        Create New Library        
+                    </v-btn>
+                </v-layout>
+            </v-flex>
+                    <!-- <v-text-field
                         label="Library Name"
                         v-if="hasSelectedLibrary && !hasScenario"
                         v-model="selectedDeficientConditionGoalLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
+                        :rules="[rules['generalRules'].valueIsNotEmpty]">
                         <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
+                            <v-btn @click="librarySelectItemValue = null"
                                 class="ara-orange"
-                                icon
-                            >
+                                icon>
                                 <v-icon>fas fa-caret-left</v-icon>
                             </v-btn>
                         </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class="sharing"
-                        label="Shared"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedDeficientConditionGoalLibrary.isShared"
-                    />
-                </v-flex>
-            </v-layout>
-            <v-flex v-show="hasSelectedLibrary || hasScenario" xs3>
-                <v-btn
-                    @click="showCreateDeficientConditionGoalDialog = true"
-                    class="ara-blue-bg white--text"
-                    >Add</v-btn
-                >
-                <v-btn
-                    :disabled="selectedDeficientConditionGoalIds.length === 0"
-                    @click="onRemoveSelectedDeficientConditionGoals"
-                    class="ara-orange-bg white--text"
-                >
-                    Delete
-                </v-btn>
-            </v-flex>
-        </v-flex>
+                    </v-text-field> -->
+        </v-layout>
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
                 <v-data-table
                     :headers="deficientConditionGoalGridHeaders"
                     :items="deficientConditionGoalGridData"
-                    class="elevation-1 fixed-header v-table__overflow"
+                    class="elevation-1 ghd-table v-table__overflow"
                     item-key="id"
                     select-all
                     v-model="selectedGridRows"
@@ -84,117 +77,56 @@
                         </td>
                         <td v-for="header in deficientConditionGoalGridHeaders">
                             <div>
-                                <v-edit-dialog
-                                    v-if="header.value !== 'criterionLibrary'"
-                                    :return-value.sync="
-                                        props.item[header.value]
-                                    "
-                                    @save="
-                                        onEditDeficientConditionGoalProperty(
-                                            props.item,
-                                            header.value,
-                                            props.item[header.value],
-                                        )
-                                    "
+                                <v-edit-dialog v-if="header.value !== 'criterionLibrary'"
+                                    :return-value.sync="props.item[header.value]"
+                                    @save="onEditDeficientConditionGoalProperty(props.item,header.value,props.item[header.value])"
                                     large
                                     lazy
-                                    persistent
-                                >
-                                    <v-text-field
-                                        v-if="
-                                            header.value !==
-                                                'allowedDeficientPercentage'
-                                        "
+                                    persistent>
+                                    <v-text-field v-if="header.value !== 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
                                         :value="props.item[header.value]"
-                                        :rules="[
-                                            rules['generalRules']
-                                                .valueIsNotEmpty,
-                                        ]"
-                                    />
+                                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                    <v-text-field
-                                        v-if="
-                                            header.value ===
-                                                'allowedDeficientPercentage'
-                                        "
+                                    <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
                                         readonly
                                         class="sm-txt"
                                         :value="props.item[header.value]"
-                                        :rules="[
-                                            rules['generalRules']
-                                                .valueIsNotEmpty,
-                                            rules[
-                                                'generalRules'
-                                            ].valueIsWithinRange(
-                                                props.item[header.value],
-                                                [0, 100],
-                                            ),
-                                        ]"
-                                    />
+                                        :rules="[rules['generalRules'].valueIsNotEmpty,
+                                            rules['generalRules'].valueIsWithinRange(props.item[header.value],[0, 100])]"/>
 
                                     <template slot="input">
-                                        <v-text-field
-                                            v-if="header.value === 'name'"
+                                        <v-text-field v-if="header.value === 'name'"
                                             label="Edit"
                                             single-line
                                             v-model="props.item[header.value]"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-select
-                                            v-if="header.value === 'attribute'"
+                                        <v-select v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
                                             label="Select an Attribute"
                                             v-model="props.item[header.value]"
                                             :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        >
+                                                rules['generalRules'].valueIsNotEmpty]">
                                         </v-select>
 
-                                        <v-text-field
-                                            v-if="
-                                                header.value ===
-                                                    'deficientLimit'
-                                            "
+                                        <v-text-field v-if="header.value === 'deficientLimit'"
                                             label="Edit"
                                             single-line
                                             v-model="props.item[header.value]"
                                             :mask="'##########'"
-                                            :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                            ]"
-                                        />
+                                            :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
-                                        <v-text-field
-                                            v-if="
-                                                header.value ===
-                                                    'allowedDeficientPercentage'
-                                            "
+                                        <v-text-field v-if="header.value === 'allowedDeficientPercentage'"
                                             label="Edit"
                                             single-line
-                                            v-model.number="
-                                                props.item[header.value]
-                                            "
+                                            v-model.number="props.item[header.value]"
                                             :mask="'###'"
                                             :rules="[
-                                                rules['generalRules']
-                                                    .valueIsNotEmpty,
-                                                rules[
-                                                    'generalRules'
-                                                ].valueIsWithinRange(
-                                                    props.item[header.value],
-                                                    [0, 100],
-                                                ),
-                                            ]"
-                                        />
+                                                rules['generalRules'].valueIsNotEmpty,
+                                                rules['generalRules'].valueIsWithinRange(
+                                                    props.item[header.value],[0, 100])]"/>
                                     </template>
                                 </v-edit-dialog>
 
@@ -202,63 +134,56 @@
                                     v-else
                                     align-center
                                     row
-                                    style="flex-wrap:nowrap"
-                                >
+                                    style="flex-wrap:nowrap">
                                     <v-menu
                                         bottom
                                         min-height="500px"
-                                        min-width="500px"
-                                    >
+                                        min-width="500px">
                                         <template slot="activator">
                                             <v-text-field
                                                 readonly
                                                 class="sm-txt"
-                                                :value="
-                                                    props.item.criterionLibrary
-                                                        .mergedCriteriaExpression
-                                                "
-                                            />
+                                                :value="props.item.criterionLibrary.mergedCriteriaExpression"/>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    :value="
-                                                        props.item
-                                                            .criterionLibrary
-                                                            .mergedCriteriaExpression
-                                                    "
+                                                    :value="props.item.criterionLibrary.mergedCriteriaExpression"
                                                     full-width
                                                     no-resize
                                                     outline
                                                     readonly
-                                                    rows="5"
-                                                />
+                                                    rows="5"/>
                                             </v-card-text>
                                         </v-card>
                                     </v-menu>
                                     <v-btn
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog(
-                                                props.item,
-                                            )
-                                        "
+                                        @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="edit-icon"
-                                        icon
-                                    >
+                                        icon>
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-layout>
                             </div>
                         </td>
                     </template>
-                </v-data-table>
+                </v-data-table> 
+                <v-btn :disabled="selectedDeficientConditionGoalIds.length === 0"
+                    @click="onRemoveSelectedDeficientConditionGoals"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    flat>
+                    Delete Selected
+            </v-btn>              
             </div>
+           
         </v-flex>
+        
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-layout justify-center>
-                <v-flex xs6>
+                <v-flex>
+                    <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
-                        label="Description"
+                        class="ghd-text-field-border"
                         no-resize
                         outline
                         rows="4"
@@ -270,46 +195,45 @@
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-end row>
+            <v-layout justify-center row>
+                <v-btn
+                    @click="onDiscardChanges"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    v-show="hasScenario"
+                    :disabled="!hasUnsavedChanges"
+                    flat>
+                    Cancel
+                </v-btn>
+                <v-btn
+                    @click="onShowConfirmDeleteAlert"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    v-show="!hasScenario"
+                    :disabled="!hasLibraryEditPermission"
+                    flat>
+                    Delete Library
+                </v-btn>    
+                <v-btn
+                    @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                    :disabled="disableCrudButtons()"
+                    outline>
+                    Create as New Library
+                </v-btn>
                 <v-btn
                     @click="onUpsertScenarioDeficientConditionGoals"
-                    class="ara-blue-bg white--text"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
-                >
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges">
                     Save
                 </v-btn>
                 <v-btn
                     @click="onUpsertDeficientConditionGoalLibrary"
-                    class="ara-blue-bg white--text"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
-                >
+                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges">
                     Update Library
-                </v-btn>
-                <v-btn
-                    @click="onShowCreateDeficientConditionGoalLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
-                    :disabled="disableCrudButtons()"
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
-                    v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission"
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
-                    :disabled="!hasUnsavedChanges"
-                >
-                    Discard Changes
-                </v-btn>
+                </v-btn>               
+                       
             </v-layout>
         </v-flex>
 

@@ -2,33 +2,44 @@
   <v-layout>
     <v-dialog max-width="450px" persistent v-model="showDialog">
       <v-card>
-        <v-card-title>
-          <v-layout justify-center>
-            <h3>New Deficient Condition Goal</h3>
+        <v-card-title class="ghd-dialog-box-padding-top">
+         <v-layout justify-space-between align-center>
+            <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
+            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>
           </v-layout>
         </v-card-title>
-        <v-card-text class="new-deficient-card-text">
+        <v-card-text>
           <v-layout column>
             <v-flex>
-              <v-text-field label="Name" outline v-model="newDeficientConditionGoal.name"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"></v-text-field>
+              <v-subheader class="ghd-subheader ">Name</v-subheader>
+              <v-text-field outline v-model="newDeficientConditionGoal.name"
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-select :items="numericAttributeNames" label="Select Attribute"
+              <v-subheader class="ghd-subheader ">Select Attribute</v-subheader>
+              <v-select :items="numericAttributeNames"
                         outline
-                        v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]">
+                        v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
             </v-flex>
             <v-flex>
-              <v-text-field label="Deficient Limit" outline
+              <v-subheader class="ghd-subheader ">Deficient Limit</v-subheader>
+              <v-text-field outline
                             v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"></v-text-field>
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-text-field label="Allowed Deficient Percentage" outline
+              <v-subheader class="ghd-subheader ">Allowed Deficient Percentage</v-subheader>
+              <v-text-field outline
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
                             :mask="'###'"
-                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]">
+                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
+                            class="ghd-text-field-border ghd-text-field">
               </v-text-field>
             </v-flex>
           </v-layout>

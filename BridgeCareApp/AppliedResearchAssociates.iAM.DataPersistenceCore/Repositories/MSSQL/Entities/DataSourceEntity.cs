@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         /// JSON formatted string containing the implementation details of the data source
         /// </summary>
         /// <example>
-        /// The details for a 
+        /// The details for a SQL data source would be the connection string
         /// </example>
         public string Details { get; set; }
     }

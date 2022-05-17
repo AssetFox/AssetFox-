@@ -59,14 +59,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void UpsertAttributes(List<DataMinerAttribute> attributes)
         {
-            var validAttributes = attributes.Where(IsValid).ToList();
+            var validAttributes = attributes.Where(_ => IsValid(_)).ToList();
             var upsertAttributeEntities = validAttributes.Select(_ => _.ToEntity()).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
 
-            var entitiesToMaybeUpdate = upsertAttributeEntities.Where(_ => existingAttributeIds.Contains(_.Id)).ToList();
-            var entitiesToUpdate = entitiesToMaybeUpdate.Where(e => OkToUpdate(existingAttributes, e)).ToList();
+            var entitiesToUpdate = upsertAttributeEntities.Where(e => existingAttributeIds.Contains(e.Id) && OkToUpdate(existingAttributes, e)).ToList();
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);

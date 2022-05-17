@@ -35,4 +35,45 @@ export default class TreatmentService {
             data,
         );
     }
+
+    static importTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+        //currentUserCriteriaFilter: UserCriteriaFilter,
+    ) {
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+        // formData.append(
+        //     'currentUserCriteriaFilter',
+        //     JSON.stringify(currentUserCriteriaFilter),
+        // );
+
+        return forScenario
+            ? coreAxiosInstance.post(
+                  `${API.PerformanceCurve}/ImportLibraryTreatmentsFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              )
+            : coreAxiosInstance.post(
+                  `${API.PerformanceCurve}/ImportLibraryTreatmentsFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              );
+    }
+
+    static exportTreatments(
+        id: string,
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ? coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(
+                  `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
+              );
+    }
 }

@@ -14,6 +14,16 @@
                 
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
+                <div style="padding-top: 12px !important">
+                    <v-btn v-if="hasScenario" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        flat
+                        @click="importLibrary()"
+                        :disabled="importLibraryDisabled">
+                        Import Library
+                    </v-btn>
+                </div>
+                
                 <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 24px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -448,6 +458,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    importLibraryDisabled: boolean = true;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -486,9 +497,7 @@ export default class DeficientConditionGoalEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onSelectItemValueChanged() {
-        this.selectDeficientConditionGoalLibraryAction({
-            libraryId: this.librarySelectItemValue,
-        });
+        this.importLibraryDisabled = false;
     }
 
     @Watch('stateSelectedDeficientConditionGoalLibrary')
@@ -549,6 +558,13 @@ export default class DeficientConditionGoalEditor extends Vue {
                 {...clone(this.selectedDeficientConditionGoalLibrary), deficientConditionGoals: clone(this.deficientConditionGoalGridData)},
                 this.stateSelectedDeficientConditionGoalLibrary);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    importLibrary() {
+        this.selectDeficientConditionGoalLibraryAction({
+            libraryId: this.librarySelectItemValue,
+        });
+        this.importLibraryDisabled = true;
     }
 
     getOwnerUserName(): string {

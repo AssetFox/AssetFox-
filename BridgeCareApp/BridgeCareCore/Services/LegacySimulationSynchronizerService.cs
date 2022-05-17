@@ -28,6 +28,8 @@ namespace BridgeCareCore.Services
         {
             SendRealTimeMessage("Upserting attributes...");
 
+            // WJ says: Not sure at all what if anything to do here.
+
             _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo
                 .GetAllAttributes().ToList());
         }

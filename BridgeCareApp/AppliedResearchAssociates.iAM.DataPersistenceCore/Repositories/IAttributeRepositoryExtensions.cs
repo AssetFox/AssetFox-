@@ -10,15 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
-            var dataMinerAttributes = new List<DataMinerAttribute>();
-            foreach (var dto in dtos)
-            {
-                var mappedDto = AttributeMapper.ToDomain(dto);
-                if (mappedDto!=null)
-                {
-                    dataMinerAttributes.Add(mappedDto);
-                }
-            }
+            var dataMinerAttributes = AttributeMapper.ToDomainListButDiscardBad(dtos);
             repository.UpsertAttributes(dataMinerAttributes);
         }
 

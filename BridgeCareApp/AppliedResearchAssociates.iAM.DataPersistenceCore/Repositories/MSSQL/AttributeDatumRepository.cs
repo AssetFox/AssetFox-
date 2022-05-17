@@ -20,9 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void AddAssignedData(List<MaintainableAsset> maintainableAssets, List<AttributeDTO> attributeDtos)
         {
 
-            var configurableAttributes = attributeDtos.Select(a => AttributeMapper.ToDomain(a))
-                .Where(a => a != null)
-                .ToList();
+            var configurableAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDtos);
 
             // insert/update configurable attributes
             _unitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);

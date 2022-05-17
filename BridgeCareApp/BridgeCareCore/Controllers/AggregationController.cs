@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
@@ -62,7 +63,7 @@ namespace BridgeCareCore.Controllers
                         UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
                         // Get/create configurable attributes
-                        var configurationAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                        var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
 
                         var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 

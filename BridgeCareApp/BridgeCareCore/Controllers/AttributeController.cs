@@ -71,10 +71,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var configurableAttributes = attributeDTOs
-                    .Select(AttributeMapper.ToDomain)
-                    .Where(a => a!=null)
-                    .ToList();
+                    var configurableAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
                     UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
                     UnitOfWork.Commit();

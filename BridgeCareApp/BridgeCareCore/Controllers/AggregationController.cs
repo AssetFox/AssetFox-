@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataMiner;
 using AppliedResearchAssociates.iAM.DataMiner.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -39,7 +40,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributeDTOs)
         {
             try
             {
@@ -183,7 +184,7 @@ namespace BridgeCareCore.Controllers
 
                         try
                         {
-                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
+                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, attributeDTOs);
                         }
                         catch(Exception e)
                         {

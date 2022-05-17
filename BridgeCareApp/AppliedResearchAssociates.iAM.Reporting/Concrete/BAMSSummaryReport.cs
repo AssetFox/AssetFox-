@@ -28,16 +28,14 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unfunde
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
+using System.Reflection;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class BAMSSummaryReport : IReport
     {
         //private readonly IHubService _hubService;
-        private IHttpContextAccessor _httpContextAccessor;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-
-        private readonly ILogger<BAMSSummaryReport> _logger;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
         private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
         private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
@@ -127,28 +125,29 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IndicateError();
                 return;
             }
-            SimulationID = _simulationId; 
+            SimulationID = _simulationId;
 
-            //// Check for simulation existence            
-            //var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(_simulationGuid);
-            //if (simulationName == null) {
-            //    IndicateError();
-            //    Errors.Add($"Failed to find name using simulation ID {_simulationGuid}.");
-            //    return;
-            //}
+            // Check for simulation existence            
+            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(_simulationId);
+            if (simulationName == null)
+            {
+                IndicateError();
+                Errors.Add($"Failed to find name using simulation ID {_simulationId}.");
+                return;
+            }
 
-            ////build report name
-            //var reportFileName = $"Reports\\{_simulationGuid}.xls";
-            //if (string.IsNullOrEmpty(simulationName) || string.IsNullOrWhiteSpace(simulationName))
-            //{
-            //    reportFileName = $"Reports\\{simulationName}-{_simulationGuid}.xls";
-            //}
+            //build report name
+            var reportFileName = $"Reports\\{_simulationId}.xls";
+            if (string.IsNullOrEmpty(simulationName) || string.IsNullOrWhiteSpace(simulationName))
+            {
+                reportFileName = $"Reports\\{simulationName}-{_simulationId}.xls";
+            }
 
-            // Generate Summary report and get path
+            // Generate Summary report 
             var summaryReportPath = "";
             try
             {
-                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId);
+                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, reportFileName);
             }
             catch (Exception e)
             {
@@ -172,8 +171,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        public string GenerateSummaryReport(Guid networkId, Guid simulationId)
+        private string GenerateSummaryReport(Guid networkId, Guid simulationId, string reportFileName)
         {
+            var functionReturnValue = "";
+
+            if (string.IsNullOrEmpty(reportFileName) || string.IsNullOrWhiteSpace(reportFileName))
+            {
+                Errors.Add("Summary report file name is missing or not set");
+                IndicateError();
+                return functionReturnValue;
+            }
+
             var requiredSections = new HashSet<string>()
             {
                 $"{BAMSConstants.DeckSeeded}",
@@ -328,24 +336,29 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
-            //check and generate folder
+            //check and generate folder            
+            var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var folderPathForSimulation = $"Reports\\{simulationId}";
-            var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
+
+            var relativeFolderPath = Path.Combine(executionDirectory, folderPathForSimulation);
             if (Directory.Exists(relativeFolderPath) == false) { Directory.CreateDirectory(relativeFolderPath); }
 
-            var filePath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation, "SummaryReport.xlsx");
+            var filePath = Path.Combine(executionDirectory, folderPathForSimulation, "SummaryReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
+
+            //set return value
+            functionReturnValue = filePath;
 
             reportDetailDto.Status = $"Report generation completed";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto, true);
 
             //return value
-            return filePath;
+            return functionReturnValue;
         }
 
-        public byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
+        private byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)
         {
             var folderPathForSimulation = $"Reports\\{simulationId}";
             var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
@@ -372,9 +385,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
-
-
-        
 
         private void IndicateError()
         {

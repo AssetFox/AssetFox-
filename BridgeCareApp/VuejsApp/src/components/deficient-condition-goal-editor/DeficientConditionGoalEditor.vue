@@ -14,13 +14,12 @@
                 
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
-                <div style="padding-top: 12px !important">
+                <div style="padding-top: 15px !important">
                     <v-btn v-if="hasScenario" 
-                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        flat
+                        class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                         @click="importLibrary()"
                         :disabled="importLibraryDisabled">
-                        Import Library
+                        Import
                     </v-btn>
                 </div>
                 

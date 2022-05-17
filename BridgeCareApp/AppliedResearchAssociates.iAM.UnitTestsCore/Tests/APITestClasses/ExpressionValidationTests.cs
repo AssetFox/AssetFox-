@@ -17,6 +17,7 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
+    // wjfix all tests in this class
     public class ExpressionValidationTests
     {
         private readonly TestHelper _testHelper;

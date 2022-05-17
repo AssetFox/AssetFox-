@@ -13,6 +13,7 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
+    // WjFix -- all but the "ShouldReturnOkResult" tests are broken
     public class TargetConditionGoalTests
     {
         private readonly TestHelper _testHelper;

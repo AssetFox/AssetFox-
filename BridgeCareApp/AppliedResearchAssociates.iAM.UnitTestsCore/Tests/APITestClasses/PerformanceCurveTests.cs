@@ -22,6 +22,7 @@ using Assert = Xunit.Assert;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
+    // WjFix -- all tests in this class are failing. But were they already failing?
     public class PerformanceCurveTests
     {
         private readonly TestHelper _testHelper;

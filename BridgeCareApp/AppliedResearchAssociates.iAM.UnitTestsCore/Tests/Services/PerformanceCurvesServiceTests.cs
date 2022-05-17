@@ -44,6 +44,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        // WjFix
         public void ImportLibraryPerformanceCurvesFileTest()
         {
             // Setup
@@ -85,6 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        // WjFix
         public void ImportScenarioPerformanceCurvesFileTest()
         {
             // Setup
@@ -108,6 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        // WjFix
         public void ImportScenarioPerformanceCurvesFileInvalidCriterionTest()
         {
             // Setup
@@ -129,6 +132,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        // WjFix
         public void ImportScenarioPerformanceCurvesFileInvalidEquationTest()
         {
             // Setup

@@ -136,9 +136,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             HasInventoryAccess = true
         };
 
-        public virtual void CreateAttributes() =>
-            UnitOfWork.AttributeRepo
-                .UpsertAttributes(UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+        public virtual void CreateAttributes()
+        {
+            // UnitOfWork.AttributeRepo
+            //     .UpsertAttributes(UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+        }
 
         public virtual void CreateNetwork()
         {

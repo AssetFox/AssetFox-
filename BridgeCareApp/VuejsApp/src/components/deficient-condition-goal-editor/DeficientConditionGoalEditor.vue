@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <v-layout row>
+        <v-layout >
             <v-flex xs4 class="ghd-constant-header">
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
@@ -26,7 +26,7 @@
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
-                <v-layout row align-end style="padding-top: 18px !important;">
+                <v-layout align-end style="padding-top: 18px !important;">
                     <v-spacer></v-spacer>
                     <v-btn
                         @click="showCreateDeficientConditionGoalDialog = true"
@@ -133,7 +133,6 @@
                                 <v-layout
                                     v-if="header.value === 'criterionLibrary'"
                                     align-center
-                                    row
                                     style="flex-wrap:nowrap">
                                     <v-menu
                                         bottom
@@ -200,7 +199,7 @@
             </v-layout>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout justify-center row>
+            <v-layout justify-center>
                 <v-btn
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'

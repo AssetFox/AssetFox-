@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -64,13 +65,16 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttributes")]
         [Authorize]
-        public async Task<IActionResult> CreateAttributes()
+        public async Task<IActionResult> CreateAttributes(List<AttributeDTO> attributeDTOs)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var configurableAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                    var configurableAttributes = attributeDTOs
+                    .Select(AttributeMapper.ToDomain)
+                    .Where(a => a!=null)
+                    .ToList();
                     UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
                     UnitOfWork.Commit();

@@ -1,9 +1,9 @@
 <template>
     <v-container fluid grid-list-xl>
-        <v-layout class='budgets-tab-content'>
+        <v-layout>
             <v-flex xs12>
-                <v-layout justify-center>
-                    <v-flex xs6>
+                <v-layout>
+                    <v-flex xs11>
                         <v-layout column v-if='budgets.length === 0'>
                             <h3>Investment Library Not Found</h3>
                             <div>
@@ -15,7 +15,7 @@
                         </v-layout>
                         <v-layout v-else>
                             <v-data-table :headers='budgetHeaders' :items='budgets'
-                                          class='elevation-1 fixed-header v-table__overflow budgets-data-table'
+                                          class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
                                           hide-actions
                                           item-key='id' select-all
                                           v-model='selectedBudgets'>
@@ -26,6 +26,7 @@
                                     <td>
                                         {{ props.item.name }}
                                     </td>
+                                    <td></td>
                                 </template>
                             </v-data-table>
                         </v-layout>
@@ -53,8 +54,8 @@ export default class BudgetsTab extends Vue {
     @Prop() selectedTreatmentBudgets: string[];
     @Prop() addTreatment: boolean;    
 
-    budgetHeaders: DataTableHeader[] = [
-        { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300px' },
+    budgetHeaders: DataTableHeader[] = [        
+        { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300' },
     ];
     budgets: SimpleBudgetDetail[] = [];
     selectedBudgets: SimpleBudgetDetail[] = [];
@@ -91,7 +92,19 @@ export default class BudgetsTab extends Vue {
 
 <style>
 .budgets-data-table {
-    height: 245px !important;
+    height: 295px !important;
     overflow-y: auto;
 }
+
+.budgets-data-table .v-table tbody tr td{
+    font-size: 14px !important;
+}
+
+.budgets-data-table .v-table thead tr th{
+    width: 20px !important;
+}
+
+.budgets-data-table .v-table thead tr th .v-input {
+    width: 20px !important;
+} 
 </style>

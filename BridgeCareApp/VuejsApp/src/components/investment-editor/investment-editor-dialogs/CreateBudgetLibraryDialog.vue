@@ -11,12 +11,12 @@
         </v-card-title>           
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
-          <v-subheader class="ghd-subheader ">Name</v-subheader>
+          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
           <v-text-field outline v-model="newBudgetLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
 
-          <v-subheader class="ghd-subheader ">Description</v-subheader>
+          <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
                       v-model="newBudgetLibrary.description"
                       class="ghd-text-field-border">

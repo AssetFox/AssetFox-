@@ -29,7 +29,6 @@ namespace BridgeCareCore.Services
             throw new NotImplementedException();
             SendRealTimeMessage("Upserting attributes...");
 
-            // WjJake: Not sure at all what if anything to do here.
 
             _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo
                 .GetAllAttributes().ToList());

@@ -26,6 +26,7 @@ namespace BridgeCareCore.Services
 
         private void SynchronizeExplorerData()
         {
+            throw new NotImplementedException();
             SendRealTimeMessage("Upserting attributes...");
 
             // WjJake: Not sure at all what if anything to do here.

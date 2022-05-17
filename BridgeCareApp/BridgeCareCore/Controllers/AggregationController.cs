@@ -41,8 +41,6 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        // WjJake -- not sure what I did is correct. An alternative would be to write a method in AttributeRepo
-        // to get the attributes in the network, then go from there.
         public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributeDTOs)
         {
             try

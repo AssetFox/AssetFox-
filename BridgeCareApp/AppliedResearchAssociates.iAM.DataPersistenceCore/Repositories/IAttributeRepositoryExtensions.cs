@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -10,16 +11,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
-            var dataMinerAttributes = new List<DataAttribute>();
+            var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
             {
                 var mappedDto = AttributeMapper.ToDomain(dto);
                 if (mappedDto!=null)
                 {
-                    dataMinerAttributes.Add(mappedDto);
+                    dataAttributes.Add(mappedDto);
+                }
+                else
+                {
+                    throw new Exception($"Invalid attribute {dto.Name}");
                 }
             }
-            repository.UpsertAttributes(dataMinerAttributes);
+            repository.UpsertAttributes(dataAttributes);
         }
 
         public static void UpsertAttributes(this IAttributeRepository repository, params AttributeDTO[] dtos)

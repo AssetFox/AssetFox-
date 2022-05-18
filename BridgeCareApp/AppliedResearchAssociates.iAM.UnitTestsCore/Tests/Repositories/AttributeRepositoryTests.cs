@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -110,12 +111,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AddInvalidAttribute_Fails()
         {
+            // rewrite to use the dto. Conversion of the dto to a NumericAttribute object should fail.
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
-            var invalidAttribute = new NumericAttribute(100, 1000, 0, attributeId, randomName, "Invalid ruleType",
-                "Command", Data.ConnectionType.MSSQL, "", true, false);
-            repo.UpsertAttributes(invalidAttribute);
+            var attributeDto = new AttributeDTO
+            {
+                Id = attributeId,
+                Name = randomName,
+                Minimum = 0,
+                Maximum = 1000,
+                DefaultValue = "100",
+                AggregationRuleType = "Invalid rule",
+                Command = "Command",
+                Type = "NUMBER",
+                IsAscending = false,
+                IsCalculated = false,
+            };
+            var invalidAttributeList = new List<AttributeDTO> { attributeDto };
+            repo.UpsertAttributes(invalidAttributeList);
             var attributesAfter = await repo.Attributes();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);

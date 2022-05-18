@@ -174,7 +174,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjFix
         public async void ShouldReturnOkResultOnEquationPost()
         {
             // Arrange
@@ -214,7 +213,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjFix
         public async void ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
@@ -238,7 +236,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjFix
         public async void ShouldValidateCriterion()
         {
             // Arrange
@@ -341,7 +338,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjFix
         public async void ShouldReturnOkResultOnCriterionPost()
         {
             // Arrange                

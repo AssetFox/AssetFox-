@@ -140,7 +140,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public virtual void CreateAttributes()
         {
-            UnitOfWork.AttributeRepo.UpsertAttributes(AttributeDtos.BrActionType);
+            var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+            UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
         }
 
         public virtual void CreateNetwork()

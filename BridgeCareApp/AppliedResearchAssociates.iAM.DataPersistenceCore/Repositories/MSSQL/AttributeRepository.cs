@@ -11,8 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -24,40 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        private static bool OkToUpdate(List<AttributeEntity> oldEntities, AttributeEntity proposedNewEntity)
-        {
-            var compare = oldEntities.Single(e => e.Id == proposedNewEntity.Id);
-            var returnValue = proposedNewEntity.Name == compare.Name
-                             && proposedNewEntity.ConnectionType == compare.ConnectionType;
-            return returnValue;
-        }
-
-        private static bool IsValid(DataMinerAttribute attribute)
-        {
-            try
-            {
-                switch (attribute.DataType)
-                {
-                case "STRING":
-                    {
-                        var _ = AggregationRuleFactory.CreateTextRule(attribute);
-                        return true;
-                    }
-                case "NUMBER":
-                    {
-                        var _ = AggregationRuleFactory.CreateNumericRule(attribute);
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-                // ignore any exception.
-            }
-            return false;
-        }
-
-        public void UpsertAttributes(List<DataMinerAttribute> attributes)
+        public void UpsertAttributes(List<Attribute> attributes)
         {
             var validAttributes = attributes.Where(_ => IsValid(_)).ToList();
             var upsertAttributeEntities = validAttributes.Select(_ => _.ToEntity()).ToList();

@@ -58,8 +58,6 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddSimulationData();
-            services.AddSummaryReportDataTABs();
-            services.AddSummaryReportGraphTABs();
             services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();

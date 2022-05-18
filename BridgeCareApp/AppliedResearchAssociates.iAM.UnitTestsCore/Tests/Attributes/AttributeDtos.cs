@@ -60,5 +60,33 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             IsCalculated = false,
             IsAscending = true
         };
+        public static AttributeDTO SupSeeded => new()
+        {
+            Id = Guid.Parse("c8cfea90-9cdc-4e02-a19e-fdcf698776a4"),
+            Name = "SUP_SEEDED",
+            DefaultValue = "10",
+            Minimum = 0.0,
+            Maximum = 10.0,
+            Type = "NUMBER",
+            Command = "SELECT TOP (100) PERCENT A.BRKEY AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(A.BRKEY AS VARCHAR(MAX)) AS FACILITY, A.BRIDGE_ID AS SECTION, NULL AS SAMPLE_, A.INSPDATE AS DATE_, R.SUP_INDEX AS DATA_ FROM dbo.PennDot_Report_A AS A INNER JOIN dbo.SEED_SUP_RAW AS R ON R.BR_KEY = A.BRKEY",
+            AggregationRuleType = "AVERAGE",
+            IsCalculated = false,
+            IsAscending = true
+        };
+
+        public static AttributeDTO CulvSeeded => new()
+        {
+            Id = Guid.Parse("2ea9ef40-a59d-4cdf-ae75-f5596d4030a5"),
+            Name = "SUB_SEEDED",
+            DefaultValue = "10",
+            Minimum = 0.0,
+            Maximum = 10.0,
+            Type = "NUMBER",
+            Command = "SELECT TOP (100) PERCENT A.BRKEY AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(A.BRKEY AS VARCHAR(MAX)) AS FACILITY, A.BRIDGE_ID AS SECTION, NULL AS SAMPLE_, A.INSPDATE AS DATE_, R.DECK_INDEX AS DATA_ FROM dbo.PennDot_Report_A AS A INNER JOIN dbo.SEED_DECK_RAW AS R ON R.BR_KEY = A.BRKEY",
+            AggregationRuleType = "AVERAGE",
+            IsCalculated = false,
+            IsAscending = true
+        };
+
     }
 }

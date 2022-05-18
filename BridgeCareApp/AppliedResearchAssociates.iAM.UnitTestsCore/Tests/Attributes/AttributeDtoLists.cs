@@ -16,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 AttributeDtos.AdtTotal,
                 AttributeDtos.DeckSeeded,
                 AttributeDtos.SubSeeded,
+                AttributeDtos.SupSeeded,
             };
     }
 }

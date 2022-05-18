@@ -51,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         private static TextAttribute ToText(AttributeDTO dto)
         {
+            // Chadwick says this should be in AttributeFactory.
             return new TextAttribute(
                 dto.DefaultValue,
                 dto.Id,

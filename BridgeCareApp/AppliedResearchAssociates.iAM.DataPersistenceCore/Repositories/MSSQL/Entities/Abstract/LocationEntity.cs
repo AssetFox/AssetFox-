@@ -1,5 +1,5 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract
 {

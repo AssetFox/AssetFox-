@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {

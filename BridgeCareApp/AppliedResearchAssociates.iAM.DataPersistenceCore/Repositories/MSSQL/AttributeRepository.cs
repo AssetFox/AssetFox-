@@ -11,7 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void UpsertAttributes(List<DataMinerAttribute> attributes)
+        public void UpsertAttributes(List<Attribute> attributes)
         {
             var attributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
             var existingAttributeIds = _unitOfWork.Context.Attribute.Select(_ => _.Id).ToList();

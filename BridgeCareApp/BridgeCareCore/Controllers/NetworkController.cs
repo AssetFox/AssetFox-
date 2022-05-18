@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;

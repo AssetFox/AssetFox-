@@ -12,8 +12,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
         public static List<AttributeDTO> AttributeSetupDtos()
             => new List<AttributeDTO>
             {
-                AttributeDtos.BrActionType,
-                AttributeDtos.BrAdTotal,
+                AttributeDtos.ActionType,
+                AttributeDtos.AdtTotal,
+                AttributeDtos.DeckSeeded,
+                AttributeDtos.SubSeeded,
             };
     }
 }

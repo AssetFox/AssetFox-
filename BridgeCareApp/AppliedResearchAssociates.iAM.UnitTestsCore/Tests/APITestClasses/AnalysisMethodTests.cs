@@ -83,7 +83,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjFix
         public async void ShouldReturnOkResultOnPost()
         {
             // Arrange
@@ -122,7 +121,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldCreateAnalysisMethod()
         {
-            // WjFix
             // Arrange
             var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
             var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -147,7 +145,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
         }
 
-        [Fact] // WjFix
         public async void ShouldUpdateAnalysisMethod()
         {
             // Arrange

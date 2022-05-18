@@ -17,7 +17,6 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
-    // wjfix all tests in this class
     public class ExpressionValidationTests
     {
         private readonly TestHelper _testHelper;
@@ -175,6 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WjFix
         public async void ShouldReturnOkResultOnEquationPost()
         {
             // Arrange
@@ -214,6 +214,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WjFix
         public async void ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
@@ -237,6 +238,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WjFix
         public async void ShouldValidateCriterion()
         {
             // Arrange
@@ -339,6 +341,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WjFix
         public async void ShouldReturnOkResultOnCriterionPost()
         {
             // Arrange                

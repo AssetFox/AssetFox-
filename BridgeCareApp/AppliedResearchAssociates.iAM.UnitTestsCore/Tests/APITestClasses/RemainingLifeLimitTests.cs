@@ -103,7 +103,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        // WjFix
         [Fact]
         public async void ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
@@ -125,7 +124,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Single(dtos[0].RemainingLifeLimits);
         }
 
-        // WjFix
         [Fact]
         public async void ShouldModifyRemainingLifeLimitData()
         {
@@ -161,7 +159,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        // WjFix
         [Fact]
         public async void ShouldDeleteRemainingLifeLimitData()
         {

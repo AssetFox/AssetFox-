@@ -12,7 +12,6 @@ using Xunit.Sdk;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    // WjFix or maybe not. These were already broken before we made the change.
     public class SimulationAnalysisDataPersistenceTests
     {
         private readonly SimulationAnalysisDataPersistenceTestHelper _testHelper;

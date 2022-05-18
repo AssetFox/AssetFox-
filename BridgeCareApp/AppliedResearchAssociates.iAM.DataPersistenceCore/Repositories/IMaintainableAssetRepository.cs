@@ -8,12 +8,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IMaintainableAssetRepository
     {
-        List<MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId);
+        List<DataAssignment.Networking.MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId);
 
-        void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId);
+        void CreateMaintainableAssets(List<DataAssignment.Networking.MaintainableAsset> maintainableAssets, Guid networkId);
 
-        void CreateMaintainableAssets(List<Section> sections, Guid networkId);
+        void CreateMaintainableAssets(List<Analysis.MaintainableAsset> maintainableAssets, Guid networkId);
 
-        void UpdateMaintainableAssetsSpatialWeighting(List<MaintainableAsset> maintainableAssets);
+        void UpdateMaintainableAssetsSpatialWeighting(List<DataAssignment.Networking.MaintainableAsset> maintainableAssets);
     }
 }

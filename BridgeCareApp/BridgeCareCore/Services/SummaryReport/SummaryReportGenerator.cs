@@ -69,7 +69,7 @@ namespace BridgeCareCore.Services.SummaryReport
 
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
-            var initialSectionValues = reportOutputData.InitialSectionSummaries[0].ValuePerNumericAttribute;
+            var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 
             var reportDetailDto = new SimulationReportDetailDTO {SimulationId = simulationId};
 
@@ -84,7 +84,7 @@ namespace BridgeCareCore.Services.SummaryReport
                 }
             }
 
-            var sectionValueAttribute = reportOutputData.Years[0].Sections[0].ValuePerNumericAttribute;
+            var sectionValueAttribute = reportOutputData.Years[0].Assets[0].ValuePerNumericAttribute;
 
             foreach (var item in requiredSections)
             {
@@ -98,13 +98,13 @@ namespace BridgeCareCore.Services.SummaryReport
             }
             // sorting the sections based on facility name. This is helpful throughout the report
             // generation process
-            reportOutputData.InitialSectionSummaries.Sort(
-                    (a, b) => Int64.Parse(a.FacilityName.Split('-')[0]).CompareTo(Int64.Parse(b.FacilityName.Split('-')[0]))
+            reportOutputData.InitialAssetSummaries.Sort(
+                    (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
                     );
             foreach (var yearlySectionData in reportOutputData.Years)
             {
-                yearlySectionData.Sections.Sort(
-                    (a, b) => Int64.Parse(a.FacilityName.Split('-')[0]).CompareTo(Int64.Parse(b.FacilityName.Split('-')[0]))
+                yearlySectionData.Assets.Sort(
+                    (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
                     );
             }
 

@@ -5,11 +5,11 @@ using AppliedResearchAssociates.CalculateEvaluate;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
-    internal sealed class SectionContext : CalculateEvaluateScope
+    internal sealed class AssetContext : CalculateEvaluateScope
     {
-        public SectionContext(Section section, SimulationRunner simulationRunner)
+        public AssetContext(MaintainableAsset asset, SimulationRunner simulationRunner)
         {
-            Section = section ?? throw new ArgumentNullException(nameof(section));
+            Asset = asset ?? throw new ArgumentNullException(nameof(asset));
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
 
             ResetDetail();
@@ -17,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             Initialize();
         }
 
-        public SectionContext(SectionContext original) : base(original)
+        public AssetContext(AssetContext original) : base(original)
         {
-            Section = original.Section;
+            Asset = original.Asset;
             SimulationRunner = original.SimulationRunner;
 
             ResetDetail();
@@ -32,19 +32,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             InitializeCalculatedFields();
         }
 
-        public SectionDetail Detail { get; private set; }
+        public AssetDetail Detail { get; private set; }
 
         public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
 
-        public Section Section { get; }
+        public MaintainableAsset Asset { get; }
 
         public SimulationRunner SimulationRunner { get; }
 
-        public SectionSummaryDetail SummaryDetail
+        public AssetSummaryDetail SummaryDetail
         {
             get
             {
-                var detail = new SectionSummaryDetail(Section);
+                var detail = new AssetSummaryDetail(Asset);
                 CopyAttributeValuesToDetail(detail);
                 return detail;
             }
@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public void CopyAttributeValuesToDetail() => CopyAttributeValuesToDetail(Detail);
 
-        public void CopyDetailFrom(SectionContext other) => Detail = new SectionDetail(other.Detail);
+        public void CopyDetailFrom(AssetContext other) => Detail = new AssetDetail(other.Detail);
 
         public void FixCalculatedFieldValuesWithoutPreDeteriorationTiming() => FixCalculatedFieldValues(AllCalculatedFields.Where(cf => cf.Timing != CalculatedFieldTiming.PreDeterioration));
 
@@ -109,8 +109,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
                 {
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
+                    AssetName = Asset.Name,
+                    AssetId = Asset.Id,
                 };
                 var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
                 SimulationRunner.Send(logBuilder);
@@ -145,10 +145,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public double GetSpatialWeight()
         {
-            var returnValue = Section.SpatialWeighting.Compute(this);
+            var returnValue = Asset.SpatialWeighting.Compute(this);
             if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
             {
-                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Section, Section.SpatialWeighting, returnValue);
+                var errorMessage = SimulationLogMessages.SpatialWeightCalculationReturned(Asset, Asset.SpatialWeighting, returnValue);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
                 SimulationRunner.Send(messageBuilder);
             }
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             ApplyTreatmentButNotMetadata(SimulationRunner.Simulation.DesignatedPassiveTreatment);
         }
 
-        public void ResetDetail() => Detail = new SectionDetail(Section);
+        public void ResetDetail() => Detail = new AssetDetail(Asset);
 
         public void RollForward()
         {
@@ -182,7 +182,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             // Forward uses the No Treatment consequences. It should in the new code."
 
             IEnumerable<int?> getMostRecentYearPerAttribute<T>(IEnumerable<Attribute<T>> attributes) =>
-                attributes.Select(attribute => Section.GetHistory(attribute).Keys.AsNullables().Max());
+                attributes.Select(attribute => Asset.GetHistory(attribute).Keys.AsNullables().Max());
 
             var earliestYearOfMostRecentValue = Enumerable.Concat(
                 getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.NumberAttributes),
@@ -327,8 +327,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 {
                     ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
                     ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
+                    AssetName = Asset.Name,
+                    AssetId = Asset.Id,
                 };
 
                 var builder = new SimulationLogMessageBuilder
@@ -343,7 +343,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-        private void CopyAttributeValuesToDetail(SectionSummaryDetail detail)
+        private void CopyAttributeValuesToDetail(AssetSummaryDetail detail)
         {
             detail.ValuePerNumericAttribute.Add(Network.SpatialWeightIdentifier, GetNumber(Network.SpatialWeightIdentifier));
 
@@ -382,8 +382,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var messageBuilder = new SimulationMessageBuilder("No performance curves are operative for a deteriorating attribute.")
                 {
                     ItemName = curves.Key.Name,
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
+                    AssetName = Asset.Name,
+                    AssetId = Asset.Id,
                 };
 
                 var logBuilder = SimulationLogMessageBuilders.RuntimeFatal(messageBuilder, SimulationRunner.Simulation.Id);
@@ -395,8 +395,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var messageBuilder = new SimulationMessageBuilder("Two or more performance curves are simultaneously operative for a single deteriorating attribute.")
                 {
                     ItemName = curves.Key.Name,
-                    SectionName = Section.Name,
-                    SectionId = Section.Id,
+                    AssetName = Asset.Name,
+                    AssetId = Asset.Id,
                 };
 
                 var logMessage = SimulationLogMessageBuilders.RuntimeWarning(messageBuilder, SimulationRunner.Simulation.Id);
@@ -419,7 +419,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.NumberAttributes, SetNumber);
             SetInitialValues(SimulationRunner.Simulation.Network.Explorer.TextAttributes, SetText);
 
-            foreach (var committedProject in SimulationRunner.CommittedProjectsPerSection[Section])
+            foreach (var committedProject in SimulationRunner.CommittedProjectsPerAsset[Asset])
             {
                 EventSchedule.Add(committedProject.Year, committedProject);
             }
@@ -460,7 +460,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             if (double.IsNaN(value) || double.IsInfinity(value))
             {
                 var key = curve.Attribute.Name;
-                var errorMessage = SimulationLogMessages.SectionCalculationReturned(Section, curve, key, value);
+                var errorMessage = SimulationLogMessages.AssetCalculationReturned(Asset, curve, key, value);
                 var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, SimulationRunner.Simulation.Id);
                 SimulationRunner.Send(messageBuilder);
             }
@@ -470,7 +470,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             foreach (var attribute in attributes)
             {
-                var attributeHistory = Section.GetHistory(attribute);
+                var attributeHistory = Asset.GetHistory(attribute);
                 if (attributeHistory.TryGetValue(referenceYear, out var value))
                 {
                     setValue(attribute.Name, value);
@@ -494,7 +494,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             foreach (var attribute in attributes)
             {
-                var initialValue = Section.GetHistory(attribute).MostRecentValue;
+                var initialValue = Asset.GetHistory(attribute).MostRecentValue;
                 setValue(attribute.Name, initialValue);
             }
         }

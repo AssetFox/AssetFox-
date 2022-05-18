@@ -52,7 +52,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
             // facilityId, year, section, treatment
-            var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>();
+            var treatmentsPerSection = new SortedDictionary<int, Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>();
             var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                 var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0])));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.AssetName.Split('-')[0])));
                     firstYear = false;
                     if(simulationOutput.Years.Count > 1)
                     {
@@ -69,12 +69,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0]))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.AssetName.Split('-')[0]))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = int.Parse(section.FacilityName.Split('-')[0]);
+                    var facilityId = int.Parse(section.AssetName.Split('-')[0]);
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.
@@ -84,7 +84,7 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentFinalList
                         var chosenTreatment = treatmentOptions.FirstOrDefault();
                         if (chosenTreatment != null)
                         {
-                            var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
+                            var newTuple = new Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
 
                             if (!validFacilityIds.Contains(facilityId))
                             {

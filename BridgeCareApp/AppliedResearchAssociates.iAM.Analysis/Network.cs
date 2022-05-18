@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public Explorer Explorer { get; }
 
-        public IReadOnlyCollection<Facility> Facilities => _Facilities;
+        public IReadOnlyCollection<MaintainableAsset> Assets => _Assets;
 
         public string Name { get; set; }
 
@@ -25,15 +25,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
             set => _SpatialWeightUnit = value?.Trim() ?? "";
         }
 
-        public ValidatorBag Subvalidators => new ValidatorBag { Facilities, Simulations };
+        public ValidatorBag Subvalidators => new ValidatorBag { Assets, Simulations };
 
-        public IEnumerable<Section> Sections => Facilities.SelectMany(facility => facility.Sections);
-
-        public Facility AddFacility() => _Facilities.GetAdd(new Facility(this));
+        public MaintainableAsset AddAsset() => _Assets.GetAdd(new MaintainableAsset(this));
 
         public Simulation AddSimulation() => _Simulations.GetAdd(new Simulation(this));
 
-        public void ClearFacilities() => _Facilities.Clear();
+        public void ClearAssets() => _Assets.Clear();
 
         public ValidationResultBag GetDirectValidationResults()
         {
@@ -44,13 +42,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 results.Add(ValidationStatus.Error, "Name is blank.", this, nameof(Name));
             }
 
-            if (Facilities.Count == 0)
+            if (Assets.Count == 0)
             {
-                results.Add(ValidationStatus.Error, "There are no facilities.", this, nameof(Facilities));
+                results.Add(ValidationStatus.Error, "There are no assets.", this, nameof(Assets));
             }
-            else if (Facilities.Select(facility => facility.Name).Distinct().Count() < Facilities.Count)
+            else if (Assets.Select(asset => asset.Name).Distinct().Count() < Assets.Count)
             {
-                results.Add(ValidationStatus.Error, "Multiple facilities have the same name.", this, nameof(Facilities));
+                results.Add(ValidationStatus.Error, "Multiple assets have the same name.", this, nameof(Assets));
             }
 
             if (Simulations.Select(simulation => simulation.Name).Distinct().Count() < Simulations.Count)
@@ -63,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void Remove(Simulation simulation) => _Simulations.Remove(simulation);
 
-        private readonly List<Facility> _Facilities = new List<Facility>();
+        private readonly List<MaintainableAsset> _Assets = new List<MaintainableAsset>();
 
         private readonly List<Simulation> _Simulations = new List<Simulation>();
 

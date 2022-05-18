@@ -70,20 +70,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Single(_ => _.Id == mainNetworkId);
         }
 
-        public bool CheckPennDotNetworkHasData()
-        {
-            var penndotNetworkId = new Guid(DataPersistenceConstants.PennDotNetworkId);
-            var facilityCount = _unitOfWork.Context.Facility.Count(_ => _.NetworkId == penndotNetworkId);
-            var sectionCount = _unitOfWork.Context.Section.Count(_ => _.Facility.NetworkId == penndotNetworkId);
-            var numericAttributeValueHistoryCount = _unitOfWork.Context.NumericAttributeValueHistory
-                .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
-            var textAttributeValueHistoryCount = _unitOfWork.Context.TextAttributeValueHistory
-                .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
-
-            return facilityCount > 0 && sectionCount > 0 && numericAttributeValueHistoryCount > 0 &&
-                   textAttributeValueHistoryCount > 0;
-        }
-
         public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))

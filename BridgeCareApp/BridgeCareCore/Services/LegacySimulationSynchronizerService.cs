@@ -51,16 +51,15 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException($"The specified network was not found.");
             }
 
-            var facilitySectionNames = network.Facilities
-                .SelectMany(facility => facility.Sections.Select(section => $"{facility.Name}{section.Name}")).ToHashSet();
+            var facilitySectionNames = network.Assets.Select(section => section.Name).ToHashSet();
             var assetFacilitySectionNames = _unitOfWork.Context.MaintainableAsset
                 .Select(_ => _.MaintainableAssetLocation.LocationIdentifier).ToHashSet();
             if (!facilitySectionNames.SetEquals(assetFacilitySectionNames))
             {
                 _unitOfWork.NetworkRepo.DeleteNetworkData();
                 SendRealTimeMessage("Creating the network's maintainable assets...");
-                var sections = network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
-                _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, network.Id);
+                var assets = network.Assets.ToList();
+                _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assets, network.Id);
             }
         }
 

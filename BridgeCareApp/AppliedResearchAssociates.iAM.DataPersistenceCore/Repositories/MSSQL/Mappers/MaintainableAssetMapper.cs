@@ -8,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class MaintainableAssetMapper
     {
-        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
+        public static DataAssignment.Networking.MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
-            var maintainableAsset = new MaintainableAsset(
+            var maintainableAsset = new DataAssignment.Networking.MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);
 
             if (entity.AssignedData != null && entity.AssignedData.Any())
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return maintainableAsset;
         }
 
-        public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId) =>
+        public static MaintainableAssetEntity ToEntity(this DataAssignment.Networking.MaintainableAsset domain, Guid networkId) =>
             new MaintainableAssetEntity
             {
                 Id = domain.Id,
@@ -47,16 +47,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 //AreaUnit = domain.SpatialWeighting.AreaUnit
             };
 
-        public static MaintainableAssetEntity ToEntity(this Section section, Guid networkId) =>
+        public static MaintainableAssetEntity ToEntity(this Analysis.MaintainableAsset asset, Guid networkId) =>
             new MaintainableAssetEntity
             {
-                Id = section.Id,
+                Id = asset.Id,
                 NetworkId = networkId,
-                SpatialWeighting = section.SpatialWeighting.Expression,
+                SpatialWeighting = asset.SpatialWeighting.Expression,
                 //Area = section.Area,
                 //AreaUnit = section.AreaUnit,
-                FacilityName = section.Facility.Name,
-                SectionName = section.Name
+                AssetName = asset.Name
             };
     }
 }

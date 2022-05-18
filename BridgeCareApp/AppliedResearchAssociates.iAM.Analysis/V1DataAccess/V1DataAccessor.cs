@@ -182,8 +182,6 @@ order by networkid
         }
 
         private const string NUMBER_ATTRIBUTE_TYPE_NAME = "NUMBER";
-        private const string PASSIVE_TREATMENT_NAME = "No Treatment";
-        private const string SECTIONID_COLUMN_NAME = "sectionid";
         private const string STRING_ATTRIBUTE_TYPE_NAME = "STRING";
 
         private readonly IDbConnection Connection;
@@ -213,56 +211,52 @@ order by simulationid
                 {
                     var readerTimer = GetTimer(reader);
 
-                    helper.SectionPerId = new Dictionary<int, Section>();
+                    helper.AssetPerSectionId = new Dictionary<int, MaintainableAsset>();
 
-                    readerTimer.Time(createSections, nameof(createSections));
-                    readerTimer.Time(fillSectionHistories, nameof(fillSectionHistories));
+                    readerTimer.Time(createAssets, nameof(createAssets));
+                    readerTimer.Time(fillAssetHistories, nameof(fillAssetHistories));
                     simulationPerId = readerTimer.Time(createSimulations, nameof(createSimulations));
 
                     #region Helper functions
 
-                    void createSections()
+                    void createAssets()
                     {
-                        var facilityPerName = new Dictionary<string, Facility>();
                         string areaUnit = null;
 
                         while (reader.Read())
                         {
                             var facilityName = reader.GetNullableString(0);
-                            if (!facilityPerName.TryGetValue(facilityName, out var facility))
-                            {
-                                facility = network.AddFacility();
-                                facility.Name = facilityName;
-                                facilityPerName.Add(facilityName, facility);
-                            }
-
                             var sectionName = reader.GetNullableString(1);
-                            if (facility.Sections.All(section => section.Name != sectionName))
-                            {
-                                var section = facility.AddSection();
-                                section.Name = sectionName;
-                                section.SpatialWeighting.Expression = reader.GetDouble(2).ToString();
+                            var assetName = $"{facilityName}/{sectionName}";
 
-                                var sectionAreaUnit = reader.GetNullableString(3)?.Trim();
+                            if (network.Assets.All(asset => asset.Name != assetName))
+                            {
+                                var asset = network.AddAsset();
+                                asset.Name = assetName;
+                                asset.SpatialWeighting.Expression = reader.GetDouble(2).ToString();
+
+                                var assetAreaUnit = reader.GetNullableString(3)?.Trim();
                                 if (areaUnit is null)
                                 {
-                                    areaUnit = sectionAreaUnit;
+                                    areaUnit = assetAreaUnit;
                                 }
-                                else if (!areaUnit.Equals(sectionAreaUnit, StringComparison.OrdinalIgnoreCase))
+                                else if (!areaUnit.Equals(assetAreaUnit, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    throw new InvalidOperationException("Sections of network have inconsistent area units.");
+                                    throw new InvalidOperationException("Assets of network have inconsistent area units.");
                                 }
 
                                 var sectionId = reader.GetInt32(4);
-                                helper.SectionPerId.Add(sectionId, section);
+                                helper.AssetPerSectionId.Add(sectionId, asset);
                             }
                         }
 
                         network.SpatialWeightUnit = areaUnit;
                     }
 
-                    void fillSectionHistories()
+                    void fillAssetHistories()
                     {
+                        const string SECTIONID_COLUMN_NAME = "sectionid";
+
                         var columnSchema = Enumerable.Range(0, reader.FieldCount)
                             .Select(columnIndex => new DbColumn(reader.GetName(columnIndex), columnIndex))
                             .ToArray();
@@ -289,7 +283,7 @@ order by simulationid
                         while (reader.Read())
                         {
                             // With respect to memory footprint, it may be worthwhile to abbreviate
-                            // (where possible) the full history of each attribute in each section,
+                            // (where possible) the full history of each attribute in each asset,
                             // at least for the purpose of analysis. The analysis requires the
                             // historical values only for roll-forward, and roll-forward does not
                             // require all history before a certain point. (See roll-forward logic
@@ -298,7 +292,7 @@ order by simulationid
                             // ignored if applying this logic.
 
                             var sectionId = reader.GetInt32(sectionidColumnIndex);
-                            if (helper.SectionPerId.TryGetValue(sectionId, out var section))
+                            if (helper.AssetPerSectionId.TryGetValue(sectionId, out var asset))
                             {
                                 fillHistories(network.Explorer.NumberAttributes, reader.GetDouble);
                                 fillHistories(network.Explorer.TextAttributes, reader.GetNullableString);
@@ -307,7 +301,7 @@ order by simulationid
                                 {
                                     foreach (var attribute in attributes)
                                     {
-                                        var history = section.GetHistory(attribute);
+                                        var history = asset.GetHistory(attribute);
 
                                         var latestValueColumnOrdinal = latestValueColumnPerAttribute[attribute.Name];
 
@@ -489,6 +483,7 @@ where simulationid = {simulationId}
                         }
                     }
 
+                    const string PASSIVE_TREATMENT_NAME = "No Treatment";
                     simulation.Treatments.Single(treatment => StringComparer.OrdinalIgnoreCase.Equals(treatment.Name.Trim(), PASSIVE_TREATMENT_NAME)).DesignateAsPassiveForSimulation();
 
                     #region Helper functions
@@ -544,9 +539,9 @@ where simulationid = {simulationId}
                                 if (budgetPerName.TryGetValue(budgetName, out var budget))
                                 {
                                     var sectionId = reader.GetInt32(1);
-                                    var section = helper.SectionPerId[sectionId];
+                                    var asset = helper.AssetPerSectionId[sectionId];
                                     var year = reader.GetInt32(2);
-                                    project = simulation.CommittedProjects.GetAdd(new CommittedProject(section, year));
+                                    project = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, year));
                                     project.Name = reader.GetNullableString(3);
                                     project.ShadowForSameTreatment = reader.GetInt32(4);
                                     project.ShadowForAnyTreatment = reader.GetInt32(5);
@@ -804,13 +799,13 @@ where simulationid = {simulationId}
         {
             public ISet<string> AllAttributeNames { get; set; }
 
-            public IDictionary<string, Analysis.Attribute> AttributePerName { get; set; }
+            public IDictionary<string, Attribute> AttributePerName { get; set; }
 
             public IDictionary<string, NumberAttribute> NumberAttributePerName { get; set; }
 
             public IDictionary<string, INumericAttribute> NumericAttributePerName { get; set; }
 
-            public IDictionary<int, Section> SectionPerId { get; set; }
+            public IDictionary<int, MaintainableAsset> AssetPerSectionId { get; set; }
         }
 
         private sealed class DbColumn

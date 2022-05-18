@@ -4,14 +4,14 @@ using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
-    public sealed class SectionDetail : SectionSummaryDetail
+    public sealed class AssetDetail : AssetSummaryDetail
     {
-        public SectionDetail(Section section) : base(section)
+        public AssetDetail(MaintainableAsset asset) : base(asset)
         {
         }
 
         [JsonConstructor]
-        public SectionDetail(string facilityName, string sectionName) : base(facilityName, sectionName)
+        public AssetDetail(string assetName) : base(assetName)
         {
         }
 
@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public TreatmentStatus TreatmentStatus { get; set; }
 
-        internal SectionDetail(SectionDetail original) : base(original)
+        internal AssetDetail(AssetDetail original) : base(original)
         {
             AppliedTreatment = original.AppliedTreatment;
             TreatmentCause = original.TreatmentCause;

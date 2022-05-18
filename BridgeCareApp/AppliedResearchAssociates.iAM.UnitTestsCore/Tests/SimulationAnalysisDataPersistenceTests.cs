@@ -131,58 +131,51 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.NotNull(dataSourceNetwork);
             Assert.Equal(network.Id, dataSourceNetwork.Id);
 
-            var facilities = network.Facilities.ToList();
-            var dataSourceFacilities = dataSourceNetwork.Facilities.ToList();
-            Assert.Equal(facilities.Count(), dataSourceFacilities.Count());
-            facilities.ForEach(facility =>
+            var assets = network.Assets.ToList();
+            var dataSourceAssets = dataSourceNetwork.Assets.ToList();
+            Assert.Equal(assets.Count(), dataSourceAssets.Count());
+
+            assets.ForEach(asset =>
             {
-                var dataSourceFacility = dataSourceFacilities.SingleOrDefault(_ => _.Name == facility.Name);
-                Assert.NotNull(dataSourceFacility);
-                var sections = facility.Sections.ToList();
-                var dataSourceSections = dataSourceFacility.Sections.ToList();
-                Assert.Equal(sections.Count(), dataSourceSections.Count());
-                sections.ForEach(section =>
+                var dataSourceAsset = dataSourceAssets.SingleOrDefault(_ => $"{_.Network.Name}{_.Name}" == $"{asset.Network.Name}{asset.Name}");
+                Assert.NotNull(dataSourceAsset);
+                Assert.Equal(asset.SpatialWeighting.Expression, dataSourceAsset.SpatialWeighting.Expression);
+                Assert.Equal(asset.HistoricalAttributes.Count(), dataSourceAsset.HistoricalAttributes.Count());
+
+                var numberAttributes = network.Explorer.NumberAttributes.ToList();
+                numberAttributes.ForEach(numberAttribute =>
                 {
-                    var dataSourceSection = dataSourceSections.SingleOrDefault(_ => $"{_.Facility.Name}{_.Name}" == $"{section.Facility.Name}{section.Name}");
-                    Assert.NotNull(dataSourceSection);
-                    Assert.Equal(section.SpatialWeighting.Expression, dataSourceSection.SpatialWeighting.Expression);
-                    Assert.Equal(section.HistoricalAttributes.Count(), dataSourceSection.HistoricalAttributes.Count());
-
-                    var numberAttributes = network.Explorer.NumberAttributes.ToList();
-                    numberAttributes.ForEach(numberAttribute =>
+                    if (asset.HistoricalAttributes.Any(_ => _.Name == numberAttribute.Name))
                     {
-                        if (section.HistoricalAttributes.Any(_ => _.Name == numberAttribute.Name))
+                        var dataSourceNumberAttribute = dataSourceNetwork.Explorer.NumberAttributes
+                            .SingleOrDefault(_ => _.Name == numberAttribute.Name);
+                        Assert.NotNull(dataSourceNumberAttribute);
+                        var history = asset.GetHistory(numberAttribute);
+                        var dataSourceHistory = dataSourceAsset.GetHistory(dataSourceNumberAttribute);
+                        Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
+                        history.Keys.ForEach(historyKey =>
                         {
-                            var dataSourceNumberAttribute = dataSourceNetwork.Explorer.NumberAttributes
-                                .SingleOrDefault(_ => _.Name == numberAttribute.Name);
-                            Assert.NotNull(dataSourceNumberAttribute);
-                            var history = section.GetHistory(numberAttribute);
-                            var dataSourceHistory = dataSourceSection.GetHistory(dataSourceNumberAttribute);
-                            Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
-                            history.Keys.ForEach(historyKey =>
-                            {
-                                Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
-                            });
-                        }
-                    });
+                            Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
+                        });
+                    }
+                });
 
-                    var textAttributes = network.Explorer.TextAttributes.ToList();
-                    textAttributes.ForEach(textAttribute =>
+                var textAttributes = network.Explorer.TextAttributes.ToList();
+                textAttributes.ForEach(textAttribute =>
+                {
+                    if (asset.HistoricalAttributes.Any(_ => _.Name == textAttribute.Name))
                     {
-                        if (section.HistoricalAttributes.Any(_ => _.Name == textAttribute.Name))
+                        var dataSourceTextAttribute = dataSourceNetwork.Explorer.TextAttributes
+                            .SingleOrDefault(_ => _.Name == textAttribute.Name);
+                        Assert.NotNull(dataSourceTextAttribute);
+                        var history = asset.GetHistory(textAttribute);
+                        var dataSourceHistory = dataSourceAsset.GetHistory(dataSourceTextAttribute);
+                        Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
+                        history.Keys.ForEach(historyKey =>
                         {
-                            var dataSourceTextAttribute = dataSourceNetwork.Explorer.TextAttributes
-                                .SingleOrDefault(_ => _.Name == textAttribute.Name);
-                            Assert.NotNull(dataSourceTextAttribute);
-                            var history = section.GetHistory(textAttribute);
-                            var dataSourceHistory = dataSourceSection.GetHistory(dataSourceTextAttribute);
-                            Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
-                            history.Keys.ForEach(historyKey =>
-                            {
-                                Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
-                            });
-                        }
-                    });
+                            Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
+                        });
+                    }
                 });
             });
         }

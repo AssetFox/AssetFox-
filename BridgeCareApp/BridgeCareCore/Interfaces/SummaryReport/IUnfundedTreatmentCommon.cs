@@ -7,8 +7,8 @@ namespace BridgeCareCore.Interfaces.SummaryReport
 {
     public interface IUnfundedTreatmentCommon
     {
-        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail section, int Year, TreatmentOptionDetail treatment);
+        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment);
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet);
-        public List<SectionDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail);
+        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail);
     }
 }

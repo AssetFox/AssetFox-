@@ -130,8 +130,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
 
-        public virtual DbSet<FacilityEntity> Facility { get; set; }
-
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 
         public virtual DbSet<MaintainableAssetEntity> MaintainableAsset { get; set; }
@@ -1202,20 +1200,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Expression).IsRequired();
             });
 
-            modelBuilder.Entity<FacilityEntity>(entity =>
-            {
-                entity.HasIndex(e => e.NetworkId);
-
-                entity.Property(e => e.Name).IsRequired();
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.HasOne(d => d.Network)
-                    .WithMany(p => p.Facilities)
-                    .HasForeignKey(d => d.NetworkId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
             modelBuilder.Entity<InvestmentPlanEntity>(entity =>
             {
                 entity.HasIndex(e => e.SimulationId).IsUnique();
@@ -1573,15 +1557,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<SectionEntity>(entity =>
             {
-                entity.HasIndex(e => e.FacilityId);
+                entity.HasIndex(e => e.NetworkId);
 
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.Facility)
+                entity.HasOne(d => d.Network)
                     .WithMany(p => p.Sections)
-                    .HasForeignKey(d => d.FacilityId)
+                    .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 

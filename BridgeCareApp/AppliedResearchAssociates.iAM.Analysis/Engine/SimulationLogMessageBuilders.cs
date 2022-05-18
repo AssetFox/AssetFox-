@@ -14,12 +14,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 Subject = SimulationLogSubject.Calculation,
             };
 
-        internal static SimulationLogMessageBuilder InvalidTreatmentCost(Section section, SelectableTreatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
+        internal static SimulationLogMessageBuilder InvalidTreatmentCost(MaintainableAsset asset, SelectableTreatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
         {
             SimulationId = simulationId,
             Status = SimulationLogStatus.Error,
             Subject = SimulationLogSubject.Calculation,
-            Message = $"Invalid cost {cost} for treatment {treatment.Name} on section ({section.Name} {section.Id})",
+            Message = $"Invalid cost {cost} for treatment {treatment.Name} on asset ({asset.Name} {asset.Id})",
         };
 
         internal static SimulationLogMessageBuilder RuntimeWarning(SimulationMessageBuilder innerBuilder, Guid simulationId)

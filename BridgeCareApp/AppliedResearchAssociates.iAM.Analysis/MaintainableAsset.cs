@@ -4,16 +4,15 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class Section : WeakEntity, IValidator
+    public sealed class MaintainableAsset : WeakEntity, IValidator
     {
-        internal Section(Facility facility)
+        internal MaintainableAsset(Network network)
         {
-            Facility = facility ?? throw new ArgumentNullException(nameof(facility));
-
-            SpatialWeighting = new Equation(Facility.Network.Explorer);
+            Network = network ?? throw new ArgumentNullException(nameof(network));
+            SpatialWeighting = new Equation(Network.Explorer);
         }
 
-        public Facility Facility { get; }
+        public Network Network { get; }
 
         public IEnumerable<Attribute> HistoricalAttributes => HistoryPerAttribute.Keys;
 
@@ -51,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
 
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
+
         public string ShortDescription => Name;
     }
 }

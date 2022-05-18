@@ -67,12 +67,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
-            AddNHSBridgeCount(worksheet, startRow, column, reportOutputData.InitialSectionSummaries, null);
+            AddNHSBridgeCount(worksheet, startRow, column, reportOutputData.InitialAssetSummaries, null);
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;
                 column = ++column;
-                AddNHSBridgeCount(worksheet, row, column, null, yearlyData.Sections);
+                AddNHSBridgeCount(worksheet, row, column, null, yearlyData.Assets);
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 4, column);
@@ -147,7 +147,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void AddNHSBridgeCount(ExcelWorksheet worksheet, int row, int column,
-            List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails)
+            List<AssetSummaryDetail> initialSectionSummaries, List<AssetDetail> sectionDetails)
         {
             int goodCount;
             int poorCount;
@@ -229,12 +229,12 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         {
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
-            AddNHSBridgeDeckArea(worksheet, startRow, column, reportOutputData.InitialSectionSummaries, null);
+            AddNHSBridgeDeckArea(worksheet, startRow, column, reportOutputData.InitialAssetSummaries, null);
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;
                 column = ++column;
-                AddNHSBridgeDeckArea(worksheet, row, column, null, yearlyData.Sections);
+                AddNHSBridgeDeckArea(worksheet, row, column, null, yearlyData.Assets);
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 3, column]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn + 1, row + 3, column], ExcelHelperCellFormat.Number);
@@ -242,7 +242,7 @@ namespace BridgeCareCore.Services.SummaryReport.BridgeWorkSummary
         }
 
         private void AddNHSBridgeDeckArea(ExcelWorksheet worksheet, int row, int column,
-            List<SectionSummaryDetail> initialSectionSummaries, List<SectionDetail> sectionDetails)
+            List<AssetSummaryDetail> initialSectionSummaries, List<AssetDetail> sectionDetails)
         {
             double goodDeckArea;
             double poorDeckArea;

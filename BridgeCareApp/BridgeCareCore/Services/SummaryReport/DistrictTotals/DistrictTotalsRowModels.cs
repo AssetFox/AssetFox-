@@ -51,7 +51,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel MpmsTableDistrict(SimulationOutput output, int districtNumber)
         {
             var title = ExcelValueModels.Integer(districtNumber);
-            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
+            Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                 .ToList();
             return ExcelRowModels.WithEntries(values);
@@ -61,7 +61,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel BamsTableDistrict(SimulationOutput output, int districtNumber)
         {
             var title = ExcelValueModels.Integer(districtNumber);
-            Func<SectionDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+            Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                          .ToList();
             return ExcelRowModels.WithEntries(values);
@@ -70,7 +70,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel TotalsTableDistrict(SimulationOutput output, int districtNumber)
         {
             var title = ExcelValueModels.Integer(districtNumber);
-            Func<SectionDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
+            Func<AssetDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                          .ToList();
             return ExcelRowModels.WithEntries(values);
@@ -79,7 +79,7 @@ namespace BridgeCareCore.Services.SummaryReport.DistrictTotals
         internal static ExcelRowModel TotalsTableTurnpike(SimulationOutput output)
         {
             var title = ExcelValueModels.String("Turnpike");
-            Func<SectionDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpike;
+            Func<AssetDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpike;
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
                 .ToList();
             return ExcelRowModels.WithEntries(values);

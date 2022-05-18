@@ -136,18 +136,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 return;
             }
 
-            //build report name
-            var reportFileName = $"Reports\\{_simulationId}.xls";
-            if (string.IsNullOrEmpty(simulationName) || string.IsNullOrWhiteSpace(simulationName))
-            {
-                reportFileName = $"Reports\\{simulationName}-{_simulationId}.xls";
-            }
-
             // Generate Summary report 
             var summaryReportPath = "";
             try
             {
-                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId, reportFileName);
+                summaryReportPath = GenerateSummaryReport(_networkId, _simulationId);
             }
             catch (Exception e)
             {
@@ -171,16 +164,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             return;
         }
 
-        private string GenerateSummaryReport(Guid networkId, Guid simulationId, string reportFileName)
+        private string GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
             var functionReturnValue = "";
-
-            if (string.IsNullOrEmpty(reportFileName) || string.IsNullOrWhiteSpace(reportFileName))
-            {
-                Errors.Add("Summary report file name is missing or not set");
-                IndicateError();
-                return functionReturnValue;
-            }
 
             var requiredSections = new HashSet<string>()
             {
@@ -337,13 +323,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
             //check and generate folder            
-            var executionDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var folderPathForSimulation = $"Reports\\{simulationId}";
-
-            var relativeFolderPath = Path.Combine(executionDirectory, folderPathForSimulation);
-            if (Directory.Exists(relativeFolderPath) == false) { Directory.CreateDirectory(relativeFolderPath); }
-
-            var filePath = Path.Combine(executionDirectory, folderPathForSimulation, "SummaryReport.xlsx");
+            var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
 

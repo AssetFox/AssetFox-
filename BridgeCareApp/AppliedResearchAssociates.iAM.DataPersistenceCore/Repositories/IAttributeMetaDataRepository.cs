@@ -5,6 +5,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IAttributeMetaDataRepository
     {
-        List<DataMinerAttribute> GetAllAttributes();
+        List<Attribute> GetAllAttributes();
     }
 }

@@ -49,13 +49,12 @@ export default class TreatmentService {
         return forScenario            
             ? // TODO: check for api name after functionality for scenario based import is in place.
               coreAxiosInstance.post(
-
-                  `${API.PerformanceCurve}/ImportLibraryTreatmentsFile`,
+                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
                   formData,
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               )
             : coreAxiosInstance.post(
-                  `${API.PerformanceCurve}/ImportLibraryTreatmentsFile`,
+                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
                   formData,
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               );
@@ -68,11 +67,11 @@ export default class TreatmentService {
         return forScenario
             ?  // TODO: check for api name after functionality for scenario based export is in place.   
                coreAxiosInstance.get(               
-                  `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
+                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
               )
             : coreAxiosInstance.get(
                 // TODO: The api looks to be for library, its name need to be changed though
-                  `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
+                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
               );
     }
 }

@@ -3,7 +3,7 @@
         <v-card>
             <v-card-title>
                 <v-layout justify-center>
-                    <h3>Treatments Import/Export</h3>
+                    <h3>Treatments Import</h3>
                 </v-layout>
             </v-card-title>
             <v-card-text>
@@ -12,9 +12,8 @@
                 </v-layout>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
-                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
+                <v-layout justify-space-between>
+                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>                    
                     <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
                 </v-layout>
             </v-card-actions>
@@ -57,7 +56,6 @@ export default class ImportExportTreatmentsDialog extends Vue {
     /**
      * FileSelector submit event handler
      */
-
     onFileSelectorChange(file: File) {
         this.TreatmentsFile = hasValue(file) ? clone(file) : null;
     }

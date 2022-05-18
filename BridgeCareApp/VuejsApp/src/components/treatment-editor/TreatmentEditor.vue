@@ -69,14 +69,13 @@
                 >
                     Add Treatment
                 </v-btn>
-                <v-btn :disabled='false' @click='showImportExportTreatmentsDialog = true'
+                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'>
                     Download
-                </v-btn>
-                <!-- <v-divider class="upload-download-divider" inset vertical>
-                </v-divider> -->
-                <v-btn :disabled='false' @click='showImportExportTreatmentsDialog = true'
+                </v-btn> 
+                <label style='float:right;padding-top:13px;' class="ghd-grey">|</label>
+                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'>
                     Upload
@@ -239,8 +238,8 @@
             @submit='onAddTreatment'
         />
 
-        <ImportExportTreatmentsDialog :showDialog='showImportExportTreatmentsDialog'
-            @submit='onSubmitImportExportTreatmentsDialogResult' />
+        <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
+            @submit='onSubmitImportTreatmentsDialogResult' />
     </v-layout>
 </template>
 
@@ -347,7 +346,7 @@ export default class TreatmentEditor extends Vue {
     @Action('importScenarioTreatmentsFile')
     importScenarioTreatmentsFileAction: any;
     @Action('importLibraryTreatmentsFile')
-    importLibrarTreatmentsFileAction: any;
+    importLibraryTreatmentsFileAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -377,7 +376,7 @@ export default class TreatmentEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
-    showImportExportTreatmentsDialog: boolean = false;    
+    showImportTreatmentsDialog: boolean = false;    
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -742,40 +741,37 @@ export default class TreatmentEditor extends Vue {
         return !allDataIsValid;
     }
 
-     onSubmitImportExportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {
-        this.showImportExportTreatmentsDialog = false;
+     onSubmitImportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {
+        this.showImportTreatmentsDialog = false;
 
-        if (hasValue(result)) {
-            if (result.isExport) {
-                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
-                Treatmentservice.exportTreatments(id, this.hasScenario)
-                    .then((response: AxiosResponse) => {
-                        if (hasValue(response, 'data')) {
-                            const fileInfo: FileInfo = response.data as FileInfo;
-                            FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
-                        }
-                    });
+        if (hasValue(result) && hasValue(result.file)) {
+            const data: TreatmentsFileImport = {
+                file: result.file
+            };
 
-            } else
-            if (hasValue(result.file)) {
-                const data: TreatmentsFileImport = {
-                    file: result.file
-                };
-
-                if (this.hasScenario) {
-                    this.importScenarioTreatmentsFileAction({
-                        ...data,
-                        id: this.selectedScenarioId
-                    });
-                } else {
-                    this.importLibraryTreatmentsFileAction({
-                        ...data,
-                        id: this.selectedPerformanceCurveLibrary.id
-                    });
-                }
-
+            if (this.hasScenario) {
+                this.importScenarioTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedScenarioId
+                });
+            } else {
+                this.importLibraryTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedTreatmentLibrary.id
+                });
             }
         }
+     }
+
+     OnExportTreamentsClick(){
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedTreatmentLibrary.id;
+        Treatmentservice.exportTreatments(id, this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
      }
 }
 </script>

@@ -2,7 +2,7 @@
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
-            var dataMinerAttributes = new List<DataMinerAttribute>();
+            var dataMinerAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
             {
                 var mappedDto = AttributeMapper.ToDomain(dto);
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             repository.UpsertAttributes(dtos.ToList());
         }
 
-        public static void UpsertAttributes(this IAttributeRepository repo, params DataMinerAttribute[] attributes)
+        public static void UpsertAttributes(this IAttributeRepository repo, params DataAttribute[] attributes)
             => repo.UpsertAttributes(attributes.ToList());
     }
 }

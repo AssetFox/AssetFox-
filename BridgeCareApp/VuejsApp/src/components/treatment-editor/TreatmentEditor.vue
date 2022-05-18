@@ -344,6 +344,10 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+    @Action('importScenarioTreatmentsFile')
+    importScenarioTreatmentsFileAction: any;
+    @Action('importLibraryTreatmentsFile')
+    importLibrarTreatmentsFileAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -761,14 +765,12 @@ export default class TreatmentEditor extends Vue {
                 if (this.hasScenario) {
                     this.importScenarioTreatmentsFileAction({
                         ...data,
-                        id: this.selectedScenarioId,
-                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                        id: this.selectedScenarioId
                     });
                 } else {
                     this.importLibraryTreatmentsFileAction({
                         ...data,
-                        id: this.selectedPerformanceCurveLibrary.id,
-                        currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                        id: this.selectedPerformanceCurveLibrary.id
                     });
                 }
 

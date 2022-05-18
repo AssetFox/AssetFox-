@@ -40,19 +40,16 @@ export default class TreatmentService {
         file: File,
         id: string,
         forScenario: boolean
-        //currentUserCriteriaFilter: UserCriteriaFilter,
     ) {
         let formData = new FormData();
 
         formData.append('file', file);
         formData.append(forScenario ? 'simulationId' : 'libraryId', id);
-        // formData.append(
-        //     'currentUserCriteriaFilter',
-        //     JSON.stringify(currentUserCriteriaFilter),
-        // );
+      
+        return forScenario            
+            ? // TODO: check for api name after functionality for scenario based import is in place.
+              coreAxiosInstance.post(
 
-        return forScenario
-            ? coreAxiosInstance.post(
                   `${API.PerformanceCurve}/ImportLibraryTreatmentsFile`,
                   formData,
                   { headers: { 'Content-Type': 'multipart/form-data' } },
@@ -69,10 +66,12 @@ export default class TreatmentService {
         forScenario: boolean = false,
     ): AxiosPromise {
         return forScenario
-            ? coreAxiosInstance.get(
+            ?  // TODO: check for api name after functionality for scenario based export is in place.   
+               coreAxiosInstance.get(               
                   `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
               )
             : coreAxiosInstance.get(
+                // TODO: The api looks to be for library, its name need to be changed though
                   `${API.PerformanceCurve}/ExportScenarioTreatmentsExcelFile/${id}`,
               );
     }

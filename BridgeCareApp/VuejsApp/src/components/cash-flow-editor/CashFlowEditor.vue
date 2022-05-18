@@ -1,48 +1,60 @@
 <template>
     <v-layout column>
         <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click="onShowCreateCashFlowRuleLibraryDialog(false)"
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
+            <v-layout justify-space-between>
+                <v-flex xs4 class="ghd-constant-header">
                     <v-select
                         :items="librarySelectItems"
                         label="Select a Cash Flow Library"
                         outline
-                        v-if="!hasSelectedLibrary || hasScenario"
-                        v-model="librarySelectItemValue"
-                    >
+                        v-model="librarySelectItemValue">
                     </v-select>
-                    <v-text-field
+                    <!-- <v-text-field
                         label="Library Name"
                         v-if="hasSelectedLibrary && !hasScenario"
                         v-model="selectedCashFlowRuleLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
+                        :rules="[rules['generalRules'].valueIsNotEmpty]">
                         <template slot="append">
                             <v-btn
                                 @click="librarySelectItemValue = null"
                                 class="ara-orange"
-                                icon
-                            >
+                                icon>
                                 <v-icon>fas fa-caret-left</v-icon>
                             </v-btn>
                         </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class="sharing"
-                        label="Shared"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedCashFlowRuleLibrary.isShared"
-                    />
+                    </v-text-field> -->
+                    
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">                   
+                    <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
+                        <div v-if='hasSelectedLibrary && !hasScenario'>
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider class="owner-shared-divider" inset vertical
+                            v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
+                        </v-divider>
+                        <v-checkbox
+                            class="sharing"
+                            label="Shared"
+                            v-if="hasSelectedLibrary && !hasScenario"
+                            v-model="selectedCashFlowRuleLibrary.isShared"/>
+                    </v-layout>  
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">                   
+                    <v-layout row align-end class="left-buttons-padding">
+                        <v-spacer></v-spacer>
+                        <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
+                            class="ara-blue-bg white--text"
+                            v-show="!hasScenario">
+                            New Library
+                        </v-btn>
+                        <v-btn @click="onAddCashFlowRule">
+                            <v-icon class="plus-icon" left>
+                                fas fa-plus
+                            </v-icon>
+                            Add Cash Flow Rule
+                        </v-btn>
+                    </v-layout>
                 </v-flex>
             </v-layout>
         </v-flex>
@@ -52,73 +64,44 @@
                     <v-flex xs8>
                         <v-card>
                             <v-card-title>
-                                <v-btn @click="onAddCashFlowRule">
-                                    <v-icon class="plus-icon" left
-                                        >fas fa-plus
-                                    </v-icon>
-                                    Add Cash Flow Rule
-                                </v-btn>
+                                
                             </v-card-title>
                             <v-card-text class="cash-flow-library-card">
                                 <v-data-table
                                     :headers="cashFlowRuleGridHeaders"
                                     :items="cashFlowRuleGridData"
                                     class="elevation-1 v-table__overflow"
-                                    item-key="id"
-                                >
+                                    item-key="id">
                                     <template slot="items" slot-scope="props">
                                         <td>
                                             <v-radio-group
                                                 :mandatory="false"
                                                 class="cash-flow-radio-group"
-                                                v-model="
-                                                    cashFlowRuleRadioBtnValue
-                                                "
-                                            >
-                                                <v-radio
-                                                    :value="props.item.id"
-                                                ></v-radio>
+                                                v-model="cashFlowRuleRadioBtnValue">
+                                                <v-radio :value="props.item.id"></v-radio>
                                             </v-radio-group>
                                         </td>
                                         <td>
                                             <v-edit-dialog
-                                                :return-value.sync="
-                                                    props.item.name
-                                                "
+                                                :return-value.sync="props.item.name"
                                                 large
                                                 lazy
                                                 persistent
-                                                @save="
-                                                    onEditSelectedLibraryListData(
-                                                        props.item,
-                                                        'description',
-                                                    )
-                                                "
-                                            >
+                                                @save="onEditSelectedLibraryListData(props.item,'description')">
                                                 <v-text-field
                                                     readonly
                                                     single-line
                                                     class="sm-txt"
                                                     :value="props.item.name"
-                                                    :rules="[
-                                                        rules.generalRules
-                                                            .valueIsNotEmpty,
-                                                    ]"
-                                                />
+                                                    :rules="[rules.generalRules.valueIsNotEmpty]"/>
                                                 <template slot="input">
                                                     <v-textarea
                                                         label="Description"
                                                         no-resize
                                                         outline
                                                         rows="5"
-                                                        :rules="[
-                                                            rules.generalRules
-                                                                .valueIsNotEmpty,
-                                                        ]"
-                                                        v-model="
-                                                            props.item.name
-                                                        "
-                                                    />
+                                                        :rules="[rules.generalRules.valueIsNotEmpty]"
+                                                        v-model="props.item.name"/>
                                                 </template>
                                             </v-edit-dialog>
                                         </td>
@@ -126,19 +109,15 @@
                                             <v-menu
                                                 bottom
                                                 min-height="500px"
-                                                min-width="500px"
-                                            >
+                                                min-width="500px">
                                                 <template slot="activator">
                                                     <v-text-field
                                                         readonly
                                                         single-line
                                                         class="sm-txt"
-                                                        :value="
-                                                            props.item
-                                                                .criterionLibrary
-                                                                .mergedCriteriaExpression
-                                                        "
-                                                    />
+                                                        :value=" props.item
+                                                                    .criterionLibrary
+                                                                    .mergedCriteriaExpression"/>
                                                 </template>
                                                 <v-card>
                                                     <v-card-text>
@@ -146,41 +125,35 @@
                                                             :value="
                                                                 props.item
                                                                     .criterionLibrary
-                                                                    .mergedCriteriaExpression
-                                                            "
+                                                                    .mergedCriteriaExpression"
                                                             full-width
                                                             no-resize
                                                             outline
                                                             readonly
-                                                            rows="5"
-                                                        />
+                                                            rows="5"/>
                                                     </v-card-text>
                                                 </v-card>
                                             </v-menu>
 
                                             <v-btn
-                                                @click="
-                                                    onEditCashFlowRuleCriterionLibrary(
-                                                        props.item,
-                                                    )
-                                                "
+                                                @click="onEditCashFlowRuleCriterionLibrary(props.item)"
                                                 class="edit-icon"
-                                                icon
-                                            >
+                                                icon>
                                                 <v-icon>fas fa-edit</v-icon>
                                             </v-btn>
                                         </td>
                                         <td>
                                             <v-btn
-                                                @click="
-                                                    onDeleteCashFlowRule(
-                                                        props.item.id,
-                                                    )
-                                                "
+                                                @click="onDeleteCashFlowRule(props.item.id)"
                                                 class="ara-orange"
-                                                icon
-                                            >
+                                                icon>
                                                 <v-icon>fas fa-trash</v-icon>
+                                            </v-btn>
+                                            <v-btn
+                                                @click="showRuleEditorDialog = true"
+                                                class="ara-orange"
+                                                icon>
+                                                <v-icon>fas fa-edit</v-icon>
                                             </v-btn>
                                         </td>
                                     </template>
@@ -200,56 +173,33 @@
                             </v-card-title>
                             <v-card-text class="cash-flow-library-card">
                                 <v-data-table
-                                    :headers="
-                                        cashFlowRuleDistributionGridHeaders
-                                    "
+                                    :headers="cashFlowRuleDistributionGridHeaders"
                                     :items="cashFlowDistributionRuleGridData"
-                                    class="elevation-1 v-table__overflow"
-                                >
+                                    class="elevation-1 v-table__overflow">
                                     <template slot="items" slot-scope="props">
                                         <td>
                                             <v-edit-dialog
-                                                :return-value.sync="
-                                                    props.item.durationInYears
-                                                "
-                                                @save="
-                                                    onEditSelectedLibraryListData(
-                                                        props.item,
-                                                        'durationInYears',
-                                                    )
-                                                "
+                                                :return-value.sync="props.item.durationInYears"
+                                                @save="onEditSelectedLibraryListData(props.item,'durationInYears')"
                                                 full-width
                                                 large
                                                 lazy
-                                                persistent
-                                            >
+                                                persistent>
                                                 <v-text-field
                                                     readonly
                                                     single-line
                                                     class="sm-txt"
-                                                    :value="
-                                                        props.item
-                                                            .durationInYears
-                                                    "
+                                                    :value="props.item.durationInYears"
                                                     :rules="[
-                                                        rules['generalRules']
-                                                            .valueIsNotEmpty,
+                                                        rules['generalRules'].valueIsNotEmpty,
                                                         rules[
                                                             'cashFlowRules'
-                                                        ].isDurationGreaterThanPreviousDuration(
-                                                            props.item,
-                                                            selectedCashFlowRule,
-                                                        ),
-                                                    ]"
-                                                />
+                                                        ].isDurationGreaterThanPreviousDuration(props.item,selectedCashFlowRule)]"/>
                                                 <template slot="input">
                                                     <v-text-field
                                                         label="Edit"
                                                         single-line
-                                                        v-model.number="
-                                                            props.item
-                                                                .durationInYears
-                                                        "
+                                                        v-model.number="props.item.durationInYears"
                                                         :rules="[
                                                             rules[
                                                                 'generalRules'
@@ -258,44 +208,28 @@
                                                                 'cashFlowRules'
                                                             ].isDurationGreaterThanPreviousDuration(
                                                                 props.item,
-                                                                selectedCashFlowRule,
-                                                            ),
-                                                        ]"
-                                                    />
+                                                                selectedCashFlowRule
+                                                            )
+                                                        ]"/>
                                                 </template>
                                             </v-edit-dialog>
                                         </td>
                                         <td>
                                             <v-edit-dialog
-                                                :return-value.sync="
-                                                    props.item.costCeiling
-                                                "
+                                                :return-value.sync="props.item.costCeiling"
                                                 large
                                                 lazy
                                                 persistent
                                                 full-width
-                                                @open="
-                                                    onOpenCostCeilingEditDialog(
-                                                        props.item.id,
-                                                    )
-                                                "
-                                                @save="
-                                                    onEditSelectedLibraryListData(
-                                                        props.item,
-                                                        'costCeiling',
-                                                    )
-                                                "
+                                                @open="onOpenCostCeilingEditDialog(props.item.id)"
+                                                @save="onEditSelectedLibraryListData(props.item,'costCeiling')"
                                             >
                                                 <v-text-field
                                                     readonly
                                                     single-line
                                                     class="sm-txt"
                                                     :value="
-                                                        formatAsCurrency(
-                                                            props.item
-                                                                .costCeiling,
-                                                        )
-                                                    "
+                                                        formatAsCurrency(props.item.costCeiling)"
                                                     :rules="[
                                                         rules['generalRules']
                                                             .valueIsNotEmpty,
@@ -303,26 +237,22 @@
                                                             'cashFlowRules'
                                                         ].isAmountGreaterThanOrEqualToPreviousAmount(
                                                             props.item,
-                                                            selectedCashFlowRule,
-                                                        ),
-                                                    ]"
-                                                />
+                                                            selectedCashFlowRule
+                                                        )
+                                                    ]"/>
                                                 <template slot="input">
                                                     <v-text-field
                                                         label="Edit"
                                                         single-line
                                                         :id="props.item.id"
-                                                        v-model="
-                                                            props.item
-                                                                .costCeiling
-                                                        "
+                                                        v-model="props.item.costCeiling"
                                                         v-currency="{
                                                             currency: {
                                                                 prefix: '$',
-                                                                suffix: '',
+                                                                suffix: ''
                                                             },
                                                             locale: 'en-US',
-                                                            distractionFree: false,
+                                                            distractionFree: false
                                                         }"
                                                         :rules="[
                                                             rules[
@@ -332,52 +262,36 @@
                                                                 'cashFlowRules'
                                                             ].isAmountGreaterThanOrEqualToPreviousAmount(
                                                                 props.item,
-                                                                selectedCashFlowRule,
-                                                            ),
-                                                        ]"
-                                                    />
+                                                                selectedCashFlowRule
+                                                            )
+                                                        ]"/>
                                                 </template>
                                             </v-edit-dialog>
                                         </td>
                                         <td>
                                             <v-edit-dialog
-                                                :return-value.sync="
-                                                    props.item.yearlyPercentages
-                                                "
-                                                @save="
-                                                    onEditSelectedLibraryListData(
-                                                        props.item,
-                                                        'yearlyPercentages',
-                                                    )
-                                                "
+                                                :return-value.sync="props.item.yearlyPercentages"
+                                                @save="onEditSelectedLibraryListData(props.item,'yearlyPercentages')"
                                                 full-width
                                                 large
                                                 lazy
-                                                persistent
-                                            >
+                                                persistent>
                                                 <v-text-field
                                                     readonly
                                                     single-line
                                                     class="sm-txt"
-                                                    :value="
-                                                        props.item
-                                                            .yearlyPercentages
-                                                    "
+                                                    :value="props.item.yearlyPercentages"
                                                     :rules="[
                                                         rules['generalRules']
                                                             .valueIsNotEmpty,
                                                         rules['cashFlowRules']
-                                                            .doesTotalOfPercentsEqualOneHundred,
-                                                    ]"
-                                                />
+                                                            .doesTotalOfPercentsEqualOneHundred
+                                                    ]"/>
                                                 <template slot="input">
                                                     <v-text-field
                                                         label="Edit"
                                                         single-line
-                                                        v-model="
-                                                            props.item
-                                                                .yearlyPercentages
-                                                        "
+                                                        v-model="props.item.yearlyPercentages"
                                                         :rules="[
                                                             rules[
                                                                 'generalRules'
@@ -385,22 +299,16 @@
                                                             rules[
                                                                 'cashFlowRules'
                                                             ]
-                                                                .doesTotalOfPercentsEqualOneHundred,
-                                                        ]"
-                                                    />
+                                                                .doesTotalOfPercentsEqualOneHundred
+                                                        ]"/>
                                                 </template>
                                             </v-edit-dialog>
                                         </td>
                                         <td>
                                             <v-btn
-                                                @click="
-                                                    onDeleteCashFlowDistributionRule(
-                                                        props.item.id,
-                                                    )
-                                                "
+                                                @click="onDeleteCashFlowDistributionRule(props.item.id)"
                                                 class="ara-orange"
-                                                icon
-                                            >
+                                                icon>
                                                 <v-icon>fas fa-trash</v-icon>
                                             </v-btn>
                                         </td>
@@ -421,13 +329,10 @@
                         outline
                         rows="4"
                         v-model="selectedCashFlowRuleLibrary.description"
-                        @input="
-                            selectedCashFlowRuleLibrary = {
+                        @input="selectedCashFlowRuleLibrary = {
                                 ...selectedCashFlowRuleLibrary,
-                                description: $event,
-                            }
-                        "
-                    >
+                                description: $event
+                            }">
                     </v-textarea>
                 </v-flex>
             </v-layout>
@@ -436,45 +341,39 @@
             <v-layout
                 justify-end
                 row
-                v-show="hasSelectedLibrary || hasScenario"
-            >
+                v-show="hasSelectedLibrary || hasScenario">
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
                     class="ara-blue-bg white--text"
-                    v-show="hasScenario"
-                >
+                    v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
                     class="ara-blue-bg white--text"
-                    v-show="!hasScenario"
-                >
+                    v-show="!hasScenario">
                     Update Library
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtons()"
                     @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
-                >
+                    class="ara-blue-bg white--text">
                     Create as New Library
                 </v-btn>
                 <v-btn
                     @click="onDeleteCashFlowRuleLibrary"
                     class="ara-orange-bg white--text"
                     v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission"
-                >
+                    :disabled="!hasLibraryEditPermission">
                     Delete Library
                 </v-btn>
                 <v-btn
                     @click="onDiscardChanges"
                     class="ara-orange-bg white--text"
                     v-show="hasSelectedLibrary || hasScenario"
-                    :disabled="!hasUnsavedChanges"
-                >
+                    :disabled="!hasUnsavedChanges">
                     Discard Changes
                 </v-btn>
             </v-layout>
@@ -493,6 +392,12 @@
         <CriterionLibraryEditorDialog
             :dialogData="criterionLibraryEditorDialogData"
             @submit="onSubmitCriterionLibraryEditorDialogResult"
+        />
+
+        <CashFlowRuleEditDialog            
+            :showDialog="showRuleEditorDialog"
+            :selectedCashFlowRule="selectedCashFlowRule"
+            @submit="onSubmitCashFlowRuleEdit"
         />
     </v-layout>
 </template>
@@ -533,6 +438,7 @@ import {
     emptyCreateCashFlowLibraryDialogData,
 } from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import CreateCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowRuleLibraryDialog.vue';
+import CashFlowRuleEditDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CashFlowRuleEditDialog.vue';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
@@ -553,6 +459,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
         CreateCashFlowRuleLibraryDialog,
         CriterionLibraryEditorDialog,
         ConfirmDeleteAlert: Alert,
+        CashFlowRuleEditDialog
     },
 })
 export default class CashFlowEditor extends Vue {
@@ -611,7 +518,7 @@ export default class CashFlowEditor extends Vue {
             width: '65%',
         },
         {
-            text: '',
+            text: 'Action',
             value: '',
             align: 'left',
             sortable: false,
@@ -673,6 +580,7 @@ export default class CashFlowEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    showRuleEditorDialog: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -825,6 +733,14 @@ export default class CashFlowEditor extends Vue {
             this.hasCreatedLibrary = true;
             this.librarySelectItemValue = cashFlowRuleLibrary.name;
         }
+    }
+
+    onSubmitCashFlowRuleEdit(CashFlowDistributionRules:CashFlowDistributionRule[])
+    {
+        this.showRuleEditorDialog = false;
+        if(!isNil(CashFlowDistributionRules))
+            this.selectedCashFlowRule.cashFlowDistributionRules = hasValue(CashFlowDistributionRules)
+                ? clone(CashFlowDistributionRules) : [];      
     }
 
     onAddCashFlowRule() {

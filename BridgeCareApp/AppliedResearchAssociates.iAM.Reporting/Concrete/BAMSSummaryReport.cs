@@ -263,7 +263,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             // Bridge Data TAB
@@ -279,7 +278,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Unfunded Treatment - Final List TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
             _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
@@ -287,14 +285,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Unfunded Treatment - Time TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
             _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
@@ -303,7 +299,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
@@ -313,7 +308,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            Errors.Add(reportDetailDto.Status);
             //_hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
@@ -324,6 +318,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";
+            if (Directory.Exists(folderPathForSimulation) == false) { Directory.CreateDirectory(folderPathForSimulation);  }
+
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);

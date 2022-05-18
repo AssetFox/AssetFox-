@@ -22,11 +22,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
-
+        private static bool OkToUpdate(List<AttributeEntity> oldEntities, AttributeEntity proposedNewEntity)
+        {
+            var compare = oldEntities.Single(e => e.Id == proposedNewEntity.Id);
+            var returnValue = proposedNewEntity.Name == compare.Name
+                             && proposedNewEntity.ConnectionType == compare.ConnectionType;
+            return returnValue;
+        }
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            var validAttributes = attributes.Where(_ => IsValid(_)).ToList();
-            var upsertAttributeEntities = validAttributes.Select(_ => _.ToEntity()).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();

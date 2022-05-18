@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {

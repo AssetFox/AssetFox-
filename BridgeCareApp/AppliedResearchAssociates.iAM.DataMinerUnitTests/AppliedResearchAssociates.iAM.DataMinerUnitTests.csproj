@@ -23,7 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Common\AppliedResearchAssociates.iAM.Common.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.DataMiner.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataMiner\AppliedResearchAssociates.iAM.Data.csproj" />
   </ItemGroup>
 
 </Project>

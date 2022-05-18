@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
-            var attributes = new List<DataMinerAttribute> { attribute };
+            var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Text();
-            var attributes = new List<DataMinerAttribute> { attribute };
+            var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -62,13 +62,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
-            var attributes = new List<DataMinerAttribute> { attribute };
+            var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var updateAttribute = new NumericAttribute(
                 20, 100, 10, attribute.Id, attribute.Name, "AVERAGE",
-                "updatedCommand", DataMiner.ConnectionType.MSSQL, "connectionString",
+                "updatedCommand", Data.ConnectionType.MSSQL, "connectionString",
                 !attribute.IsCalculated, !attribute.IsAscending);
-            var updateAttributes = new List<DataMinerAttribute> { updateAttribute };
+            var updateAttributes = new List<DataAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -83,10 +83,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
-            var attributes = new List<DataMinerAttribute> { attribute };
+            var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var updateAttribute = AttributeTestSetup.Numeric(attribute.Id, "updated name should fail");
-            var updateAttributes = new List<DataMinerAttribute> { updateAttribute };
+            var updateAttributes = new List<DataAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -98,9 +98,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
-            var attributes = new List<DataMinerAttribute> { attribute };
+            var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", DataMiner.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
+            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
             repo.UpsertAttributes(updateAttribute);
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
             var invalidAttribute = new NumericAttribute(100, 1000, 0, attributeId, randomName, "Invalid ruleType",
-                "Command", DataMiner.ConnectionType.MSSQL, "", true, false);
+                "Command", Data.ConnectionType.MSSQL, "", true, false);
             repo.UpsertAttributes(invalidAttribute);
             var attributesAfter = await repo.Attributes();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);

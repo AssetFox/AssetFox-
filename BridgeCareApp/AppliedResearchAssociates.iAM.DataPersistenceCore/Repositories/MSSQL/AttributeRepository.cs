@@ -11,8 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
-using DataMinerAttribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -23,7 +22,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
-
         private static bool OkToUpdate(List<AttributeEntity> oldEntities, AttributeEntity proposedNewEntity)
         {
             var compare = oldEntities.Single(e => e.Id == proposedNewEntity.Id);
@@ -31,36 +29,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                              && proposedNewEntity.ConnectionType == compare.ConnectionType;
             return returnValue;
         }
-
-        private static bool IsValid(DataMinerAttribute attribute)
+        public void UpsertAttributes(List<Attribute> attributes)
         {
-            try
-            {
-                switch (attribute.DataType)
-                {
-                case "STRING":
-                    {
-                        var _ = AggregationRuleFactory.CreateTextRule(attribute);
-                        return true;
-                    }
-                case "NUMBER":
-                    {
-                        var _ = AggregationRuleFactory.CreateNumericRule(attribute);
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-                // ignore any exception.
-            }
-            return false;
-        }
-
-        public void UpsertAttributes(List<DataMinerAttribute> attributes)
-        {
-            var validAttributes = attributes.Where(_ => IsValid(_)).ToList();
-            var upsertAttributeEntities = validAttributes.Select(_ => _.ToEntity()).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();

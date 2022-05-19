@@ -28,12 +28,14 @@
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
-                        </div>                       
+                        </div>  
+                        <div style="margin-top: -8px !important">                     
                         <v-checkbox
                             class='sharing ghd-control-text ghd-padding'
                             label='Shared'                            
                             v-model='selectedTreatmentLibrary.isShared'
-                        />                                               
+                        /> 
+                        </div>                                              
                     </v-layout>
                 </v-flex>
                 <v-flex xs2>
@@ -56,12 +58,36 @@
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
+        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>        
+        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top: -20px; margin-bottom: -25px;">
+               <v-btn
+                    @click='showCreateTreatmentDialog = true'
+                    depressed
+                    class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
+                    style='float:right;'
+                    v-show='!hasScenario'
+                >
+                    Add Treatment
+                </v-btn>
+                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    v-show ='hasSelectedLibrary && !hasScenario'>
+                    Download
+                </v-btn> 
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
+                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    v-show ='hasSelectedLibrary && !hasScenario'>
+                    Upload
+                </v-btn>
+            </div>    
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>              
             <div class='treatments-div'>
-                <v-layout column>                    
-                    <v-flex xs12>                        
-                        <div v-show='selectedTreatment.id !== uuidNIL'>
+                <v-layout column> 
+                    <v-flex xs12>               
+                        <div v-show='selectedTreatment.id !== uuidNIL'>                                                
                             <v-tabs v-model='activeTab'>
                                 <v-tab
                                     :key='index'
@@ -129,16 +155,7 @@
                                                             @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                             </v-card-text>
                                         </v-card>
-                                    </v-tab-item>                                    
-                                    <v-btn
-                                        @click='showCreateTreatmentDialog = true'
-                                        depressed
-                                        class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'
-                                        style="margin-top: -930px;margin-left: 1030px;"
-                                        v-show='!hasScenario'
-                                    >
-                                        Add Treatment
-                                    </v-btn>                                      
+                                    </v-tab-item>
                                 </v-tabs-items>
                             </v-tabs>
                         </div>                                             
@@ -222,6 +239,9 @@
             :showDialog='showCreateTreatmentDialog'
             @submit='onAddTreatment'
         />
+
+        <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
+            @submit='onSubmitImportTreatmentsDialogResult' />
     </v-layout>
 </template>
 
@@ -246,6 +266,7 @@ import {
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
+    TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
 import {
@@ -276,9 +297,18 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUserName } from '@/shared/utils/get-user-info';
+import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
+import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
+import Treatmentservice from '@/services/treatment.service';
+import { AxiosResponse } from 'axios';
+import { FileInfo } from '@/shared/models/iAM/file-info';
+import FileDownload from 'js-file-download';
+import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component({
     components: {
+        ImportExportTreatmentsDialog,
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
@@ -315,6 +345,10 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+    @Action('importScenarioTreatmentsFile')
+    importScenarioTreatmentsFileAction: any;
+    @Action('importLibraryTreatmentsFile')
+    importLibraryTreatmentsFileAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -344,6 +378,7 @@ export default class TreatmentEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    showImportTreatmentsDialog: boolean = false;    
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -707,6 +742,39 @@ export default class TreatmentEditor extends Vue {
         this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
+
+     onSubmitImportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {
+        this.showImportTreatmentsDialog = false;
+
+        if (hasValue(result) && hasValue(result.file)) {
+            const data: TreatmentsFileImport = {
+                file: result.file
+            };
+
+            if (this.hasScenario) {
+                this.importScenarioTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedScenarioId
+                });
+            } else {
+                this.importLibraryTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedTreatmentLibrary.id
+                });
+            }
+        }
+     }
+
+     OnExportTreamentsClick(){
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedTreatmentLibrary.id;
+        Treatmentservice.exportTreatments(id, this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+     }
 }
 </script>
 

@@ -71,15 +71,17 @@
                 </v-btn>
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'>
+                    style='float:right;'
+                    v-show ='hasSelectedLibrary && !hasScenario'>
                     Download
                 </v-btn> 
-                <label style='float:right;padding-top:13px;' class="ghd-grey">|</label>
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
-                    style='float:right;'>
+                    style='float:right;'
+                    v-show ='hasSelectedLibrary && !hasScenario'>
                     Upload
-                </v-btn>                
+                </v-btn>
             </div>    
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>              
             <div class='treatments-div'>

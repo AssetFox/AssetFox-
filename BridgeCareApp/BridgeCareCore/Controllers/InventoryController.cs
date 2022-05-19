@@ -28,26 +28,15 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetInventory")]
+        [Route("GetKeyProperties")]
         [Authorize]
-        public async Task<IActionResult> GetInventory()
-        {
-            var data = new List<BMSIDAndBRKeyDTO>();
+        public async Task<IActionResult> GetKeyProperties() =>
+            Ok(_assetData.KeyProperties.Keys.ToList());
 
-            // TODO:  Need to figure out a way to make this more generic.  Another setting in appSettings.json?
-
-            if (_assetData.KeyProperties.ContainsKey("BRKEY") && _assetData.KeyProperties.ContainsKey("BMSID"))
-            {
-                data = _assetData.KeyProperties["BMSID"].Join(
-                    _assetData.KeyProperties["BRKEY"],
-                    assetIDBMS => assetIDBMS.AssetId,
-                    assetBrKey => assetBrKey.AssetId,
-                    (bmsid, brkey)
-                    => new BMSIDAndBRKeyDTO { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
-                    .ToList();
-            }
-
-            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
-        }
+        [HttpGet]
+        [Route("GetValuesForKey/{propertyName}")]
+        [Authorize]
+        public async Task<IActionResult> GetValuesForKey(string propertyName) =>
+            Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
     }
 }

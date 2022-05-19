@@ -17,7 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<Guid> GetAttributeIdsInNetwork(Guid networkId);
 
-        Task<List<AttributeDTO>> Attributes();
+        List<AttributeDTO> GetAttributes();
+
+        Task<List<AttributeDTO>> GetAttributesAsync();
 
         Task<List<AttributeDTO>> CalculatedAttributes();
     }

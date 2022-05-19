@@ -21,7 +21,7 @@
                     <td>
                         <v-edit-dialog
                             :return-value.sync="props.item.durationInYears"
-                            
+                            @save="onEditSelectedLibraryListData(props.item,'durationInYears')"
                             full-width
                             large
                             lazy
@@ -62,6 +62,7 @@
                             lazy
                             persistent
                             full-width
+                            @save="onEditSelectedLibraryListData(props.item,'costCeiling')"
                             @open="onOpenCostCeilingEditDialog(props.item.id)">
                             <v-text-field
                                 readonly
@@ -159,6 +160,7 @@
       <v-card-actions>
         <v-layout justify-space-between row>
           <v-btn @click="onSubmit(true)"
+                 :disabled="!hasUnsavedChanges"
                  class="ara-blue-bg white--text">
             Submit
           </v-btn>
@@ -173,7 +175,7 @@
 
 <script lang="ts">
 import Vue from 'vue';
-import {Getter} from 'vuex-class';
+import {Action, Getter, State} from 'vuex-class';
 import Component from 'vue-class-component';
 import {Prop, Watch} from 'vue-property-decorator';
 import {
@@ -190,13 +192,19 @@ import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 
 @Component
 export default class CashFlowRuleEditDialog extends Vue {
   @Prop() selectedCashFlowRule: CashFlowRule;
   @Prop() showDialog: boolean;
+
+  hasUnsavedChanges: boolean = false;
+    
+  @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+
   cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = []
-cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
+    cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
         {
             text: 'Duration (yr)',
             value: 'durationInYears',
@@ -235,6 +243,7 @@ cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
 
   onSubmit(submit: boolean) {
     if (submit) {
+      this.hasUnsavedChanges = false;
       this.$emit('submit', this.cashFlowDistributionRuleGridData);
     } else {
       this.onSelectedSplitTreatmentIdChanged()
@@ -245,7 +254,11 @@ cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
   onEditSelectedLibraryListData(data: any, property: string) {
         switch (property) {
             case 'durationInYears':
+                this.onCashFlowDistributionRuleGridDataChanged();
             case 'costCeiling':
+                data.costCeiling = this.unFormatAsCurrency(data.costCeiling)
+                this.onCashFlowDistributionRuleGridDataChanged();
+                break;
             case 'yearlyPercentages':
                 this.cashFlowDistributionRuleGridData = update(
                             findIndex(
@@ -352,11 +365,29 @@ cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
             ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
     }
 
+    @Watch('cashFlowDistributionRuleGridData')
+    onCashFlowDistributionRuleGridDataChanged() {
+        this.hasUnsavedChanges = 
+            hasUnsavedChangesCore(
+                '',
+                this.cashFlowDistributionRuleGridData,
+                this.selectedCashFlowRule.cashFlowDistributionRules,
+            )
+    }
+
     formatAsCurrency(value: any) {
         if (hasValue(value)) {
             return formatAsCurrency(value);
         }
         return null;
+    }
+
+    unFormatAsCurrency(value: any) : number {
+        if (hasValue(value)) {
+            let foo = Number(value.replace(/[^0-9.-]+/g,""));
+            return foo;
+        }
+        return 0;
     }
 
     onDeleteCashFlowDistributionRule(id: string) {

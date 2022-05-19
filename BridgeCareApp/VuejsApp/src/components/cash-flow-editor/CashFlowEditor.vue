@@ -1,13 +1,14 @@
 <template>
-    <v-layout column>
+    <v-layout column class="Montserrat-font-family">
         <v-flex xs12>
             <v-layout justify-space-between>
                 <v-flex xs4 class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
-                        label="Select a Cash Flow Library"
                         outline
-                        v-model="librarySelectItemValue">
+                        v-model="librarySelectItemValue"
+                        class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
                     <!-- <v-text-field
                         label="Library Name"
@@ -26,15 +27,15 @@
                     
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">                   
-                    <v-layout row v-show='hasSelectedLibrary || hasScenario' class="shared-owner-flex-padding">
-                        <div v-if='hasSelectedLibrary && !hasScenario'>
+                    <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
+                        <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                         </v-divider>
                         <v-checkbox
-                            class="sharing"
+                            class='sharing header-text-content'
                             label="Shared"
                             v-if="hasSelectedLibrary && !hasScenario"
                             v-model="selectedCashFlowRuleLibrary.isShared"/>
@@ -44,14 +45,12 @@
                     <v-layout row align-end class="left-buttons-padding">
                         <v-spacer></v-spacer>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
-                            class="ara-blue-bg white--text"
+                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
                             New Library
                         </v-btn>
-                        <v-btn @click="onAddCashFlowRule">
-                            <v-icon class="plus-icon" left>
-                                fas fa-plus
-                            </v-icon>
+                        <v-btn @click="onAddCashFlowRule" v-show="hasSelectedLibrary"
+                            outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
                     </v-layout>
@@ -60,264 +59,104 @@
         </v-flex>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
             <div class="cash-flow-library-tables">
-                <v-layout justify-center row>
-                    <v-flex xs8>
-                        <v-card>
-                            <v-card-title>
-                                
-                            </v-card-title>
-                            <v-card-text class="cash-flow-library-card">
-                                <v-data-table
-                                    :headers="cashFlowRuleGridHeaders"
-                                    :items="cashFlowRuleGridData"
-                                    class="elevation-1 v-table__overflow"
-                                    item-key="id">
-                                    <template slot="items" slot-scope="props">
-                                        <td>
-                                            <v-radio-group
-                                                :mandatory="false"
-                                                class="cash-flow-radio-group"
-                                                v-model="cashFlowRuleRadioBtnValue">
-                                                <v-radio :value="props.item.id"></v-radio>
-                                            </v-radio-group>
-                                        </td>
-                                        <td>
-                                            <v-edit-dialog
-                                                :return-value.sync="props.item.name"
-                                                large
-                                                lazy
-                                                persistent
-                                                @save="onEditSelectedLibraryListData(props.item,'description')">
-                                                <v-text-field
-                                                    readonly
-                                                    single-line
-                                                    class="sm-txt"
-                                                    :value="props.item.name"
-                                                    :rules="[rules.generalRules.valueIsNotEmpty]"/>
-                                                <template slot="input">
-                                                    <v-textarea
-                                                        label="Description"
-                                                        no-resize
-                                                        outline
-                                                        rows="5"
-                                                        :rules="[rules.generalRules.valueIsNotEmpty]"
-                                                        v-model="props.item.name"/>
-                                                </template>
-                                            </v-edit-dialog>
-                                        </td>
-                                        <td>
-                                            <v-menu
-                                                bottom
-                                                min-height="500px"
-                                                min-width="500px">
-                                                <template slot="activator">
-                                                    <v-text-field
-                                                        readonly
-                                                        single-line
-                                                        class="sm-txt"
-                                                        :value=" props.item
-                                                                    .criterionLibrary
-                                                                    .mergedCriteriaExpression"/>
-                                                </template>
-                                                <v-card>
-                                                    <v-card-text>
-                                                        <v-textarea
-                                                            :value="
-                                                                props.item
-                                                                    .criterionLibrary
-                                                                    .mergedCriteriaExpression"
-                                                            full-width
-                                                            no-resize
-                                                            outline
-                                                            readonly
-                                                            rows="5"/>
-                                                    </v-card-text>
-                                                </v-card>
-                                            </v-menu>
+                <v-data-table
+                    :headers="cashFlowRuleGridHeaders"
+                    :items="cashFlowRuleGridData"
+                    v-model='selectedCashRuleGridRows'
+                    class="ghd-table v-table__overflow"
+                    item-key="id"
+                    :must-sort='true'
+                    select-all>
+                    <template slot="items" slot-scope="props">
+                        <td>
+                            <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                        </td>
+                        <td>
+                            <v-edit-dialog
+                                :return-value.sync="props.item.name"
+                                large
+                                lazy
+                                persistent
+                                @save="onEditSelectedLibraryListData(props.item,'description')">
+                                <v-text-field
+                                    readonly
+                                    single-line
+                                    class="sm-txt"
+                                    :value="props.item.name"
+                                    :rules="[rules.generalRules.valueIsNotEmpty]"/>
+                                <template slot="input">
+                                    <v-textarea
+                                        label="Description"
+                                        no-resize
+                                        outline
+                                        rows="5"
+                                        :rules="[rules.generalRules.valueIsNotEmpty]"
+                                        v-model="props.item.name"/>
+                                </template>
+                            </v-edit-dialog>
+                        </td>
+                        <td>
+                            <v-layout align-center style='flex-wrap:nowrap'>
+                                <v-menu
+                                bottom
+                                min-height="500px"
+                                min-width="500px">
+                                <template slot="activator">
+                                    <v-text-field
+                                        readonly
+                                        single-line
+                                        class="sm-txt"
+                                        :value=" props.item
+                                                    .criterionLibrary
+                                                    .mergedCriteriaExpression"/>
+                                </template>
+                                <v-card>
+                                    <v-card-text>
+                                        <v-textarea
+                                            :value="
+                                                props.item
+                                                    .criterionLibrary
+                                                    .mergedCriteriaExpression"
+                                            full-width
+                                            no-resize
+                                            outline
+                                            readonly
+                                            rows="5"/>
+                                    </v-card-text>
+                                </v-card>
+                            </v-menu>
+                            <v-btn
+                                @click="onEditCashFlowRuleCriterionLibrary(props.item)"
+                                class="edit-icon"
+                                icon>
+                                <v-icon>fas fa-edit</v-icon>
+                            </v-btn>
+                            </v-layout>
+                                                   
+                        </td>
+                        <td>
+                            <v-layout style='flex-wrap:nowrap'>
+                                <v-btn
+                                @click="onDeleteCashFlowRule(props.item.id)"
+                                class="ara-orange"
+                                icon>
+                                <v-icon>fas fa-trash</v-icon>
+                            </v-btn>
+                            <v-btn
+                                @click="onSelectCashFlowRule(props.item.id)"
+                                class="ara-orange"
+                                icon>
+                                <v-icon>fas fa-edit</v-icon>
+                            </v-btn>
+                            </v-layout>                          
+                        </td>
+                    </template>
+                </v-data-table>
 
-                                            <v-btn
-                                                @click="onEditCashFlowRuleCriterionLibrary(props.item)"
-                                                class="edit-icon"
-                                                icon>
-                                                <v-icon>fas fa-edit</v-icon>
-                                            </v-btn>
-                                        </td>
-                                        <td>
-                                            <v-btn
-                                                @click="onDeleteCashFlowRule(props.item.id)"
-                                                class="ara-orange"
-                                                icon>
-                                                <v-icon>fas fa-trash</v-icon>
-                                            </v-btn>
-                                            <v-btn
-                                                @click="showRuleEditorDialog = true"
-                                                class="ara-orange"
-                                                icon>
-                                                <v-icon>fas fa-edit</v-icon>
-                                            </v-btn>
-                                        </td>
-                                    </template>
-                                </v-data-table>
-                            </v-card-text>
-                        </v-card>
-                    </v-flex>
-                    <v-flex v-if="selectedCashFlowRule.id !== uuidNIL" xs4>
-                        <v-card>
-                            <v-card-title>
-                                <v-btn @click="onAddCashFlowDistributionRule">
-                                    <v-icon class="plus-icon" left
-                                        >fas fa-plus
-                                    </v-icon>
-                                    Add Distribution Rule
-                                </v-btn>
-                            </v-card-title>
-                            <v-card-text class="cash-flow-library-card">
-                                <v-data-table
-                                    :headers="cashFlowRuleDistributionGridHeaders"
-                                    :items="cashFlowDistributionRuleGridData"
-                                    class="elevation-1 v-table__overflow">
-                                    <template slot="items" slot-scope="props">
-                                        <td>
-                                            <v-edit-dialog
-                                                :return-value.sync="props.item.durationInYears"
-                                                @save="onEditSelectedLibraryListData(props.item,'durationInYears')"
-                                                full-width
-                                                large
-                                                lazy
-                                                persistent>
-                                                <v-text-field
-                                                    readonly
-                                                    single-line
-                                                    class="sm-txt"
-                                                    :value="props.item.durationInYears"
-                                                    :rules="[
-                                                        rules['generalRules'].valueIsNotEmpty,
-                                                        rules[
-                                                            'cashFlowRules'
-                                                        ].isDurationGreaterThanPreviousDuration(props.item,selectedCashFlowRule)]"/>
-                                                <template slot="input">
-                                                    <v-text-field
-                                                        label="Edit"
-                                                        single-line
-                                                        v-model.number="props.item.durationInYears"
-                                                        :rules="[
-                                                            rules[
-                                                                'generalRules'
-                                                            ].valueIsNotEmpty,
-                                                            rules[
-                                                                'cashFlowRules'
-                                                            ].isDurationGreaterThanPreviousDuration(
-                                                                props.item,
-                                                                selectedCashFlowRule
-                                                            )
-                                                        ]"/>
-                                                </template>
-                                            </v-edit-dialog>
-                                        </td>
-                                        <td>
-                                            <v-edit-dialog
-                                                :return-value.sync="props.item.costCeiling"
-                                                large
-                                                lazy
-                                                persistent
-                                                full-width
-                                                @open="onOpenCostCeilingEditDialog(props.item.id)"
-                                                @save="onEditSelectedLibraryListData(props.item,'costCeiling')"
-                                            >
-                                                <v-text-field
-                                                    readonly
-                                                    single-line
-                                                    class="sm-txt"
-                                                    :value="
-                                                        formatAsCurrency(props.item.costCeiling)"
-                                                    :rules="[
-                                                        rules['generalRules']
-                                                            .valueIsNotEmpty,
-                                                        rules[
-                                                            'cashFlowRules'
-                                                        ].isAmountGreaterThanOrEqualToPreviousAmount(
-                                                            props.item,
-                                                            selectedCashFlowRule
-                                                        )
-                                                    ]"/>
-                                                <template slot="input">
-                                                    <v-text-field
-                                                        label="Edit"
-                                                        single-line
-                                                        :id="props.item.id"
-                                                        v-model="props.item.costCeiling"
-                                                        v-currency="{
-                                                            currency: {
-                                                                prefix: '$',
-                                                                suffix: ''
-                                                            },
-                                                            locale: 'en-US',
-                                                            distractionFree: false
-                                                        }"
-                                                        :rules="[
-                                                            rules[
-                                                                'generalRules'
-                                                            ].valueIsNotEmpty,
-                                                            rules[
-                                                                'cashFlowRules'
-                                                            ].isAmountGreaterThanOrEqualToPreviousAmount(
-                                                                props.item,
-                                                                selectedCashFlowRule
-                                                            )
-                                                        ]"/>
-                                                </template>
-                                            </v-edit-dialog>
-                                        </td>
-                                        <td>
-                                            <v-edit-dialog
-                                                :return-value.sync="props.item.yearlyPercentages"
-                                                @save="onEditSelectedLibraryListData(props.item,'yearlyPercentages')"
-                                                full-width
-                                                large
-                                                lazy
-                                                persistent>
-                                                <v-text-field
-                                                    readonly
-                                                    single-line
-                                                    class="sm-txt"
-                                                    :value="props.item.yearlyPercentages"
-                                                    :rules="[
-                                                        rules['generalRules']
-                                                            .valueIsNotEmpty,
-                                                        rules['cashFlowRules']
-                                                            .doesTotalOfPercentsEqualOneHundred
-                                                    ]"/>
-                                                <template slot="input">
-                                                    <v-text-field
-                                                        label="Edit"
-                                                        single-line
-                                                        v-model="props.item.yearlyPercentages"
-                                                        :rules="[
-                                                            rules[
-                                                                'generalRules'
-                                                            ].valueIsNotEmpty,
-                                                            rules[
-                                                                'cashFlowRules'
-                                                            ]
-                                                                .doesTotalOfPercentsEqualOneHundred
-                                                        ]"/>
-                                                </template>
-                                            </v-edit-dialog>
-                                        </td>
-                                        <td>
-                                            <v-btn
-                                                @click="onDeleteCashFlowDistributionRule(props.item.id)"
-                                                class="ara-orange"
-                                                icon>
-                                                <v-icon>fas fa-trash</v-icon>
-                                            </v-btn>
-                                        </td>
-                                    </template>
-                                </v-data-table>
-                            </v-card-text>
-                        </v-card>
-                    </v-flex>
-                </v-layout>
+                <v-btn :disabled='selectedCashRuleGridRows.length === 0' @click='onDeleteSelectedCashFlowRules'
+                    class='ghd-blue ghd-button' flat>
+                    Delete Selected
+                </v-btn>
             </div>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
@@ -418,6 +257,7 @@ import {
     propEq,
     update,
     reject,
+    contains,
 } from 'ramda';
 import {
     CashFlowDistributionRule,
@@ -494,14 +334,6 @@ export default class CashFlowEditor extends Vue {
     );
     cashFlowRuleGridHeaders: DataTableHeader[] = [
         {
-            text: 'Select',
-            value: '',
-            align: 'left',
-            sortable: false,
-            class: '',
-            width: '5%',
-        },
-        {
             text: 'Rule Name',
             value: 'name',
             align: 'left',
@@ -523,10 +355,11 @@ export default class CashFlowEditor extends Vue {
             align: 'left',
             sortable: false,
             class: '',
-            width: '5%',
+            width: '10%',
         },
     ];
     cashFlowRuleGridData: CashFlowRule[] = [];
+    selectedCashRuleGridRows: CashFlowRule[] = [];
     cashFlowRuleRadioBtnValue: string = '';
     selectedCashFlowRule: CashFlowRule = clone(emptyCashFlowRule);
     selectedCashFlowRuleForCriteriaEdit: CashFlowRule = clone(
@@ -684,12 +517,6 @@ export default class CashFlowEditor extends Vue {
                   this.stateSelectedCashRuleFlowLibrary,
               );
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-        this.onSelectCashFlowRule();
-    }
-
-    @Watch('cashFlowRuleRadioBtnValue')
-    onSplitTreatmentRadioValueChanged() {
-        this.onSelectCashFlowRule();
     }
 
     @Watch('selectedCashFlowRule')
@@ -701,9 +528,9 @@ export default class CashFlowEditor extends Vue {
             : [];
     }
 
-    onSelectCashFlowRule() {
+    onSelectCashFlowRule(id:string) {
         const cashFlowRule: CashFlowRule = find(
-            propEq('id', this.cashFlowRuleRadioBtnValue),
+            propEq('id', id),
             this.cashFlowRuleGridData,
         ) as CashFlowRule;
 
@@ -712,6 +539,8 @@ export default class CashFlowEditor extends Vue {
         } else {
             this.selectedCashFlowRule = clone(emptyCashFlowRule);
         }
+
+        this.showRuleEditorDialog = true;
     }
 
     onShowCreateCashFlowRuleLibraryDialog(createAsNewLibrary: boolean) {
@@ -739,8 +568,14 @@ export default class CashFlowEditor extends Vue {
     {
         this.showRuleEditorDialog = false;
         if(!isNil(CashFlowDistributionRules))
-            this.selectedCashFlowRule.cashFlowDistributionRules = hasValue(CashFlowDistributionRules)
-                ? clone(CashFlowDistributionRules) : [];      
+        {
+            let selectedRule = this.cashFlowRuleGridData.find(o => o.id == this.selectedCashFlowRule.id) 
+            if(!isNil(selectedRule))
+            {
+                selectedRule.cashFlowDistributionRules = hasValue(CashFlowDistributionRules) ? clone(CashFlowDistributionRules) : [];  
+                this.onCashFlowRuleGridDataChanged()
+            }                
+        }              
     }
 
     onAddCashFlowRule() {
@@ -763,58 +598,11 @@ export default class CashFlowEditor extends Vue {
         );
     }
 
-    onAddCashFlowDistributionRule() {
-        const newCashFlowDistributionRule: CashFlowDistributionRule = this.modifyNewCashFlowDistributionRuleDefaultValues();
-
-        this.cashFlowRuleGridData = update(
-            findIndex(
-                propEq('id', this.selectedCashFlowRule.id),
-                this.cashFlowRuleGridData,
-            ),
-            {
-                ...this.selectedCashFlowRule,
-                cashFlowDistributionRules: append(
-                    newCashFlowDistributionRule,
-                    this.selectedCashFlowRule.cashFlowDistributionRules,
-                ),
-            },
-            this.cashFlowRuleGridData,
-        );
+    onDeleteSelectedCashFlowRules() {
+        this.cashFlowRuleGridData = this.cashFlowRuleGridData
+            .filter((cf: CashFlowRule) => !contains(cf, this.selectedCashRuleGridRows));
     }
 
-    modifyNewCashFlowDistributionRuleDefaultValues() {
-        const newCashFlowDistributionRule: CashFlowDistributionRule = {
-            ...emptyCashFlowDistributionRule,
-            id: getNewGuid(),
-        };
-
-        if (this.selectedCashFlowRule.cashFlowDistributionRules.length === 0) {
-            return newCashFlowDistributionRule;
-        } else {
-            const durationInYears: number =
-                getLastPropertyValue(
-                    'durationInYears',
-                    this.selectedCashFlowRule.cashFlowDistributionRules,
-                ) + 1;
-            const costCeiling: number = getLastPropertyValue(
-                'costCeiling',
-                this.selectedCashFlowRule.cashFlowDistributionRules,
-            );
-            const yearlyPercentages = this.getNewCashFlowDistributionRuleYearlyPercentages(
-                durationInYears,
-            );
-
-            return {
-                ...newCashFlowDistributionRule,
-                durationInYears: durationInYears,
-                costCeiling:
-                    newCashFlowDistributionRule.costCeiling! < costCeiling
-                        ? costCeiling
-                        : newCashFlowDistributionRule.costCeiling,
-                yearlyPercentages: yearlyPercentages,
-            };
-        }
-    }
 
     checkLibraryEditPermission() {
         this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
@@ -833,48 +621,6 @@ export default class CashFlowEditor extends Vue {
         return getUserName();
     }
 
-    getNewCashFlowDistributionRuleYearlyPercentages(durationInYears: number) {
-        const percentages: number[] = [];
-        let percentage = 100 / durationInYears;
-
-        if (100 % durationInYears !== 0) {
-            percentage = Math.floor(percentage);
-
-            for (let i = 0; i < durationInYears; i++) {
-                if (i === durationInYears - 1) {
-                    const sumCurrentPercentages: number = percentages.reduce(
-                        (x, y) => x + y,
-                    );
-                    percentages.push(100 - sumCurrentPercentages);
-                } else {
-                    percentages.push(percentage);
-                }
-            }
-        } else {
-            for (let i = 0; i < durationInYears; i++) {
-                percentages.push(percentage);
-            }
-        }
-
-        return percentages.join('/');
-    }
-
-    onDeleteCashFlowDistributionRule(cashFlowDistributionRuleId: string) {
-        this.cashFlowRuleGridData = update(
-            findIndex(
-                propEq('id', this.selectedCashFlowRule),
-                this.cashFlowRuleGridData,
-            ),
-            {
-                ...this.selectedCashFlowRule,
-                cashFlowDistributionRules: reject(
-                    propEq('id', cashFlowDistributionRuleId),
-                    this.selectedCashFlowRule.cashFlowDistributionRules,
-                ),
-            },
-            this.cashFlowRuleGridData,
-        );
-    }
 
     onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
         this.selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
@@ -924,37 +670,6 @@ export default class CashFlowEditor extends Vue {
                     this.cashFlowRuleGridData,
                 );
                 break;
-            case 'durationInYears':
-            case 'costCeiling':
-            case 'yearlyPercentages':
-                this.cashFlowRuleGridData = update(
-                    findIndex(
-                        propEq('id', this.selectedCashFlowRule.id),
-                        this.cashFlowRuleGridData,
-                    ),
-                    {
-                        ...this.selectedCashFlowRule,
-                        cashFlowDistributionRules: update(
-                            findIndex(
-                                propEq('id', data.id),
-                                this.selectedCashFlowRule
-                                    .cashFlowDistributionRules,
-                            ),
-                            {
-                                ...data,
-                                costCeiling: hasValue(data.costCeiling)
-                                    ? parseFloat(
-                                          data.costCeiling
-                                              .toString()
-                                              .replace(/(\$*)(,*)/g, ''),
-                                      )
-                                    : null,
-                            } as CashFlowDistributionRule,
-                            this.selectedCashFlowRule.cashFlowDistributionRules,
-                        ),
-                    },
-                    this.cashFlowRuleGridData,
-                );
         }
     }
 
@@ -1099,7 +814,7 @@ export default class CashFlowEditor extends Vue {
 }
 
 .cash-flow-library-tables .v-menu--inline {
-    width: 85%;
+    width: 100%;
 }
 
 .cash-flow-library-tables .v-menu__activator a,

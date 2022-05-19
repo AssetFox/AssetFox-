@@ -25,7 +25,7 @@
                     </v-select>
                 </v-flex>
                 <v-flex xs4>
-                    <v-layout row v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
                         </div>                       
@@ -193,7 +193,7 @@
                     class='ghd-blue-bg ghd-white ghd-button-text'
                     depressed
                     v-show='hasScenario'
-                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'>
+                    :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn

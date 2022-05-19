@@ -131,12 +131,18 @@ namespace BridgeCareCore.Controllers
                 return CreateErrorListing(message);
             }
 
+            //read file from the specified location and return download response
+            var response = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
 
+            //set file download response
+            var downloadFileName = $"SummaryReport-\\{reportIndexEntity.SimulationID}\\.xlsx";
+            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            HttpContext.Response.ContentType = contentType;
+            HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");            
+            var fileContentResult = new FileContentResult(response, contentType) { FileDownloadName = downloadFileName };
 
-            // return the report file path
-            var validResult = Content(reportPath);
-            validResult.StatusCode = (int?)HttpStatusCode.OK;
-            return validResult;
+            // return the download response
+            return fileContentResult;
         }
 
         #endregion
@@ -208,6 +214,19 @@ namespace BridgeCareCore.Controllers
             //return value
             return functionRetrunValue;
         }
+
+        private byte[] FetchFromFileLocation(string filePath)
+        {
+            if (System.IO.File.Exists(filePath) == false)
+            {
+                throw new FileNotFoundException($"Summary report is not available in the path {filePath}");
+            }
+
+            //read file and return byte array
+            byte[] summaryReportData = System.IO.File.ReadAllBytes(filePath);
+            return summaryReportData;
+        }
+
 
         private void SendRealTimeMessage(string message) =>
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, message);

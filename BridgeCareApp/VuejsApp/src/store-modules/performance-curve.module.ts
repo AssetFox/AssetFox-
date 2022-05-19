@@ -102,8 +102,8 @@ const actions = {
                     propEq('id', library.id),
                     state.performanceCurveLibraries,
                 )
-                    ? 'Updated performance curve library'
-                    : 'Added performance curve library';
+                    ? 'Updated deterioration model library'
+                    : 'Added deterioration model library';
 
                 commit('performanceCurveLibraryMutator', library);
                 commit('selectedPerformanceCurveLibraryMutator', library.id);
@@ -141,7 +141,7 @@ const actions = {
                     payload.scenarioPerformanceCurves,
                 );
                 dispatch('addSuccessNotification', {
-                    message: "Modified scenario's performance curves",
+                    message: "Modified scenario's deterioration models",
                 });
             }
         });
@@ -168,7 +168,7 @@ const actions = {
                 );
 
                 dispatch('addSuccessNotification', {
-                    message: 'Deleted performance curve library',
+                    message: 'Deleted deterioration model library',
                 });
             }
         });
@@ -187,7 +187,7 @@ const actions = {
                 const performanceCurves: PerformanceCurve[] = response.data as PerformanceCurve[];
                 commit('scenarioPerformanceCurvesMutator', performanceCurves);
                 dispatch('addSuccessNotification', {
-                    message: 'Performance curves file imported',
+                    message: 'Deterioration models file imported',
                 });
             }
         });
@@ -207,7 +207,7 @@ const actions = {
                 commit('performanceCurveLibraryMutator', library);
                 commit('selectedPerformanceCurveLibraryMutator', library.id);               
                 dispatch('addSuccessNotification', {
-                    message: 'Performance curves file imported',
+                    message: 'Deterioration Models file imported',
                 });
             }
         });

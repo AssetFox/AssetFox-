@@ -61,7 +61,7 @@ export default class EditLibrary extends Vue {
             },
         },
         {
-            tabName: 'Performance Curve',
+            tabName: 'Deterioration Model',
             tabIcon: 'fas fa-chart-line',
             navigation: {
                 path: '/PerformanceCurveEditor/Library/',

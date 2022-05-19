@@ -8,15 +8,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestDataForPennDOTMaintainableAssetRepo
     {
         private List<AttributeEntity> _attributeLibrary;
+        private List<MaintainableAssetLocationEntity> _maintainableAssetLocationLibrary;
 
         public NetworkEntity TestNetwork { get; private set; }
         public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
         public IQueryable<MaintainableAssetEntity> MaintainableAssetsLibrary => TestNetwork.MaintainableAssets.AsQueryable();
         public IQueryable<AggregatedResultEntity> AggregatedResultsLibrary => TestNetwork.MaintainableAssets.SelectMany(_ => _.AggregatedResults).AsQueryable();
+        public IQueryable<MaintainableAssetLocationEntity> MaintainableAssetLocationLibrary => _maintainableAssetLocationLibrary.AsQueryable();
 
         public TestDataForPennDOTMaintainableAssetRepo()
         {
-            _attributeLibrary = CreateTestAttributes();
+            _attributeLibrary = CreateTestAttributes();      
             TestNetwork = CreateTestNetwork();
         }
 
@@ -76,6 +78,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             AssignLength(SecondBSection, 20);
             AssignName(SecondBSection, "Second B");
 
+            _maintainableAssetLocationLibrary = CreateTestMaintainableAssetLocations(testNetwork.MaintainableAssets.ToList());
+
             return testNetwork;
         }
 
@@ -100,6 +104,60 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             });
 
             return attributeLibrary;
+        }
+
+        private List<MaintainableAssetLocationEntity> CreateTestMaintainableAssetLocations(List<MaintainableAssetEntity> maintainableAssets)
+        {
+            var maintainableAssetLocationLibrary = new List<MaintainableAssetLocationEntity>();
+
+            var FirstALocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.NewGuid(),
+                MaintainableAssetId = new Guid("799acb6e-539d-444b-b16a-6defc50b2c64"),
+                Discriminator = "SectionLocation",
+                LocationIdentifier = "1-00101256",
+                MaintainableAsset = maintainableAssets.ElementAt(0),
+            };
+            var FirstBLocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.NewGuid(),
+                MaintainableAssetId = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06"),
+                Discriminator = "SectionLocation",
+                LocationIdentifier = "2-13401256",
+                MaintainableAsset = maintainableAssets.ElementAt(1),
+            };
+            var FirstCLocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.NewGuid(),
+                MaintainableAssetId = new Guid("1bb0dd92-db74-45c6-a66a-72ae0c70b636"),
+                Discriminator = "SectionLocation",
+                LocationIdentifier = "3-5983256",
+                MaintainableAsset = maintainableAssets.ElementAt(2),
+            };
+            var SecondALocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.NewGuid(),
+                MaintainableAssetId = new Guid("3fb90c20-9885-48db-8e47-1c76c5040757"),
+                Discriminator = "SectionLocation",
+                LocationIdentifier = "4-98451298",
+                MaintainableAsset = maintainableAssets.ElementAt(3),
+            };
+            var SecondBLocation = new MaintainableAssetLocationEntity()
+            {
+                Id = Guid.NewGuid(),
+                MaintainableAssetId = new Guid("6d79de97-1c3c-4da5-9cc4-f5043efa047a"),
+                Discriminator = "SectionLocation",
+                LocationIdentifier = "5-56451278",
+                MaintainableAsset = maintainableAssets.ElementAt(4),
+            };
+
+            maintainableAssetLocationLibrary.Add(FirstALocation);
+            maintainableAssetLocationLibrary.Add(FirstBLocation);
+            maintainableAssetLocationLibrary.Add(FirstCLocation);
+            maintainableAssetLocationLibrary.Add(SecondALocation);
+            maintainableAssetLocationLibrary.Add(SecondBLocation);
+
+            return maintainableAssetLocationLibrary;
         }
 
         private void AssignLength(MaintainableAssetEntity asset, double value)

@@ -122,6 +122,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CriterionLibraryScenarioTreatmentSupersessionEntity> CriterionLibraryScenarioTreatmentSupersession { get; set; }
 
+        public virtual DbSet<DataSourceEntity> DataSource { get; set; }
+
         public virtual DbSet<DeficientConditionGoalEntity> DeficientConditionGoal { get; set; }
 
         public virtual DbSet<ScenarioDeficientConditionGoalEntity> ScenarioDeficientConditionGoal { get; set; }
@@ -1135,6 +1137,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithOne(p => p.CriterionLibraryScenarioTreatmentSupersessionJoin)
                     .HasForeignKey<CriterionLibraryScenarioTreatmentSupersessionEntity>(d => d.TreatmentSupersessionId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DataSourceEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Type).IsRequired();
+
+                entity.Property(e => e.Secure).IsRequired();
+
             });
 
             modelBuilder.Entity<DeficientConditionGoalEntity>(entity =>

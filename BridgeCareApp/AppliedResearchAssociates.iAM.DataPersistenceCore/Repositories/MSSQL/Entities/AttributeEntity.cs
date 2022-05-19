@@ -48,6 +48,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public ConnectionType ConnectionType { get; set; }
 
+        public DataSourceEntity DataSource { get; set; }
+
         public string DefaultValue { get; set; }
 
         public double? Minimum { get; set; }

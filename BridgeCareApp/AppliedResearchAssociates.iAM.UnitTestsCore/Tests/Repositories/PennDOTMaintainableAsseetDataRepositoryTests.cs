@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private Mock<IAMContext> _mockedContext;
         private Mock<DbSet<MaintainableAssetEntity>> _mockedMaintainableAssetEntitySet;
         private Mock<DbSet<AggregatedResultEntity>> _mockedAggregatedResultsEntitySet;
+        private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
 
         public PennDOTMaintainableAsseetDataRepositoryTests()
         {
@@ -37,8 +38,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedAggregatedResultsEntitySet.As<IQueryable<AggregatedResultEntity>>().Setup(_ => _.ElementType).Returns(_testData.AggregatedResultsLibrary.ElementType);
             _mockedAggregatedResultsEntitySet.As<IQueryable<AggregatedResultEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testData.AggregatedResultsLibrary.GetEnumerator());
 
+            _mockedMaintainableAssetLocationEntitySet = new Mock<DbSet<MaintainableAssetLocationEntity>>();
+            _mockedMaintainableAssetLocationEntitySet.As<IQueryable<MaintainableAssetLocationEntity>>().Setup(_ => _.Provider).Returns(_testData.MaintainableAssetLocationLibrary.Provider);
+            _mockedMaintainableAssetLocationEntitySet.As<IQueryable<MaintainableAssetLocationEntity>>().Setup(_ => _.Expression).Returns(_testData.MaintainableAssetLocationLibrary.Expression);
+            _mockedMaintainableAssetLocationEntitySet.As<IQueryable<MaintainableAssetLocationEntity>>().Setup(_ => _.ElementType).Returns(_testData.MaintainableAssetLocationLibrary.ElementType);
+            _mockedMaintainableAssetLocationEntitySet.As<IQueryable<MaintainableAssetLocationEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testData.MaintainableAssetLocationLibrary.GetEnumerator());
+
             _mockedContext.Setup(_ => _.MaintainableAsset).Returns(_mockedMaintainableAssetEntitySet.Object);
             _mockedContext.Setup(_ => _.AggregatedResult).Returns(_mockedAggregatedResultsEntitySet.Object);
+            _mockedContext.Setup(_ => _.MaintainableAssetLocation).Returns(_mockedMaintainableAssetLocationEntitySet.Object);
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);
             _testRepo = mockedRepo.Object;

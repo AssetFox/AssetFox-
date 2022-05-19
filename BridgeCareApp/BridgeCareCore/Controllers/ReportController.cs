@@ -10,11 +10,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.IO;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace BridgeCareCore.Controllers
 {
@@ -26,7 +28,7 @@ namespace BridgeCareCore.Controllers
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _generator = generator ?? throw new ArgumentNullException(nameof(generator));
+            _generator = generator ?? throw new ArgumentNullException(nameof(generator));            
 
         #region "API functions"
 
@@ -93,8 +95,46 @@ namespace BridgeCareCore.Controllers
                 return CreateErrorListing(message);
             }
 
-            // Report is good, return the location of the file
-            var validResult = Content(report.Results);
+            //create report index repository
+            var reportIndexID = createReportIndexRepository(report);
+
+            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID)) {
+                var message = new List<string>() { $"Failed to create report repository index" };
+                return CreateErrorListing(message);
+            }
+
+            // Report is good, return the report repository index id
+            var validResult = Content(reportIndexID);
+            validResult.StatusCode = (int?)HttpStatusCode.OK;
+            return validResult;
+        }
+
+
+        [HttpGet]
+        [Route("DownloadReport/{reportIndexID}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadReport(string reportIndexID)
+        {
+            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+            {
+                var message = new List<string>() { $"Repository index identifier is missing or not set" };
+                return CreateErrorListing(message);
+            }
+
+            //get report path
+            var reportIndexEntity = this.UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
+            var reportPath = reportIndexEntity?.Result ?? "";
+
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
+            {
+                var message = new List<string>() { $"Failed to get report path using the specified repository index" };
+                return CreateErrorListing(message);
+            }
+
+
+
+            // return the report file path
+            var validResult = Content(reportPath);
             validResult.StatusCode = (int?)HttpStatusCode.OK;
             return validResult;
         }
@@ -145,6 +185,28 @@ namespace BridgeCareCore.Controllers
 
             //return object
             return reportObject;
+        }
+
+        private string createReportIndexRepository(IReport reportObject)
+        {
+            var functionRetrunValue = "";
+
+            //configure report index entity
+            var reportIndexEntity = new ReportIndexEntity()
+            {
+                Id = reportObject.ID,
+                SimulationID = reportObject.SimulationID,
+                ReportTypeName = reportObject.ReportTypeName,
+                Result = reportObject.Results,
+                ExpirationDate = DateTime.Now.AddDays(30),
+            };
+
+            ////create report index repository
+            var isSuccess = this.UnitOfWork.ReportIndexRepository.Add(reportIndexEntity);
+            if (isSuccess == true) { functionRetrunValue = reportIndexEntity.Id.ToString(); }
+
+            //return value
+            return functionRetrunValue;
         }
 
         private void SendRealTimeMessage(string message) =>

@@ -95,14 +95,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         }
 
         [Fact]
-        public async Task NumericAttributeInDb_UpdateManyFields_NotChanged()
+        public async Task NumericAttributeInDb_UpdateFieldsThatAreNotAllowedToChange_Throws()
         {
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
             var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
-            repo.UpsertAttributes(updateAttribute);
+            Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(updateAttribute));
             var attributesAfter = await repo.Attributes();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Equal(attribute.Name, attributeAfter.Name);

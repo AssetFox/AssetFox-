@@ -49,6 +49,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
+        private static TextAttribute ToText(AttributeDTO dto)
+        {
+            return new TextAttribute(
+                dto.DefaultValue,
+                dto.Id,
+                dto.Name,
+                dto.AggregationRuleType,
+                dto.Command,
+                ConnectionType.MSSQL,
+                "",
+                dto.IsCalculated,
+                dto.IsAscending);
+        }
+
+        private static NumericAttribute ToNumeric(AttributeDTO dto)
+        {
+            return double.TryParse(dto.DefaultValue, out double value)
+                ? new NumericAttribute(
+                    value,
+                    dto.Maximum,
+                    dto.Minimum,
+                    dto.Id,
+                    dto.Name,
+                    dto.AggregationRuleType,
+                    dto.Command,
+                    ConnectionType.MSSQL,
+                    "",
+                    dto.IsCalculated,
+                    dto.IsAscending)
+                : null;
+        }
+
+        public static Attribute ToDomain(AttributeDTO dto)
+        {
+            switch (dto.Type.ToLowerInvariant())
+            {
+            case "string":
+                return ToText(dto);
+            case "number":
+                return ToNumeric(dto);
+            }
+            return null;
+        }
+
         public static AttributeEntity ToEntity(this Attribute domain)
         {
             if (domain == null)

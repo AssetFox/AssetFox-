@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -15,6 +16,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             foreach (var dto in dtos)
             {
                 var mappedDto = AttributeMapper.ToDomain(dto);
+                var valid = AttributeValidityChecker.IsValid(mappedDto);
+                if (!valid)
+                {
+                    throw new Exception($"Invalid attribute {mappedDto.Name} with aggregation rule {mappedDto.AggregationRuleType}");
+                }
                 if (mappedDto!=null)
                 {
                     dataAttributes.Add(mappedDto);

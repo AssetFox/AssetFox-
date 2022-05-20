@@ -129,7 +129,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsCalculated = false,
             };
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
-            repo.UpsertAttributes(invalidAttributeList);
+            Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(invalidAttributeList));
             var attributesAfter = await repo.Attributes();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);

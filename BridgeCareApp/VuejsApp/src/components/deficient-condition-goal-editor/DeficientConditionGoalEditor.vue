@@ -1,6 +1,7 @@
 <template>
     <v-layout column>
-        <v-layout >
+        <v-flex xs12>
+        <v-layout justify-space-between>
             <v-flex xs4 class="ghd-constant-header">
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
@@ -23,7 +24,7 @@
                     </v-btn>
                 </div>
                 
-                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 24px">
+                <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 11px">
                     <div class="header-text-content owner-padding" style="padding-top: 7px;">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                     </div>
@@ -66,6 +67,7 @@
                         </template>
                     </v-text-field> -->
         </v-layout>
+        </v-flex>
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <div class="deficients-data-table">
                 <v-data-table
@@ -496,6 +498,9 @@ export default class DeficientConditionGoalEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onSelectItemValueChanged() {
+        this.selectDeficientConditionGoalLibraryAction({
+            libraryId: this.librarySelectItemValue,
+        });
         this.importLibraryDisabled = false;
     }
 

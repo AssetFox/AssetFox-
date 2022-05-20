@@ -111,7 +111,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AddInvalidAttribute_Fails()
         {
-            // rewrite to use the dto. Conversion of the dto to a NumericAttribute object should fail.
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
@@ -135,6 +134,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Assert.Null(addedAttribute);
         }
 
+        [Fact]
         public async Task AttributeInDb_CreateNewAttributeWithSameName_Fails()
         {
             var repo = attributeRepository;
@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attribute);
             var attributesBefore = await repo.Attributes();
             var attribute2 = AttributeTestSetup.Numeric(null, randomName);
-            repo.UpsertAttributes(attribute2);
+            Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(attribute2));
             var attributesAfter = await repo.Attributes();
             Assert.Equal(attributesBefore.Count, attributesAfter.Count);
             var addedAttribute2 = attributesAfter.SingleOrDefault(a => a.Id == attribute2.Id);

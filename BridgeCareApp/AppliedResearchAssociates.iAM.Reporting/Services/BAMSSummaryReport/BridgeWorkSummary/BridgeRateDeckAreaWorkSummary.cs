@@ -283,7 +283,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.TotalInitialBridgeClosedCount(reportOutputData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount + closedCount);
+            //worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount + closedCount);
+            var fairCount = totalSimulationDataModelCount - (goodCount + poorCount);
+            worksheet.Cells[row + 1, column].Value = fairCount;
         }
 
         private void AddTotalBridgeCount(ExcelWorksheet worksheet, SimulationYearDetail yearlyData, int totalSimulationDataModelCount, int row, int column)
@@ -297,7 +299,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.CalculateTotalBridgeClosedCount(yearlyData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount + closedCount);
+            //worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount + closedCount);
+
+            var fairCount = totalSimulationDataModelCount - (goodCount + poorCount);
+            worksheet.Cells[row + 1, column].Value = fairCount;
         }
 
         private void AddDetailsForTotalBridgeAndDeckPercent(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, int dataStartRow)
@@ -346,7 +351,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.TotalInitialClosedDeckArea(reportOutputData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.InitialTotalDeckArea(reportOutputData) - (goodCount + poorCount + closedCount);
+            //worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.InitialTotalDeckArea(reportOutputData) - (goodCount + poorCount + closedCount);
+
+            var fairCount = _bridgeWorkSummaryComputationHelper.InitialTotalDeckArea(reportOutputData) - (goodCount + poorCount);
+            worksheet.Cells[row + 1, column].Value = fairCount;
         }
 
         private void AddTotalDeckArea(ExcelWorksheet worksheet, SimulationYearDetail yearlyData, int row, int column)
@@ -360,7 +368,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.CalculateTotalClosedDeckArea(yearlyData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.CalculateTotalDeckArea(yearlyData) - (goodCount + poorCount);
+            //worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.CalculateTotalDeckArea(yearlyData) - (goodCount + poorCount);
+
+            var fairCount = _bridgeWorkSummaryComputationHelper.CalculateTotalDeckArea(yearlyData) - (goodCount + poorCount);
+            worksheet.Cells[row + 1, column].Value = fairCount;
         }
 
         #endregion Private methods

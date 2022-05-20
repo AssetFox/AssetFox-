@@ -142,17 +142,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 row = startRow;
                 column = ++column;
-                double culvertTotalCount = 0;
-
+                double culvertTotalCount = 0; 
                 foreach (var treatment in simulationTreatments)
                 {
                     if (treatment.AssetType == AssetCategory.Culvert || treatment.Name == BAMSConstants.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
-                        worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount;
+                        worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount; 
                         projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
-                        culvertTotalCount += culvertCostAndCount.bridgeCount;
+                        //culvertTotalCount += culvertCostAndCount.bridgeCount;
+
+                        //exclude No Treatment from total
+                        if (treatment.Name != BAMSConstants.CulvertNoTreatment) { culvertTotalCount += culvertCostAndCount.bridgeCount; }
                     }
                 }
                 worksheet.Cells[row, column].Value = culvertTotalCount;
@@ -188,7 +190,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
                         projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
-                        nonCulvertTotalCount += nonCulvertCostAndCount.bridgeCount;
+                        //nonCulvertTotalCount += nonCulvertCostAndCount.bridgeCount;
+
+                        //exclude No Treatment from total
+                        if (treatment.Name != BAMSConstants.NonCulvertNoTreatment) { nonCulvertTotalCount += nonCulvertCostAndCount.bridgeCount; }
                     }
                 }
                 worksheet.Cells[row, column].Value = nonCulvertTotalCount;
@@ -231,7 +236,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var noTreatmentCount = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.CulvertNoTreatment + "_" + year], column].Value);
                 noTreatmentCount += Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.NonCulvertNoTreatment + "_" + year], column].Value);
                 worksheet.Cells[row++, column].Value = noTreatmentCount;
-                totalCount += noTreatmentCount;
+                //totalCount += noTreatmentCount;
+
                 foreach (var treatment in simulationTreatments)
                 {
                     var count = 0;

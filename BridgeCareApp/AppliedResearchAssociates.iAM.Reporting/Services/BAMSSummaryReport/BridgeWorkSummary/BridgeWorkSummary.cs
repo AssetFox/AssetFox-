@@ -267,13 +267,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddKeyValue(Dictionary<string, int> completedProj, string bridgeType, string appliedTreatment)
         {
-            if (!completedProj.ContainsKey($"{bridgeType}_{appliedTreatment}"))
+            var key = $"{bridgeType}_{appliedTreatment}";
+            if (!completedProj.ContainsKey(key))
             {
-                completedProj.Add($"{bridgeType}_{appliedTreatment}", 1);
+                //completedProj.Add($"{bridgeType}_{appliedTreatment}", 1);
+                completedProj.Add(key, 1);
             }
             else
             {
-                completedProj[$"{bridgeType}_{appliedTreatment}"] += 1;
+                //completedProj[$"{bridgeType}_{appliedTreatment}"] += 1;
+                completedProj[key] += 1;
             }
         }
 

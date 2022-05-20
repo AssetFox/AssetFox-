@@ -6,11 +6,11 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     public static class NumericAttributeAggregationRules
     {
-        public const string Predominant = "PREDOMINANT";
+        public const string Average = "AVERAGE";
 
         public static IEnumerable<string> ValidRules()
         {
-            yield return Predominant;
+            yield return Average;
         }
     }
 }

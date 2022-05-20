@@ -6,10 +6,10 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     internal class TextAttributeAggregationRules
     {
-        public const string Average = "AVERAGE";
+        public const string Predominant = "PREDOMINANT";
         public static IEnumerable<string> ValidRuleNames()
         {
-            yield return Average;
+            yield return Predominant;
         }
     }
 }

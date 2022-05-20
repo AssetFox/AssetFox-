@@ -185,6 +185,19 @@ v-list-item.ghd-control-text {
     color: #333333 !important;
 }
 
+.ghd-control-text-sm {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 12px !important;
+    padding-top: 0px !important;
+}
+
+.ghd-control-text .v-label {
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 14px !important;
+    padding-top: 0px !important;
+    font-weight: normal;
+}
+
 .ghd-control-text .v-select__selections {
     padding-top: 0px !important;
     vertical-align: middle !important;
@@ -307,6 +320,13 @@ v-list-item.ghd-control-text {
     min-width: 0 !important;
     padding-left: 5px !important;
     padding-right: 5px !important;
+}
+.ghd-button-text-sm {
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
 }
 
 /* Checkbox */
@@ -571,6 +591,79 @@ table.v-table tbody td input {
     max-height: 600px;
 }
 
+.ghd-blue-border
+{
+    border-color: #2A578D !important;
+    border-style: solid !important;
+}
+
+.ghd-text-padding{
+    padding: 5px !important;
+}
+
+.ghd-padding{
+    padding: 10px !important;
+}
+
+.ghd-padding-top{
+    padding-top: 10px !important;
+}
+
+.ghd-left-padding{
+    padding-left: 10px !important;
+}
+
+.ghd-right-padding{
+    padding-right: 10px !important;
+}
+
+.ghd-control-width{
+    width: 250px !important;
+}
+
+.ghd-control-width-sm{
+    width: 200px !important;
+}
+
+.ghd-control-width-lg{
+    width: 400px !important;
+}
+
+.ghd-control-width-dd{
+    width: 340px !important;
+}
+
+.ghd-card-width{
+    min-width: 1200px !important;
+}
+
+.v-label--active{
+display: none !important;
+}
+
+.v-small-dialog__actions .v-btn
+{
+    padding: 0px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    color: #2A578D !important;
+}
+
+.v-input__control .v-input__slot .accent--text{
+    color: #2A578D !important;
+    caret-color: #2A578D !important;
+}
+
+.ghd-title{
+    height: 22px !important;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;
 }

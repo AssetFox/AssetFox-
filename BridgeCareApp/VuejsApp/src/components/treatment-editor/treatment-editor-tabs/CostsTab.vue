@@ -12,7 +12,7 @@
                     <template slot="items" slot-scope="props">
                         <tr style="border:none">
                             <td>                            
-                                <v-layout row xs6 align-center>                                
+                                <v-layout xs6 align-center>                                
                                     <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Equation</v-subheader>
                                     <v-btn
                                         @click="
@@ -26,7 +26,7 @@
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>                                
                                 </v-layout>
-                                <v-layout row xs6 align-center>  
+                                <v-layout xs6 align-center>  
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         full-width
@@ -40,7 +40,7 @@
                                 </v-layout>                          
                             </td>
                             <td>
-                                <v-layout row xs6 align-center>
+                                <v-layout xs6 align-center>
                                 <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Criteria</v-subheader>
                                     <v-btn
                                         @click="
@@ -54,7 +54,7 @@
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-layout> 
-                                <v-layout row xs6 align-center>              
+                                <v-layout xs6 align-center>              
                                     <v-textarea
                                         class="ghd-control-border ghd-control-text-sm"
                                         full-width

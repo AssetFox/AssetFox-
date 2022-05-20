@@ -128,14 +128,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsAscending = false,
                 IsCalculated = false,
             };
-            var invalidAttribute = new NumericAttribute(100, 1000, 0, attributeId, randomName, "Invalid ruleType",
-                "Command", Data.ConnectionType.MSSQL, "", true, false);
-            repo.UpsertAttributes(invalidAttribute);
+            var invalidAttributeList = new List<AttributeDTO> { attributeDto };
+            Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(invalidAttributeList));
             var attributesAfter = await repo.Attributes();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);
         }
 
+        [Fact]
         public async Task AttributeInDb_CreateNewAttributeWithSameName_Fails()
         {
             var repo = attributeRepository;
@@ -144,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attribute);
             var attributesBefore = await repo.Attributes();
             var attribute2 = AttributeTestSetup.Numeric(null, randomName);
-            repo.UpsertAttributes(attribute2);
+            Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(attribute2));
             var attributesAfter = await repo.Attributes();
             Assert.Equal(attributesBefore.Count, attributesAfter.Count);
             var addedAttribute2 = attributesAfter.SingleOrDefault(a => a.Id == attribute2.Id);

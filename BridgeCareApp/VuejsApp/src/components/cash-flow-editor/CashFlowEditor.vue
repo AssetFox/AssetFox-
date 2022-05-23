@@ -326,11 +326,11 @@ export default class CashFlowEditor extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
-    @Action('upsertScenarioCashFlowRules')
+    @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
-    upsertScenarioCashFlowRulesAction: any;
+    
     hasSelectedLibrary: boolean = false;
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];

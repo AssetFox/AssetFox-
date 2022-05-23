@@ -193,7 +193,7 @@ import {
 } from '@/shared/models/iAM/cash-flow';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
-import {append, clone, find, findIndex, propEq, update} from 'ramda';
+import {append, clone, find, findIndex, propEq, update, isNil} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
@@ -206,10 +206,10 @@ export default class CashFlowRuleEditDialog extends Vue {
   @Prop() showDialog: boolean;
 
   hasUnsavedChanges: boolean = false;
-    
-  @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
   cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = []
+  processedGridData: CashFlowDistributionRule[] = [];
+
     cashFlowRuleDistributionGridHeaders: DataTableHeader[] = [
         {
             text: 'Duration (yr)',
@@ -250,7 +250,7 @@ export default class CashFlowRuleEditDialog extends Vue {
   onSubmit(submit: boolean) {
     if (submit) {
       this.hasUnsavedChanges = false;
-      this.$emit('submit', this.cashFlowDistributionRuleGridData);
+      this.$emit('submit', this.processedGridData);
     } else {
       this.onSelectedSplitTreatmentIdChanged()
       this.$emit('submit', null);      
@@ -258,36 +258,26 @@ export default class CashFlowRuleEditDialog extends Vue {
   }
 
   onEditSelectedLibraryListData(data: any, property: string) {
-        switch (property) {
-            case 'durationInYears':
-                this.onCashFlowDistributionRuleGridDataChanged();
-            case 'costCeiling':
-                data.costCeiling = this.unFormatAsCurrency(data.costCeiling)
-                this.onCashFlowDistributionRuleGridDataChanged();
-                break;
-            case 'yearlyPercentages':
-                this.cashFlowDistributionRuleGridData = update(
-                            findIndex(
-                                propEq('id', data.id),
-                                this.cashFlowDistributionRuleGridData,
-                            ),
-                            {
-                                ...data,
-                                costCeiling: hasValue(data.costCeiling)
-                                    ? parseFloat(
-                                          data.costCeiling
-                                              .toString()
-                                              .replace(/(\$*)(,*)/g, ''),
-                                      )
-                                    : null,
-                            } as CashFlowDistributionRule,
-                            this.cashFlowDistributionRuleGridData)
-        }
+        let changedRule = data as CashFlowDistributionRule
+        let rule = this.processedGridData.find(o => o.id === changedRule.id)
+        if(!isNil(rule))
+            switch (property) {
+                case 'durationInYears':
+                    rule.durationInYears = changedRule.durationInYears;
+                    break;
+                case 'costCeiling':
+                    rule.costCeiling = this.unFormatAsCurrency(changedRule.costCeiling);
+                    break;
+                case 'yearlyPercentages':
+                    rule.yearlyPercentages = changedRule.yearlyPercentages;
+                    break;
+            }
+            this.onCashFlowDistributionRuleGridDataChanged()
     }
 
     onAddCashFlowDistributionRule() {
         const newCashFlowDistributionRule: CashFlowDistributionRule = this.modifyNewCashFlowDistributionRuleDefaultValues();
-
+        this.processedGridData.push(clone(newCashFlowDistributionRule))
         this.cashFlowDistributionRuleGridData.push(newCashFlowDistributionRule);
     }
 
@@ -369,14 +359,17 @@ export default class CashFlowRuleEditDialog extends Vue {
     onSelectedSplitTreatmentIdChanged() {
         this.cashFlowDistributionRuleGridData = hasValue(this.selectedCashFlowRule.cashFlowDistributionRules)
             ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
+        
+        this.processedGridData = hasValue(this.selectedCashFlowRule.cashFlowDistributionRules)
+            ? clone(this.selectedCashFlowRule.cashFlowDistributionRules) : [];
     }
 
-    @Watch('cashFlowDistributionRuleGridData')
+    @Watch('processedGridData')
     onCashFlowDistributionRuleGridDataChanged() {
         this.hasUnsavedChanges = 
             hasUnsavedChangesCore(
                 '',
-                this.cashFlowDistributionRuleGridData,
+                this.processedGridData,
                 this.selectedCashFlowRule.cashFlowDistributionRules,
             )
     }
@@ -390,14 +383,15 @@ export default class CashFlowRuleEditDialog extends Vue {
 
     unFormatAsCurrency(value: any) : number {
         if (hasValue(value)) {
-            let foo = Number(value.replace(/[^0-9.-]+/g,""));
-            return foo;
+            let num = Number(value.toString().replace(/[^0-9.-]+/g,""));
+            return num;
         }
         return 0;
     }
 
     onDeleteCashFlowDistributionRule(id: string) {
         this.cashFlowDistributionRuleGridData = this.cashFlowDistributionRuleGridData.filter((rule: CashFlowDistributionRule) => rule.id !== id)
+        this.processedGridData = this.processedGridData.filter((rule: CashFlowDistributionRule) => rule.id !== id)
     }
 }
 </script>

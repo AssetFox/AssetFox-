@@ -31,7 +31,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
         {
             SendRealTimeMessage("Upserting attributes...");
 
-            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+            throw new NotSupportedException();
+           // _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
         }
 
         private void SynchronizeNetwork(Network network, Guid? userId = null)
@@ -108,6 +109,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
 
         public void Synchronize(int simulationId, string username, bool withCommittedProjects = false)
         {
+            // This was killed when we got rid of MetaData.json. If you need it for some reason, ask WJ. Other test code might, or might not, be able to help.
+            throw new NotSupportedException(); 
             try
             {
                 _unitOfWork.SetUser(username);

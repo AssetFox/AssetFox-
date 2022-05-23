@@ -29,9 +29,9 @@ namespace BridgeCareCore.Services
             throw new NotImplementedException();
             SendRealTimeMessage("Upserting attributes...");
 
-
-            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo
-                .GetAllAttributes().ToList());
+            throw new NotSupportedException();
+//            _unitOfWork.AttributeRepo.UpsertAttributes(_unitOfWork.AttributeMetaDataRepo
+  //              .GetAllAttributes().ToList());
         }
 
         private void SynchronizeNetwork(Network network)

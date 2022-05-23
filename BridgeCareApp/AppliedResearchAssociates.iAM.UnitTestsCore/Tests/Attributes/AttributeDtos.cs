@@ -33,6 +33,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 IsAscending = false
             };
 
+        public static AttributeDTO Age => new()
+        {
+
+            Id = Guid.Parse("d27f24d1-7f8a-4778-a2b2-e61911a58897"),
+            Name = "AGE",
+            DefaultValue = "0",
+            Minimum = 0.0,
+            Maximum = 100.0,
+            Type = "NUMBER",
+            Command = "SELECT BRKEY AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(BRKEY AS VARCHAR(MAX)) AS FACILITY, BRIDGE_ID AS SECTION, NULL AS SAMPLE_, CAST(INSPDATE AS datetime) AS DATE_, CAST(2021 - YEAR_BUILT + 1 AS float) AS DATA_ FROM dbo.PennDot_Report_A",
+            AggregationRuleType = "AVERAGE",
+            IsCalculated = false,
+            IsAscending = false
+        };
+
         public static AttributeDTO DeckSeeded
             => new()
             {

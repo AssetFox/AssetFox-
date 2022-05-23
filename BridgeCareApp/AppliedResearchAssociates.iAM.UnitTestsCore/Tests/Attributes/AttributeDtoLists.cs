@@ -14,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             {
                 AttributeDtos.ActionType,
                 AttributeDtos.AdtTotal,
+                AttributeDtos.Age,
                 AttributeDtos.DeckSeeded,
                 AttributeDtos.SubSeeded,
                 AttributeDtos.SupSeeded,

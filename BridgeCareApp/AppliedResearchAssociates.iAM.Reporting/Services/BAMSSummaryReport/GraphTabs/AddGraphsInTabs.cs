@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Gra
             var poorDeckAreaGraphTab = excelPackage.Workbook.Worksheets.Add(BAMSConstants.Graph_PoorDeckAreaGraph_Tab);
             _addPoorDeckAreaGraphTab.AddPoorDeckAreaTab(poorDeckAreaGraphTab, bridgeWorkSummaryWorksheet, chartRowModel.TotalPoorBridgesDeckAreaSectionYearsRow, simulationYearsCount);
 
-            _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+           _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
         }
     }
 }

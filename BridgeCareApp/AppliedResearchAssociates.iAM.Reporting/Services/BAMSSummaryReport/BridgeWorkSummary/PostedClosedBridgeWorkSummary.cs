@@ -19,11 +19,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private BridgeWorkSummaryComputationHelper _bridgeWorkSummaryComputationHelper;
         private WorkSummaryModel _workSummaryModel;
 
-        public PostedClosedBridgeWorkSummary()
+        public PostedClosedBridgeWorkSummary(WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon(); 
             _bridgeWorkSummaryComputationHelper = new BridgeWorkSummaryComputationHelper();
-            _workSummaryModel = new WorkSummaryModel();
+            _workSummaryModel = workSummaryModel;
         }
 
         internal ChartRowsModel FillPostedBridgesCountByBPN(ExcelWorksheet worksheet, CurrentCell currentCell,

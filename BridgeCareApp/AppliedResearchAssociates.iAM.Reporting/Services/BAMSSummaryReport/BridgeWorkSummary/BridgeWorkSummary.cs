@@ -25,7 +25,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary();
             if (_bridgesCulvertsWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgesCulvertsWorkSummary)); }
 
-            _costBudgetsWorkSummary = new CostBudgetsWorkSummary();
+            var workSummaryModel = new WorkSummaryModel();
+            _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
             if (_costBudgetsWorkSummary == null) { throw new ArgumentNullException(nameof(_costBudgetsWorkSummary)); }
 
             _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
@@ -37,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
             if (_deckAreaBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_deckAreaBridgeWorkSummary)); }
 
-            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary();
+            _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
             if (_postedClosedBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_postedClosedBridgeWorkSummary)); }
 
             _projectsCompletedCount = new ProjectsCompletedCount();

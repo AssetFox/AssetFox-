@@ -25,10 +25,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private int CulvertTotalRow = 0;
         private int CommittedTotalRow = 0;
 
-        public CostBudgetsWorkSummary()
+        public CostBudgetsWorkSummary(WorkSummaryModel workSummaryModel)
         {
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
-            _workSummaryModel = new WorkSummaryModel();
+            _workSummaryModel = workSummaryModel;
         }
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,

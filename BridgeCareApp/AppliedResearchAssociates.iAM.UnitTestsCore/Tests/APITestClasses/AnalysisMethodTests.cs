@@ -3,6 +3,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Debugging;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -57,6 +58,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void SetupForGet()
         {
+            ErrorCondition.ErrorStateBreakpointHolder();
             TestAnalysis.SimulationId = _testHelper.TestSimulation.Id;
             if (!_testHelper.UnitOfWork.Context.AnalysisMethod.Any(m => m.SimulationId == TestAnalysis.SimulationId))
             {
@@ -103,6 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldGetAnalysisMethod()
         {
+            using var _ = new ErrorConditionIncrement();
             // Arrange
             SetupForGet();
 
@@ -145,6 +148,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(analysisMethodDto.Benefit.Id, upsertedAnalysisMethodDto.Benefit.Id);
         }
 
+        [Fact]
         public async void ShouldUpdateAnalysisMethod()
         {
             // Arrange

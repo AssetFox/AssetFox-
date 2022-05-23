@@ -58,6 +58,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Debugging\AppliedResearchAssociates.iAM.Debugging.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
   </ItemGroup>
 

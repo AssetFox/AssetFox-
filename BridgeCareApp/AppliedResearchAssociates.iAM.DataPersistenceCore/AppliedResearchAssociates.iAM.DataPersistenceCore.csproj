@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Data\AppliedResearchAssociates.iAM.Data.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Debugging\AppliedResearchAssociates.iAM.Debugging.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DTOs\AppliedResearchAssociates.iAM.DTOs.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
   </ItemGroup>

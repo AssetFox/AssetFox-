@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Debugging;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
@@ -44,6 +45,7 @@ namespace BridgeCareCore.Controllers
 
             AnalysisMethodDTO GetPermitted(Guid simulationId)
             {
+                ErrorCondition.ErrorStateBreakpointHolder();
                 CheckUserSimulationReadAuthorization(simulationId);
                 return GetAny(simulationId);
             }

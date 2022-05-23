@@ -1,8 +1,8 @@
 using Xunit;
 using Moq;
 using System;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
 
         public void Init(string aggregationRuleType)
         {
-            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, DataMiner.ConnectionType.MSSQL, null, false, false);
+            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, Data.ConnectionType.MSSQL, null, false, false);
         }
     }
 }

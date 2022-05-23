@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
 {

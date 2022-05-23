@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
+namespace AppliedResearchAssociates.iAM.Data.Networking
 {
     public class Network
     {

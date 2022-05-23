@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
+namespace AppliedResearchAssociates.iAM.Data.Networking
 {
     public class MaintainableAsset
     {

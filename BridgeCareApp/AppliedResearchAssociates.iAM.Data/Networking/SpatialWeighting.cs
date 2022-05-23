@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
+﻿namespace AppliedResearchAssociates.iAM.Data.Networking
 {
     public class SpatialWeighting
     {

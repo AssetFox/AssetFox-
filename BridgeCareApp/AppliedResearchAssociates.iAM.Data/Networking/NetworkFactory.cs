@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 
-namespace AppliedResearchAssociates.iAM.DataAssignment.Networking
+namespace AppliedResearchAssociates.iAM.Data.Networking
 {
     public static class NetworkFactory
     {

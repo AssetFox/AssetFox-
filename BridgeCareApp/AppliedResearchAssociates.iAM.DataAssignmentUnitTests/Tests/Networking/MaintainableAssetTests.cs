@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.Data;
 using Moq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
 {

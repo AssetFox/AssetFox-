@@ -2,8 +2,8 @@
 using System;
 using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking

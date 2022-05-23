@@ -1,11 +1,11 @@
 ﻿using Xunit;
 using System;
 using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
 {

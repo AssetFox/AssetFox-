@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using System;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes

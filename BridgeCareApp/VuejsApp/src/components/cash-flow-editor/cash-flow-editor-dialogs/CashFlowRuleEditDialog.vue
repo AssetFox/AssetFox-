@@ -1,22 +1,23 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="showDialog">
+  <v-dialog max-width="850px" persistent v-model="showDialog">
     <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>New Cash Flow Rule Library</h3>
+      <v-card-title class="ghd-dialog-box-padding-top">
+        <v-layout justify-space-between align-center>
+          <div class="ghd-control-dialog-header">Cash Flow Rule Settings: {{this.selectedCashFlowRule.name}}</div>
+          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>
         </v-layout>
       </v-card-title>
-        <v-card-text class="cash-flow-library-card">
-            <v-btn @click="onAddCashFlowDistributionRule">
-                <v-icon class="plus-icon" left
-                    >fas fa-plus
-                </v-icon>
-                Add Distribution Rule
-            </v-btn>
+
+            
+            <div style='height: 500px; max-width:850px' class="ghd-dialog-box-padding-center">
+                    <div style='max-height: 450px; overflow-y:auto;'>
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
-                class="elevation-1 v-table__overflow">
+                hide-actions
+                class="ghd-table v-table__overflow">
                 <template slot="items" slot-scope="props">
                     <td>
                         <v-edit-dialog
@@ -147,26 +148,31 @@
                     <td>
                         <v-btn
                             @click="onDeleteCashFlowDistributionRule(props.item.id)"
-                            class="ara-orange"
+                            class="ghd-blue"
                             icon>
                             <v-icon>fas fa-trash</v-icon>
                         </v-btn>
                     </td>
                 </template>
             </v-data-table>
-        </v-card-text>                          
+                </div>
+                <v-btn @click="onAddCashFlowDistributionRule" class='ghd-blue ghd-button' flat>
+                    Add Distribution Rule
+                </v-btn>
+            </div>
+                     
 
                             
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(true)"
-                 :disabled="!hasUnsavedChanges"
-                 class="ara-blue-bg white--text">
-            Submit
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+        <v-layout justify-center row>
+            <v-btn @click="onSubmit(false)" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
             Cancel
           </v-btn>
+          <v-btn @click="onSubmit(true)"
+                 :disabled="!hasUnsavedChanges"
+                 class='ghd-blue hd-button-text ghd-button' flat>
+            Submit
+          </v-btn>         
         </v-layout>
       </v-card-actions>
     </v-card>

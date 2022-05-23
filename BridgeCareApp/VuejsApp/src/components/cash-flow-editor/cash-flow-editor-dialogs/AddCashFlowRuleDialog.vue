@@ -1,5 +1,5 @@
 <template>
-  <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
+  <v-dialog max-width="450px" persistent v-model="showDialog">
     <v-card>
       <v-card-title class="ghd-dialog-box-padding-top">
         <v-layout justify-space-between align-center>
@@ -11,14 +11,10 @@
       </v-card-title>
       <v-card-text class="ghd-dialog-box-padding-center">
         <v-layout column>
-          <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
-          <v-text-field outline v-model="newCashFlowRuleLibrary.name"
+          <v-subheader class="ghd-md-gray ghd-control-label">Rule Name</v-subheader>
+          <v-text-field outline v-model="newCashRule.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
-          <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
-          <v-textarea no-resize outline rows="3"
-                      v-model="newCashFlowRuleLibrary.description"
-                      class="ghd-text-field-border"/>
         </v-layout>
       </v-card-text>
       <v-card-actions class="ghd-dialog-box-padding-bottom">
@@ -26,7 +22,7 @@
           <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
             Cancel
           </v-btn>
-          <v-btn :disabled="newCashFlowRuleLibrary.name === ''" @click="onSubmit(true)"
+          <v-btn :disabled="newCashRule.name === ''" @click="onSubmit(true)"
                  outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
             Submit
           </v-btn>        
@@ -46,6 +42,7 @@ import {
   CashFlowDistributionRule,
   CashFlowRule,
   CashFlowRuleLibrary,
+  emptyCashFlowRule,
   emptyCashFlowRuleLibrary
 } from '@/shared/models/iAM/cash-flow';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -55,44 +52,24 @@ import {clone} from 'ramda';
 import {getNewGuid} from '@/shared/utils/uuid-utils';
 
 @Component
-export default class CreateCashFlowRuleLibraryDialog extends Vue {
-  @Prop() dialogData: CreateCashFlowRuleLibraryDialogData;
-  
-  @Getter('getIdByUserName') getIdByUserNameGetter: any;
+export default class AddCashFlowDialog extends Vue {
+    @Prop() showDialog: boolean;
 
-  newCashFlowRuleLibrary: CashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
-  rules: InputValidationRules = clone(rules);
+  newCashRule: CashFlowRule = {...emptyCashFlowRule, id: getNewGuid()};
+  rules: InputValidationRules = rules;
 
-  @Watch('dialogData')
-  onDialogDataChanged() {
-    let currentUser: string = getUserName();
-
-    this.newCashFlowRuleLibrary = {
-      ...this.newCashFlowRuleLibrary,
-      cashFlowRules: hasValue(this.dialogData.cashFlowRules)
-          ? this.dialogData.cashFlowRules.map((cashFlowRule: CashFlowRule) => ({
-            ...cashFlowRule,
-            id: getNewGuid(),
-            cashFlowDistributionRules: hasValue(cashFlowRule.cashFlowDistributionRules)
-                ? cashFlowRule.cashFlowDistributionRules.map((distributionRule: CashFlowDistributionRule) => ({
-                  ...distributionRule,
-                  id: getNewGuid()
-                }))
-                : []
-          }))
-          : [],
-        owner: this.getIdByUserNameGetter(currentUser),
-    };
+  disableSubmitButton() {
+    return !(this.rules['generalRules'].valueIsNotEmpty(this.newCashRule.name) === true);
   }
 
   onSubmit(submit: boolean) {
     if (submit) {
-      this.$emit('submit', this.newCashFlowRuleLibrary);
+      this.$emit('submit', this.newCashRule);
     } else {
       this.$emit('submit', null);
     }
 
-    this.newCashFlowRuleLibrary = {...emptyCashFlowRuleLibrary, id: getNewGuid()};
+    this.newCashRule = {...emptyCashFlowRule, id: getNewGuid()};
   }
 }
 </script>

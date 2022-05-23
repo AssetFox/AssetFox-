@@ -42,14 +42,14 @@
                     </v-layout>  
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">                   
-                    <v-layout row align-end class="left-buttons-padding">
+                    <v-layout row align-end style="padding-top: 22px !important">
                         <v-spacer></v-spacer>
                         <v-btn @click="onShowCreateCashFlowRuleLibraryDialog(false)"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
                             v-show="!hasScenario">
-                            New Library
+                            Create New Library
                         </v-btn>
-                        <v-btn @click="onAddCashFlowRule" v-show="hasSelectedLibrary"
+                        <v-btn @click="showAddCashFlowRuleDialog = true" v-show="hasSelectedLibrary || hasScenario"
                             outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                             Add Cash Flow Rule
                         </v-btn>
@@ -127,7 +127,7 @@
                             </v-menu>
                             <v-btn
                                 @click="onEditCashFlowRuleCriterionLibrary(props.item)"
-                                class="edit-icon"
+                                class="ghd-blue"
                                 icon>
                                 <v-icon>fas fa-edit</v-icon>
                             </v-btn>
@@ -138,13 +138,13 @@
                             <v-layout style='flex-wrap:nowrap'>
                                 <v-btn
                                 @click="onDeleteCashFlowRule(props.item.id)"
-                                class="ara-orange"
+                                class="ghd-blue"
                                 icon>
                                 <v-icon>fas fa-trash</v-icon>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(props.item.id)"
-                                class="ara-orange"
+                                class="ghd-blue"
                                 icon>
                                 <v-icon>fas fa-edit</v-icon>
                             </v-btn>
@@ -161,9 +161,10 @@
         </v-flex>
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-layout justify-center>
-                <v-flex xs6>
+                <v-flex>
+                    <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea
-                        label="Description"
+                        class="ghd-text-field-border"
                         no-resize
                         outline
                         rows="4"
@@ -178,43 +179,42 @@
         </v-flex>
         <v-flex xs12>
             <v-layout
-                justify-end
+                justify-center
                 row
                 v-show="hasSelectedLibrary || hasScenario">
                 <v-btn
+                    @click="onDeleteCashFlowRuleLibrary"
+                    flat class='ghd-blue ghd-button-text ghd-button'
+                    v-show="!hasScenario"
+                    :disabled="!hasLibraryEditPermission">
+                    Delete Library
+                </v-btn>   
+                <v-btn
+                    @click="onDiscardChanges"
+                    v-show="hasScenario"
+                    :disabled="!hasUnsavedChanges" flat class='ghd-blue ghd-button-text ghd-button'>
+                    Cancel
+                </v-btn>
+                <v-btn
+                    :disabled="disableCrudButtons()"
+                    @click="onShowCreateCashFlowRuleLibraryDialog(true)"
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    Create as New Library
+                </v-btn>
+                <v-btn
                     :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
                     @click="onUpsertScenarioCashFlowRules"
-                    class="ara-blue-bg white--text"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
                     v-show="hasScenario">
                     Save
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges"
                     @click="onUpsertCashFlowRuleLibrary"
-                    class="ara-blue-bg white--text"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
                     v-show="!hasScenario">
                     Update Library
-                </v-btn>
-                <v-btn
-                    :disabled="disableCrudButtons()"
-                    @click="onShowCreateCashFlowRuleLibraryDialog(true)"
-                    class="ara-blue-bg white--text">
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click="onDeleteCashFlowRuleLibrary"
-                    class="ara-orange-bg white--text"
-                    v-show="!hasScenario"
-                    :disabled="!hasLibraryEditPermission">
-                    Delete Library
-                </v-btn>
-                <v-btn
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
-                    :disabled="!hasUnsavedChanges">
-                    Discard Changes
-                </v-btn>
+                </v-btn>                                       
             </v-layout>
         </v-flex>
 
@@ -238,6 +238,10 @@
             :selectedCashFlowRule="selectedCashFlowRule"
             @submit="onSubmitCashFlowRuleEdit"
         />
+
+        <AddCashFlowRuleDialog
+            :showDialog="showAddCashFlowRuleDialog"
+            @submit="onSubmitAddCashFlowRule"/>
     </v-layout>
 </template>
 
@@ -279,6 +283,7 @@ import {
 } from '@/shared/models/modals/create-cash-flow-rule-library-dialog-data';
 import CreateCashFlowRuleLibraryDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CreateCashFlowRuleLibraryDialog.vue';
 import CashFlowRuleEditDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/CashFlowRuleEditDialog.vue';
+import AddCashFlowRuleDialog from '@/components/cash-flow-editor/cash-flow-editor-dialogs/AddCashFlowRuleDialog.vue';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { getLastPropertyValue } from '@/shared/utils/getter-utils';
@@ -299,7 +304,8 @@ import { getUserName } from '@/shared/utils/get-user-info';
         CreateCashFlowRuleLibraryDialog,
         CriterionLibraryEditorDialog,
         ConfirmDeleteAlert: Alert,
-        CashFlowRuleEditDialog
+        CashFlowRuleEditDialog,
+        AddCashFlowRuleDialog
     },
 })
 export default class CashFlowEditor extends Vue {
@@ -414,6 +420,7 @@ export default class CashFlowEditor extends Vue {
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
     showRuleEditorDialog: boolean = false;
+    showAddCashFlowRuleDialog: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -589,6 +596,17 @@ export default class CashFlowEditor extends Vue {
             newCashFlowRule,
             this.cashFlowRuleGridData,
         );
+    }
+
+    onSubmitAddCashFlowRule(newCashFlowRule: CashFlowRule){
+        if(!isNil(newCashFlowRule))
+        {
+            this.cashFlowRuleGridData = prepend(
+                newCashFlowRule,
+                this.cashFlowRuleGridData,
+            );
+        }
+        this.showAddCashFlowRuleDialog = false;
     }
 
     onDeleteCashFlowRule(cashFlowRuleId: string) {

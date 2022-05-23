@@ -36,7 +36,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
 
-            var entitiesToUpdate = upsertAttributeEntities.Where(e => existingAttributeIds.Contains(e.Id) && OkToUpdate(existingAttributes, e)).ToList();
+            var entitiesToUpdate = upsertAttributeEntities.Where(e => existingAttributeIds.Contains(e.Id)).ToList();
+            foreach (var updateEntity in entitiesToUpdate)
+            {
+                if (!OkToUpdate(existingAttributes, updateEntity)) {
+                    throw new Exception($"Proposed update of {updateEntity.Name} is invalid");
+                };
+            }
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
@@ -230,6 +236,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return Task.Factory.StartNew(() =>
                 _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+        }
+
+        public AttributeDTO GetSingleById(Guid attributeId)
+        {
+            var entity = _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId);
+            if (entity == null)
+            {
+                return null;
+            }
+            return AttributeMapper.ToDto(entity);
         }
     }
 }

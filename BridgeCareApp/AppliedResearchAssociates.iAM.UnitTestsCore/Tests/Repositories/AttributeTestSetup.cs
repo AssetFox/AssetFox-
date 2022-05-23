@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
@@ -18,6 +20,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return attribute;
         }
 
+        public static AttributeDTO NumericDto(Guid? id = null, string name = null)
+        {
+            var attribute = Numeric(id, name);
+            var entity = AttributeMapper.ToEntity(attribute);
+            var dto = AttributeMapper.ToDto(entity);
+            return dto;
+        }
         public static TextAttribute Text(Guid? id = null)
         {
             var resolvedId = id ?? Guid.NewGuid();

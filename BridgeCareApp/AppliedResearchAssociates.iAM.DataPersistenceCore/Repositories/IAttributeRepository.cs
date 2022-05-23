@@ -20,5 +20,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         Task<List<AttributeDTO>> Attributes();
 
         Task<List<AttributeDTO>> CalculatedAttributes();
+        AttributeDTO GetSingleById(Guid attributeId);
     }
 }

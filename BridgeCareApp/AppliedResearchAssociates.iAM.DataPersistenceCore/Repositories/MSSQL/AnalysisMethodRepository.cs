@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
-using AppliedResearchAssociates.iAM.Debugging;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -165,7 +164,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 };
             }
 
-            ErrorCondition.ErrorStateBreakpointHolder();
             return _unitOfWork.Context.AnalysisMethod
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)

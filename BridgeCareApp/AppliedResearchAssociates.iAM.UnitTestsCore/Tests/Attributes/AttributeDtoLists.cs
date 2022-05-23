@@ -15,9 +15,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 AttributeDtos.ActionType,
                 AttributeDtos.AdtTotal,
                 AttributeDtos.Age,
+                AttributeDtos.CulvSeeded,
                 AttributeDtos.DeckSeeded,
                 AttributeDtos.SubSeeded,
                 AttributeDtos.SupSeeded,
+                AttributeDtos.CulvDurationN,
+                AttributeDtos.DeckDurationN,
+                AttributeDtos.SubDurationN,
+                AttributeDtos.SupDurationN,
             };
     }
 }

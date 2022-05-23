@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -22,13 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeRepository(UnitOfDataPersistenceWork unitOfWork) =>
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
-        private static bool OkToUpdate(List<AttributeEntity> oldEntities, AttributeEntity proposedNewEntity)
-        {
-            var compare = oldEntities.Single(e => e.Id == proposedNewEntity.Id);
-            var returnValue = proposedNewEntity.Name == compare.Name
-                             && proposedNewEntity.ConnectionType == compare.ConnectionType;
-            return returnValue;
-        }
         public void UpsertAttributes(List<Attribute> attributes)
         {
             var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
@@ -39,8 +33,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entitiesToUpdate = upsertAttributeEntities.Where(e => existingAttributeIds.Contains(e.Id)).ToList();
             foreach (var updateEntity in entitiesToUpdate)
             {
-                if (!OkToUpdate(existingAttributes, updateEntity)) {
-                    throw new Exception($"Proposed update of {updateEntity.Name} is invalid");
+                var updateValidity = AttributeUpdateValidityChecker.CheckUpdateValidity(existingAttributes, updateEntity);
+                if (!updateValidity.Ok) {
+                    throw new InvalidAttributeUpsertException(updateValidity.Message);
                 };
             }
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();

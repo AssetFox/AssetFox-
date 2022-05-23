@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                 var valid = AttributeValidityChecker.IsValid(mappedDto);
                 if (!valid)
                 {
-                    throw new Exception($"Invalid attribute {mappedDto.Name} with aggregation rule {mappedDto.AggregationRuleType}");
+                    throw new InvalidAttributeException($"Invalid attribute {mappedDto.Name} with aggregation rule {mappedDto.AggregationRuleType}");
                 }
                 if (mappedDto!=null)
                 {
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                 }
                 else
                 {
-                    throw new Exception($"Invalid attribute {dto.Name}");
+                    throw new AttributeMappingFailureException($"Invalid attribute {dto.Name}");
                 }
             }
             repository.UpsertAttributes(dataAttributes);

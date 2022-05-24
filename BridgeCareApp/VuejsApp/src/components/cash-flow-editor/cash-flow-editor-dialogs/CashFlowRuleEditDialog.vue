@@ -169,7 +169,7 @@
             Cancel
           </v-btn>
           <v-btn @click="onSubmit(true)"
-                 :disabled="!hasUnsavedChanges"
+                 :disabled="!hasUnsavedChanges || !isDataValid"
                  class='ghd-blue hd-button-text ghd-button' flat>
             Submit
           </v-btn>         
@@ -189,6 +189,7 @@ import {
   CashFlowRule,
   CashFlowRuleLibrary,
   emptyCashFlowDistributionRule,
+  emptyCashFlowRule,
   emptyCashFlowRuleLibrary
 } from '@/shared/models/iAM/cash-flow';
 import {hasValue} from '@/shared/utils/has-value-util';
@@ -206,6 +207,7 @@ export default class CashFlowRuleEditDialog extends Vue {
   @Prop() showDialog: boolean;
 
   hasUnsavedChanges: boolean = false;
+  isDataValid: boolean = true;
 
   cashFlowDistributionRuleGridData: CashFlowDistributionRule[] = []
   processedGridData: CashFlowDistributionRule[] = [];
@@ -366,12 +368,59 @@ export default class CashFlowRuleEditDialog extends Vue {
 
     @Watch('processedGridData')
     onCashFlowDistributionRuleGridDataChanged() {
-        this.hasUnsavedChanges = 
-            hasUnsavedChangesCore(
-                '',
-                this.processedGridData,
-                this.selectedCashFlowRule.cashFlowDistributionRules,
-            )
+        if(this.checkIsDataValid())
+            this.hasUnsavedChanges = 
+                hasUnsavedChangesCore(
+                    '',
+                    this.processedGridData,
+                    this.selectedCashFlowRule.cashFlowDistributionRules,
+                )
+    }
+
+    checkIsDataValid() : boolean
+    {
+        let rule =  clone(emptyCashFlowRule)
+        rule.cashFlowDistributionRules = this.processedGridData;
+        this.isDataValid = this.processedGridData.every((
+                        distributionRule: CashFlowDistributionRule,
+                        index: number,
+                    ) => {
+                        let isValid: boolean =
+                            this.rules['generalRules'].valueIsNotEmpty(
+                                distributionRule.durationInYears,
+                            ) === true &&
+                            this.rules['generalRules'].valueIsNotEmpty(
+                                distributionRule.costCeiling,
+                            ) === true &&
+                            this.rules['generalRules'].valueIsNotEmpty(
+                                distributionRule.yearlyPercentages,
+                            ) === true &&
+                            this.rules[
+                                'cashFlowRules'
+                            ].doesTotalOfPercentsEqualOneHundred(
+                                distributionRule.yearlyPercentages,
+                            ) === true;
+
+                        if (index !== 0) {
+                            isValid =
+                                isValid &&
+                                this.rules[
+                                    'cashFlowRules'
+                                ].isDurationGreaterThanPreviousDuration(
+                                    distributionRule,
+                                    rule,
+                                ) === true &&
+                                this.rules[
+                                    'cashFlowRules'
+                                ].isAmountGreaterThanOrEqualToPreviousAmount(
+                                    distributionRule,
+                                    rule,
+                                ) === true;
+                        }
+
+                        return isValid;
+                    },);
+        return this.isDataValid;     
     }
 
     formatAsCurrency(value: any) {

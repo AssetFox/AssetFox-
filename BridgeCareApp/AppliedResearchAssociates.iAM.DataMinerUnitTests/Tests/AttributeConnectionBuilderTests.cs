@@ -1,9 +1,9 @@
 ﻿using Xunit;
 using System;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests

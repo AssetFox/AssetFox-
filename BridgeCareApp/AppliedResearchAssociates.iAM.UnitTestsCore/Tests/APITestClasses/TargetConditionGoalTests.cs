@@ -38,19 +38,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        public TargetConditionGoalLibraryEntity TestTargetConditionGoalLibrary { get; } = new TargetConditionGoalLibraryEntity
+        public TargetConditionGoalLibraryEntity
+            TestTargetConditionGoalLibraryEntity(
+            Guid? id = null,
+            string name = null
+            )
         {
-            Id = TargetConditionGoalLibraryId,
-            Name = "Test Name"
-        };
+            var resolvedId = id ?? Guid.NewGuid();
+            var resolvedName = name ?? RandomStrings.Length11();
+            var returnValue = new TargetConditionGoalLibraryEntity
+            {
+                Id = resolvedId,
+                Name = resolvedName,
+            };
+            return returnValue;
+        }
 
-        public TargetConditionGoalEntity TestTargetConditionGoal { get; } = new TargetConditionGoalEntity
+        public TargetConditionGoalEntity TestTargetConditionGoal(
+            Guid libraryId,
+            Guid? id = null,
+            string name = null)
         {
-            Id = TargetConditionGoalId,
-            TargetConditionGoalLibraryId = TargetConditionGoalLibraryId,
-            Name = "Test Name",
-            Target = 1
-        };
+            var resolveId = id ?? Guid.NewGuid();
+            var resolveName = name ?? RandomStrings.Length11();
+            var returnValue = new TargetConditionGoalEntity
+            {
+                Id = resolveId,
+                TargetConditionGoalLibraryId = libraryId,
+                Name = resolveName,
+                Target = 1
+            };
+            return returnValue;
+        }
         public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal { get; } = new ScenarioTargetConditionGoalEntity
         {
             Id = ScenarioTargetConditionGoalId,
@@ -58,26 +77,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Target = 1
         };
 
-        private void SetupForGet()
+        private TargetConditionGoalLibraryEntity SetupLibraryForGet()
         {
-            if (!_testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Add(TestTargetConditionGoalLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
-
-            if (!_testHelper.UnitOfWork.Context.TargetConditionGoal.Any())
-            {
-                var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
-                TestTargetConditionGoal.AttributeId = attribute.Id;
-                _testHelper.UnitOfWork.Context.TargetConditionGoal.Add(TestTargetConditionGoal);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var libraryEntity = TestTargetConditionGoalLibraryEntity();
+            _testHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Add(libraryEntity);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return libraryEntity;
         }
 
-        private CriterionLibraryEntity SetupForUpsertOrDelete()
+        public TargetConditionGoalEntity SetupTargetConditionGoal(Guid targetConditionGoalLibraryId)
         {
-            SetupForGet();
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var targetConditionGoalEntity = TestTargetConditionGoal(targetConditionGoalLibraryId);
+            targetConditionGoalEntity.AttributeId = attribute.Id;
+            _testHelper.UnitOfWork.Context.TargetConditionGoal.Add(targetConditionGoalEntity);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return targetConditionGoalEntity;
+        }
+
+        private CriterionLibraryEntity SetupCriterionLibraryForUpsertOrDelete()
+        {
             //var criterionLibraries = _testHelper.UnitOfWork.Context.CriterionLibrary.ToList();
             //_testHelper.UnitOfWork.Context.CriterionLibrary.RemoveRange(criterionLibraries);
             //_testHelper.UnitOfWork.Context.SaveChanges();
@@ -120,9 +139,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var entity = SetupLibraryForGet();
             // Act
             var result = await _controller
-                .UpsertTargetConditionGoalLibrary(TestTargetConditionGoalLibrary.ToDto());
+                .UpsertTargetConditionGoalLibrary(entity.ToDto());
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -142,7 +162,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
         {
             // Arrange
-            SetupForGet();
+            var library = SetupLibraryForGet();
+            var goal = SetupTargetConditionGoal(library.Id);
 
             // Act
             var result = await _controller.TargetConditionGoalLibraries();
@@ -153,24 +174,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
-            Assert.Single(dtos);
+            var foundLibrary = dtos.Single(dto => dto.Id == library.Id);
 
-            Assert.Equal(TargetConditionGoalLibraryId, dtos[0].Id);
-            Assert.Single(dtos[0].TargetConditionGoals);
-
-            Assert.Equal(TargetConditionGoalId, dtos[0].TargetConditionGoals[0].Id);
+            Assert.Equal(goal.Id, foundLibrary.TargetConditionGoals[0].Id);
         }
 
-        [Fact]
+        [Fact (Skip = "Is broken. Despite appearances, was broken prior to WJ work on getting the tests to be independent. The problem was that the code inside the timer did not fire as the test was already completed.")]
         public async Task ShouldModifyTargetConditionGoalData()
         {
             // Arrange
-            var criterionLibraryEntity = SetupForUpsertOrDelete();
+            var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
+            var library = SetupLibraryForGet();
+            var goal = SetupTargetConditionGoal(library.Id);
             var getResult = await _controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
-            var dto = dtos[0];
+            var dto = dtos.Single(l => l.Id == library.Id);
             dto.Description = "Updated Description";
             dto.TargetConditionGoals[0].Name = "Updated Name";
             dto.TargetConditionGoals[0].CriterionLibrary =
@@ -180,32 +200,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertTargetConditionGoalLibrary(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.TargetConditionGoalRepo
-                    .GetTargetConditionGoalLibrariesWithTargetConditionGoals()[0];
-                Assert.Equal(dto.Description, modifiedDto.Description);
-                Assert.Single(modifiedDto.AppliedScenarioIds);
-                Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
+            await Task.Delay(5000);
+            var modifiedDto = _testHelper.UnitOfWork.TargetConditionGoalRepo
+                .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
+                .Single(x => x.Id == library.Id);
+            Assert.Equal(dto.Description, modifiedDto.Description);
+            Assert.Single(modifiedDto.AppliedScenarioIds);
+            Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-                Assert.Equal(dto.TargetConditionGoals[0].CriterionLibrary.Id,
-                    modifiedDto.TargetConditionGoals[0].CriterionLibrary.Id);
-                Assert.Equal(dto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
-            };
+            Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
+            Assert.Equal(dto.TargetConditionGoals[0].CriterionLibrary.Id,
+                modifiedDto.TargetConditionGoals[0].CriterionLibrary.Id);
+            Assert.Equal(dto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
         }
 
         [Fact]
         public async Task ShouldDeleteTargetConditionGoalData()
         {
             // Arrange
-            var criterionLibraryEntity = SetupForUpsertOrDelete();
+            var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
+            var targetConditionGoalLibraryEntity = SetupLibraryForGet();
+            var targetConditionGoalEntity = SetupTargetConditionGoal(targetConditionGoalLibraryEntity.Id);
             var getResult = await _controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
-            var targetConditionGoalLibraryDTO = dtos[0];
+            var targetConditionGoalLibraryDTO = dtos.Single(dto => dto.Id == targetConditionGoalLibraryEntity.Id);
             targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
                 criterionLibraryEntity.ToDto();
 

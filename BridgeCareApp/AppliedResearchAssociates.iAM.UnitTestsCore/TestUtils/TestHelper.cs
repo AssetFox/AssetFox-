@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
         private static readonly Guid SimulationId = Guid.Parse("416ad546-0796-4889-9db4-9c11bbd6c50d");
-        private static readonly Guid CriterionLibraryId = Guid.Parse("47380dd4-8df8-46e2-9195-b7f786a4258a");
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";

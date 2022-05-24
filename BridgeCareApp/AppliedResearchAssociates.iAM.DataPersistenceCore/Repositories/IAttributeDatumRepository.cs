@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {

@@ -76,12 +76,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData()
+        private void CreateScenarioTestData(Guid simulationId)
         {
             _testScenarioBudget = new ScenarioBudgetEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 Name = "ScenarioBudgetEntity"
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
@@ -90,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testScenarioBudgetPriority = new ScenarioBudgetPriorityEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 PriorityLevel = 1,
                 CriterionLibraryScenarioBudgetPriorityJoin = new CriterionLibraryScenarioBudgetPriorityEntity
                 {
@@ -133,10 +133,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
 
             // Act
-            var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioBudgetPriorities(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -166,12 +167,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
             var dtos = new List<BudgetPriorityDTO>();
 
             // Act
             var result = await _controller
-                .UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+                .UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -216,11 +218,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioBudgetPriorities(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -278,12 +281,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // Wjwjwj this test had a timer. So it may or may not work after we get a build.
         public async Task ShouldModifyScenarioData()
         {
-            // wjwjwj this test was colliding 9:42am Tuesday
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             // Arrange
             _testScenarioBudgetPriority.BudgetPercentagePairs =
@@ -296,19 +300,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dtos[0].BudgetPercentagePairs[0].Percentage = 90;
 
             // Act
-            await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+            await _controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(_testHelper.TestSimulation.Id)[0];
-                Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
-                Assert.Equal(dtos[0].Year, modifiedDto.Year);
-                Assert.Equal(dtos[0].CriterionLibrary.Id, modifiedDto.CriterionLibrary.Id);
-                Assert.Equal(dtos[0].BudgetPercentagePairs[0].Percentage, modifiedDto.BudgetPercentagePairs[0].Percentage);
-            };
-            timer.Start();
+            await Task.Delay(5000);
+            var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id)[0];
+            Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
+            Assert.Equal(dtos[0].Year, modifiedDto.Year);
+            Assert.Equal(dtos[0].CriterionLibrary.Id, modifiedDto.CriterionLibrary.Id);
+            Assert.Equal(dtos[0].BudgetPercentagePairs[0].Percentage, modifiedDto.BudgetPercentagePairs[0].Percentage);
         }
 
         [Fact]
@@ -336,13 +336,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowUnauthorizedOnInvestmentPost()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateUnauthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             var dtos = new List<BudgetPriorityDTO>();
 
             // Act
-            var result = await _controller.UpsertScenarioBudgetPriorities(_testHelper.TestSimulation.Id, dtos);
+            var result = await _controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);

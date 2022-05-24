@@ -51,7 +51,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testCashFlowRuleLibrary = new CashFlowRuleLibraryEntity
             {
-                Id = Guid.NewGuid(), Name = "TestCashFlowRuleLibrary", Description = ""
+                Id = Guid.NewGuid(),
+                Name = "TestCashFlowRuleLibrary",
+                Description = ""
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testCashFlowRuleLibrary);
 
@@ -87,12 +89,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.AddEntity(_testCashFlowDistributionRule);
         }
 
-        private void CreateScenarioTestData()
+        private void CreateScenarioTestData(Guid simulationId)
         {
             _testScenarioCashFlowRule = new ScenarioCashFlowRuleEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 Name = "TestCashFlowRule",
                 CriterionLibraryScenarioCashFlowRuleJoin = new CriterionLibraryScenarioCashFlowRuleEntity
                 {
@@ -138,9 +140,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.GetScenarioCashFlowRules(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -170,10 +173,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
             var dtos = new List<CashFlowRuleDTO>();
 
             // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(_testHelper.TestSimulation.Id, dtos);
+            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -226,11 +230,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioCashFlowRules(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -285,11 +290,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // Wjwjwj deleted timer. Could be broken.
         public async Task ShouldModifyScenarioData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             _testScenarioCashFlowRule.ScenarioCashFlowDistributionRules.Add(_testScenarioCashFlowDistributionRule);
 
@@ -299,23 +306,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dtos[0].CashFlowDistributionRules[0].DurationInYears = 2;
 
             // Act
-            await _controller.UpsertScenarioCashFlowRules(_testHelper.TestSimulation.Id, dtos);
+            await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDtos = _testHelper.UnitOfWork.CashFlowRuleRepo
-                    .GetScenarioCashFlowRules(_testHelper.TestSimulation.Id);
-                Assert.Single(modifiedDtos);
+            await Task.Delay(5000);
+            var modifiedDtos = _testHelper.UnitOfWork.CashFlowRuleRepo
+                .GetScenarioCashFlowRules(simulation.Id);
+            Assert.Single(modifiedDtos);
 
-                Assert.Equal(dtos[0].Name, modifiedDtos[0].Name);
-                Assert.Equal(dtos[0].CriterionLibrary.MergedCriteriaExpression,
-                    modifiedDtos[0].CriterionLibrary.MergedCriteriaExpression);
+            Assert.Equal(dtos[0].Name, modifiedDtos[0].Name);
+            Assert.Equal(dtos[0].CriterionLibrary.MergedCriteriaExpression,
+                modifiedDtos[0].CriterionLibrary.MergedCriteriaExpression);
 
-                Assert.Equal(dtos[0].CashFlowDistributionRules[0].DurationInYears,
-                    modifiedDtos[0].CashFlowDistributionRules[0].DurationInYears);
-            };
+            Assert.Equal(dtos[0].CashFlowDistributionRules[0].DurationInYears,
+                modifiedDtos[0].CashFlowDistributionRules[0].DurationInYears);
         }
 
         [Fact]
@@ -346,13 +350,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowUnauthorizedOnInvestmentPost()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateUnauthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             var dtos = new List<CashFlowRuleDTO>();
 
             // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(_testHelper.TestSimulation.Id, dtos);
+            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);

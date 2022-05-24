@@ -102,7 +102,7 @@
                     >   
                         <template slot="activator">                                                                                       
                             <v-layout column class="ghd-left-padding">  
-                                <v-layout xs12 align-center row style="height:50px;">                                    
+                                <v-layout xs12 align-center style="height:50px;">                                    
                                     <v-flex xs11>
                                         <v-subheader class="ghd-control-label ghd-md-gray">Treatment Criteria</v-subheader>    
                                     </v-flex>
@@ -127,7 +127,7 @@
                                         </v-btn>   
                                     </v-flex>                                    
                                 </v-layout>       
-                                <v-layout align-center row class="ghd-right-padding">  
+                                <v-layout align-center class="ghd-right-padding">  
                                     <v-flex>
                                         <v-textarea
                                             class="ghd-control-border sm-txt"                                            

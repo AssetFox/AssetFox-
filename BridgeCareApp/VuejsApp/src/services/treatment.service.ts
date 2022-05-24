@@ -35,4 +35,43 @@ export default class TreatmentService {
             data,
         );
     }
+
+    static importTreatments(
+        file: File,
+        id: string,
+        forScenario: boolean
+    ) {
+        let formData = new FormData();
+
+        formData.append('file', file);
+        formData.append(forScenario ? 'simulationId' : 'libraryId', id);
+      
+        return forScenario            
+            ? // TODO: check for api name after functionality for scenario based import is in place.
+              coreAxiosInstance.post(
+                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              )
+            : coreAxiosInstance.post(
+                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
+                  formData,
+                  { headers: { 'Content-Type': 'multipart/form-data' } },
+              );
+    }
+
+    static exportTreatments(
+        id: string,
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ?  // TODO: check for api name after functionality for scenario based export is in place.   
+               coreAxiosInstance.get(               
+                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
+              )
+            : coreAxiosInstance.get(
+                // TODO: The api looks to be for library, its name need to be changed though
+                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
+              );
+    }
 }

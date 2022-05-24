@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -48,6 +49,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
+        private static TextAttribute ToText(AttributeDTO dto)
+        {
+            return new TextAttribute(
+                dto.DefaultValue,
+                dto.Id,
+                dto.Name,
+                dto.AggregationRuleType,
+                dto.Command,
+                ConnectionType.MSSQL,
+                "",
+                dto.IsCalculated,
+                dto.IsAscending);
+        }
+
+        private static NumericAttribute ToNumeric(AttributeDTO dto)
+        {
+            return double.TryParse(dto.DefaultValue, out double value)
+                ? new NumericAttribute(
+                    value,
+                    dto.Maximum,
+                    dto.Minimum,
+                    dto.Id,
+                    dto.Name,
+                    dto.AggregationRuleType,
+                    dto.Command,
+                    ConnectionType.MSSQL,
+                    "",
+                    dto.IsCalculated,
+                    dto.IsAscending)
+                : null;
+        }
+
+        public static Attribute ToDomain(AttributeDTO dto)
+        {
+            switch (dto.Type.ToLowerInvariant())
+            {
+            case "string":
+                return ToText(dto);
+            case "number":
+                return ToNumeric(dto);
+            }
+            return null;
+        }
+
         public static AttributeEntity ToEntity(this Attribute domain)
         {
             if (domain == null)
@@ -85,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var filteredAttribute = attributes.Where(_ => _.Name == entity.Name).FirstOrDefault();
 
-            if(filteredAttribute == null)
+            if (filteredAttribute == null)
             {
                 throw new ArgumentNullException($"The attribute present in `Attribute entity` {entity.Name}, is not present in `Explorer.Network.Attribute` object");
             }
@@ -94,6 +139,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>
-            new AttributeDTO { Name = entity.Name, Type = entity.DataType };
+            new()
+            {
+                Name = entity.Name,
+                Type = entity.DataType,
+                Id = entity.Id,
+                IsAscending = entity.IsAscending,
+                IsCalculated = entity.IsCalculated,
+                AggregationRuleType = entity.AggregationRuleType,
+                Command = entity.Command,
+                DefaultValue = entity.DefaultValue,
+                Maximum = entity.Maximum,
+                Minimum = entity.Minimum,
+            };
     }
 }

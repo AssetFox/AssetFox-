@@ -528,9 +528,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnScenarioImport()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateUnauthorizedController();
-            CreateScenarioTestData();
-            CreateRequestWithScenarioFormData();
+            CreateScenarioTestData(simulation.Id);
+            CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
             var result = await _controller.ImportScenarioInvestmentBudgetsExcelFile();
@@ -790,7 +791,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.True(budgetAmounts.All(_ => _.Year == Year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
+            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Equal(3, budgets.Count);
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
@@ -818,9 +819,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
-            CreateRequestWithScenarioFormData();
+            CreateScenarioTestData(simulation.Id);
+            CreateRequestWithScenarioFormData(simulation.Id);
 
             _testScenarioBudget.Name = "Sample Budget 1";
             _testHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
@@ -838,12 +840,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             timer.Elapsed += delegate
             {
                 var budgetAmounts =
-                    _testHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(_testHelper.TestSimulation.Id);
+                    _testHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
                 Assert.Equal(2, budgetAmounts.Count);
                 Assert.True(budgetAmounts.All(_ => _.Year == Year));
                 Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-                var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
+                var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
                 Assert.Equal(2, budgets.Count);
                 Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
                 Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
@@ -873,13 +875,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleScenarioBudgetsFile()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
-            CreateRequestWithScenarioFormData();
+            CreateScenarioTestData(simulation.Id);
+            CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
             var result =
-                await _controller.ExportScenarioInvestmentBudgetsExcelFile(_testHelper.TestSimulation.Id);
+                await _controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

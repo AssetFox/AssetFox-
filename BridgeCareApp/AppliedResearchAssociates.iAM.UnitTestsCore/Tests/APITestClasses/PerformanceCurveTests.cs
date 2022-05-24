@@ -59,12 +59,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Shift = false
         };
 
-        public ScenarioPerformanceCurveEntity TestScenarioPerformanceCurve { get; } = new ScenarioPerformanceCurveEntity
+        public ScenarioPerformanceCurveEntity TestScenarioPerformanceCurve(Guid simulationId)
         {
-            Id = ScenarioPerformanceCurveId,
-            Name = "Test Name",
-            Shift = false
-        };
+            return new ScenarioPerformanceCurveEntity
+            {
+                Id = ScenarioPerformanceCurveId,
+                SimulationId = simulationId,
+                Name = "Test Name",
+                Shift = false,
+            };
+        }
 
         public EquationEntity TestEquation { get; } = new EquationEntity
         {
@@ -108,19 +112,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return AddTestCriterionLibrary();
         }
 
-        private SimulationEntity SetupForScenarioCurveGet()
+        private ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(Guid simulationId)
         {
-            var simulation = _testHelper.CreateSimulation();
-            TestScenarioPerformanceCurve.SimulationId = simulation.Id;
-            TestScenarioPerformanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-            _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(TestScenarioPerformanceCurve);
+            var performanceCurve = TestScenarioPerformanceCurve(simulationId);
+            performanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
+            _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            return simulation;
+            return performanceCurve;
         }
 
-        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete()
+        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete(Guid simulationId)
         {
-            SetupForScenarioCurveGet();
+            SetupForScenarioCurveGet(simulationId);
             var criterionLibrary = AddTestCriterionLibrary();
             return criterionLibrary;
         }
@@ -169,10 +172,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioCurveGet()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
 
             // Act
-            var result = await _controller.GetScenarioPerformanceCurves(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioPerformanceCurves(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -182,13 +186,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioCurvePost()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
-            TestScenarioPerformanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var performanceCurve = TestScenarioPerformanceCurve(simulation.Id);
+            performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act
             var result = await _controller
-                .UpsertScenarioPerformanceCurves(_testHelper.TestSimulation.Id,
-                    new List<PerformanceCurveDTO> { TestScenarioPerformanceCurve.ToDto() });
+                .UpsertScenarioPerformanceCurves(simulation.Id,
+                    new List<PerformanceCurveDTO> { performanceCurve.ToDto() });
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -295,11 +301,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
-            SetupForScenarioCurveGet();
+            SetupForScenarioCurveGet(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioPerformanceCurves(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioPerformanceCurves(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -308,13 +315,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dtos = (List<PerformanceCurveDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<PerformanceCurveDTO>));
             Assert.Single(dtos);
-            Assert.Equal(TestScenarioPerformanceCurve.Id, dtos[0].Id);
+            Assert.Equal(simulation.Id, dtos[0].Id);
         }
 
         [Fact(Skip = "Broken")]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
             var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
@@ -322,16 +330,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(new ScenarioPerformanceCurveEntity
             {
                 Id = deletedCurveId,
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulation.Id,
                 AttributeId = attribute.Id,
                 Shift = false,
                 Name = "Deleted"
             });
 
-            var criterionLibrary = SetupForScenarioCurveUpsertOrDelete();
+            var criterionLibrary = SetupForScenarioCurveUpsertOrDelete(simulation.Id);
 
             var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
-                .GetScenarioPerformanceCurves(_testHelper.TestSimulation.Id);
+                .GetScenarioPerformanceCurves(simulation.Id);
             localScenarioPerformanceCurves[0].Name = "Updated";
             localScenarioPerformanceCurves[0].CriterionLibrary = criterionLibrary.ToDto();
             localScenarioPerformanceCurves[0].Equation = TestEquation.ToDto();
@@ -344,14 +352,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
 
             // Act
-            await _controller.UpsertScenarioPerformanceCurves(_testHelper.TestSimulation.Id, localScenarioPerformanceCurves);
+            await _controller.UpsertScenarioPerformanceCurves(simulation.Id, localScenarioPerformanceCurves);
 
             // Assert
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
                 var serverScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
-                    .GetScenarioPerformanceCurves(_testHelper.TestSimulation.Id);
+                    .GetScenarioPerformanceCurves(simulation.Id);
                 Assert.Equal(localScenarioPerformanceCurves.Count, serverScenarioPerformanceCurves.Count);
 
                 Assert.True(
@@ -379,6 +387,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             var mockedUnauthorized = new Mock<IEsecSecurity>();
             mockedUnauthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
@@ -389,12 +398,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Email = "fake@pa.gov"
                 });
             SetupController(mockedUnauthorized);
-            TestScenarioPerformanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var performanceCurve = TestScenarioPerformanceCurve(simulation.Id);
+            performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act
             var upsertScenarioPerformanceCurveLibraryResult = await _controller
-                .UpsertScenarioPerformanceCurves(_testHelper.TestSimulation.Id,
-                    new List<PerformanceCurveDTO> { TestScenarioPerformanceCurve.ToDto() });
+                .UpsertScenarioPerformanceCurves(simulation.Id,
+                    new List<PerformanceCurveDTO> { performanceCurve.ToDto() });
 
             // Assert
             Assert.IsType<UnauthorizedResult>(upsertScenarioPerformanceCurveLibraryResult);

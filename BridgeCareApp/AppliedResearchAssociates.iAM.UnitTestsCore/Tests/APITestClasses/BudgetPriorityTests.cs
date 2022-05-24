@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
-                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries()[0];
+                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
                 Assert.Equal(dto.Description, modifiedDto.Description);
 
                 Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);

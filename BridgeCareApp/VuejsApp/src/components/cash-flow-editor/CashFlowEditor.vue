@@ -26,7 +26,15 @@
                     </v-text-field> -->
                     
                 </v-flex>
-                <v-flex xs4 class="ghd-constant-header">                   
+                <v-flex xs4 class="ghd-constant-header">    
+                    <div v-if="hasScenario" style="padding-top: 18px !important">
+                        <v-btn  
+                            class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                            @click="importLibrary()"
+                            :disabled="importLibraryDisabled">
+                            Import
+                        </v-btn>
+                    </div>               
                     <v-layout row v-show='hasSelectedLibrary || hasScenario' style="padding-top: 28px !important">
                         <div v-if='hasSelectedLibrary && !hasScenario' class="header-text-content" style="padding-top: 7px !important">
                             Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
@@ -421,6 +429,7 @@ export default class CashFlowEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showRuleEditorDialog: boolean = false;
     showAddCashFlowRuleDialog: boolean = false;
+    importLibraryDisabled: boolean = true;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -459,7 +468,15 @@ export default class CashFlowEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onLibrarySelectItemValueChanged() {
+        if(!this.hasScenario)
+            this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
+        else
+            this.importLibraryDisabled = false;
+    }
+
+    importLibrary() {
         this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
+        this.importLibraryDisabled = true;
     }
 
     @Watch('stateSelectedCashRuleFlowLibrary')

@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
                 
         [Fact]
-        public async void ShouldGetUserTokens()
+        public async Task ShouldGetUserTokens()
         {
             try
             {

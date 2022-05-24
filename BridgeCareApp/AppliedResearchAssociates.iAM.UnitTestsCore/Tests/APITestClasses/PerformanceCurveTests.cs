@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -126,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -139,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -153,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -166,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnOkResultOnScenarioCurveGet()
+        public async Task ShouldReturnOkResultOnScenarioCurveGet()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -179,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnOkResultOnScenarioCurvePost()
+        public async Task ShouldReturnOkResultOnScenarioCurvePost()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -195,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
+        public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -219,7 +220,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldModifyPerformanceCurveData()
+        public async Task ShouldModifyPerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -257,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip ="Broken")]
-        public async void ShouldDeletePerformanceCurveData()
+        public async Task ShouldDeletePerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -292,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldGetAllScenarioPerformanceCurveData()
+        public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -312,7 +313,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldModifyScenarioPerformanceCurveData()
+        public async Task ShouldModifyScenarioPerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -376,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact(Skip="Broken")]
-        public async void ShouldReturnUnauthorizedOnPost()
+        public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();

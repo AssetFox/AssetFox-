@@ -25,6 +25,7 @@ using OfficeOpenXml;
 using Xunit;
 using MoreLinq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -262,7 +263,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnLibraryGet()
+        public async Task ShouldReturnOkResultOnLibraryGet()
         {
             // Arrange
             CreateAuthorizedController();
@@ -275,7 +276,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnScenarioGet()
+        public async Task ShouldReturnOkResultOnScenarioGet()
         {
             // Arrange
             CreateAuthorizedController();
@@ -288,7 +289,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnLibraryPost()
+        public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
             CreateAuthorizedController();
@@ -302,7 +303,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnScenarioPost()
+        public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
             CreateAuthorizedController();
@@ -320,7 +321,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
             CreateAuthorizedController();
@@ -333,7 +334,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetLibraryData()
+        public async Task ShouldGetLibraryData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -366,7 +367,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetInvestmentData()
+        public async Task ShouldGetInvestmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -399,7 +400,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyLibraryData()
+        public async Task ShouldModifyLibraryData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -434,7 +435,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyInvestmentData()
+        public async Task ShouldModifyInvestmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -476,7 +477,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteBudgetData()
+        public async Task ShouldDeleteBudgetData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -499,7 +500,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowUnauthorizedOnInvestmentPost()
+        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
         {
             // Arrange
             CreateUnauthorizedController();
@@ -519,7 +520,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
         [Fact]
-        public async void ShouldReturnUnauthorizedOnScenarioImport()
+        public async Task ShouldReturnUnauthorizedOnScenarioImport()
         {
             // Arrange
             CreateUnauthorizedController();
@@ -534,7 +535,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldImportLibraryBudgetsFromFile()
+        public async Task ShouldImportLibraryBudgetsFromFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -583,7 +584,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
+        public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -637,7 +638,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldExportSampleLibraryBudgetsFile()
+        public async Task ShouldExportSampleLibraryBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -683,7 +684,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldExportLibraryBudgetsFile()
+        public async Task ShouldExportLibraryBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -721,7 +722,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
+        public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
             // Arrange
             CreateAuthorizedController();
@@ -734,7 +735,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoFilesForLibraryImport()
+        public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
         {
             // Arrange
             CreateAuthorizedController();
@@ -747,7 +748,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
+        public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
         {
             // Arrange
             CreateAuthorizedController();
@@ -762,7 +763,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldImportScenarioBudgetsFromFile()
+        public async Task ShouldImportScenarioBudgetsFromFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -811,7 +812,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
+        public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -866,7 +867,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldExportSampleScenarioBudgetsFile()
+        public async Task ShouldExportSampleScenarioBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -911,7 +912,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldExportScenarioBudgetsFile()
+        public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
             CreateAuthorizedController();
@@ -949,7 +950,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
+        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
         {
             // Arrange
             CreateAuthorizedController();
@@ -962,7 +963,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoFilesForScenarioImport()
+        public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
             CreateAuthorizedController();
@@ -975,7 +976,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
+        public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
             CreateAuthorizedController();

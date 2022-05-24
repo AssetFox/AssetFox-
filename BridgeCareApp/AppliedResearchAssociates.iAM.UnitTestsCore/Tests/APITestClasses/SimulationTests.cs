@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -451,7 +452,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         [Fact]
         // WjFix -- saw a HeisenFailure when running all the tests in this class. On other attempts, it has succeeded.
-        public async void ShouldDeleteSimulation()
+        public async Task ShouldDeleteSimulation()
         {
             // Arrange
             CreateAuthorizedController();
@@ -470,7 +471,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
             CreateAuthorizedController();
@@ -483,7 +484,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
             CreateAuthorizedController();
@@ -498,7 +499,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPut()
+        public async Task ShouldReturnOkResultOnPut()
         {
             // Arrange
             CreateAuthorizedController();
@@ -511,7 +512,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
             CreateAuthorizedController();
@@ -524,7 +525,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllSimulations()
+        public async Task ShouldGetAllSimulations()
         {
             // Arrange
             CreateAuthorizedController();
@@ -543,7 +544,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldCreateSimulation()
+        public async Task ShouldCreateSimulation()
         {
             // Arrange
             CreateAuthorizedController();
@@ -585,7 +586,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldUpdateSimulation()
+        public async Task ShouldUpdateSimulation()
         {
             // Arrange
             CreateAuthorizedController();
@@ -627,7 +628,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldCloneSimulation()
+        public async Task ShouldCloneSimulation()
         {
             // Arrange
             CreateAuthorizedController();

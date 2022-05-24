@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -75,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.DeficientConditionGoalLibraries();
@@ -85,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Act
             var result = await _controller
@@ -96,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
             var result = await _controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
@@ -106,7 +107,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+        public async Task ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
             // Arrange
             SetupForGet();
@@ -127,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyDeficientConditionGoalData()
+        public async Task ShouldModifyDeficientConditionGoalData()
         {
             // Arrange
             SetupForUpsertOrDelete();
@@ -163,7 +164,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteDeficientConditionGoalData()
+        public async Task ShouldDeleteDeficientConditionGoalData()
         {
             // Arrange
             SetupForUpsertOrDelete();

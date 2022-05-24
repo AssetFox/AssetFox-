@@ -4,10 +4,12 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.Debugging;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -218,7 +220,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -236,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
             CreateRequestWithFormData();
@@ -254,8 +256,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
+            using var _ = new ErrorConditionIncrement();
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(_service,
@@ -272,7 +275,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnUnauthorizedOnGet()
+        public async Task ShouldReturnUnauthorizedOnGet()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -290,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnUnauthorizedOnPost()
+        public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange
             CreateRequestWithFormData();
@@ -308,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnUnauthorizedOnDelete()
+        public async Task ShouldReturnUnauthorizedOnDelete()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -326,7 +329,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldImportCommittedProjectsFromFile()
+        public async Task ShouldImportCommittedProjectsFromFile()
         {
             // Arrange
             CreateRequestWithFormData();
@@ -345,7 +348,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldExportCommittedProjectsToFile()
+        public async Task ShouldExportCommittedProjectsToFile()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -376,7 +379,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteCommittedProjectData()
+        public async Task ShouldDeleteCommittedProjectData()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -406,7 +409,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoMimeTypeWithBadRequestForImport()
+        public async Task ShouldThrowConstraintWhenNoMimeTypeWithBadRequestForImport()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -423,7 +426,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoFilesWithBadRequestForImport()
+        public async Task ShouldThrowConstraintWhenNoFilesWithBadRequestForImport()
         {
             // Arrange
             _controller = new CommittedProjectController(_service,
@@ -440,7 +443,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowConstraintWhenNoSimulationIdWithBadRequestForImport()
+        public async Task ShouldThrowConstraintWhenNoSimulationIdWithBadRequestForImport()
         {
             // Arrange
             _controller = new CommittedProjectController(_service,

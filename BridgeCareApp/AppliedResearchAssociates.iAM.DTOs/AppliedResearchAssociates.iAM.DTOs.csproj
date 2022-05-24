@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
+      <ProjectReference Include="..\AppliedResearchAssociates.iAM.Debugging\AppliedResearchAssociates.iAM.Debugging.csproj" />
     </ItemGroup>
 
 </Project>

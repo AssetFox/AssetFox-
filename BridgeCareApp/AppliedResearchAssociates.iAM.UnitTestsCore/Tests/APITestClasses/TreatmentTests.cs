@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
@@ -134,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
 
         [Fact]
-        public async void ShouldReturnOkResultOnLibraryGet()
+        public async Task ShouldReturnOkResultOnLibraryGet()
         {
             // Act
             CreateAuthorizedController();
@@ -145,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnScenarioGet()
+        public async Task ShouldReturnOkResultOnScenarioGet()
         {
             // Act
             CreateAuthorizedController();
@@ -156,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnLibraryPost()
+        public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
             CreateAuthorizedController();
@@ -175,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnScenarioPost()
+        public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
             CreateAuthorizedController();
@@ -189,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnLibraryDelete()
+        public async Task ShouldReturnOkResultOnLibraryDelete()
         {
             // Arrange
             CreateAuthorizedController();
@@ -202,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetLibraryTreatmentData()
+        public async Task ShouldGetLibraryTreatmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -231,7 +232,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetScenarioTreatmentData()
+        public async Task ShouldGetScenarioTreatmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -258,7 +259,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyLibraryTreatmentData()
+        public async Task ShouldModifyLibraryTreatmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -323,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyScenarioTreatmentData()
+        public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
             CreateAuthorizedController();
@@ -391,7 +392,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldThrowUnauthorizedException()
+        public async Task ShouldThrowUnauthorizedException()
         {
             // Arrange
             CreateUnauthorizedController();
@@ -408,7 +409,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteLibraryData()
+        public async Task ShouldDeleteLibraryData()
         {
             // Arrange
             CreateAuthorizedController();

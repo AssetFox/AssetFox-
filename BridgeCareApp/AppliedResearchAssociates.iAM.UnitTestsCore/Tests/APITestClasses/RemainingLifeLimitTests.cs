@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -73,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.RemainingLifeLimitLibraries();
@@ -83,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Act
             var result = await _controller
@@ -94,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
             var result = await _controller.DeleteRemainingLifeLimitLibrary(Guid.Empty);
@@ -104,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
+        public async Task ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
             // Arrange
             SetupForGet();
@@ -125,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyRemainingLifeLimitData()
+        public async Task ShouldModifyRemainingLifeLimitData()
         {
             // Arrange
             SetupForUpsertOrDelete();
@@ -160,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteRemainingLifeLimitData()
+        public async Task ShouldDeleteRemainingLifeLimitData()
         {
             // Arrange
             SetupForUpsertOrDelete();

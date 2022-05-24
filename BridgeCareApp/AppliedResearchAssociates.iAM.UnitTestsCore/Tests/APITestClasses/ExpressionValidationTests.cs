@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -174,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnEquationPost()
+        public async Task ShouldReturnOkResultOnEquationPost()
         {
             // Arrange
             var model = new EquationValidationParameters
@@ -192,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldValidateEquation()
+        public async Task ShouldValidateEquation()
         {
             // Arrange
             var model = new EquationValidationParameters
@@ -213,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldValidateNonPiecewiseEquation()
+        public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
@@ -236,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldValidateCriterion()
+        public async Task ShouldValidateCriterion()
         {
             // Arrange
             SetData();
@@ -276,7 +277,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldInvalidateNonPiecewiseEquation()
+        public async Task ShouldInvalidateNonPiecewiseEquation()
         {
             // Arrange
             var model = new EquationValidationParameters
@@ -338,7 +339,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnCriterionPost()
+        public async Task ShouldReturnOkResultOnCriterionPost()
         {
             // Arrange                
             SetData();

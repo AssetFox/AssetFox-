@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
@@ -105,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.TargetConditionGoalLibraries();
@@ -115,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Act
             var result = await _controller
@@ -126,7 +127,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
             var result = await _controller.DeleteTargetConditionGoalLibrary(Guid.Empty);
@@ -136,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
+        public async Task ShouldGetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
         {
             // Arrange
             SetupForGet();
@@ -159,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyTargetConditionGoalData()
+        public async Task ShouldModifyTargetConditionGoalData()
         {
             // Arrange
             SetupForUpsertOrDelete();
@@ -194,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeleteTargetConditionGoalData()
+        public async Task ShouldDeleteTargetConditionGoalData()
         {
             // Arrange
             SetupForUpsertOrDelete();
@@ -223,7 +224,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllScenarioTargetConditionGoalData()
+        public async Task ShouldGetAllScenarioTargetConditionGoalData()
         {
             // Arrange
             SetupForScenarioTargetGet();
@@ -242,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyScenarioTargetConditionGoalData()
+        public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
             // Arrange
             SetupForScenarioTargetUpsertOrDelete();

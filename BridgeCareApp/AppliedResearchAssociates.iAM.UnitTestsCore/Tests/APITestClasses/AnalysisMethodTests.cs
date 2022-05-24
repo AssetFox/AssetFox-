@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -73,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
@@ -83,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
@@ -101,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAnalysisMethod()
+        public async Task ShouldGetAnalysisMethod()
         {
             // Arrange
             SetupForGet();
@@ -119,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldCreateAnalysisMethod()
+        public async Task ShouldCreateAnalysisMethod()
         {
             // Arrange
             var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
@@ -146,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldUpdateAnalysisMethod()
+        public async Task ShouldUpdateAnalysisMethod()
         {
             // Arrange
             SetupForUpsert();

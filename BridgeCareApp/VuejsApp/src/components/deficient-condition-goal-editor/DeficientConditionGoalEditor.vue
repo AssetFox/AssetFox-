@@ -498,10 +498,12 @@ export default class DeficientConditionGoalEditor extends Vue {
 
     @Watch('librarySelectItemValue')
     onSelectItemValueChanged() {
-        this.selectDeficientConditionGoalLibraryAction({
-            libraryId: this.librarySelectItemValue,
-        });
-        this.importLibraryDisabled = false;
+        if(!this.hasScenario)
+            this.selectDeficientConditionGoalLibraryAction({
+                libraryId: this.librarySelectItemValue,
+            });
+        else
+            this.importLibraryDisabled = false;
     }
 
     @Watch('stateSelectedDeficientConditionGoalLibrary')

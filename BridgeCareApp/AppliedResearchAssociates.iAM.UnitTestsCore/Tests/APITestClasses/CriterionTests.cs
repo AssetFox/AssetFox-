@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private CriterionLibraryEntity Setup()
         {
-            var criterionLibrary = new CriterionLibraryEntity();
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
@@ -101,11 +101,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             criterionLibraryDTO.Description = "Updated Description";
 
             var newName = RandomStrings.WithPrefix("New Name");
+            var newDescription = RandomStrings.WithPrefix("Updated description");
             var newCriterionLibraryDTO = new CriterionLibraryEntity
             {
                 Id = criterionLibrary.Id,
                 Name = newName,
-                MergedCriteriaExpression = "New Expression"
+                MergedCriteriaExpression = "New Expression",
+                Description = newDescription,
             }.ToDto();
 
             // Act
@@ -118,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
                 .Single(_ => _.Id == criterionLibrary.Id);
-            Assert.Equal(criterionLibraryDTO.Description, updatedCriterionLibraryEntity.Description);
+            Assert.Equal(newDescription, updatedCriterionLibraryEntity.Description);
 
             var newCriterionLibraryEntity =
                 _testHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>

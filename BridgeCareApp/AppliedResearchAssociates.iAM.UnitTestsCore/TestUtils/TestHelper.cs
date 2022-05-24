@@ -88,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Context.Database.EnsureCreated();
         }
-                       
+
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
         public static TestHelper Instance
         {
@@ -96,13 +96,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 return lazy.Value;
             }
-        }        
+        }
+
+        private static readonly object HttpContextSetupLock = new object();
+        private static bool HttpContextHasBeenSetup = false;
 
         public void SetupDefaultHttpContext()
         {
-            var context = new DefaultHttpContext();
-            AddAuthorizationHeader(context);
-            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+            if (!HttpContextHasBeenSetup)
+            {
+                lock (HttpContextSetupLock)
+                {
+                    if (!HttpContextHasBeenSetup)
+                    {
+                        var context = new DefaultHttpContext();
+                        AddAuthorizationHeader(context);
+                        MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+                    }
+                }
+            }
         }
 
         public void AddAuthorizationHeader(DefaultHttpContext context) =>
@@ -148,10 +160,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             HasInventoryAccess = true
         };
 
-        public virtual void CreateAttributes()
+        private static bool AttributesHaveBeenCreated = false;
+        private static readonly object AttributeLock = new object();
+
+        public void CreateAttributes()
         {
-            var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
-            UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+            if (!AttributesHaveBeenCreated)
+            {
+                lock (AttributeLock) // it's possible a SemaphoreSlim is a better solution. I don't know. -- WJ.
+                {
+                    if (!AttributesHaveBeenCreated)
+                    {
+                        var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+                        AttributesHaveBeenCreated = true;
+                    }
+                }
+            }
+        }
+
+        public virtual void CreateSingletons()
+        {
+            CreateAttributes();
+            CreateNetwork();
+            SetupDefaultHttpContext();
         }
 
         public virtual void CreateNetwork()
@@ -162,12 +194,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual void CreateSimulation()
+        public virtual SimulationEntity CreateSimulation()
         {
-            if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == SimulationId))
-            {
-                UnitOfWork.Context.AddEntity(TestSimulation);
-            }
+            var entity = TestSimulation();
+            UnitOfWork.Context.AddEntity(entity);
+            return entity;
         }
 
         public virtual void CreateCalculatedAttributeLibrary()

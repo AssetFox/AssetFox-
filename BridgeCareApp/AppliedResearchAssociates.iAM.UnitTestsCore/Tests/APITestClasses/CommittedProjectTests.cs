@@ -28,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CommittedProjectController _controller;
 
         private CommittedProjectEntity _testProject;
+        private readonly SimulationEntity Simulation; // WjTodo -- get rid of this ivar.
 
         private static readonly List<string> ConsequenceAttributeNames = new List<string>
         {
@@ -44,30 +45,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public CommittedProjectTests()
         {
             _testHelper = TestHelper.Instance;
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();                
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            var simulation = _testHelper.CreateSimulation();
             _service = new CommittedProjectService(_testHelper.UnitOfWork);
-            if (!_testHelper.DbContext.InvestmentPlan.Any())
+            if (!_testHelper.DbContext.InvestmentPlan.Any(ip => ip.SimulationId == simulation.Id))
             {
-                CreateCommittedProjectTestData();
+                CreateCommittedProjectTestData(simulation.Id);
             }
         }
 
-        private void CreateCommittedProjectTestData()
+        private InvestmentPlanEntity CreateCommittedProjectTestData(Guid simulationId)
         {
-            _testHelper.UnitOfWork.Context.AddEntity(new InvestmentPlanEntity
+            var entity = new InvestmentPlanEntity
             {
                 Id = Guid.NewGuid(),
                 FirstYearOfAnalysisPeriod = 2020,
                 InflationRatePercentage = 0,
                 MinimumProjectCostLimit = 0,
                 NumberOfYearsInAnalysisPeriod = 1,
-                SimulationId = _testHelper.TestSimulation.Id
-            });
+                SimulationId = simulationId
+            };
+            _testHelper.UnitOfWork.Context.AddEntity(entity);
+            return entity;
 
 
             var attributeIdsPerAttributeName =
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     new ScenarioBudgetEntity
                     {
                         Id = Guid.NewGuid(),
-                        SimulationId = _testHelper.TestSimulation.Id,
+                        SimulationId = Simulation.Id,
                         Name = "Test Name"
                     },
                 MaintainableAsset =
@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 2,
                 Cost = 250000,
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = Simulation.Id,
                 CommittedProjectConsequences = ConsequenceAttributeNames.Select(attributeName =>
                     new CommittedProjectConsequenceEntity
                     {
@@ -133,10 +133,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var formData = new Dictionary<string, StringValues>()
             {
                 {"applyNoTreatment", new StringValues("0")},
-                {"simulationId", new StringValues(_testHelper.TestSimulation.Id.ToString())}
+                {"simulationId", new StringValues(Simulation.Id.ToString())}
             };
 
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
             _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
@@ -152,10 +152,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var formData = new Dictionary<string, StringValues>()
             {
                 {"applyNoTreatment", new StringValues("0")},
-                {"simulationId", new StringValues(_testHelper.TestSimulation.Id.ToString())}
+                {"simulationId", new StringValues(Simulation.Id.ToString())}
             };
 
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection {formFile});
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
             _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             FormFileCollection formFileCollection;
             if (file != null)
             {
-                formFileCollection = new FormFileCollection {file};
+                formFileCollection = new FormFileCollection { file };
             }
             else
             {
@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void AssertCommittedProjectsData()
         {
-            var timer = new Timer {Interval = 5000};
+            var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
                 var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         CommittedProjectConsequences = project.CommittedProjectConsequences
                             .Select(consequence => new CommittedProjectConsequenceEntity
                             {
-                                Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
+                                Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
                                 ChangeValue = consequence.ChangeValue
                             }).ToList()
                     }).ToList();
@@ -206,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Assert.Equal(2021, committedProjects[0].Year);
                 Assert.Equal(1, committedProjects[0].ShadowForAnyTreatment);
                 Assert.Equal(2, committedProjects[0].ShadowForSameTreatment);
-                Assert.Equal(_testHelper.TestSimulation.Id, committedProjects[0].SimulationId);
+                Assert.Equal(Simulation.Id, committedProjects[0].SimulationId);
 
                 var consequences = committedProjects[0].CommittedProjectConsequences.ToList();
                 Assert.Equal(8, consequences.Count);
@@ -231,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+            var result = await _controller.ExportCommittedProjects(Simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+            var result = await _controller.DeleteCommittedProjects(Simulation.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -286,7 +286,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+            var result = await _controller.ExportCommittedProjects(Simulation.Id);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -322,7 +322,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+            var result = await _controller.DeleteCommittedProjects(Simulation.Id);
 
             // assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -359,7 +359,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.ExportCommittedProjects(_testHelper.TestSimulation.Id);
+            var result = await _controller.ExportCommittedProjects(Simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -390,14 +390,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            await _controller.DeleteCommittedProjects(_testHelper.TestSimulation.Id);
+            await _controller.DeleteCommittedProjects(Simulation.Id);
 
             // Assert
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
                 var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
-                    .Where(_ => _.SimulationId == _testHelper.TestSimulation.Id)
+                    .Where(_ => _.SimulationId == Simulation.Id)
                     .ToList();
                 Assert.Empty(committedProjects);
 

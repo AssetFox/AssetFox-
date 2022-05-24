@@ -108,15 +108,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return AddTestCriterionLibrary();
         }
 
-        private void SetupForScenarioCurveGet()
+        private SimulationEntity SetupForScenarioCurveGet()
         {
-            if (!_testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Any())
-            {
-                TestScenarioPerformanceCurve.SimulationId = _testHelper.TestSimulation.Id;
-                TestScenarioPerformanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-                _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(TestScenarioPerformanceCurve);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var simulation = _testHelper.CreateSimulation();
+            TestScenarioPerformanceCurve.SimulationId = simulation.Id;
+            TestScenarioPerformanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
+            _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(TestScenarioPerformanceCurve);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return simulation;
         }
 
         private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete()

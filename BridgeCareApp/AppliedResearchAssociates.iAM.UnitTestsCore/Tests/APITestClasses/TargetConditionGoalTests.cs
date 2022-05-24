@@ -106,15 +106,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criterionLibrary;
         }
 
-        private void SetupForScenarioTargetGet()
+        private SimulationEntity SetupForScenarioTargetGet()
         {
-            if (!_testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any())
-            {
-                TestScenarioTargetConditionGoal.SimulationId = _testHelper.TestSimulation.Id;
-                TestScenarioTargetConditionGoal.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-                _testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(TestScenarioTargetConditionGoal);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var simulation = _testHelper.CreateSimulation();
+            TestScenarioTargetConditionGoal.SimulationId = simulation.Id;
+            TestScenarioTargetConditionGoal.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
+            _testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(TestScenarioTargetConditionGoal);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return simulation;
         }
 
         private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete()
@@ -179,10 +178,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(goal.Id, foundLibrary.TargetConditionGoals[0].Id);
         }
 
-        [Fact (Skip = "Is broken. Despite appearances, was broken prior to WJ work on getting the tests to be independent. The problem was that the code inside the timer did not fire as the test was already completed.")]
+        [Fact(Skip = "Is broken. Despite appearances, was broken prior to WJ work on getting the tests to be independent. The problem was that the code inside the timer did not fire as the test was already completed.")]
         public async Task ShouldModifyTargetConditionGoalData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
@@ -206,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Single(x => x.Id == library.Id);
             Assert.Equal(dto.Description, modifiedDto.Description);
             Assert.Single(modifiedDto.AppliedScenarioIds);
-            Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
+            Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
             Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
             Assert.Equal(dto.TargetConditionGoals[0].CriterionLibrary.Id,

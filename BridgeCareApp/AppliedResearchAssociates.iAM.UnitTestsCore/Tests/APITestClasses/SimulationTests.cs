@@ -490,9 +490,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var dto = _testHelper.TestSimulation.ToDto(null);
+            var dto = simulation.ToDto(null);
             dto.Id = Guid.NewGuid();
             var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, dto);
 
@@ -505,9 +506,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
-
+            var simulation = _testHelper.CreateSimulation();
             // Act
-            var result = await _controller.UpdateSimulation(_testHelper.TestSimulation.ToDto(null));
+            var result = await _controller.UpdateSimulation(simulation.ToDto(null));
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -531,6 +532,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
             var result = await _controller.GetSimulations();
@@ -540,9 +542,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.NotNull(okObjResult.Value);
 
             var dtos = (List<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimulationDTO>));
-            Assert.Single(dtos);
-
-            Assert.Equal(_testHelper.TestSimulation.Id, dtos[0].Id);
+            var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 
         [Fact (Skip ="Was broken before WJ started latest round of work. Not investigating further for now.")]
@@ -550,8 +550,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
 
-            var newSimulationDTO = _testHelper.TestSimulation.ToDto(null);
+            var newSimulationDTO = simulation.ToDto(null);
             newSimulationDTO.Id = Guid.NewGuid();
             newSimulationDTO.Users = new List<SimulationUserDTO>
                 {

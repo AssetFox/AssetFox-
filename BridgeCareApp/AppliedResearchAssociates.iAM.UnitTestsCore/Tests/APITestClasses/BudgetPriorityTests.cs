@@ -34,10 +34,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
+                _testHelper.CreateSingletons();
                 _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
             }
         }
 

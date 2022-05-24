@@ -104,18 +104,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData()
+        private void CreateScenarioTestData(Guid simulationId)
         {
             _testInvestmentPlan = new InvestmentPlanEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 FirstYearOfAnalysisPeriod = Year,
                 NumberOfYearsInAnalysisPeriod = 1,
                 MinimumProjectCostLimit = 500000,
                 InflationRatePercentage = 3
             };
-            var investmentPlan = _testHelper.UnitOfWork.Context.InvestmentPlan.FirstOrDefault(b => b.SimulationId == _testHelper.TestSimulation.Id);
+            var investmentPlan = _testHelper.UnitOfWork.Context.InvestmentPlan.FirstOrDefault(ip => ip.SimulationId == simulationId);
             if (investmentPlan != null)
             {
                 _testHelper.UnitOfWork.Context.Remove(investmentPlan);
@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 Id = Guid.NewGuid(),
                 Name = BudgetEntityName,
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 ScenarioBudgetAmounts =
                         new List<ScenarioBudgetAmountEntity>
                         {
@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
-        private void CreateRequestWithScenarioFormData(bool overwriteBudgets = false)
+        private void CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
         {
             ResetHttpContextToDefault();
             var httpContext = new DefaultHttpContext();
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var formData = new Dictionary<string, StringValues>()
             {
                 {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"simulationId", new StringValues(_testHelper.TestSimulation.Id.ToString())}
+                {"simulationId", new StringValues(simulationId.ToString())}
             };
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
@@ -280,9 +280,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetInvestment(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -307,6 +308,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
+            var simulation = _testHelper.CreateSimulation();
             var dto = new InvestmentDTO
             {
                 ScenarioBudgets = new List<BudgetDTO>(),
@@ -314,7 +316,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, dto);
+            var result = await _controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -370,11 +372,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetInvestmentData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetInvestment(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetInvestment(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -439,7 +442,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            var simulation = _testHelper.CreateSimulation();
+            CreateScenarioTestData(simulation.Id);
 
             var dto = new InvestmentDTO
             {
@@ -452,16 +456,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
 
             // Act
-            await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, dto);
+            await _controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             var timer = new SystemTimer.Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
                 var modifiedBudgetDto =
-                    _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id)[0];
+                    _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)[0];
                 var modifiedInvestmentPlanDto =
-                    _testHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(_testHelper.TestSimulation.Id);
+                    _testHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
 
                 Assert.Equal(dto.ScenarioBudgets[0].Name, modifiedBudgetDto.Name);
                 Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
@@ -504,7 +508,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateUnauthorizedController();
-            CreateScenarioTestData();
+            var simulation = _testHelper.CreateSimulation();
+            CreateScenarioTestData(simulation.Id);
             var dto = new InvestmentDTO
             {
                 ScenarioBudgets = new List<BudgetDTO> { _testScenarioBudget.ToDto() },
@@ -512,7 +517,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.UpsertInvestment(_testHelper.TestSimulation.Id, dto);
+            var result = await _controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -767,48 +772,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
-            CreateScenarioTestData();
-            CreateRequestWithScenarioFormData();
+            var simulation = _testHelper.CreateSimulation();
+            CreateScenarioTestData(simulation.Id);
+            CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
             await _controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
-            var timer = new SystemTimer.Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
-                    .GetScenarioBudgetAmounts(_testHelper.TestSimulation.Id)
+            await Task.Delay(5000);
+            var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
+                .GetScenarioBudgetAmounts(simulation.Id)
                     .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
                     .ToList();
 
-                Assert.Equal(2, budgetAmounts.Count);
-                Assert.True(budgetAmounts.All(_ => _.Year == Year));
-                Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == Year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-                var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
-                Assert.Equal(3, budgets.Count);
-                Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
-                Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(_testHelper.TestSimulation.Id);
+            Assert.Equal(3, budgets.Count);
+            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
+            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
 
-                var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-                var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-                var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
-                    .Where(_ => _.IsSingleUse &&
-                                _.CriterionLibraryScenarioBudgetJoins.Any(join =>
-                                    budgetNames.Contains(join.ScenarioBudget.Name)))
-                    .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
-                    .ThenInclude(_ => _.ScenarioBudget)
-                    .ToList();
-                Assert.NotEmpty(criteria);
-                GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
-                {
-                    var databaseCriterion = criteria.Single(_ =>
-                        _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
-                    var excelCriterion = criteriaPerBudgetName[budgetName];
-                    Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
-                });
-            };
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+            var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                .Where(_ => _.IsSingleUse &&
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                budgetNames.Contains(join.ScenarioBudget.Name)))
+                .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .ToList();
+            Assert.NotEmpty(criteria);
+            GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
+            {
+                var databaseCriterion = criteria.Single(_ =>
+                    _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
+                var excelCriterion = criteriaPerBudgetName[budgetName];
+                Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
+            });
         }
 
         [Fact]
@@ -915,12 +918,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
-            CreateRequestWithScenarioFormData();
+            CreateScenarioTestData(simulation.Id);
+            CreateRequestWithScenarioFormData(simulation.Id);
             // Act
             var result =
-                await _controller.ExportScenarioInvestmentBudgetsExcelFile(_testHelper.TestSimulation.Id);
+                await _controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

@@ -53,7 +53,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurve.xlsx");
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var result = performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, new UserCriteriaDTO());
 
@@ -75,7 +74,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurveInvalidAttribute.xlsx");
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var result = performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, new UserCriteriaDTO());
 
@@ -94,7 +92,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
@@ -117,7 +114,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
@@ -138,7 +134,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
-            ExcelPackage.LicenseContext = LicenseContext.Commercial;
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());

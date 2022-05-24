@@ -169,7 +169,7 @@
                                     </v-menu>
                                     <v-btn
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
-                                        class="edit-icon"
+                                        class="ghd-blue"
                                         icon>
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>

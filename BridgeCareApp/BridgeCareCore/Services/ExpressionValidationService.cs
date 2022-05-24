@@ -210,7 +210,10 @@ namespace BridgeCareCore.Services
                 }
 
                 var resultsCount = GetResultsCount(modifiedExpression, customAttribute);
-
+                if (resultsCount > 0)
+                {
+                    int x = 666;
+                }
                 return new CriterionValidationResult
                 {
                     IsValid = true, ResultsCount = resultsCount, ValidationMessage = "Success"

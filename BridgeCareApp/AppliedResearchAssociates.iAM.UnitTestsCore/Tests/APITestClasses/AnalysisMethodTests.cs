@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.Debugging;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -66,11 +67,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void SetupForUpsert()
+        private CriterionLibraryEntity SetupForUpsert()
         {
             SetupForGet();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
 
         [Fact]
@@ -150,13 +153,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldUpdateAnalysisMethod()
         {
             // Arrange
-            SetupForUpsert();
+            using var _ = new ErrorConditionIncrement();
+            var criterionLibrary = SetupForUpsert();
             var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
             var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(AnalysisMethodDTO));
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
             dto.Attribute = attributeEntity.Name;
-            dto.CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
+            dto.CriterionLibrary = criterionLibrary.ToDto();
             TestBenefit.Attribute = attributeEntity;
             dto.Benefit = TestBenefit.ToDto();
             dto.Benefit.Attribute = attributeEntity.Name;

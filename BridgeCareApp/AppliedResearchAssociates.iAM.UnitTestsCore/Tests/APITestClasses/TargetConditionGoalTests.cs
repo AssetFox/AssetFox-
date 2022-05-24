@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -74,14 +75,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void SetupForUpsertOrDelete()
+        private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             SetupForGet();
-            var criterionLibraries = _testHelper.UnitOfWork.Context.CriterionLibrary.ToList();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.RemoveRange(criterionLibraries);
+            //var criterionLibraries = _testHelper.UnitOfWork.Context.CriterionLibrary.ToList();
+            //_testHelper.UnitOfWork.Context.CriterionLibrary.RemoveRange(criterionLibraries);
+            //_testHelper.UnitOfWork.Context.SaveChanges();
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
 
         private void SetupForScenarioTargetGet()
@@ -95,14 +98,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void SetupForScenarioTargetUpsertOrDelete()
+        private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete()
         {
             SetupForScenarioTargetGet();
-            if (!_testHelper.UnitOfWork.Context.CriterionLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
 
         [Fact]
@@ -163,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyTargetConditionGoalData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibraryEntity = SetupForUpsertOrDelete();
             var getResult = await _controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
@@ -172,7 +174,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Description = "Updated Description";
             dto.TargetConditionGoals[0].Name = "Updated Name";
             dto.TargetConditionGoals[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibraryEntity.ToDto();
 
             // Act
             await _controller.UpsertTargetConditionGoalLibrary(dto);
@@ -198,14 +200,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteTargetConditionGoalData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibraryEntity = SetupForUpsertOrDelete();
             var getResult = await _controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
             var targetConditionGoalLibraryDTO = dtos[0];
             targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibraryEntity.ToDto();
 
             await _controller.UpsertTargetConditionGoalLibrary(
                 targetConditionGoalLibraryDTO);
@@ -246,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
             // Arrange
-            SetupForScenarioTargetUpsertOrDelete();
+            var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete();
             var getResult = await _controller.GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalDTO>));
@@ -265,7 +267,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var localScenarioTargetGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo
                 .GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
             localScenarioTargetGoals[0].Name = "Updated";
-            localScenarioTargetGoals[0].CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
+            localScenarioTargetGoals[0].CriterionLibrary = criterionLibraryEntity.ToDto();
             localScenarioTargetGoals.Add(new TargetConditionGoalDTO
             {
                 Id = Guid.NewGuid(),

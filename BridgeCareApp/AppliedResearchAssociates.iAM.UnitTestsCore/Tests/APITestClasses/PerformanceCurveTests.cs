@@ -91,22 +91,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 TestPerformanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
                 _testHelper.UnitOfWork.Context.PerformanceCurve.Add(TestPerformanceCurve);
                 _testHelper.UnitOfWork.Context.SaveChanges();
-            }           
-        }
-
-        private void AddTestCriterionLibrary()
-        {
-            if (!_testHelper.UnitOfWork.Context.CriterionLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
             }
         }
 
-        private void SetupForUpsertOrDelete()
+        private CriterionLibraryEntity AddTestCriterionLibrary()
+        {
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
+        }
+
+        private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             SetupForGet();
-            AddTestCriterionLibrary();
+            return AddTestCriterionLibrary();
         }
 
         private void SetupForScenarioCurveGet()
@@ -120,13 +119,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void SetupForScenarioCurveUpsertOrDelete()
+        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete()
         {
             SetupForScenarioCurveGet();
-            AddTestCriterionLibrary();
+            var criterionLibrary = AddTestCriterionLibrary();
+            return criterionLibrary;
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
@@ -139,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnScenarioCurveGet()
         {
             // Arrange
@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnScenarioCurvePost()
         {
             // Arrange
@@ -195,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
             // Arrange
@@ -219,12 +219,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(PerformanceCurveId, dtos[0].PerformanceCurves[0].Id);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldModifyPerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
-            SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
@@ -233,7 +233,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Description = "Updated Description";
             dto.PerformanceCurves[0].Shift = true;
             dto.PerformanceCurves[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibrary.ToDto();
             dto.PerformanceCurves[0].Equation = TestEquation.ToDto();
 
             // Act
@@ -257,19 +257,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        [Fact(Skip ="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldDeletePerformanceCurveData()
         {
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
-            SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
 
             var performanceCurveLibraryDTO = dtos[0];
             performanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibrary.ToDto();
 
             await _controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDTO);
 
@@ -292,7 +292,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
             // Arrange
@@ -312,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(TestScenarioPerformanceCurve.Id, dtos[0].Id);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
             // Arrange
@@ -329,12 +329,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Deleted"
             });
 
-            SetupForScenarioCurveUpsertOrDelete();
+            var criterionLibrary = SetupForScenarioCurveUpsertOrDelete();
 
             var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
                 .GetScenarioPerformanceCurves(_testHelper.TestSimulation.Id);
             localScenarioPerformanceCurves[0].Name = "Updated";
-            localScenarioPerformanceCurves[0].CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
+            localScenarioPerformanceCurves[0].CriterionLibrary = criterionLibrary.ToDto();
             localScenarioPerformanceCurves[0].Equation = TestEquation.ToDto();
             localScenarioPerformanceCurves.Add(new PerformanceCurveDTO
             {
@@ -376,7 +376,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = "Broken")]
         public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange

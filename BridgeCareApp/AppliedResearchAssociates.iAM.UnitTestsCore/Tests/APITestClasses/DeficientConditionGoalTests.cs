@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -65,16 +66,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void SetupForUpsertOrDelete()
+        private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             SetupForGet();
-            if (!_testHelper.UnitOfWork.Context.CriterionLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
-
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
@@ -131,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyDeficientConditionGoalData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.DeficientConditionGoalLibraries();
             var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
                 (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
@@ -140,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Description = "Updated Description";
             dto.DeficientConditionGoals[0].Name = "Updated Name";
             dto.DeficientConditionGoals[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibrary.ToDto();
 
             // Act
             await _controller.UpsertDeficientConditionGoalLibrary(dto);
@@ -167,14 +166,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteDeficientConditionGoalData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.DeficientConditionGoalLibraries();
             var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
                 (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
             var deficientConditionGoalLibraryDTO = dtos[0];
             deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+               criterionLibrary.ToDto();
 
             await _controller.UpsertDeficientConditionGoalLibrary(
                 deficientConditionGoalLibraryDTO);

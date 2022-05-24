@@ -124,12 +124,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             NumberOfYearsOfTreatmentOutlook = 2
         };
 
-        public CriterionLibraryEntity TestCriterionLibrary { get; } = new CriterionLibraryEntity
+        public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
         {
-            Id = CriterionLibraryId,
-            Name = "Test Criterion",
-            MergedCriteriaExpression = "Test Expression"
-        };
+            var resolvedId = id ?? Guid.NewGuid();
+            var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
+            var returnValue = new CriterionLibraryEntity
+            {
+                Id = resolvedId,
+                Name = resolvedName,
+                MergedCriteriaExpression = "Test Expression"
+            };
+            return returnValue;
+        }
 
         public UserEntity TestUser { get; } = new UserEntity
         {

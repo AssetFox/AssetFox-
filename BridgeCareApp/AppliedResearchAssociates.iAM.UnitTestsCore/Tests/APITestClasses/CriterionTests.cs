@@ -31,13 +31,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        private void Setup()
+        private CriterionLibraryEntity Setup()
         {
-            if (!_testHelper.DbContext.CriterionLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }            
+            var criterionLibrary = new CriterionLibraryEntity();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
 
         [Fact]
@@ -55,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Act
             var result = await _controller
-                .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary.ToDto());
+                .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary().ToDto());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -75,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllCriterionLibraries()
         {
             // Arrange
-            Setup();
+            var criterionLibrary = Setup();
 
             // Act
             var result = await _controller.CriterionLibraries();
@@ -86,25 +85,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<CriterionLibraryDTO>));
-            Assert.True(dtos.Any());
+            Assert.True(dtos.Any(cl => cl.Id == criterionLibrary.Id));
         }
 
         [Fact]
         public async Task ShouldModifyCriterionLibraries()
         {
             // Arrange
-            Setup();
+            var criterionLibrary = Setup();
             var getResult = await _controller.CriterionLibraries();
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<CriterionLibraryDTO>));
 
-            var criterionLibraryDTO = dtos[0];
+            var criterionLibraryDTO = dtos.Single(dto => dto.Id == criterionLibrary.Id);
             criterionLibraryDTO.Description = "Updated Description";
 
+            var newName = RandomStrings.WithPrefix("New Name");
             var newCriterionLibraryDTO = new CriterionLibraryEntity
             {
-                Id = Guid.NewGuid(),
-                Name = "New Name",
+                Id = criterionLibrary.Id,
+                Name = newName,
                 MergedCriteriaExpression = "New Expression"
             }.ToDto();
 
@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(addResult);
 
             var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
-                .Single(_ => _.Id == _testHelper.TestCriterionLibrary.Id);
+                .Single(_ => _.Id == criterionLibrary.Id);
             Assert.Equal(criterionLibraryDTO.Description, updatedCriterionLibraryEntity.Description);
 
             var newCriterionLibraryEntity =
@@ -130,17 +130,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteCriterionLibrary()
         {
             // Arrange
-            Setup();
+            var criterionLibrary = Setup();
 
             // Act
-            var result = await _controller.DeleteCriterionLibrary(_testHelper.TestCriterionLibrary.Id);
+            var result = await _controller.DeleteCriterionLibrary(criterionLibrary.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
 
             Assert.True(
                 !_testHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
-                    _.Id == _testHelper.TestCriterionLibrary.Id));
+                    _.Id == criterionLibrary.Id));
         }
     }
 }

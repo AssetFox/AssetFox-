@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -19,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private readonly RemainingLifeLimitController _controller;
 
         private static readonly Guid RemainingLifeLimitLibraryId = Guid.Parse("7f243aeb-62b7-4df8-9c15-15d6cea16ec4");
-        
+
         public RemainingLifeLimitTests()
         {
             _testHelper = TestHelper.Instance;
@@ -60,17 +61,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 TestRemainingLifeLimit.AttributeId = attribute.Id;
                 _testHelper.UnitOfWork.Context.RemainingLifeLimit.Add(TestRemainingLifeLimit);
                 _testHelper.UnitOfWork.Context.SaveChanges();
-            }            
+            }
         }
 
-        private void SetupForUpsertOrDelete()
+        private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             SetupForGet();
-            if (!_testHelper.UnitOfWork.Context.CriterionLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
+
         }
 
         [Fact]
@@ -129,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyRemainingLifeLimitData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<RemainingLifeLimitLibraryDTO>));
@@ -138,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Description = "Updated Description";
             dto.RemainingLifeLimits[0].Value = 2.0;
             dto.RemainingLifeLimits[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibrary.ToDto();
 
             // Act
             await _controller.UpsertRemainingLifeLimitLibrary(dto);
@@ -164,14 +165,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteRemainingLifeLimitData()
         {
             // Arrange
-            SetupForUpsertOrDelete();
+            var criterionLibraryEntity = SetupForUpsertOrDelete();
             var getResult = await _controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<RemainingLifeLimitLibraryDTO>));
 
             var remainingLifeLimitLibraryDTO = dtos[0];
             remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
-                _testHelper.TestCriterionLibrary.ToDto();
+                criterionLibraryEntity.ToDto();
 
             await _controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
 

@@ -41,7 +41,7 @@
                     <v-btn
                         @click="showCreateDeficientConditionGoalDialog = true"
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
-                        v-show="hasSelectedLibrary"
+                        v-show="hasSelectedLibrary || hasScenario"
                         outline>
                         Add Deficient Condition Goal
                     </v-btn>

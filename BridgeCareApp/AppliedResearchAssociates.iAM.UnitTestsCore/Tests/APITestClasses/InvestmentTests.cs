@@ -918,7 +918,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateAuthorizedController();
             CreateScenarioTestData();
             CreateRequestWithScenarioFormData();
-            const int expectedYear = 2021;
             // Act
             var result =
                 await _controller.ExportScenarioInvestmentBudgetsExcelFile(_testHelper.TestSimulation.Id);

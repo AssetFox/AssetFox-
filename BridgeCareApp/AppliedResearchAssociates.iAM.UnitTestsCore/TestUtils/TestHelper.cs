@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestHelper
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
-        private static readonly Guid SimulationId = Guid.Parse("416ad546-0796-4889-9db4-9c11bbd6c50d");
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
@@ -115,13 +114,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Test Network"
         };
 
-        public SimulationEntity TestSimulation { get; } = new SimulationEntity
+        public SimulationEntity TestSimulation(Guid? id = null, string name = null)
         {
-            Id = SimulationId,
-            NetworkId = NetworkId,
-            Name = "Test Simulation",
-            NumberOfYearsOfTreatmentOutlook = 2
-        };
+            var resolveName = name ?? RandomStrings.Length11();
+            var resolveId = id ?? Guid.NewGuid();
+            var returnValue = new SimulationEntity
+            {
+                Id = resolveId,
+                NetworkId = NetworkId,
+                Name = resolveName,
+                NumberOfYearsOfTreatmentOutlook = 2
+            };
+            return returnValue;
+        }
 
         public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
         {

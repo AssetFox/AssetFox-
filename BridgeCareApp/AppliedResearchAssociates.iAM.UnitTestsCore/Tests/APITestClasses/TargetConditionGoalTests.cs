@@ -272,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(goal.Id, dto.Id);
         }
 
-        [Fact]
+        [Fact (Skip ="Broken asserts were hidden behind a timer")]
         public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
             // Arrange

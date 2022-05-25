@@ -1,45 +1,63 @@
 <template>
     <v-layout justify-center column class="criteria-editor-card-text">
         <div>
-            <v-layout justify-space-between row>
-                <v-flex xs5>
-                    <v-card>
-                        <v-card-title>
-                            <v-layout justify-left><h3>Output</h3></v-layout>
-                        </v-card-title>
-                        <div class="conjunction-and-messages-container">
+            <v-layout justify-space-between>
+                <v-flex xs6>
+                    <v-layout justify-start
+                    >
+                        <h3 class="ghd-dialog">Output</h3>
+                    </v-layout>
+                    <v-card class="elevation-0" style="border: 1px solid;">
+                        <div class="conjunction-and-messages-container" style="margin-top:4px;">
                             <v-layout
                                 :class="{
                                     'justify-space-between': !criteriaEditorData.isLibraryContext,
-                                    'justify-space-around':
+                                    'justify-start':
                                         criteriaEditorData.isLibraryContext,
                                 }"
                             >
-                                <div class="conjunction-select-list-container">
-                                    <v-select
-                                        :items="conjunctionSelectListItems"
-                                        class="conjunction-select-list"
-                                        lablel="Select a Conjunction"
-                                        v-model="selectedConjunction"
-                                    >
-                                    </v-select>
-                                </div>
+                            <v-flex xs2>
+                                <v-layout>
+                                <v-select
+                                    :items="conjunctionSelectListItems"
+                                    class="ghd-control-border ghd-control-text ghd-select"
+                                    v-model="selectedConjunction"
+                                >
+                                    <template v-slot:selection="{ item }">
+                                        <span class="ghd-control-text">{{ item.text }}</span>
+                                    </template>
+                                    <template v-slot:item="{ item }">
+                                        <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                        <v-list-item-content>
+                                            <v-list-item-title>
+                                            <v-row no-gutters align="center">
+                                            <span>{{ item.text }}</span>
+                                            </v-row>
+                                            </v-list-item-title>
+                                        </v-list-item-content>
+                                        </v-list-item>
+                                    </template>                                    
+                                </v-select>
+                                </v-layout>
+                            </v-flex>
                                 <v-btn
                                     @click="onAddSubCriteria"
-                                    class="ara-blue-bg white--text"
-                                    >Add Criteria
+                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"    
+                                    depressed                                
+                                    >Add Subcriteria
                                 </v-btn>
                             </v-layout>
                         </div>
                         <v-card-text
                             :class="{
-                                'clauses-card-dialog': !criteriaEditorData.isLibraryContext,
+                                'clauses-card-dialog':
+                                    !criteriaEditorData.isLibraryContext,
                                 'clauses-card-library':
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
                             <div v-for="(clause, index) in subCriteriaClauses">
-                                <v-textarea
+                                <v-textarea style="padding-left:0px;"
                                     :class="{
                                         'textarea-focused':
                                             index ===
@@ -53,7 +71,7 @@
                                         )
                                     "
                                     box
-                                    class="clause-textarea"
+                                    class="ghd-control-text"
                                     full-width
                                     no-resize
                                     readonly
@@ -62,10 +80,10 @@
                                     <template slot="append">
                                         <v-btn
                                             @click="onRemoveSubCriteria(index)"
-                                            class="ara-orange"
+                                            class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fas fa-times</v-icon>
+                                            <v-icon>fas fa-trash</v-icon>
                                         </v-btn>
                                     </template>
                                 </v-textarea>
@@ -77,12 +95,13 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout row>
+                            <v-layout>
                                 <div class="validation-check-btn-container">
                                     <v-btn
                                         :disabled="onDisableCheckOutputButton()"
                                         @click="onCheckCriteria"
-                                        class="ara-blue-bg white--text"
+                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                        depressed
                                     >
                                         Check Output
                                     </v-btn>
@@ -110,22 +129,43 @@
                         </v-card-actions>
                     </v-card>
                 </v-flex>
-                <v-flex xs7>
-                    <v-card class="criteria-editor-card">
-                        <v-card-title>
-                            <v-layout justify-left
-                                ><h3>Criteria Editor</h3></v-layout
-                            >
-                        </v-card-title>
+                <v-flex xs6>
+                    <v-layout justify-start
+                    >
+                        <h3 class="ghd-dialog">Criteria Editor</h3>
+                    </v-layout>
+                    <v-card class="elevation-0" style="border: 1px solid;">
+                        <v-layout justify-end>
+                            <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
+                                <v-btn 
+                                    :disabled="
+                                        onDisableCheckCriteriaButton()
+                                    "
+                                    @click="onCheckSubCriteria"
+                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                    depressed
+                                >
+                                    Update Subcriteria
+                                </v-btn>
+                            </div>            
+                        </v-layout>                   
                         <v-card-text
                             :class="{
-                                'criteria-editor-card-dialog': !criteriaEditorData.isLibraryContext,
+                                'criteria-editor-card-dialog':
+                                    !criteriaEditorData.isLibraryContext,
                                 'criteria-editor-card-library':
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-tabs
-                                centered
+                            <v-layout
+                                :class="{
+                                    'justify-space-between': !criteriaEditorData.isLibraryContext,
+                                    'justify-end':
+                                        criteriaEditorData.isLibraryContext,
+                                }"
+                            >                        
+                            </v-layout>                     
+                            <v-tabs class="ghd-control-text" style="margin-left:4px;margin-right:4px;"
                                 v-if="selectedSubCriteriaClauseIndex !== -1"
                             >
                                 <v-tab @click="onParseRawSubCriteria" ripple>
@@ -151,6 +191,7 @@
                                         outline
                                         rows="23"
                                         v-model="selectedRawSubCriteriaClause"
+                                        class="ghd-control-text"
                                     ></v-textarea>
                                 </v-tab-item>
                             </v-tabs>
@@ -161,18 +202,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout row>
-                                <div class="validation-check-btn-container">
-                                    <v-btn
-                                        :disabled="
-                                            onDisableCheckCriteriaButton()
-                                        "
-                                        @click="onCheckSubCriteria"
-                                        class="ara-blue-bg white--text"
-                                    >
-                                        Add subcriteria
-                                    </v-btn>
-                                </div>
+                            <v-layout>
                                 <div class="validation-messages-container">
                                     <p
                                         class="invalid-message"
@@ -202,7 +232,7 @@
                 v-show="!criteriaEditorData.isLibraryContext"
                 class="save-cancel-flex"
             >
-                <v-layout justify-center row wrap>
+                <v-layout justify-center wrap>
                     <v-btn
                         :disabled="cannotSubmit"
                         @click="onSubmitCriteriaEditorResult(true)"
@@ -225,7 +255,7 @@
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { Action, State } from 'vuex-class';
-import VueQueryBuilder from 'vue-query-builder/src/VueQueryBuilder.vue';
+import VueQueryBuilder from "vue-query-builder/src/VueQueryBuilder.vue";
 import {
     Criteria,
     CriteriaEditorData,
@@ -292,11 +322,12 @@ export default class CriteriaEditor extends Vue {
             { id: 'OR', label: 'OR' },
         ],
         addRule: 'Add Rule',
-        removeRule: '&times;',
+        removeRule: '<div class="fas fa-trash ghd-blue" style="margin-top:4px;margin-left:4px;"/>',
         addGroup: 'Add Group',
-        removeGroup: '&times;',
+        removeGroup: '<div class="fas fa-trash ghd-blue"/>',
         textInputPlaceholder: 'value',
     };
+
     cannotSubmit: boolean = true;
     validCriteriaMessage: string | null = null;
     invalidCriteriaMessage: string | null = null;
@@ -921,26 +952,23 @@ export default class CriteriaEditor extends Vue {
 }
 
 .criteria-editor-card-dialog {
-    height: 568px;
-    max-height: calc(100vh - 332px);
+    height: 500px;
+    max-height: calc(100vh - 400px);
     overflow-y: auto;
 }
 
 .criteria-editor-card-library {
-    height: 581px;
+    height: 537px;
     overflow-y: auto;
 }
 
 .clause-textarea {
     font-size: 12px !important;
+    font-weight: 400px !important;
 }
 
 .clause-textarea .v-input__slot {
     background-color: transparent !important;
-}
-
-.clause-textarea textarea {
-    border: 1px solid;
 }
 
 .conjunction-and-messages-container {
@@ -952,7 +980,10 @@ export default class CriteriaEditor extends Vue {
 }
 
 .textarea-focused textarea {
-    background: lightblue;
+    margin-left:-12px;
+    padding-left:12px;  
+    border: 2px solid #666666;
+    border-radius: 4px;
 }
 
 .save-cancel-flex {
@@ -970,4 +1001,20 @@ export default class CriteriaEditor extends Vue {
 .validation-messages-container {
     margin-left: 5px;
 }
+
+/* Force drop-down arrow on vue-query-view selects */
+select.form-control {
+    -webkit-appearance:auto !important;
+}
+
+button.btn.btn-default {
+    border-radius: 5px;
+    border: 1px solid #99999980 !important;
+    padding-left: 5px;
+    padding-right: 5px;
+    background-color: #FFFFFF !important;   
+    color: #2A578D !important;
+    font-weight: 600 !important;    
+}
+
 </style>

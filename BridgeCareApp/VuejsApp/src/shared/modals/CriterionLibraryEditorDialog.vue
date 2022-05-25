@@ -21,20 +21,22 @@
                 </v-layout>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-layout justify-center>
                     <v-btn
-                        :disabled="(!dialogData.isCallFromScenario && !dialogData.isCriterionForLibrary) || !stateSelectedCriterionIsValid
-                        "
-                        class="ara-blue-bg white--text"
-                        @click="onBeforeSubmit(true)"
-                    >
-                        Apply Changes
-                    </v-btn>
-                    <v-btn
-                        class="ara-orange-bg white--text"
+                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                        depressed
                         @click="onSubmit(false)"
                     >
                         Cancel
+                    </v-btn>
+                    <v-btn
+                        :disabled="(!dialogData.isCallFromScenario && !dialogData.isCriterionForLibrary) || !stateSelectedCriterionIsValid
+                        "
+                        class="ghd-blue-bg ghd-white ghd-button-text"
+                        depressed
+                        @click="onBeforeSubmit(true)"
+                    >
+                        Save
                     </v-btn>
                 </v-layout>
             </v-card-actions>

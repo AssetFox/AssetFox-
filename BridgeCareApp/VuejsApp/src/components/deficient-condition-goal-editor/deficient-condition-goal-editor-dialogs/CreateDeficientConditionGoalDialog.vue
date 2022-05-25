@@ -2,45 +2,57 @@
   <v-layout>
     <v-dialog max-width="450px" persistent v-model="showDialog">
       <v-card>
-        <v-card-title>
-          <v-layout justify-center>
-            <h3>New Deficient Condition Goal</h3>
+        <v-card-title class="ghd-dialog-box-padding-top">
+         <v-layout justify-space-between align-center>
+            <div class="ghd-control-dialog-header">Add New Deficient Condition Goal</div>
+            <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+              X
+            </v-btn>
           </v-layout>
         </v-card-title>
-        <v-card-text class="new-deficient-card-text">
+        <v-card-text class="ghd-dialog-box-padding-center">
           <v-layout column>
             <v-flex>
-              <v-text-field label="Name" outline v-model="newDeficientConditionGoal.name"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"></v-text-field>
+              <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
+              <v-text-field outline v-model="newDeficientConditionGoal.name"
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-select :items="numericAttributeNames" label="Select Attribute"
+              <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
+              <v-select :items="numericAttributeNames"
                         outline
-                        v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]">
+                        v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ghd-select ghd-text-field ghd-text-field-border">
               </v-select>
             </v-flex>
             <v-flex>
-              <v-text-field label="Deficient Limit" outline
+              <v-subheader class="ghd-md-gray ghd-control-label">Deficient Limit</v-subheader>
+              <v-text-field outline
                             v-model.number="newDeficientConditionGoal.deficientLimit" :mask="'##########'"
-                            :rules="[rules['generalRules'].valueIsNotEmpty]"></v-text-field>
+                            :rules="[rules['generalRules'].valueIsNotEmpty]"
+                            class="ghd-text-field-border ghd-text-field"></v-text-field>
             </v-flex>
             <v-flex>
-              <v-text-field label="Allowed Deficient Percentage" outline
+              <v-subheader class="ghd-md-gray ghd-control-label">Allowed Deficient Percentage</v-subheader>
+              <v-text-field outline
                             v-model.number="newDeficientConditionGoal.allowedDeficientPercentage"
                             :mask="'###'"
-                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]">
+                            :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(newDeficientConditionGoal.allowedDeficientPercentage, [0, 100])]"
+                            class="ghd-text-field-border ghd-text-field">
               </v-text-field>
             </v-flex>
           </v-layout>
         </v-card-text>
-        <v-card-actions>
-          <v-layout justify-space-between row>
-            <v-btn :disabled="disableSubmitBtn()" @click="onSubmit(true)" class="ara-blue-bg white--text">
-              Save
-            </v-btn>
-            <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+        <v-card-actions class="ghd-dialog-box-padding-bottom">
+          <v-layout justify-center row>
+            <v-btn @click="onSubmit(false)" flat class='ghd-blue ghd-button-text ghd-button'>
               Cancel
             </v-btn>
+            <v-btn :disabled="disableSubmitBtn()" @click="onSubmit(true)" 
+              outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+              Save
+            </v-btn>           
           </v-layout>
         </v-card-actions>
       </v-card>

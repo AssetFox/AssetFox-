@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
-using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
+using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {

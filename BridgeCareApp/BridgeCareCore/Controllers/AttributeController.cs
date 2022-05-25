@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -17,8 +20,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AttributeController : BridgeCareCoreBaseController
     {
-        private readonly IEsecSecurity _esecSecurity;
-
         private readonly AttributeService _attributeService;
 
         public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
@@ -72,6 +73,30 @@ namespace BridgeCareCore.Controllers
                     var configurableAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
                     UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("CreateAttribute")]
+        [Authorize]
+        public async Task<IActionResult> CreateAttribute(AttributeDTO attributeDto)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
                     UnitOfWork.Commit();
                 });
 

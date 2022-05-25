@@ -62,6 +62,9 @@
                                         'textarea-focused':
                                             index ===
                                             selectedSubCriteriaClauseIndex,
+                                        'clause-textarea':
+                                            index !=
+                                            selectedSubCriteriaClauseIndex,
                                     }"
                                     :value="clause"
                                     @click="
@@ -134,21 +137,7 @@
                     >
                         <h3 class="ghd-dialog">Criteria Editor</h3>
                     </v-layout>
-                    <v-card class="elevation-0" style="border: 1px solid;">
-                        <v-layout justify-end>
-                            <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
-                                <v-btn 
-                                    :disabled="
-                                        onDisableCheckCriteriaButton()
-                                    "
-                                    @click="onCheckSubCriteria"
-                                    class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
-                                    depressed
-                                >
-                                    Update Subcriteria
-                                </v-btn>
-                            </div>            
-                        </v-layout>                   
+                    <v-card class="elevation-0" style="border: 1px solid;height:682px;">                  
                         <v-card-text
                             :class="{
                                 'criteria-editor-card-dialog':
@@ -202,7 +191,7 @@
                                     criteriaEditorData.isLibraryContext,
                             }"
                         >
-                            <v-layout>
+                            <v-layout column>          
                                 <div class="validation-messages-container">
                                     <p
                                         class="invalid-message"
@@ -220,7 +209,19 @@
                                     >
                                         {{ validSubCriteriaMessage }}
                                     </p>
-                                </div>
+                                </div>        
+                                <div class="validation-check-btn-container" style="height:64px;margin-top:4px;">
+                                    <v-btn 
+                                        :disabled="
+                                            onDisableCheckCriteriaButton()
+                                        "
+                                        @click="onCheckSubCriteria"
+                                        class="ghd-white-bg ghd-blue ghd-button-text ghd-outline-button-padding ghd-button ghd-button-border"
+                                        depressed
+                                    >
+                                        Update Subcriteria
+                                    </v-btn>
+                                </div>                                                         
                             </v-layout>
                         </v-card-actions>
                     </v-card>
@@ -952,23 +953,39 @@ export default class CriteriaEditor extends Vue {
 }
 
 .criteria-editor-card-dialog {
-    height: 500px;
-    max-height: calc(100vh - 400px);
+    height: 568px;
+    max-height: calc(100vh - 332px);
     overflow-y: auto;
 }
 
 .criteria-editor-card-library {
-    height: 537px;
+    height: 618px;
     overflow-y: auto;
 }
 
-.clause-textarea {
-    font-size: 12px !important;
-    font-weight: 400px !important;
-}
 
 .clause-textarea .v-input__slot {
-    background-color: transparent !important;
+    background-color: #ffffff !important;
+}
+
+.textarea-focused .v-input__slot {
+    background-color: #ffffff !important;
+}
+
+.clause-textarea textarea {
+    border: 1px solid #999999;
+    margin-left:-12px;
+    padding-left:12px;  
+    border-radius: 4px;    
+}
+
+
+.textarea-focused textarea {
+    background-color: #ffffff !important;
+    margin-left:-12px;
+    padding-left:12px;  
+    border: 2px solid #2A578D;
+    border-radius: 4px;
 }
 
 .conjunction-and-messages-container {
@@ -979,12 +996,6 @@ export default class CriteriaEditor extends Vue {
     width: 100px;
 }
 
-.textarea-focused textarea {
-    margin-left:-12px;
-    padding-left:12px;  
-    border: 2px solid #666666;
-    border-radius: 4px;
-}
 
 .save-cancel-flex {
     margin-top: 20px;

@@ -87,12 +87,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData()
+        private void CreateScenarioTestData(Guid simulationId)
         {
-            _testScenarioBudget = new ScenarioBudgetEntity
+            var budget = new ScenarioBudgetEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 Name = "Test Name"
             };
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
@@ -101,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testScenarioTreatment = new ScenarioSelectableTreatmentEntity
             {
                 Id = Guid.NewGuid(),
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulationId,
                 Name = "Test Name",
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
@@ -149,9 +149,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
+            var simulation = _testHelper.CreateSimulation();
             // Act
             CreateAuthorizedController();
-            var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioSelectedTreatments(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -182,9 +183,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             CreateAuthorizedController();
             var dtos = new List<TreatmentDTO>();
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dtos);
+            var result = await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -236,11 +238,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioTreatmentData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioSelectedTreatments(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioSelectedTreatments(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -260,10 +263,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // wjwjwj deleted timer
         public async Task ShouldModifyLibraryTreatmentData()
         {
-            // Wjwjwj collision 5/24 10:08am
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             using var foo = new ErrorConditionIncrement();
             CreateAuthorizedController();
             CreateLibraryTestData();
@@ -300,50 +304,49 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertTreatmentLibrary(dtoLibrary);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto =
-                    _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries()[0];
-                Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
-                Assert.True(modifiedDto.AppliedScenarioIds.Any());
-                Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
+            await Task.Delay(5000);
+            var modifiedDto =
+                _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries()[0];
+            Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
+            Assert.True(modifiedDto.AppliedScenarioIds.Any());
+            Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
 
-                Assert.Equal(dtoLibrary.Treatments[0].Name, modifiedDto.Treatments[0].Name);
-                Assert.Equal(dtoLibrary.Treatments[0].CriterionLibrary.Id,
-                    modifiedDto.Treatments[0].CriterionLibrary.Id);
-                Assert.True(modifiedDto.Treatments[0].Costs.Any());
+            Assert.Equal(dtoLibrary.Treatments[0].Name, modifiedDto.Treatments[0].Name);
+            Assert.Equal(dtoLibrary.Treatments[0].CriterionLibrary.Id,
+                modifiedDto.Treatments[0].CriterionLibrary.Id);
+            Assert.True(modifiedDto.Treatments[0].Costs.Any());
 
-                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-                    modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
-                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].Equation.Id,
-                    modifiedDto.Treatments[0].Costs[0].Equation.Id);
+            Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
+                modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
+            Assert.Equal(dtoLibrary.Treatments[0].Costs[0].Equation.Id,
+                modifiedDto.Treatments[0].Costs[0].Equation.Id);
 
-                Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-                    modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
-                Assert.Equal(dtoLibrary.Treatments[0].Consequences[0].Equation.Id,
-                    modifiedDto.Treatments[0].Consequences[0].Equation.Id);
-            };
+            Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
+                modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
+            Assert.Equal(dtoLibrary.Treatments[0].Consequences[0].Equation.Id,
+                modifiedDto.Treatments[0].Consequences[0].Equation.Id);
         }
 
         [Fact]
+        // Wjwjwj created timer
         public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             var scenarioBudget = new ScenarioBudgetEntity
             {
                 Id = Guid.NewGuid(),
                 Name = "",
-                SimulationId = _testHelper.TestSimulation.Id
+                SimulationId = simulation.Id
             };
             _testHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
             _testHelper.UnitOfWork.Context.SaveChanges();
 
             var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
+                .GetScenarioSelectableTreatments(simulation.Id);
 
             dto[0].Description = "Updated Description";
             dto[0].Name = "Updated Name";
@@ -373,40 +376,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto[0].BudgetIds.Add(scenarioBudget.Id);
 
             // Act
-            await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
+            await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                    .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
-                Assert.Equal(dto[0].Description, modifiedDto[0].Description);
-                Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-                Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
-                Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
-                Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
-                Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
-                    modifiedDto[0].Consequences[0].CriterionLibrary.Id);
-                Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
-                Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-                Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
-            };
+            await Task.Delay(5000);
+            var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
+            Assert.Equal(dto[0].Description, modifiedDto[0].Description);
+            Assert.Equal(dto[0].Name, modifiedDto[0].Name);
+            Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
+            Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
+            Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
+            Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
+                modifiedDto[0].Consequences[0].CriterionLibrary.Id);
+            Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
+            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+            Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
         }
 
         [Fact]
         public async Task ShouldThrowUnauthorizedException()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             using var _ = new ErrorConditionIncrement();
             CreateUnauthorizedController();
-            CreateScenarioTestData();
+            CreateScenarioTestData(simulation.Id);
 
             var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                .GetScenarioSelectableTreatments(_testHelper.TestSimulation.Id);
+                .GetScenarioSelectableTreatments(simulation.Id);
 
             // Act
-            var result = await _controller.UpsertScenarioSelectedTreatments(_testHelper.TestSimulation.Id, dto);
+            var result = await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);

@@ -35,6 +35,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
+
+        // wjwjwj delete this
         public RemainingLifeLimitLibraryEntity TestRemainingLifeLimitLibrary { get; } = new RemainingLifeLimitLibraryEntity
         {
             Id = RemainingLifeLimitLibraryId,
@@ -127,9 +129,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // wjwjwj deleted timer
         public async Task ShouldModifyRemainingLifeLimitData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -145,20 +149,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertRemainingLifeLimitLibrary(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
-                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits()[0];
-                Assert.Equal(dto.Description, modifiedDto.Description);
-                Assert.Single(modifiedDto.AppliedScenarioIds);
-                Assert.Equal(_testHelper.TestSimulation.Id, modifiedDto.AppliedScenarioIds[0]);
+            await Task.Delay(5000);
 
-                Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
-                Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
-                    modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
-                Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
-            };
+            var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
+                .RemainingLifeLimitLibrariesWithRemainingLifeLimits()[0];
+            Assert.Equal(dto.Description, modifiedDto.Description);
+            Assert.Single(modifiedDto.AppliedScenarioIds);
+            Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
+
+            Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
+            Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
+                modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
+            Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
+
         }
 
         [Fact]

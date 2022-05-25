@@ -249,10 +249,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllScenarioTargetConditionGoalData()
         {
             // Arrange
-            SetupForScenarioTargetGet();
+            var simulation = SetupForScenarioTargetGet();
 
             // Act
-            var result = await _controller.GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
+            var result = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -260,16 +260,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TargetConditionGoalDTO>));
-            Assert.Single(dtos);
-            Assert.Equal(TestScenarioTargetConditionGoal.Id, dtos[0].Id);
+            var dto = dtos.Single();
+            Assert.Equal(TestScenarioTargetConditionGoal.Id, dto.Id);
         }
 
         [Fact]
         public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
             // Arrange
+            var simulation = _testHelper.CreateSimulation();
             var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete();
-            var getResult = await _controller.GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
+            var getResult = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalDTO>));
 
@@ -279,13 +280,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(new ScenarioTargetConditionGoalEntity
             {
                 Id = deletedTargetConditionId,
-                SimulationId = _testHelper.TestSimulation.Id,
+                SimulationId = simulation.Id,
                 AttributeId = attribute.Id,
                 Name = "Deleted"
             });
 
             var localScenarioTargetGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo
-                .GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
+                .GetScenarioTargetConditionGoals(simulation.Id);
             localScenarioTargetGoals[0].Name = "Updated";
             localScenarioTargetGoals[0].CriterionLibrary = criterionLibraryEntity.ToDto();
             localScenarioTargetGoals.Add(new TargetConditionGoalDTO
@@ -296,14 +297,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
 
             // Act
-            await _controller.UpsertScenarioTargetConditionGoals(_testHelper.TestSimulation.Id, localScenarioTargetGoals);
+            await _controller.UpsertScenarioTargetConditionGoals(simulation.Id, localScenarioTargetGoals);
 
             // Assert
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
                 var serverScenarioTargetConditionGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo
-                    .GetScenarioTargetConditionGoals(_testHelper.TestSimulation.Id);
+                    .GetScenarioTargetConditionGoals(simulation.Id);
                 Assert.Equal(serverScenarioTargetConditionGoals.Count, serverScenarioTargetConditionGoals.Count);
 
                 Assert.True(

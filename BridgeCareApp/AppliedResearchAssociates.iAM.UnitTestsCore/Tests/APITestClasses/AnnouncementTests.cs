@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        public AnnouncementEntity TestAnnouncement(Guid? id = null) {
+        private AnnouncementEntity TestAnnouncement(Guid? id = null) {
             var resolvedId = id ?? Guid.NewGuid();
             var returnValue = new AnnouncementEntity
             {

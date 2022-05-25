@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 SpatialWeighting = asset.SpatialWeighting.Expression,
                 //Area = section.Area,
                 //AreaUnit = section.AreaUnit,
-                AssetName = asset.Name
+                AssetName = asset.AssetName
             };
     }
 }

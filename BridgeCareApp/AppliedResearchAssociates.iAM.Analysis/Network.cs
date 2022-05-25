@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             {
                 results.Add(ValidationStatus.Error, "There are no assets.", this, nameof(Assets));
             }
-            else if (Assets.Select(asset => asset.Name).Distinct().Count() < Assets.Count)
+            else if (Assets.Select(asset => asset.AssetName).Distinct().Count() < Assets.Count)
             {
                 results.Add(ValidationStatus.Error, "Multiple assets have the same name.", this, nameof(Assets));
             }

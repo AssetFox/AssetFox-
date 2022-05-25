@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var asset = network.AddAsset();
             asset.Id = entity.Id;
-            asset.Name = entity.AssetName;
+            asset.AssetName = entity.AssetName;
             asset.SpatialWeighting.Expression = entity.SpatialWeighting;
 
             if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))

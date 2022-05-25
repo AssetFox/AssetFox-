@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public IEnumerable<Attribute> HistoricalAttributes => HistoryPerAttribute.Keys;
 
-        public string Name { get; set; }
+        public string AssetName { get; set; }
 
         public Equation SpatialWeighting { get; }
 
@@ -28,9 +28,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             var results = new ValidationResultBag();
 
-            if (string.IsNullOrWhiteSpace(Name))
+            if (string.IsNullOrWhiteSpace(AssetName))
             {
-                results.Add(ValidationStatus.Error, "Name is blank.", this, nameof(Name));
+                results.Add(ValidationStatus.Error, "Name is blank.", this, nameof(AssetName));
             }
 
             return results;
@@ -51,6 +51,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
 
-        public string ShortDescription => Name;
+        public string ShortDescription => AssetName;
     }
 }

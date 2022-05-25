@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var messageBuilder = new SimulationMessageBuilder(MessageStrings.CalculatedFieldHasNoOperativeEquations)
                 {
                     ItemName = Name,
-                    AssetName = scope.Asset.Name,
+                    AssetName = scope.Asset.AssetName,
                     AssetId = scope.Asset.Id,
                 };
 

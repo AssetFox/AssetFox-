@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 throw new ArgumentNullException(nameof(asset));
             }
 
-            AssetName = asset.Name;
+            AssetName = asset.AssetName;
         }
 
         [JsonConstructor]

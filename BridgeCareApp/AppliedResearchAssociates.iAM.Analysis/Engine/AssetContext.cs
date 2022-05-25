@@ -109,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 var messageBuilder = new SimulationMessageBuilder("Loop encountered during number calculation: " + loopText)
                 {
-                    AssetName = Asset.Name,
+                    AssetName = Asset.AssetName,
                     AssetId = Asset.Id,
                 };
                 var logBuilder = SimulationLogMessageBuilders.CalculationFatal(messageBuilder.ToString(), SimulationRunner.Simulation.Id);
@@ -327,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 {
                     ItemName = SimulationRunner.Simulation.DesignatedPassiveTreatment.Name,
                     ItemId = SimulationRunner.Simulation.DesignatedPassiveTreatment.Id,
-                    AssetName = Asset.Name,
+                    AssetName = Asset.AssetName,
                     AssetId = Asset.Id,
                 };
 
@@ -382,7 +382,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var messageBuilder = new SimulationMessageBuilder("No performance curves are operative for a deteriorating attribute.")
                 {
                     ItemName = curves.Key.Name,
-                    AssetName = Asset.Name,
+                    AssetName = Asset.AssetName,
                     AssetId = Asset.Id,
                 };
 
@@ -395,7 +395,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var messageBuilder = new SimulationMessageBuilder("Two or more performance curves are simultaneously operative for a single deteriorating attribute.")
                 {
                     ItemName = curves.Key.Name,
-                    AssetName = Asset.Name,
+                    AssetName = Asset.AssetName,
                     AssetId = Asset.Id,
                 };
 

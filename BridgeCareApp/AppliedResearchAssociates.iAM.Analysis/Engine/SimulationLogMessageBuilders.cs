@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             SimulationId = simulationId,
             Status = SimulationLogStatus.Error,
             Subject = SimulationLogSubject.Calculation,
-            Message = $"Invalid cost {cost} for treatment {treatment.Name} on asset ({asset.Name} {asset.Id})",
+            Message = $"Invalid cost {cost} for treatment {treatment.Name} on asset ({asset.AssetName} {asset.Id})",
         };
 
         internal static SimulationLogMessageBuilder RuntimeWarning(SimulationMessageBuilder innerBuilder, Guid simulationId)

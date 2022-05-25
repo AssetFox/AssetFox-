@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             assets.ForEach(asset =>
             {
-                var dataSourceAsset = dataSourceAssets.SingleOrDefault(_ => $"{_.Network.Name}{_.Name}" == $"{asset.Network.Name}{asset.Name}");
+                var dataSourceAsset = dataSourceAssets.SingleOrDefault(_ => $"{_.Network.Name}{_.AssetName}" == $"{asset.Network.Name}{asset.AssetName}");
                 Assert.NotNull(dataSourceAsset);
                 Assert.Equal(asset.SpatialWeighting.Expression, dataSourceAsset.SpatialWeighting.Expression);
                 Assert.Equal(asset.HistoricalAttributes.Count(), dataSourceAsset.HistoricalAttributes.Count());

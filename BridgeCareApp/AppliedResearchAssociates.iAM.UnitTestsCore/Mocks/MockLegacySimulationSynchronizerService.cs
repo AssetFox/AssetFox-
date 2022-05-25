@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Mocks
                 throw new RowNotInTableException($"The specified network was not found.");
             }
 
-            var facilitySectionNames = network.Assets.Select(asset => asset.Name).ToHashSet();
+            var facilitySectionNames = network.Assets.Select(asset => asset.AssetName).ToHashSet();
             var assetFacilitySectionNames = _unitOfWork.Context.MaintainableAsset
                 .Select(_ => _.MaintainableAssetLocation.LocationIdentifier).ToHashSet();
             if (!facilitySectionNames.SetEquals(assetFacilitySectionNames))

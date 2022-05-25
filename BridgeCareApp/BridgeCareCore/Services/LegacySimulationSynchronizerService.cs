@@ -51,7 +51,7 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException($"The specified network was not found.");
             }
 
-            var facilitySectionNames = network.Assets.Select(section => section.Name).ToHashSet();
+            var facilitySectionNames = network.Assets.Select(section => section.AssetName).ToHashSet();
             var assetFacilitySectionNames = _unitOfWork.Context.MaintainableAsset
                 .Select(_ => _.MaintainableAssetLocation.LocationIdentifier).ToHashSet();
             if (!facilitySectionNames.SetEquals(assetFacilitySectionNames))

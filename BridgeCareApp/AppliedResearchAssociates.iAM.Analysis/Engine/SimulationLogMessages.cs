@@ -9,7 +9,7 @@
                x.ToString();
 
         private static string AssetString(MaintainableAsset asset)
-            => $"(asset {asset.Name} {asset.Id})";
+            => $"(asset {asset.AssetName} {asset.Id})";
 
         public static string AssetCalculationReturned(MaintainableAsset asset, PerformanceCurve performanceCurve, string key, double value)
         {

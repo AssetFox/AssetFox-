@@ -229,10 +229,10 @@ order by simulationid
                             var sectionName = reader.GetNullableString(1);
                             var assetName = $"{facilityName}/{sectionName}";
 
-                            if (network.Assets.All(asset => asset.Name != assetName))
+                            if (network.Assets.All(asset => asset.AssetName != assetName))
                             {
                                 var asset = network.AddAsset();
-                                asset.Name = assetName;
+                                asset.AssetName = assetName;
                                 asset.SpatialWeighting.Expression = reader.GetDouble(2).ToString();
 
                                 var assetAreaUnit = reader.GetNullableString(3)?.Trim();

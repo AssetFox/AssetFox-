@@ -125,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     {
                         ItemName = Name,
                         ItemId = Id,
-                        AssetName = scope.Asset.Name,
+                        AssetName = scope.Asset.AssetName,
                         AssetId = scope.Asset.Id,
                     };
 

@@ -88,6 +88,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         Id = asset.Id,
                         SpatialWeighting = asset.SpatialWeighting,
+                        AssetName = asset.AssetName,
                         MaintainableAssetLocation = new MaintainableAssetLocationEntity
                         {
                             LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier

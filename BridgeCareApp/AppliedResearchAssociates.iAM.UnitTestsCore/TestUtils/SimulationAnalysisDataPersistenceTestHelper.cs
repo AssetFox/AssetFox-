@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     var asset = network.AddAsset();
                     asset.Id = __.Id;
-                    asset.Name = __.Name;
+                    asset.AssetName = __.AssetName;
 
                     if (__.HistoricalAttributes.Any())
                     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -70,12 +70,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
             return returnValue;
         }
-        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal { get; } = new ScenarioTargetConditionGoalEntity
+        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(            Guid simulationId,
+            Guid attributeId,
+            Guid? id = null)
         {
-            Id = ScenarioTargetConditionGoalId,
-            Name = "Test Name",
-            Target = 1
-        };
+            var resolveId = id ?? Guid.NewGuid();
+            var returnValue = new ScenarioTargetConditionGoalEntity
+            {
+                Id = resolveId,
+                SimulationId = simulationId,
+                AttributeId = attributeId,
+                Name = "Test Name",
+                Target = 1
+            };
+            return returnValue;
+        }
 
         private TargetConditionGoalLibraryEntity SetupLibraryForGet()
         {
@@ -106,19 +115,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criterionLibrary;
         }
 
-        private SimulationEntity SetupForScenarioTargetGet()
+        private ScenarioTargetConditionGoalEntity SetupForScenarioTargetGet(Guid simulationId)
         {
-            var simulation = _testHelper.CreateSimulation();
-            TestScenarioTargetConditionGoal.SimulationId = simulation.Id;
-            TestScenarioTargetConditionGoal.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-            _testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(TestScenarioTargetConditionGoal);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var goal = TestScenarioTargetConditionGoal(simulationId, attribute.Id);
+            _testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Add(goal);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            return simulation;
+            return goal;
         }
 
-        private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete()
+        private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete(Guid simulationId)
         {
-            SetupForScenarioTargetGet();
+            SetupForScenarioTargetGet(simulationId);
             var criterionLibrary = _testHelper.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
@@ -249,7 +257,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllScenarioTargetConditionGoalData()
         {
             // Arrange
-            var simulation = SetupForScenarioTargetGet();
+            var simulation = _testHelper.CreateSimulation();
+            var goal = SetupForScenarioTargetGet(simulation.Id);
 
             // Act
             var result = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
@@ -261,7 +270,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TargetConditionGoalDTO>));
             var dto = dtos.Single();
-            Assert.Equal(TestScenarioTargetConditionGoal.Id, dto.Id);
+            Assert.Equal(goal.Id, dto.Id);
         }
 
         [Fact]
@@ -269,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete();
+            var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
             var getResult = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalDTO>));

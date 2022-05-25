@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -158,7 +160,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
-        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
+        private ConcurrentDictionary<int, int> ThreadTransactionCounts { get; set; } = new ConcurrentDictionary<int, int>();
+
+        public void BeginTransaction()
+        {
+            var threadId = Thread.CurrentThread.ManagedThreadId;
+            ThreadTransactionCounts.AddOrUpdate(threadId, 1, (threadId, n) => n + 1
+                );
+            try
+            {
+                DbContextTransaction = Context.Database.BeginTransaction();
+            }
+            catch
+            {
+                RemoveCurrentThreadFromBusyList();
+                throw;
+            }
+        }
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
@@ -179,6 +197,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
                 Context.SaveChanges();
                 DbContextTransaction.Commit();
                 DbContextTransaction.Dispose();
+                RemoveCurrentThreadFromBusyList();
+            }
+        }
+
+        private void RemoveCurrentThreadFromBusyList()
+        {
+            var threadId = Thread.CurrentThread.ManagedThreadId;
+            if (ThreadTransactionCounts.TryRemove(threadId, out int value))
+            {
+                if (value > 1)
+                {
+                    ThreadTransactionCounts.AddOrUpdate(threadId, value - 1, (tid, v) => v + value);
+                }
             }
         }
 
@@ -188,6 +219,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             {
                 DbContextTransaction.Rollback();
                 DbContextTransaction.Dispose();
+                RemoveCurrentThreadFromBusyList();
             }
         }
 

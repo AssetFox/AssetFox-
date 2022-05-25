@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 SimulationId = simulationId
             };
             _testHelper.UnitOfWork.Context.AddEntity(entity);
-            return entity;
+
 
 
             var attributeIdsPerAttributeName =
@@ -109,6 +109,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
 
             _testHelper.UnitOfWork.Context.SaveChanges();
+            return entity;
         }
 
         private void CreateRequestWithFormData(Guid simulationId)

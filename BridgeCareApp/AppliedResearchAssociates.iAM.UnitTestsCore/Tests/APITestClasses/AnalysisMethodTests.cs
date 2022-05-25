@@ -21,7 +21,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private readonly TestHelper _testHelper;
         private readonly AnalysisMethodController _controller;
 
-        private static readonly Guid AnalysisMethodId = Guid.Parse("e93670b5-af82-4b58-9487-6eceed99b91e");
         private static readonly Guid BenefitId = Guid.Parse("be2497dd-3acd-4cdd-88a8-adeb9893f1df");
         private readonly Mock<IAnalysisDefaultDataService> _mockAnalysisDefaultDataService = new Mock<IAnalysisDefaultDataService>();
 
@@ -38,11 +37,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
         }
 
-        public AnalysisMethodEntity TestAnalysis(Guid simulationId)
+        public AnalysisMethodEntity TestAnalysis(Guid simulationId, Guid? id = null)
         {
+            var resolveId = id ?? Guid.NewGuid();
             var returnValue = new AnalysisMethodEntity
             {
-                Id = AnalysisMethodId,
+                Id = resolveId,
                 SimulationId = simulationId,
                 OptimizationStrategy = OptimizationStrategy.Benefit,
                 SpendingStrategy = SpendingStrategy.NoSpending,
@@ -53,12 +53,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return returnValue;
         }
 
-        public BenefitEntity TestBenefit { get; } = new BenefitEntity
+        public BenefitEntity TestBenefit(Guid analysisMethodId, Guid? benefitId = null)
         {
-            Id = BenefitId,
-            AnalysisMethodId = AnalysisMethodId,
-            Limit = 1
-        };
+            var resolveId = benefitId ?? Guid.NewGuid();
+            var returnValue = new BenefitEntity
+            {
+                Id = resolveId,
+                AnalysisMethodId = analysisMethodId,
+                Limit = 1
+            };
+            return returnValue;
+        }
 
         private AnalysisMethodEntity SetupForGet(Guid simulationId)
         {
@@ -97,8 +102,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var analysisEntity = TestAnalysis(simulation.Id);
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
             var dto = analysisEntity.ToDto();
-            TestBenefit.Attribute = attributeEntity;
-            dto.Benefit = TestBenefit.ToDto();
+            var benefit = TestBenefit(analysisEntity.Id);
+            benefit.Attribute = attributeEntity;
+            dto.Benefit = benefit.ToDto();
             dto.Benefit.Attribute = attributeEntity.Name;
 
             // Act
@@ -114,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            SetupForGet(simulation.Id);
+            var analysisMethodEntity = SetupForGet(simulation.Id);
 
             // Act
             var result = await _controller.AnalysisMethod(simulation.Id);
@@ -125,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dto = (AnalysisMethodDTO)Convert.ChangeType(okObjResult.Value, typeof(AnalysisMethodDTO));
 
-            Assert.Equal(AnalysisMethodId, dto.Id);
+            Assert.Equal(analysisMethodEntity.Id, dto.Id);
         }
 
         [Fact]
@@ -169,8 +175,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
             dto.Attribute = attributeEntity.Name;
             dto.CriterionLibrary = criterionLibrary.ToDto();
-            TestBenefit.Attribute = attributeEntity;
-            dto.Benefit = TestBenefit.ToDto();
+            var analysisMethod = TestAnalysis(simulation.Id);
+            var benefit = TestBenefit(analysisMethod.Id);
+            benefit.Attribute = attributeEntity;
+            dto.Benefit = benefit.ToDto();
             dto.Benefit.Attribute = attributeEntity.Name;
 
             // Act

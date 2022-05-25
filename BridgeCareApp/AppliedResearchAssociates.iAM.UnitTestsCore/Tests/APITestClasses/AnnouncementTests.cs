@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -17,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class AnnouncementTests
     {
         private readonly TestHelper _testHelper;
-        private readonly AnnouncementController _controller;        
+        private readonly AnnouncementController _controller;
 
         public AnnouncementTests()
         {
@@ -95,15 +94,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                Assert.Equal(dto.Id, newDto.Id);
-                Assert.Equal(dto.Title, newDto.Title);
-                Assert.Equal(dto.Content, newDto.Content);
-                Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
-            };
+            var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+            Assert.Equal(dto.Id, newDto.Id);
+            Assert.Equal(dto.Title, newDto.Title);
+            Assert.Equal(dto.Content, newDto.Content);
+            Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
         }
 
         [Fact]
@@ -123,15 +118,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                Assert.Equal(dto.Id, modifiedDto.Id);
-                Assert.Equal(dto.Title, modifiedDto.Title);
-                Assert.Equal(dto.Content, modifiedDto.Content);
-                Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
-            };
+            var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+            Assert.Equal(dto.Id, modifiedDto.Id);
+            Assert.Equal(dto.Title, modifiedDto.Title);
+            Assert.Equal(dto.Content, modifiedDto.Content);
+            Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
         }
 
         [Fact]
@@ -149,11 +140,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result.Result);
 
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
-            };
+            Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
         }
     }
 }

@@ -36,8 +36,11 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("GetValuesForKey/{propertyName}")]
         [Authorize]
-        public async Task<IActionResult> GetValuesForKey(string propertyName) =>
-            Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
+        public async Task<IActionResult> GetValuesForKey(string propertyName)
+        {
+            if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
+            return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
+        }
 
         // TODO: Remove this once front end can handle generic properties
         [HttpGet]
@@ -47,10 +50,10 @@ namespace BridgeCareCore.Controllers
         {
             var data = new List<KeyIDs>();
 
-            if (_assetData.KeyProperties.ContainsKey("BRKEY") && _assetData.KeyProperties.ContainsKey("BMSID"))
+            if (_assetData.KeyProperties.ContainsKey("BRKEY_") && _assetData.KeyProperties.ContainsKey("BMSID"))
             {
                 data = _assetData.KeyProperties["BMSID"].Join(
-                    _assetData.KeyProperties["BRKEY"],
+                    _assetData.KeyProperties["BRKEY_"],
                     assetIDBMS => assetIDBMS.AssetId,
                     assetBrKey => assetBrKey.AssetId,
                     (bmsid, brkey)

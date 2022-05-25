@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == mainNetworkId))
             {
-                return null;
+                throw new RowNotInTableException("Unable to find primary network ID specified in appsettings.json");
             }
 
             return _unitOfWork.Context.Network

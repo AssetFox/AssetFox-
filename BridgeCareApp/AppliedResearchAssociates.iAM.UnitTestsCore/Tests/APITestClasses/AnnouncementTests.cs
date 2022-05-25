@@ -50,8 +50,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            await Task.Delay(5000); // WjTodo -- get rid of this horrible hack
             // Act
-            var result = await _controller.UpsertAnnouncement(TestAnnouncement().ToDto());
+            var testAnnouncement = TestAnnouncement().ToDto();
+            var result = await _controller.UpsertAnnouncement(testAnnouncement);
 
             // Assert
             Assert.IsType<OkResult>(result);

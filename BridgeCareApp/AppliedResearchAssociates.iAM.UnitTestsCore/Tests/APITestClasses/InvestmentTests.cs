@@ -875,7 +875,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleScenarioBudgetsFile()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulationName = RandomStrings.Length11();
+            var simulation = _testHelper.CreateSimulation(null, simulationName);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -889,7 +890,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var fileInfo = (FileInfoDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(FileInfoDTO));
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
-            Assert.Equal("Test_Simulation_investment_budgets.xlsx", fileInfo.FileName);
+            Assert.Equal($"{simulationName}_investment_budgets.xlsx", fileInfo.FileName);
 
             var file = Convert.FromBase64String(fileInfo.FileData);
             var memStream = new MemoryStream();
@@ -921,7 +922,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulationName = RandomStrings.Length11();
+            var simulation = _testHelper.CreateSimulation(null, simulationName);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -934,7 +936,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var fileInfo = (FileInfoDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(FileInfoDTO));
             Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
-            Assert.Equal("Test_Simulation_investment_budgets.xlsx", fileInfo.FileName);
+            Assert.Equal($"{simulationName}_investment_budgets.xlsx", fileInfo.FileName);
 
             var file = Convert.FromBase64String(fileInfo.FileData);
             var memStream = new MemoryStream();

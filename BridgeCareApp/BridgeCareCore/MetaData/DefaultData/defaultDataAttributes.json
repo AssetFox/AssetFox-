@@ -1,7 +1,7 @@
 {
   "DefaultData": {
     "Analysis": {
-      "Weighting": "RISK_SCORE",
+      "Weighting": "",
       "OptimizationStrategy": "BenefitToCostRatio",
       "BenefitAttribute": "CONDITIONINDEX",
       "BenefitLimit": 0,

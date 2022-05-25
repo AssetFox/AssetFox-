@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using Moq;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {

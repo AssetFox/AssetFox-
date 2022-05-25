@@ -102,7 +102,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
-            var result = await _controller.DeleteRemainingLifeLimitLibrary(Guid.Empty);
+            var library = SetupForGet();
+            var result = await _controller.DeleteRemainingLifeLimitLibrary(library.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -149,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
-                .RemainingLifeLimitLibrariesWithRemainingLifeLimits()[0];
+                .RemainingLifeLimitLibrariesWithRemainingLifeLimits().Single(rll => rll.Id == lifeLimitLibrary.Id);
 
             Assert.Equal(dto.Description, modifiedDto.Description);
             // Below was already broken. Brokenness hidden behind a timer that never fired.

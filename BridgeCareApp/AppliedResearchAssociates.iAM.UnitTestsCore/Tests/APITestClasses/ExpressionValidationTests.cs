@@ -317,7 +317,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 await _controller.GetEquationValidationResult(model));
         }
 
-        [Fact]
+        [Fact (Skip ="Timer")]
         public void ShouldInvalidateCriteria()
         {
             var timer = new System.Timers.Timer { Interval = 5000 };

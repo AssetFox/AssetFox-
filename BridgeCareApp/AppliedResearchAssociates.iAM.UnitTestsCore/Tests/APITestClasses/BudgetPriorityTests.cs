@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -266,18 +265,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertBudgetPriorityLibrary(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
-                Assert.Equal(dto.Description, modifiedDto.Description);
+            var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
+            Assert.Equal(dto.Description, modifiedDto.Description);
 
-                Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
-                Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
-                Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
-                    modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
-            };
-            timer.Start();
+            Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
+            Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
+            Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
+                modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
         }
 
         [Fact]

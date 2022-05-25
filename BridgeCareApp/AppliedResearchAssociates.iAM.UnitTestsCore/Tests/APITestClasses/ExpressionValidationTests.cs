@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Logging;
@@ -69,10 +70,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void SetData()
         {
+            var culvAttribute = AttributeDtos.CulvDurationN;
+            var actionTypeAttribute = AttributeDtos.ActionType;
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
+                .Single(_ => _.Name == culvAttribute.Name);
             TextAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .First(_ => _.DataType == DataPersistenceConstants.AttributeTextDataType);
+                .Single(_ => _.Name == actionTypeAttribute.Name);
         }
 
         private void AddTestData()

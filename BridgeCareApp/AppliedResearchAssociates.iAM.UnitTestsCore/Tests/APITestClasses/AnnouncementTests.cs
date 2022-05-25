@@ -26,12 +26,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        public AnnouncementEntity TestAnnouncement { get; } = new AnnouncementEntity
-        {
-            Id = Guid.Empty,
-            Title = "Test Title",
-            Content = "Test Content"
-        };
+        public AnnouncementEntity TestAnnouncement(Guid? id = null) {
+            var resolvedId = id ?? Guid.NewGuid();
+            var returnValue = new AnnouncementEntity
+            {
+                Id = resolvedId,
+                Title = "Test Title",
+                Content = "Test Content"
+            };
+            return returnValue;
+        }
 
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
@@ -47,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnPost()
         {
             // Act
-            var result = await _controller.UpsertAnnouncement(TestAnnouncement.ToDto());
+            var result = await _controller.UpsertAnnouncement(TestAnnouncement().ToDto());
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -68,8 +72,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var AnnouncementId = Guid.NewGuid();
-            TestAnnouncement.Id = AnnouncementId;
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var announcement = TestAnnouncement(AnnouncementId);
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
             var result = await _controller.Announcements();
@@ -87,8 +91,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldAddAnnouncementData()
         {
             // Arrange
-            TestAnnouncement.Id = Guid.NewGuid();
-            var dto = TestAnnouncement.ToDto();
+            var announcement = TestAnnouncement();
+            var dto = announcement.ToDto();
 
             // Act
             await _controller.UpsertAnnouncement(dto);
@@ -105,12 +109,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyAnnouncementData()
         {
             // Arrange                
-            TestAnnouncement.Id = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var announcement = TestAnnouncement();
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
-            var dto = dtos[0];
+            var dto = dtos.Single(a => a.Id == announcement.Id);
             dto.Title = "Updated Title";
             dto.Content = "Updated Content";
 
@@ -118,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+            var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements().Single(a => a.Id == announcement.Id);
             Assert.Equal(dto.Id, modifiedDto.Id);
             Assert.Equal(dto.Title, modifiedDto.Title);
             Assert.Equal(dto.Content, modifiedDto.Content);
@@ -129,8 +133,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeletePerformanceCurveData()
         {
             // Arrange
-            TestAnnouncement.Id = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var announcement = TestAnnouncement();
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 

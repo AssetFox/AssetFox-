@@ -273,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertCashFlowRuleLibrary(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries()[0];
+            var modifiedDto = _testHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
             Assert.Equal(dto.Description, modifiedDto.Description);
 
             Assert.Equal(dto.CashFlowRules[0].Name, modifiedDto.CashFlowRules[0].Name);

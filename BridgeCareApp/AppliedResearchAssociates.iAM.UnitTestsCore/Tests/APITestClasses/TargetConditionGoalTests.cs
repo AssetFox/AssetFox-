@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
@@ -70,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
             return returnValue;
         }
-        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(            Guid simulationId,
+        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
             Guid attributeId,
             Guid? id = null)
         {
@@ -309,30 +308,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertScenarioTargetConditionGoals(simulation.Id, localScenarioTargetGoals);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var serverScenarioTargetConditionGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo
-                    .GetScenarioTargetConditionGoals(simulation.Id);
-                Assert.Equal(serverScenarioTargetConditionGoals.Count, serverScenarioTargetConditionGoals.Count);
+            var serverScenarioTargetConditionGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo
+                .GetScenarioTargetConditionGoals(simulation.Id);
+            Assert.Equal(serverScenarioTargetConditionGoals.Count, serverScenarioTargetConditionGoals.Count);
 
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any(_ => _.Id == deletedTargetConditionId));
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any(_ => _.Id == deletedTargetConditionId));
 
-                var localNewTargetGoal = localScenarioTargetGoals.Single(_ => _.Name == "New");
-                var serverNewTargetGoal = localScenarioTargetGoals.FirstOrDefault(_ => _.Id == localNewTargetGoal.Id);
-                Assert.NotNull(serverNewTargetGoal);
-                Assert.Equal(localNewTargetGoal.Attribute, serverNewTargetGoal.Attribute);
+            var localNewTargetGoal = localScenarioTargetGoals.Single(_ => _.Name == "New");
+            var serverNewTargetGoal = localScenarioTargetGoals.FirstOrDefault(_ => _.Id == localNewTargetGoal.Id);
+            Assert.NotNull(serverNewTargetGoal);
+            Assert.Equal(localNewTargetGoal.Attribute, serverNewTargetGoal.Attribute);
 
-                var localUpdatedTargetGoal = localScenarioTargetGoals.Single(_ => _.Id == ScenarioTargetConditionGoalId);
-                var serverUpdatedTargetGoal = serverScenarioTargetConditionGoals
-                    .FirstOrDefault(_ => _.Id == ScenarioTargetConditionGoalId);
-                Assert.Equal(localUpdatedTargetGoal.Name, serverNewTargetGoal.Name);
-                Assert.Equal(localUpdatedTargetGoal.Attribute, serverNewTargetGoal.Attribute);
-                Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.Id, serverNewTargetGoal.CriterionLibrary.Id);
-                Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
-                    serverNewTargetGoal.CriterionLibrary.MergedCriteriaExpression);
-            };
+            var localUpdatedTargetGoal = localScenarioTargetGoals.Single(_ => _.Id == ScenarioTargetConditionGoalId);
+            var serverUpdatedTargetGoal = serverScenarioTargetConditionGoals
+                .FirstOrDefault(_ => _.Id == ScenarioTargetConditionGoalId);
+            Assert.Equal(localUpdatedTargetGoal.Name, serverNewTargetGoal.Name);
+            Assert.Equal(localUpdatedTargetGoal.Attribute, serverNewTargetGoal.Attribute);
+            Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.Id, serverNewTargetGoal.CriterionLibrary.Id);
+            Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
+                serverNewTargetGoal.CriterionLibrary.MergedCriteriaExpression);
         }
     }
 }

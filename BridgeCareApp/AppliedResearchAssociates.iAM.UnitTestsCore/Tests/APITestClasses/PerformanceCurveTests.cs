@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
@@ -224,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(PerformanceCurveId, dtos[0].PerformanceCurves[0].Id);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken. Had a timer.")]
         public async Task ShouldModifyPerformanceCurveData()
         {
             // Arrange
@@ -245,21 +244,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertPerformanceCurveLibrary(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
-                    .GetPerformanceCurveLibraries()[0];
-                Assert.Equal(dto.Description, modifiedDto.Description);
 
-                Assert.Equal(dto.PerformanceCurves[0].Shift, modifiedDto.PerformanceCurves[0].Shift);
-                Assert.Equal(dto.PerformanceCurves[0].CriterionLibrary.Id,
-                    modifiedDto.PerformanceCurves[0].CriterionLibrary.Id);
-                Assert.Equal(dto.PerformanceCurves[0].Equation.Id,
-                    modifiedDto.PerformanceCurves[0].Equation.Id);
-                Assert.Equal(dto.PerformanceCurves[0].Attribute,
-                    modifiedDto.PerformanceCurves[0].Attribute);
-            };
+            var modifiedDto = _testHelper.UnitOfWork.PerformanceCurveRepo
+                .GetPerformanceCurveLibraries()[0];
+            Assert.Equal(dto.Description, modifiedDto.Description);
+
+            Assert.Equal(dto.PerformanceCurves[0].Shift, modifiedDto.PerformanceCurves[0].Shift);
+            Assert.Equal(dto.PerformanceCurves[0].CriterionLibrary.Id,
+                modifiedDto.PerformanceCurves[0].CriterionLibrary.Id);
+            Assert.Equal(dto.PerformanceCurves[0].Equation.Id,
+                modifiedDto.PerformanceCurves[0].Equation.Id);
+            Assert.Equal(dto.PerformanceCurves[0].Attribute,
+                modifiedDto.PerformanceCurves[0].Attribute);
+
         }
 
         [Fact(Skip = "Broken")]
@@ -318,7 +315,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(simulation.Id, dtos[0].Id);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken. Had a timer.")]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
             // Arrange
@@ -355,32 +352,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertScenarioPerformanceCurves(simulation.Id, localScenarioPerformanceCurves);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var serverScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
-                    .GetScenarioPerformanceCurves(simulation.Id);
-                Assert.Equal(localScenarioPerformanceCurves.Count, serverScenarioPerformanceCurves.Count);
+            var serverScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
+                .GetScenarioPerformanceCurves(simulation.Id);
+            Assert.Equal(localScenarioPerformanceCurves.Count, serverScenarioPerformanceCurves.Count);
 
-                Assert.True(
-                    !_testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Any(_ => _.Id == deletedCurveId));
+            Assert.True(
+                !_testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Any(_ => _.Id == deletedCurveId));
 
-                var localNewCurve = localScenarioPerformanceCurves.Single(_ => _.Name == "New");
-                var serverNewCurve = serverScenarioPerformanceCurves.FirstOrDefault(_ => _.Id == localNewCurve.Id);
-                Assert.NotNull(serverNewCurve);
-                Assert.Equal(localNewCurve.Attribute, serverNewCurve.Attribute);
+            var localNewCurve = localScenarioPerformanceCurves.Single(_ => _.Name == "New");
+            var serverNewCurve = serverScenarioPerformanceCurves.FirstOrDefault(_ => _.Id == localNewCurve.Id);
+            Assert.NotNull(serverNewCurve);
+            Assert.Equal(localNewCurve.Attribute, serverNewCurve.Attribute);
 
-                var localUpdatedCurve = localScenarioPerformanceCurves.Single(_ => _.Id == ScenarioPerformanceCurveId);
-                var serverUpdatedCurve = serverScenarioPerformanceCurves
-                    .FirstOrDefault(_ => _.Id == ScenarioPerformanceCurveId);
-                Assert.Equal(localUpdatedCurve.Name, serverUpdatedCurve.Name);
-                Assert.Equal(localUpdatedCurve.Attribute, serverUpdatedCurve.Attribute);
-                Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
-                Assert.Equal(localUpdatedCurve.CriterionLibrary.MergedCriteriaExpression,
-                    serverUpdatedCurve.CriterionLibrary.MergedCriteriaExpression);
-                Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
-                Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
-            };
+            var localUpdatedCurve = localScenarioPerformanceCurves.Single(_ => _.Id == ScenarioPerformanceCurveId);
+            var serverUpdatedCurve = serverScenarioPerformanceCurves
+                .FirstOrDefault(_ => _.Id == ScenarioPerformanceCurveId);
+            Assert.Equal(localUpdatedCurve.Name, serverUpdatedCurve.Name);
+            Assert.Equal(localUpdatedCurve.Attribute, serverUpdatedCurve.Attribute);
+            Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
+            Assert.Equal(localUpdatedCurve.CriterionLibrary.MergedCriteriaExpression,
+                serverUpdatedCurve.CriterionLibrary.MergedCriteriaExpression);
+            Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
+            Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
         }
 
         [Fact(Skip = "Broken")]

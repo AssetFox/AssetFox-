@@ -30,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private ScenarioSelectableTreatmentEntity _testScenarioTreatment;
         private ScenarioTreatmentCostEntity _testScenarioTreatmentCost;
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
-        private ScenarioBudgetEntity _testScenarioBudget;
 
         public TreatmentTests()
         {
@@ -87,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData(Guid simulationId)
+        private ScenarioBudgetEntity CreateScenarioTestData(Guid simulationId)
         {
             var budget = new ScenarioBudgetEntity
             {
@@ -95,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 SimulationId = simulationId,
                 Name = "Test Name"
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
+            _testHelper.UnitOfWork.Context.AddEntity(budget);
 
 
             _testScenarioTreatment = new ScenarioSelectableTreatmentEntity
@@ -109,7 +108,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
             _testHelper.UnitOfWork.Context.AddEntity(new ScenarioSelectableTreatmentScenarioBudgetEntity
             {
-                ScenarioBudgetId = _testScenarioBudget.Id,
+                ScenarioBudgetId = budget.Id,
                 ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
             });
 
@@ -132,6 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
 
             _testHelper.UnitOfWork.Context.SaveChanges();
+            return budget;
         }
 
 
@@ -240,7 +240,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
-            CreateScenarioTestData(simulation.Id);
+            var budget = CreateScenarioTestData(simulation.Id);
 
             // Act
             var result = await _controller.GetScenarioSelectedTreatments(simulation.Id);
@@ -259,7 +259,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
             Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
-            Assert.True(dtos[0].BudgetIds.Contains(_testScenarioBudget.Id));
+            Assert.True(dtos[0].BudgetIds.Contains(budget.Id));
         }
 
         [Fact]

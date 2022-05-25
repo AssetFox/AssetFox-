@@ -38,5 +38,27 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetValuesForKey(string propertyName) =>
             Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
+
+        // TODO: Remove this once front end can handle generic properties
+        [HttpGet]
+        [Route("GetPennDOTInventory")]
+        [Authorize]
+        public async Task<IActionResult> GetPennDOTInventory()
+        {
+            var data = new List<KeyIDs>();
+
+            if (_assetData.KeyProperties.ContainsKey("BRKEY") && _assetData.KeyProperties.ContainsKey("BMSID"))
+            {
+                data = _assetData.KeyProperties["BMSID"].Join(
+                    _assetData.KeyProperties["BRKEY"],
+                    assetIDBMS => assetIDBMS.AssetId,
+                    assetBrKey => assetBrKey.AssetId,
+                    (bmsid, brkey)
+                    => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
+                    .ToList();
+            }
+
+            return Ok(data.OrderBy(_ => _.BrKey.Length).ThenBy(_ => _.BrKey));
+        }
     }
 }

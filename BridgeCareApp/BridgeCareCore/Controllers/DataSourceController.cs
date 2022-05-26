@@ -15,7 +15,7 @@ namespace BridgeCareCore.Controllers
 {
     public class DataSourceController : BridgeCareCoreBaseController
     {
-        private readonly IDataSourceRepository _dataSourceRepository;
+        public const string DataSourceError = "DataSource error";
 
         public DataSourceController(
             IEsecSecurity esecSecurity,
@@ -27,7 +27,6 @@ namespace BridgeCareCore.Controllers
                   hubService,
                   contextAccessor)
         {
-
         }
 
         [HttpPost]
@@ -43,14 +42,35 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.DataSourceRepo.UpsertDatasource(dto);
                     UnitOfWork.Commit();
                 });
-
                 return Ok();
             }
-
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"DataSource error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpDelete]
+        [Route("DeleteDataSource/{dataSourceId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteDataSource(Guid dataSourceId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.DataSourceRepo.DeleteDataSource(dataSourceId);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
                 throw;
             }
         }

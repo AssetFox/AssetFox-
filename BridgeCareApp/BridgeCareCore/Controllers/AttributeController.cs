@@ -71,6 +71,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    // WjTodo -- next time I look at attributes, don't do it this way. Throw if something is wrong.
                     var configurableAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
                     UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);

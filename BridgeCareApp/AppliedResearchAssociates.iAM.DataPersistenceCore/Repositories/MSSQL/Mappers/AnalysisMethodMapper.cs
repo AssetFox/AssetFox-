@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             var specifiedFilter = entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             simulation.AnalysisMethod.Filter.Expression =
-                userCriteria == null ? specifiedFilter :
+                string.IsNullOrEmpty(userCriteria) ? specifiedFilter :
                 $"({userCriteria}) AND ({specifiedFilter})";
 
             if (entity.Attribute != null)

@@ -2,26 +2,45 @@
   <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
     <v-card>
       <v-card-title>
-        <v-layout justify-center>
-          <h3>New Criteria Library</h3>
+        <v-layout justify-left>
+          <h3 class="ghd-dialog">New Criteria Library</h3>
         </v-layout>
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-text-field v-model="newCriterionLibrary.name" label="Name" outline>
+          <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>            
+          <v-text-field
+            class="ghd-control-text ghd-control-border"
+            v-model="newCriterionLibrary.name"
+            outline
+          >
           </v-text-field>
-          <v-textarea v-model="newCriterionLibrary.description" label="Description" no-resize outline rows="3">
+          <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>            
+          <v-textarea
+            class="ghd-control-text ghd-control-border"
+            v-model="newCriterionLibrary.description"
+            no-resize
+            outline
+            rows="3">
           </v-textarea>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(true)" :disabled="newCriterionLibrary.name === ''"
-                 class="ara-blue-bg white--text">
-            Save
-          </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
-        </v-layout>
+          <v-layout justify-center row>
+            <v-btn
+                   class="ghd-white-bg ghd-blue ghd-button-text"
+                   depressed
+                   @click="onSubmit(false)">
+              Cancel
+            </v-btn>
+            <v-btn :disabled="newCriterionLibrary.name === ''"
+                   class="ghd-blue-bg ghd-white ghd-button-text"
+                   @click="onSubmit(true)"
+                   depressed                   
+                   >
+              Save
+            </v-btn>
+          </v-layout>
       </v-card-actions>
     </v-card>
   </v-dialog>

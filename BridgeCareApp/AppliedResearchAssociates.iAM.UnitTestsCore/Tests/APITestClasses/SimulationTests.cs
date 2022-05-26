@@ -486,6 +486,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             CreateAuthorizedController();
             var simulation = _testHelper.TestSimulation();
+            simulation.NetworkId = _testHelper.TestNetwork.Id;
+            simulation.Network = _testHelper.TestNetwork;
 
             // Act
             var dto = simulation.ToDto(null);

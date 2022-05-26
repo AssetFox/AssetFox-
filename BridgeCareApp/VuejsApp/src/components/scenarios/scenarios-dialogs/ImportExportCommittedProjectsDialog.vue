@@ -1,21 +1,27 @@
 <template>
-    <v-dialog max-width='500px' width="768px" height="540px" persistent v-model='showDialog'>
-        <v-card>
-            <v-card-title>
-                <v-layout justify-center>
+    <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
+        <v-card class="div-padding">
+            <v-card-title class="pa-2">
+                <v-layout justify-start>
                     <h3>Committed Projects</h3>
                 </v-layout>
+                <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+                </v-btn>
             </v-card-title>
-            <v-card-text>
+            <v-card-text class="pa-2">
                 <v-layout column>
                     <CommittedProjectsFileSelector :closed='closed' @submit='onSubmitFileSelectorFile' />
-                    <v-flex xs12>
+                    <!-- <v-flex xs12>
                         <v-layout justify-start>
                             <v-checkbox label='No Treatment' v-model='applyNoTreatment'></v-checkbox>
                         </v-layout>
-                    </v-flex>
+                    </v-flex> -->
                     <span class="div-warning-border">
-                        <v-layout align-center><v-icon>fas fa-exclamation-triangle</v-icon><h3>Warning</h3></v-layout>
+                        <v-layout align-start>
+                            <v-icon class="px-2">fas fa-exclamation-triangle</v-icon>
+                            <h3>Warning</h3>
+                        </v-layout>
                         <p>
                             Uploading new committed projects will override ALL previous commitments.
                             Committed projects may take a few minutes to process. You will receive an email when this process is complete.
@@ -24,10 +30,10 @@
                 </v-layout>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
+                <v-layout justify-center row>
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue' flat>Cancel</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue' outline>Export</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue' outline>Upload</v-btn>
+                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue ghd-button' outline>Export</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button' outline>Upload</v-btn>
                     <!-- <v-tooltip top>
                         <template slot='activator'>
                             <v-btn @click='onDelete' class='ara-orange-bg white--text'>Delete</v-btn>
@@ -110,5 +116,8 @@ export default class ImportExportCommittedProjectsDialog extends Vue {
     border-radius: 4px;
     border-width: 1px;
     padding: 10px;
+}
+.div-padding {
+    padding: 30px;
 }
 </style>

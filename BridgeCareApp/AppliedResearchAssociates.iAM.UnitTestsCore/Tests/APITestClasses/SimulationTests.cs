@@ -457,18 +457,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             CreateAuthorizedController();
-
-            var getResult = await _controller.GetSimulations();
-            var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<SimulationDTO>));
-
-            var dto = dtos[0];
+            var simulation = _testHelper.CreateSimulation();
 
             // Act
-            await _controller.DeleteSimulation(dto.Id);
+            await _controller.DeleteSimulation(simulation.Id);
 
             // Assert
-            Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == dto.Id));
+            Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
         }
 
         [Fact]
@@ -487,9 +482,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            // wjwjwj failing
             // Arrange
             CreateAuthorizedController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = _testHelper.TestSimulation();
 
             // Act
             var dto = simulation.ToDto(null);

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
+
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary

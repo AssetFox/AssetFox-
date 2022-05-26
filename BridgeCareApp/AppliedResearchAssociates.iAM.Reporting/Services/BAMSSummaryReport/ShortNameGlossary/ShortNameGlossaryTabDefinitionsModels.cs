@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelRanges;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Regions;
-
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary
 {
     public static class ShortNameGlossaryTabDefinitionsModels

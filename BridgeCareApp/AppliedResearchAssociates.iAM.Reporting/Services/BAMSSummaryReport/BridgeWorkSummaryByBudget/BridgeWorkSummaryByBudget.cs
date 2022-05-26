@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using OfficeOpenXml;
-using BridgeCareCore.Helpers.Excel;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Analysis;

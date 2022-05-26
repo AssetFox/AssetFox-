@@ -1,7 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelRanges;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelStyles;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Regions;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Rows;
+﻿using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary

@@ -2,6 +2,8 @@
 using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
+
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData

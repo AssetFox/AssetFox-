@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
 
 using System.Linq;
-using BridgeCareCore.Helpers.Excel;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {

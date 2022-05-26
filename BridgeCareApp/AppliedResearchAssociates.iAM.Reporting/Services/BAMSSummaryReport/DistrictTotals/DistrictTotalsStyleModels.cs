@@ -1,5 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelRanges;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelStyles;
+﻿using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
 {

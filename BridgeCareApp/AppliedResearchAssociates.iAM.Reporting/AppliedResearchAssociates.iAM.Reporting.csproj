@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.ExcelHelpers\AppliedResearchAssociates.iAM.ExcelHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

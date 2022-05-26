@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
+
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelRanges;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.ExcelStyles;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
 {

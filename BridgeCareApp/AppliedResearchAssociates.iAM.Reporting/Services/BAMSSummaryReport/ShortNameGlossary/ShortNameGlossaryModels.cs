@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport.Worksheets;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Worksheets;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary
 {

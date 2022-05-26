@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport.Worksheets;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Regions;
-using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport.Worksheets;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
 {

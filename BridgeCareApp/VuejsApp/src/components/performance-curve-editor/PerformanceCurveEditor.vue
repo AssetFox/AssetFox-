@@ -63,39 +63,41 @@
 
 
 
-        <v-flex v-show='hasSelectedLibrary && !hasScenario'>
+        <v-flex>
             <v-layout row style="height:48px;">
-                <v-flex xs10>
-                 <v-layout row>
-                        <div style="margin-top:6px;"
-                            v-if='hasSelectedLibrary && !hasScenario'
-                            class="ghd-control-label ghd-md-gray"
-                        > 
-                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                        </div>
-                        <v-divider class="owner-shared-divider" style="margin-left:10px;" inset vertical>
-                        </v-divider>                        
-                        <v-checkbox style="margin-left:10px;margin-top:4px;"
-                            class="sharing ghd-checkbox"
-                            label="Shared"
-                            v-if="hasSelectedLibrary && !hasScenario"
-                            v-model="selectedPerformanceCurveLibrary.isShared"
-                        />               
-                </v-layout>
+                <v-flex xs10 v-show="!hasScenario">
+                    <v-layout row>
+                            <div style="margin-top:6px;"
+                                v-if='hasSelectedLibrary && !hasScenario'
+                                class="ghd-control-label ghd-md-gray"
+                            > 
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            </div>
+                            <v-divider class="owner-shared-divider" style="margin-left:10px;" inset vertical>
+                            </v-divider>                        
+                            <v-switch style="margin-left:10px;margin-top:4px;"
+                                class="sharing ghd-checkbox"
+                                label="Shared"
+                                v-if="hasSelectedLibrary && !hasScenario"
+                                v-model="selectedPerformanceCurveLibrary.isShared"
+                            />               
+                    </v-layout>
                 </v-flex>
-                <v-flex xs2>
-                <v-layout row align-end style="margin-top:-4px;height:40px;">
-                    <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
-                        flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                        Upload
-                    </v-btn>
-                    <v-divider class="upload-download-divider" inset vertical>
-                    </v-divider>
-                    <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
-                        flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                        Download
-                    </v-btn>
-                </v-layout>            
+                <v-flex xs10 v-show="hasScenario">
+                </v-flex>
+                <v-flex xs2 v-show="hasScenario || hasSelectedLibrary">
+                    <v-layout row align-end style="margin-top:-4px;height:40px;">
+                        <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Upload
+                        </v-btn>
+                        <v-divider class="upload-download-divider" inset vertical>
+                        </v-divider>
+                        <v-btn :disabled='false' @click='exportPerformanceCurves()'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Download
+                        </v-btn>
+                    </v-layout>            
                 </v-flex>
             </v-layout>
         </v-flex>
@@ -966,12 +968,8 @@ export default class PerformanceCurveEditor extends Vue {
         return !dataIsValid;
     }
 
-    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        this.showImportExportPerformanceCurvesDialog = false;
-
-        if (hasValue(result)) {
-            if (result.isExport) {
-                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
+    exportPerformanceCurves() {
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
                 PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
@@ -979,8 +977,16 @@ export default class PerformanceCurveEditor extends Vue {
                             FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                         }
                     });
+    }
 
-            } else
+    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
+        this.showImportExportPerformanceCurvesDialog = false;
+
+        if (hasValue(result)) {
+            if (result.isExport) {
+
+            }
+            else
             if (hasValue(result.file)) {
                 const data: PerformanceCurvesFileImport = {
                     file: result.file

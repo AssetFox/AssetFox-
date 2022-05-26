@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 

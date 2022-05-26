@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.Debugging;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -167,7 +166,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            using var _ = new ErrorConditionIncrement();
             var criterionLibrary = SetupForUpsert(simulation.Id);
             var getResult = await _controller.AnalysisMethod(simulation.Id);
             var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,

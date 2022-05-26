@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width='500px' persistent v-model='showDialog'>
+    <v-dialog max-width='500px' width="768px" height="540px" persistent v-model='showDialog'>
         <v-card>
             <v-card-title>
                 <v-layout justify-center>
@@ -14,9 +14,10 @@
                             <v-checkbox label='No Treatment' v-model='applyNoTreatment'></v-checkbox>
                         </v-layout>
                     </v-flex>
-                    <span>
+                    <span class="div-warning-border">
+                        <v-layout align-center><v-icon>fas fa-exclamation-triangle</v-icon><h3>Warning</h3></v-layout>
                         <p>
-                            Warning: Uploading new committed projects will override ALL previous commitments.
+                            Uploading new committed projects will override ALL previous commitments.
                             Committed projects may take a few minutes to process. You will receive an email when this process is complete.
                         </p>
                     </span>
@@ -24,15 +25,15 @@
             </v-card-text>
             <v-card-actions>
                 <v-layout justify-space-between row>
-                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
-                    <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
-                    <v-tooltip top>
+                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue' flat>Cancel</v-btn>
+                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue' outline>Export</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue' outline>Upload</v-btn>
+                    <!-- <v-tooltip top>
                         <template slot='activator'>
                             <v-btn @click='onDelete' class='ara-orange-bg white--text'>Delete</v-btn>
                         </template>
                         <span>Delete scenario's current committed projects</span>
-                    </v-tooltip>
+                    </v-tooltip> -->
                 </v-layout>
             </v-card-actions>
         </v-card>
@@ -102,3 +103,12 @@ export default class ImportExportCommittedProjectsDialog extends Vue {
     }
 }
 </script>
+<style scoped>
+.div-warning-border {
+    border: solid;
+    border-color: #F00;
+    border-radius: 4px;
+    border-width: 1px;
+    padding: 10px;
+}
+</style>

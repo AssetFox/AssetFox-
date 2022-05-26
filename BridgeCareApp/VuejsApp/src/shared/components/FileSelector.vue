@@ -1,16 +1,28 @@
 <template>
     <v-layout column>
-        <v-layout column>           
-            <div id="app" class="ara-light-gray-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
+        <v-layout column>        
+            <div class="div-border">   
+            <div id="app" class="ghd-white-bg" v-cloak @drop.prevent="onSelect($event.dataTransfer.files)" @dragover.prevent>
                 <v-layout align-center fill-height justify-center>
-                    <div class="drag-drop-area">Drag & Drop File Here</div>
+                    <div class="drag-drop-area">
+                        <p>Drag & Drop File Here <br>
+                        or <br>
+                       Click here to select files 
+                        </p>
+                    </div>
                 </v-layout>                
             </div>
+            </div>
             <v-flex xs12>
-                <v-layout justify-start>                  
-                    <v-btn @click="chooseFiles()" class="ara-blue-bg white--text">
+                <v-layout justify-start>     
+                    <v-switch
+                        label="No Treatment"
+                        class="ghd-control-label ghd-md-gray my-2"
+                        
+                    />
+                    <!-- <v-btn @click="chooseFiles()" class="ghd-blue-bg white--text">
                         Select File
-                    </v-btn>
+                    </v-btn> -->
                 </v-layout>
             </v-flex>
             <div v-show="true">
@@ -130,5 +142,10 @@ export default class FileSelector extends Vue {
     height: 100px;
     border-radius: 4px;
     padding-top: 40px;
+}
+.div-border {
+    border: dashed;
+    border-radius: 4px;
+    border-width: 1px;
 }
 </style>

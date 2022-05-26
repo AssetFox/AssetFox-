@@ -28,8 +28,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 _testHelper.CreateAttributes();
                 _testHelper.CreateNetwork();
                 _testHelper.CreateSimulation();
-                _testHelper.CreateCalculatedAttributeLibrary();
             }
+            _testHelper.CreateCalculatedAttributeLibrary();
+
         }
 
         [Fact]

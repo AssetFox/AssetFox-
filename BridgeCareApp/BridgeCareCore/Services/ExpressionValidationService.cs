@@ -182,7 +182,7 @@ namespace BridgeCareCore.Services
                 foreach (Match m in match)
                 {
                     hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
-                }
+                } // {"CULV_DURATION_N", "ACTIONTYPE"}
 
                 var attributes = _unitOfWork.Context.Attribute
                     .Where(_ => hashMatch.Contains(_.Name))
@@ -190,7 +190,7 @@ namespace BridgeCareCore.Services
                     {
                         Name = attribute.Name,
                         DataType = attribute.DataType
-                    }).AsNoTracking().ToList();
+                    }).AsNoTracking().ToList(); // 2 attributes on successful test
 
                 var compiler = new CalculateEvaluateCompiler();
 
@@ -404,6 +404,10 @@ namespace BridgeCareCore.Services
                     });
                     return value;
                 });
+
+            // All for one attribute:
+            // {ACTIONTYPE => (Test, string)}
+            // {CULV_DURATION_N => (1, Number)}
 
             AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
 

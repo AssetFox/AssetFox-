@@ -42,9 +42,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.CreateAttributes();
                 _testHelper.CreateNetwork();
                 _testHelper.CreateSimulation();
-                _testHelper.CreateCalculatedAttributeLibrary();
                 _testHelper.SetupDefaultHttpContext();
             }
+            _testHelper.CreateCalculatedAttributeLibrary();
+
             _simulationAnalysisService =
                 new SimulationAnalysisService(_testHelper.UnitOfWork, new());
         }
@@ -482,7 +483,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
-            // wjwjwj failing
+            // wjwjwj first errror here 9:11am Thursday
             // Arrange
             CreateAuthorizedController();
             var simulation = _testHelper.TestSimulation();

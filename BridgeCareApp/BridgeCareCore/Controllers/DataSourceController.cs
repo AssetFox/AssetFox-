@@ -94,5 +94,23 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetDataSource/{dataSourceId}")]
+        [Authorize]
+        public async Task<IActionResult> GetDataSource(Guid dataSourceId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                throw;
+            }
+        }
+
     }
 }

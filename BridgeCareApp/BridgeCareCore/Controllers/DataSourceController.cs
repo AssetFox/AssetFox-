@@ -90,7 +90,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
                 throw;
             }
         }
@@ -112,5 +112,21 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetDataSourceTypes")]
+        [Authorize]
+        public async Task<IActionResult> GetDataSourceTypes()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSourceTypes());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
     }
 }

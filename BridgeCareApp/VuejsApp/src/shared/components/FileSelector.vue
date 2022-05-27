@@ -8,9 +8,9 @@
                             <v-layout fill-height align-center justify-center>
                                 <v-icon class="px-2">fas fa-cloud-upload-alt</v-icon>
                                 <v-layout column align-center>
-                                    <span class="span-center">Drag & Drop Files Here </span>
-                                    <span class="span-center">or</span>
-                                    <v-btn class="ghd-blue pa-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>
+                                    <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
+                                    <span class="span-center Montserrat-font-family">or</span>
+                                    <v-btn class="ghd-blue Montserrat-font-family a-0 ma-0" @click="chooseFiles()" flat> Click here to select files </v-btn>
                                 </v-layout>
                             </v-layout>
                         </div>
@@ -21,12 +21,9 @@
                 <v-layout justify-start>     
                     <v-switch
                         label="No Treatment"
-                        class="ghd-control-label ghd-md-gray my-2"
-                        
+                        class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
+                        v-model="applyNoTreatment"
                     />
-                    <!-- <v-btn @click="chooseFiles()" class="ghd-blue-bg white--text">
-                        Select File
-                    </v-btn> -->
                 </v-layout>
             </v-flex>
             <div v-show="true">
@@ -34,12 +31,11 @@
             </div>
         </v-layout>        
         <div class="files-table">
-            <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow"
+            <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
                           hide-actions>
                 <template slot="items" slot-scope="props">
-                    <div>
                     <td>
-                        <span>{{props.item.name}}</span>
+                        {{props.item.name}}
                     </td>
                     <td>
                         <div><strong>{{ formatBytesSize(props.item.size) }}</strong></div>
@@ -49,7 +45,6 @@
                             <v-icon>fas fa-trash</v-icon>
                         </v-btn>
                     </td>
-                    </div>
                 </template>
             </v-data-table>
         </div>
@@ -73,13 +68,12 @@ export default class FileSelector extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
 
+    applyNoTreatment: boolean = true;
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     tableHeaders: DataTableHeader[] = [
-        //{text: 'Selected File', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
-        //{text: '', value: '', align: 'center', sortable: false, class: '', width: '25px'}
-        {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '150px'},
-        {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '150px'},
-        {text: 'Action', value: 'action', align: 'right', sortable: false, class: '', width: '150px'}
+        {text: 'Name', value: 'name', align: 'left', sortable: false, class: '', width: '50%'},
+        {text: 'Size', value: 'size', align: 'left', sortable: false, class: '', width: '35%'},
+        {text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     ];
     files: File[] = [];
     file: File | null = null;   
@@ -107,7 +101,10 @@ export default class FileSelector extends Vue {
             (<HTMLInputElement>document.getElementById('file-select')!).value = '';
         }
     }
-
+    @Watch('applyNoTreatment')
+    onTreatmentChanged() {
+        this.$emit('treatment', this.applyNoTreatment);
+    }
     mounted() {
         // couple fileSelect object with #file-select input element
         this.fileSelect = document.getElementById('file-select') as HTMLInputElement;        

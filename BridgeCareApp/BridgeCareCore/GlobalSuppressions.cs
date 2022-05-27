@@ -6,3 +6,4 @@
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Style", "IDE0021:Use expression body for constructors", Justification = "As a general matter, this should not be required", Scope = "module")]
+[assembly: SuppressMessage("Style", "IDE0022:Use expression body for methods", Justification = "As a general matter, this should not be required", Scope = "module")]

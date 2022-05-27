@@ -55,6 +55,28 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("UpsertExcelDataSource")]
+        [Authorize]
+        public async Task<IActionResult> UpsertExcelDataSource(ExcelDataSourceDTO dto)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.DataSourceRepo.UpsertDatasource(dto);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                throw;
+            }
+        }
         [HttpDelete]
         [Route("DeleteDataSource/{dataSourceId}")]
         [Authorize]

@@ -8,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class MaintainableAssetMapper
     {
-        public static DataAssignment.Networking.MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
+        public static Data.Networking.MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
-            var maintainableAsset = new DataAssignment.Networking.MaintainableAsset(
+            var maintainableAsset = new Data.Networking.MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);
 
             if (entity.AssignedData != null && entity.AssignedData.Any())
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return maintainableAsset;
         }
 
-        public static MaintainableAssetEntity ToEntity(this DataAssignment.Networking.MaintainableAsset domain, Guid networkId) =>
+        public static MaintainableAssetEntity ToEntity(this Data.Networking.MaintainableAsset domain, Guid networkId) =>
             new MaintainableAssetEntity
             {
                 Id = domain.Id,

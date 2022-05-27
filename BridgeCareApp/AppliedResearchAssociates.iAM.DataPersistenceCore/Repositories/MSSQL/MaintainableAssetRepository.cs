@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public MaintainableAssetRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public List<DataAssignment.Networking.MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
+        public List<Data.Networking.MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void UpdateMaintainableAssetsSpatialWeighting(List<DataAssignment.Networking.MaintainableAsset> maintainableAssets)
+        public void UpdateMaintainableAssetsSpatialWeighting(List<Data.Networking.MaintainableAsset> maintainableAssets)
         {
             var networkId = maintainableAssets.First().NetworkId;
             var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity(networkId)).ToList();
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
         }
 
-        public void CreateMaintainableAssets(List<DataAssignment.Networking.MaintainableAsset> maintainableAssets, Guid networkId)
+        public void CreateMaintainableAssets(List<Data.Networking.MaintainableAsset> maintainableAssets, Guid networkId)
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {

@@ -176,9 +176,12 @@ namespace BridgeCareCore.Services.SummaryReport.UnfundedTreatmentCommon
         {
             var untreatedSections =
                     simulationYearDetail.Assets.Where(
-                        sect => sect.TreatmentCause == TreatmentCause.NoSelection &&
-                        (int.Parse(sect.ValuePerTextAttribute["NHS_IND"]) == 1 ||
-                        sect.ValuePerNumericAttribute["DECK_AREA"] > 28500) &&
+                        sect => sect.TreatmentCause == TreatmentCause.NoSelection
+                        &&
+                        (!string.IsNullOrEmpty(sect.ValuePerTextAttribute["NHS_IND"]) && int.Parse(sect.ValuePerTextAttribute["NHS_IND"]) == 1)
+                        ||
+                        sect.ValuePerNumericAttribute["DECK_AREA"] > 28500
+                        &&
                         sect.TreatmentOptions.Count > 0
                         ).ToList();
             return untreatedSections;

@@ -63,7 +63,7 @@
 
 
 
-        <v-flex v-show="hasSelectedLibrary">
+        <v-flex>
             <v-layout row style="height:48px;">
                 <v-flex xs10 v-show="!hasScenario">
                     <v-layout row>
@@ -85,7 +85,7 @@
                 </v-flex>
                 <v-flex xs10 v-show="hasScenario">
                 </v-flex>
-                <v-flex xs2>
+                <v-flex xs2 v-show="hasScenario || hasSelectedLibrary">
                     <v-layout row align-end style="margin-top:-4px;height:40px;">
                         <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
                             flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
@@ -93,7 +93,7 @@
                         </v-btn>
                         <v-divider class="upload-download-divider" inset vertical>
                         </v-divider>
-                        <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                        <v-btn :disabled='false' @click='exportPerformanceCurves()'
                             flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download
                         </v-btn>
@@ -968,12 +968,8 @@ export default class PerformanceCurveEditor extends Vue {
         return !dataIsValid;
     }
 
-    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        this.showImportExportPerformanceCurvesDialog = false;
-
-        if (hasValue(result)) {
-            if (result.isExport) {
-                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
+    exportPerformanceCurves() {
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
                 PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
@@ -981,8 +977,16 @@ export default class PerformanceCurveEditor extends Vue {
                             FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                         }
                     });
+    }
 
-            } else
+    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
+        this.showImportExportPerformanceCurvesDialog = false;
+
+        if (hasValue(result)) {
+            if (result.isExport) {
+
+            }
+            else
             if (hasValue(result.file)) {
                 const data: PerformanceCurvesFileImport = {
                     file: result.file

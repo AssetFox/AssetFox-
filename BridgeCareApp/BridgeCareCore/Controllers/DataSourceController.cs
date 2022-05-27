@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
@@ -13,6 +14,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BridgeCareCore.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class DataSourceController : BridgeCareCoreBaseController
     {
         public const string DataSourceError = "DataSource error";
@@ -30,9 +33,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertDataSource")]
+        [Route("UpsertSqlDataSource")]
         [Authorize]
-        public async Task<IActionResult> UpsertDataSource(BaseDataSourceDTO dto)
+        public async Task<IActionResult> UpsertSqlDataSource(SQLDataSourceDTO dto)
         {
             try
             {

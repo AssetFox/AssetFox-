@@ -242,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
                 _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation);
+                _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation, null);
                 var dataSourceAnalysisMethod = dataSourceSimulation.AnalysisMethod;
                 AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceAnalysisMethod);
             }

@@ -242,7 +242,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 _testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
                 var dataSourceSimulation = dataSourceNetwork.Simulations.First();
                 _testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-                _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation, null);
+                _testHelper.UnitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(dataSourceSimulation, null); // WJ added the "null" here to fix the build. No idea if it's what we want for the test or not.
                 var dataSourceAnalysisMethod = dataSourceSimulation.AnalysisMethod;
                 AssertAnalysisMethodProperties(_testHelper.StandAloneSimulation.AnalysisMethod, dataSourceAnalysisMethod);
             }

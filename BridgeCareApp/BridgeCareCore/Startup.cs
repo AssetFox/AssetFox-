@@ -67,9 +67,10 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            var connectionString = Configuration.GetConnectionString("BridgeCareConnex");
 
             services.AddDbContext<IAMContext>(options => options.UseSqlServer(
-                Configuration.GetConnectionString("BridgeCareConnex"),
+                connectionString,
                 sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 

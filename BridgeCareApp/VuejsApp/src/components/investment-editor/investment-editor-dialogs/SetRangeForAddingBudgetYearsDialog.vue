@@ -7,7 +7,7 @@
         </v-layout>
       </v-card-title>
       <v-card-text>
-        <v-text-field type="number" min=1 :mask="'##########'" label="Edit" single-line v-model.number="range"/>
+        <v-text-field type="number" min=1 :mask="'##########'" label="Edit" outline v-model.number="range"/>
         <label>{{rangeLabel}}</label>
       </v-card-text>
       <v-card-actions>

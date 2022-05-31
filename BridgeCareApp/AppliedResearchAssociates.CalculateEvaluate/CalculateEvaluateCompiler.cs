@@ -67,9 +67,20 @@ namespace AppliedResearchAssociates.CalculateEvaluate
                 {
                     tree = parser.root();
                 }
-                catch (ParseCanceledException e)
+                catch (ParseCanceledException parseCanceled)
                 {
-                    throw new CalculateEvaluateParsingException(null, e);
+                    string message = null;
+                    if (parseCanceled.InnerException is RecognitionException recognition)
+                    {
+                        var (text, line, column) = (
+                            recognition.OffendingToken.Text,
+                            recognition.OffendingToken.Line,
+                            recognition.OffendingToken.Column);
+
+                        message = $"Offending token \"{text}\" at line {line}, column {column}.";
+                    }
+
+                    throw new CalculateEvaluateParsingException(message, parseCanceled);
                 }
             }
 

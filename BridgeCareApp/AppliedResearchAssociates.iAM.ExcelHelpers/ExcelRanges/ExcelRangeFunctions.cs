@@ -4,7 +4,11 @@ using System.Linq;
 using System.Text;
 using OfficeOpenXml;
 
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelRangeFunctions.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/ExcelRangeFunctions.cs
 {
     public static class ExcelRangeFunctions
     {
@@ -14,8 +18,8 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                 var start = range.Start;
                 var offsetStart = ExcelCellAddressFunctions.Offset(start, columnDelta, rowDelta);
                 var address = offsetStart.Address;
-                var r = ExcelAddressFunctions.ChangeAbsolute(address, absoluteColumn, absoluteRow);
-                return r;
+                var returnValue = ExcelAddressFunctions.ChangeAbsolute(address, absoluteColumn, absoluteRow);
+                return returnValue;
             };
 
         /// <summary>
@@ -26,8 +30,8 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
             range =>
                 {
                     var start = range.Start;
-                    var r = ExcelCellAddressFunctions.Left(start).Address;
-                    return r;
+                    var returnValue = ExcelCellAddressFunctions.Left(start).Address;
+                    return returnValue;
                 };
         /// <summary>Always returns the text, regardless of the range</summary>
         public static Func<ExcelRange, string> Constant(string text)
@@ -43,8 +47,8 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                     {
                         builder.Append(func(range));
                     }
-                    var r = builder.ToString();
-                    return r;
+                    var returnValue = builder.ToString();
+                    return returnValue;
                 };
         public static Func<ExcelRange, string> Plus(params Func<ExcelRange, string>[] summands)
         {
@@ -59,8 +63,8 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                         builder.Append("+");
                         builder.Append(summands[i](range));
                     }
-                    var r = builder.ToString();
-                    return r;
+                    var returnValue = builder.ToString();
+                    return returnValue;
                 };
             }
             return Empty;
@@ -86,8 +90,8 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                     }
                 }
                 builder.Append(")");
-                var r = builder.ToString();
-                return r;
+                var returnValue = builder.ToString();
+                return returnValue;
             };
 
         public static Func<ExcelRange, string> BuildExcelFunctionWithOptionalArguments(

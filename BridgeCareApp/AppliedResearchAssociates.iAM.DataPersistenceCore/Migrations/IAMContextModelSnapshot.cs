@@ -266,6 +266,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("DataSourceId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("DataType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -296,6 +299,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DataSourceId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -623,6 +628,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsUnique();
 
                     b.ToTable("CriterionLibrary_User", (string)null);
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DataSourceEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Secure")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataSource");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.EquationEntity", b =>
@@ -3806,6 +3836,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                         .IsRequired();
 
                     b.Navigation("AttributeDatum");
+                });
+
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.DataSourceEntity", "DataSource")
+                        .WithMany()
+                        .HasForeignKey("DataSourceId");
+
+                    b.Navigation("DataSource");
                 });
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.AttributeEquationCriterionLibraryEntity", b =>

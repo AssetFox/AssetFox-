@@ -1,21 +1,24 @@
 <template>
     <v-layout>
         <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
-            <v-card>
+            <v-card class="ghd-padding">
                 <v-card-title>
-                    <v-layout justify-center>
-                        <h3>New Treatment Library</h3>
+                    <v-layout justify-left>
+                        <h3 class="ghd-title">Create New Treatment Library</h3>
                     </v-layout>
+                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                        X
+                    </v-btn>
                 </v-card-title>
                 <v-card-text>
                     <v-layout column>
-                        <v-text-field
-                            label="Name"
+                        <v-subheader class="ghd-control-label ghd-md-gray">Name</v-subheader>
+                        <v-text-field class="ghd-control-border ghd-control-text ghd-control-width-lg"
                             outline
                             v-model="newTreatmentLibrary.name"
                         ></v-text-field>
-                        <v-textarea
-                            label="Description"
+                        <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                        <v-textarea class="ghd-control-border ghd-control-text ghd-control-width-lg"
                             no-resize
                             outline
                             rows="3"
@@ -25,17 +28,17 @@
                     </v-layout>
                 </v-card-text>
                 <v-card-actions>
-                    <v-layout justify-space-between row>
+                    <v-layout row justify-center>
+                        <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed
+                            >Cancel</v-btn
+                        >
                         <v-btn
                             :disabled="newTreatmentLibrary.name === ''"
                             @click="onSubmit(true)"
-                            color="info"
+                            class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding"
                         >
                             Save
-                        </v-btn>
-                        <v-btn @click="onSubmit(false)" color="error"
-                            >Cancel</v-btn
-                        >
+                        </v-btn>                        
                     </v-layout>
                 </v-card-actions>
             </v-card>

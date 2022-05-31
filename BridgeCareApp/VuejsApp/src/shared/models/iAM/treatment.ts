@@ -142,3 +142,7 @@ export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new M
     [4, 'Maintenance'],
     [5, 'Other'],
 ]);
+
+export interface TreatmentsFileImport {
+    file: File;
+}

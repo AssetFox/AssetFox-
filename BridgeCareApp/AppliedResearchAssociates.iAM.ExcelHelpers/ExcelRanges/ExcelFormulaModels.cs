@@ -1,7 +1,11 @@
 ﻿using System;
 using OfficeOpenXml;
 
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelFormulaModels.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/ExcelFormulaModels.cs
 {
     public static class ExcelFormulaModels
     {

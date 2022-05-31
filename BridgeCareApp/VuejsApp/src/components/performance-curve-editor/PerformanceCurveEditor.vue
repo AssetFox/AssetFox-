@@ -1,93 +1,129 @@
 <template>
     <v-layout column>
         <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreatePerformanceCurveLibraryDialog(false)
-                        "
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
-                    <v-select
-                        :items="librarySelectItems"
-                        label="Select a Performance Library"
-                        outline
-                        v-if="!hasSelectedLibrary || hasScenario"
-                        v-model="librarySelectItemValue"
-                    >
-                    </v-select>
-                    <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedPerformanceCurveLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
-                        <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon
+            <v-layout column>
+                <v-layout justify-left style="height:96px">
+                    <v-flex xs5>
+                        <v-subheader class="ghd-control-label ghd-md-gray">Deterioration Model Library</v-subheader>
+                        <v-select
+                            class="ghd-control-border ghd-control-text ghd-select"
+                            :items="librarySelectItems"
+                            outline
+                            v-model="librarySelectItemValue"
+                        >
+                            <template v-slot:selection="{ item }">
+                                <span class="ghd-control-text">{{ item.text }}</span>
+                            </template>
+                            <template v-slot:item="{ item }">
+                                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                    <v-row no-gutters align="center">
+                                    <span>{{ item.text }}</span>
+                                    </v-row>
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                                </v-list-item>
+                            </template>
+                        </v-select>
+                    </v-flex>
+                    <v-flex xs2 v-show="hasScenario"></v-flex>
+                    <v-flex xs5 v-show="hasSelectedLibrary || hasScenario">
+                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                        <v-text-field
+                            class="ghd-control-text ghd-control-border"
+                            style="margin-top:0px;"
+                            prepend-inner-icon="fas fa-search"
+                            hide-details
+                            label="Search Deterioration Equations"
+                            single-line
+                            v-model="gridSearchTerm"
+                        >
+                        </v-text-field>
+                    </v-flex>
+                    <v-flex xs5 v-show="!(hasSelectedLibrary || hasScenario)">
+                    </v-flex>                    
+                    <v-flex xs2 v-show='!hasScenario'>
+                        <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                        <v-layout row align-end>
+                            <v-btn @click='onShowCreatePerformanceCurveLibraryDialog(false)'
+                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                                style="margin-top:0px;"
+                                outline                               
                             >
-                                <v-icon>fas fa-caret-left</v-icon>
+                                Create New Library
                             </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class="sharing"
-                        label="Shared"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedPerformanceCurveLibrary.isShared"
-                    />
+                        </v-layout>
+                    </v-flex>                    
+                </v-layout>
+            </v-layout>            
+        </v-flex>
+
+
+
+
+
+        <v-flex>
+            <v-layout row style="height:48px;">
+                <v-flex xs10 v-show="!hasScenario">
+                    <v-layout row>
+                            <div style="margin-top:6px;"
+                                v-if='hasSelectedLibrary && !hasScenario'
+                                class="ghd-control-label ghd-md-gray"
+                            > 
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                            </div>
+                            <v-divider class="owner-shared-divider" style="margin-left:10px;" inset vertical>
+                            </v-divider>                        
+                            <v-switch style="margin-left:10px;margin-top:4px;"
+                                class="sharing ghd-checkbox"
+                                label="Shared"
+                                v-if="hasSelectedLibrary && !hasScenario"
+                                v-model="selectedPerformanceCurveLibrary.isShared"
+                            />               
+                    </v-layout>
+                </v-flex>
+                <v-flex xs10 v-show="hasScenario">
+                </v-flex>
+                <v-flex xs2 v-show="hasScenario || hasSelectedLibrary">
+                    <v-layout row align-end style="margin-top:-4px;height:40px;">
+                        <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Upload
+                        </v-btn>
+                        <v-divider class="upload-download-divider" inset vertical>
+                        </v-divider>
+                        <v-btn :disabled='false' @click='exportPerformanceCurves()'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Download
+                        </v-btn>
+                    </v-layout>            
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
         <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout class="header-height" justify-center>
-                <v-flex xs8>
-                    <v-btn
-                        @click="showCreatePerformanceCurveDialog = true"
-                        class="ara-blue-bg white--text"
-                    >
-                        Add
-                    </v-btn>
-                    <v-btn :disabled='false' @click='showImportExportPerformanceCurvesDialog = true'
-                        class='ara-blue-bg white--text'>
-                        Import/Export
-                    </v-btn>
-                </v-flex>
-            </v-layout>
-            <v-layout class="data-table" justify-center>
-                <v-flex xs8>
-                    <v-card>
-                        <v-card-title>
-                            Performance equation
-                            <v-spacer></v-spacer>
-                            <v-text-field
-                                append-icon="fas fa-search"
-                                hide-details
-                                lablel="Search"
-                                single-line
-                                v-model="gridSearchTerm"
-                            >
-                            </v-text-field>
-                        </v-card-title>
+            <v-layout class="data-table" justify-left>
+                <v-flex xs12>
+                    <v-card class="elevation-0">
                         <v-data-table
                             :headers="performanceCurveGridHeaders"
                             :items="performanceCurveGridData"
                             :search="gridSearchTerm"
-                            class="elevation-1 fixed-header v-table__overflow"
-                            item-key="performanceLibraryEquationId"
+                            select-all
+                            v-model='selectedPerformanceEquations'
+                            class="fixed-header ghd-table v-table__overflow"
+                            item-key="id"
                         >
                             <template slot="items" slot-scope="props">
-                                <td class="text-xs-center">
+                                <td>
+                                    <v-checkbox class="ghd-checkbox"
+                                        hide-details
+                                        primary
+                                        v-model='props.selected'
+                                    >
+                                    </v-checkbox>
+                                </td>                                
+                                <td class="text-xs-left">
                                     <v-edit-dialog
                                         :return-value.sync="props.item.name"
                                         @save="
@@ -124,7 +160,7 @@
                                         </template>
                                     </v-edit-dialog>
                                 </td>
-                                <td class="text-xs-center">
+                                <td class="text-xs-left">
                                     <v-edit-dialog
                                         :return-value.sync="
                                             props.item.attribute
@@ -163,7 +199,7 @@
                                         </template>
                                     </v-edit-dialog>
                                 </td>
-                                <td class="text-xs-center">
+                                <td class="text-xs-left">
                                     <v-menu
                                         left
                                         min-height="500px"
@@ -174,14 +210,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ara-blue" icon>
+                                            <v-btn class="ghd-blue" icon>
                                                 <v-icon>fas fa-eye</v-icon>
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    class="sm-txt"
+                                                    class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item.equation
                                                             .expression
@@ -201,13 +237,13 @@
                                                 props.item.id,
                                             )
                                         "
-                                        class="edit-icon"
+                                        class="ghd-blue"
                                         icon
                                     >
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                 </td>
-                                <td class="text-xs-center">
+                                <td class="text-xs-left">
                                     <v-menu
                                         min-height="500px"
                                         min-width="500px"
@@ -218,14 +254,14 @@
                                         "
                                     >
                                         <template slot="activator">
-                                            <v-btn class="ara-blue" flat icon>
+                                            <v-btn class="ghd-blue" flat icon>
                                                 <v-icon>fas fa-eye</v-icon>
                                             </v-btn>
                                         </template>
                                         <v-card>
                                             <v-card-text>
                                                 <v-textarea
-                                                    class="sm-txt"
+                                                    class="sm-txt Montserrat-font-family"
                                                     :value="
                                                         props.item
                                                             .criterionLibrary
@@ -246,37 +282,60 @@
                                                 props.item.id,
                                             )
                                         "
-                                        class="edit-icon"
+                                        class="ghd-blue"
                                         icon
                                     >
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                 </td>
-                                <td class="text-xs-center">
+                                <td class="text-xs-left">
                                     <v-btn
                                         @click="
                                             onRemovePerformanceCurve(
                                                 props.item.id,
                                             )
                                         "
-                                        class="ara-orange"
+                                        class="ghd-blue"
                                         icon
                                     >
                                         <v-icon>fas fa-trash</v-icon>
                                     </v-btn>
                                 </td>
                             </template>
+                            <template v-slot:body.append>
+                            <v-btn>Append button</v-btn>
+                            </template>                               
                         </v-data-table>
+                        <v-btn style="margin-top:-84px"
+                            :disabled='selectedPerformanceEquationIds.length === 0 || !hasLibraryEditPermission'
+                            @click='onRemovePerformanceEquations'
+                            class='ghd-blue' flat
+                        >
+                            Delete Selected
+                        </v-btn>                        
                     </v-card>
                 </v-flex>
             </v-layout>
         </v-flex>
+            <v-layout class="header-height" justify-left v-show="hasSelectedLibrary || hasScenario">
+                <v-flex xs3>
+                    <v-btn
+                        @click="showCreatePerformanceCurveDialog = true"
+                        class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                        depressed                
+                        outlined
+                    >
+                        Add Deterioration Model
+                    </v-btn>
+                </v-flex>
+            </v-layout>        
         <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
             <v-layout justify-center>
-                <v-flex xs6>
+                <v-flex xs12>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>                    
                     <v-textarea
-                        label="Description"
+                        class="ghd-control-text ghd-control-border"
                         no-resize
                         outline
                         rows="4"
@@ -287,41 +346,55 @@
             </v-layout>
         </v-flex>
         <v-flex xs12>
-            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                       @click='onUpsertScenarioPerformanceCurves'
-                       class='ara-blue-bg white--text'
-                       v-show='hasScenario'>
-                    Save
-                </v-btn>
-                <v-btn :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
-                       @click='onUpsertPerformanceCurveLibrary'
-                       class='ara-blue-bg white--text'
-                       v-show='!hasScenario'>
-                    Update Library
-                </v-btn>
+            <v-layout
+                justify-center
+                row
+                v-show='hasSelectedLibrary || hasScenario'
+            >
                 <v-btn
-                    :disabled="disableCrudButtons()"
-                    @click="onShowCreatePerformanceCurveLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
+                    :disabled="disableCrudButtonsResult || !hasUnsavedChanges"
+                    @click="onDiscardChanges"
+                    class="ghd-white-bg ghd-blue ghd-button-text"
+                    depressed
+                    v-show="hasSelectedLibrary || hasScenario"
                 >
-                    Create as New Library
+                    Cancel
                 </v-btn>
                 <v-btn
                     @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
+                    class="ghd-white-bg ghd-blue ghd-button-text"
+                    depressed
                     v-show="!hasScenario"
                     :disabled="!hasLibraryEditPermission"
                 >
                     Delete Library
-                </v-btn>
+                </v-btn>                
                 <v-btn
-                    :disabled="!hasUnsavedChanges"
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
+                    :disabled="disableCrudButtons()"
+                    @click="onShowCreatePerformanceCurveLibraryDialog(true)"
+                    class="ghd-blue ghd-white-bg ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    depressed                    
+                    outlined
                 >
-                    Discard Changes
+                    Create as New Library
+                </v-btn>
+               <v-btn
+                    :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
+                    @click='onUpsertPerformanceCurveLibrary'
+                    class="ghd-blue-bg ghd-white ghd-button-text ghd-button-border ghd-outline-button-padding"
+                    depressed
+                    outlined
+                    v-show='!hasScenario'
+                >
+                    Update Library
+                </v-btn>
+                <v-btn :disabled='disableCrudButtonsResult || !hasUnsavedChanges'
+                       @click='onUpsertScenarioPerformanceCurves'
+                       class="ghd-blue-bg ghd-white ghd-button-text"
+                       depressed
+                       v-show='hasScenario'
+                >
+                    Save
                 </v-btn>
             </v-layout>
         </v-flex>
@@ -378,6 +451,7 @@ import {
     any,
     prepend,
     clone,
+    contains,
     find,
     findIndex,
     isNil,
@@ -412,8 +486,7 @@ import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
-import ImportExportPerformanceCurvesDialog
-    from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
+import ImportExportPerformanceCurvesDialog from '@/components/performance-curve-editor/performance-curve-editor-dialogs/ImportExportPerformanceCurvesDialog.vue';
 import { ImportExportPerformanceCurvesDialogResult } from '@/shared/models/modals/import-export-performance-curves-dialog-result';
 import PerformanceCurveService from '@/services/performance-curve.service';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
@@ -421,6 +494,7 @@ import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { getPropertyValues } from '@/shared/utils/getter-utils';
 
 @Component({
     components: {
@@ -483,7 +557,7 @@ export default class PerformanceCurveEditor extends Vue {
         {
             text: 'Name',
             value: 'name',
-            align: 'center',
+            align: 'left',
             sortable: true,
             class: '',
             width: '',
@@ -491,7 +565,7 @@ export default class PerformanceCurveEditor extends Vue {
         {
             text: 'Attribute',
             value: 'attribute',
-            align: 'center',
+            align: 'left',
             sortable: true,
             class: '',
             width: '',
@@ -499,23 +573,23 @@ export default class PerformanceCurveEditor extends Vue {
         {
             text: 'Equation',
             value: 'equation',
-            align: 'center',
+            align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: 'Criterion',
+            text: 'Criteria',
             value: 'criterionLibrary',
-            align: 'center',
+            align: 'left',
             sortable: false,
             class: '',
             width: '',
         },
         {
-            text: '',
+            text: 'Actions',
             value: '',
-            align: 'center',
+            align: 'left',
             sortable: false,
             class: '',
             width: '',
@@ -525,6 +599,10 @@ export default class PerformanceCurveEditor extends Vue {
     attributeSelectItems: SelectItem[] = [];
     selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
     hasSelectedPerformanceCurve: boolean = false;
+
+    selectedPerformanceEquations: PerformanceCurve[] = [];
+    selectedPerformanceEquationIds: string[] = [];
+
     createPerformanceCurveLibraryDialogData: CreatePerformanceCurveLibraryDialogData = clone(
         emptyCreatePerformanceLibraryDialogData,
     );
@@ -572,6 +650,16 @@ export default class PerformanceCurveEditor extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+
+    @Watch('selectedPerformanceEquations')
+    onSelectedPerformanceEquationsChanged() {
+        this.selectedPerformanceEquationIds = getPropertyValues('id', this.selectedPerformanceEquations) as string[];
+    } 
+    
+    onRemovePerformanceEquations() {
+        this.performanceCurveGridData = this.performanceCurveGridData
+            .filter((performanceCurve: PerformanceCurve) => !contains(performanceCurve.id, this.selectedPerformanceEquationIds));
+    }    
 
     @Watch('statePerformanceCurveLibraries')
     onStatePerformanceCurveLibrariesChanged() {
@@ -880,12 +968,8 @@ export default class PerformanceCurveEditor extends Vue {
         return !dataIsValid;
     }
 
-    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
-        this.showImportExportPerformanceCurvesDialog = false;
-
-        if (hasValue(result)) {
-            if (result.isExport) {
-                const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
+    exportPerformanceCurves() {
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedPerformanceCurveLibrary.id;
                 PerformanceCurveService.exportPerformanceCurves(id, this.hasScenario)
                     .then((response: AxiosResponse) => {
                         if (hasValue(response, 'data')) {
@@ -893,8 +977,16 @@ export default class PerformanceCurveEditor extends Vue {
                             FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
                         }
                     });
+    }
 
-            } else
+    onSubmitImportExportPerformanceCurvesDialogResult(result: ImportExportPerformanceCurvesDialogResult) {
+        this.showImportExportPerformanceCurvesDialog = false;
+
+        if (hasValue(result)) {
+            if (result.isExport) {
+
+            }
+            else
             if (hasValue(result.file)) {
                 const data: PerformanceCurvesFileImport = {
                     file: result.file
@@ -905,13 +997,13 @@ export default class PerformanceCurveEditor extends Vue {
                         ...data,
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
-                    })
+                    });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
                         ...data,
                         id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
-                    })
+                    });
                 }
 
             }

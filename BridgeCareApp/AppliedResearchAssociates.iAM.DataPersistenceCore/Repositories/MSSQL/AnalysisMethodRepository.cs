@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.RemainingLifeLimitRepo.CreateRemainingLifeLimits(remainingLifeLimits, simulationEntity.Id);
         }
 
-        public void GetSimulationAnalysisMethod(Simulation simulation)
+        public void GetSimulationAnalysisMethod(Simulation simulation, string userCriteria)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
@@ -139,7 +139,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 .AsNoTracking()
                 .Single(_ => _.Simulation.Id == simulation.Id)
-                .FillSimulationAnalysisMethod(simulation);
+                .FillSimulationAnalysisMethod(simulation, userCriteria);
         }
 
         public AnalysisMethodDTO GetAnalysisMethod(Guid simulationId)

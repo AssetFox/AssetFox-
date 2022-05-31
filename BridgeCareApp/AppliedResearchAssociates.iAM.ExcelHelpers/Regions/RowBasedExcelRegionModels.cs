@@ -1,7 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Regions/RowBasedExcelRegionModels.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Regions/RowBasedExcelRegionModels.cs
 {
     public static class RowBasedExcelRegionModels
     {

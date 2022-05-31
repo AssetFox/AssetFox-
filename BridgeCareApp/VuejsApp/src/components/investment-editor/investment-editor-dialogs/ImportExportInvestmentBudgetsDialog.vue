@@ -1,30 +1,47 @@
 <template>
-    <v-dialog max-width='500px' persistent v-model='showDialog'>
-        <v-card>
-            <v-card-title>
-                <v-layout justify-center>
-                    <h3>Investment Budgets Import/Export</h3>
-                </v-layout>
-            </v-card-title>
-            <v-card-text>
-                <v-layout column>
-                    <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
-                    <v-flex xs12>
-                        <v-layout justify-start>
-                            <v-checkbox label='Overwrite budgets' v-model='overwriteBudgets'></v-checkbox>
-                        </v-layout>
-                    </v-flex>
-                </v-layout>
-            </v-card-text>
-            <v-card-actions>
-                <v-layout justify-space-between row>
-                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
-                    <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
-                </v-layout>
-            </v-card-actions>
-        </v-card>
-    </v-dialog>
+    <v-layout>
+        <v-dialog max-width='500px' persistent v-model='showDialog'>
+            <v-card>
+                <v-card-title>
+                    <v-layout justify-center>
+                        <h3>Investment Budgets Import/Export</h3>
+                    </v-layout>
+                </v-card-title>
+                <v-card-text>
+                    <v-layout column>
+                        <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
+                        <v-flex xs12>
+                            <v-layout justify-start>
+                                <v-checkbox label='Overwrite budgets' v-model='overwriteBudgets'></v-checkbox>
+                            </v-layout>
+                        </v-flex>
+                    </v-layout>
+                </v-card-text>
+                <v-card-actions>
+                    <v-layout justify-space-between row>
+                        <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
+                        <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
+                    </v-layout>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog max-width='400px' persistent v-model='showReminder'>
+            <v-card>
+                <v-card-title class="title-padding">
+                    <v-layout justify-center>
+                        <h6 class="ghd-control-label">Budgets have been replaced.  Please update budget priorities</h6>
+                    </v-layout>
+                </v-card-title>
+                <v-card-actions class="bottom-portion-padding">
+                    <v-layout justify-space-between row>
+                        <v-btn @click="showReminder = false" outline class="ghd-blue ghd-button-text">Ok</v-btn>
+                    </v-layout>
+                </v-card-actions>
+                
+            </v-card>
+        </v-dialog>
+    </v-layout>
 </template>
 
 <script lang='ts'>
@@ -35,12 +52,14 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { ImportExportInvestmentBudgetsDialogResult } from '@/shared/models/modals/import-export-investment-budgets-dialog-result';
 import {clone} from 'ramda';
 import InvestmentBudgetsFileSelector from '@/shared/components/FileSelector.vue';
+import { watch } from 'fs';
 
 @Component({
     components: { InvestmentBudgetsFileSelector }
 })
 export default class ImportExportInvestmentBudgetsDialog extends Vue {
     @Prop() showDialog: boolean;
+    @Prop() showReminder: boolean;
 
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
@@ -57,7 +76,7 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
             this.investmentBudgetsFile = null;
             this.closed = true;
         }
-    }
+    }   
 
     /**
      * FileSelector submit event handler
@@ -84,3 +103,14 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
     }
 }
 </script>
+<style>
+    .title-padding{
+        padding-top: 30px;
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+
+    .bottom-portion-padding{
+        padding-bottom: 30px;
+    }
+</style>

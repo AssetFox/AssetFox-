@@ -1,7 +1,11 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Visitors/ExcelWriter.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
+========
+namespace BridgeCareCore.Helpers.Excel.Visitors
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Visitors/ExcelWriter.cs
 {
     public class ExcelWriter : IExcelModelVisitor<ExcelRange, Unit>
     {
@@ -60,6 +64,25 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
             cells.Style.Border.Left.Style = model.BorderStyle;
             return Unit.Default;
         }
+        public Unit Visit(ExcelSingleBorderModel model, ExcelRange cells)
+        {
+            switch(model.Edge)
+            {
+            case RectangleEdge.Top:
+                cells.Style.Border.Top.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Left:
+                cells.Style.Border.Left.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Right:
+                cells.Style.Border.Right.Style = model.BorderStyle;
+                break;
+            case RectangleEdge.Bottom:
+                cells.Style.Border.Bottom.Style = model.BorderStyle;
+                break;
+            }
+            return Unit.Default;
+        }
 
         public Unit Visit(ExcelHorizontalAlignmentModel model, ExcelRange cells)
         {
@@ -85,6 +108,12 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
             return Unit.Default;
         }
 
+        public Unit Visit(ExcelFontSizeModel model, ExcelRange cells)
+        {
+            cells.Style.Font.Size = model.FontSize;
+            return Unit.Default;
+        }
+
         public Unit Visit(ExcelNumberFormatModel model, ExcelRange cells)
         {
             cells.Style.Numberformat.Format = model.Format;
@@ -95,6 +124,10 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
         {
             var richText = cells.RichText.Add(model.Text);
             richText.Bold = model.Bold;
+            if (model.FontSize.HasValue)
+            {
+                richText.Size = model.FontSize.Value;
+            }
             return Unit.Default;
         }
 

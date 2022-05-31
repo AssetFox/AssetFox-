@@ -1,8 +1,16 @@
 ﻿using System.Drawing;
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelHelper.cs
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+using BridgeCareCore.Interfaces.SummaryReport;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelHelper.cs
 {
     public enum ExcelHelperCellFormat
     {

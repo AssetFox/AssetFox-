@@ -1,7 +1,11 @@
 ﻿using System.Drawing;
 using OfficeOpenXml.Style;
 
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelStyles/ExcelStyleModels.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelStyles/ExcelStyleModels.cs
 {
     /// <summary>The excel-spreadsheet-filling engine treats styles
     /// the same way as values. Both conform to the same interface. However,
@@ -80,6 +84,13 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                 BorderStyle = ExcelBorderStyle.Medium,
             };
 
+        public static ExcelSingleBorderModel ThinBottomBorder()
+            => new()
+            {
+                BorderStyle = ExcelBorderStyle.Thin,
+                Edge = RectangleEdge.Bottom,
+            };
+
         public static ExcelHorizontalAlignmentModel HorizontalCenter
             => new ExcelHorizontalAlignmentModel
             {
@@ -103,6 +114,12 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
             => new ExcelFontColorModel
             {
                 Color = color,
+            };
+
+        public static ExcelFontSizeModel FontSize(float fontSize)
+            => new ExcelFontSizeModel
+            {
+                FontSize = fontSize,
             };
 
         public static ExcelFontColorModel WhiteText

@@ -70,6 +70,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IReportIndexRepository _reportIndexRepo;
         private IAssetData _assetDataRepository;
         private IAnnouncementRepository _announcementRepo;
+        private IDataSourceRepository _dataSourceRepo;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
@@ -153,6 +154,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IAnnouncementRepository AnnouncementRepo => _announcementRepo ??= new AnnouncementRepository(this);
 
+        public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
+
 
         public UserEntity UserEntity { get; private set; }
 
@@ -162,8 +165,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
-        public void SetUser(string username) =>
-            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
+        public void SetUser(string username)
+        {
+            var user = Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .FirstOrDefault(_ => _.Username == username);
+            UserEntity = user;
+        }
 
         public void AddUser(string username, string role)
         {

@@ -1,6 +1,12 @@
+<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Worksheets/AnchoredExcelRegionModel.cs
 ﻿using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
 
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
+========
+﻿using BridgeCareCore.Helpers.Excel.Visitors;
+
+namespace BridgeCareCore.Helpers.Excel
+>>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Worksheets/AnchoredExcelRegionModel.cs
 {
     /// <summary>A region model, together with its location in the worksheet.</summary>
     public class AnchoredExcelRegionModel: IExcelWorksheetContentModel

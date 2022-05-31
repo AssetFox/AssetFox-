@@ -24,10 +24,14 @@ namespace BridgeCareCore.Controllers
     public class AttributeController : BridgeCareCoreBaseController
     {
         private readonly AttributeService _attributeService;
+        private readonly AttributeImportService _attributeImportService;
 
-        public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+        public AttributeController(AttributeService attributeService, AttributeImportService attributeImportService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
+            _attributeImportService = attributeImportService ?? throw new ArgumentNullException(nameof(attributeImportService));
+        }
 
         [HttpGet]
         [Route("GetAttributes")]
@@ -115,7 +119,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("ImportAttributesExcelFile")]
         [Authorize]
-        public async Task<IActionResult> ImportAttributesExcelFile()
+        public async Task<IActionResult> ImportAttributesExcelFile(string keyColumnName)
         {
             try
             {
@@ -133,7 +137,7 @@ namespace BridgeCareCore.Controllers
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _attributeService.ImportExcelAttributes(excelPackage);
+                    return _attributeImportService.ImportExcelAttributes(keyColumnName, excelPackage);
                 });
 
                 if (result.WarningMessage != null)

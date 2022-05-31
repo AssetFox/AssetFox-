@@ -75,9 +75,5 @@ namespace BridgeCareCore.Services
                 }).ToList();
         }
 
-        public AttributesImportResultDTO ImportExcelAttributes(ExcelPackage excelPackage)
-        {
-            return null;
-        }
     }
 }

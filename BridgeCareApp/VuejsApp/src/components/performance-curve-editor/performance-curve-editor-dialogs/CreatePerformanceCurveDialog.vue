@@ -6,7 +6,7 @@
       <v-card  height="411px" class="ghd-dialog">
         <v-card-title class="ghd-dialog">
           <v-layout justify-left>
-            <h3  class="ghd-dialog">Add New Deterioration Equation</h3>
+            <h3 class="ghd-dialog">Add New Deterioration Equation</h3>
           </v-layout>
         </v-card-title>
         <v-card-text class="ghd-dialog">

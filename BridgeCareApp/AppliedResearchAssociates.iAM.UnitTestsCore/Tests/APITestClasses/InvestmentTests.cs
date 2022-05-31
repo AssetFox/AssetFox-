@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public InvestmentTests()
         {
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000); // Wjwjwj we may not need this one any more?
             _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {

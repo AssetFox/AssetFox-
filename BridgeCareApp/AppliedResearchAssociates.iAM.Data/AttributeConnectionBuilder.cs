@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Data
                 return new SqlAttributeConnection(attribute);
 
             case ConnectionType.EXCEL:
-                throw new NotImplementedException("Mongo Db data retrieval has not been implemented");
+                throw new NotImplementedException("Excel data retrieval has not been implemented");
             default:
                 throw new InvalidOperationException($"Invalid Connection type \"{attribute.ConnectionType}\".");
             }

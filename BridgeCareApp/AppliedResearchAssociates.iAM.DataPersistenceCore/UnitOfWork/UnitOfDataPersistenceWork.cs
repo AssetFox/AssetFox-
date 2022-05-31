@@ -180,8 +180,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
-        public void SetUser(string username) =>
-            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
+        public void SetUser(string username)
+        {
+            var user = Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .FirstOrDefault(_ => _.Username == username);
+            UserEntity = user;
+        }
 
         public void AddUser(string username, string role)
         {

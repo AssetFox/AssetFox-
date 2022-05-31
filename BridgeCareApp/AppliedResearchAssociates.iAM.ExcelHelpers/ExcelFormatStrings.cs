@@ -1,10 +1,6 @@
 ﻿using System.Text;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelFormatStrings.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelFormatStrings.cs
 {
     public static class ExcelFormatStrings
     {

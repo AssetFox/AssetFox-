@@ -1,12 +1,7 @@
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelNothingModel.cs
-﻿using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
+
+﻿using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-﻿using BridgeCareCore.Helpers.Excel.Visitors;
-
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/ExcelNothingModel.cs
 {
     public class ExcelNothingModel: IExcelModel
     {

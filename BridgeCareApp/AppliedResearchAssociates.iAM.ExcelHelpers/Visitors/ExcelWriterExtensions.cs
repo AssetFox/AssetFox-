@@ -1,10 +1,6 @@
 ﻿using OfficeOpenXml;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Visitors/ExcelWriterExtensions.cs
-namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
-========
-namespace BridgeCareCore.Helpers.Excel.Visitors
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Visitors/ExcelWriterExtensions.cs
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public static class ExcelWriterExtensions
     {

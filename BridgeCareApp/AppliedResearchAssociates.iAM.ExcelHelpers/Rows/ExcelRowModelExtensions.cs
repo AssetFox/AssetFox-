@@ -1,10 +1,6 @@
 ﻿using System.Linq;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Rows/ExcelRowModelExtensions.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Rows/ExcelRowModelExtensions.cs
 {
     public static class ExcelRowModelExtensions
     {

@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelValueModels.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/ExcelValueModels.cs
 {
     public static class ExcelValueModels
     {

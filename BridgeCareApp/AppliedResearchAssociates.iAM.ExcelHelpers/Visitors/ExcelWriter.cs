@@ -1,11 +1,8 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Visitors/ExcelWriter.cs
-namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
-========
-namespace BridgeCareCore.Helpers.Excel.Visitors
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Visitors/ExcelWriter.cs
+
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public class ExcelWriter : IExcelModelVisitor<ExcelRange, Unit>
     {
@@ -144,21 +141,21 @@ namespace BridgeCareCore.Helpers.Excel.Visitors
         }
 
 
-        public Unit Visit(ExcelFontSizeModel model, ExcelRange cells)
-        {
-            cells.Style.Font.Size = model.FontSize;
-            return Unit.Default;
-        }
+        //public Unit Visit(ExcelFontSizeModel model, ExcelRange cells)
+        //{
+        //    cells.Style.Font.Size = model.FontSize;
+        //    return Unit.Default;
+        //}
 
 
-        public Unit Visit(ExcelSingleBorderModel model, ExcelRange cells)
-        {
-            cells.Style.Border.Top.Style = model.BorderStyle;
-            cells.Style.Border.Right.Style = model.BorderStyle;
-            cells.Style.Border.Bottom.Style = model.BorderStyle;
-            cells.Style.Border.Left.Style = model.BorderStyle;
+        //public Unit Visit(ExcelSingleBorderModel model, ExcelRange cells)
+        //{
+        //    cells.Style.Border.Top.Style = model.BorderStyle;
+        //    cells.Style.Border.Right.Style = model.BorderStyle;
+        //    cells.Style.Border.Bottom.Style = model.BorderStyle;
+        //    cells.Style.Border.Left.Style = model.BorderStyle;
 
-            return Unit.Default;
-        }
+        //    return Unit.Default;
+        //}
     }
 }

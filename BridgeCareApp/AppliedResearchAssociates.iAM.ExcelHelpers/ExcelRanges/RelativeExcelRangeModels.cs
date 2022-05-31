@@ -1,14 +1,10 @@
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/RelativeExcelRangeModels.cs
-﻿
-namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
+
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/RelativeExcelRangeModels.cs
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public static class RelativeExcelRangeModels
     {

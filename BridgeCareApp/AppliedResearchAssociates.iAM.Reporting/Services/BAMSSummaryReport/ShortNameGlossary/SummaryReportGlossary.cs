@@ -1,4 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
+﻿using AppliedResearchAssociates.iAM.ExcelHelpers;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary

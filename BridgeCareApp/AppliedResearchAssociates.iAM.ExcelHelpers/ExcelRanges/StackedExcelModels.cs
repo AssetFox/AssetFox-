@@ -1,10 +1,7 @@
 ﻿using System.Linq;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/StackedExcelModels.cs
+
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/StackedExcelModels.cs
 {
     /// <summary>
     /// All of the models will get applied in the same place. If two conflict,

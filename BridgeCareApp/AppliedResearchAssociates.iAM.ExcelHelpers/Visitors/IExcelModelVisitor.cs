@@ -1,8 +1,5 @@
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Visitors/IExcelModelVisitor.cs
-﻿namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
-========
-﻿namespace BridgeCareCore.Helpers.Excel.Visitors
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Visitors/IExcelModelVisitor.cs
+
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public interface IExcelModelVisitor<THelper, TOutput>
     {
@@ -27,7 +24,6 @@
 
         TOutput Visit(ExcelWrapTextModel model, THelper helper);
 
-        TOutput Visit(ExcelFontSizeModel model, THelper helper);
-        TOutput Visit(ExcelSingleBorderModel model, THelper helper);
+        //TOutput Visit(ExcelSingleBorderModel model, THelper helper);
     }
 }

@@ -1,11 +1,7 @@
 ﻿using System.Drawing;
 using OfficeOpenXml.Style;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelStyles/ExcelStyleModels.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelStyles/ExcelStyleModels.cs
 {
     /// <summary>The excel-spreadsheet-filling engine treats styles
     /// the same way as values. Both conform to the same interface. However,

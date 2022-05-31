@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelMoneyValueModel.cs
-using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
+
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-using BridgeCareCore.Helpers.Excel.Visitors;
-
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/ExcelMoneyValueModel.cs
 {
     public class ExcelMoneyValueModel: IExcelModel
     {

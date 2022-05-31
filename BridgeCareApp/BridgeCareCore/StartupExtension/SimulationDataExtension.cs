@@ -6,7 +6,6 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SummaryReport.BridgeData;
 using BridgeCareCore.Services.Treatment;
 using Microsoft.Extensions.DependencyInjection;
 

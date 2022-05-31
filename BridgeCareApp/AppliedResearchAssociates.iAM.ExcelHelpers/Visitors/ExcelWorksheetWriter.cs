@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using OfficeOpenXml;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Visitors/ExcelWorksheetWriter.cs
-namespace AppliedResearchAssociates.iAM.ExcelHelpers.Visitors
-========
-namespace BridgeCareCore.Helpers.Excel.Visitors
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Visitors/ExcelWorksheetWriter.cs
+
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public class ExcelWorksheetWriter: IExcelWorksheetModelVisitor<ExcelWorksheet, ExcelWorksheet>
     {
@@ -48,7 +45,6 @@ namespace BridgeCareCore.Helpers.Excel.Visitors
             }
             return worksheet;
         }
-
-        public ExcelWorksheet Visit(SpecifiedColumnWidthExcelWorksheetModel specifiedColumnWidthExcelWorksheetModel, ExcelWorksheet helper) => throw new System.NotImplementedException();
+        
     }
 }

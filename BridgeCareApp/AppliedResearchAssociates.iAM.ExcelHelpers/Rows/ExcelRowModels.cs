@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/Rows/ExcelRowModels.cs
+
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/Rows/ExcelRowModels.cs
 {
     public static class ExcelRowModels
     {

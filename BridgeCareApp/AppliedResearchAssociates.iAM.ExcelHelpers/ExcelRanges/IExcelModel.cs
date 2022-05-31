@@ -1,12 +1,6 @@
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/IExcelModel.cs
-﻿using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
+﻿using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-﻿using BridgeCareCore.Helpers.Excel.Visitors;
-
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelRanges/IExcelModel.cs
 {
     /// <summary>A class that implements this interface represents a change
     /// to be made to a cell or group of cells in an Excel worksheet. The change

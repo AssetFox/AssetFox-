@@ -1,10 +1,6 @@
 ﻿using System.Linq;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelAddressFunctions.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelAddressFunctions.cs
 {
     public static class ExcelAddressFunctions
     {

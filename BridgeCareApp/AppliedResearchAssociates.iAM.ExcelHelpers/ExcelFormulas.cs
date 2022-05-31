@@ -3,11 +3,7 @@ using System.Linq;
 using System.Text;
 using OfficeOpenXml;
 
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelFormulas.cs
 namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelFormulas.cs
 {
     public static class ExcelFormulas
     {

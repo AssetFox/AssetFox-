@@ -1,20 +1,16 @@
-<<<<<<<< HEAD:BridgeCareApp/AppliedResearchAssociates.iAM.ExcelHelpers/ExcelRanges/ExcelDecimalValueModel.cs
-﻿using AppliedResearchAssociates.iAM.ExcelHelpers.Visitors;
-
-namespace AppliedResearchAssociates.iAM.ExcelHelpers
-========
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using BridgeCareCore.Helpers.Excel.Visitors;
+using AppliedResearchAssociates.iAM.ExcelHelpers;
 
-namespace BridgeCareCore.Helpers.Excel
->>>>>>>> master:BridgeCareApp/BridgeCareCore/Helpers/Excel/ExcelStyles/ExcelFontSizeModel.cs
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
-    public class ExcelFontSizeModel : IExcelModel
+    public class ExcelDecimalValueModel : IExcelModel
     {
+        public decimal Value { get; set; }
+
         public float FontSize { get; set; }
 
         public T Accept<THelper, T>(IExcelModelVisitor<THelper, T> visitor, THelper helper) =>

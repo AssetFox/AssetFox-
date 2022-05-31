@@ -1,6 +1,6 @@
 ﻿using OfficeOpenXml;
 
-namespace BridgeCareCore.Helpers.Excel.Visitors
+namespace AppliedResearchAssociates.iAM.ExcelHelpers
 {
     public static class ExcelWorksheetAdder
     {

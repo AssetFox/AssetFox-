@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public ExpressionValidationTests()
         {
-            Thread.Sleep(2000);
+            Thread.Sleep(2000); // Wjwjwj another hint. This line is absurd, yet it does reduce the number of failures when one runs all the tests.
             _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {

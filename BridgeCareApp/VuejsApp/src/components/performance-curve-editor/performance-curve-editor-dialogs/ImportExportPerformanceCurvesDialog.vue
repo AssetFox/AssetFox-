@@ -3,7 +3,7 @@
         <v-card>
             <v-card-title>
                 <v-layout justify-center>
-                    <h3>Performance Curves Import/Export</h3>
+                    <h3>Deterioration Equations Upload</h3>
                 </v-layout>
             </v-card-title>
             <v-card-text>
@@ -14,7 +14,6 @@
             <v-card-actions>
                 <v-layout justify-space-between row>
                     <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
                     <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
                 </v-layout>
             </v-card-actions>

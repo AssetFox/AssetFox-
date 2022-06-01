@@ -3,7 +3,7 @@
         <v-card>
             <v-card-title>
                 <v-layout justify-center>
-                    <h3>Treatments Import</h3>
+                    <h3>Treatments Upload</h3>
                 </v-layout>
             </v-card-title>
             <v-card-text>

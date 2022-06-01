@@ -4,7 +4,7 @@
             <v-card>
                 <v-card-title>
                     <v-layout justify-center>
-                        <h3>Investment Budgets Import/Export</h3>
+                        <h3>Investment Budgets Upload</h3>
                     </v-layout>
                 </v-card-title>
                 <v-card-text>

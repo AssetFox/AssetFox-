@@ -89,7 +89,7 @@ namespace BridgeCareCore.Services.Treatment
                     CriterionLibraryDTO criterionLibrary = null;
                     if (!string.IsNullOrWhiteSpace(criterion))
                     {
-                        var validateCriterion = _expressionValidationService.ValidateCriterion(criterion, newCriteria);
+                        var validateCriterion = _expressionValidationService.ValidateCriterionWithoutResults(criterion, newCriteria);
                         if (!validateCriterion.IsValid)
                         {
                             validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 2)}: {validateCriterion.ValidationMessage}");
@@ -167,7 +167,7 @@ namespace BridgeCareCore.Services.Treatment
                 CriterionLibraryDTO criterionLibraryDto = null;
                 if (!string.IsNullOrWhiteSpace(criterionString))
                 {
-                    var validateCriterion = _expressionValidationService.ValidateCriterion(criterionString, newCriteria);
+                    var validateCriterion = _expressionValidationService.ValidateCriterionWithoutResults(criterionString, newCriteria);
                     if (!validateCriterion.IsValid)
                     {
                         validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 4)}: {validateCriterion.ValidationMessage}");

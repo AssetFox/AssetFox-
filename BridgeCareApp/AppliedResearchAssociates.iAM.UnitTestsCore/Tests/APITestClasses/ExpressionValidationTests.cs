@@ -142,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        public static IEnumerable<object[]> GetInvalidCriterionValidationData()
+        public  IEnumerable<object[]> GetInvalidCriterionValidationData()
         {
             yield return new object[]
             {
@@ -243,7 +243,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
+                Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'",
+                NetworkId = _testHelper.TestNetwork.Id
             };
 
             // Act
@@ -322,8 +323,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 timer.Elapsed += async delegate
                 {
+                    var validationParams = testDataSet[0] as ValidationParameter;
+                    validationParams.NetworkId = _testHelper.TestNetwork.Id;
                     var result =
-                        await _controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
+                        await _controller.GetCriterionValidationResult(validationParams);
 
                     var actualValidationResult =
                         (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(CriterionValidationResult));
@@ -345,7 +348,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                Expression = $"[{NumericAttribute.Name}]='1'"
+                Expression = $"[{NumericAttribute.Name}]='1'",
+                NetworkId = _testHelper.TestNetwork.Id
             };
 
             // Act

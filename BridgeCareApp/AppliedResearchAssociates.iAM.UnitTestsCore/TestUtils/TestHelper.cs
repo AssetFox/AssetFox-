@@ -213,6 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     CalculatedAttributes = { },
                     CreatedDate = DateTime.Now
                 });
+                UnitOfWork.Commit();
             }
         }
     }

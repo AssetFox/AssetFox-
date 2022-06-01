@@ -14,13 +14,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
     public class PennDOTMaintainableAsseetDataRepositoryTests
     {
         private TestDataForPennDOTMaintainableAssetRepo _testData;
-        private UnitOfDataPersistenceWork _testRepo;
         private Mock<IAMContext> _mockedContext;
         private Mock<DbSet<MaintainableAssetEntity>> _mockedMaintainableAssetEntitySet;
         private Mock<DbSet<AggregatedResultEntity>> _mockedAggregatedResultsEntitySet;
         private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
 
-        public PennDOTMaintainableAsseetDataRepositoryTests()
+        public UnitOfDataPersistenceWork Setup()
         {
             _testData = new TestDataForPennDOTMaintainableAssetRepo();
             _mockedContext = new Mock<IAMContext>();
@@ -49,17 +48,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _mockedContext.Setup(_ => _.MaintainableAssetLocation).Returns(_mockedMaintainableAssetLocationEntitySet.Object);
             var mockedRepo = new Mock<UnitOfDataPersistenceWork>((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             mockedRepo.Setup(_ => _.NetworkRepo.GetMainNetwork()).Returns(_testData.TestNetwork);
-            _testRepo = mockedRepo.Object;
+            var testRepo = mockedRepo.Object;
+            return testRepo;
         }
 
         [Fact]
         public void GeneratesKeyPropertiesDictionaryWithNumericKey()
         {
+            var testRepo = Setup();
+
             // Arrange
             var checkGuid = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06");
 
             // Act
-            var repo = new PennDOTMaintainableAssetDataRepository(_testRepo);
+            var repo = new PennDOTMaintainableAssetDataRepository(testRepo);
 
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
@@ -72,7 +74,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void ReturnsSegmeentDataWithBRKey()
         {
             // Arrange
-            var repo = new PennDOTMaintainableAssetDataRepository(_testRepo);
+            var testRepo = Setup();
+            var repo = new PennDOTMaintainableAssetDataRepository(testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKEY", "2");
@@ -88,7 +91,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void ReturnsSegmeentDataWithBMSID()
         {
             // Arrange
-            var repo = new PennDOTMaintainableAssetDataRepository(_testRepo);
+            var testRepo = Setup();
+            var repo = new PennDOTMaintainableAssetDataRepository(testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BMSID", "13401256");
@@ -104,7 +108,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void HandlesUnmatchedKey()
         {
             // Arrange
-            var repo = new PennDOTMaintainableAssetDataRepository(_testRepo);
+            var testRepo = Setup();
+            var repo = new PennDOTMaintainableAssetDataRepository(testRepo);
 
             // Act & Assert
             Assert.Throws<ArgumentException>(() => repo.GetAssetAttributes("Dummy", "0"));
@@ -116,7 +121,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Should the system also remove the asset from KeyProperties if not found?  I think so.
 
             // Arrange
-            var repo = new PennDOTMaintainableAssetDataRepository(_testRepo);
+            var testRepo = Setup();
+            var repo = new PennDOTMaintainableAssetDataRepository(testRepo);
 
             // Act
             var testSegment = repo.GetAssetAttributes("BRKEY", "100");

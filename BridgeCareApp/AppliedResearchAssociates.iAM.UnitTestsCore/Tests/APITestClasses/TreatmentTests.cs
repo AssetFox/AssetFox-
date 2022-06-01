@@ -17,8 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class TreatmentTests
     {
-        private readonly TestHelper _testHelper;
-        private TreatmentController _controller;
+        private static TestHelper _testHelper => TestHelper.Instance;
 
         private TreatmentLibraryEntity _testTreatmentLibrary;
         private SelectableTreatmentEntity _testTreatment;
@@ -31,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public TreatmentTests()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -41,17 +39,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void CreateAuthorizedController()
+        private TreatmentController CreateAuthorizedController()
         {
-            _controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
-        private void CreateUnauthorizedController()
+        private TreatmentController CreateUnauthorizedController()
         {
-            _controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityNotAuthorized.Object,
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
         private void CreateLibraryTestData()
@@ -137,8 +137,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
             // Act
-            CreateAuthorizedController();
-            var result = await _controller.GetTreatmentLibraries();
+            var controller = CreateAuthorizedController();
+            var result = await controller.GetTreatmentLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -149,8 +149,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var simulation = _testHelper.CreateSimulation();
             // Act
-            CreateAuthorizedController();
-            var result = await _controller.GetScenarioSelectedTreatments(simulation.Id);
+            var controller = CreateAuthorizedController();
+            var result = await controller.GetScenarioSelectedTreatments(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -160,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -169,7 +169,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.UpsertTreatmentLibrary(dto);
+            var result = await controller.UpsertTreatmentLibrary(dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -179,12 +179,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             var dtos = new List<TreatmentDTO>();
             var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
+            var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -194,10 +194,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryDelete()
         {
             // Arrange
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
 
             // Act
-            var result = await _controller.DeleteTreatmentLibrary(Guid.Empty);
+            var result = await controller.DeleteTreatmentLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -207,11 +207,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetLibraryTreatmentData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.GetTreatmentLibraries();
+            var result = await controller.GetTreatmentLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -237,11 +237,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             var budget = CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioSelectedTreatments(simulation.Id);
+            var result = await controller.GetScenarioSelectedTreatments(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -265,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
@@ -297,7 +297,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dtoLibrary.Treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
 
             // Act
-            await _controller.UpsertTreatmentLibrary(dtoLibrary);
+            await controller.UpsertTreatmentLibrary(dtoLibrary);
 
             // Assert
             var modifiedDto =
@@ -328,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
             var scenarioBudget = new ScenarioBudgetEntity
@@ -371,7 +371,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto[0].BudgetIds.Add(scenarioBudget.Id);
 
             // Act
-            await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
+            await controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
@@ -394,14 +394,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateUnauthorizedController();
+            var controller = CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);
 
             var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
                 .GetScenarioSelectableTreatments(simulation.Id);
 
             // Act
-            var result = await _controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
+            var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -411,11 +411,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteLibraryData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
+            var result = await controller.DeleteTreatmentLibrary(_testTreatmentLibrary.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);

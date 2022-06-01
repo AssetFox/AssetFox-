@@ -14,19 +14,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class CriterionTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly CriterionLibraryController _controller;
+        private static TestHelper _testHelper => TestHelper.Instance;
 
         public CriterionTests()
         {
-            _testHelper = TestHelper.Instance;
+        }
+
+        private CriterionLibraryController SetupController()
+        {
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateSingletons();
                 _testHelper.CreateSimulation();
             }
-            _controller = new CriterionLibraryController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new CriterionLibraryController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
         private CriterionLibraryEntity Setup()
@@ -40,8 +43,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller.CriterionLibraries();
+            var result = await controller.CriterionLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -50,8 +54,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary().ToDto());
 
             // Assert
@@ -61,8 +66,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller.DeleteCriterionLibrary(Guid.Empty);
+            var result = await controller.DeleteCriterionLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -71,11 +77,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetAllCriterionLibraries()
         {
+            var controller = SetupController();
             // Arrange
             var criterionLibrary = Setup();
 
             // Act
-            var result = await _controller.CriterionLibraries();
+            var result = await controller.CriterionLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -90,8 +97,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyCriterionLibraries()
         {
             // Arrange
+            var controller = SetupController();
             var criterionLibrary = Setup();
-            var getResult = await _controller.CriterionLibraries();
+            var getResult = await controller.CriterionLibraries();
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<CriterionLibraryDTO>));
 
@@ -109,8 +117,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }.ToDto();
 
             // Act
-            var updateResult = await _controller.UpsertCriterionLibrary(criterionLibraryDTO);
-            var addResult = await _controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
+            var updateResult = await controller.UpsertCriterionLibrary(criterionLibraryDTO);
+            var addResult = await controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
 
             // Assert
             Assert.IsType<OkObjectResult>(updateResult);
@@ -130,10 +138,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteCriterionLibrary()
         {
             // Arrange
+            var controller = SetupController();
             var criterionLibrary = Setup();
 
             // Act
-            var result = await _controller.DeleteCriterionLibrary(criterionLibrary.Id);
+            var result = await controller.DeleteCriterionLibrary(criterionLibrary.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);

@@ -30,8 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class InvestmentTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly InvestmentBudgetsService _service;
+        private TestHelper _testHelper => TestHelper.Instance;
         private InvestmentController _controller;
 
         private BudgetLibraryEntity _testBudgetLibrary;
@@ -43,10 +42,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
 
-        public InvestmentTests()
+        public InvestmentBudgetsService Setup()
         {
-            Thread.Sleep(2000);
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -54,21 +51,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.CreateSimulation();
                 _testHelper.SetupDefaultHttpContext();
             }
-            _service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
+            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
+            return service;
         }
 
-        private void CreateAuthorizedController()
+        private void CreateAuthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityAuthorized.Object,
+            _controller = new InvestmentController(service, _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
         }
 
-        private void CreateUnauthorizedController()
+        private void CreateUnauthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            _controller = new InvestmentController(_service, _testHelper.MockEsecSecurityNotAuthorized.Object,
+            _controller = new InvestmentController(service, _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
         }
@@ -264,8 +262,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
 
             // Act
             var result = await _controller.GetBudgetLibraries();
@@ -277,8 +276,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
 
             // Act
@@ -291,8 +291,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
 
             // Act
@@ -305,8 +306,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             var dto = new InvestmentDTO
             {
@@ -324,8 +326,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
 
             // Act
             var result = await _controller.DeleteBudgetLibrary(Guid.Empty);
@@ -338,7 +341,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetLibraryData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
@@ -370,9 +374,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetInvestmentData()
         {
+            var service = Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -405,7 +410,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyLibraryData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
@@ -436,7 +442,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyInvestmentData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
 
@@ -475,7 +482,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteBudgetData()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
@@ -498,7 +506,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowUnauthorizedOnInvestmentPost()
         {
             // Arrange
-            CreateUnauthorizedController();
+            var service = Setup();
+            CreateUnauthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
             var dto = new InvestmentDTO
@@ -519,8 +528,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnScenarioImport()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateUnauthorizedController();
+            CreateUnauthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
@@ -535,7 +545,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldImportLibraryBudgetsFromFile()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
 
@@ -581,7 +592,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
 
@@ -632,7 +644,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleLibraryBudgetsFile()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
             _testHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
@@ -678,7 +691,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportLibraryBudgetsFile()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
 
@@ -716,7 +730,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             ResetHttpContextToDefault();
 
             // Act + Asset
@@ -729,7 +744,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateRequestForExceptionTesting();
 
             // Act + Asset
@@ -742,7 +758,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             CreateRequestForExceptionTesting(file);
@@ -757,7 +774,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldImportScenarioBudgetsFromFile()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -804,8 +822,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
@@ -856,9 +875,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleScenarioBudgetsFile()
         {
             // Arrange
+            var service = Setup();
             var simulationName = RandomStrings.Length11();
             var simulation = _testHelper.CreateSimulation(null, simulationName);
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
@@ -903,9 +923,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
+            var service = Setup();
             var simulationName = RandomStrings.Length11();
             var simulation = _testHelper.CreateSimulation(null, simulationName);
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
             // Act
@@ -942,7 +963,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             ResetHttpContextToDefault();
 
             // Act + Asset
@@ -955,7 +977,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateRequestForExceptionTesting();
 
             // Act + Asset
@@ -968,7 +991,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             CreateRequestForExceptionTesting(file);

@@ -26,17 +26,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class SimulationTests
     {
-        private readonly TestHelper _testHelper;
-        private static SimulationAnalysisService _simulationAnalysisService;
+        private static TestHelper _testHelper => TestHelper.Instance;
         private SimulationController _controller;
 
         private UserEntity _testUserEntity;
         private SimulationEntity _testSimulationToClone;
         private const string SimulationName = "Simulation";
 
-        public SimulationTests()
+        public SimulationAnalysisService Setup()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -46,20 +44,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
             _testHelper.CreateCalculatedAttributeLibrary();
 
-            _simulationAnalysisService =
+            var simulationAnalysisService =
                 new SimulationAnalysisService(_testHelper.UnitOfWork, new());
+            return simulationAnalysisService;
         }
 
-        private void CreateAuthorizedController() =>
+        private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(
-                _simulationAnalysisService,
+                simulationAnalysisService,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
 
-        private void CreateUnauthorizedController() =>
-            _controller = new SimulationController(_simulationAnalysisService,
+        private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService) =>
+            _controller = new SimulationController(simulationAnalysisService,
                 _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
@@ -456,8 +455,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         // WjFix -- saw a HeisenFailure when running all the tests in this class. On other attempts, it has succeeded.
         public async Task ShouldDeleteSimulation()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
 
             // Act
@@ -471,7 +471,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
 
             // Act
             var result = await _controller.GetSimulations();
@@ -483,9 +484,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
-            // wjwjwj first errror here 9:11am Thursday
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.TestSimulation();
             simulation.NetworkId = _testHelper.TestNetwork.Id;
             simulation.Network = _testHelper.TestNetwork;
@@ -502,8 +503,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPut()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             // Act
             var result = await _controller.UpdateSimulation(simulation.ToDto(null));
@@ -515,8 +517,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
 
             // Act
             var result = await _controller.DeleteSimulation(Guid.Empty);
@@ -528,8 +531,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetAllSimulations()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
 
             // Act
@@ -546,8 +550,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Was broken before WJ started latest round of work. Not investigating further for now.")]
         public async Task ShouldCreateSimulation()
         {
+            var service = Setup();
             // Arrange
-            CreateAuthorizedController();
+            CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
 
             var newSimulationDTO = simulation.ToDto(null);
@@ -587,7 +592,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldUpdateSimulation()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
             _testHelper.UnitOfWork.Context.SaveChanges();
 
@@ -629,7 +635,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldCloneSimulation()
         {
             // Arrange
-            CreateAuthorizedController();
+            var service = Setup();
+            CreateAuthorizedController(service);
             CreateTestData();
             var simulationDto = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(_testSimulationToClone.Id);
             var cloneSimulationDto = new CloneSimulationDTO

@@ -10,8 +10,6 @@ using BridgeCareCore.Services;
 using Moq;
 using OfficeOpenXml;
 using Xunit;
-using System.Threading;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
@@ -19,34 +17,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     {
         private static readonly Guid performanceCurveLibraryId = Guid.NewGuid();                
         private PerformanceCurvesService performanceCurvesService;
-        private readonly TestHelper _testHelper;
-        private readonly Mock<IExpressionValidationService> mockExpressionValidationService;        
+        private static TestHelper _testHelper => TestHelper.Instance;
 
-        public PerformanceCurvesServiceTests()
+        private Mock<IExpressionValidationService> SetupMock()
         {
-            Thread.Sleep(3000);
-            _testHelper = TestHelper.Instance;
             var dbContext = _testHelper.DbContext;
-            Thread.Sleep(2000);
             if (!dbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
                 _testHelper.CreateNetwork();
                 _testHelper.CreateSimulation();
                 _testHelper.SetupDefaultHttpContext();
-            }            
-            mockExpressionValidationService = new Mock<IExpressionValidationService>();
+            }
+            var mockExpressionValidationService = new Mock<IExpressionValidationService>();
             if (!dbContext.PerformanceCurveLibrary.Any())
             {
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
                 dbContext.SaveChanges();
             }
+            return mockExpressionValidationService;
         }
 
         [Fact]
         public void ImportLibraryPerformanceCurvesFileTest()
         {
             // Setup
+            var mockExpressionValidationService = SetupMock();
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, mockExpressionValidationService.Object);
@@ -68,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public void ImportLibraryPerformanceCurvesFileInvalidAttributeTest()
         {
             // Setup
+            var mockExpressionValidationService = SetupMock();
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, mockExpressionValidationService.Object);
@@ -86,6 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public void ImportScenarioPerformanceCurvesFileTest()
         {
             // Setup
+            var mockExpressionValidationService = SetupMock();
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, mockExpressionValidationService.Object);
@@ -108,6 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public void ImportScenarioPerformanceCurvesFileInvalidCriterionTest()
         {
             // Setup
+            var mockExpressionValidationService = SetupMock();
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = false });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, mockExpressionValidationService.Object);
@@ -128,6 +127,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public void ImportScenarioPerformanceCurvesFileInvalidEquationTest()
         {
             // Setup
+            var mockExpressionValidationService = SetupMock();
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = false });
             performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, _testHelper.MockHubService.Object, mockExpressionValidationService.Object);

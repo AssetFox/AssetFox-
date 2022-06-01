@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("F70E0EAD-EC60-4D3B-B05D-D1FC1933EB60"), network);
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
-            UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);
+            UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation, "");
             UnitOfWorkForAnalysis.PerformanceCurveRepo.GetScenarioPerformanceCurves(StandAloneSimulation);
             UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetScenarioSelectableTreatments(StandAloneSimulation);
 

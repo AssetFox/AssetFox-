@@ -58,8 +58,6 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddSimulationData();
-            services.AddSummaryReportDataTABs();
-            services.AddSummaryReportGraphTABs();
             services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();
@@ -81,6 +79,7 @@ namespace BridgeCareCore
             reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
             reportLookup.Add("InventoryLookup", typeof(InventoryReport));
             reportLookup.Add("ScenarioOutput", typeof(ScenarioOutputReport));
+            reportLookup.Add("BAMSSummaryReport", typeof(BAMSSummaryReport));
 
             services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();

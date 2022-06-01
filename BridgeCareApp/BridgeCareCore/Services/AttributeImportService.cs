@@ -18,7 +18,8 @@ namespace BridgeCareCore.Services
             var endColumn = end.Column;
             var endRow = end.Row;
             var rowLength = cells.End.Column;
-            var columnNames = new List<string>();
+            var columnNames = new Dictionary<int, string>();
+            var keyColumnIndex = -1;
             for (int i=1; i<=rowLength; i++)
             {
                 var cellValue = cells[rowIndex, i].Value?.ToString();
@@ -26,7 +27,18 @@ namespace BridgeCareCore.Services
                 {
                     break;
                 }
-                columnNames.Add(cellValue);
+                columnNames[i] = cellValue;
+                if (cellValue == keyColumnName)
+                {
+                    keyColumnIndex = i;
+                }
+            }
+            if (keyColumnIndex == -1)
+            {
+                return new AttributesImportResultDTO
+                {
+                    WarningMessage = $"No column found for Id {keyColumnName}",
+                };
             }
             throw new NotImplementedException();
         }

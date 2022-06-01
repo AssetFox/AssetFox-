@@ -351,9 +351,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnCriterionPost()
         {
-            // Arrange                
-            SetData();
+            // Arrange   
             var controller = SetupController();
+            SetData();
             var model = new ValidationParameter
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),

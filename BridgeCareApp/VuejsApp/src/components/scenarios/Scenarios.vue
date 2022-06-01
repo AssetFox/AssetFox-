@@ -743,6 +743,11 @@ export default class Scenarios extends Vue {
                 icon: 'fas fa-edit',
             },
             {
+                title: 'Committed Projects',
+                action: this.availableActions.commitedProjects,
+                icon: 'fas fa-list-check',
+            },
+            {
                 title: 'Clone',
                 action: this.availableActions.clone,
                 icon: 'fas fa-paste',
@@ -751,15 +756,10 @@ export default class Scenarios extends Vue {
                 title: 'Delete',
                 action: this.availableActions.delete,
                 icon: 'fas fa-trash',
-            },
-            {
-                title: 'Committed Projects',
-                action: this.availableActions.commitedProjects,
-                icon: 'fas fa-trash',
-            }
+            }           
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
-        this.actionItems.splice(3, 0, {
+        this.actionItems.splice(4, 0, {
             title: 'Share',
             action: this.availableActions.share,
             icon: 'fas fa-users',

@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.AssetName.Split('-')[0])));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"])));
                     firstYear = false;
                     if(simulationOutput.Years.Count > 1)
                     {
@@ -73,12 +73,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.AssetName.Split('-')[0]))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"]))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = int.Parse(section.AssetName.Split('-')[0]);
+                    var facilityId = Convert.ToInt32(section.ValuePerNumericAttribute["BRKEY_"]);
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.

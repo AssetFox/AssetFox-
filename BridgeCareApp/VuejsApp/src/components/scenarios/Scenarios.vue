@@ -690,8 +690,8 @@ export default class Scenarios extends Vue {
             this.getScenarioAnalysisDetailUpdate,
         );
         this.$statusHub.$on(
-            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
-            this.getSummaryReportStatus,
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            this.getReportStatus,
         );
 
         this.availableActions = {
@@ -752,8 +752,8 @@ export default class Scenarios extends Vue {
             this.getScenarioAnalysisDetailUpdate,
         );
         this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
-            this.getSummaryReportStatus,
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            this.getReportStatus,
         );
     }
 
@@ -977,7 +977,7 @@ export default class Scenarios extends Vue {
         });
     }
 
-    getSummaryReportStatus(data: any) {
+    getReportStatus(data: any) {
         this.updateSimulationReportDetailAction({
             simulationReportDetail: data.simulationReportDetail,
         });

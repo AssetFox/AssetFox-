@@ -51,6 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         private static TextAttribute ToText(AttributeDTO dto)
         {
+            // Chadwick says this should be in AttributeFactory.
             return new TextAttribute(
                 dto.DefaultValue,
                 dto.Id,
@@ -91,6 +92,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return ToNumeric(dto);
             }
             return null;
+        }
+
+        public static List<Attribute> ToDomainListButDiscardBad(List<AttributeDTO> attributeDTOs)
+        {
+            var returnValue = attributeDTOs
+                .Select(dto => ToDomain(dto))
+                .Where(r => r != null)
+                .ToList();
+            return returnValue;
         }
 
         public static AttributeEntity ToEntity(this Attribute domain)

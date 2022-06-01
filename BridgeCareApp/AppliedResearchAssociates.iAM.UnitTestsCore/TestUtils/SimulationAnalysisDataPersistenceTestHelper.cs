@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
@@ -44,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWorkForAnalysis.SimulationRepo.GetSimulationInNetwork(new Guid("F70E0EAD-EC60-4D3B-B05D-D1FC1933EB60"), network);
             StandAloneSimulation = network.Simulations.First();
             UnitOfWorkForAnalysis.InvestmentPlanRepo.GetSimulationInvestmentPlan(StandAloneSimulation);
-            UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation);
+            UnitOfWorkForAnalysis.AnalysisMethodRepo.GetSimulationAnalysisMethod(StandAloneSimulation, "");
             UnitOfWorkForAnalysis.PerformanceCurveRepo.GetScenarioPerformanceCurves(StandAloneSimulation);
             UnitOfWorkForAnalysis.SelectableTreatmentRepo.GetScenarioSelectableTreatments(StandAloneSimulation);
 
@@ -162,17 +161,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             });
         }
 
-        public void SynchronizeLegacySimulation(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username);
-        }
-
-        public void SynchronizeLegacySimulationWithCommittedProjects(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username, true);
-        }
 
         public void AddTreatmentSupersessions()
         {

@@ -24,6 +24,5 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
 
         TOutput Visit(ExcelWrapTextModel model, THelper helper);
 
-        //TOutput Visit(ExcelSingleBorderModel model, THelper helper);
     }
 }

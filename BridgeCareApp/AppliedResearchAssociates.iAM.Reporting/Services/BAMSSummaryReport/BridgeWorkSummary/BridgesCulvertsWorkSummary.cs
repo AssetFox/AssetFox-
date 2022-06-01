@@ -151,7 +151,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount; 
                         projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
-                        //culvertTotalCount += culvertCostAndCount.bridgeCount;
 
                         //exclude No Treatment from total
                         if (treatment.Name != BAMSConstants.CulvertNoTreatment) { culvertTotalCount += culvertCostAndCount.bridgeCount; }
@@ -190,7 +189,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
                         projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                         row++;
-                        //nonCulvertTotalCount += nonCulvertCostAndCount.bridgeCount;
 
                         //exclude No Treatment from total
                         if (treatment.Name != BAMSConstants.NonCulvertNoTreatment) { nonCulvertTotalCount += nonCulvertCostAndCount.bridgeCount; }
@@ -236,7 +234,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var noTreatmentCount = Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.CulvertNoTreatment + "_" + year], column].Value);
                 noTreatmentCount += Convert.ToInt32(worksheet.Cells[projectRowNumberModel.TreatmentsCount[BAMSConstants.NonCulvertNoTreatment + "_" + year], column].Value);
                 worksheet.Cells[row++, column].Value = noTreatmentCount;
-                //totalCount += noTreatmentCount;
 
                 foreach (var treatment in simulationTreatments)
                 {

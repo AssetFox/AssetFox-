@@ -284,7 +284,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.TotalInitialBridgeClosedCount(reportOutputData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            //worksheet.Cells[row + 1, column].Value = totalSimulationDataModelCount - (goodCount + poorCount + closedCount);
             var fairCount = totalSimulationDataModelCount - (goodCount + poorCount);
             worksheet.Cells[row + 1, column].Value = fairCount;
         }
@@ -352,8 +351,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var closedCount = _bridgeWorkSummaryComputationHelper.TotalInitialClosedDeckArea(reportOutputData);
             worksheet.Cells[row + 3, column].Value = closedCount;
 
-            //worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.InitialTotalDeckArea(reportOutputData) - (goodCount + poorCount + closedCount);
-
             var fairCount = _bridgeWorkSummaryComputationHelper.InitialTotalDeckArea(reportOutputData) - (goodCount + poorCount);
             worksheet.Cells[row + 1, column].Value = fairCount;
         }
@@ -368,8 +365,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             var closedCount = _bridgeWorkSummaryComputationHelper.CalculateTotalClosedDeckArea(yearlyData);
             worksheet.Cells[row + 3, column].Value = closedCount;
-
-            //worksheet.Cells[row + 1, column].Value = _bridgeWorkSummaryComputationHelper.CalculateTotalDeckArea(yearlyData) - (goodCount + poorCount);
 
             var fairCount = _bridgeWorkSummaryComputationHelper.CalculateTotalDeckArea(yearlyData) - (goodCount + poorCount);
             worksheet.Cells[row + 1, column].Value = fairCount;

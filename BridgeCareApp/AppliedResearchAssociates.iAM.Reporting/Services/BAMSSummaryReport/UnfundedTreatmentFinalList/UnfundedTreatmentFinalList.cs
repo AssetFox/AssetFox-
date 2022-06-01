@@ -20,7 +20,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         {
             _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
             if (_unfundedTreatmentCommon == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentCommon)); }
-
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)

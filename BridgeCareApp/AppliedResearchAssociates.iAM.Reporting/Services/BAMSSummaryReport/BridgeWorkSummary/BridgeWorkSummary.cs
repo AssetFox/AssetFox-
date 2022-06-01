@@ -271,12 +271,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var key = $"{bridgeType}_{appliedTreatment}";
             if (!completedProj.ContainsKey(key))
             {
-                //completedProj.Add($"{bridgeType}_{appliedTreatment}", 1);
                 completedProj.Add(key, 1);
             }
             else
             {
-                //completedProj[$"{bridgeType}_{appliedTreatment}"] += 1;
                 completedProj[key] += 1;
             }
         }

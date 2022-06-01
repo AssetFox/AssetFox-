@@ -139,23 +139,5 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
             cells.Style.WrapText = model.Wrap;
             return Unit.Default;
         }
-
-
-        //public Unit Visit(ExcelFontSizeModel model, ExcelRange cells)
-        //{
-        //    cells.Style.Font.Size = model.FontSize;
-        //    return Unit.Default;
-        //}
-
-
-        //public Unit Visit(ExcelSingleBorderModel model, ExcelRange cells)
-        //{
-        //    cells.Style.Border.Top.Style = model.BorderStyle;
-        //    cells.Style.Border.Right.Style = model.BorderStyle;
-        //    cells.Style.Border.Bottom.Style = model.BorderStyle;
-        //    cells.Style.Border.Left.Style = model.BorderStyle;
-
-        //    return Unit.Default;
-        //}
     }
 }

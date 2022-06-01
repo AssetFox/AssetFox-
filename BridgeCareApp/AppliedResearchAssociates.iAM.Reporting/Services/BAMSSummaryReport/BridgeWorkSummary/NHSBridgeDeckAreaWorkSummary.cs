@@ -170,8 +170,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             worksheet.Cells[row + 3, column].Value = closedCount;
 
             var yNHSCount = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, true);
-            //worksheet.Cells[row + 1, column].Value = yNHSCount - (goodCount + poorCount + closedCount);
-
             var fairCount = yNHSCount - (goodCount + poorCount);
             worksheet.Cells[row + 1, column].Value = fairCount;
         }
@@ -268,8 +266,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             worksheet.Cells[row + 3, column].Value = closedDeckArea;
 
             var totalDeckArea = _bridgeWorkSummaryComputationHelper.TotalNHSBridgeCountOrArea(initialSectionSummaries, sectionDetails, false);
-            //worksheet.Cells[row + 1, column].Value = totalDeckArea - (goodDeckArea + poorDeckArea + closedDeckArea);
-
             var fairDeckArea = totalDeckArea - (goodDeckArea + poorDeckArea);
             worksheet.Cells[row + 1, column].Value = fairDeckArea;
         }

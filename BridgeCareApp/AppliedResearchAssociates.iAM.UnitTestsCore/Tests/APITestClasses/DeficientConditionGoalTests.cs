@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
         }
 
-        private DeficientConditionGoalController Setup()
+        private static DeficientConditionGoalController Setup()
         {
             if (!_testHelper.DbContext.Attribute.Any())
             {

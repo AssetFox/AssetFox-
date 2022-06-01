@@ -15,13 +15,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class DeficientConditionGoalTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly DeficientConditionGoalController _controller;
+        private TestHelper _testHelper;
+        private DeficientConditionGoalController _controller;
 
         private static readonly Guid DeficientConditionGoalLibraryId = Guid.Parse("569618ce-ee50-45de-99ce-cd4625134d07");
         private static readonly Guid DeficientConditionGoalId = Guid.Parse("c148ab58-8b27-40c0-a4a4-84454022d032");
 
         public DeficientConditionGoalTests()
+        {
+            Setup();
+        }
+
+        private void Setup()
         {
             _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())

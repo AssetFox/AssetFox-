@@ -5,7 +5,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Mocks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
@@ -161,17 +160,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             });
         }
 
-        public void SynchronizeLegacySimulation(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username);
-        }
-
-        public void SynchronizeLegacySimulationWithCommittedProjects(int simulationId)
-        {
-            var mockLegacySimulationSynchronizer = new MockLegacySimulationSynchronizerService(MockHubContext.Object, UnitOfWork, this);
-            mockLegacySimulationSynchronizer.Synchronize(simulationId, TestUser.Username, true);
-        }
 
         public void AddTreatmentSupersessions()
         {

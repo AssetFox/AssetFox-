@@ -15,7 +15,6 @@ namespace BridgeCareCore.StartupExtension
     {
         public static void AddSimulationData(this IServiceCollection services)
         {
-            services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
 

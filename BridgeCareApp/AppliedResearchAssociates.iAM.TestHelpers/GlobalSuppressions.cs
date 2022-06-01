@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "This should not be a warning", Scope = "module")]
+[assembly: SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "this should not be a warning", Scope = "module")]

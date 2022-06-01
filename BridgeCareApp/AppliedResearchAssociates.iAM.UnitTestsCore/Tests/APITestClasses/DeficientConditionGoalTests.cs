@@ -15,29 +15,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class DeficientConditionGoalTests
     {
-        private TestHelper _testHelper;
-        private DeficientConditionGoalController _controller;
+        private static TestHelper _testHelper => TestHelper.Instance;
 
         private static readonly Guid DeficientConditionGoalLibraryId = Guid.Parse("569618ce-ee50-45de-99ce-cd4625134d07");
         private static readonly Guid DeficientConditionGoalId = Guid.Parse("c148ab58-8b27-40c0-a4a4-84454022d032");
 
         public DeficientConditionGoalTests()
         {
-            Setup();
         }
 
-        private void Setup()
+        private DeficientConditionGoalController Setup()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
+                _testHelper.CreateSingletons();
                 _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
             }
-            _controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
         public DeficientConditionGoalLibraryEntity TestDeficientConditionGoalLibrary { get; } = new DeficientConditionGoalLibraryEntity
@@ -81,8 +77,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = Setup();
+
             // Act
-            var result = await _controller.DeficientConditionGoalLibraries();
+            var result = await controller.DeficientConditionGoalLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -91,8 +89,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var controller = Setup();
+
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertDeficientConditionGoalLibrary(TestDeficientConditionGoalLibrary.ToDto());
 
             // Assert
@@ -102,8 +102,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var controller = Setup();
+
             // Act
-            var result = await _controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
+            var result = await controller.DeleteDeficientConditionGoalLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -113,10 +115,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
         {
             // Arrange
+            var controller = Setup();
             SetupForGet();
 
             // Act
-            var result = await _controller.DeficientConditionGoalLibraries();
+            var result = await controller.DeficientConditionGoalLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -134,8 +137,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyDeficientConditionGoalData()
         {
             // Arrange
+            var controller = Setup();
             var criterionLibrary = SetupForUpsertOrDelete();
-            var getResult = await _controller.DeficientConditionGoalLibraries();
+            var getResult = await controller.DeficientConditionGoalLibraries();
             var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
                 (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
@@ -146,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 criterionLibrary.ToDto();
 
             // Act
-            await _controller.UpsertDeficientConditionGoalLibrary(dto);
+            await controller.UpsertDeficientConditionGoalLibrary(dto);
 
             // Assert
 
@@ -168,8 +172,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteDeficientConditionGoalData()
         {
             // Arrange
+            var controller = Setup();
             var criterionLibrary = SetupForUpsertOrDelete();
-            var getResult = await _controller.DeficientConditionGoalLibraries();
+            var getResult = await controller.DeficientConditionGoalLibraries();
             var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
                 (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
 
@@ -177,11 +182,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
                criterionLibrary.ToDto();
 
-            await _controller.UpsertDeficientConditionGoalLibrary(
+            await controller.UpsertDeficientConditionGoalLibrary(
                 deficientConditionGoalLibraryDTO);
 
             // Act
-            var result = await _controller.DeleteDeficientConditionGoalLibrary(DeficientConditionGoalLibraryId);
+            var result = await controller.DeleteDeficientConditionGoalLibrary(DeficientConditionGoalLibraryId);
 
             // Assert
             Assert.IsType<OkResult>(result);

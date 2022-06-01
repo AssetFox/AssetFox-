@@ -1,8 +1,8 @@
 <template>
     <v-layout>
-        <v-dialog max-width='500px' persistent v-model='showDialog'>
-            <v-card>
-                <v-card-title>
+        <v-dialog width="768px" height="540px" persistent v-model='showDialog'>
+            <v-card class="div-padding">
+                <v-card-title class="pa-2">
                     <v-layout justify-start>
                         <h4 class="Montserrat-font-family">Investment Budgets Import/Export</h4>
                     </v-layout>
@@ -10,7 +10,7 @@
                     <i class="fas fa-times fa-2x"></i>
                 </v-btn>
                 </v-card-title>
-                <v-card-text>
+                <v-card-text class="pa-0">
                     <v-layout column>
                         <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
                         <v-flex xs12>
@@ -115,5 +115,8 @@ export default class ImportExportInvestmentBudgetsDialog extends Vue {
 
     .bottom-portion-padding{
         padding-bottom: 30px;
+    }
+    .div-padding {
+    padding: 30px;
     }
 </style>

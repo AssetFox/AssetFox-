@@ -9,11 +9,12 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BridgeCareCore.Services
 {
-    public record AnalysisWorkItem(Guid networkId, Guid simulationId) : IWorkItem
+    public record AnalysisWorkItem(Guid networkId, Guid simulationId, UserInfo userInfo) : IWorkItem
     {
         public string WorkId => simulationId.ToString();
 
@@ -24,6 +25,15 @@ namespace BridgeCareCore.Services
             using var scope = serviceProvider.CreateScope();
 
             var _unitOfWork = scope.ServiceProvider.GetRequiredService<UnitOfDataPersistenceWork>();
+            if (!string.IsNullOrEmpty(userInfo.Name))
+            {
+                if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Name))
+                {
+                    _unitOfWork.AddUser(userInfo.Name, userInfo.Role);
+                }
+
+                _unitOfWork.SetUser(userInfo.Name);
+            }
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
@@ -35,7 +45,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();                
 
             simulationAnalysisDetail.Status = "Getting simulation analysis network";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
@@ -50,7 +60,7 @@ namespace BridgeCareCore.Services
 
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, _unitOfWork.UserEntity?.UserCriteriaFilterJoin?.Criteria);
 
             simulationAnalysisDetail.Status = "Getting performance curve";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);

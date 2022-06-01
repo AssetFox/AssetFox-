@@ -21,16 +21,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class ExpressionValidationTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly ExpressionValidationService _service;
-        private ExpressionValidationController _controller;
-
+        private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
 
         public ExpressionValidationTests()
         {
-            Thread.Sleep(2000); // Wjwjwj another hint. This line is absurd, yet it does reduce the number of failures when one runs all the tests.
-            _testHelper = TestHelper.Instance;
+        }
+
+        private ExpressionValidationController SetupController()
+        {
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -40,10 +39,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 SetData();
                 AddTestData();
             }
-            _service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
-            _controller = new ExpressionValidationController(_service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
+            var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
-
+            return controller;
         }
 
         private AttributeEntity NumericAttribute { get; set; }
@@ -180,6 +179,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnEquationPost()
         {
+            var controller = SetupController();
             // Arrange
             var model = new EquationValidationParameters
             {
@@ -189,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetEquationValidationResult(model);
+            var result = await controller.GetEquationValidationResult(model);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -199,6 +199,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldValidateEquation()
         {
             // Arrange
+            var controller = SetupController();
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -207,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetEquationValidationResult(model);
+            var result = await controller.GetEquationValidationResult(model);
 
             // Assert
             var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
@@ -220,6 +221,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
+            var controller = SetupController();
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
             var model = new EquationValidationParameters
@@ -230,7 +232,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetEquationValidationResult(model);
+            var result = await controller.GetEquationValidationResult(model);
 
             // Assert
             var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
@@ -243,6 +245,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldValidateCriterion()
         {
             // Arrange
+            var controller = SetupController();
             SetData();
             var model = new ValidationParameter
             {
@@ -251,7 +254,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetCriterionValidationResult(model);
+            var result = await controller.GetCriterionValidationResult(model);
 
             // Assert
             var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
@@ -265,11 +268,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public void ShouldInvalidatePiecewiseEquations()
         {
             // Act + Assert
+            var controller = SetupController();
             var invalidPiecewiseEquationValidationData = GetInvalidPiecewiseEquationValidationData().ToList();
 
             foreach (var testDataSet in invalidPiecewiseEquationValidationData)
             {
-                var result = _controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
+                var result = controller.GetEquationValidationResult(testDataSet[0] as EquationValidationParameters);
                 var objectResult = (OkObjectResult)result.Result;
                 var actualValidationResult = (ValidationResult)objectResult.Value;
                 var expectedValidationResult = testDataSet[1] as ValidationResult;
@@ -283,6 +287,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldInvalidateNonPiecewiseEquation()
         {
             // Arrange
+            var controller = SetupController();
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -291,7 +296,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetEquationValidationResult(model);
+            var result = await controller.GetEquationValidationResult(model);
 
             // Assert
             var validationResult =
@@ -305,6 +310,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public void ShouldThrowCalculateEvaluateExceptionOnInvalidEquation()
         {
             // Arrange
+            var controller = SetupController();
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -314,12 +320,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Act + Assert
             Assert.ThrowsAsync<CalculateEvaluateException>(async () =>
-                await _controller.GetEquationValidationResult(model));
+                await controller.GetEquationValidationResult(model));
         }
 
         [Fact (Skip ="Timer")]
         public void ShouldInvalidateCriteria()
         {
+            var controller = SetupController();
             var timer = new System.Timers.Timer { Interval = 5000 };
             // Act + Assert
             GetInvalidCriterionValidationData().ToList().ForEach(async testDataSet =>
@@ -327,7 +334,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 timer.Elapsed += async delegate
                 {
                     var result =
-                        await _controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
+                        await controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
 
                     var actualValidationResult =
                         (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(CriterionValidationResult));
@@ -344,7 +351,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnCriterionPost()
         {
-            // Arrange                
+            // Arrange   
+            var controller = SetupController();
             SetData();
             var model = new ValidationParameter
             {
@@ -353,7 +361,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.GetCriterionValidationResult(model);
+            var result = await controller.GetCriterionValidationResult(model);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

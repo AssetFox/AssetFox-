@@ -22,11 +22,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static readonly Guid BenefitId = Guid.Parse("be2497dd-3acd-4cdd-88a8-adeb9893f1df");
         private readonly Mock<IAnalysisDefaultDataService> _mockAnalysisDefaultDataService = new Mock<IAnalysisDefaultDataService>();
 
-        public AnalysisMethodTests()
-        { 
-
-        }
-
         private AnalysisMethodController SetupController()
         {
             if (!_testHelper.DbContext.Attribute.Any())

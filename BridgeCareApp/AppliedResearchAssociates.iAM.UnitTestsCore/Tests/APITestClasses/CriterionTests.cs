@@ -16,10 +16,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     {
         private static TestHelper _testHelper => TestHelper.Instance;
 
-        public CriterionTests()
-        {
-        }
-
         private CriterionLibraryController SetupController()
         {
             if (!_testHelper.DbContext.Attribute.Any())

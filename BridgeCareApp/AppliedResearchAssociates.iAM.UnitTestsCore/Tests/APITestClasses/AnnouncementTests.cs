@@ -15,15 +15,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnnouncementTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly AnnouncementController _controller;
+        private static TestHelper _testHelper => TestHelper.Instance;
 
-        public AnnouncementTests()
+        public AnnouncementController Setup()
         {
-            _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
-            _controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
         private AnnouncementEntity TestAnnouncement(Guid? id = null) {
@@ -40,8 +39,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = Setup();
             // Act
-            var result = await _controller.Announcements();
+            var result = await controller.Announcements();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -50,9 +50,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact (Skip ="WjTodo -- I have no idea why my changes broke this test.")]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var controller = Setup();
             // Act
             var testAnnouncement = TestAnnouncement().ToDto();
-            var result = await _controller.UpsertAnnouncement(testAnnouncement);
+            var result = await controller.UpsertAnnouncement(testAnnouncement);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -61,8 +62,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var controller = Setup();
             // Act
-            var result = await _controller.DeleteAnnouncement(Guid.Empty);
+            var result = await controller.DeleteAnnouncement(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -71,13 +73,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetAllAnnouncements()
         {
+            var controller = Setup();
             // Arrange
             var AnnouncementId = Guid.NewGuid();
             var announcement = TestAnnouncement(AnnouncementId);
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
-            var result = await _controller.Announcements();
+            var result = await controller.Announcements();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -91,12 +94,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldAddAnnouncementData()
         {
+            var controller = Setup();
             // Arrange
             var announcement = TestAnnouncement();
             var dto = announcement.ToDto();
 
             // Act
-            await _controller.UpsertAnnouncement(dto);
+            await controller.UpsertAnnouncement(dto);
 
             // Assert
             var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
@@ -109,10 +113,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldModifyAnnouncementData()
         {
+            var controller = Setup();
             // Arrange                
             var announcement = TestAnnouncement();
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
-            var getResult = await _controller.Announcements();
+            var getResult = await controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
             var dto = dtos.Single(a => a.Id == announcement.Id);
@@ -120,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Content = "Updated Content";
 
             // Act
-            await _controller.UpsertAnnouncement(dto);
+            await controller.UpsertAnnouncement(dto);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements().Single(a => a.Id == announcement.Id);
@@ -133,14 +138,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldDeletePerformanceCurveData()
         {
+            var controller = Setup();
             // Arrange
             var announcement = TestAnnouncement();
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
-            var getResult = await _controller.Announcements();
+            var getResult = await controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
             // Act
-            var result = _controller.DeleteAnnouncement(dtos[0].Id);
+            var result = controller.DeleteAnnouncement(dtos[0].Id);
 
             // Assert
             Assert.IsType<OkResult>(result.Result);

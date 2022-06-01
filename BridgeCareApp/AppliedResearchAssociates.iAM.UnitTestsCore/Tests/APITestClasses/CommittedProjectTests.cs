@@ -21,8 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class CommittedProjectTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly CommittedProjectService _service;
+        private TestHelper _testHelper => TestHelper.Instance;
         private CommittedProjectController _controller;
 
         private CommittedProjectEntity _testProject;
@@ -39,12 +38,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             "CULV_DURATION_N"
         };
 
-        public CommittedProjectTests()
+        public CommittedProjectService Setup()
         {
-            _testHelper = TestHelper.Instance;
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _service = new CommittedProjectService(_testHelper.UnitOfWork);
+            var service = new CommittedProjectService(_testHelper.UnitOfWork);
+            return service;
         }
 
         private InvestmentPlanEntity CreateCommittedProjectTestData(Guid simulationId)
@@ -213,9 +212,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnGet()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -232,10 +232,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateCommittedProjectTestData(simulation.Id);
             CreateRequestWithFormData(simulation.Id);
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -252,9 +253,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -271,9 +273,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnGet()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -290,9 +293,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateRequestWithFormData(simulation.Id);
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -309,9 +313,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnUnauthorizedOnDelete()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -328,9 +333,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldImportCommittedProjectsFromFile()
         {
             // Arrange
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateRequestWithFormData(simulation.Id);
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -346,10 +352,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public async Task ShouldExportCommittedProjectsToFile()
         {
+            var service = Setup();
             var simulation = _testHelper.CreateSimulation();
             // Arrange
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -373,10 +380,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public async Task ShouldDeleteCommittedProjectData()
         {
+            var service = Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -402,8 +410,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoMimeTypeWithBadRequestForImport()
         {
             // Arrange
+            var service = Setup();
             _testHelper.SetupDefaultHttpContext();
-            _controller = new CommittedProjectController(_service,
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -419,7 +428,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoFilesWithBadRequestForImport()
         {
             // Arrange
-            _controller = new CommittedProjectController(_service,
+            var service = Setup();
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -436,7 +446,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowConstraintWhenNoSimulationIdWithBadRequestForImport()
         {
             // Arrange
-            _controller = new CommittedProjectController(_service,
+            var service = Setup();
+            _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,

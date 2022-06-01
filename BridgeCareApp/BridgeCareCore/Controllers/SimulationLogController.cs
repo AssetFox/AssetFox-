@@ -40,7 +40,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
 
                 var logDtos = await UnitOfWork.SimulationLogRepo.GetLog(simulationId);
                 var log = SimulationLogReport.ToLog(logDtos);
@@ -56,7 +56,7 @@ namespace BridgeCareCore.Controllers
 
                 reportDetailDto.Status = "Completed";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
 
                 return fileContentResult;
             }
@@ -65,7 +65,7 @@ namespace BridgeCareCore.Controllers
                 reportDetailDto.Status = $"Failed to generate";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report error::{e.Message}");
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
                 throw;
             }
         }

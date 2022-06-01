@@ -3,24 +3,27 @@
         <v-dialog max-width='500px' persistent v-model='showDialog'>
             <v-card>
                 <v-card-title>
-                    <v-layout justify-center>
-                        <h3>Investment Budgets Import/Export</h3>
+                    <v-layout justify-start>
+                        <h4 class="Montserrat-font-family">Investment Budgets Import/Export</h4>
                     </v-layout>
+                    <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+                </v-btn>
                 </v-card-title>
                 <v-card-text>
                     <v-layout column>
                         <InvestmentBudgetsFileSelector :closed='closed' @submit='onFileSelectorChange' />
                         <v-flex xs12>
                             <v-layout justify-start>
-                                <v-checkbox label='Overwrite budgets' v-model='overwriteBudgets'></v-checkbox>
+                                <v-checkbox class="Montserrat-font-family" label='Overwrite budgets' v-model='overwriteBudgets'></v-checkbox>
                             </v-layout>
                         </v-flex>
                     </v-layout>
                 </v-card-text>
                 <v-card-actions>
-                    <v-layout justify-space-between row>
-                        <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                        <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
+                    <v-layout justify-center>
+                        <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue Montserrat-font-family' outline>Upload</v-btn>
+                        <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' outline>Cancel</v-btn>
                     </v-layout>
                 </v-card-actions>
             </v-card>

@@ -450,6 +450,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WjFix -- saw a HeisenFailure when running all the tests in this class. On other attempts, it has succeeded.
         public async void ShouldDeleteSimulation()
         {
             // Arrange

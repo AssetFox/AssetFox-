@@ -61,7 +61,6 @@ namespace BridgeCareCore
             services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();
-            services.AddScoped<LegacySimulationSynchronizerService>();
 
             services.AddSignalR();
             services.AddScoped<IHubService, HubService>();

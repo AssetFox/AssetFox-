@@ -32,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
-        private IAttributeMetaDataRepository _attributeMetaDataRepo;
         private IAttributeRepository _attributeRepo;
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
         private IBenefitRepository _benefitRepo;
@@ -77,8 +76,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IAnalysisMethodRepository AnalysisMethodRepo => _analysisMethodRepo ??= new AnalysisMethodRepository(this);
 
         public IAttributeDatumRepository AttributeDatumRepo => _attributeDatumRepo ??= new AttributeDatumRepository(this);
-
-        public IAttributeMetaDataRepository AttributeMetaDataRepo => _attributeMetaDataRepo ??= new AttributeMetaDataRepository();
 
         public IAttributeRepository AttributeRepo => _attributeRepo ??= new AttributeRepository(this);
 
@@ -165,8 +162,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
-        public void SetUser(string username) =>
-            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
+        public void SetUser(string username)
+        {
+            var user = Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .FirstOrDefault(_ => _.Username == username);
+            UserEntity = user;
+        }
 
         public void AddUser(string username, string role)
         {

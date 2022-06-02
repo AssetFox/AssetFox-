@@ -5,4 +5,4 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "<Pending>", Scope = "member", Target = "~M:AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories.AttributeRepositoryTests.NumericAttributeInDb_UpdateFieldsThatAreNotAllowedToChange_ThrowsWithoutUpdating~System.Threading.Tasks.Task")]
+[assembly: SuppressMessage("Style", "IDE0058:Expression value is never used", Justification = "This should not be a warning", Scope = "module")]

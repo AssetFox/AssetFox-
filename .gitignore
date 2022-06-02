@@ -410,7 +410,4 @@ BridgeCareApp/BridgeCareCore/b2c.json
 *.lock
 /BridgeCareApp/BridgeCareCore/Reports
 .Rproj.user
-*.old
-/BridgeCareApp/BridgeCareCore/MetaData/AttributeMetaData/metaData w Parallel.json
-/BridgeCareApp/BridgeCareCore/MetaData/AttributeMetaData/metaData w Paralle.json
-/BridgeCareApp/BridgeCareCore/MetaData/AttributeMetaData/metaData - old.json
+/BridgeCareApp/BridgeCareCore/web.config

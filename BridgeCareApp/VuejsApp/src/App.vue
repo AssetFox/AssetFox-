@@ -530,7 +530,7 @@ export default class AppComponent extends Vue {
     onAzureLogout() {
         this.azureB2CLogoutAction().then(() => this.onLogout());
     }
-
+    
     /**
      * Sets up a recurring attempt at refreshing user tokens, and fetches network and attribute data
      */
@@ -541,7 +541,9 @@ export default class AppComponent extends Vue {
         this.getAllUsersAction();
         this.getAnnouncementsAction();
         this.getUserCriteriaFilterAction();
-        this.getCurrentUserByUserNameAction(this.username);
+        if (this.username != null && this.username != '') {
+            this.getCurrentUserByUserNameAction(this.username);
+        }
     }
 
     /**

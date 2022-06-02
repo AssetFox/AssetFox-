@@ -119,6 +119,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AddInvalidAttribute_Fails()
         {
+            // rewrite to use the dto. Conversion of the dto to a NumericAttribute object should fail.
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();

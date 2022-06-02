@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
@@ -17,7 +18,7 @@ namespace BridgeCareCore.Services
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
         }
 
-        public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId)
+        public IQueuedWorkHandle CreateAndRunPermitted(Guid networkId, Guid simulationId, UserInfo userInfo)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -30,12 +31,12 @@ namespace BridgeCareCore.Services
                 throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
             }
 
-            return CreateAndRun(networkId, simulationId);
+            return CreateAndRun(networkId, simulationId, userInfo);
         }
 
-        public IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId)
+        public IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo)
         {
-            AnalysisWorkItem workItem = new(networkId, simulationId);
+            AnalysisWorkItem workItem = new(networkId, simulationId, userInfo);
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
             return workHandle;
         }

@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             // Add the new report
-            _unitOfDataPersistenceWork.Context.AddEntity(report, report.Id);
+            _unitOfDataPersistenceWork.Context.AddEntity(report, _unitOfDataPersistenceWork.UserEntity?.Id);
 
             return true;
         }

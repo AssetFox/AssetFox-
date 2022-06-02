@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -205,14 +206,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!UnitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
             {
-                _ = UnitOfWork.Context.CalculatedAttributeLibrary.Add(new CalculatedAttributeLibraryEntity
+                var dto = new CalculatedAttributeLibraryDTO
                 {
                     IsDefault = true,
                     Id = Guid.NewGuid(),
                     Name = "Default Test Calculated Attribute Library",
                     CalculatedAttributes = { },
-                    CreatedDate = DateTime.Now
-                });
+                };
+                UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
             }
         }
     }

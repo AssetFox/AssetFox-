@@ -16,16 +16,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class TargetConditionGoalTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly TargetConditionGoalController _controller;
+        private static TestHelper _testHelper => TestHelper.Instance;
 
         private static readonly Guid TargetConditionGoalLibraryId = Guid.Parse("a353d18d-cacf-48c9-b8a3-a58cb7410e81");
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
         private static readonly Guid ScenarioTargetConditionGoalId = Guid.Parse("65FA24FD-3FA2-4FB8-94D0-1AC2AED4336E");
 
-        public TargetConditionGoalTests()
+        public TargetConditionGoalController SetupController()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -33,8 +31,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.CreateSimulation();
                 _testHelper.SetupDefaultHttpContext();
             }
-            _controller = new TargetConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new TargetConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
         public TargetConditionGoalLibraryEntity
@@ -135,8 +134,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller.TargetConditionGoalLibraries();
+            var result = await controller.TargetConditionGoalLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -145,9 +145,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var controller = SetupController();
             var entity = SetupLibraryForGet();
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertTargetConditionGoalLibrary(entity.ToDto());
 
             // Assert
@@ -157,8 +158,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller.DeleteTargetConditionGoalLibrary(Guid.Empty);
+            var result = await controller.DeleteTargetConditionGoalLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -167,12 +169,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
         {
+            var controller = SetupController();
             // Arrange
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
 
             // Act
-            var result = await _controller.TargetConditionGoalLibraries();
+            var result = await controller.TargetConditionGoalLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -188,12 +191,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Is broken. Despite appearances, was broken prior to WJ work on getting the tests to be independent. The problem was that the code inside the timer did not fire as the test was already completed.")]
         public async Task ShouldModifyTargetConditionGoalData()
         {
+            var controller = SetupController();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
-            var getResult = await _controller.TargetConditionGoalLibraries();
+            var getResult = await controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
@@ -204,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 criterionLibraryEntity.ToDto();
 
             // Act
-            await _controller.UpsertTargetConditionGoalLibrary(dto);
+            await controller.UpsertTargetConditionGoalLibrary(dto);
 
             // Assert
             await Task.Delay(5000);
@@ -224,11 +228,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldDeleteTargetConditionGoalData()
         {
+            var controller = SetupController();
             // Arrange
             var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
             var targetConditionGoalLibraryEntity = SetupLibraryForGet();
             var targetConditionGoalEntity = SetupTargetConditionGoal(targetConditionGoalLibraryEntity.Id);
-            var getResult = await _controller.TargetConditionGoalLibraries();
+            var getResult = await controller.TargetConditionGoalLibraries();
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
@@ -236,11 +241,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
                 criterionLibraryEntity.ToDto();
 
-            await _controller.UpsertTargetConditionGoalLibrary(
+            await controller.UpsertTargetConditionGoalLibrary(
                 targetConditionGoalLibraryDTO);
 
             // Act
-            var result = await _controller.DeleteTargetConditionGoalLibrary(TargetConditionGoalLibraryId);
+            var result = await controller.DeleteTargetConditionGoalLibrary(TargetConditionGoalLibraryId);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -255,12 +260,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldGetAllScenarioTargetConditionGoalData()
         {
+            var controller = SetupController();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             var goal = SetupForScenarioTargetGet(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
+            var result = await controller.GetScenarioTargetConditionGoals(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -275,10 +281,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact (Skip ="Broken asserts were hidden behind a timer")]
         public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
+            var controller = SetupController();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
-            var getResult = await _controller.GetScenarioTargetConditionGoals(simulation.Id);
+            var getResult = await controller.GetScenarioTargetConditionGoals(simulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalDTO>));
 
@@ -305,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
 
             // Act
-            await _controller.UpsertScenarioTargetConditionGoals(simulation.Id, localScenarioTargetGoals);
+            await controller.UpsertScenarioTargetConditionGoals(simulation.Id, localScenarioTargetGoals);
 
             // Assert
             var serverScenarioTargetConditionGoals = _testHelper.UnitOfWork.TargetConditionGoalRepo

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Threading;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -149,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
-        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTMaintainableAssetDataRepository(this);
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new MaintainableAssetDataRepository(this);
 
         public IAnnouncementRepository AnnouncementRepo => _announcementRepo ??= new AnnouncementRepository(this);
 
@@ -160,28 +158,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
-        private ConcurrentDictionary<int, int> ThreadTransactionCounts { get; set; } = new ConcurrentDictionary<int, int>();
-
-        public void BeginTransaction()
-        {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            ThreadTransactionCounts.AddOrUpdate(threadId, 1, (threadId, n) => n + 1
-                );
-            try
-            {
-                DbContextTransaction = Context.Database.BeginTransaction();
-            }
-            catch
-            {
-                RemoveCurrentThreadFromBusyList();
-                throw;
-            }
-        }
+        public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
-        public void SetUser(string username) =>
-            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
+        public void SetUser(string username)
+        {
+            var user = Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .FirstOrDefault(_ => _.Username == username);
+            UserEntity = user;
+        }
 
         public void AddUser(string username, string role)
         {
@@ -197,19 +184,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
                 Context.SaveChanges();
                 DbContextTransaction.Commit();
                 DbContextTransaction.Dispose();
-                RemoveCurrentThreadFromBusyList();
-            }
-        }
-
-        private void RemoveCurrentThreadFromBusyList()
-        {
-            var threadId = Thread.CurrentThread.ManagedThreadId;
-            if (ThreadTransactionCounts.TryRemove(threadId, out int value))
-            {
-                if (value > 1)
-                {
-                    ThreadTransactionCounts.AddOrUpdate(threadId, value - 1, (tid, v) => v + value);
-                }
             }
         }
 
@@ -219,7 +193,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             {
                 DbContextTransaction.Rollback();
                 DbContextTransaction.Dispose();
-                RemoveCurrentThreadFromBusyList();
             }
         }
 

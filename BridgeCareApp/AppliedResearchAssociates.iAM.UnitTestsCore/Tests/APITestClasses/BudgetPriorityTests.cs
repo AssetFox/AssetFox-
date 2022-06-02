@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class BudgetPriorityTests
     {
-        private readonly TestHelper _testHelper;
+        private static TestHelper _testHelper => TestHelper.Instance;
         private BudgetPriorityController _controller;
 
         private ScenarioBudgetEntity _testScenarioBudget;
@@ -28,9 +28,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityEntity _testBudgetPriority;
         private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
 
-        public BudgetPriorityTests()
+        private void Setup()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateSingletons();
@@ -119,6 +118,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
             // Arrange
+            Setup();
             CreateAuthorizedController();
 
             // Act
@@ -132,6 +132,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
 
@@ -146,6 +147,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
+            Setup();
             CreateAuthorizedController();
             var dto = new BudgetPriorityLibraryDTO
             {
@@ -166,6 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
             var dtos = new List<BudgetPriorityDTO>();
@@ -182,6 +185,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
+            Setup();
             CreateAuthorizedController();
             var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
 
@@ -193,6 +197,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetLibraryData()
         {
             // Arrange
+            Setup();
             CreateAuthorizedController();
             CreateLibraryTestData();
 
@@ -217,6 +222,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioData()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
@@ -247,8 +253,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldModifyLibraryData()
         {
-            // WJWJWJ this test was colliding 9:42am Tuesday
             // Arrange
+            Setup();
             CreateAuthorizedController();
             CreateLibraryTestData();
 
@@ -275,10 +281,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // Wjwjwj this test had a timer. So it may or may not work after we get a build.
         public async Task ShouldModifyScenarioData()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
@@ -309,6 +315,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteLibraryData()
         {
             // Arrange
+            Setup();
             CreateAuthorizedController();
             CreateLibraryTestData();
 
@@ -330,6 +337,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowUnauthorizedOnInvestmentPost()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);

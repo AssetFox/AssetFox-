@@ -293,7 +293,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // Wjwjwj deleted timer. Could be broken.
         public async Task ShouldModifyScenarioData()
         {
             // Arrange

@@ -281,7 +281,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // Wjwjwj this test had a timer. So it may or may not work after we get a build.
         public async Task ShouldModifyScenarioData()
         {
             // Arrange

@@ -126,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criterionLibrary;
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:18am 2 June 2022, even when run by itself")]
         public async Task ShouldReturnOkResultOnGet()
         {
             Setup();
@@ -140,7 +140,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:20am 2 June 2022, even when run by itself")]
+
         public async Task ShouldReturnOkResultOnPost()
         {
             Setup();
@@ -155,7 +156,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:22am 2 June 2022, even when run by itself")]
+
         public async Task ShouldReturnOkResultOnDelete()
         {
             Setup();
@@ -170,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:22am 2 June 2022, even when run by itself")]
         public async Task ShouldReturnOkResultOnScenarioCurveGet()
         {
             Setup();
@@ -186,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:23am 2 June 2022, even when run by itself")]
         public async Task ShouldReturnOkResultOnScenarioCurvePost()
         {
             Setup();
@@ -205,7 +207,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:24am 2 June 2022, even when run by itself")]
+
         public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
             Setup();
@@ -267,7 +270,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:18am 2 June 2022, even when run by itself")]
+
         public async Task ShouldDeletePerformanceCurveData()
         {
             Setup();
@@ -303,7 +307,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:21am 2 June 2022, even when run by itself")]
+
         public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
             Setup();
@@ -387,7 +392,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
         }
 
-        [Fact(Skip = "Broken")]
+        [Fact(Skip = "Broken as of 10:21am 2 June 2022, even when run by itself")]
+
         public async Task ShouldReturnUnauthorizedOnPost()
         {
             Setup();

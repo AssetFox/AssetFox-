@@ -302,7 +302,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Unsupported Attribute FALSE_ATTRIBUTE", validationResult.ValidationMessage);
         }
 
-        [Fact (Skip = "Broken")]
+        [Fact (Skip ="Broken as of 10:50am 2 June 2022, even when run on its own")]
         public async Task ShouldThrowCalculateEvaluateExceptionOnInvalidEquation()
         {
             // Arrange

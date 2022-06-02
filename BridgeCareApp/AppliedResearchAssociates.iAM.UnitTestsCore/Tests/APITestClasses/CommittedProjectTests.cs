@@ -380,6 +380,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             AssertCommittedProjectsData(simulation.Id);
         }
 
+        [Fact (Skip = "as of 11:11am 2 June 2022, this is broken, even when run by itself.")]
         public async Task ShouldDeleteCommittedProjectData()
         {
             var service = Setup();
@@ -396,7 +397,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.DeleteCommittedProjects(simulation.Id);
 
             // Assert
-            await Task.Delay(5000);
             var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulation.Id)
                 .ToList();

@@ -2,10 +2,10 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Interfaces.SummaryReport;
 using BridgeCareCore.Services;
-using BridgeCareCore.Services.SummaryReport.BridgeData;
 using BridgeCareCore.Services.Treatment;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +15,6 @@ namespace BridgeCareCore.StartupExtension
     {
         public static void AddSimulationData(this IServiceCollection services)
         {
-            services.AddScoped<IAttributeMetaDataRepository, AttributeMetaDataRepository>();
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
             services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
 

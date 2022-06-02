@@ -1,11 +1,13 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
@@ -136,9 +138,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             HasInventoryAccess = true
         };
 
-        public virtual void CreateAttributes() =>
-            UnitOfWork.AttributeRepo
-                .UpsertAttributes(UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList());
+        public virtual void CreateAttributes()
+        {
+            var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+            UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+        }
 
         public virtual void CreateNetwork()
         {

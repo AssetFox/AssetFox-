@@ -17,24 +17,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
     public class AttributeRepositoryTests
     {
-        private readonly TestHelper _testHelper;
+        private TestHelper _testHelper => TestHelper.Instance;
         private IAttributeRepository attributeRepository => _testHelper.UnitOfWork.AttributeRepo;
 
-        public AttributeRepositoryTests()
+        public void Setup()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
                 _testHelper.CreateNetwork();
                 _testHelper.CreateSimulation();
-                _testHelper.CreateCalculatedAttributeLibrary();
             }
+            _testHelper.CreateCalculatedAttributeLibrary();
         }
 
         [Fact]
         public async Task AddNumericAttribute_Does()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
@@ -50,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AddTextAttribute_Does()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Text();
             var attributes = new List<DataAttribute> { attribute };
@@ -65,6 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AttributeInDb_UpdateAllowedFields_Does()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
@@ -85,6 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task NumericAttributeInDb_UpdateNameOnly_ThrowsWithoutUpdating()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
@@ -103,6 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task NumericAttributeInDb_UpdateFieldsThatAreNotAllowedToChange_ThrowsWithoutUpdating()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
@@ -119,6 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AddInvalidAttribute_Fails()
         {
+            Setup();
             // rewrite to use the dto. Conversion of the dto to a NumericAttribute object should fail.
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
@@ -146,6 +151,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task AttributeInDb_CreateNewAttributeWithSameName_Throws()
         {
+            Setup();
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attribute = AttributeTestSetup.Numeric(null, randomName);
@@ -165,6 +171,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public async Task CreateTwoAttributes_OneValidOneNot_ThrowsWithoutCreatingEither()
         {
+            Setup();
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
@@ -195,6 +202,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public void AttributeInDb_GetSingleById_Does()
         {
+            Setup();
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attribute = AttributeTestSetup.Numeric(null, randomName);
@@ -208,6 +216,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact]
         public void AttributeNotInDb_GetSingleById_ReturnsNull()
         {
+            Setup();
             var repo = attributeRepository;
             var attribute = repo.GetSingleById(Guid.NewGuid());
             Assert.Null(attribute);

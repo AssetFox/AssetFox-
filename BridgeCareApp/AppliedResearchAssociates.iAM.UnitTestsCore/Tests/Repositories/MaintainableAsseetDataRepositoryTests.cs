@@ -7,13 +7,12 @@ using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
-    public class MaintainableAsseetDataRepositoryTests
+    public class MaintainableAssetDataRepositoryTests
     {
         private TestDataForMaintainableAssetRepo _testData;
         private UnitOfDataPersistenceWork _testRepo;
@@ -23,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
         private Mock<DbSet<AttributeEntity>> _mockedAttributeSet;
 
-        public MaintainableAsseetDataRepositoryTests()
+        public void Setup()
         {
             _testData = new TestDataForMaintainableAssetRepo();
             _mockedContext = new Mock<IAMContext>();
@@ -85,6 +84,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void GeneratesKeyPropertiesDictionaryWithNumericKey()
         {
             // Arrange
+            Setup();
             var checkGuid = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06");
 
             // Act
@@ -101,6 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void ReturnsSegmeentDataWithBRKey()
         {
             // Arrange
+            Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act
@@ -117,6 +118,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void ReturnsSegmeentDataWithBMSID()
         {
             // Arrange
+            Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act
@@ -133,6 +135,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public void HandlesUnmatchedKey()
         {
             // Arrange
+            Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act & Assert
@@ -145,6 +148,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Should the system also remove the asset from KeyProperties if not found?  I think so.
 
             // Arrange
+            Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act

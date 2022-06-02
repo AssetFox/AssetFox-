@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -25,8 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestHelper
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
-        private static readonly Guid SimulationId = Guid.Parse("416ad546-0796-4889-9db4-9c11bbd6c50d");
-        private static readonly Guid CriterionLibraryId = Guid.Parse("47380dd4-8df8-46e2-9195-b7f786a4258a");
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
@@ -90,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork.Context.Database.EnsureDeleted();
             UnitOfWork.Context.Database.EnsureCreated();
         }
-                       
+
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
         public static TestHelper Instance
         {
@@ -98,13 +97,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 return lazy.Value;
             }
-        }        
+        }
+
+        private static readonly object HttpContextSetupLock = new object();
+        private static bool HttpContextHasBeenSetup = false;
 
         public void SetupDefaultHttpContext()
         {
-            var context = new DefaultHttpContext();
-            AddAuthorizationHeader(context);
-            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+            if (!HttpContextHasBeenSetup)
+            {
+                lock (HttpContextSetupLock)
+                {
+                    if (!HttpContextHasBeenSetup)
+                    {
+                        var context = new DefaultHttpContext();
+                        AddAuthorizationHeader(context);
+                        MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+                    }
+                }
+            }
         }
 
         public void AddAuthorizationHeader(DefaultHttpContext context) =>
@@ -116,20 +127,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Test Network"
         };
 
-        public SimulationEntity TestSimulation { get; } = new SimulationEntity
+        public SimulationEntity TestSimulation(Guid? id = null, string name = null)
         {
-            Id = SimulationId,
-            NetworkId = NetworkId,
-            Name = "Test Simulation",
-            NumberOfYearsOfTreatmentOutlook = 2
-        };
+            var resolveName = name ?? RandomStrings.Length11();
+            var resolveId = id ?? Guid.NewGuid();
+            var returnValue = new SimulationEntity
+            {
+                Id = resolveId,
+                NetworkId = NetworkId,
+                Name = resolveName,
+                NumberOfYearsOfTreatmentOutlook = 2
+            };
+            return returnValue;
+        }
 
-        public CriterionLibraryEntity TestCriterionLibrary { get; } = new CriterionLibraryEntity
+        public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
         {
-            Id = CriterionLibraryId,
-            Name = "Test Criterion",
-            MergedCriteriaExpression = "Test Expression"
-        };
+            var resolvedId = id ?? Guid.NewGuid();
+            var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
+            var returnValue = new CriterionLibraryEntity
+            {
+                Id = resolvedId,
+                Name = resolvedName,
+                MergedCriteriaExpression = "Test Expression"
+            };
+            return returnValue;
+        }
 
         public UserEntity TestUser { get; } = new UserEntity
         {
@@ -138,10 +161,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             HasInventoryAccess = true
         };
 
-        public virtual void CreateAttributes()
+        private static bool AttributesHaveBeenCreated = false;
+        private static readonly object AttributeLock = new object();
+
+        public void CreateAttributes()
         {
-            var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
-            UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+            if (!AttributesHaveBeenCreated)
+            {
+                lock (AttributeLock) // it's possible a SemaphoreSlim is a better solution. I don't know. -- WJ.
+                {
+                    if (!AttributesHaveBeenCreated)
+                    {
+                        var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+                        AttributesHaveBeenCreated = true;
+                    }
+                }
+            }
+        }
+
+        public virtual void CreateSingletons()
+        {
+            CreateAttributes();
+            CreateNetwork();
+            SetupDefaultHttpContext();
         }
 
         public virtual void CreateNetwork()
@@ -152,26 +195,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual void CreateSimulation()
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string? name = null)
         {
-            if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == SimulationId))
-            {
-                UnitOfWork.Context.AddEntity(TestSimulation);
-            }
+            var entity = TestSimulation(id, name);
+            UnitOfWork.Context.AddEntity(entity);
+            return entity;
         }
 
         public virtual void CreateCalculatedAttributeLibrary()
         {
             if (!UnitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
             {
-                _ = UnitOfWork.Context.CalculatedAttributeLibrary.Add(new CalculatedAttributeLibraryEntity
+                var dto = new CalculatedAttributeLibraryDTO
                 {
                     IsDefault = true,
                     Id = Guid.NewGuid(),
                     Name = "Default Test Calculated Attribute Library",
                     CalculatedAttributes = { },
-                    CreatedDate = DateTime.Now
-                });
+                };
+                UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
             }
         }
     }

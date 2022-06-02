@@ -17,8 +17,8 @@
             <v-card-actions>
                 <v-layout justify-center>
                     <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' flat>Cancel</v-btn>
-                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue Montserrat-font-family' outline>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue Montserrat-font-family' outline>Export</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Upload</v-btn>
+                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Export</v-btn>
                 </v-layout>
             </v-card-actions>
         </v-card>

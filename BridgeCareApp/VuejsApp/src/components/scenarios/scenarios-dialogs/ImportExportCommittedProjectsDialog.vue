@@ -11,7 +11,7 @@
             </v-card-title>
             <v-card-text class="pa-0">
                 <v-layout column>
-                    <CommittedProjectsFileSelector :closed='closed' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
+                    <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
                     <span class="div-warning-border">
                         <v-layout align-start>
                             <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>

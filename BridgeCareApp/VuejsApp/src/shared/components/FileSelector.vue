@@ -20,6 +20,7 @@
             <v-flex xs12>
                 <v-layout justify-start>     
                     <v-switch
+                        v-show="useTreatment"
                         label="No Treatment"
                         class="ghd-control-label ghd-md-gray Montserrat-font-family my-2"
                         v-model="applyNoTreatment"
@@ -64,7 +65,7 @@ import { formatBytes } from '@/shared/utils/math-utils';
 @Component
 export default class FileSelector extends Vue {
     @Prop() closed: boolean = false;
-
+    @Prop() useTreatment: boolean = false;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setIsBusy') setIsBusyAction: any;
 

@@ -250,7 +250,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Wj broke this. He needs to fix it. WjTodo.")]
+        [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Arrange
@@ -290,7 +290,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<UnauthorizedResult>(result);
         }
 
-        [Fact(Skip = "WjTodo WJ broke this. He needs to fix it.")]
+        [Fact]
         public async Task ShouldReturnUnauthorizedOnPost()
         {
             // Arrange

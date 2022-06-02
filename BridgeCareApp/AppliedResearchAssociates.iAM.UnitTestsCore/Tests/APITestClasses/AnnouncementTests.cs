@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -15,17 +15,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnnouncementTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
+        private readonly TestHelper _testHelper;
+        private readonly AnnouncementController _controller;
 
-        public AnnouncementController Setup()
+        public AnnouncementTests()
         {
+            _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
-            var controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            _controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
-            return controller;
         }
 
-        private AnnouncementEntity TestAnnouncement(Guid? id = null) {
+        public AnnouncementEntity TestAnnouncement(Guid? id = null)
+        {
             var resolvedId = id ?? Guid.NewGuid();
             var returnValue = new AnnouncementEntity
             {
@@ -37,50 +39,47 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
-            var controller = Setup();
             // Act
-            var result = await controller.Announcements();
+            var result = await _controller.Announcements();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact (Skip ="WjTodo -- I have no idea why my changes broke this test.")]
-        public async Task ShouldReturnOkResultOnPost()
+        [Fact]
+        public async void ShouldReturnOkResultOnPost()
         {
-            var controller = Setup();
             // Act
-            var testAnnouncement = TestAnnouncement().ToDto();
-            var result = await controller.UpsertAnnouncement(testAnnouncement);
+            var announcement = TestAnnouncement();
+            var dto = announcement.ToDto();
+            var result = await _controller.UpsertAnnouncement(dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
-            var controller = Setup();
             // Act
-            var result = await controller.DeleteAnnouncement(Guid.Empty);
+            var result = await _controller.DeleteAnnouncement(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
         }
 
         [Fact]
-        public async Task ShouldGetAllAnnouncements()
+        public async void ShouldGetAllAnnouncements()
         {
-            var controller = Setup();
             // Arrange
-            var AnnouncementId = Guid.NewGuid();
-            var announcement = TestAnnouncement(AnnouncementId);
+            var announcementId = Guid.NewGuid();
+            var announcement = TestAnnouncement(announcementId);
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
-            var result = await controller.Announcements();
+            var result = await _controller.Announcements();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -88,65 +87,70 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
             Assert.True(dtos.Any());
-            Assert.Equal(AnnouncementId, dtos[0].Id);
+            Assert.Equal(announcementId, dtos[0].Id);
         }
 
         [Fact]
-        public async Task ShouldAddAnnouncementData()
+        public async void ShouldAddAnnouncementData()
         {
-            var controller = Setup();
             // Arrange
             var announcement = TestAnnouncement();
             var dto = announcement.ToDto();
 
             // Act
-            await controller.UpsertAnnouncement(dto);
+            await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-            Assert.Equal(dto.Id, newDto.Id);
-            Assert.Equal(dto.Title, newDto.Title);
-            Assert.Equal(dto.Content, newDto.Content);
-            Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, newDto.Id);
+                Assert.Equal(dto.Title, newDto.Title);
+                Assert.Equal(dto.Content, newDto.Content);
+                Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
+            };
         }
 
         [Fact]
-        public async Task ShouldModifyAnnouncementData()
+        public async void ShouldModifyAnnouncementData()
         {
-            var controller = Setup();
-            // Arrange                
+            // Arrange
             var announcement = TestAnnouncement();
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
-            var getResult = await controller.Announcements();
+            var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
-            var dto = dtos.Single(a => a.Id == announcement.Id);
+            var dto = dtos[0];
             dto.Title = "Updated Title";
             dto.Content = "Updated Content";
 
             // Act
-            await controller.UpsertAnnouncement(dto);
+            await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements().Single(a => a.Id == announcement.Id);
-            Assert.Equal(dto.Id, modifiedDto.Id);
-            Assert.Equal(dto.Title, modifiedDto.Title);
-            Assert.Equal(dto.Content, modifiedDto.Content);
-            Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, modifiedDto.Id);
+                Assert.Equal(dto.Title, modifiedDto.Title);
+                Assert.Equal(dto.Content, modifiedDto.Content);
+                Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
+            };
         }
 
         [Fact]
-        public async Task ShouldDeletePerformanceCurveData()
+        public async void ShouldDeletePerformanceCurveData()
         {
-            var controller = Setup();
             // Arrange
             var announcement = TestAnnouncement();
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
-            var getResult = await controller.Announcements();
+            var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
             // Act
-            var result = controller.DeleteAnnouncement(dtos[0].Id);
+            var result = _controller.DeleteAnnouncement(dtos[0].Id);
 
             // Assert
             Assert.IsType<OkResult>(result.Result);

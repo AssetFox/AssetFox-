@@ -20,10 +20,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static readonly Guid DeficientConditionGoalLibraryId = Guid.Parse("569618ce-ee50-45de-99ce-cd4625134d07");
         private static readonly Guid DeficientConditionGoalId = Guid.Parse("c148ab58-8b27-40c0-a4a4-84454022d032");
 
-        public DeficientConditionGoalTests()
-        {
-        }
-
         private static DeficientConditionGoalController Setup()
         {
             if (!_testHelper.DbContext.Attribute.Any())

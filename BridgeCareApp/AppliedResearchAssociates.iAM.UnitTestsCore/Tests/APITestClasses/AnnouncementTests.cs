@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -26,7 +26,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        private AnnouncementEntity TestAnnouncement(Guid? id = null) {
+        public AnnouncementEntity TestAnnouncement(Guid? id = null)
+        {
             var resolvedId = id ?? Guid.NewGuid();
             var returnValue = new AnnouncementEntity
             {
@@ -38,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async void ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.Announcements();
@@ -47,19 +48,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact (Skip ="WjTodo -- I have no idea why my changes broke this test.")]
-        public async Task ShouldReturnOkResultOnPost()
+        [Fact]
+        public async void ShouldReturnOkResultOnPost()
         {
             // Act
-            var testAnnouncement = TestAnnouncement().ToDto();
-            var result = await _controller.UpsertAnnouncement(testAnnouncement);
+            var announcement = TestAnnouncement();
+            var dto = announcement.ToDto();
+            var result = await _controller.UpsertAnnouncement(dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
+        public async void ShouldReturnOkResultOnDelete()
         {
             // Act
             var result = await _controller.DeleteAnnouncement(Guid.Empty);
@@ -69,11 +71,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldGetAllAnnouncements()
+        public async void ShouldGetAllAnnouncements()
         {
             // Arrange
-            var AnnouncementId = Guid.NewGuid();
-            var announcement = TestAnnouncement(AnnouncementId);
+            var announcementId = Guid.NewGuid();
+            var announcement = TestAnnouncement(announcementId);
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
@@ -85,11 +87,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
             Assert.True(dtos.Any());
-            Assert.Equal(AnnouncementId, dtos[0].Id);
+            Assert.Equal(announcementId, dtos[0].Id);
         }
 
         [Fact]
-        public async Task ShouldAddAnnouncementData()
+        public async void ShouldAddAnnouncementData()
         {
             // Arrange
             var announcement = TestAnnouncement();
@@ -99,23 +101,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-            Assert.Equal(dto.Id, newDto.Id);
-            Assert.Equal(dto.Title, newDto.Title);
-            Assert.Equal(dto.Content, newDto.Content);
-            Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, newDto.Id);
+                Assert.Equal(dto.Title, newDto.Title);
+                Assert.Equal(dto.Content, newDto.Content);
+                Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
+            };
         }
 
         [Fact]
-        public async Task ShouldModifyAnnouncementData()
+        public async void ShouldModifyAnnouncementData()
         {
-            // Arrange                
+            // Arrange
             var announcement = TestAnnouncement();
             _testHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
-            var dto = dtos.Single(a => a.Id == announcement.Id);
+            var dto = dtos[0];
             dto.Title = "Updated Title";
             dto.Content = "Updated Content";
 
@@ -123,15 +129,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements().Single(a => a.Id == announcement.Id);
-            Assert.Equal(dto.Id, modifiedDto.Id);
-            Assert.Equal(dto.Title, modifiedDto.Title);
-            Assert.Equal(dto.Content, modifiedDto.Content);
-            Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
+            var timer = new Timer { Interval = 5000 };
+            timer.Elapsed += delegate
+            {
+                var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                Assert.Equal(dto.Id, modifiedDto.Id);
+                Assert.Equal(dto.Title, modifiedDto.Title);
+                Assert.Equal(dto.Content, modifiedDto.Content);
+                Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
+            };
         }
 
         [Fact]
-        public async Task ShouldDeletePerformanceCurveData()
+        public async void ShouldDeletePerformanceCurveData()
         {
             // Arrange
             var announcement = TestAnnouncement();

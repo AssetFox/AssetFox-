@@ -40,7 +40,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await UnitOfWork.AttributeRepo.Attributes();
+                var result = await UnitOfWork.AttributeRepo.GetAttributesAsync();
                 return Ok(result);
             }
             catch (Exception e)

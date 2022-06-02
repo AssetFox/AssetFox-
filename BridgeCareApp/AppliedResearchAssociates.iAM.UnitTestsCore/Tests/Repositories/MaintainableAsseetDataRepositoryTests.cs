@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
-    public class MaintainableAsseetDataRepositoryTests
+    public class MaintainableAssetDataRepositoryTests
     {
         private TestDataForMaintainableAssetRepo _testData;
         private UnitOfDataPersistenceWork _testRepo;
@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
         private Mock<DbSet<AttributeEntity>> _mockedAttributeSet;
 
-        public MaintainableAsseetDataRepositoryTests()
+        public MaintainableAssetDataRepositoryTests()
         {
             _testData = new TestDataForMaintainableAssetRepo();
             _mockedContext = new Mock<IAMContext>();

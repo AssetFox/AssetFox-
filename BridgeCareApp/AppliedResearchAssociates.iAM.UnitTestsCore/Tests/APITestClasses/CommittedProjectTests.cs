@@ -172,6 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void AssertCommittedProjectsData(Guid simulationId)
         {
+            var allCommittedProjects = _testHelper.UnitOfWork.Context.CommittedProject.ToList();
             var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
                 .Select(project => new CommittedProjectEntity
                 {

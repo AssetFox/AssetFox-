@@ -18,7 +18,6 @@ namespace BridgeCareCore.Services
 {
     public class ExpressionValidationService : IExpressionValidationService
     {
-        public const string DelayingPoorlyUnderstoodIssue = "If we don't skip these, we start seeing failures, sometimes in other tests. Something is still wrong here. These tests should be unskipped and fixed when somebody has time.";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly ILog _log;
 

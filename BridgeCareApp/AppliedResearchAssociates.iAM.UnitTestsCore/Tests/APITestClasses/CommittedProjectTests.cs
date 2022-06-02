@@ -170,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
 
-        private async Task AssertCommittedProjectsData(Guid simulationId)
+        private void AssertCommittedProjectsData(Guid simulationId)
         {
             var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject
                 .Select(project => new CommittedProjectEntity
@@ -375,7 +375,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateRequestWithFormData(simulation.Id, fileInfo);
             await _controller.ImportCommittedProjects();
 
-            await AssertCommittedProjectsData(simulation.Id);
+            AssertCommittedProjectsData(simulation.Id);
         }
 
         public async Task ShouldDeleteCommittedProjectData()

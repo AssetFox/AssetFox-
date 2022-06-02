@@ -172,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact]
         public async Task ShouldReturnOkResultOnEquationPost()
         {
             var controller = SetupController();
@@ -191,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact]
         public async Task ShouldValidateEquation()
         {
             // Arrange
@@ -213,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact]
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
@@ -237,7 +237,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact(Skip = "Broken as of 10:38am 2 June 2022, not when run by itself, but yes when run as part of a full run. WjTodo if time arises for it?")]
+
         public async Task ShouldValidateCriterion()
         {
             // Arrange
@@ -259,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact (Skip ="Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]
         public void ShouldInvalidatePiecewiseEquations()
         {
             // Act + Assert
@@ -278,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact]
         public async Task ShouldInvalidateNonPiecewiseEquation()
         {
             // Arrange

@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Equal(1, attributeAfter.Minimum);
             Assert.Equal(3, attributeAfter.Maximum);
@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeTestSetup.Text();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Null(attributeAfter.Minimum);
             Assert.Null(attributeAfter.Maximum);
@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var attributesBefore = await repo.Attributes();
+            var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = new NumericAttribute(
                 20, 100, 10, attribute.Id, attribute.Name, "AVERAGE",
@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 !attribute.IsCalculated, !attribute.IsAscending);
             var updateAttributes = new List<DataAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             ObjectAssertions.Equivalent(attributeBefore, attributeAfter);
         }
@@ -89,13 +89,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var attributesBefore = await repo.Attributes();
+            var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = AttributeTestSetup.Numeric(attribute.Id, "updated name should fail");
             var updateAttributes = new List<DataAttribute> { updateAttribute };
             var exception = Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttributes));
             Assert.Contains(AttributeUpdateValidityChecker.NameChangeNotAllowed, exception.Message);
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             ObjectAssertions.Equivalent(attributeBefore, attributeAfter);
         }
@@ -107,11 +107,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = AttributeTestSetup.Numeric();
             var attributes = new List<DataAttribute> { attribute };
             repo.UpsertAttributes(attributes);
-            var attributesBefore = await repo.Attributes();
+            var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
             Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttribute));
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             ObjectAssertions.Equivalent(attributeBefore, attributeAfter);
         }
@@ -138,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             };
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
             Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);
         }
@@ -150,11 +150,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var randomName = RandomStrings.Length11();
             var attribute = AttributeTestSetup.Numeric(null, randomName);
             repo.UpsertAttributes(attribute);
-            var attributesBefore = await repo.Attributes();
+            var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
             var attribute2 = AttributeTestSetup.Numeric(null, randomName);
             Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(attribute2));
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
             Assert.Equal(attributesBefore.Count, attributesAfter.Count);
             var addedAttribute2 = attributesAfter.SingleOrDefault(a => a.Id == attribute2.Id);
@@ -185,7 +185,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
             Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
-            var attributesAfter = await repo.Attributes();
+            var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.FirstOrDefault(a =>
                a.Id == attributeId
                || a.Id == validAttribute.Id);

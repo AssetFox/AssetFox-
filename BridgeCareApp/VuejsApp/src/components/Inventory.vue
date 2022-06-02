@@ -62,7 +62,7 @@
         @State(state => state.inventoryModule.lastFiveBrKeySearches) stateLastFiveBrKeySearches: number[];
         @State(state => state.inventoryModule.staticHTMLForInventory) staticHTMLForInventory: any;
 
-        @Action('getInventory') getInventoryAction: any;
+        @Action('getPennDOTInventory') getInventoryAction: any;
         @Action('getStaticInventoryHTML') getStaticInventoryHTMLAction: any; 
         @Action('getInventoryItemDetailByBMSId') getInventoryItemDetailByBMSIdAction: any;
         @Action('getInventoryItemDetailByBRKey') getInventoryItemDetailByBRKeyAction: any;

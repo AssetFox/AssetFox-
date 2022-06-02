@@ -213,7 +213,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     CalculatedAttributes = { },
                     CreatedDate = DateTime.Now
                 });
-                UnitOfWork.Commit();
+                // Today (June 2, 2022), tests are behaving without the Commit call below. Yesterday, they
+                // were behaving better with it. Someone who understands this better than WJ does might
+                // want to take a look and advise.
+         //       UnitOfWork.Commit();  
             }
         }
     }

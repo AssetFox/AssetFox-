@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private ScenarioTreatmentCostEntity _testScenarioTreatmentCost;
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
 
-        public TreatmentTests()
+        public void Setup()
         {
             if (!_testHelper.DbContext.Attribute.Any())
             {
@@ -136,6 +136,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
+            Setup();
             // Act
             var controller = CreateAuthorizedController();
             var result = await controller.GetTreatmentLibraries();
@@ -147,6 +148,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             // Act
             var controller = CreateAuthorizedController();
@@ -160,6 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
+            Setup();
             var controller = CreateAuthorizedController();
             var dto = new TreatmentLibraryDTO
             {
@@ -179,6 +182,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
             // Arrange
+            Setup();
             var controller = CreateAuthorizedController();
             var dtos = new List<TreatmentDTO>();
             var simulation = _testHelper.CreateSimulation();
@@ -194,6 +198,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnLibraryDelete()
         {
             // Arrange
+            Setup();
             var controller = CreateAuthorizedController();
 
             // Act
@@ -393,6 +398,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldThrowUnauthorizedException()
         {
             // Arrange
+            Setup();
             var simulation = _testHelper.CreateSimulation();
             var controller = CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);
@@ -411,6 +417,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteLibraryData()
         {
             // Arrange
+            Setup();
             var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 

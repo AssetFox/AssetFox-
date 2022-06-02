@@ -15,12 +15,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class RemainingLifeLimitTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly RemainingLifeLimitController _controller;
+        private TestHelper _testHelper => TestHelper.Instance;
 
-        public RemainingLifeLimitTests()
+        public RemainingLifeLimitController SetupController()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -28,8 +26,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.CreateSimulation();
                 _testHelper.SetupDefaultHttpContext();
             }
-            _controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
         }
 
 
@@ -78,8 +77,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = SetupController();
+
             // Act
-            var result = await _controller.RemainingLifeLimitLibraries();
+            var result = await controller.RemainingLifeLimitLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -88,9 +89,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnPost()
         {
+            var controller = SetupController();
+
             var library = TestRemainingLifeLimitLibrary();
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertRemainingLifeLimitLibrary(library.ToDto());
 
             // Assert
@@ -100,9 +103,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            var controller = SetupController();
+
             // Act
             var library = SetupForGet();
-            var result = await _controller.DeleteRemainingLifeLimitLibrary(library.Id);
+            var result = await controller.DeleteRemainingLifeLimitLibrary(library.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -112,10 +117,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
             // Arrange
+            var controller = SetupController();
             var library = SetupForGet();
 
             // Act
-            var result = await _controller.RemainingLifeLimitLibraries();
+            var result = await controller.RemainingLifeLimitLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -131,10 +137,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyRemainingLifeLimitData()
         {
             // Arrange
+            var controller = SetupController();
             var simulation = _testHelper.CreateSimulation();
             var lifeLimitLibrary = SetupForGet();
             var criterionLibrary = SetupForUpsertOrDelete();
-            var getResult = await _controller.RemainingLifeLimitLibraries();
+            var getResult = await controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<RemainingLifeLimitLibraryDTO>));
 
@@ -145,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 criterionLibrary.ToDto();
 
             // Act
-            await _controller.UpsertRemainingLifeLimitLibrary(dto);
+            await controller.UpsertRemainingLifeLimitLibrary(dto);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
@@ -167,9 +174,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldDeleteRemainingLifeLimitData()
         {
             // Arrange
+            var controller = SetupController();
             var library = SetupForGet();
             var criterionLibraryEntity = SetupForUpsertOrDelete();
-            var getResult = await _controller.RemainingLifeLimitLibraries();
+            var getResult = await controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<RemainingLifeLimitLibraryDTO>));
 
@@ -177,10 +185,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
                 criterionLibraryEntity.ToDto();
 
-            await _controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
+            await controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
 
             // Act
-            var result = await _controller.DeleteRemainingLifeLimitLibrary(library.Id);
+            var result = await controller.DeleteRemainingLifeLimitLibrary(library.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);

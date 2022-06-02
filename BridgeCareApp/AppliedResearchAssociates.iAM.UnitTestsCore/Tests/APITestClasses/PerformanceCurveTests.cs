@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class PerformanceCurveTests
     {
-        private readonly TestHelper _testHelper;
+        private TestHelper _testHelper => TestHelper.Instance;
         private PerformanceCurveController _controller;
 
         private static readonly Guid PerformanceCurveLibraryId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
@@ -32,9 +32,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static readonly Guid ScenarioPerformanceCurveId = Guid.Parse("5451c55f-05a7-4dda-8fc0-e925b52d7af1");
         private static readonly Guid EquationId = Guid.Parse("a6c65132-e45c-4a48-a0b2-72cd274c9cc2");
 
-        public PerformanceCurveTests()
+        public void Setup()
         {
-            _testHelper = TestHelper.Instance;
             if (!_testHelper.DbContext.Attribute.Any())
             {
                 _testHelper.CreateAttributes();
@@ -130,6 +129,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnGet()
         {
+            Setup();
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
 
@@ -143,6 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnPost()
         {
+            Setup();
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
 
@@ -157,6 +158,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnDelete()
         {
+            Setup();
+
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
 
@@ -170,6 +173,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnScenarioCurveGet()
         {
+            Setup();
+
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -184,6 +189,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnOkResultOnScenarioCurvePost()
         {
+            Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -202,6 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
+            Setup();
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
             SetupForGet();
@@ -226,6 +233,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken. Had a timer.")]
         public async Task ShouldModifyPerformanceCurveData()
         {
+            Setup();
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
             var criterionLibrary = SetupForUpsertOrDelete();
@@ -262,6 +270,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldDeletePerformanceCurveData()
         {
+            Setup();
             // Arrange
             SetupController(_testHelper.MockEsecSecurityAuthorized);
             var criterionLibrary = SetupForUpsertOrDelete();
@@ -297,6 +306,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
+            Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -318,6 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken. Had a timer.")]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
+            Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAuthorized);
@@ -379,6 +390,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact(Skip = "Broken")]
         public async Task ShouldReturnUnauthorizedOnPost()
         {
+            Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();

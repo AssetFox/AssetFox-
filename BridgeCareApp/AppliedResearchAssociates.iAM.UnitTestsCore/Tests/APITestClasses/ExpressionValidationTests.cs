@@ -24,10 +24,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
 
-        public ExpressionValidationTests()
-        {
-        }
-
         private ExpressionValidationController SetupController()
         {
             if (!_testHelper.DbContext.Attribute.Any())

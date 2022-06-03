@@ -10,8 +10,16 @@ export default class InventoryService {
     //     return axiosInstance.get('/api/GetInventory');
     // }
 
-    static getInventory(): AxiosPromise {
-        return coreAxiosInstance.get('/api/Inventory/GetInventory');
+    static getPennDOTInventory(): AxiosPromise {
+        return coreAxiosInstance.get('/api/Inventory/GetPennDOTInventory');
+    }
+
+    static getKeyProperties(): AxiosPromise {
+        return coreAxiosInstance.get('/api/Inventory/GetKeyProperties');
+    }
+
+    static getValuesForKey(propertyName: string): AxiosPromise {
+        return coreAxiosInstance.get(`/api/Inventory/GetValuesForKey/${propertyName}`);
     }
 
     /**

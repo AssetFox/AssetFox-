@@ -59,11 +59,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public NetworkEntity GetMainNetwork()
         {
-            var mainNetworkId = new Guid(_unitOfWork.Config.GetSection("PrimaryNetwork").Value);
+            var mainNetworkId = new Guid(_unitOfWork.Config["InventoryData:PrimaryNetwork"]);
 
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == mainNetworkId))
             {
-                return null;
+                throw new RowNotInTableException("Unable to find primary network ID specified in appsettings.json");
             }
 
             return _unitOfWork.Context.Network

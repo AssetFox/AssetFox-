@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,7 +20,12 @@ namespace AppliedResearchAssociates.iAM.Debugging
      */
     public static class ErrorCondition
     {
+        static ErrorCondition()
+        {
+            ErrorCallerMembers = new ConcurrentDictionary<string, int>();
+        }
         internal static int ErrorConditionCount = 0;
+        public static ConcurrentDictionary<string, int> ErrorCallerMembers { get; set; }
         public static bool ErrorState => ErrorConditionCount > 0;
 
         /// <summary> convenience method for setting a breakpoint that will fire if and only if we are in an error state</summary>

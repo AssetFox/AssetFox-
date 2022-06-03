@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class AnnouncementTests
     {
         private readonly TestHelper _testHelper;
-        private readonly AnnouncementController _controller;        
+        private readonly AnnouncementController _controller;
 
         public AnnouncementTests()
         {
@@ -26,12 +26,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 
-        public AnnouncementEntity TestAnnouncement { get; } = new AnnouncementEntity
+        public AnnouncementEntity TestAnnouncement(Guid? id = null)
         {
-            Id = Guid.Empty,
-            Title = "Test Title",
-            Content = "Test Content"
-        };
+            var resolvedId = id ?? Guid.NewGuid();
+            var returnValue = new AnnouncementEntity
+            {
+                Id = resolvedId,
+                Title = "Test Title",
+                Content = "Test Content"
+            };
+            return returnValue;
+        }
 
         [Fact]
         public async void ShouldReturnOkResultOnGet()
@@ -47,7 +52,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async void ShouldReturnOkResultOnPost()
         {
             // Act
-            var result = await _controller.UpsertAnnouncement(TestAnnouncement.ToDto());
+            var announcement = TestAnnouncement();
+            var dto = announcement.ToDto();
+            var result = await _controller.UpsertAnnouncement(dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -67,9 +74,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async void ShouldGetAllAnnouncements()
         {
             // Arrange
-            var AnnouncementId = Guid.NewGuid();
-            TestAnnouncement.Id = AnnouncementId;
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var announcementId = Guid.NewGuid();
+            var announcement = TestAnnouncement(announcementId);
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
             var result = await _controller.Announcements();
@@ -80,15 +87,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<AnnouncementDTO>));
             Assert.True(dtos.Any());
-            Assert.Equal(AnnouncementId, dtos[0].Id);
+            Assert.Equal(announcementId, dtos[0].Id);
         }
 
         [Fact]
         public async void ShouldAddAnnouncementData()
         {
             // Arrange
-            TestAnnouncement.Id = Guid.NewGuid();
-            var dto = TestAnnouncement.ToDto();
+            var announcement = TestAnnouncement();
+            var dto = announcement.ToDto();
 
             // Act
             await _controller.UpsertAnnouncement(dto);
@@ -108,9 +115,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async void ShouldModifyAnnouncementData()
         {
-            // Arrange                
-            TestAnnouncement.Id = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            // Arrange
+            var announcement = TestAnnouncement();
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
@@ -137,8 +144,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async void ShouldDeletePerformanceCurveData()
         {
             // Arrange
-            TestAnnouncement.Id = Guid.NewGuid();
-            _testHelper.UnitOfWork.Context.AddEntity(TestAnnouncement);
+            var announcement = TestAnnouncement();
+            _testHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
@@ -148,11 +155,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result.Result);
 
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
-            };
+            Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
         }
     }
 }

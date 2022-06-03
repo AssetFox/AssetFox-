@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
-    public class TestDataForPennDOTMaintainableAssetRepo
+    public class TestDataForMaintainableAssetRepo
     {
         private List<AttributeEntity> _attributeLibrary;
         private List<MaintainableAssetLocationEntity> _maintainableAssetLocationLibrary;
@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IQueryable<AggregatedResultEntity> AggregatedResultsLibrary => TestNetwork.MaintainableAssets.SelectMany(_ => _.AggregatedResults).AsQueryable();
         public IQueryable<MaintainableAssetLocationEntity> MaintainableAssetLocationLibrary => _maintainableAssetLocationLibrary.AsQueryable();
 
-        public TestDataForPennDOTMaintainableAssetRepo()
+        public TestDataForMaintainableAssetRepo()
         {
             _attributeLibrary = CreateTestAttributes();      
             TestNetwork = CreateTestNetwork();
@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstASection);
+            AssignKeyAttributes(FirstASection);
             AssignLength(FirstASection, 10);
             AssignName(FirstASection, "First A");
             var FirstBSection = new MaintainableAssetEntity()
@@ -45,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstBSection);
+            AssignKeyAttributes(FirstBSection);
             AssignLength(FirstBSection, 15.4);
             AssignName(FirstBSection, "First B");
             var FirstCSection = new MaintainableAssetEntity()
@@ -55,6 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstCSection);
+            AssignKeyAttributes(FirstCSection);
             AssignLength(FirstCSection, 20);
             AssignName(FirstCSection, "First C");
             var SecondASection = new MaintainableAssetEntity()
@@ -65,6 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(SecondASection);
+            AssignKeyAttributes(SecondASection);
             AssignLength(SecondASection, 10);
             AssignName(SecondASection, "Second A");
             var SecondBSection = new MaintainableAssetEntity()
@@ -75,6 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(SecondBSection);
+            AssignKeyAttributes(SecondBSection);
             AssignLength(SecondBSection, 20);
             AssignName(SecondBSection, "Second B");
 
@@ -90,17 +95,41 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             attributeLibrary.Add(new AttributeEntity()
             {
                 Id = Guid.NewGuid(),
-                Name = "Length"
+                Name = "Length",
+                DataType = "STRING"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
                 Id = Guid.NewGuid(),
-                Name = "Name"
+                Name = "Name",
+                DataType = "STRING"
             });
             attributeLibrary.Add(new AttributeEntity()
             {
                 Id = Guid.NewGuid(),
-                Name = "NoData"
+                Name = "NoData",
+                DataType = "STRING"
+            });
+            attributeLibrary.Add(new AttributeEntity
+            {
+                Id = new Guid("2e3ae9ac-c14c-46ab-8e4b-f93312bc8637"),
+                Name = "BMSID",
+                DataType = "STRING",
+                AggregationRuleType = "PREDOMINANT"
+            });
+            attributeLibrary.Add(new AttributeEntity
+            {
+                Id = new Guid("104bd958-8e0a-403c-b065-07d5e91eb27b"),
+                Name = "BRKEY_",
+                DataType = "NUMBER",
+                AggregationRuleType = "AVERAGE"
+            });
+            attributeLibrary.Add(new AttributeEntity
+            {
+                Id = new Guid("9151b85a-a980-4301-a102-a6e0c301c193"),
+                Name = "Bad",
+                DataType = "STRING",
+                AggregationRuleType = "PREDOMINANT"
             });
 
             return attributeLibrary;
@@ -191,6 +220,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 TextValue = value
             };
             asset.AggregatedResults.Add(result);
+        }
+
+        private void AssignKeyAttributes(MaintainableAssetEntity asset)
+        {
+            var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKEY_");
+            var brKey = new AggregatedResultEntity
+            {
+                Id = Guid.NewGuid(),
+                AttributeId = brkeyAttribute.Id,
+                Attribute = brkeyAttribute,
+                MaintainableAsset = asset,
+                MaintainableAssetId = asset.Id,
+                Discriminator = "NumericAggregatedResult",
+                Year = 2020,
+                NumericValue = int.Parse(asset.FacilityName)
+            };
+            asset.AggregatedResults.Add(brKey);
+
+            var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
+            var bmsid = new AggregatedResultEntity
+            {
+                Id = Guid.NewGuid(),
+                AttributeId = bmsidAttribute.Id,
+                Attribute = bmsidAttribute,
+                MaintainableAsset = asset,
+                MaintainableAssetId = asset.Id,
+                Discriminator = "TextAggregatedResult",
+                Year = 2020,
+                TextValue = asset.SectionName
+            };
+            asset.AggregatedResults.Add(bmsid);
         }
     }
 }

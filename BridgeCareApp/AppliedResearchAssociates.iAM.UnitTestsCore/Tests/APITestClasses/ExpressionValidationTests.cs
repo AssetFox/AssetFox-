@@ -333,11 +333,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     var validationParams = testDataSet[0] as ValidationParameter;
                     validationParams.NetworkId = _testHelper.TestNetwork.Id;
                     var result =
-<<<<<<< HEAD
-                        await _controller.GetCriterionValidationResult(validationParams);
-=======
-                        await controller.GetCriterionValidationResult(testDataSet[0] as ValidationParameter);
->>>>>>> master
+                        await controller.GetCriterionValidationResult(validationParams);
 
                     var actualValidationResult =
                         (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value, typeof(CriterionValidationResult));

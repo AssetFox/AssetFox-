@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -33,7 +34,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await UnitOfWork.AttributeRepo.Attributes();
+                var result = await UnitOfWork.AttributeRepo.GetAttributesAsync();
                 return Ok(result);
             }
             catch (Exception e)
@@ -64,13 +65,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttributes")]
         [Authorize]
-        public async Task<IActionResult> CreateAttributes()
+        public async Task<IActionResult> CreateAttributes(List<AttributeDTO> attributeDTOs)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var configurableAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                    // WjTodo -- next time I look at attributes, don't do it this way. Throw if something is wrong.
+                    var configurableAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
                     UnitOfWork.BeginTransaction();
                     UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
                     UnitOfWork.Commit();

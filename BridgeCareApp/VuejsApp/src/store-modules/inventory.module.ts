@@ -56,8 +56,8 @@ const actions = {
     appendBrKeySearchNumber({commit}: any, payload: any) {
         commit('lastFiveBrKeySearchesMutator', payload.brKey);
     },
-    async getInventory({commit}: any) {
-        await InventoryService.getInventory()
+    async getPennDOTInventory({commit}: any) {
+        await InventoryService.getPennDOTInventory()
             .then((response: AxiosResponse<InventoryItem[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('inventoryItemsMutator', response.data);

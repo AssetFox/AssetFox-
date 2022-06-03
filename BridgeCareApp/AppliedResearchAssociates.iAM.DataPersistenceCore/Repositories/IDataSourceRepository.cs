@@ -14,5 +14,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertDatasource(BaseDataSourceDTO dataSource);
 
         void DeleteDataSource(Guid id);
+        List<string> GetDataSourceTypes();
     }
 }

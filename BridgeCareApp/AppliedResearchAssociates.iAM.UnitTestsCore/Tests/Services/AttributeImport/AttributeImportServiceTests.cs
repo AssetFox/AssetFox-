@@ -48,5 +48,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoColumnFoundForId, warningMessage);
         }
+
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNotAttributeName_FailsWithWarning()
+        {
+            _testHelper.CreateSingletons();
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var memoryStream = new MemoryStream();
+            stream.CopyTo(memoryStream);
+            var excelPackage = new ExcelPackage(memoryStream);
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
+        }
     }
 }

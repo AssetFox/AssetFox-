@@ -12,6 +12,7 @@ namespace BridgeCareCore.Services
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
+        public const string NoAttributeWasFoundWithName = "no attribute was found with name";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -42,7 +43,7 @@ namespace BridgeCareCore.Services
                 }
                 columnNameDictionary[columnIndex] = cellValue;
                 columnNameList.Append(cellValue);
-                if (cellValue == keyColumnName)
+                if (keyColumnName.Equals(cellValue, StringComparison.OrdinalIgnoreCase))
                 {
                     keyColumnIndex = columnIndex;
                 }
@@ -57,17 +58,17 @@ namespace BridgeCareCore.Services
             }
             var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
             var allAttributeNames = allAttributes.Select(a => a.Name).OrderBy(s => s).ToList();
-            var allAttributeNamesAsList = string.Join(", ", allAttributeNames);
+            var allAttributeNamesString = string.Join(", ", allAttributeNames);
             var columnIndexAttributeDictionary = new Dictionary<int, AttributeDTO>();
             foreach (var columnIndex in columnNameDictionary.Keys)
             {
                 if (columnIndex!=keyColumnIndex)
                 {
                     var attributeName = columnNameDictionary[columnIndex];
-                    var attribute = allAttributes.FirstOrDefault(a => a.Name == attributeName);
+                    var attribute = allAttributes.FirstOrDefault(a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase));
                     if (attribute == null)
                     {
-                        var warningMessage = $"The title of colum {columnIndex} is {attributeName}. However, no attribute was found with name {attributeName}. The following is a list of all attribute names: {allAttributeNames}";
+                        var warningMessage = $"The title of column {columnIndex} is {attributeName}. However, {NoAttributeWasFoundWithName} {attributeName}. The following is a list of all attribute names: {allAttributeNamesString}";
                         return new AttributesImportResultDTO
                         {
                             WarningMessage = warningMessage,

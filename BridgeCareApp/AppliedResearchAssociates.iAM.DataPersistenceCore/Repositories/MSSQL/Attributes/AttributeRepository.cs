@@ -211,15 +211,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return attributes;
         }
 
-        public Task<List<AttributeDTO>> Attributes()
+        public List<AttributeDTO> GetAttributes()
         {
             if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
 
+            return _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+        }
+
+        public Task<List<AttributeDTO>> GetAttributesAsync()
+        {
             return Task.Factory.StartNew(() =>
-                _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+                GetAttributes());
         }
 
         public Task<List<AttributeDTO>> CalculatedAttributes()

@@ -6,7 +6,7 @@
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'
-                        class='ghd-control-border ghd-control-text ghd-control-width-dd'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
                         outline                        
                         v-model='librarySelectItemValue'
@@ -17,7 +17,7 @@
                     <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
                     <v-select
                         :items='treatmentSelectItems'
-                        class='ghd-control-border ghd-control-text ghd-control-width-dd'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select'
                         outline                        
                         v-model='treatmentSelectItemValue'
@@ -72,14 +72,14 @@
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
-                    v-show ='hasSelectedLibrary && !hasScenario'>
+                    >
                     Download
                 </v-btn> 
                 <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
-                    v-show ='hasSelectedLibrary && !hasScenario'>
+                    >
                     Upload
                 </v-btn>
             </div>    

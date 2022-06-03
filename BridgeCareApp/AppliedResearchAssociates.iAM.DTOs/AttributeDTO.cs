@@ -14,7 +14,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string Command { get; set; }
 
-
         public string DefaultValue { get; set; }
 
         public double? Minimum { get; set; }

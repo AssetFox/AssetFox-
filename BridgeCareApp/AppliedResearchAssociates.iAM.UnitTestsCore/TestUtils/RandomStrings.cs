@@ -14,5 +14,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var path = Path.GetRandomFileName();
             return path.Replace(".", "");
         }
+
+        public static string WithPrefix(string prefix)
+        {
+            var suffix = Length11();
+            return $"{prefix}{suffix}";
+        }
     }
 }

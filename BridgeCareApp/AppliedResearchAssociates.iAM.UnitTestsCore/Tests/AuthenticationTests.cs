@@ -14,11 +14,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         private HttpClient _client;
         private Mock<HttpMessageHandler> handlerMock;
 
-        public AuthenticationTests()
-        {                    
-            SetupMockClient();
-        }
-
         private void SetupMockClient()
         {                  
             var response = new HttpResponseMessage
@@ -40,8 +35,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
                 
         [Fact]
-        public async void ShouldGetUserTokens()
+        public async Task ShouldGetUserTokens()
         {
+            SetupMockClient();
             try
             {
                 // Arrange

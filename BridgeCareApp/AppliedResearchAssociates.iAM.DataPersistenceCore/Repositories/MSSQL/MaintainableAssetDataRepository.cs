@@ -7,38 +7,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class PennDOTMaintainableAssetDataRepository : IAssetData
+    public class MaintainableAssetDataRepository : IAssetData
     {
         UnitOfDataPersistenceWork _unitOfWork;
 
-        public PennDOTMaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
+        public MaintainableAssetDataRepository(UnitOfDataPersistenceWork uow)
         {
             // TODO:  Switch this to be non-PennDOT specific.  It should take in an array
             // of strings that name the key values and build KeyProperties
 
             _unitOfWork = uow;
             var network = _unitOfWork.NetworkRepo.GetMainNetwork();
+            var keyDatumFieldNames = _unitOfWork.Config.GetSection("InventoryData:KeyProperties").GetChildren()
+                .Select(_ => _.Value).ToList();
+            var keyDatumFields = _unitOfWork.Context.Attribute
+                .Where(_ => keyDatumFieldNames.Contains(_.Name))
+                .Select(_ => new {_.Id, _.Name, Type = _.DataType})
+                .ToList();
+
             KeyProperties = new Dictionary<string, List<KeySegmentDatum>>();
-            var brkeyDatum = new List<KeySegmentDatum>();
-            var bmsidDatum = new List<KeySegmentDatum>();
-
-            var locations = _unitOfWork.Context.MaintainableAssetLocation
-                .Include(_ => _.MaintainableAsset)
-                .Where(_ => _.MaintainableAsset.NetworkId == network.Id);
-
-            foreach (var location in locations)
+            foreach (var attribute in keyDatumFields)
             {
-                var ids = location.LocationIdentifier.Split('-');
-                if (ids.Length == 2)
+                var keyFieldValue = new List<KeySegmentDatum>();
+                var filteredAggregatedData = _unitOfWork.Context.AggregatedResult
+                    .Include(_ => _.MaintainableAsset)
+                    .Where(_ => _.MaintainableAsset.NetworkId == network.Id && _.AttributeId == attribute.Id);
+                foreach (var datum in filteredAggregatedData)
                 {
-                    // This is a valid PennDOT location identifier for us
-                    brkeyDatum.Add(new KeySegmentDatum { AssetId = location.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BRKEY", ids[0]) });
-                    bmsidDatum.Add(new KeySegmentDatum { AssetId = location.MaintainableAssetId, KeyValue = new SegmentAttributeDatum("BMSID", ids[1]) });
+                    var dataValue = attribute.Type == "NUMBER" ? datum.NumericValue.ToString() : datum.TextValue;
+                    keyFieldValue.Add(new KeySegmentDatum { AssetId = datum.MaintainableAssetId, KeyValue = new SegmentAttributeDatum(attribute.Name, dataValue) });
                 }
+                KeyProperties.Add(attribute.Name, keyFieldValue);
             }
-
-            KeyProperties.Add("BRKEY", brkeyDatum);
-            KeyProperties.Add("BMSID", bmsidDatum);
         }
 
         public Dictionary<string, List<KeySegmentDatum>> KeyProperties { get; private set; }

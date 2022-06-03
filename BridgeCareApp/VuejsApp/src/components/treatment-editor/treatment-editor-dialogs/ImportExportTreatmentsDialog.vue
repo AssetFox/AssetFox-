@@ -3,7 +3,7 @@
         <v-card class="div-padding">
             <v-card-title class="pa-2">
                 <v-layout justify-start>
-                    <h3 class="Montserrat-font-family">Treatments Import</h3>
+                    <h3 class="Montserrat-font-family">Treatments Upload</h3>
                 </v-layout>
                 <v-btn @click="onSubmit(false)" icon>
                     <i class="fas fa-times fa-2x"></i>

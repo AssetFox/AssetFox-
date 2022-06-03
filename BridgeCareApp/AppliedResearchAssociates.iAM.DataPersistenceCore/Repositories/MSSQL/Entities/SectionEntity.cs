@@ -21,10 +21,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
-        //public double Area { get; set; }
-
-        //public string AreaUnit { get; set; }
-
         public virtual EquationEntity SpatialWeighting { get; set; }
 
         public Guid NetworkId { get; set; }

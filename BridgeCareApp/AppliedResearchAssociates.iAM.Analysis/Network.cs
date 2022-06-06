@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public Explorer Explorer { get; }
 
-        public IReadOnlyCollection<MaintainableAsset> Assets => _Assets;
+        public IReadOnlyCollection<AnalysisMaintainableAsset> Assets => _Assets;
 
         public string Name { get; set; }
 
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public ValidatorBag Subvalidators => new ValidatorBag { Assets, Simulations };
 
-        public MaintainableAsset AddAsset() => _Assets.GetAdd(new MaintainableAsset(this));
+        public AnalysisMaintainableAsset AddAsset() => _Assets.GetAdd(new AnalysisMaintainableAsset(this));
 
         public Simulation AddSimulation() => _Simulations.GetAdd(new Simulation(this));
 
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void Remove(Simulation simulation) => _Simulations.Remove(simulation);
 
-        private readonly List<MaintainableAsset> _Assets = new List<MaintainableAsset>();
+        private readonly List<AnalysisMaintainableAsset> _Assets = new List<AnalysisMaintainableAsset>();
 
         private readonly List<Simulation> _Simulations = new List<Simulation>();
 

@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 Subject = SimulationLogSubject.Calculation,
             };
 
-        internal static SimulationLogMessageBuilder InvalidTreatmentCost(MaintainableAsset asset, SelectableTreatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
+        internal static SimulationLogMessageBuilder InvalidTreatmentCost(AnalysisMaintainableAsset asset, SelectableTreatment treatment, double cost, Guid simulationId) => new SimulationLogMessageBuilder
         {
             SimulationId = simulationId,
             Status = SimulationLogStatus.Error,

@@ -211,7 +211,7 @@ order by simulationid
                 {
                     var readerTimer = GetTimer(reader);
 
-                    helper.AssetPerSectionId = new Dictionary<int, MaintainableAsset>();
+                    helper.AssetPerSectionId = new Dictionary<int, AnalysisMaintainableAsset>();
 
                     readerTimer.Time(createAssets, nameof(createAssets));
                     readerTimer.Time(fillAssetHistories, nameof(fillAssetHistories));
@@ -805,7 +805,7 @@ where simulationid = {simulationId}
 
             public IDictionary<string, INumericAttribute> NumericAttributePerName { get; set; }
 
-            public IDictionary<int, MaintainableAsset> AssetPerSectionId { get; set; }
+            public IDictionary<int, AnalysisMaintainableAsset> AssetPerSectionId { get; set; }
         }
 
         private sealed class DbColumn

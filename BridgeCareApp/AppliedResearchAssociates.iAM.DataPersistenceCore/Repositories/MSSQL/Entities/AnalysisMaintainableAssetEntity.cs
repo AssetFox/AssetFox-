@@ -8,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     ///     This is the entity representing the "analysis version" of a maintainable asset, as they
     ///     used to be called "sections".
     /// </summary>
-    public class SectionEntity : BaseEntity
+    public class AnalysisMaintainableAssetEntity : BaseEntity
     {
-        public SectionEntity()
+        public AnalysisMaintainableAssetEntity()
         {
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();

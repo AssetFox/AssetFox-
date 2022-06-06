@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public sealed class AssetDetail : AssetSummaryDetail
     {
-        public AssetDetail(MaintainableAsset asset) : base(asset)
+        public AssetDetail(AnalysisMaintainableAsset asset) : base(asset)
         {
         }
 

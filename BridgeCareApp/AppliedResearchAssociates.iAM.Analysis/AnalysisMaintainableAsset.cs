@@ -4,9 +4,9 @@ using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    public sealed class MaintainableAsset : WeakEntity, IValidator
+    public sealed class AnalysisMaintainableAsset : WeakEntity, IValidator
     {
-        internal MaintainableAsset(Network network)
+        internal AnalysisMaintainableAsset(Network network)
         {
             Network = network ?? throw new ArgumentNullException(nameof(network));
             SpatialWeighting = new Equation(Network.Explorer);

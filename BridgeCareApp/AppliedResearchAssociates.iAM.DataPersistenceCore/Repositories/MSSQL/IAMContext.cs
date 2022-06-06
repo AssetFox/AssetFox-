@@ -152,7 +152,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
 
-        public virtual DbSet<SectionEntity> Section { get; set; }
+        public virtual DbSet<AnalysisMaintainableAssetEntity> AnalysisMaintainableAsset { get; set; }
 
         public virtual DbSet<SimulationEntity> Simulation { get; set; }
 
@@ -1569,7 +1569,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<SectionEntity>(entity =>
+            modelBuilder.Entity<AnalysisMaintainableAssetEntity>(entity =>
             {
                 entity.HasIndex(e => e.NetworkId);
 
@@ -1578,7 +1578,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.HasOne(d => d.Network)
-                    .WithMany(p => p.Sections)
+                    .WithMany(p => p.AnalysisMaintainableAssets)
                     .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
@@ -1972,7 +1972,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Value).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.NumericAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -1993,7 +1993,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.TextAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);

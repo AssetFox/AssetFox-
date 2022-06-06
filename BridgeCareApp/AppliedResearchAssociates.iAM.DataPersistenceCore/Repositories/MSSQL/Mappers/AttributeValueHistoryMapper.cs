@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     public static class AttributeValueHistoryMapper
     {
         public static void SetNumericAttributeValueHistories(this List<AggregatedResultEntity> entities,
-            MaintainableAsset maintainableAsset)
+            AnalysisMaintainableAsset maintainableAsset)
         {
             var entitiesPerAttributeName = entities
                 .GroupBy(_ => _.Attribute.Name, _ => _)
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static void SetTextAttributeValueHistories(this List<AggregatedResultEntity> entities,
-            MaintainableAsset maintainableAsset)
+            AnalysisMaintainableAsset maintainableAsset)
         {
             var entitiesPerAttributeName = entities
                 .GroupBy(_ => _.Attribute.Name, _ => _)

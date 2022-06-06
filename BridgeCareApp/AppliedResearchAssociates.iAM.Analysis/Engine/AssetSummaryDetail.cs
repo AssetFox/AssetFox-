@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     public class AssetSummaryDetail
     {
-        public AssetSummaryDetail(MaintainableAsset asset)
+        public AssetSummaryDetail(AnalysisMaintainableAsset asset)
         {
             if (asset is null)
             {

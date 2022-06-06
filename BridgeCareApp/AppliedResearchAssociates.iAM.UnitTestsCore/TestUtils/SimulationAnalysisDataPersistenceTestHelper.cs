@@ -64,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public void ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(Simulation simulation)
         {
-            var assets = new List<MaintainableAsset>();
+            var assets = new List<AnalysisMaintainableAsset>();
             CommittedProject committedProject = null;
 
             // Originally, this logic reduced to a single facility's sections. Facilities no longer
@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public void ReUpSectionsAndHistories(List<MaintainableAsset> assets, Network network) =>
+        public void ReUpSectionsAndHistories(List<AnalysisMaintainableAsset> assets, Network network) =>
             assets.ForEach(_ =>
             {
                 assets.ForEach(__ =>

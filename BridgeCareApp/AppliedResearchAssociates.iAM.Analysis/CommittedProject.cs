@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class CommittedProject : Treatment
     {
-        public CommittedProject(MaintainableAsset asset, int year)
+        public CommittedProject(AnalysisMaintainableAsset asset, int year)
         {
             Asset = asset ?? throw new ArgumentNullException(nameof(asset));
             Year = year;
@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public double Cost { get; set; }
 
-        public MaintainableAsset Asset { get; }
+        public AnalysisMaintainableAsset Asset { get; }
 
         public SelectableTreatment TemplateTreatment
         {

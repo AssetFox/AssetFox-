@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             return simulationValidationResults;
         }
 
-        internal ILookup<MaintainableAsset, CommittedProject> CommittedProjectsPerAsset { get; private set; }
+        internal ILookup<AnalysisMaintainableAsset, CommittedProject> CommittedProjectsPerAsset { get; private set; }
 
         internal ILookup<NumberAttribute, PerformanceCurve> CurvesPerAttribute { get; private set; }
 

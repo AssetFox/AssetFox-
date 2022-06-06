@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public NetworkEntity TestNetwork { get; private set; }
         public IQueryable<AttributeEntity> AttributeLibrary => _attributeLibrary.AsQueryable();
-        public IQueryable<SectionEntity> SectionLibrary => TestNetwork.Sections.AsQueryable();
+        public IQueryable<AnalysisMaintainableAssetEntity> AnalysisMaintainableAssetLibrary => TestNetwork.AnalysisMaintainableAssets.AsQueryable();
         public IQueryable<NumericAttributeValueHistoryEntity> NumericAttributes => _numericAttributes.AsQueryable();
         public IQueryable<TextAttributeValueHistoryEntity> TextAttributes => _textAttributes.AsQueryable();
 
@@ -31,66 +31,66 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var testNetwork = new NetworkEntity();
             testNetwork.Id = new Guid("c6de7a77-7d81-4e17-9a21-c6ed17f7875c");
 
-            var FirstASection = new SectionEntity()
+            var FirstASection = new AnalysisMaintainableAssetEntity()
             {
                 Name = "FirstA",
                 Id = new Guid("799acb6e-539d-444b-b16a-6defc50b2c64"),
                 NetworkId = testNetwork.Id,
                 Network = testNetwork
             };
-            testNetwork.Sections.Add(FirstASection);
+            testNetwork.AnalysisMaintainableAssets.Add(FirstASection);
             AssignBRKey(FirstASection, 1);
             AssignBMSID(FirstASection, "00101256");
             AssignLength(FirstASection, 10);
             AssignName(FirstASection, "First A");
 
-            var FirstBSection = new SectionEntity()
+            var FirstBSection = new AnalysisMaintainableAssetEntity()
             {
                 Name = "FirstB",
                 Id = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06"),
                 NetworkId = testNetwork.Id,
                 Network = testNetwork
             };
-            testNetwork.Sections.Add(FirstBSection);
+            testNetwork.AnalysisMaintainableAssets.Add(FirstBSection);
             AssignBRKey(FirstBSection, 2);
             AssignBMSID(FirstBSection, "13401256");
             AssignLength(FirstBSection, 15.4);
             AssignName(FirstBSection, "First B");
 
-            var FirstCSection = new SectionEntity()
+            var FirstCSection = new AnalysisMaintainableAssetEntity()
             {
                 Name = "First C",
                 Id = new Guid("1bb0dd92-db74-45c6-a66a-72ae0c70b636"),
                 NetworkId = testNetwork.Id,
                 Network = testNetwork
             };
-            testNetwork.Sections.Add(FirstCSection);
+            testNetwork.AnalysisMaintainableAssets.Add(FirstCSection);
             AssignBRKey(FirstCSection, 3);
             AssignBMSID(FirstCSection, "5983256");
             AssignLength(FirstCSection, 20);
             AssignName(FirstCSection, "First C");
 
-            var SecondASection = new SectionEntity()
+            var SecondASection = new AnalysisMaintainableAssetEntity()
             {
                 Name = "SecondA",
                 Id = new Guid("3fb90c20-9885-48db-8e47-1c76c5040757"),
                 NetworkId = testNetwork.Id,
                 Network = testNetwork
             };
-            testNetwork.Sections.Add(SecondASection);
+            testNetwork.AnalysisMaintainableAssets.Add(SecondASection);
             AssignBRKey(SecondASection, 4);
             AssignBMSID(SecondASection, "98451298");
             AssignLength(SecondASection, 10);
             AssignName(SecondASection, "Second A");
 
-            var SecondBSection = new SectionEntity()
+            var SecondBSection = new AnalysisMaintainableAssetEntity()
             {
                 Name = "SecondB",
                 Id = new Guid("6d79de97-1c3c-4da5-9cc4-f5043efa047a"),
                 NetworkId = testNetwork.Id,
                 Network = testNetwork
             };
-            testNetwork.Sections.Add(SecondBSection);
+            testNetwork.AnalysisMaintainableAssets.Add(SecondBSection);
             AssignBRKey(SecondBSection, 5);
             AssignBMSID(SecondBSection, "56451278");
             AssignLength(SecondBSection, 20);
@@ -132,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return attributeLibrary;
         }
 
-        private void AssignBRKey(SectionEntity section, double value)
+        private void AssignBRKey(AnalysisMaintainableAssetEntity AnalysisMaintainableAsset, double value)
         {
             var brkeyAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BRKEY_");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
@@ -140,16 +140,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Year = 2020,
                 Value = value,
                 Id = Guid.NewGuid(),
-                SectionId = section.Id,
+                SectionId = AnalysisMaintainableAsset.Id,
                 AttributeId = brkeyAttribute.Id,
                 Attribute = brkeyAttribute,
-                Section = section
+                AnalysisMaintainableAsset = AnalysisMaintainableAsset
             };
-            section.NumericAttributeValueHistories.Add(newNumericAttribute);
+            AnalysisMaintainableAsset.NumericAttributeValueHistories.Add(newNumericAttribute);
             _numericAttributes.Add(newNumericAttribute);
         }
 
-        private void AssignBMSID(SectionEntity section, string value)
+        private void AssignBMSID(AnalysisMaintainableAssetEntity section, string value)
         {
             //var bmsidAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "BMSID");
             //var newtextAttribute = new TextAttributeValueHistoryEntity()
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             section.Name = value;
         }
 
-        private void AssignLength(SectionEntity section, double value)
+        private void AssignLength(AnalysisMaintainableAssetEntity AnalysisMaintainableAsset, double value)
         {
             var lengthAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "Length");
             var newNumericAttribute = new NumericAttributeValueHistoryEntity()
@@ -174,16 +174,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Year = 2020,
                 Value = value,
                 Id =Guid.NewGuid(),
-                SectionId = section.Id,
+                SectionId = AnalysisMaintainableAsset.Id,
                 AttributeId = lengthAttribute.Id,
                 Attribute = lengthAttribute,
-                Section = section
+                AnalysisMaintainableAsset = AnalysisMaintainableAsset
             };
-            section.NumericAttributeValueHistories.Add(newNumericAttribute);
+            AnalysisMaintainableAsset.NumericAttributeValueHistories.Add(newNumericAttribute);
             _numericAttributes.Add(newNumericAttribute);
         }
 
-        private void AssignName(SectionEntity section, string value)
+        private void AssignName(AnalysisMaintainableAssetEntity AnalysisMaintainableAsset, string value)
         {
             var nameAttribute = _attributeLibrary.FirstOrDefault(_ => _.Name == "Name");
             var newtextAttribute = new TextAttributeValueHistoryEntity()
@@ -191,12 +191,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Year = 2020,
                 Value = value,
                 Id =Guid.NewGuid(),
-                SectionId = section.Id,
+                SectionId = AnalysisMaintainableAsset.Id,
                 AttributeId = nameAttribute.Id,
                 Attribute = nameAttribute,
-                Section = section
+                AnalysisMaintainableAsset = AnalysisMaintainableAsset
             };
-            section.TextAttributeValueHistories.Add(newtextAttribute);
+            AnalysisMaintainableAsset.TextAttributeValueHistories.Add(newtextAttribute);
             _textAttributes.Add(newtextAttribute);
         }
     }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Analysis;
-using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -10,9 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         List<Data.Networking.MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId);
 
-        void CreateMaintainableAssets(List<Data.Networking.MaintainableAsset> maintainableAssets, Guid networkId);
+        void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId);
 
-        void CreateMaintainableAssets(List<Analysis.MaintainableAsset> maintainableAssets, Guid networkId);
+        void CreateMaintainableAssets(List<AnalysisMaintainableAsset> maintainableAssets, Guid networkId);
 
         void UpdateMaintainableAssetsSpatialWeighting(List<Data.Networking.MaintainableAsset> maintainableAssets);
     }

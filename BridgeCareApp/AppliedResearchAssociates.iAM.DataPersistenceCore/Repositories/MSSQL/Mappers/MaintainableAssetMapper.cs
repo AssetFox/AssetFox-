@@ -8,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class MaintainableAssetMapper
     {
-        public static Data.Networking.MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
+        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
-            var maintainableAsset = new Data.Networking.MaintainableAsset(
+            var maintainableAsset = new MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);
 
             if (entity.AssignedData != null && entity.AssignedData.Any())
@@ -37,24 +37,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return maintainableAsset;
         }
 
-        public static MaintainableAssetEntity ToEntity(this Data.Networking.MaintainableAsset domain, Guid networkId) =>
+        public static MaintainableAssetEntity ToEntity(this MaintainableAsset domain, Guid networkId) =>
             new MaintainableAssetEntity
             {
                 Id = domain.Id,
                 NetworkId = networkId,
                 SpatialWeighting = domain.SpatialWeighting
-                //Area = domain.SpatialWeighting.Area,
-                //AreaUnit = domain.SpatialWeighting.AreaUnit
             };
 
-        public static MaintainableAssetEntity ToEntity(this Analysis.MaintainableAsset asset, Guid networkId) =>
+        public static MaintainableAssetEntity ToEntity(this AnalysisMaintainableAsset asset, Guid networkId) =>
             new MaintainableAssetEntity
             {
                 Id = asset.Id,
                 NetworkId = networkId,
                 SpatialWeighting = asset.SpatialWeighting.Expression,
-                //Area = section.Area,
-                //AreaUnit = section.AreaUnit,
                 AssetName = asset.AssetName
             };
     }

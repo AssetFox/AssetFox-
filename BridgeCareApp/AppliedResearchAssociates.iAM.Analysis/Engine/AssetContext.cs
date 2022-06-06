@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     internal sealed class AssetContext : CalculateEvaluateScope
     {
-        public AssetContext(MaintainableAsset asset, SimulationRunner simulationRunner)
+        public AssetContext(AnalysisMaintainableAsset asset, SimulationRunner simulationRunner)
         {
             Asset = asset ?? throw new ArgumentNullException(nameof(asset));
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public IDictionary<int, Choice<Treatment, TreatmentProgress>> EventSchedule { get; } = new Dictionary<int, Choice<Treatment, TreatmentProgress>>();
 
-        public MaintainableAsset Asset { get; }
+        public AnalysisMaintainableAsset Asset { get; }
 
         public SimulationRunner SimulationRunner { get; }
 

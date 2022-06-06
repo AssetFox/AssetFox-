@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             // non-analysis "maintainable assets" and the other is for entities that correspond to
             // analysis "maintainable assets", which used to be called "sections".
             MaintainableAssets = new HashSet<MaintainableAssetEntity>();
-            Sections = new HashSet<SectionEntity>();
+            AnalysisMaintainableAssets = new HashSet<AnalysisMaintainableAssetEntity>();
         }
 
         public Guid Id { get; set; }
@@ -30,6 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<SimulationEntity> Simulations { get; set; }
 
-        public virtual ICollection<SectionEntity> Sections { get; set; }
+        public virtual ICollection<AnalysisMaintainableAssetEntity> AnalysisMaintainableAssets { get; set; }
     }
 }

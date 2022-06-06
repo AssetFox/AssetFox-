@@ -19,7 +19,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class BudgetPriorityTests
     {
         private static TestHelper _testHelper => TestHelper.Instance;
-        private BudgetPriorityController _controller;
 
         private ScenarioBudgetEntity _testScenarioBudget;
         private ScenarioBudgetPriorityEntity _testScenarioBudgetPriority;
@@ -37,15 +36,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        private void CreateAuthorizedController() =>
-            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object,
+        private BudgetPriorityController CreateAuthorizedController()
+        {
+            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
+        }
 
-        private void CreateUnauthorizedController() =>
-            _controller = new BudgetPriorityController(_testHelper.MockEsecSecurityNotAuthorized.Object,
+        private BudgetPriorityController CreateUnauthorizedController()
+        {
+            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityNotAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            return controller;
+        }
 
         private void CreateLibraryTestData()
         {
@@ -119,10 +124,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
 
             // Act
-            var result = await _controller.GetBudgetPriorityLibraries();
+            var result = await controller.GetBudgetPriorityLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -134,10 +139,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
 
             // Act
-            var result = await _controller.GetScenarioBudgetPriorities(simulation.Id);
+            var result = await controller.GetScenarioBudgetPriorities(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -148,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             var dto = new BudgetPriorityLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -157,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertBudgetPriorityLibrary(dto);
 
             // Assert
@@ -170,11 +175,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             var dtos = new List<BudgetPriorityDTO>();
 
             // Act
-            var result = await _controller
+            var result = await controller
                 .UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
@@ -186,8 +191,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Act
             Setup();
-            CreateAuthorizedController();
-            var result = await _controller.DeleteBudgetPriorityLibrary(Guid.Empty);
+            var controller = CreateAuthorizedController();
+            var result = await controller.DeleteBudgetPriorityLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -198,11 +203,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.GetBudgetPriorityLibraries();
+            var result = await controller.GetBudgetPriorityLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -224,11 +229,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetScenarioBudgetPriorities(simulation.Id);
+            var result = await controller.GetScenarioBudgetPriorities(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -255,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             // Arrange
@@ -268,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.BudgetPriorities[0].CriterionLibrary = new CriterionLibraryDTO();
 
             // Act
-            await _controller.UpsertBudgetPriorityLibrary(dto);
+            await controller.UpsertBudgetPriorityLibrary(dto);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
@@ -286,7 +291,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
             // Arrange
@@ -300,7 +305,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dtos[0].BudgetPercentagePairs[0].Percentage = 90;
 
             // Act
-            await _controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
+            await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
             await Task.Delay(5000);
@@ -316,11 +321,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            CreateAuthorizedController();
+            var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
+            var result = await controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -339,13 +344,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateUnauthorizedController();
+            var controller = CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);
 
             var dtos = new List<BudgetPriorityDTO>();
 
             // Act
-            var result = await _controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
+            var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);

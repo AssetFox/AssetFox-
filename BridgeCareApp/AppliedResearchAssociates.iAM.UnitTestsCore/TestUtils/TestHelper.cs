@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!HttpContextHasBeenSetup)
             {
-                lock (HttpContextSetupLock)
+                lock (HttpContextSetupLock) // WjTodo -- can we get rid of the lock?
                 {
                     if (!HttpContextHasBeenSetup)
                     {
@@ -168,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!AttributesHaveBeenCreated)
             {
-                lock (AttributeLock) // it's possible a SemaphoreSlim is a better solution. I don't know. -- WJ.
+                lock (AttributeLock) // WjTodo -- can we get rid of the lock?
                 {
                     if (!AttributesHaveBeenCreated)
                     {
@@ -187,11 +187,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             SetupDefaultHttpContext();
         }
 
-        public virtual void CreateNetwork()
+        private static readonly object NetworkCreationLock = new object();
+
+        public void CreateNetwork()
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                UnitOfWork.Context.AddEntity(TestNetwork);
+                lock (NetworkCreationLock) // WjTodo -- can we get rid of the lock?
+                {
+                    if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
+                    {
+                        UnitOfWork.Context.AddEntity(TestNetwork);
+                    }
+                }
             }
         }
 

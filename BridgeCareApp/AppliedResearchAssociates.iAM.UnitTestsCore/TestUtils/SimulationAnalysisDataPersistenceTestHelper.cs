@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             newHistory.ForEach(oldHistory.Add);
         }
 
-        public override void CreateNetwork()
+        public void CreateSimulationAnalysisNetwork()
         {
             UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 

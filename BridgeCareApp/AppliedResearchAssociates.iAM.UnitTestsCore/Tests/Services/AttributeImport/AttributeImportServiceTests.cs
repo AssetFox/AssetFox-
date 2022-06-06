@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var randomString = RandomStrings.Length11();
-            excelPackage.Workbook.Worksheets[0].Cells[1, 2].Value = randomString;
+            excelPackage.Workbook.Worksheets[0].Cells[1, 3].Value = randomString;
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("BRKEY", excelPackage);
             var warningMessage = result.WarningMessage;
@@ -99,6 +99,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var result = service.ImportExcelAttributes("BRKEY", excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
+        }
+        [Fact]
+        public void ImportSpreadsheet_RepeatedRowKey_FailsWithWarning()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[3, 1].Value = worksheet.Cells[2, 1].Value;
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.WasFoundInRow, warningMessage);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
@@ -13,6 +14,7 @@ namespace BridgeCareCore.Services
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
+        public const string WasFoundInRow = "was found in row";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -33,21 +35,7 @@ namespace BridgeCareCore.Services
             var rowLength = cells.End.Column;
             var columnNameDictionary = new Dictionary<int, string>();
             var columnNameList = new List<string>();
-            var keyColumnIndex = -1;
-            for (var columnIndex=1; columnIndex<=rowLength; columnIndex++)
-            {
-                var cellValue = cells[rowIndex, columnIndex].Value?.ToString();
-                if (cellValue == null)
-                {
-                    break;
-                }
-                columnNameDictionary[columnIndex] = cellValue;
-                columnNameList.Append(cellValue);
-                if (keyColumnName.Equals(cellValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    keyColumnIndex = columnIndex;
-                }
-            }
+            var keyColumnIndex = FindKeyColumnIndex(keyColumnName, cells, rowIndex, rowLength, columnNameDictionary, columnNameList);
             if (keyColumnIndex == -1)
             {
                 var warningMessage = BuildKeyNotFoundWarningMessage(keyColumnName, columnNameDictionary);
@@ -62,7 +50,7 @@ namespace BridgeCareCore.Services
             var columnIndexAttributeDictionary = new Dictionary<int, AttributeDTO>();
             foreach (var columnIndex in columnNameDictionary.Keys)
             {
-                if (columnIndex!=keyColumnIndex)
+                if (columnIndex != keyColumnIndex)
                 {
                     var attributeName = columnNameDictionary[columnIndex];
                     var attribute = allAttributes.FirstOrDefault(a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase));
@@ -77,7 +65,54 @@ namespace BridgeCareCore.Services
                     columnIndexAttributeDictionary[columnIndex] = attribute;
                 }
             }
+            var networkId = Guid.NewGuid();
+
+            var maintainableAssets = new List<MaintainableAsset>();
+            var foundAssetNames = new Dictionary<string, int>();
+            for (var assetRowIndex = 2; assetRowIndex <= endRow; assetRowIndex++)
+            {
+                var assetName = worksheet.Cells[assetRowIndex, 1]?.Value.ToString();
+                var lowercaseAssetName = assetName.ToLowerInvariant();
+                if (foundAssetNames.ContainsKey(lowercaseAssetName))
+                {
+                    var warningMessage = $"The asset name {assetName} {WasFoundInRow} {foundAssetNames[lowercaseAssetName]} and row {assetRowIndex}. This is not allowed.";
+                    return new AttributesImportResultDTO
+                    {
+                        WarningMessage = warningMessage,
+                    };
+                }
+                foundAssetNames[lowercaseAssetName] = assetRowIndex;
+                if (!string.IsNullOrWhiteSpace(assetName)) {
+                    var newAsset = new MaintainableAsset(Guid.NewGuid(), networkId, null, "spatialWeighting");
+                    maintainableAssets.Add(newAsset);
+                }
+            }
+            var networkName = "Created by import";
+            var newNetwork = new Network(maintainableAssets, networkId, networkName);
+            _unitOfWork.NetworkRepo.CreateNetwork(newNetwork);
+            // If we have reached this point, we should add a new Network to our database based on the spreadsheet values
             throw new NotImplementedException();
+        }
+
+        private static int FindKeyColumnIndex(string keyColumnName, ExcelRange cells, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
+        {
+            var keyColumnIndex = -1;
+            for (var columnIndex = 2; columnIndex <= rowLength; columnIndex++)
+            {
+                var cellValue = cells[rowIndex, columnIndex].Value?.ToString();
+                if (cellValue == null)
+                {
+                    break;
+                }
+                columnNameDictionary[columnIndex] = cellValue;
+                columnNameList.Append(cellValue);
+                if (keyColumnName.Equals(cellValue, StringComparison.OrdinalIgnoreCase))
+                {
+                    keyColumnIndex = columnIndex;
+                }
+            }
+
+            return keyColumnIndex;
         }
 
         private static string BuildKeyNotFoundWarningMessage(string keyColumnName, Dictionary<int, string> columnNameDictionary)

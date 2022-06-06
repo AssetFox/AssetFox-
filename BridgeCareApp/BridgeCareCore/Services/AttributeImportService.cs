@@ -9,12 +9,26 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
 {
+    /*
+Every record/row is a bridge
+Every column/field is a specific attribute (ID, Deck Area, Structure Type, Rating, etc.)
+The user will provide the name of the ID field as part of the import (in our case, BRKEY)
+You can attempt to match the attribute names in the first row of the excel sheet to the attribute names in the Attribute table.
+>> If there are repeats in the column names, reject the upload
+>> If the user specified key column is null, reject the upload with a message telling the user which row has a null key field
+>> If the key field values are not unique, reject the upload with a message telling the user which rows have duplicates
+>> If you find a unique match for each column, great!  start importing data
+>> If there are column names that do not have a matching Attribute.Name in the Attributes table, reject the upload and let the user know what fields need to be added
+The network is defined by these attributes - in other words, you cannot have a mismatch between assets and attributes
+Do not try and create attributes here - juset verify they exist.  We can tackle making the attributes later given our timeframe
+    */
     public class AttributeImportService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
         public const string WasFoundInRow = "was found in row";
+        public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -25,6 +39,13 @@ namespace BridgeCareCore.Services
 
         public AttributesImportResultDTO ImportExcelAttributes(string keyColumnName, ExcelPackage excelPackage)
         {
+            if (string.IsNullOrWhiteSpace(keyColumnName))
+            {
+                return new AttributesImportResultDTO
+                {
+                    WarningMessage = NonemptyKeyIsRequired,
+                };
+            }
             var workbook = excelPackage.Workbook;
             var worksheet = workbook.Worksheets[0];
             var cells = worksheet.Cells;

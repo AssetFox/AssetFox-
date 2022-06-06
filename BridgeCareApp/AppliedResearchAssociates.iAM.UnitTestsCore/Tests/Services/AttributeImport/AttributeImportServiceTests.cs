@@ -60,13 +60,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        public void ImportSpreadsheet_KeyColumnNameIsEmpty_FailsWithWarning()
+        {
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var service = CreateAttributeImportService();
+            var importResult = service.ImportExcelAttributes("", excelPackage);
+            var warning = importResult.WarningMessage;
+            Assert.Equal(AttributeImportService.NonemptyKeyIsRequired, warning);
+        }
+
+        [Fact]
         public void ImportSpreadsheet_IdKeyIsNotColumnTitle_FailsWithWarning()
         {
             var path = SampleAttributeDataPath();
             var stream = FileContent(path);
-            var memoryStream = new MemoryStream();
-            stream.CopyTo(memoryStream);
-            var excelPackage = new ExcelPackage(memoryStream);
+            var excelPackage = new ExcelPackage(stream);
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("nonExistentColumn", excelPackage);
             var warningMessage = result.WarningMessage;
@@ -100,6 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         }
+
         [Fact]
         public void ImportSpreadsheet_RepeatedRowKey_FailsWithWarning()
         {

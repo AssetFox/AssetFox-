@@ -296,9 +296,10 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import CriteriaCombo from './CriteriaCombo.vue';
 
 @Component({
-    components: { VueQueryBuilder },
+    components: { VueQueryBuilder, CriteriaCombo },
 })
 export default class CriteriaEditor extends Vue {
     @Prop() criteriaEditorData: CriteriaEditorData;
@@ -458,7 +459,7 @@ export default class CriteriaEditor extends Vue {
                                 this.queryBuilderRules,
                             ),
                             {
-                                type: 'select',
+                                type: 'custom-component',
                                 id: asv.attribute,
                                 label: asv.attribute,
                                 operators: ['=', '<>', '<', '<=', '>', '>='],
@@ -466,6 +467,7 @@ export default class CriteriaEditor extends Vue {
                                     label: value,
                                     value: value,
                                 })),
+                                component: CriteriaCombo 
                             },
                             this.queryBuilderRules,
                         );

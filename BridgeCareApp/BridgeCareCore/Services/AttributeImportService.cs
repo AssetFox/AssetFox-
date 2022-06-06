@@ -112,6 +112,7 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             var newNetwork = new Network(maintainableAssets, networkId, networkName);
             _unitOfWork.NetworkRepo.CreateNetwork(newNetwork);
             // If we have reached this point, we should add a new Network to our database based on the spreadsheet values
+
             throw new NotImplementedException();
         }
 

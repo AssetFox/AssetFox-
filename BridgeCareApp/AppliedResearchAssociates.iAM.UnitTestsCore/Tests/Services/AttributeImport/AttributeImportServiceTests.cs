@@ -97,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         }
 
-        [Fact]
+        [Fact (Skip = "putting this aside for now WjTodo")]
         public void ImportSpreadsheet_ColumnHeaderIsAttributeName_IdkWhat()
         {
             _testHelper.CreateAttributes();

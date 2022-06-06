@@ -310,7 +310,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<UnauthorizedResult>(result);
         }
 
-        [Fact(Skip = "Wjtodo -- Wj broke this. He needs to fix it.")]
+        [Fact]
         public async Task ShouldReturnUnauthorizedOnDelete()
         {
             // Arrange

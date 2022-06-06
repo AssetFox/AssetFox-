@@ -32,9 +32,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.CreateNetwork();
                 _testHelper.CreateSimulation();
                 _testHelper.SetupDefaultHttpContext();
-                SetData();
-                AddTestData();
             }
+            SetData();
+            AddTestData();
             var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
             var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
@@ -63,27 +63,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             TextValue = "test"
         };
 
+        private static bool DataHaveBeenSet = false;
+        private static bool TestDataHaveBeenAdded = false;
+
         private void SetData()
         {
-            var culvAttribute = AttributeDtos.CulvDurationN;
-            var actionTypeAttribute = AttributeDtos.ActionType;
-            NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .Single(_ => _.Name == culvAttribute.Name);
-            TextAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .Single(_ => _.Name == actionTypeAttribute.Name);
+            if (!DataHaveBeenSet)
+            {
+                DataHaveBeenSet = true;
+                var culvAttribute = AttributeDtos.CulvDurationN;
+                var actionTypeAttribute = AttributeDtos.ActionType;
+                NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
+                    .Single(_ => _.Name == culvAttribute.Name);
+                TextAttribute = _testHelper.UnitOfWork.Context.Attribute
+                    .Single(_ => _.Name == actionTypeAttribute.Name);
+            }
         }
 
         private void AddTestData()
         {
-            TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
-            _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
+            if (!TestDataHaveBeenAdded)
+            {
+                TestDataHaveBeenAdded = true;
+                TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
+                _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
 
-            TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
-            TestTextAggregatedResult.AttributeId = TextAttribute.Id;
-            _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
+                TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
+                TestTextAggregatedResult.AttributeId = TextAttribute.Id;
+                _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
             {
                 TestNumericAggregatedResult, TestTextAggregatedResult
             });
+            }
         }
 
         public static IEnumerable<object[]> GetInvalidPiecewiseEquationValidationData()
@@ -237,30 +248,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "Broken as of 10:38am 2 June 2022, not when run by itself, but yes when run as part of a full run. WjTodo if time arises for it?")]
-
+        //[Fact(Skip = "Broken as of 10:38am 2 June 2022, not when run by itself, but yes when run as part of a full run. WjTodo if time arises for it?")]
+        [Fact]
         public async Task ShouldValidateCriterion()
         {
             // Arrange
-            var controller = SetupController();
-            var model = new ValidationParameter
+            try
             {
-                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
-            };
+                var controller = SetupController();
+                var model = new ValidationParameter
+                {
+                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                    Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
+                };
 
-            // Act
-            var result = await controller.GetCriterionValidationResult(model);
+                // Act
+                var result = await controller.GetCriterionValidationResult(model);
 
-            // Assert
-            var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                typeof(CriterionValidationResult));
-            Assert.True(validationResult.IsValid);
-            Assert.Equal(1, validationResult.ResultsCount);
-            Assert.Equal("Success", validationResult.ValidationMessage);
+                // Assert
+                var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
+                    typeof(CriterionValidationResult));
+
+                Assert.True(validationResult.IsValid);
+                Assert.Equal(1, validationResult.ResultsCount);
+                Assert.Equal("Success", validationResult.ValidationMessage);
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
-        [Fact (Skip ="Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]
+        [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]
         public void ShouldInvalidatePiecewiseEquations()
         {
             // Act + Assert
@@ -302,7 +321,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Unsupported Attribute FALSE_ATTRIBUTE", validationResult.ValidationMessage);
         }
 
-        [Fact (Skip ="Broken as of 10:50am 2 June 2022, even when run on its own")]
+        [Fact(Skip = "Broken as of 10:50am 2 June 2022, even when run on its own")]
         public async Task ShouldThrowCalculateEvaluateExceptionOnInvalidEquation()
         {
             // Arrange
@@ -319,7 +338,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 await controller.GetEquationValidationResult(model));
         }
 
-        [Fact (Skip ="Timer")]
+        [Fact(Skip = "Timer")]
         public void ShouldInvalidateCriteria()
         {
             var controller = SetupController();
@@ -344,7 +363,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
         }
 
-        [Fact (Skip ="poorly understood issues in class")]
+        [Fact(Skip = "poorly understood issues in class")]
         public async Task ShouldReturnOkResultOnCriterionPost()
         {
             // Arrange   

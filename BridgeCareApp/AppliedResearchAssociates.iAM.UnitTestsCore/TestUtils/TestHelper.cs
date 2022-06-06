@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestHelper
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
-        private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
 
@@ -153,13 +152,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             };
             return returnValue;
         }
-
-        public UserEntity TestUser { get; } = new UserEntity
-        {
-            Id = UserId,
-            Username = "pdsystbamsusr02",
-            HasInventoryAccess = true
-        };
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();

@@ -363,7 +363,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
         }
 
-        [Fact(Skip = "poorly understood issues in class")]
+        [Fact(Skip = "unskipping breaks another test as of 1:40pm 6/6/2022")]
         public async Task ShouldReturnOkResultOnCriterionPost()
         {
             // Arrange   

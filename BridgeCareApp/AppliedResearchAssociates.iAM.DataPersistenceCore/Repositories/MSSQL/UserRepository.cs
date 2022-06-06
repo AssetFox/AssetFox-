@@ -25,11 +25,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
+            var hasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator;
             _unitOfWork.Context.User.Add(new UserEntity
             {
                 Id = Guid.NewGuid(),
                 Username = username,
-                HasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator
+                HasInventoryAccess = hasInventoryAccess,
             });
 
             _unitOfWork.Context.SaveChanges();

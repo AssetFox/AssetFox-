@@ -32,6 +32,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private UserEntity _testUserEntity;
         private SimulationEntity _testSimulationToClone;
         private const string SimulationName = "Simulation";
+        private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
+
+        private async Task<UserDTO> AddTestUser()
+        {
+            var randomName = RandomStrings.Length11();
+            var role = "PD-BAMS-Administrator";
+            _testHelper.UnitOfWork.AddUser(randomName, role);
+            var returnValue = await _testHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
+            return returnValue;
+        }
 
         public SimulationAnalysisService Setup()
         {
@@ -547,7 +557,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 
-        [Fact(Skip = "Was broken before WJ started latest round of work. Not investigating further for now.")]
+        [Fact]
         public async Task ShouldCreateSimulation()
         {
             var service = Setup();
@@ -557,12 +567,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var newSimulationDTO = simulation.ToDto(null);
             newSimulationDTO.Id = Guid.NewGuid();
+            var testUser = await AddTestUser();
+            
             newSimulationDTO.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
                     {
-                        UserId = _testHelper.TestUser.Id,
-                        Username = _testHelper.TestUser.Username,
+                        UserId = testUser.Id,
+                        Username = testUser.Username,
                         CanModify = true,
                         IsOwner = true
                     }
@@ -574,7 +586,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
             // Assert
-            await Task.Delay(5000);
             var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
@@ -594,7 +605,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             CreateAuthorizedController(service);
-            _testHelper.UnitOfWork.Context.AddEntity(_testHelper.TestUser);
             _testHelper.UnitOfWork.Context.SaveChanges();
 
             var getResult = await _controller.GetSimulations();
@@ -603,12 +613,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var simulationDTO = dtos[0];
             simulationDTO.Name = "Updated Name";
+            var testUser = await AddTestUser();
             simulationDTO.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
                     {
-                        UserId = _testHelper.TestUser.Id,
-                        Username = _testHelper.TestUser.Username,
+                        UserId = testUser.Id,
+                        Username = testUser.Username,
                         CanModify = true,
                         IsOwner = true
                     }

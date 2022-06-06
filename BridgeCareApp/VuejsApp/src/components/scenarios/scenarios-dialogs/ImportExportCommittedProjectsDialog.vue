@@ -1,38 +1,40 @@
 <template>
-    <v-dialog max-width='500px' persistent v-model='showDialog'>
-        <v-card>
-            <v-card-title>
-                <v-layout justify-center>
-                    <h3>Committed Projects</h3>
+    <v-dialog  width="768px" height="540px" persistent v-model='showDialog'>
+        <v-card class="div-padding">
+            <v-card-title class="pa-2">
+                <v-layout justify-start>
+                    <h3 class="Montserrat-font-family">Committed Projects</h3>
                 </v-layout>
+                <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+                </v-btn>
             </v-card-title>
-            <v-card-text>
+            <v-card-text class="pa-0">
                 <v-layout column>
-                    <CommittedProjectsFileSelector :closed='closed' @submit='onSubmitFileSelectorFile' />
-                    <v-flex xs12>
-                        <v-layout justify-start>
-                            <v-checkbox label='No Treatment' v-model='applyNoTreatment'></v-checkbox>
+                    <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
+                    <span class="div-warning-border">
+                        <v-layout align-start>
+                            <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
+                            <h3 class="h3-color">Warning</h3>
                         </v-layout>
-                    </v-flex>
-                    <span>
-                        <p>
-                            Warning: Uploading new committed projects will override ALL previous commitments.
+                        <p class="Montserrat-font-family">
+                            Uploading new committed projects will override ALL previous commitments.
                             Committed projects may take a few minutes to process. You will receive an email when this process is complete.
                         </p>
                     </span>
                 </v-layout>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row>
-                    <v-btn @click='onSubmit(true)' class='ara-blue-bg white--text'>Upload</v-btn>
-                    <v-btn @click='onSubmit(true, true)' class='ara-blue-bg white--text'>Export</v-btn>
-                    <v-btn @click='onSubmit(false)' class='ara-orange-bg white--text'>Cancel</v-btn>
-                    <v-tooltip top>
+                <v-layout justify-center row>
+                    <v-btn @click='onSubmit(false)' class='ghd-white-bg ghd-blue Montserrat-font-family' flat>Cancel</v-btn>
+                    <v-btn @click='onSubmit(true, true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Export</v-btn>
+                    <v-btn @click='onSubmit(true)' class='ghd-white-bg ghd-blue ghd-button Montserrat-font-family' outline>Upload</v-btn>
+                    <!-- <v-tooltip top>
                         <template slot='activator'>
                             <v-btn @click='onDelete' class='ara-orange-bg white--text'>Delete</v-btn>
                         </template>
                         <span>Delete scenario's current committed projects</span>
-                    </v-tooltip>
+                    </v-tooltip> -->
                 </v-layout>
             </v-card-actions>
         </v-card>
@@ -74,8 +76,9 @@ export default class ImportExportCommittedProjectsDialog extends Vue {
     /**
      * FileSelector submit event handler
      */
-    onSubmitFileSelectorFile(file: File) {
+    onSubmitFileSelectorFile(file: File, treatment: boolean) {
         this.committedProjectsFile = hasValue(file) ? clone(file) : null;
+        this.applyNoTreatment = treatment;
     }
 
     /**
@@ -93,7 +96,12 @@ export default class ImportExportCommittedProjectsDialog extends Vue {
             this.$emit('submit', null);
         }
     }
-
+    /**
+     * Apply no treatment event handler
+     */
+    onTreatmentChanged(treatment: boolean) {
+        this.applyNoTreatment = treatment;
+    }
     /**
      * Dialog delete event handler
      */
@@ -102,3 +110,22 @@ export default class ImportExportCommittedProjectsDialog extends Vue {
     }
 }
 </script>
+<style scoped>
+.div-warning-border {
+    border: solid;
+    border-color: #F00;
+    border-radius: 4px;
+    border-width: 1px;
+    padding: 10px;
+}
+.div-padding {
+    padding: 30px;
+}
+.h3-color {
+    color: red;
+    font-family: Montserrat-font-family;
+}
+.icon-color {
+    color: red;
+}
+</style>

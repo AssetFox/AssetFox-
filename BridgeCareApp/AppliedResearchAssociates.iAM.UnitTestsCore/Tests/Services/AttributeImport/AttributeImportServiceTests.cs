@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         private const string SampleAttributeDataFilename = "SampleAttributeData.xlsx";
+        private const string SampleAttributeDataWithSpuriousEmptyFirstRowFilename = "SampleAttributeDataWithSpuriousEmptyFirstRow.xlsx";
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
@@ -51,6 +52,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         private static string SampleAttributeDataPath()
         {
             var filename = SampleAttributeDataFilename;
+            var folder = Directory.GetCurrentDirectory();
+            var returnValue = Path.Combine(folder, "SampleData", filename);
+            return returnValue;
+        }
+
+        private static string SampleAttributeDataWithSpuriousEmptyFirstRowPath()
+        {
+            var filename = SampleAttributeDataWithSpuriousEmptyFirstRowFilename;
             var folder = Directory.GetCurrentDirectory();
             var returnValue = Path.Combine(folder, "SampleData", filename);
             return returnValue;
@@ -150,8 +159,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         [Fact]
         public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
         {
-            // WjTodo -- write this 
-
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
+            
         }
     }
 }

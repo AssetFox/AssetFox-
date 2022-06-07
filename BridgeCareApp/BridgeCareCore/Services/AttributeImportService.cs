@@ -33,12 +33,30 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
         public const string WasFoundInRow = "was found in row";
         public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
         public const string InspectionDateColumn = "InspectionDate column";
+        public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
             )
         {
             _unitOfWork = unitOfWork;
+        }
+
+        private bool TopRowIsEmpty(ExcelWorksheet worksheet)
+        {
+            var rowLength = worksheet.Cells.End.Column;
+            for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
+            {
+                var value = worksheet.Cells[1, columnIndex].Value?.ToString();
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    if (!double.TryParse(value, out double _))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
 
         public AttributesImportResultDTO ImportExcelAttributes(
@@ -56,6 +74,13 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             }
             var workbook = excelPackage.Workbook;
             var worksheet = workbook.Worksheets[0];
+            if (TopRowIsEmpty(worksheet))
+            {
+                return new AttributesImportResultDTO
+                {
+                    WarningMessage = TopSpreadsheetRowIsEmpty,
+                };
+            }
             var cells = worksheet.Cells;
             var rowIndex = 1;
             var end = cells.End;

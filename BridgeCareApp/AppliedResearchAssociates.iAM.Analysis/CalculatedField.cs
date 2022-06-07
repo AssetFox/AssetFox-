@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal CalculatedField(string name, Explorer explorer) : base(name) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        internal double Calculate(SectionContext scope)
+        internal double Calculate(AssetContext scope)
         {
             ValueSources.Channel(
                 source => source.Criterion.Evaluate(scope),
@@ -67,8 +67,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var messageBuilder = new SimulationMessageBuilder(MessageStrings.CalculatedFieldHasNoOperativeEquations)
                 {
                     ItemName = Name,
-                    SectionName = scope.Section.Name,
-                    SectionId = scope.Section.Id,
+                    AssetName = scope.Asset.AssetName,
+                    AssetId = scope.Asset.Id,
                 };
 
                 throw new SimulationException(messageBuilder.ToString());
@@ -90,14 +90,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private CalculatedFieldTiming _Timing = CalculatedFieldTiming.OnDemand;
 
-        private double Compute(Equation equation, SectionContext sectionContext)
+        private double Compute(Equation equation, AssetContext assetContext)
         {
-            var equationValue = equation.Compute(sectionContext);
+            var equationValue = equation.Compute(assetContext);
             if (double.IsNaN(equationValue) || double.IsInfinity(equationValue))
             {
-                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(sectionContext.Section, equation, Name, equationValue);
-                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, sectionContext.SimulationRunner.Simulation.Id);
-                sectionContext.SimulationRunner.Send(messageBuilder);
+                var errorMessage = SimulationLogMessages.CalculatedFieldReturned(assetContext.Asset, equation, Name, equationValue);
+                var messageBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, assetContext.SimulationRunner.Simulation.Id);
+                assetContext.SimulationRunner.Send(messageBuilder);
             }
             return equationValue;
         }

@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     public static class AttributeValueHistoryMapper
     {
         public static void SetNumericAttributeValueHistories(this List<AggregatedResultEntity> entities,
-            Section section)
+            AnalysisMaintainableAsset maintainableAsset)
         {
             var entitiesPerAttributeName = entities
                 .GroupBy(_ => _.Attribute.Name, _ => _)
@@ -17,10 +17,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             entitiesPerAttributeName.Keys.ForEach(attributeName =>
             {
-                var numberAttribute = section.Facility.Network.Explorer.NumberAttributes
+                var numberAttribute = maintainableAsset.Network.Explorer.NumberAttributes
                     .Single(_ => _.Name == attributeName);
 
-                var history = section.GetHistory(numberAttribute);
+                var history = maintainableAsset.GetHistory(numberAttribute);
 
                 var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
 
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static void SetTextAttributeValueHistories(this List<AggregatedResultEntity> entities,
-            Section section)
+            AnalysisMaintainableAsset maintainableAsset)
         {
             var entitiesPerAttributeName = entities
                 .GroupBy(_ => _.Attribute.Name, _ => _)
@@ -45,10 +45,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             entitiesPerAttributeName.Keys.ForEach(attributeName =>
             {
-                var textAttribute = section.Facility.Network.Explorer.TextAttributes
+                var textAttribute = maintainableAsset.Network.Explorer.TextAttributes
                     .Single(_ => _.Name == attributeName);
 
-                var history = section.GetHistory(textAttribute);
+                var history = maintainableAsset.GetHistory(textAttribute);
 
                 var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
 

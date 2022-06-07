@@ -8,13 +8,13 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         internal Criterion(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        internal bool? Evaluate(SectionContext scope)
+        internal bool? Evaluate(AssetContext scope)
         {
             EnsureCompiled();
             return Evaluator?.Delegate(scope);
         }
 
-        internal bool EvaluateOrDefault(SectionContext scope) => Evaluate(scope) ?? true;
+        internal bool EvaluateOrDefault(AssetContext scope) => Evaluate(scope) ?? true;
 
         protected override void Compile()
         {

@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        internal ChangeApplicator GetApplicator(SectionContext scope)
+        internal ChangeApplicator GetApplicator(AssetContext scope)
         {
             switch (Attribute)
             {

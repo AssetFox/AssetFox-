@@ -208,13 +208,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             row = startRow;
             worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData);
 
-            var poorBridgesNHSCountInitial = _bridgeWorkSummaryComputationHelper.InitialNHSBridgePoorCountOrArea(reportOutputData.InitialSectionSummaries, true);
+            var poorBridgesNHSCountInitial = _bridgeWorkSummaryComputationHelper.InitialNHSBridgePoorCountOrArea(reportOutputData.InitialAssetSummaries, true);
             worksheet.Cells[row++, column].Value = poorBridgesNHSCountInitial;
             worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.TotalInitialPoorBridgesCount(reportOutputData) - poorBridgesNHSCountInitial;
 
             for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
             {
-                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(reportOutputData.InitialSectionSummaries, bpnName.ToMatchInDictionary(), true);
+                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(reportOutputData.InitialAssetSummaries, bpnName.ToMatchInDictionary(), true);
             }
 
             foreach (var yearlyData in reportOutputData.Years)
@@ -225,13 +225,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var totalPoorBridgesCount = _bridgeWorkSummaryComputationHelper.TotalSectionalPoorBridgesCount(yearlyData);
                 worksheet.Cells[row++, column].Value = totalPoorBridgesCount;
 
-                var poorBridgesNHSCount = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgePoorCountOrArea(yearlyData.Sections, true);
+                var poorBridgesNHSCount = _bridgeWorkSummaryComputationHelper.SectionalNHSBridgePoorCountOrArea(yearlyData.Assets, true);
                 worksheet.Cells[row++, column].Value = poorBridgesNHSCount;
                 worksheet.Cells[row++, column].Value = totalPoorBridgesCount - poorBridgesNHSCount;
 
                 for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
                 {
-                    worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(yearlyData.Sections, bpnName.ToMatchInDictionary(), true);
+                    worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePoorCountOrAreaForBPN(yearlyData.Assets, bpnName.ToMatchInDictionary(), true);
                 }
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
@@ -258,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddDetailsForTotalBridgeCount(ExcelWorksheet worksheet, CurrentCell currentCell, SimulationOutput reportOutputData)
         {
-            var totalCount = reportOutputData.InitialSectionSummaries.Count;
+            var totalCount = reportOutputData.InitialAssetSummaries.Count;
             int startRow, startColumn, row, column;
             _bridgeWorkSummaryCommon.InitializeLabelCells(worksheet, currentCell, out startRow, out startColumn, out row, out column);
             AddInitialBridgeCount(worksheet, reportOutputData, totalCount, startRow, column);

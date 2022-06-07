@@ -22,14 +22,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
-        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, SectionDetail section, int Year, TreatmentOptionDetail treatment)
+        public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
         {
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
-            worksheet.Cells[row, columnNo++].Value = section.FacilityName.Split('-')[0];
+            worksheet.Cells[row, columnNo++].Value = section.AssetName.Split('-')[0];
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
             var deckArea = section.ValuePerNumericAttribute["DECK_AREA"];
@@ -175,13 +175,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             return currentCell;
         }
 
-        public List<SectionDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
+        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
         {
             var untreatedSections =
-                    simulationYearDetail.Sections.Where(
-                        sect => sect.TreatmentCause == TreatmentCause.NoSelection &&
-                        (int.Parse(sect.ValuePerTextAttribute["NHS_IND"]) == 1 ||
-                        sect.ValuePerNumericAttribute["DECK_AREA"] > 28500) &&
+                    simulationYearDetail.Assets.Where(
+                        sect => sect.TreatmentCause == TreatmentCause.NoSelection
+                        &&
+                        (!string.IsNullOrEmpty(sect.ValuePerTextAttribute["NHS_IND"]) && int.Parse(sect.ValuePerTextAttribute["NHS_IND"]) == 1)
+                        ||
+                        sect.ValuePerNumericAttribute["DECK_AREA"] > 28500
+                        &&
                         sect.TreatmentOptions.Count > 0
                         ).ToList();
             return untreatedSections;

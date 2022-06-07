@@ -4,9 +4,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class SectionEntity : BaseEntity
+    /// <summary>
+    ///     This is the entity representing the "analysis version" of a maintainable asset, as they
+    ///     used to be called "sections".
+    /// </summary>
+    public class AnalysisMaintainableAssetEntity : BaseEntity
     {
-        public SectionEntity()
+        public AnalysisMaintainableAssetEntity()
         {
             CommittedProjects = new HashSet<CommittedProjectEntity>();
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
@@ -15,17 +19,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid Id { get; set; }
 
-        public Guid FacilityId { get; set; }
-
         public string Name { get; set; }
-
-        //public double Area { get; set; }
-
-        //public string AreaUnit { get; set; }
 
         public virtual EquationEntity SpatialWeighting { get; set; }
 
-        public virtual FacilityEntity Facility { get; set; }
+        public Guid NetworkId { get; set; }
+
+        public virtual NetworkEntity Network { get; set; }
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
 

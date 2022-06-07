@@ -745,7 +745,7 @@ export default class Scenarios extends Vue {
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
-                icon: 'fas fa-list-check',
+                icon: 'fas fa-tasks',
             },
             {
                 title: 'Clone',

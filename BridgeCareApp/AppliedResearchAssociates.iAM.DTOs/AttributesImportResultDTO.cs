@@ -9,5 +9,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class AttributesImportResultDTO: WarningServiceResultDTO
     {
+        public Guid? NetworkId { get; set; }
     }
 }

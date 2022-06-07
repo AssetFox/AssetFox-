@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
@@ -73,8 +75,9 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             }
             Func<KeyValuePair<int, string>, bool> dateTimeColumnPredicate =
                 kvp => kvp.Value.Equals(inspectionDateColumnName, StringComparison.OrdinalIgnoreCase);
-            var dateTimeColumnIndex = columnNameDictionary.FirstOrDefault(dateTimeColumnPredicate);
-            if (dateTimeColumnIndex.Key <= 0)
+            var inspectionDateColumnPair = columnNameDictionary.FirstOrDefault(dateTimeColumnPredicate);
+            var inspectionDateColumnIndex = inspectionDateColumnPair.Key;
+            if (inspectionDateColumnIndex <= 0)
             {
                 var allColumnNames = string.Join(", ", columnNameList);
                 var warningMessage = $"{InspectionDateColumn} {inspectionDateColumnName} not found. The column names we did find were {allColumnNames}";
@@ -89,7 +92,7 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             var columnIndexAttributeDictionary = new Dictionary<int, AttributeDTO>();
             foreach (var columnIndex in columnNameDictionary.Keys)
             {
-                if (columnIndex != keyColumnIndex)
+                if (columnIndex != keyColumnIndex && columnIndex != inspectionDateColumnIndex)
                 {
                     var attributeName = columnNameDictionary[columnIndex];
                     var attribute = allAttributes.FirstOrDefault(a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase));
@@ -126,8 +129,18 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
                     var location = new SectionLocation(Guid.NewGuid(), assetName);
                     var maintainableAssetId = Guid.NewGuid();
                     var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); // wjwjwj this "[Deck_Area]" is wrong and will need to change
-                    // assign attributes here?
-                    // 
+                    var inspectionDateObject = worksheet.Cells[assetRowIndex, inspectionDateColumnIndex].Value;
+                    DateTime inspectionDate = DateTime.MinValue;
+                    if (inspectionDateObject is DateTime inspectionDateObjectDate)
+                    {
+                        inspectionDate = inspectionDateObjectDate;
+                    }
+                    foreach (var attributeColumnIndex in columnIndexAttributeDictionary.Keys)
+                    {
+                        var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
+                        var attributeValue = worksheet.Cells[assetRowIndex, attributeColumnIndex].Value;
+                        var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
+                    }
                     maintainableAssets.Add(newAsset);
                 }
             }
@@ -135,8 +148,18 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             var newNetwork = new Network(maintainableAssets, networkId, networkName);
             _unitOfWork.NetworkRepo.CreateNetwork(newNetwork);
             // If we have reached this point, we should add a new Network to our database based on the spreadsheet values
+            return new AttributesImportResultDTO
+            {
+                NetworkId = newNetwork.Id,
+            };
+        }
 
-            throw new NotImplementedException();
+        private AttributeDatum<string> CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
+        {
+            var domainAttribute = AttributeMapper.ToDomain(attribute);
+            var attributeId = Guid.NewGuid();
+            var returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
+            return returnValue;
         }
 
         private static int FindKeyColumnIndex(string keyColumnName, ExcelRange cells, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)

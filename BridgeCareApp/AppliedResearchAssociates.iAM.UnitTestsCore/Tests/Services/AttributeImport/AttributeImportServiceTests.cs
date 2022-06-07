@@ -106,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var randomString = RandomStrings.Length11();
-            excelPackage.Workbook.Worksheets[0].Cells[1, 3].Value = randomString;
+            excelPackage.Workbook.Worksheets[0].Cells[1, 4].Value = randomString;
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
@@ -124,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
-            Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
+            Assert.True(string.IsNullOrEmpty(warningMessage)); 
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var worksheet = excelPackage.Workbook.Worksheets[0];
             worksheet.Cells[3, 1].Value = worksheet.Cells[2, 1].Value;
             var service = CreateAttributeImportService();
-            var result = service.ImportExcelAttributes("BRKEY", SpatialWeighting, InspectionDateColumnTitle, excelPackage);
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.WasFoundInRow, warningMessage);
         }

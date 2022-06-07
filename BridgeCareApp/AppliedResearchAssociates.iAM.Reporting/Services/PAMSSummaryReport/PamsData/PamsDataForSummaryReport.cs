@@ -47,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 "BPN",
 
                 "Year Built",
-                "Year Last ResurfaceYear Last  Structural overlay",
+                "Year Last Resurface",
+                "Year Last  Structural overlay",
 
                 "ADT",
                 "Truck %",
@@ -111,11 +112,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             int headerRow = 1;
             for (int column = 0; column < headers.Count; column++) {
                 worksheet.Cells[headerRow, column + 1].Value = headers[column];
+                ExcelHelper.MergeCells(worksheet, headerRow, column + 1, headerRow + 1, column + 1);
             }
 
-            //ExcelHelper.MergeCells(worksheet, 1, headers.Count, 1, headers.Count + 5);
-
-            var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count + 1 };
+            var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
             AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
             return currentCell;
         }
@@ -136,10 +136,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
 
-            worksheet.Cells[row, ++column].Value = "Work Done";
-            worksheet.Cells[row, ++column].Value = "Work Done more than once";
-            ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column], Color.FromArgb(244, 176, 132));
+            worksheet.Cells[row, ++column].Value = "Work Done"; 
+            worksheet.Cells[row, ++column].Value = "Work Done more than once";            
             worksheet.Cells[row, ++column].Value = "Total";
+
+            ExcelHelper.ApplyStyle(worksheet.Cells[row, column-2, row, column]);
+            ExcelHelper.ApplyColor(worksheet.Cells[row, column-2, row, column], Color.FromArgb(244, 176, 132));
 
             worksheet.Row(row).Height = 40;            
             currentCell.Column = column;
@@ -210,28 +212,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 //worksheet.Cells[rowNo, columnNo++].Value = facilityId;
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["CO_NO"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["CNTY"];
 
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ROUTE"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SEGMENT"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SR"];
+                worksheet.Cells[rowNo, columnNo++].Value = ""; //sectionSummary.ValuePerNumericAttribute["SEGMENT"];
 
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WIDTH"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["DEPTH"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WIDTH"];
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // sectionSummary.ValuePerNumericAttribute["DEPTH"];
 
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DIRECTION"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LANES"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["FAMILY"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["MPO_RPO"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SURFACE"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["BPN"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YEAR"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YEAR_LAST_RESURFACE"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YEAR_LAST_OVERLAY"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ADT"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["TRUCK"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["ESLAS"];
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RICK_SCORE"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DIRECTION"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LANES"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["MPO_RPO"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SURFACEID"] + "-" + sectionSummary.ValuePerTextAttribute["SURFACE_NAME"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUSIPLAN"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YR_BUILT"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YEAR_LAST_OVERLAY"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LAST_STRUCTURAL_OVERLAY"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AADT"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["TRK_PERCENT"];
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // sectionSummary.ValuePerNumericAttribute["ESLAS"];
+                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISKSCORE"];
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
             }

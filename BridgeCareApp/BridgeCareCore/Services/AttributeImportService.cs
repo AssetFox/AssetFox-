@@ -135,12 +135,15 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
                     {
                         inspectionDate = inspectionDateObjectDate;
                     }
+                    var attributeDataForAsset = new List<IAttributeDatum>();
                     foreach (var attributeColumnIndex in columnIndexAttributeDictionary.Keys)
                     {
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
                         var attributeValue = worksheet.Cells[assetRowIndex, attributeColumnIndex].Value;
                         var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
+                        attributeDataForAsset.Add(attributeDatum);
                     }
+                    newAsset.AssignAttributeData(attributeDataForAsset);
                     maintainableAssets.Add(newAsset);
                 }
             }

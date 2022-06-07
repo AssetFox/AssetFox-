@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
                 Name = network.Name
-            };
+            }; // unused . . . why do we create it?
             //_unitOfWork.Context.Upsert(networkEntity, networkEntity.Id, _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);

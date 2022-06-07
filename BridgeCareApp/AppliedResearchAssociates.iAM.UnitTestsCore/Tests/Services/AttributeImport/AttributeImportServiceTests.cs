@@ -124,7 +124,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
-            Assert.True(string.IsNullOrEmpty(warningMessage)); 
+            Assert.True(string.IsNullOrEmpty(warningMessage));
+            var networkId = result.NetworkId.Value;
+            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assetCount = assets.Count();
+            Assert.Equal(4, assetCount);
         }
 
         [Fact]
@@ -143,6 +147,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Assert.Contains(AttributeImportService.WasFoundInRow, warningMessage);
         }
 
+        [Fact]
         public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
         {
             // WjTodo -- write this 

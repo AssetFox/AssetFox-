@@ -19,6 +19,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         private const string SampleAttributeDataFilename = "SampleAttributeData.xlsx";
+        public const string SpatialWeighting = "[DECK_AREA]";
+        public const string BrKey = "BRKEY";
+        public const string InspectionDateColumnTitle = "Inspection_Date";
         private AttributeImportService CreateAttributeImportService()
         {
             var returnValue = new AttributeImportService(_testHelper.UnitOfWork);
@@ -66,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var service = CreateAttributeImportService();
-            var importResult = service.ImportExcelAttributes("", excelPackage);
+            var importResult = service.ImportExcelAttributes("", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warning = importResult.WarningMessage;
             Assert.Equal(AttributeImportService.NonemptyKeyIsRequired, warning);
         }
@@ -78,10 +81,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var service = CreateAttributeImportService();
-            var result = service.ImportExcelAttributes("nonExistentColumn", excelPackage);
+            var result = service.ImportExcelAttributes("nonExistentColumn", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoColumnFoundForId, warningMessage);
         }
+
+        [Fact]
+        public void ImportSpreadsheet_InspectionDateColumnTitleIsNotColumnTitle_FailsWithWarning()
+        {
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes(BrKey, "NonexistentColumn", SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.InspectionDateColumn, warningMessage);
+        }
+
         [Fact]
         public void ImportSpreadsheet_ColumnHeaderIsNotAttributeName_FailsWithWarning()
         {
@@ -92,12 +108,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var randomString = RandomStrings.Length11();
             excelPackage.Workbook.Worksheets[0].Cells[1, 3].Value = randomString;
             var service = CreateAttributeImportService();
-            var result = service.ImportExcelAttributes("BRKEY", excelPackage);
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         }
 
-        [Fact (Skip = "putting this aside for now WjTodo")]
+        [Fact]
         public void ImportSpreadsheet_ColumnHeaderIsAttributeName_IdkWhat()
         {
             _testHelper.CreateAttributes();
@@ -106,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var service = CreateAttributeImportService();
-            var result = service.ImportExcelAttributes("BRKEY", excelPackage);
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         }
@@ -122,9 +138,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var worksheet = excelPackage.Workbook.Worksheets[0];
             worksheet.Cells[3, 1].Value = worksheet.Cells[2, 1].Value;
             var service = CreateAttributeImportService();
-            var result = service.ImportExcelAttributes("BRKEY", excelPackage);
+            var result = service.ImportExcelAttributes("BRKEY", SpatialWeighting, InspectionDateColumnTitle, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.WasFoundInRow, warningMessage);
+        }
+
+        public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
+        {
+            // WjTodo -- write this 
+
         }
     }
 }

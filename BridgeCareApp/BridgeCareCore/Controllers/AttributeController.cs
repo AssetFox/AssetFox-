@@ -119,7 +119,10 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("ImportAttributesExcelFile")]
         [Authorize]
-        public async Task<IActionResult> ImportAttributesExcelFile(string keyColumnName)
+        public async Task<IActionResult> ImportAttributesExcelFile(
+            string keyColumnName,
+            string inspectionDateColumnName,
+            string spatialWeighting)
         {
             try
             {
@@ -137,7 +140,7 @@ namespace BridgeCareCore.Controllers
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _attributeImportService.ImportExcelAttributes(keyColumnName, excelPackage);
+                    return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
                 });
 
                 if (result.WarningMessage != null)

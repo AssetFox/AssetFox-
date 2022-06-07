@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -29,6 +30,7 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
         public const string WasFoundInRow = "was found in row";
         public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
+        public const string InspectionDateColumn = "InspectionDate column";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -37,7 +39,11 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             _unitOfWork = unitOfWork;
         }
 
-        public AttributesImportResultDTO ImportExcelAttributes(string keyColumnName, ExcelPackage excelPackage)
+        public AttributesImportResultDTO ImportExcelAttributes(
+            string keyColumnName,
+            string inspectionDateColumnName,
+            string spatialWeightingValue,
+            ExcelPackage excelPackage)
         {
             if (string.IsNullOrWhiteSpace(keyColumnName))
             {
@@ -60,6 +66,18 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             if (keyColumnIndex == -1)
             {
                 var warningMessage = BuildKeyNotFoundWarningMessage(keyColumnName, columnNameDictionary);
+                return new AttributesImportResultDTO
+                {
+                    WarningMessage = warningMessage,
+                };
+            }
+            Func<KeyValuePair<int, string>, bool> dateTimeColumnPredicate =
+                kvp => kvp.Value.Equals(inspectionDateColumnName, StringComparison.OrdinalIgnoreCase);
+            var dateTimeColumnIndex = columnNameDictionary.FirstOrDefault(dateTimeColumnPredicate);
+            if (dateTimeColumnIndex.Key <= 0)
+            {
+                var allColumnNames = string.Join(", ", columnNameList);
+                var warningMessage = $"{InspectionDateColumn} {inspectionDateColumnName} not found. The column names we did find were {allColumnNames}";
                 return new AttributesImportResultDTO
                 {
                     WarningMessage = warningMessage,
@@ -92,19 +110,24 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             var foundAssetNames = new Dictionary<string, int>();
             for (var assetRowIndex = 2; assetRowIndex <= endRow; assetRowIndex++)
             {
-                var assetName = worksheet.Cells[assetRowIndex, 1]?.Value.ToString();
-                var lowercaseAssetName = assetName.ToLowerInvariant();
-                if (foundAssetNames.ContainsKey(lowercaseAssetName))
+                var assetName = worksheet.Cells[assetRowIndex, keyColumnIndex]?.Value?.ToString();
+                if (!string.IsNullOrWhiteSpace(assetName))
                 {
-                    var warningMessage = $"The asset name {assetName} {WasFoundInRow} {foundAssetNames[lowercaseAssetName]} and row {assetRowIndex}. This is not allowed.";
-                    return new AttributesImportResultDTO
+                    var lowercaseAssetName = assetName.ToLowerInvariant();
+                    if (foundAssetNames.ContainsKey(lowercaseAssetName))
                     {
-                        WarningMessage = warningMessage,
-                    };
-                }
-                foundAssetNames[lowercaseAssetName] = assetRowIndex;
-                if (!string.IsNullOrWhiteSpace(assetName)) {
-                    var newAsset = new MaintainableAsset(Guid.NewGuid(), networkId, null, "spatialWeighting");
+                        var warningMessage = $"The asset name {assetName} {WasFoundInRow} {foundAssetNames[lowercaseAssetName]} and row {assetRowIndex}. This is not allowed.";
+                        return new AttributesImportResultDTO
+                        {
+                            WarningMessage = warningMessage,
+                        };
+                    }
+                    foundAssetNames[lowercaseAssetName] = assetRowIndex;
+                    var location = new SectionLocation(Guid.NewGuid(), assetName);
+                    var maintainableAssetId = Guid.NewGuid();
+                    var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); // wjwjwj this "[Deck_Area]" is wrong and will need to change
+                    // assign attributes here?
+                    // 
                     maintainableAssets.Add(newAsset);
                 }
             }
@@ -119,7 +142,7 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
         private static int FindKeyColumnIndex(string keyColumnName, ExcelRange cells, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
         {
             var keyColumnIndex = -1;
-            for (var columnIndex = 2; columnIndex <= rowLength; columnIndex++)
+            for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
             {
                 var cellValue = cells[rowIndex, columnIndex].Value?.ToString();
                 if (cellValue == null)
@@ -127,7 +150,7 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
                     break;
                 }
                 columnNameDictionary[columnIndex] = cellValue;
-                columnNameList.Append(cellValue);
+                columnNameList.Add(cellValue);
                 if (keyColumnName.Equals(cellValue, StringComparison.OrdinalIgnoreCase))
                 {
                     keyColumnIndex = columnIndex;

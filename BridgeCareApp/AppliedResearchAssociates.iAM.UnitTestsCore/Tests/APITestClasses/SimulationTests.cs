@@ -461,8 +461,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        [Fact]
-        // WjFix -- saw a HeisenFailure when running all the tests in this class. On other attempts, it has succeeded.
+        [Fact] // WjTodo -- seems to be some connection with other tests here. For example I had a failure in an "unrelated" attribute import test that fried it.
         public async Task ShouldDeleteSimulation()
         {
             var service = Setup();

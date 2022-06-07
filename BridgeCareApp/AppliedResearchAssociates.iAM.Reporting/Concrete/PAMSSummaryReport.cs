@@ -144,31 +144,31 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
-            var simulation = network.Simulations.First();
-            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null); // to do: bimal
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            //var simulation = network.Simulations.First();
+            //_unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            //_unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null); // to do: bimal
+            //_unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
-            var yearlyBudgetAmount = new Dictionary<string, Budget>();
-            foreach (var budget in simulation.InvestmentPlan.Budgets)
-            {
-                if (!yearlyBudgetAmount.ContainsKey(budget.Name))
-                {
-                    yearlyBudgetAmount.Add(budget.Name, budget);
-                }
-                else
-                {
-                    yearlyBudgetAmount[budget.Name] = budget;
-                }
-            }
+            //var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            //foreach (var budget in simulation.InvestmentPlan.Budgets)
+            //{
+            //    if (!yearlyBudgetAmount.ContainsKey(budget.Name))
+            //    {
+            //        yearlyBudgetAmount.Add(budget.Name, budget);
+            //    }
+            //    else
+            //    {
+            //        yearlyBudgetAmount[budget.Name] = budget;
+            //    }
+            //}
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
-            // Simulation parameters TAB
-            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
-            reportDetailDto.Status = $"Creating Pams Data TAB";
-            UpdateSimulationAnalysisDetail(reportDetailDto);
+            //// Simulation parameters TAB
+            //var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            //reportDetailDto.Status = $"Creating Pams Data TAB";
+            //UpdateSimulationAnalysisDetail(reportDetailDto);
 
             // PAMS Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
@@ -191,6 +191,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //return value
             return functionReturnValue;
         }
+
 
 
         private byte[] FetchFromFileLocation(Guid networkId, Guid simulationId)

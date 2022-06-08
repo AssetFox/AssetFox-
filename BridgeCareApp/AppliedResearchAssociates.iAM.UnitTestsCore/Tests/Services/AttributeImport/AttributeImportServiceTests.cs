@@ -170,5 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
             
         }
+
+        // WjTodo -- after writing that the 7 test failures were "consistent" over 3 trials, I tried moving the repo back then forward, and the failures went away. Then Running just UnitTestsCore saw 24 failures.
     }
 }

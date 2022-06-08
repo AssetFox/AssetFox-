@@ -42,9 +42,15 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             if (ContextAccessor?.HttpContext?.Request != null)
             {
-                return !PathsToIgnore.Any(pathToIgnore =>
+                var returnValue = !PathsToIgnore.Any(pathToIgnore =>
                     ContextAccessor.HttpContext.Request.Path.Value.Contains(pathToIgnore));
+                if (returnValue)
+                {
+                    return returnValue;
+                }
+                throw new Exception("Funny business with PathsToIgnore!!!");
             }
+            throw new Exception("No bearer!!!!!!");
 
             return false;
         }

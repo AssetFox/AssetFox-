@@ -38,9 +38,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private BudgetPriorityController CreateAuthorizedController()
         {
-            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityAuthorized.Object,
+            var controller = new BudgetPriorityController(
+                _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }
 

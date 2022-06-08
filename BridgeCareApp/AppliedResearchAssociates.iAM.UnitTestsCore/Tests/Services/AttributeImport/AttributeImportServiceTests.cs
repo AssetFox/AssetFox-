@@ -136,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Assert.True(string.IsNullOrEmpty(warningMessage));
             var networkId = result.NetworkId.Value;
             var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
-            var assetCount = assets.Count();
+            var assetCount = assets.Count;
             Assert.Equal(4, assetCount);
         }
 

@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public double GetValueRelativeToLimit(double benefit) => Math.Max(0, _LimitValue(benefit));
 
-        internal double GetNetworkCondition(IEnumerable<SectionContext> network)
+        internal double GetNetworkCondition(IEnumerable<AssetContext> network)
         {
             var networkSpatialWeight = network.Sum(context => context.GetSpatialWeight());
             var networkCondition = network.Sum(context => GetValueRelativeToLimit(context.GetNumber(Attribute.Name)) * context.GetSpatialWeight()) / networkSpatialWeight;

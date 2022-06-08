@@ -4,20 +4,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 {
     public static class DistrictTotalsSectionDetailPredicates
     {
-        public static bool IsTurnpike(SectionDetail section)
+        public static bool IsTurnpike(AssetDetail section)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
             var returnValue = ownerCode.Trim() == "31";
             return returnValue;
         }
 
-        public static bool IsCommittedProject(SectionDetail section)
+        public static bool IsCommittedProject(AssetDetail section)
         {
             var returnValue = section.TreatmentCause == TreatmentCause.CommittedProject;
             return returnValue;
         }
 
-        public static bool IsDistrictNotTurnpike(SectionDetail section, int districtNumber)
+        public static bool IsDistrictNotTurnpike(AssetDetail section, int districtNumber)
         {
             var actualDistrict = section.ValuePerTextAttribute["DISTRICT"];
             var isTurnpike = IsTurnpike(section);
@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return returnValue;
         }
 
-        public static bool IsNumberedDistrictMpmsTable(SectionDetail section, int districtNumber)
+        public static bool IsNumberedDistrictMpmsTable(AssetDetail section, int districtNumber)
         {
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-        public static bool IsNumberedDistrictBamsTable(SectionDetail section, int districtNumber)
+        public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
             var committed = IsCommittedProject(section);
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return district && !committed;
         }
 
-        public static bool IsCommittedTurnpike(SectionDetail section)
+        public static bool IsCommittedTurnpike(AssetDetail section)
         {
             bool committed = IsCommittedProject(section);
             bool turnpike = IsTurnpike(section);
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-        public static bool IsTurnpikeButNotCommitted(SectionDetail section)
+        public static bool IsTurnpikeButNotCommitted(AssetDetail section)
         {
             bool committed = IsCommittedProject(section);
             bool turnpike = IsTurnpike(section);

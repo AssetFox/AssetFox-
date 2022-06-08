@@ -46,9 +46,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal abstract bool CanUseBudget(Budget budget);
 
-        internal abstract IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope);
+        internal abstract IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope);
 
-        internal abstract double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts);
+        internal abstract double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts);
 
         private const int DEFAULT_SHADOW = 1;
 

@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var consequence = committedProject.Consequences.GetAdd(new TreatmentConsequence());
             consequence.Id = entity.Id;
             consequence.Change.Expression = entity.ChangeValue;
-            consequence.Attribute = committedProject.Section.Facility.Network.Explorer.NumberAttributes
+            consequence.Attribute = committedProject.Asset.Network.Explorer.NumberAttributes
                 .Single(_ => _.Name == entity.Attribute.Name);
         }
     }

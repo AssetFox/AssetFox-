@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.MaintainableAssets.Any())
             {
-                entity.MaintainableAssets.ForEach(_ => _.CreateFacility(network));
+                entity.MaintainableAssets.ForEach(_ => _.CreateMaintainableAsset(network));
             }
 
             return network;

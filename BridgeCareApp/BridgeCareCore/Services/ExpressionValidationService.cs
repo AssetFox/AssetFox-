@@ -149,7 +149,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter)
+        public CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression, UserCriteriaDTO currentUserCriteriaFilter, Guid networkId)
         {
             try
             {
@@ -209,7 +209,7 @@ namespace BridgeCareCore.Services
                     customAttribute.Add((attribute.Name, attribute.DataType));
                 }
 
-                var resultsCount = GetResultsCount(modifiedExpression, customAttribute);
+                var resultsCount = GetResultsCount(modifiedExpression, customAttribute, networkId);
 
                 return new CriterionValidationResult
                 {
@@ -365,7 +365,7 @@ namespace BridgeCareCore.Services
                 flattenedDataTable.Rows.Add(row);
             });
 
-        private int GetResultsCount(string expression, List<(string name, string dataType)> attributes)
+        private int GetResultsCount(string expression, List<(string name, string dataType)> attributes, Guid networkId)
         {
             var flattenedDataTable = CreateFlattenedDataTable(attributes);
 
@@ -375,8 +375,8 @@ namespace BridgeCareCore.Services
                 attributeNames.Add(attribute.name);
             }
 
-            var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult
-                .Where(_ => attributeNames.Contains(_.Attribute.Name))
+            var valuePerAttributeNamePerMaintainableAssetId = _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
                 .Select(aggregatedResult => new AggregatedResultEntity
                 {
                     MaintainableAssetId = aggregatedResult.MaintainableAssetId,

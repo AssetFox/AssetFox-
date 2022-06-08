@@ -12,6 +12,7 @@ export interface CriterionValidationResult extends ValidationResult {
 export interface ValidationParameter {
     expression: string;
     currentUserCriteriaFilter: UserCriteriaFilter;
+    networkId: string;
 }
 
 export interface EquationValidationParameters extends ValidationParameter {

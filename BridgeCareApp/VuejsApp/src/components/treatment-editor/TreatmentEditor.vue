@@ -1,82 +1,93 @@
 <template>
     <v-layout column>
-        <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click='onShowCreateTreatmentLibraryDialog(false)'
-                        class='ara-blue-bg white--text'
-                        v-show='!hasScenario'
-                    >
-                        New Library
-                    </v-btn>
+        <v-flex>
+            <v-layout>
+                <v-flex>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                     <v-select
                         :items='librarySelectItems'
-                        class='treatment-library-select'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
-                        outline
-                        v-if='!hasSelectedLibrary || hasScenario'
+                        outline                        
                         v-model='librarySelectItemValue'
                     >
                     </v-select>
-                    <v-text-field
-                        v-if='hasSelectedLibrary && !hasScenario'
-                        label='Treatment Library Name'
-                        v-model='selectedTreatmentLibrary.name'
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                </v-flex>
+                <v-flex>                       
+                    <v-subheader class="ghd-control-label ghd-md-gray">Treatment</v-subheader>
+                    <v-select
+                        :items='treatmentSelectItems'
+                        class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
+                        label='Select'
+                        outline                        
+                        v-model='treatmentSelectItemValue'
                     >
-                        <template slot='append'>
-                            <v-btn
-                                @click='librarySelectItemValue = null'
-                                class='ara-orange'
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        class='sharing'
-                        label='Shared'
-                        v-if='hasSelectedLibrary && !hasScenario'
-                        v-model='selectedTreatmentLibrary.isShared'
-                    />
+                    </v-select>
+                </v-flex>
+                <v-flex xs4>
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
+                        <div class="ghd-control-label" style="padding-top: 12px !important">
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
+                        </div>  
+                        <div style="margin-top: -8px !important">                     
+                        <v-checkbox
+                            class='sharing ghd-control-text ghd-padding'
+                            label='Shared'                            
+                            v-model='selectedTreatmentLibrary.isShared'
+                        /> 
+                        </div>                                              
+                    </v-layout>
+                </v-flex>
+                <v-flex xs2>
+                    <v-btn
+                        @click='onShowCreateTreatmentLibraryDialog(false)'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                        v-show='!hasScenario'
+                    >
+                        Create New Library
+                    </v-btn>                  
+                    <v-btn
+                        @click='showCreateTreatmentDialog = true'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                        v-show='hasScenario'
+                    >
+                        Add Treatment
+                    </v-btn>
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
+        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>        
+        <div v-show='hasSelectedLibrary || hasScenario' style="width:100%;margin-top: -20px; margin-bottom: -25px;">
+               <v-btn
+                    @click='showCreateTreatmentDialog = true'
+                    depressed
+                    class='ghd-white-bg ghd-blue ghd-button-text ghd-text-padding'                              
+                    style='float:right;'
+                    v-show='!hasScenario'
+                >
+                    Add Treatment
+                </v-btn>
+                <v-btn :disabled='false' @click='OnExportTreamentsClick()'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download
+                </v-btn> 
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
+                <v-btn :disabled='false' @click='showImportTreatmentsDialog = true'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Upload
+                </v-btn>
+            </div>    
+        <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>              
             <div class='treatments-div'>
-                <v-layout justify-center row>
-                    <v-flex xs3>
-                        <v-btn
-                            @click='showCreateTreatmentDialog = true'
-                            class='ara-blue-bg white--text'
-                        >
-                            Add Treatment
-                        </v-btn>
-                        <v-list class='treatments-list'>
-                            <template v-for='treatmentSelectItem in treatmentSelectItems'>
-                                <v-list-tile :key='treatmentSelectItem.value' ripple :class="{'selected-treatment-item': isSelectedTreatmentItem(treatmentSelectItem.value)}"
-                                             avatar @click='onSetTreatmentSelectItemValue(treatmentSelectItem.value)'>
-                                    <v-list-tile-content>
-                                        <span>{{treatmentSelectItem.text}}</span>
-                                    </v-list-tile-content>
-                                    <v-list-tile-action>
-                                        <v-btn @click="onDeleteTreatment(treatmentSelectItem.value)" class="ara-orange" icon>
-                                            <v-icon>fas fa-trash</v-icon>
-                                        </v-btn>
-                                    </v-list-tile-action>
-                                </v-list-tile>
-                            </template>
-                        </v-list>
-
-                    </v-flex>
-                    <v-flex xs9>
-                        <div v-show='selectedTreatment.id !== uuidNIL'>
+                <v-layout column> 
+                    <v-flex xs12>               
+                        <div v-show='selectedTreatment.id !== uuidNIL'>                                                
                             <v-tabs v-model='activeTab'>
                                 <v-tab
                                     :key='index'
@@ -89,7 +100,7 @@
                                 </v-tab>
                                 <v-tabs-items v-model='activeTab'>
                                     <v-tab-item>
-                                        <v-card>
+                                        <v-card style="border:none;">
                                             <v-card-text
                                                 class='card-tab-content'
                                             >
@@ -147,64 +158,69 @@
                                     </v-tab-item>
                                 </v-tabs-items>
                             </v-tabs>
-                        </div>
-                    </v-flex>
+                        </div>                                             
+                    </v-flex>                    
                 </v-layout>
-            </div>
-        </v-flex>
-        <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
-        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
-            <v-layout justify-center>
-                <v-flex xs6>
-                    <v-textarea
-                        label='Description'
+            </div>            
+        </v-flex>        
+        <v-flex xs12>
+            <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider>
+            <v-layout justify-center v-show='hasSelectedLibrary && !hasScenario'>
+                <v-flex xs12>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                    <v-textarea                        
+                        class='ghd-control-border ghd-control-text'
                         no-resize
                         outline
-                        rows='4'
+                        rows='2'
                         :value='selectedTreatmentLibrary.description'
                         @input='selectedTreatmentLibrary = {...selectedTreatmentLibrary, description: $event}'
                     />
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-flex xs12>
-            <v-layout justify-end row v-show='hasSelectedLibrary || hasScenario'>
+        <v-flex xs9>
+            <v-layout justify-center row v-show='(hasSelectedLibrary || hasScenario)'>
+                <v-btn :disabled='!hasUnsavedChanges'
+                    @click='onDiscardChanges'
+                    class='ghd-white-bg ghd-blue ghd-button-text'
+                    depressed
+                    v-show='hasScenario'
+                >
+                    Cancel
+                </v-btn>
+                <v-btn
+                    @click='onShowConfirmDeleteAlert'
+                    class='ghd-white-bg ghd-blue ghd-button-text'
+                    depressed
+                    v-show='!hasScenario'
+                    :disabled='!hasLibraryEditPermission'
+                >
+                    Delete Library
+                </v-btn>
+                <v-btn
+                    @click='onShowCreateTreatmentLibraryDialog(true)'
+                    class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'
+                    :disabled='disableCrudButtons()'
+                >
+                    Create as New Library
+                </v-btn>
                 <v-btn
                     @click='onUpsertScenarioTreatments'
-                    class='ara-blue-bg white--text'
+                    class='ghd-blue-bg ghd-white ghd-button-text'
+                    depressed
                     v-show='hasScenario'
                     :disabled='disableCrudButtonsResult || !hasUnsavedChanges'>
                     Save
                 </v-btn>
                 <v-btn
                     @click='onUpsertTreatmentLibrary'
-                    class='ara-blue-bg white--text'
+                    class='ghd-blue-bg ghd-white ghd-button-text  ghd-text-padding'
+                    depressed
                     v-show='!hasScenario'
                     :disabled='disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges'
                 >
                     Update Library
-                </v-btn>
-                <v-btn
-                    @click='onShowCreateTreatmentLibraryDialog(true)'
-                    class='ara-blue-bg white--text'
-                    :disabled='disableCrudButtons()'
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    @click='onShowConfirmDeleteAlert'
-                    class='ara-orange-bg white--text'
-                    v-show='!hasScenario'
-                    :disabled='!hasLibraryEditPermission'
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges'
-                    @click='onDiscardChanges'
-                    class='ara-orange-bg white--text'
-                    v-show='hasSelectedLibrary || hasScenario'
-                >
-                    Discard Changes
                 </v-btn>
             </v-layout>
         </v-flex>
@@ -223,6 +239,9 @@
             :showDialog='showCreateTreatmentDialog'
             @submit='onAddTreatment'
         />
+
+        <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
+            @submit='onSubmitImportTreatmentsDialogResult' />
     </v-layout>
 </template>
 
@@ -247,6 +266,7 @@ import {
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
+    TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
 import {
@@ -277,9 +297,18 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-changes-helper';
 import { getUserName } from '@/shared/utils/get-user-info';
+import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
+import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
+import Treatmentservice from '@/services/treatment.service';
+import { AxiosResponse } from 'axios';
+import { FileInfo } from '@/shared/models/iAM/file-info';
+import FileDownload from 'js-file-download';
+import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { hasValue } from '@/shared/utils/has-value-util';
 
 @Component({
     components: {
+        ImportExportTreatmentsDialog,
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
@@ -316,6 +345,10 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+    @Action('importScenarioTreatmentsFile')
+    importScenarioTreatmentsFileAction: any;
+    @Action('importLibraryTreatmentsFile')
+    importLibraryTreatmentsFileAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -330,7 +363,7 @@ export default class TreatmentEditor extends Vue {
     selectedTreatment: Treatment = clone(emptyTreatment);
     selectedTreatmentDetails: TreatmentDetails = clone(emptyTreatmentDetails);
     activeTab: number = 0;
-    treatmentTabs: string[] = ['details', 'costs', 'consequences'];
+    treatmentTabs: string[] = ['Treatment Details', 'Costs', 'Consequences'];
     createTreatmentLibraryDialogData: CreateTreatmentLibraryDialogData = clone(
         emptyCreateTreatmentLibraryDialogData,
     );
@@ -345,6 +378,7 @@ export default class TreatmentEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
+    showImportTreatmentsDialog: boolean = false;    
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -363,7 +397,7 @@ export default class TreatmentEditor extends Vue {
                 vm.hasScenario = true;
                 vm.getScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
 
-                vm.treatmentTabs = [...vm.treatmentTabs, 'budgets'];
+                vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
                 vm.getScenarioSimpleBudgetDetailsAction({
                     scenarioId: vm.selectedScenarioId,
                 });
@@ -708,6 +742,39 @@ export default class TreatmentEditor extends Vue {
         this.disableCrudButtonsResult = !allDataIsValid;
         return !allDataIsValid;
     }
+
+     onSubmitImportTreatmentsDialogResult(result: ImportExportTreatmentsDialogResult) {
+        this.showImportTreatmentsDialog = false;
+
+        if (hasValue(result) && hasValue(result.file)) {
+            const data: TreatmentsFileImport = {
+                file: result.file
+            };
+
+            if (this.hasScenario) {
+                this.importScenarioTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedScenarioId
+                });
+            } else {
+                this.importLibraryTreatmentsFileAction({
+                    ...data,
+                    id: this.selectedTreatmentLibrary.id
+                });
+            }
+        }
+     }
+
+     OnExportTreamentsClick(){
+        const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedTreatmentLibrary.id;
+        Treatmentservice.exportTreatments(id, this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+     }
 }
 </script>
 
@@ -719,21 +786,18 @@ export default class TreatmentEditor extends Vue {
 }
 
 .treatments-div {
-    height: 355px;
+    height: 440px;
 }
 
 .card-tab-content {
-    height: 305px;
+    height: 430px;
     overflow-x: hidden;
     overflow-y: auto;
-}
-
-.treatment-library-select {
-    height: 60px;
+    border: none;
 }
 
 .sharing label {
-    padding-top: 0.5em;
+    padding-top: 0.7em;
 }
 
 .sharing {

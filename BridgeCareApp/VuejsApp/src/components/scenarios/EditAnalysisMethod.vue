@@ -7,7 +7,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
-                                class="ghd-control-border ghd-control-text"
+                                class="ghd-select ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -24,7 +24,7 @@
                         </v-flex>
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
-                            <v-select class="ghd-control-border ghd-control-text"
+                            <v-select class="ghd-select ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -41,7 +41,7 @@
                         <v-flex xs4>
                             <v-subheader class="ghd-control-label ghd-md-gray">Spending Strategy</v-subheader>
                             <v-select
-                                class="ghd-control-border ghd-control-text"
+                                class="ghd-select ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
                                 @change="
                                     onSetAnalysisMethodProperty(
@@ -60,7 +60,7 @@
                          <v-flex xs6>
                             <v-subheader class="ghd-control-label ghd-md-gray">Benefit Attribute</v-subheader>
                             <v-select
-                                class="ghd-control-text ghd-control-border"
+                                class="ghd-select ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
@@ -113,7 +113,7 @@
                             </v-textarea>
                         </v-flex>
                         <v-flex xs6>
-                            <v-layout row style="height=12px;padding-bottom:0px;">
+                            <v-layout style="height=12px;padding-bottom:0px;">
                                 <v-flex xs12 style="height=12px;padding-bottom:0px">
                                     <v-subheader class="ghd-control-label ghd-md-gray">                             
                                         Criteria</v-subheader>

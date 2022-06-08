@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ShouldUseExtraFundsAcrossBudgets = domain.ShouldUseExtraFundsAcrossBudgets
             };
 
-        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation)
+        public static void FillSimulationAnalysisMethod(this AnalysisMethodEntity entity, Simulation simulation, string userCriteria)
         {
             simulation.AnalysisMethod.Id = entity.Id;
             simulation.AnalysisMethod.Description = entity.Description;
@@ -32,8 +32,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.AnalysisMethod.ShouldApplyMultipleFeasibleCosts = entity.ShouldApplyMultipleFeasibleCosts;
             simulation.AnalysisMethod.ShouldDeteriorateDuringCashFlow = entity.ShouldDeteriorateDuringCashFlow;
             simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets;
+
+            var specifiedFilter = entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
             simulation.AnalysisMethod.Filter.Expression =
-                entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+                string.IsNullOrEmpty(userCriteria) ? specifiedFilter :
+                $"({userCriteria}) AND ({specifiedFilter})";
 
             if (entity.Attribute != null)
             {

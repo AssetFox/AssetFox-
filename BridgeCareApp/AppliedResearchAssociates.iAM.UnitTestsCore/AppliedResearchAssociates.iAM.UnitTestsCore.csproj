@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <PackageReference Include="EFCore.BulkExtensions" Version="6.2.8" />
-    <PackageReference Include="EPPlus" Version="5.7.5" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.12" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.12" />
@@ -39,6 +38,7 @@
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.TestHelpers\AppliedResearchAssociates.iAM.TestHelpers.csproj" />
     <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
   </ItemGroup>
 
@@ -71,6 +71,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="TestUtils\Files\TestCommittedProjects.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="xunit.runner.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
 using MoreLinq;
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.MaintainableAssets.Any())
             {
-                entity.MaintainableAssets.ForEach(_ => _.CreateFacility(network));
+                entity.MaintainableAssets.ForEach(_ => _.CreateMaintainableAsset(network));
             }
 
             return network;

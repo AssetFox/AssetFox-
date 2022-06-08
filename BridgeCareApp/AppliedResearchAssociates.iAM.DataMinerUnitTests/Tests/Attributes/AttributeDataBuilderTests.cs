@@ -1,8 +1,8 @@
 ﻿using Xunit;
 using Moq;
 using System;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
-using Attribute = AppliedResearchAssociates.iAM.DataMiner.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
         private void Init(string type)
         {
-            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, DataMiner.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, Data.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
             mockAttributeConnection = new Mock<AttributeConnection>(mockAttribute.Object);
             mockAttributeConnection.Setup(m => m.GetData<It.IsAnyType>()).Returns(new List<IAttributeDatum>());
         }

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
-using Network = AppliedResearchAssociates.iAM.DataAssignment.Networking.Network;
+using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -19,8 +19,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<Network> GetAllNetworks();
 
         NetworkEntity GetMainNetwork();
-
-        bool CheckPennDotNetworkHasData();
 
         Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
 

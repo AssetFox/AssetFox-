@@ -124,6 +124,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CriterionLibraryScenarioTreatmentSupersessionEntity> CriterionLibraryScenarioTreatmentSupersession { get; set; }
 
+        public virtual DbSet<DataSourceEntity> DataSource { get; set; }
+
         public virtual DbSet<DeficientConditionGoalEntity> DeficientConditionGoal { get; set; }
 
         public virtual DbSet<ScenarioDeficientConditionGoalEntity> ScenarioDeficientConditionGoal { get; set; }
@@ -131,8 +133,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
-
-        public virtual DbSet<FacilityEntity> Facility { get; set; }
 
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 
@@ -154,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
 
-        public virtual DbSet<SectionEntity> Section { get; set; }
+        public virtual DbSet<AnalysisMaintainableAssetEntity> AnalysisMaintainableAsset { get; set; }
 
         public virtual DbSet<SimulationEntity> Simulation { get; set; }
 
@@ -1160,6 +1160,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
+            modelBuilder.Entity<DataSourceEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.Type).IsRequired();
+
+                entity.Property(e => e.Secure).IsRequired();
+
+            });
+
             modelBuilder.Entity<DeficientConditionGoalEntity>(entity =>
             {
                 entity.HasIndex(e => e.DeficientConditionGoalLibraryId);
@@ -1221,20 +1233,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Expression).IsRequired();
-            });
-
-            modelBuilder.Entity<FacilityEntity>(entity =>
-            {
-                entity.HasIndex(e => e.NetworkId);
-
-                entity.Property(e => e.Name).IsRequired();
-
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.HasOne(d => d.Network)
-                    .WithMany(p => p.Facilities)
-                    .HasForeignKey(d => d.NetworkId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<InvestmentPlanEntity>(entity =>
@@ -1592,17 +1590,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<SectionEntity>(entity =>
+            modelBuilder.Entity<AnalysisMaintainableAssetEntity>(entity =>
             {
-                entity.HasIndex(e => e.FacilityId);
+                entity.HasIndex(e => e.NetworkId);
 
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.Facility)
-                    .WithMany(p => p.Sections)
-                    .HasForeignKey(d => d.FacilityId)
+                entity.HasOne(d => d.Network)
+                    .WithMany(p => p.AnalysisMaintainableAssets)
+                    .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -1995,7 +1993,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Value).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.NumericAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -2016,7 +2014,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.TextAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);

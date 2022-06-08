@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateAnalysisMethod(AnalysisMethod analysisMethod, Guid simulationId);
 
-        void GetSimulationAnalysisMethod(Simulation simulation);
+        void GetSimulationAnalysisMethod(Simulation simulation, string userCriteria);
 
         AnalysisMethodDTO GetAnalysisMethod(Guid simulationId);
 

@@ -32,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
-        private IAttributeMetaDataRepository _attributeMetaDataRepo;
         private IAttributeRepository _attributeRepo;
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
         private IBenefitRepository _benefitRepo;
@@ -45,14 +44,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private IFacilityRepository _facilityRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
         private IPerformanceCurveRepository _performanceCurveRepo;
         private ICalculatedAttributesRepository _calculatedAttributesRepo;
         private IRemainingLifeLimitRepository _remainingLifeLimitRepo;
-        private ISectionRepository _sectionRepo;
         private ISelectableTreatmentRepository _selectableTreatmentRepo;
         private ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
         private ISimulationLogRepository _simulationLogRepo;
@@ -70,14 +67,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private IReportIndexRepository _reportIndexRepo;
         private IAssetData _assetDataRepository;
         private IAnnouncementRepository _announcementRepo;
+        private IDataSourceRepository _dataSourceRepo;
 
         public IAggregatedResultRepository AggregatedResultRepo => _aggregatedResultRepo ??= new AggregatedResultRepository(this);
 
         public IAnalysisMethodRepository AnalysisMethodRepo => _analysisMethodRepo ??= new AnalysisMethodRepository(this);
 
         public IAttributeDatumRepository AttributeDatumRepo => _attributeDatumRepo ??= new AttributeDatumRepository(this);
-
-        public IAttributeMetaDataRepository AttributeMetaDataRepo => _attributeMetaDataRepo ??= new AttributeMetaDataRepository();
 
         public IAttributeRepository AttributeRepo => _attributeRepo ??= new AttributeRepository(this);
 
@@ -103,8 +99,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
 
-        public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(this);
-
         public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(this);
 
         public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
@@ -116,8 +110,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository(this);
 
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(this);
-
-        public ISectionRepository SectionRepo => _sectionRepo ??= new SectionRepository(this);
 
         public ISelectableTreatmentRepository SelectableTreatmentRepo => _selectableTreatmentRepo ??= new SelectableTreatmentRepository(this);
 
@@ -149,9 +141,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
-        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTMaintainableAssetDataRepository(this);
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new MaintainableAssetDataRepository(this);
 
         public IAnnouncementRepository AnnouncementRepo => _announcementRepo ??= new AnnouncementRepository(this);
+
+        public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
 
         public UserEntity UserEntity { get; private set; }
@@ -162,8 +156,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
 
-        public void SetUser(string username) =>
-            UserEntity = Context.User.SingleOrDefault(_ => _.Username == username);
+        public void SetUser(string username)
+        {
+            var user = Context.User
+                .Include(_ => _.UserCriteriaFilterJoin)
+                .FirstOrDefault(_ => _.Username == username);
+            UserEntity = user;
+        }
 
         public void AddUser(string username, string role)
         {

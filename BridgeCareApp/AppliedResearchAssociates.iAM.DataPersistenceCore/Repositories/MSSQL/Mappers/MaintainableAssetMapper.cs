@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
 
@@ -43,6 +43,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = domain.Id,
                 NetworkId = networkId,
                 SpatialWeighting = domain.SpatialWeighting
+            };
+
+        public static MaintainableAssetEntity ToEntity(this AnalysisMaintainableAsset asset, Guid networkId) =>
+            new MaintainableAssetEntity
+            {
+                Id = asset.Id,
+                NetworkId = networkId,
+                SpatialWeighting = asset.SpatialWeighting.Expression,
+                AssetName = asset.AssetName
+                SpatialWeighting = section.SpatialWeighting.Expression,
+                //Area = section.Area,
+                //AreaUnit = section.AreaUnit,
+                FacilityName = section.Facility.Name,
+                SectionName = section.Name
+                SpatialWeighting = section.SpatialWeighting.Expression,
+                //Area = section.Area,
+                //AreaUnit = section.AreaUnit,
+                FacilityName = section.Facility.Name,
+                SectionName = section.Name
             };
     }
 }

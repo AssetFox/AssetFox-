@@ -408,6 +408,16 @@
             @submit="onMigrateLegacySimulationSubmit"
         />
         <ShowAggregationDialog :dialogData="aggragateDialogData" />
+        <Alert
+            :dialogData="alertDataForDeletingCommittedProjects"
+            @submit="onDeleteCommittedProjectsSubmit"
+        />
+
+        <CommittedProjectsFileUploaderDialog
+            :showDialog="showImportExportCommittedProjectsDialog"
+            @submit="onSubmitImportExportCommittedProjectsDialogResult"
+            @delete="onDeleteCommittedProjects"
+        />
     </v-layout>
 </template>
 
@@ -452,6 +462,14 @@ import {
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import MigrateLegacySimulationDialog from '@/components/scenarios/scenarios-dialogs/MigrateLegacySimulationDialog.vue';
 import { Hub } from '@/connectionHub';
+import CommittedProjectsService from '@/services/committed-projects.service';
+import { AxiosResponse } from 'axios';
+import { http2XX } from '@/shared/utils/http-utils';
+import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import { FileInfo } from '@/shared/models/iAM/file-info';
+import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
+import FileDownload from 'js-file-download';
+import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 
 @Component({
     components: {
@@ -466,6 +484,8 @@ import { Hub } from '@/connectionHub';
         CreateNetworkDialog,
         ShareScenarioDialog,
         ShowAggregationDialog,
+        CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
+        Alert
     },
 })
 export default class Scenarios extends Vue {
@@ -632,6 +652,9 @@ export default class Scenarios extends Vue {
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
+    showImportExportCommittedProjectsDialog: boolean = false;
+    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    selectedScenarioId: string = "";
 
     aggragateDialogData: any = { showDialog: false };
 
@@ -690,8 +713,8 @@ export default class Scenarios extends Vue {
             this.getScenarioAnalysisDetailUpdate,
         );
         this.$statusHub.$on(
-            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
-            this.getSummaryReportStatus,
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            this.getReportStatus,
         );
 
         this.availableActions = {
@@ -701,6 +724,7 @@ export default class Scenarios extends Vue {
             share: 'share',
             clone: 'clone',
             delete: 'delete',
+            commitedProjects: 'commitedProjects'
         };
         this.actionItemsForSharedScenario = [
             {
@@ -719,6 +743,11 @@ export default class Scenarios extends Vue {
                 icon: 'fas fa-edit',
             },
             {
+                title: 'Committed Projects',
+                action: this.availableActions.commitedProjects,
+                icon: 'fas fa-tasks',
+            },
+            {
                 title: 'Clone',
                 action: this.availableActions.clone,
                 icon: 'fas fa-paste',
@@ -727,10 +756,10 @@ export default class Scenarios extends Vue {
                 title: 'Delete',
                 action: this.availableActions.delete,
                 icon: 'fas fa-trash',
-            },
+            }           
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
-        this.actionItems.splice(3, 0, {
+        this.actionItems.splice(4, 0, {
             title: 'Share',
             action: this.availableActions.share,
             icon: 'fas fa-users',
@@ -752,8 +781,8 @@ export default class Scenarios extends Vue {
             this.getScenarioAnalysisDetailUpdate,
         );
         this.$statusHub.$off(
-            Hub.BroadcastEventType.BroadcastSummaryReportGenerationStatusEvent,
-            this.getSummaryReportStatus,
+            Hub.BroadcastEventType.BroadcastReportGenerationStatusEvent,
+            this.getReportStatus,
         );
     }
 
@@ -977,7 +1006,7 @@ export default class Scenarios extends Vue {
         });
     }
 
-    getSummaryReportStatus(data: any) {
+    getReportStatus(data: any) {
         this.updateSimulationReportDetailAction({
             simulationReportDetail: data.simulationReportDetail,
         });
@@ -1001,6 +1030,83 @@ export default class Scenarios extends Vue {
             this.migrateLegacySimulationDataAction({
                 simulationId: legacySimulationId,
                 networkId: 'D7B54881-DD44-4F93-8250-3D4A630A4D3B',
+            });
+        }
+    }
+
+    onSubmitImportExportCommittedProjectsDialogResult(
+        result: ImportExportCommittedProjectsDialogResult,
+    ) {
+        this.showImportExportCommittedProjectsDialog = false;
+
+        if (hasValue(result)) {
+            if (result.isExport) {
+                CommittedProjectsService.exportCommittedProjects(
+                    this.selectedScenarioId,
+                ).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        const fileInfo: FileInfo = response.data as FileInfo;
+                        FileDownload(
+                            convertBase64ToArrayBuffer(fileInfo.fileData),
+                            fileInfo.fileName,
+                            fileInfo.mimeType,
+                        );
+                    }
+                });
+            } else {
+                if (hasValue(result.file)) {
+                    CommittedProjectsService.importCommittedProjects(
+                        result.file,
+                        result.applyNoTreatment,
+                        this.selectedScenarioId,
+                    ).then((response: AxiosResponse) => {
+                        if (
+                            hasValue(response, 'status') &&
+                            http2XX.test(response.status.toString())
+                        ) {
+                            this.addSuccessNotificationAction({
+                                message: 'Successful upload.',
+                                longMessage:
+                                    'Successfully uploaded committed projects.',
+                            });
+                        }
+                    });
+                } else {
+                    this.addErrorNotificationAction({
+                        message: 'No file selected.',
+                        longMessage:
+                            'No file selected to upload the committed projects.',
+                    });
+                }
+            }
+        }
+    }
+
+    onDeleteCommittedProjects() {
+        this.alertDataForDeletingCommittedProjects = {
+            showDialog: true,
+            heading: 'Are you sure?',
+            message:
+                "You are about to delete all of this scenario's committed projects.",
+            choice: true,
+        };
+    }
+
+    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+
+        if (doDelete) {
+            CommittedProjectsService.deleteCommittedProjects(
+                this.selectedScenarioId,
+            ).then((response: AxiosResponse) => {
+                if (
+                    hasValue(response) &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    this.addSuccessNotificationAction({
+                        message: 'Committed projects have been deleted.',
+                    });
+                }
             });
         }
     }
@@ -1034,6 +1140,10 @@ export default class Scenarios extends Vue {
                 break;
             case this.availableActions.delete:
                 this.onShowConfirmDeleteAlert(scenario);
+                break;
+            case this.availableActions.commitedProjects:
+                this.selectedScenarioId = scenario.id;
+                this.showImportExportCommittedProjectsDialog = true;
                 break;
         }
     }

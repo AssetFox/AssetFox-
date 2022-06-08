@@ -1,8 +1,8 @@
-﻿<template>
+<template>
     <v-layout column>
-        <v-layout row>
+        <v-layout>
             <v-card
-                class="mx-auto"
+                class="mx-auto ghd-sidebar-scenario"
                 height="100%"
                 elevation="0"
                 style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
@@ -39,7 +39,7 @@
                     </v-btn>
                 </div>
             </v-card>
-            <v-flex xs12>
+            <v-flex xs12 class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>
@@ -123,7 +123,7 @@ export default class EditScenario extends Vue {
             },
         },
         {
-            tabName: 'Performance Curve',
+            tabName: 'Deterioration Model',
             tabIcon: 'fas fa-chart-line',
             navigation: {
                 path: '/PerformanceCurveEditor/Scenario/',

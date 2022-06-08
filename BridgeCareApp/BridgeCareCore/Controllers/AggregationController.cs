@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataAssignment.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignment.Networking;
-using AppliedResearchAssociates.iAM.DataMiner;
-using AppliedResearchAssociates.iAM.DataMiner.Attributes;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -39,7 +41,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributeDTOs)
         {
             try
             {
@@ -61,7 +63,7 @@ namespace BridgeCareCore.Controllers
                         UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
                         // Get/create configurable attributes
-                        var configurationAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes().ToList();
+                        var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
 
                         var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 
@@ -183,7 +185,7 @@ namespace BridgeCareCore.Controllers
 
                         try
                         {
-                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets);
+                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, attributeDTOs);
                         }
                         catch(Exception e)
                         {

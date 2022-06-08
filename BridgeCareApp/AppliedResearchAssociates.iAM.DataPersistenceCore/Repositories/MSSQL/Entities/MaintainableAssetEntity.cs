@@ -16,6 +16,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid NetworkId { get; set; }
 
+        public string AssetName { get; set; }
+
         public string SpatialWeighting { get; set; }
 
         public virtual NetworkEntity Network { get; set; }

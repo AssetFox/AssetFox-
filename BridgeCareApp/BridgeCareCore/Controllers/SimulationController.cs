@@ -52,7 +52,7 @@ namespace BridgeCareCore.Controllers
             }
 
             IQueuedWorkHandle RunAnySimulation(Guid networkId, Guid simulationId) =>
-                _simulationAnalysis.CreateAndRun(networkId, simulationId);
+                _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo);
 
             IQueuedWorkHandle RunPermittedSimulation(Guid networkId, Guid simulationId)
             {

@@ -163,6 +163,43 @@ const actions = {
             },
         );
     },
+    async importScenarioTreatmentsFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await TreatmentService.importTreatments(
+            payload.file,
+            payload.id,
+            true
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const Treatments: Treatment[] = response.data as Treatment[];
+                commit('scenarioSelectableTreatmentsMutator', Treatments);
+                dispatch('addSuccessNotification', {
+                    message: 'Treatments file imported',
+                });
+            }
+        });
+    },
+    async importLibraryTreatmentsFile(
+        { commit, dispatch }: any,
+        payload: any,
+    ) {
+        await TreatmentService.importTreatments(
+            payload.file,
+            payload.id,
+            false
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                const library: TreatmentLibrary = response.data as TreatmentLibrary;
+                commit('treatmentLibrariesMutator', library);
+                commit('selectedTreatmentLibraryMutator', library.id);               
+                dispatch('addSuccessNotification', {
+                    message: 'Treatments Models file imported',
+                });
+            }
+        });
+    },
 };
 
 const getters = {};

@@ -8,9 +8,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public NetworkEntity()
         {
-            MaintainableAssets = new HashSet<MaintainableAssetEntity>();
             Simulations = new HashSet<SimulationEntity>();
-            Facilities = new HashSet<FacilityEntity>();
+
+            // Looks weird because sections and maintainable assets are identical conceptually, but
+            // I think these two collections exist because one is for entities that correspond to
+            // non-analysis "maintainable assets" and the other is for entities that correspond to
+            // analysis "maintainable assets", which used to be called "sections".
+            MaintainableAssets = new HashSet<MaintainableAssetEntity>();
+            AnalysisMaintainableAssets = new HashSet<AnalysisMaintainableAssetEntity>();
         }
 
         public Guid Id { get; set; }
@@ -25,6 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<SimulationEntity> Simulations { get; set; }
 
-        public virtual ICollection<FacilityEntity> Facilities { get; set; }
+        public virtual ICollection<AnalysisMaintainableAssetEntity> AnalysisMaintainableAssets { get; set; }
     }
 }

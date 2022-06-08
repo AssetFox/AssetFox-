@@ -27,6 +27,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
     <DefineConstants>DEBUG;TRACE;Test</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Reports\**" />
+    <Content Remove="Reports\**" />
+    <EmbeddedResource Remove="Reports\**" />
+    <None Remove="Reports\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="tempIds.json" />
@@ -57,7 +63,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.CalculateEvaluate\AppliedResearchAssociates.CalculateEvaluate.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataAssignment\AppliedResearchAssociates.iAM.DataAssignment.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
   </ItemGroup>
@@ -102,6 +107,7 @@
   <ItemGroup>
     <Folder Include="Helpers\LocationMatching\" />
     <Folder Include="Interfaces\Inventory\" />
+    <Folder Include="MetaData\AttributeMetaData\" />
     <Folder Include="Services\SummaryReport\Models\" />
   </ItemGroup>
 

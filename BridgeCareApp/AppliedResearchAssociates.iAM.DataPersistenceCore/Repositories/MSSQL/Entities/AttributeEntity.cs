@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataMiner;
+using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
@@ -47,6 +47,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public string Command { get; set; }
 
         public ConnectionType ConnectionType { get; set; }
+
+        public DataSourceEntity DataSource { get; set; }
 
         public string DefaultValue { get; set; }
 

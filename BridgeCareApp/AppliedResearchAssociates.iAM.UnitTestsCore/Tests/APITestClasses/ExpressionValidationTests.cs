@@ -254,30 +254,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldValidateCriterion()
         {
             // Arrange
-            try
+            var controller = SetupController();
+            var model = new ValidationParameter
             {
-                var controller = SetupController();
-                var model = new ValidationParameter
-                {
-                    CurrentUserCriteriaFilter = new UserCriteriaDTO(),
-                    Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
-                };
+                CurrentUserCriteriaFilter = new UserCriteriaDTO(),
+                Expression = $"[{NumericAttribute.Name}]='1' AND [{TextAttribute.Name}]='test'"
+            };
 
-                // Act
-                var result = await controller.GetCriterionValidationResult(model);
+            // Act
+            var result = await controller.GetCriterionValidationResult(model);
 
-                // Assert
-                var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
-                    typeof(CriterionValidationResult));
+            // Assert
+            var validationResult = (CriterionValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
+                typeof(CriterionValidationResult));
 
-                Assert.True(validationResult.IsValid);
-                Assert.Equal(1, validationResult.ResultsCount);
-                Assert.Equal("Success", validationResult.ValidationMessage);
-            }
-            catch (Exception e)
-            {
-                throw;
-            }
+            Assert.True(validationResult.IsValid);
+            Assert.Equal(1, validationResult.ResultsCount);
+            Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
         [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]

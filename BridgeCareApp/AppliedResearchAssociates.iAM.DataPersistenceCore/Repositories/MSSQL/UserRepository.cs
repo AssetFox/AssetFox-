@@ -65,7 +65,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Task<UserDTO> GetUserByUserName(string userName)
         {
-            return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
+            var existingUser = _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault();
+            if (existingUser == null)
+            {
+                return Task.Factory.StartNew(() =>
+                    new UserDTO
+                    {
+                        Id = Guid.NewGuid(),
+                        Username = userName,
+                        HasInventoryAccess = true,
+                        LastNewsAccessDate = new DateTime(),
+                        CriterionLibrary = new CriterionLibraryDTO()
+                    }
+                    );
+            }
+            else return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
         }
 
         public Task<UserDTO> GetUserById(Guid id)

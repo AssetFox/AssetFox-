@@ -29,11 +29,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateSingletons();
-                _testHelper.CreateSimulation();
-            }
+            _testHelper.CreateSingletons();
+            _testHelper.CreateSimulation();
         }
 
         private BudgetPriorityController CreateAuthorizedController()

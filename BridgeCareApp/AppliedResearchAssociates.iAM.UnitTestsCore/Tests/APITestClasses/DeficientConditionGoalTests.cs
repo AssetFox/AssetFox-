@@ -22,11 +22,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private static DeficientConditionGoalController Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateSingletons();
-                _testHelper.CreateSimulation();
-            }
+            _testHelper.CreateSingletons();
+            _testHelper.CreateSimulation();
             var controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
@@ -162,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             //Assert.Equal(dto.DeficientConditionGoals[0].Name, modifiedDto.DeficientConditionGoals[0].Name);
             //Assert.Equal(dto.DeficientConditionGoals[0].CriterionLibrary.Id,
-             //   modifiedDto.DeficientConditionGoals[0].CriterionLibrary.Id);
+            //   modifiedDto.DeficientConditionGoals[0].CriterionLibrary.Id);
         }
 
         [Fact]

@@ -45,13 +45,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public SimulationAnalysisService Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             _testHelper.CreateCalculatedAttributeLibrary();
 
             var simulationAnalysisService =
@@ -566,7 +563,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var newSimulationDTO = simulation.ToDto(null);
             newSimulationDTO.Id = Guid.NewGuid();
             var testUser = await AddTestUser();
-            
+
             newSimulationDTO.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
@@ -590,7 +587,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .SingleOrDefault(_ => _.Id == dto.Id);
 
             Assert.NotNull(simulationEntity);
-        //    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy); // Not true in any world I can find. -- WJ
+            //    Assert.Equal(dto.Users[0].UserId, simulationEntity.CreatedBy); // Not true in any world I can find. -- WJ
 
             var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
             var simulationUser = simulationUsers.Single();

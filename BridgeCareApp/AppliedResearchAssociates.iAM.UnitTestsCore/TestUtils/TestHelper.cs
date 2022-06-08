@@ -195,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual SimulationEntity CreateSimulation(Guid? id = null, string? name = null)
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null)
         {
             var entity = TestSimulation(id, name);
             UnitOfWork.Context.AddEntity(entity);

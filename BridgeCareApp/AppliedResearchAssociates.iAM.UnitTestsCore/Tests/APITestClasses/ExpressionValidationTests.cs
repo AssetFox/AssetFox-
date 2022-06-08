@@ -26,13 +26,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private ExpressionValidationController SetupController()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             SetData();
             AddTestData();
             var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
@@ -153,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
         }
 
-        public  IEnumerable<object[]> GetInvalidCriterionValidationData()
+        public IEnumerable<object[]> GetInvalidCriterionValidationData()
         {
             yield return new object[]
             {

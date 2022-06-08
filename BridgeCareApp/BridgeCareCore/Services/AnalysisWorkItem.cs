@@ -139,7 +139,7 @@ namespace BridgeCareCore.Services
             // resetting the report generation status.
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "" };
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastSummaryReportGenerationStatus, reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.UserEntity?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
 
             RunValidation(runner);
             runner.Run(false);

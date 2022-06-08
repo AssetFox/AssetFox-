@@ -296,6 +296,7 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import { getBlankGuid } from '../utils/uuid-utils';
 
 @Component({
     components: { VueQueryBuilder },
@@ -648,14 +649,26 @@ export default class CriteriaEditor extends Vue {
         const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
             this.getMainCriteria(),
         );
-
         if (parsedCriteria) {
-            const validationParameter = {
+            if(!isNil(this.$router.currentRoute.query['networkId']))
+                this.criteriaValidationWithCount(parsedCriteria)
+            else
+                this.criteriaValidationNoCount(parsedCriteria)
+        } else {
+            this.invalidCriteriaMessage = 'Unable to parse criteria';
+        }
+    }
+
+    private criteriaValidationWithCount(parsedCriteria: string[])
+    {
+        let networkId = ''
+        networkId = this.$router.currentRoute.query['networkId'].toString()
+        const validationParameter = {
                 expression: parsedCriteria.join(''),
                 currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+                networkId:networkId
             } as ValidationParameter;
-
-            ValidationService.getCriterionValidationResult(
+        ValidationService.getCriterionValidationResult(
                 validationParameter,
             ).then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
@@ -700,9 +713,60 @@ export default class CriteriaEditor extends Vue {
                     }
                 }
             });
-        } else {
-            this.invalidCriteriaMessage = 'Unable to parse criteria';
-        }
+    }
+
+     private criteriaValidationNoCount(parsedCriteria: string[])
+    {
+        const validationParameter = {
+                expression: parsedCriteria.join(''),
+                currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+                networkId:getBlankGuid()
+            } as ValidationParameter;
+        ValidationService.getCriterionValidationResultNoCount(
+                validationParameter,
+            ).then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const result: CriterionValidationResult = response.data as CriterionValidationResult;
+                    const message = `Criterion is Valid`;
+                    if (result.isValid) {
+                        this.validCriteriaMessage = message;
+                        this.cannotSubmit = false;
+
+                        if (this.criteriaEditorData.isLibraryContext) {
+                            const parsedCriteria = convertCriteriaObjectToCriteriaExpression(
+                                this.getMainCriteria(),
+                            );
+                            if (parsedCriteria) {
+                                this.$emit('submitCriteriaEditorResult', {
+                                    validated: true,
+                                    criteria: parsedCriteria.join(''),
+                                });
+                            } else {
+                                this.invalidCriteriaMessage =
+                                    'Unable to parse the criteria';
+                            }
+                        }
+                    } else {
+                        this.resetCriteriaValidationProperties();
+                        setTimeout(() => {
+                            if (result.resultsCount === 0) {
+                                this.invalidCriteriaMessage = message;
+                                this.cannotSubmit = false;
+                            } else {
+                                this.invalidCriteriaMessage =
+                                    result.validationMessage;
+                            }
+                        });
+
+                        if (this.criteriaEditorData.isLibraryContext) {
+                            this.$emit('submitCriteriaEditorResult', {
+                                validated: false,
+                                criteria: null,
+                            });
+                        }
+                    }
+                }
+            });
     }
 
     onCheckSubCriteria() {

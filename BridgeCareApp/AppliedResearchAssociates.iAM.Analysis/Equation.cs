@@ -77,9 +77,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal Equation(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
-        internal double Compute(SectionContext scope) => Compute(scope, null);
+        internal double Compute(AssetContext scope) => Compute(scope, null);
 
-        internal double Compute(SectionContext scope, PerformanceCurve curve)
+        internal double Compute(AssetContext scope, PerformanceCurve curve)
         {
             EnsureCompiled();
             if (Format == EquationFormat.PiecewiseExpression)

@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 foreach (var yearData in reportOutputData.Years)
                 {
-                    foreach (var section in yearData.Sections)
+                    foreach (var section in yearData.Assets)
                     {
                         if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                             section.AppliedTreatment.ToLower() != BAMSConstants.NoTreatment)

@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput simulationOutput, CurrentCell currentCell)
         {
             // facilityId, year, section, treatment
-            var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>>>();
+            var treatmentsPerSection = new SortedDictionary<int, List<Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>>>();
             var validFacilityIds = new List<int>(); // It will keep the Ids which has gone unfunded for all the years
             var firstYear = true;
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0])));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"])));
                     firstYear = false;
                     if (simulationOutput.Years.Count > 1)
                     {
@@ -60,12 +60,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => int.Parse(_.FacilityName.Split('-')[0]))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"]))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = int.Parse(section.FacilityName.Split('-')[0]);
+                    var facilityId = Convert.ToInt32(section.ValuePerNumericAttribute["BRKEY_"]);
 
                     var treatmentOptions = section.TreatmentOptions.
                         Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                     var chosenTreatment = treatmentOptions.FirstOrDefault();
                     if (chosenTreatment != null)
                     {
-                        var newTuple = new Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
+                        var newTuple = new Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
 
                         if (!validFacilityIds.Contains(facilityId))
                         {
@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                         {
                             if (!treatmentsPerSection.ContainsKey(facilityId))
                             {
-                                treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, SectionDetail, TreatmentOptionDetail>> { newTuple });
+                                treatmentsPerSection.Add(facilityId, new List<Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>> { newTuple });
                             }
                             else
                             {

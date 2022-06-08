@@ -84,9 +84,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 results.Add(ValidationStatus.Error, "Multiple selectable treatments have the same name.", this, nameof(Treatments));
             }
 
-            if (CommittedProjects.Select(project => (project.Section, project.Year)).Distinct().Count() < CommittedProjects.Count)
+            if (CommittedProjects.Select(project => (project.Asset, project.Year)).Distinct().Count() < CommittedProjects.Count)
             {
-                results.Add(ValidationStatus.Error, "Multiple projects are committed to the same section in the same year.", this, nameof(CommittedProjects));
+                results.Add(ValidationStatus.Error, "Multiple projects are committed to the same asset in the same year.", this, nameof(CommittedProjects));
             }
             else if (InvestmentPlan.GetAllValidationResults(new List<string>()).All(result => result.Status != ValidationStatus.Error))
             {

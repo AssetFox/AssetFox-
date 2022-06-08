@@ -218,8 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                             {
                                 Id = Guid.NewGuid(),
                                 NetworkId = _testHelper.TestNetwork.Id,
-                                FacilityName = "Facility",
-                                SectionName = "Section",
+                                AssetName = "Asset",
                                 SpatialWeighting = "SpatialWeighting",
                                 MaintainableAssetLocation = new MaintainableAssetLocationEntity
                                 {

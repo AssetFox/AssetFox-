@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public override IEnumerable<TreatmentScheduling> GetSchedulings() => Schedulings;
 
-        internal bool IsFeasible(SectionContext scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
+        internal bool IsFeasible(AssetContext scope) => FeasibilityCriteria.Any(feasibility => feasibility.EvaluateOrDefault(scope));
 
         public void Remove(TreatmentSupersession supersession) => _Supersessions.Remove(supersession);
 
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 
-        internal override IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope)
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope)
         {
             return ConsequencesPerAttribute.SelectMany(getConsequenceAction).ToArray();
 
@@ -125,8 +125,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
                     {
                         ItemName = Name,
                         ItemId = Id,
-                        SectionName = scope.Section.Name,
-                        SectionId = scope.Section.Id,
+                        AssetName = scope.Asset.AssetName,
+                        AssetId = scope.Asset.Id,
                     };
 
                     throw new SimulationException(messageBuilder.ToString());
@@ -140,12 +140,12 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        private double getCost(TreatmentCost cost, SectionContext scope)
+        private double getCost(TreatmentCost cost, AssetContext scope)
         {
             var returnValue = cost.Equation.Compute(scope);
             if (double.IsNaN(returnValue) || double.IsInfinity(returnValue))
             {
-                var errorMessage = SimulationLogMessages.TreatmentCostReturned(scope.Section, cost, this, returnValue);
+                var errorMessage = SimulationLogMessages.TreatmentCostReturned(scope.Asset, cost, this, returnValue);
                 var message = new SimulationLogMessageBuilder
                 {
                     SimulationId = scope.SimulationRunner.Simulation.Id,
@@ -158,7 +158,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return returnValue;
         }
 
-        internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts)
+        internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts)
         {
             var feasibleCosts = Costs.Where(cost => cost.Criterion.EvaluateOrDefault(scope)).ToArray();
             if (feasibleCosts.Length == 0)

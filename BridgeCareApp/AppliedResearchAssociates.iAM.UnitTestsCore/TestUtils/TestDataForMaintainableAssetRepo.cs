@@ -30,9 +30,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var FirstASection = new MaintainableAssetEntity()
             {
                 Id = new Guid("799acb6e-539d-444b-b16a-6defc50b2c64"),
-                FacilityName = "1",
-                SectionName = "00101256",
-                NetworkId = testNetwork.Id,
+                //FacilityName = "1",
+                AssetName = "00101256",
+                NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstASection);
             AssignKeyAttributes(FirstASection);
@@ -40,9 +40,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             AssignName(FirstASection, "First A");
             var FirstBSection = new MaintainableAssetEntity()
             {
-                Id = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06"),
-                FacilityName = "2",
-                SectionName = "13401256",
+                Id = new Guid("8f80c690-3088-4084-b0e5-a8e070000a06"),                
+                //FacilityName = "2",
+                AssetName = "13401256",
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstBSection);
@@ -52,8 +52,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var FirstCSection = new MaintainableAssetEntity()
             {
                 Id = new Guid("1bb0dd92-db74-45c6-a66a-72ae0c70b636"),
-                FacilityName = "3",
-                SectionName = "5983256",
+                //FacilityName = "3",
+                AssetName = "5983256",
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(FirstCSection);
@@ -63,8 +63,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var SecondASection = new MaintainableAssetEntity()
             {
                 Id = new Guid("3fb90c20-9885-48db-8e47-1c76c5040757"),
-                FacilityName = "4",
-                SectionName = "98451298",
+                //FacilityName = "4",
+                AssetName = "98451298",
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(SecondASection);
@@ -74,8 +74,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var SecondBSection = new MaintainableAssetEntity()
             {
                 Id = new Guid("6d79de97-1c3c-4da5-9cc4-f5043efa047a"),
-                FacilityName = "5",
-                SectionName = "56451278",
+                //FacilityName = "5",
+                AssetName = "56451278",
                 NetworkId = testNetwork.Id
             };
             testNetwork.MaintainableAssets.Add(SecondBSection);
@@ -234,7 +234,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 MaintainableAssetId = asset.Id,
                 Discriminator = "NumericAggregatedResult",
                 Year = 2020,
-                NumericValue = int.Parse(asset.FacilityName)
+                NumericValue = int.Parse(asset.AssetName)
             };
             asset.AggregatedResults.Add(brKey);
 
@@ -248,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 MaintainableAssetId = asset.Id,
                 Discriminator = "TextAggregatedResult",
                 Year = 2020,
-                TextValue = asset.SectionName
+                TextValue = asset.AssetName
             };
             asset.AggregatedResults.Add(bmsid);
         }

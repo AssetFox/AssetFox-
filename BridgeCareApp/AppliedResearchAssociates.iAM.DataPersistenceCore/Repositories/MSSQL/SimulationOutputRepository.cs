@@ -54,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             OutputType = SimulationOutputEnum.InitialConditionNetwork
                         });
 
-                var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialSectionSummaries, settings);
+                var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
 
                 _unitOfWork.Context.Add(
                         new SimulationOutputEntity
@@ -130,11 +130,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
                     break;
                 case SimulationOutputEnum.InitialSummary:
-                    var initialSummary = JsonConvert.DeserializeObject<List<SectionSummaryDetail>>(item.Output, new JsonSerializerSettings
+                    var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
                     {
                         ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
                     });
-                    simulationOutput.InitialSectionSummaries.AddRange(initialSummary);
+                    simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
                     break;
                 }
             }

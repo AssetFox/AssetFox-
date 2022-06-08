@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
         private void Init(string type, string dataColumn)
         {
-            testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, CreatedDate AS DATE_, " + dataColumn + " AS DATA_ FROM dbo.Attribute";
+            testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + dataColumn + " AS DATA_ FROM dbo.Attribute";
             mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, testCommand, Data.ConnectionType.MSSQL, testConnection, false, false);
         }
     }

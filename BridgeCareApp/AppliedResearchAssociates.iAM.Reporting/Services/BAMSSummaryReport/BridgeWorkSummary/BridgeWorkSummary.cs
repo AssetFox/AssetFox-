@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
                 countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
-                foreach (var section in yearData.Sections)
+                foreach (var section in yearData.Assets)
                 {
                     if (!costPerBPNPerYear[yearData.Year].ContainsKey(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]))
                     {
@@ -172,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
         }
 
-        private void PopulateWorkedOnCostAndCount(int year, SectionDetail section,
+        private void PopulateWorkedOnCostAndCount(int year, AssetDetail section,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costAndCountPerTreatmentPerYear, decimal cost)
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
@@ -207,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
         }
 
-        private void PopulateCompletedProjectCount(int year, SectionDetail section, Dictionary<int, Dictionary<string, int>> countForCompletedProject)
+        private void PopulateCompletedProjectCount(int year, AssetDetail section, Dictionary<int, Dictionary<string, int>> countForCompletedProject)
         {
             if (section.TreatmentCause == TreatmentCause.NoSelection)
             {
@@ -237,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         private void RemoveBridgesForCashFlowedProj(Dictionary<int, Dictionary<string, int>> countForCompletedProject,
-            SectionDetail section, bool isInitialYear, int year)
+            AssetDetail section, bool isInitialYear, int year)
         {
             // to store "Projects completed"
             if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)

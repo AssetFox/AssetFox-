@@ -8,9 +8,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class CommittedProject : Treatment
     {
-        public CommittedProject(Section section, int year)
+        public CommittedProject(AnalysisMaintainableAsset asset, int year)
         {
-            Section = section ?? throw new ArgumentNullException(nameof(section));
+            Asset = asset ?? throw new ArgumentNullException(nameof(asset));
             Year = year;
         }
 
@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public double Cost { get; set; }
 
-        public Section Section { get; }
+        public AnalysisMaintainableAsset Asset { get; }
 
         public SelectableTreatment TemplateTreatment
         {
@@ -69,9 +69,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         internal override bool CanUseBudget(Budget budget) => budget == Budget;
 
-        internal override IReadOnlyCollection<Action> GetConsequenceActions(SectionContext scope) => Consequences.Select(consequence => consequence.GetChangeApplicators(scope, null).Single().Action).ToArray();
+        internal override IReadOnlyCollection<Action> GetConsequenceActions(AssetContext scope) => Consequences.Select(consequence => consequence.GetChangeApplicators(scope, null).Single().Action).ToArray();
 
-        internal override double GetCost(SectionContext scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
+        internal override double GetCost(AssetContext scope, bool shouldApplyMultipleFeasibleCosts) => Cost;
 
         private SelectableTreatment _TemplateTreatment;
     }

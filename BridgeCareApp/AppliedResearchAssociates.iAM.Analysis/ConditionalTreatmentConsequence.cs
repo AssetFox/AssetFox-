@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return results;
         }
 
-        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(SectionContext scope, Treatment treatment)
+        internal override IEnumerable<ChangeApplicator> GetChangeApplicators(AssetContext scope, Treatment treatment)
         {
             var applicators = base.GetChangeApplicators(scope, treatment);
 
@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 var newValue = Equation.Compute(scope);
                 if (double.IsNaN(newValue) || double.IsInfinity(newValue))
                 {
-                    var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Section, treatment, Equation, this, newValue);
+                    var errorMessage = SimulationLogMessages.TreatmentConsequenceReturned(scope.Asset, treatment, Equation, this, newValue);
                     var logBuilder = SimulationLogMessageBuilders.CalculationFatal(errorMessage, scope.SimulationRunner.Simulation.Id);
                     scope.SimulationRunner.Send(logBuilder);
                 }

@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
     {
         public double InitialConditionOfNetwork { get; set; }
 
-        public List<SectionSummaryDetail> InitialSectionSummaries { get; } = new List<SectionSummaryDetail>();
+        public List<AssetSummaryDetail> InitialAssetSummaries { get; } = new List<AssetSummaryDetail>();
 
         public List<SimulationYearDetail> Years { get; } = new List<SimulationYearDetail>();
     }

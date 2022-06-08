@@ -57,12 +57,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             };
         }
 
-        private List<string> GetYearDataSubHeaders()
+        private List<string> GetSubHeaders()
         {
             return new List<string>
             {
                 "OPI",
-                "IRI Rutting",
+                "IRI",
+                "Rutting",
                 "Faulting",
                 "Cracking",
                 "Project Source",
@@ -86,8 +87,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 autoFilterCells.AutoFilter = true;
             }
 
-            AddPamsDataModelsCells(worksheet, reportOutputData, currentCell);
-            //AddDynamicDataCells(worksheet, reportOutputData, currentCell);
+            FillData(worksheet, reportOutputData, currentCell);
+            FillDynamicData(worksheet, reportOutputData, currentCell);
 
             worksheet.Cells.AutoFitColumns();
             var spacerBeforeFirstYear = _spacerColumnNumbers[0] - 11;
@@ -108,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             //Get Headers
             var headers = GetHeaders();
 
-            //add header columns
+            //build header columns
             int headerRow = 1;
             for (int column = 0; column < headers.Count; column++) {
                 worksheet.Cells[headerRow, column + 1].Value = headers[column];
@@ -116,11 +117,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
 
             var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count };
-            AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
+            BuildDynamicHeadersCells(worksheet, currentCell, simulationYears);
             return currentCell;
         }
 
-        private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
+        private void BuildDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
         {
             const string HeaderConstText = "Work to be Done in ";
             var column = currentCell.Column;
@@ -147,10 +148,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             currentCell.Column = column;
 
             // Add Years Data headers
-            var yearDataSubHeaders = GetYearDataSubHeaders();
+            var dataSubHeaders = GetSubHeaders();
             worksheet.Cells[row, ++column].Value = simulationYears[0] - 1;
             column = currentCell.Column;
-            column = AddYearDataSubHeaders(worksheet, column, row, yearDataSubHeaders, yearDataSubHeaders.Count - 5);
+            column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count - 5);
             ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
 
             // Empty column
@@ -166,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             {
                 worksheet.Cells[row, ++column].Value = simulationYear;
                 column = currentCell.Column;
-                column = AddYearDataSubHeaders(worksheet, column, row, yearDataSubHeaders, yearDataSubHeaders.Count);
+                column = BuildDataSubHeaders(worksheet, column, row, dataSubHeaders, dataSubHeaders.Count);
                 ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
                 if (simulationYear % 2 != 0)
                 {
@@ -187,29 +188,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             currentCell.Row = currentCell.Row + 2;
         }
 
-        private int AddYearDataSubHeaders(ExcelWorksheet worksheet, int column, int row, List<string> yearDataSubHeaders, int length)
+        private int BuildDataSubHeaders(ExcelWorksheet worksheet, int column, int row, List<string> dataSubHeaders, int length)
         {
             for (var index = 0; index < length; index++)
             {
-                worksheet.Cells[row + 1, ++column].Value = yearDataSubHeaders[index];
+                worksheet.Cells[row + 1, ++column].Value = dataSubHeaders[index];
                 ExcelHelper.ApplyStyle(worksheet.Cells[row + 1, column]);
             }
 
             return column;
         }
 
-        private void AddPamsDataModelsCells(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
+
+
+        private void FillData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var rowNo = currentCell.Row; var columnNo = currentCell.Column;
             foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
             {
-                rowNo++; columnNo = 2;
-                //var splitIds = sectionSummary.FacilityName.Split('-');
-                //var sectionId = ""; var facilityId = splitIds[0];
-                //if (splitIds.Length == 2) { sectionId = splitIds[1]; }
-
-                //worksheet.Cells[rowNo, columnNo++].Value = sectionId;
-                //worksheet.Cells[rowNo, columnNo++].Value = facilityId;
+                rowNo++; columnNo = 1;
+                
+                worksheet.Cells[rowNo, columnNo++].Value = ""; //Asset Management Section Column Blank
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["CNTY"];
@@ -237,298 +236,180 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
             }
-            currentCell.Row = rowNo;
-            currentCell.Column = columnNo;
+            currentCell.Row = rowNo; currentCell.Column = columnNo;
         }
 
-        //private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
-        //{
-        //    var initialRow = 4;
-        //    var row = 4; // Data starts here
-        //    var startingRow = row;
-        //    var column = currentCell.Column;
-        //    var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
+        private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
+        {
+            var initialRow = 4;
+            var row = 4; // Data starts here
+            var startingRow = row;
+            var column = currentCell.Column;
 
-        //    // making dictionary to remove if else, which was used to enter value for MinC
-        //    _valueForMinC = new Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>>();
-        //    _valueForMinC.Add(MinCValue.defaultValue, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterDefaultMinCValue));
-        //    _valueForMinC.Add(MinCValue.valueEqualsCulv, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterValueEqualsCulv));
-        //    _valueForMinC.Add(MinCValue.minOfDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSub));
-        //    _valueForMinC.Add(MinCValue.minOfCulvDeckSubSuper, new Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>(EnterMinDeckSuperSubCulv));
+            var workDoneData = new List<int>();
+            if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]); }
 
-        //    var workDoneData = new List<int>();
-        //    var previousYearSectionMinC = new List<double>();
-        //    if (outputResults.Years.Count > 0)
-        //    {
-        //        workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
-        //        previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Sections.Count]);
-        //    }
-        //    var poorOnOffColumnStart = (outputResults.Years.Count * 2) + column + 3;
-        //    var index = 1; // to track the initial section from rest of the years
+            var isInitialYear = true;
+            foreach (var yearlySectionData in outputResults.Years)
+            {
+                row = initialRow;
 
-        //    var isInitialYear = true;
-        //    foreach (var yearlySectionData in outputResults.Years)
-        //    {
-        //        _poorOnOffCount.Add(yearlySectionData.Year, (on: 0, off: 0));
+                // Add work done cells
+                TreatmentCause previousYearCause = TreatmentCause.Undefined;
+                var previousYearTreatment = PAMSConstants.NoTreatment;
+                var i = 0;
+                foreach (var section in yearlySectionData.Sections)
+                {
+                    SectionDetail prevYearSection = null;
+                    if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
+                    {
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
+                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                        previousYearCause = prevYearSection.TreatmentCause;
+                        previousYearTreatment = prevYearSection.AppliedTreatment;
+                    }
 
-        //        row = initialRow;
+                    // Work done and cost for the given year
+                    var treatmentDone = section.AppliedTreatment.ToLower() == PAMSConstants.NoTreatment ? "--" : section.AppliedTreatment;
+                    var sumCoveredCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
 
-        //        // Add work done cells
-        //        TreatmentCause previousYearCause = TreatmentCause.Undefined;
-        //        var previousYearTreatment = BAMSConstants.NoTreatment;
-        //        var i = 0;
-        //        foreach (var section in yearlySectionData.Sections)
-        //        {
-        //            TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
+                    worksheet.Cells[row, column].Value = treatmentDone;
+                    worksheet.Cells[row, column + 1].Value = sumCoveredCost;
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
 
-        //            if (!_bpnPoorOnPerYear.ContainsKey(yearlySectionData.Year))
-        //            {
-        //                _bpnPoorOnPerYear.Add(yearlySectionData.Year, new Dictionary<string, int>());
-        //            }
+                    if (!treatmentDone.Equals("--")) { workDoneData[i]++; } i++;
+                    if (row % 2 == 0) {
+                        if (section.TreatmentCause != TreatmentCause.CashFlowProject || section.TreatmentCause == TreatmentCause.CommittedProject) {
+                            ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
+                        }
+                    }
+                    ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
+                    ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
+                    row++;
+                }
 
-        //            if (!_nhsPoorOnPerYear.ContainsKey(yearlySectionData.Year))
-        //            {
-        //                _nhsPoorOnPerYear.Add(yearlySectionData.Year, 0);
-        //            }
+                column += 2;
+                isInitialYear = false;
+            }
 
-        //            if (!_nonNhsPoorOnPerYear.ContainsKey(yearlySectionData.Year))
-        //            {
-        //                _nonNhsPoorOnPerYear.Add(yearlySectionData.Year, 0);
-        //            }
+            // work done information
+            row = 4; // setting row back to start
+            column++;
+            var totalWorkMoreThanOnce = 0;
+            foreach (var wdInfo in workDoneData)
+            {
+                // Work Done
+                worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
+                // Work done more than once
+                worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
+                if (row % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column + 1], Color.LightGray); }
+                row++;
+                totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
+            }
 
-        //            bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
+            // "Total" column
+            worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
+            ExcelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
 
-        //            int nhsOrNonPoorOnCount = isNHS ? _nhsPoorOnPerYear[yearlySectionData.Year] : _nonNhsPoorOnPerYear[yearlySectionData.Year];
+            row = 4; // setting row back to start
+            var initialColumn = column + 1;
+            foreach (var intialsection in outputResults.InitialSectionSummaries)
+            {
+                column = initialColumn; // This is to reset the column
+                column = AddSimulationYearData(worksheet, row, column, intialsection, null);
+                row++;
+            }
 
-        //            Dictionary<string, int> bpnPoorOnDictionary = _bpnPoorOnPerYear[yearlySectionData.Year];
-        //            var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-        //            int bpnPoorOnCount;
-        //            // Create/Update BPN info for this Section/Year
-        //            if (!bpnPoorOnDictionary.ContainsKey(busPlanNetwork))
-        //            {
-        //                bpnPoorOnCount = 0;
-        //                bpnPoorOnDictionary.Add(busPlanNetwork, bpnPoorOnCount);
-        //            }
-        //            else
-        //            {
-        //                bpnPoorOnCount = bpnPoorOnDictionary[busPlanNetwork];
-        //            }
+            currentCell.Column = column++;
+            currentCell.Row = initialRow;
+            isInitialYear = true;
+            foreach (var sectionData in outputResults.Years)
+            {
+                row = currentCell.Row; // setting row back to start
+                currentCell.Column = column;
+                foreach (var section in sectionData.Sections)
+                {
+                    column = currentCell.Column;
+                    column = AddSimulationYearData(worksheet, row, column, null, section);
+                    var initialColumnForShade = column;
 
-        //            var thisYrMinc = section.ValuePerNumericAttribute["MINCOND"];
-        //            // poor on off Rate
-        //            var prevYrMinc = 0.0;
-        //            if (index == 1)
-        //            {
-        //                prevYrMinc = _previousYearInitialMinC[i];
-        //            }
-        //            else
-        //            {
-        //                prevYrMinc = previousYearSectionMinC[i];
-        //            }
-        //            SectionDetail prevYearSection = null;
-        //            if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
-        //            {
-        //                prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-        //                    .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
-        //                previousYearCause = prevYearSection.TreatmentCause;
-        //                previousYearTreatment = prevYearSection.AppliedTreatment;
-        //            }
-        //            setColor((int)section.ValuePerNumericAttribute["PARALLEL"], section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
-        //                yearlySectionData.Year, index, worksheet, row, column);
+                    SectionDetail prevYearSection = null;
+                    if (!isInitialYear)
+                    {
+                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
+                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                    }
 
-        //            // Work done in a year
-        //            var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-        //            var range = worksheet.Cells[row, column];
-        //            if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
-        //            {
-        //                range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
-        //                worksheet.Cells[row, column + 1].Value = cost;
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
+                    {
+                        var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
+                        worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
+                        worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
+                    }
+                    else
+                    {
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause); //Project Pick
+                    }
 
+                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
+                    BudgetUsageDetail budgetUsage = null;
 
-        //                if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
-        //                {
-        //                    if (prevYearSection == null)
-        //                    {
-        //                        prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-        //                    .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
-        //                    }
-        //                    if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
-        //                    {
-        //                        range.Value = "--";
-        //                        worksheet.Cells[row, column + 1].Value = cost;
-        //                    }
-        //                }
-        //                worksheet.Cells[row, column + 1].Value = cost;
-        //                ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+                    foreach (var item in treatmentConsideration)
+                    {
+                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull || _.Status == BudgetUsageStatus.CostCoveredInPart);
+                    }
 
-        //            }
-        //            else
-        //            {
-        //                range.Value = section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment ? "--" :
-        //                    section.AppliedTreatment.ToLower();
+                    var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
 
-        //                worksheet.Cells[row, column + 1].Value = cost;
-        //                ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
-        //            }
-        //            if (!range.Value.Equals("--"))
-        //            {
-        //                workDoneData[i]++;
-        //            }
+                    worksheet.Cells[row, ++column].Value = budgetName; // Budget
+                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
+                    var columnForAppliedTreatment = column;
 
-        //            worksheet.Cells[row, poorOnOffColumnStart].Value = prevYrMinc < 5 ? (thisYrMinc >= 5 ? "Off" : "--") :
-        //                (thisYrMinc < 5 ? "On" : "--");
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    worksheet.Cells[row, ++column].Value = cost; // cost
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+                    worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
-        //            var onOffCount = _poorOnOffCount[yearlySectionData.Year];
-        //            if (worksheet.Cells[row, poorOnOffColumnStart].Value.ToString() == "On")
-        //            {
-        //                onOffCount.on += 1;
-        //                bpnPoorOnCount += 1;
-        //                nhsOrNonPoorOnCount += 1;
-        //            }
-        //            else if (worksheet.Cells[row, poorOnOffColumnStart].Value.ToString() == "Off")
-        //            {
-        //                onOffCount.off += 1;
-        //            }
-        //            _poorOnOffCount[yearlySectionData.Year] = onOffCount;
-        //            bpnPoorOnDictionary[busPlanNetwork] = bpnPoorOnCount;
-        //            if (isNHS)
-        //            {
-        //                _nhsPoorOnPerYear[yearlySectionData.Year] = nhsOrNonPoorOnCount;
-        //            }
-        //            else
-        //            {
-        //                _nonNhsPoorOnPerYear[yearlySectionData.Year] = nhsOrNonPoorOnCount;
-        //            }
+                    if (row % 2 == 0)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+                    }
 
-        //            previousYearSectionMinC[i] = thisYrMinc;
-        //            i++;
-        //            if (row % 2 == 0)
-        //            {
-        //                if (section.TreatmentCause != TreatmentCause.CashFlowProject ||
-        //                    section.TreatmentCause == TreatmentCause.CommittedProject)
-        //                {
-        //                    ExcelHelper.ApplyColor(worksheet.Cells[row, column, row, column + 1], Color.LightGray);
-        //                }
-        //                ExcelHelper.ApplyColor(worksheet.Cells[row, poorOnOffColumnStart], Color.LightGray);
-        //            }
-        //            ExcelHelper.ApplyLeftBorder(worksheet.Cells[row, column]);
-        //            ExcelHelper.ApplyRightBorder(worksheet.Cells[row, column + 1]);
-        //            row++;
-        //        }
-        //        index++;
+                    if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+                    {
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
-        //        poorOnOffColumnStart++;
-        //        column += 2;
-        //        isInitialYear = false;
-        //    }
+                        // Color the previous year project also
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
+                    }
 
-        //    // work done information
-        //    row = 4; // setting row back to start
-        //    column++;
-        //    var totalWorkMoreThanOnce = 0;
-        //    foreach (var wdInfo in workDoneData)
-        //    {
-        //        // Work Done
-        //        worksheet.Cells[row, column - 1].Value = wdInfo >= 1 ? "Yes" : "--";
-        //        // Work done more than once
-        //        worksheet.Cells[row, column].Value = wdInfo > 1 ? "Yes" : "--";
-        //        ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1, row, column]);
-        //        if (row % 2 == 0)
-        //        {
-        //            ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column + 1], Color.LightGray);
-        //        }
-        //        row++;
-        //        totalWorkMoreThanOnce += wdInfo > 1 ? 1 : 0;
-        //    }
+                    column = column + 1;
+                    row++;
+                }
+                isInitialYear = false;
+            }
+        }
 
-        //    // "Total" column
-        //    worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
-        //    ExcelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, SectionSummaryDetail initialSection, SectionDetail section)
+        {
+            var initialColumnForShade = column + 1;
+            var selectedSection = initialSection ?? section;
 
-        //    column = column + outputResults.Years.Count + 2; // this will take us to the empty column after "poor on off"
-        //    worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
-        //    worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
+            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["OPI"];
+            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_IRI"];
+            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_RUTTING"];
+            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_FAULTING"];
+            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_CRACKING"];
 
-        //    row = 4; // setting row back to start
-        //    var initialColumn = column;
-        //    foreach (var intialsection in outputResults.InitialSectionSummaries)
-        //    {
-        //        TrackInitialYearDataForParametersTAB(intialsection);
-        //        column = initialColumn; // This is to reset the column
-        //        column = AddSimulationYearData(worksheet, row, column, intialsection, null);
-        //        row++;
-        //    }
-        //    currentCell.Column = column++;
-        //    currentCell.Row = initialRow;
-        //    isInitialYear = true;
-        //    foreach (var sectionData in outputResults.Years)
-        //    {
-        //        row = currentCell.Row; // setting row back to start
-        //        currentCell.Column = column;
-        //        foreach (var section in sectionData.Sections)
-        //        {
-        //            column = currentCell.Column;
-        //            column = AddSimulationYearData(worksheet, row, column, null, section);
-        //            var initialColumnForShade = column;
+            if (row % 2 == 0)
+            {
+                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
+            }
 
-        //            SectionDetail prevYearSection = null;
-        //            if (!isInitialYear)
-        //            {
-        //                prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
-        //                    .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
-        //            }
-
-        //            if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
-        //            {
-        //                var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
-        //                worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-        //                worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
-        //            }
-        //            else
-        //            {
-        //                worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);//Project Pick
-        //            }
-
-        //            var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
-        //            BudgetUsageDetail budgetUsage = null;
-
-        //            foreach (var item in treatmentConsideration)
-        //            {
-        //                budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
-        //            _.Status == BudgetUsageStatus.CostCoveredInPart);
-        //            }
-
-        //            var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
-
-        //            worksheet.Cells[row, ++column].Value = budgetName; // Budget
-        //            worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
-        //            var columnForAppliedTreatment = column;
-
-        //            var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-        //            worksheet.Cells[row, ++column].Value = cost; // cost
-        //            ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
-        //            worksheet.Cells[row, ++column].Value = ""; // District Remarks
-
-        //            if (row % 2 == 0)
-        //            {
-        //                ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
-        //            }
-
-        //            if (section.TreatmentCause == TreatmentCause.CashFlowProject)
-        //            {
-        //                ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(0, 255, 0));
-        //                ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
-
-        //                // Color the previous year project also
-        //                ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
-        //                ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
-        //            }
-
-        //            column = column + 1;
-        //            row++;
-        //        }
-        //        isInitialYear = false;
-        //    }
-        //}
+            return column;
+        }
     }
 }

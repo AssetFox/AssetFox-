@@ -60,7 +60,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string Legend_Tab = "Legend";
         public const string Legend_Tab_Title = "";
 
+
+        //Data Variables
         public const string Work = "Work";
         public const string Cost = "Cost";
+
+        public const string NoTreatment = "no treatment";
+        public const string NoTreatmentForWorkSummary = "No Treatment";
     }
 }

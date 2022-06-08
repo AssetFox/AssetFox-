@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.ClearResults();
 
             simulation.Results.InitialConditionOfNetwork = simulationOutputObject.InitialConditionOfNetwork;
-            simulation.Results.InitialSectionSummaries.AddRange(simulationOutputObject.InitialSectionSummaries);
+            simulation.Results.InitialAssetSummaries.AddRange(simulationOutputObject.InitialAssetSummaries);
             simulation.Results.Years.AddRange(simulationOutputObject.Years);
         }
     }

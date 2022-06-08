@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.DTOs;
+﻿using System;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Models.Validation
 {
@@ -7,5 +8,7 @@ namespace BridgeCareCore.Models.Validation
         public string Expression { get; set; }
 
         public UserCriteriaDTO CurrentUserCriteriaFilter { get; set; }
+
+        public Guid NetworkId { get; set; }
     }
 }

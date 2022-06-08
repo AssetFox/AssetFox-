@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     internal sealed class RemainingLifeCalculator
     {
-        public RemainingLifeCalculator(SectionContext context, IGrouping<INumericAttribute, double> limits)
+        public RemainingLifeCalculator(AssetContext context, IGrouping<INumericAttribute, double> limits)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             Attribute = limits.Key;
@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             public Factory(IGrouping<INumericAttribute, double> limits) => Limits = limits ?? throw new ArgumentNullException(nameof(limits));
 
-            public RemainingLifeCalculator Create(SectionContext context) => new RemainingLifeCalculator(context, Limits);
+            public RemainingLifeCalculator Create(AssetContext context) => new RemainingLifeCalculator(context, Limits);
 
             private readonly IGrouping<INumericAttribute, double> Limits;
         }
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private readonly INumericAttribute Attribute;
 
-        private readonly SectionContext Context;
+        private readonly AssetContext Context;
 
         private readonly double Limit;
 

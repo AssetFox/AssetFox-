@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid AttributeId { get; set; }
 
-        public virtual SectionEntity Section { get; set; }
+        public virtual AnalysisMaintainableAssetEntity AnalysisMaintainableAsset { get; set; }
 
         public virtual AttributeEntity Attribute { get; set; }
     }

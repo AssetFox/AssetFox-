@@ -22,7 +22,7 @@
             <v-chip
                         color="ara-blue-bg"
                         text-color="white"
-                        @click="onGenerateSummaryReport(true)"
+                        @click="onGenerateReport(true)"
                     >
                         Generate Summary Report
                     </v-chip>
@@ -73,12 +73,12 @@ export default class ReportsDownloaderDialog extends Vue {
     errorMessage: string = '';
     isDownloading: boolean = false;
 
-    async onGenerateSummaryReport(download: boolean) {
+    async onGenerateReport(download: boolean) {
         if (download) {
             this.errorMessage = '';
             this.isDownloading = true;
             this.dialogData.showModal = false;
-            await ReportsService.generateSummaryReport(
+            await ReportsService.generateReport(
                 this.dialogData.networkId,
                 this.dialogData.scenarioId,
             ).then((response: AxiosResponse<any>) => {
@@ -104,7 +104,7 @@ export default class ReportsDownloaderDialog extends Vue {
         this.errorMessage = '';
         this.isDownloading = true;
         this.dialogData.showModal = false;
-        await ReportsService.downloadSummaryReport(
+        await ReportsService.downloadReport(
             this.dialogData.networkId,
             this.dialogData.scenarioId,
         ).then((response: AxiosResponse<any>) => {

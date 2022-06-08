@@ -105,8 +105,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var previousYearSectionMinC = new List<double>();
             if (outputResults.Years.Count > 0)
             {
-                workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]);
-                previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Sections.Count]);
+                workDoneData = new List<int>(new int[outputResults.Years[0].Assets.Count]);
+                previousYearSectionMinC = new List<double>(new double[outputResults.Years[0].Assets.Count]);
             }
             var poorOnOffColumnStart = (outputResults.Years.Count * 2) + column + 3;
             var index = 1; // to track the initial section from rest of the years
@@ -122,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = BAMSConstants.NoTreatment;
                 var i = 0;
-                foreach (var section in yearlySectionData.Sections)
+                foreach (var section in yearlySectionData.Assets)
                 {
                     TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
 
@@ -170,11 +170,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         prevYrMinc = previousYearSectionMinC[i];
                     }
-                    SectionDetail prevYearSection = null;
+                    AssetDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
@@ -195,7 +195,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             if (prevYearSection == null)
                             {
                                 prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                             }
                             if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
                             {
@@ -296,7 +296,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             row = 4; // setting row back to start
             var initialColumn = column;
-            foreach (var intialsection in outputResults.InitialSectionSummaries)
+            foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
                 TrackInitialYearDataForParametersTAB(intialsection);
                 column = initialColumn; // This is to reset the column
@@ -310,17 +310,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 row = currentCell.Row; // setting row back to start
                 currentCell.Column = column;
-                foreach (var section in sectionData.Sections)
+                foreach (var section in sectionData.Assets)
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
 
-                    SectionDetail prevYearSection = null;
+                    AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                     }
 
                     if(section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
@@ -377,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
         private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
-            SectionSummaryDetail initialSection, SectionDetail section)
+            AssetSummaryDetail initialSection, AssetDetail section)
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
@@ -464,11 +464,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             var rowNo = currentCell.Row;
             var columnNo = currentCell.Column;
-            foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
+            foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++;
                 columnNo = 1;
-                var splitIds = sectionSummary.FacilityName.Split('-');
+                var splitIds = sectionSummary.AssetName.Split('-');
                 var sectionId = "";
                 var facilityId = splitIds[0];
                 if (splitIds.Length == 2)
@@ -800,7 +800,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return column;
         }
 
-        private void TrackInitialYearDataForParametersTAB(SectionSummaryDetail intialsection)
+        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail intialsection)
         {
             // Get NHS record for Parameter TAB
             if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)

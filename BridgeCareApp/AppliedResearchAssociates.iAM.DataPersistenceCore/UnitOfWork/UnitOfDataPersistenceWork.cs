@@ -44,14 +44,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private IFacilityRepository _facilityRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
         private IPerformanceCurveRepository _performanceCurveRepo;
         private ICalculatedAttributesRepository _calculatedAttributesRepo;
         private IRemainingLifeLimitRepository _remainingLifeLimitRepo;
-        private ISectionRepository _sectionRepo;
         private ISelectableTreatmentRepository _selectableTreatmentRepo;
         private ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
         private ISimulationLogRepository _simulationLogRepo;
@@ -101,8 +99,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
 
-        public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(this);
-
         public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(this);
 
         public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
@@ -114,8 +110,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository(this);
 
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(this);
-
-        public ISectionRepository SectionRepo => _sectionRepo ??= new SectionRepository(this);
 
         public ISelectableTreatmentRepository SelectableTreatmentRepo => _selectableTreatmentRepo ??= new SelectableTreatmentRepository(this);
 

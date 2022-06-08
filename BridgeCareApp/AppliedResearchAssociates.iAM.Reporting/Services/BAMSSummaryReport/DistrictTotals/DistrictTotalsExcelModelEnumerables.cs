@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 {
     public static class DistrictTotalsExcelModelEnumerables
     {
-        internal static IEnumerable<IExcelModel> TableContent(SimulationOutput output, IExcelModel title, Func<SectionDetail, bool> inclusionPredicate)
+        internal static IEnumerable<IExcelModel> TableContent(SimulationOutput output, IExcelModel title, Func<AssetDetail, bool> inclusionPredicate)
         {
             yield return StackedExcelModels.Stacked(
                 title,

@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
 
-        public List<SectionDetail> Sections { get; } = new List<SectionDetail>();
+        public List<AssetDetail> Assets { get; } = new List<AssetDetail>();
 
         public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
 

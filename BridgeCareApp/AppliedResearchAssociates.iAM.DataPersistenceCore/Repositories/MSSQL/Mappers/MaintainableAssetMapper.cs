@@ -52,16 +52,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 NetworkId = networkId,
                 SpatialWeighting = asset.SpatialWeighting.Expression,
                 AssetName = asset.AssetName
-                SpatialWeighting = section.SpatialWeighting.Expression,
-                //Area = section.Area,
-                //AreaUnit = section.AreaUnit,
-                FacilityName = section.Facility.Name,
-                SectionName = section.Name
-                SpatialWeighting = section.SpatialWeighting.Expression,
-                //Area = section.Area,
-                //AreaUnit = section.AreaUnit,
-                FacilityName = section.Facility.Name,
-                SectionName = section.Name
             };
     }
 }

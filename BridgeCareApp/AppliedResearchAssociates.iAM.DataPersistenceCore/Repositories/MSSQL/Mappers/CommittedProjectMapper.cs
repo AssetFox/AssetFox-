@@ -37,8 +37,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity)
         {
-            var asset = simulation.Network.Assets.Single(_ =>
-                _.Id == entity.MaintainableAsset.Id);
+            
             switch (entity.CommittedProjectLocation.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
@@ -107,21 +106,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new ArgumentException($"Cannot convert the DTO location for committed project with the ID ${dto.Id}");
             }
 
-            var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
-            committedProject.Id = entity.Id;
-            committedProject.Name = entity.Name;
-            committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
-            committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
-            committedProject.Cost = entity.Cost;
-            committedProject.Budget = simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name);
-
-            if (entity.CommittedProjectConsequences.Any())
-            {
-                entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
-            }
+            return result;
         }
-    }
-}
         public static CommittedProjectLocationEntity ToCommittedProjectLocation(this MaintainableAssetLocationEntity entity, CommittedProjectEntity commit)
         {
             return new CommittedProjectLocationEntity(Guid.NewGuid(), entity.Discriminator, entity.LocationIdentifier)
@@ -147,6 +133,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     return result;
                 default:
                     throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
+            }
+        }
+
+        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
+        {
+            var asset = simulation.Network.Assets.Single(_ =>
+                _.Id == entity.MaintainableAsset.Id);
+
+            var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
+            committedProject.Id = entity.Id;
+            committedProject.Name = entity.Name;
+            committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
+            committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
+            committedProject.Cost = entity.Cost;
+            committedProject.Budget = simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name);
+
+            if (entity.CommittedProjectConsequences.Any())
+            {
+                entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
             }
         }
     }

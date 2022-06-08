@@ -48,11 +48,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .SelectMany(_ => _.AssignedData.Select(__ => __.ToEntity(_.Id)));
 
              var configAttributeIds = configurableAttributes.Select(s => s.Id).ToHashSet();
-             var filtertedEnteties = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
+             var filteredEntities = attributeDatumEntities.Where(_ => configAttributeIds.Contains(_.AttributeId)).ToList();
 
-            _unitOfWork.Context.AddAll(filtertedEnteties, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(filteredEntities, _unitOfWork.UserEntity?.Id);
 
-            var attributeDatumLocationEntities = filtertedEnteties.Select(_ => _.AttributeDatumLocation).ToList();
+            var attributeDatumLocationEntities = filteredEntities.Select(_ => _.AttributeDatumLocation).ToList();
 
             _unitOfWork.Context.AddAll(attributeDatumLocationEntities, _unitOfWork.UserEntity?.Id);
         }

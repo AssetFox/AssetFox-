@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             AggregationRuleType = NumericAttributeAggregationRules.Average,
             Id = Guid.NewGuid(),
             Command = "SuffRateCommand",
-            DefaultValue = "0",
+            DefaultValue = "77",
             Minimum = 0,
             Maximum = 100,
             Type = DataPersistenceConstants.AttributeNumericDataType,
@@ -229,12 +230,52 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var worksheet = excelPackage.Workbook.Worksheets[0];
-            worksheet.Cells[3, 3].Value = 1000;
+            worksheet.Cells[2, 3].Value = 1000;
             var service = CreateAttributeImportService();
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Contains(AttributeImportService.IsNotLessThanOrEqualToTheMaximumValue, warningMessage);
         }
+
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneEntryIsTooSmall_FailsWithWarning()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            EnsureSuffRateAttributeExists();
+            var path = SampleAttributeDataPathWithSuffRatePath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[2, 3].Value = -2;
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.IsNotGreaterThanOrEqualToTheMinimumValue, warningMessage);
+        }
+
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneValueIsEmpty_UsesDefaultValueForThatAttributeDatum()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            EnsureSuffRateAttributeExists();
+            var path = SampleAttributeDataPathWithSuffRatePath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[2, 3].Value = "";
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var networkId = result.NetworkId.Value;
+            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var asset1 = assets.Single(a => a.Location.LocationIdentifier == "1");
+            var asset1AttributeDatum = asset1.AssignedData[0];
+            var doubleAsset1AttributeDatum = (AttributeDatum<double>)asset1AttributeDatum;
+            var value = doubleAsset1AttributeDatum.Value;
+            Assert.Equal(77, value);
+        }
+
         [Fact]
         public void ImportSpreadsheet_RepeatedRowKey_FailsWithWarning()
         {

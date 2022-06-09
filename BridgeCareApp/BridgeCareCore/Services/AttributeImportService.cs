@@ -26,6 +26,7 @@ namespace BridgeCareCore.Services
         public const string FailedToCreateAValidAttributeDatum = "Failed to create a valid AttributeDatum";
         public const string NumberIsOutOfValidRange = "is out of the valid range";
         public const string IsNotLessThanOrEqualToTheMaximumValue = "is not less than or equal to the maximum value";
+        public const string IsNotGreaterThanOrEqualToTheMinimumValue = "is not greater than or equal to the minimum value";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -170,6 +171,19 @@ namespace BridgeCareCore.Services
                         {
                             if (attributeDatum is AttributeDatum<double> doubleAttributeDatum)
                             {
+                                var min = attribute.Minimum;
+                                if (min != null)
+                                {
+                                    var minValue = min.Value;
+                                    if (!(minValue <= doubleAttributeDatum.Value))
+                                    {
+                                        var warningMessage = $"Value for attribute {attribute.Name} at row {assetRowIndex}, colum {attributeColumnIndex} is {doubleAttributeDatum.Value}. This {IsNotGreaterThanOrEqualToTheMinimumValue} {attribute.Minimum}.";
+                                        return new AttributesImportResultDTO
+                                        {
+                                            WarningMessage = warningMessage,
+                                        };
+                                    }
+                                }
                                 var max = attribute.Maximum;
                                 if (max != null)
                                 {
@@ -214,7 +228,19 @@ namespace BridgeCareCore.Services
                 returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
                 break;
             case DataPersistenceConstants.AttributeNumericDataType:
-                var nullableDoubleValue = DoubleParseHelper.TryParseNullableDouble(attributeValue);
+                double? nullableDoubleValue = null;
+                if (attributeValue == null || attributeValue is string attributeValueString && string.IsNullOrWhiteSpace(attributeValueString))
+                {
+                    var parseDefaultValue = DoubleParseHelper.TryParseNullableDouble(attribute.DefaultValue);
+                    if (parseDefaultValue != null)
+                    {
+                        nullableDoubleValue = parseDefaultValue;
+                    }
+                }
+                else
+                {
+                    nullableDoubleValue = DoubleParseHelper.TryParseNullableDouble(attributeValue);
+                }
                 if (nullableDoubleValue.HasValue)
                 {
                     returnValue = new AttributeDatum<double>(attributeId, domainAttribute, nullableDoubleValue.Value, location, inspectionDate);

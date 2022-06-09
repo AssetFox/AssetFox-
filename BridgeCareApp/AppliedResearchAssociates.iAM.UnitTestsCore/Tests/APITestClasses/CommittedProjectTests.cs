@@ -431,12 +431,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
+            CreateRequestForExceptionTesting();
             _controller = new CommittedProjectController(service,
                 _testHelper.MockEsecSecurityAuthorized.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
-            CreateRequestForExceptionTesting();
 
             // Act + Asset
             var result = await _controller.ImportCommittedProjects();

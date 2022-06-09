@@ -14,22 +14,8 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
 {
-    /*
-Every record/row is a bridge
-Every column/field is a specific attribute (ID, Deck Area, Structure Type, Rating, etc.)
-The user will provide the name of the ID field as part of the import (in our case, BRKEY)
-You can attempt to match the attribute names in the first row of the excel sheet to the attribute names in the Attribute table.
->> If there are repeats in the column names, reject the upload
->> If the user specified key column is null, reject the upload with a message telling the user which row has a null key field
->> If the key field values are not unique, reject the upload with a message telling the user which rows have duplicates
->> If you find a unique match for each column, great!  start importing data
->> If there are column names that do not have a matching Attribute.Name in the Attributes table, reject the upload and let the user know what fields need to be added
-The network is defined by these attributes - in other words, you cannot have a mismatch between assets and attributes
-Do not try and create attributes here - just verify they exist.  We can tackle making the attributes later given our timeframe
-    */
     public class AttributeImportService
     {
-        // WjTodo THURSDAY -- need to think about attribute values, which may be non-string. Parse to the correct type, as defined by the existing attribute in the db?
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
@@ -38,6 +24,8 @@ Do not try and create attributes here - just verify they exist.  We can tackle m
         public const string InspectionDateColumn = "InspectionDate column";
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
         public const string FailedToCreateAValidAttributeDatum = "Failed to create a valid AttributeDatum";
+        public const string NumberIsOutOfValidRange = "is out of the valid range";
+        public const string IsNotLessThanOrEqualToTheMaximumValue = "is not less than or equal to the maximum value";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -177,6 +165,25 @@ Do not try and create attributes here - just verify they exist.  We can tackle m
                             {
                                 WarningMessage = warningMessage,
                             };
+                        }
+                        if (attribute.Type == DataPersistenceConstants.AttributeNumericDataType)
+                        {
+                            if (attributeDatum is AttributeDatum<double> doubleAttributeDatum)
+                            {
+                                var max = attribute.Maximum;
+                                if (max != null)
+                                {
+                                    var maxValue = max.Value;
+                                    if (!(maxValue >= doubleAttributeDatum.Value))
+                                    {
+                                        var warningMessage = $"Value for attribute {attribute.Name} at row {assetRowIndex}, colum {attributeColumnIndex} is {doubleAttributeDatum.Value}. This {IsNotLessThanOrEqualToTheMaximumValue} {attribute.Maximum}.";
+                                        return new AttributesImportResultDTO
+                                        {
+                                            WarningMessage = warningMessage,
+                                        };
+                                    }
+                                }
+                            }
                         }
                         attributeDataForAsset.Add(attributeDatum);
                     }

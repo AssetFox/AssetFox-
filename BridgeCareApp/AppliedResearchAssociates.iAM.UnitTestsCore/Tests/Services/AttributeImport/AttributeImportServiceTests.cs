@@ -71,6 +71,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Id = Guid.NewGuid(),
             Command = "SuffRateCommand",
             DefaultValue = "0",
+            Minimum = 0,
+            Maximum = 100,
             Type = DataPersistenceConstants.AttributeNumericDataType,
             IsAscending = false,
             IsCalculated = false,
@@ -201,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
-        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneEntryIsAlphabetical_IdkWhat()
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneEntryIsAlphabetical_FailsWithWarning()
         {
             _testHelper.CreateAttributes();
             EnsureDistrictAttributeExists();
@@ -217,6 +219,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             Assert.Contains(AttributeImportService.FailedToCreateAValidAttributeDatum, warningMessage);
         }
 
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneEntryIsTooBig_FailsWithWarning()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            EnsureSuffRateAttributeExists();
+            var path = SampleAttributeDataPathWithSuffRatePath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[3, 3].Value = 1000;
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.IsNotLessThanOrEqualToTheMaximumValue, warningMessage);
+        }
         [Fact]
         public void ImportSpreadsheet_RepeatedRowKey_FailsWithWarning()
         {

@@ -2,15 +2,14 @@
     <v-layout column>
         <v-layout>
             <v-card
-                class="mx-auto ghd-sidebar-libary"
+                class="mx-auto ghd-sidebar-raw-data"
                 height="100%"
                 elevation="0"
-                style="border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #999999;"
             >
-                <div>
-                    Test
+                <div class="raw-data-list-header">
+                    Raw Data
                 </div>
-                <v-list class="ghd-navigation-list">
+                <v-list class="ghd-navigation-rawdata-list">
                     <v-list-item-group
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
@@ -18,13 +17,16 @@
                     >
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
-                                <v-list-tile-icon>
+                                <v-list-tile-icon class="sidebar-icon">
                                     <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
                                 <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
                             </v-list-tile-content>
+                            <v-list-tile-icon class="selected-sidebar-icon">
+                                    <v-icon class="mx-2 ghd-blue" slot="prependIcon">fa-thin fa-angle-right</v-icon>
+                            </v-list-tile-icon>
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
@@ -139,6 +141,34 @@ export default class EditRawData extends Vue {
 }
 .settings-list a:hover {
     text-decoration: none;
+    color: black;
+}
+
+.settings-list a:active {
+    text-decoration: none;
+}
+
+.settings-list a:focus {
+    text-decoration: none;
+}
+
+.raw-data-list-header {
+    font-family: 'Montserrat' !important;
+    font-weight: 500 !important;
+    font-size: 18px !important;
+    background-color: #607C9F !important;
+    color: #FFFFFF !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    padding-left: 20px !important;
+}
+
+.primary--text .selected-sidebar-icon .v-icon{
+    visibility: visible !important;
+}
+
+.selected-sidebar-icon .v-icon{
+    visibility: hidden !important;
 }
 
 </style>

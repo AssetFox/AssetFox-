@@ -25,11 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
-            var networkEntity = new NetworkEntity
-            {
-                Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
-                Name = network.Name
-            }; // unused . . . why do we create it?
+
             //_unitOfWork.Context.Upsert(networkEntity, networkEntity.Id, _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);

@@ -56,17 +56,15 @@ namespace BridgeCareCore.Services
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                     }
-                    // limit returned values to 500 or enable
-                    // manual text entry for values
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
-                        Values = values.Count > 500
+                        Values = values.Count > 100
                             ? new List<string>()
                             : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
-                            : values.Count > 500
+                            : values.Count > 100
                                 ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
                                 : "Success",
                         ResultType = !values.Any() || values.Count > 100 ? "warning" : "success"

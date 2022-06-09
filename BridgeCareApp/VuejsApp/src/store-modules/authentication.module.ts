@@ -20,7 +20,7 @@ const state = {
     isCWOPA: false,
     username: '',
     refreshing: false,
-    securityType: SecurityTypes.ESEC,
+    securityType: SecurityTypes.esec,
     pennDotSecurityType: 'ESEC',
     azureSecurityType: 'B2C',
 };

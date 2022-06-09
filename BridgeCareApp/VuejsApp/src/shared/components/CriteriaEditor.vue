@@ -459,7 +459,7 @@ export default class CriteriaEditor extends Vue {
                                 this.queryBuilderRules,
                             ),
                             {
-                                type: 'custom-component',
+                                type: 'select',
                                 id: asv.attribute,
                                 label: asv.attribute,
                                 operators: ['=', '<>', '<', '<=', '>', '>='],
@@ -467,7 +467,6 @@ export default class CriteriaEditor extends Vue {
                                     label: value,
                                     value: value,
                                 })),
-                                component: CriteriaCombo 
                             },
                             this.queryBuilderRules,
                         );

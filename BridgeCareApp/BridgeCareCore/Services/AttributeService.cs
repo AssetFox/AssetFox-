@@ -61,15 +61,15 @@ namespace BridgeCareCore.Services
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
-                        Values = values.Count > 500
+                        Values = values.Count > 20
                             ? new List<string>()
                             : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
-                            : values.Count > 500
+                            : values.Count > 20
                                 ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
                                 : "Success",
-                        ResultType = !values.Any() || values.Count > 100 ? "warning" : "success"
+                        ResultType = !values.Any() || values.Count > 20 ? "warning" : "success"
                     };
                 }).ToList();
         }

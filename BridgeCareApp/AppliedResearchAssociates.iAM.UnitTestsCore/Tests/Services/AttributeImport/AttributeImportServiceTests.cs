@@ -201,6 +201,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttributeButOneEntryIsAlphabetical_IdkWhat()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            EnsureSuffRateAttributeExists();
+            var path = SampleAttributeDataPathWithSuffRatePath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[3, 3].Value = "This is not a number";
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.Contains(AttributeImportService.FailedToCreateAValidAttributeDatum, warningMessage);
+        }
+
+        [Fact]
         public void ImportSpreadsheet_RepeatedRowKey_FailsWithWarning()
         {
             _testHelper.CreateAttributes();

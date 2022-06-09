@@ -37,6 +37,7 @@ Do not try and create attributes here - just verify they exist.  We can tackle m
         public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
         public const string InspectionDateColumn = "InspectionDate column";
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
+        public const string FailedToCreateAValidAttributeDatum = "Failed to create a valid AttributeDatum";
 
         public AttributeImportService(
             UnitOfDataPersistenceWork unitOfWork
@@ -169,6 +170,14 @@ Do not try and create attributes here - just verify they exist.  We can tackle m
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
                         var attributeValue = worksheet.Cells[assetRowIndex, attributeColumnIndex].Value;
                         var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
+                        if (attributeDatum == null)
+                        {
+                            var warningMessage = $@"{FailedToCreateAValidAttributeDatum} at row {assetRowIndex} column {attributeColumnIndex}. The spreadsheet value was ""{attributeValue}.""";
+                            return new AttributesImportResultDTO
+                            {
+                                WarningMessage = warningMessage,
+                            };
+                        }
                         attributeDataForAsset.Add(attributeDatum);
                     }
                     newAsset.AssignAttributeData(attributeDataForAsset);

@@ -28,46 +28,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
         private const string DistrictAttributeName = "DISTRICT";
         private const string SuffRateAttributeName = "SUFF_RATE";
-
-        private static void EnsureDistrictAttributeExists()
+      
+        private static void EnsureAttributeExists(AttributeDTO dto)
         {
-            var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(DistrictAttributeName);
+            var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
             if (existingDistrictAttribute == null)
             {
-                var dto = new AttributeDTO
-                {
-                    Name = DistrictAttributeName,
-                    AggregationRuleType = TextAttributeAggregationRules.Predominant,
-                    Id = Guid.NewGuid(),
-                    Command = "DistrictCommand",
-                    DefaultValue = "",
-                    Type = DataPersistenceConstants.AttributeTextDataType,
-                    IsAscending = false,
-                    IsCalculated = false,
-                };
                 _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
             }
         }
+
+
+        private static AttributeDTO DistrictAttributeDto() => new AttributeDTO
+        {
+            Name = DistrictAttributeName,
+            AggregationRuleType = TextAttributeAggregationRules.Predominant,
+            Id = Guid.NewGuid(),
+            Command = "DistrictCommand",
+            DefaultValue = "",
+            Type = DataPersistenceConstants.AttributeTextDataType,
+            IsAscending = false,
+            IsCalculated = false,
+        };
 
         private static void EnsureSuffRateAttributeExists()
         {
-            var existingSuffRateAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(SuffRateAttributeName);
-            if (existingSuffRateAttribute == null)
-            {
-                var dto = new AttributeDTO
-                {
-                    Name = SuffRateAttributeName,
-                    AggregationRuleType = NumericAttributeAggregationRules.Average,
-                    Id = Guid.NewGuid(),
-                    Command = "SuffRateCommand",
-                    DefaultValue = "0",
-                    Type = DataPersistenceConstants.AttributeNumericDataType,
-                    IsAscending = false,
-                    IsCalculated = false,
-                };
-                _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
-            }
+            var dto = SuffRateAttributeDto();
+            EnsureAttributeExists(dto);
         }
+
+        private static void EnsureDistrictAttributeExists()
+        {
+            var dto = DistrictAttributeDto();
+            EnsureAttributeExists(dto);
+        }
+
+
+        private static AttributeDTO SuffRateAttributeDto() => new AttributeDTO
+        {
+            Name = SuffRateAttributeName,
+            AggregationRuleType = NumericAttributeAggregationRules.Average,
+            Id = Guid.NewGuid(),
+            Command = "SuffRateCommand",
+            DefaultValue = "0",
+            Type = DataPersistenceConstants.AttributeNumericDataType,
+            IsAscending = false,
+            IsCalculated = false,
+        };
 
         private static string SampleAttributeDataPath()
         {
@@ -221,8 +228,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
-            
         }
-
     }
 }

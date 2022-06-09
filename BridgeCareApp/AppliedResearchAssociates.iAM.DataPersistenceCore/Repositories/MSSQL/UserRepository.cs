@@ -71,9 +71,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return Task.Factory.StartNew(() =>
                     new UserDTO
                     {
-                        Id = Guid.NewGuid(),
+                        Id = Guid.Empty,
                         Username = userName,
-                        HasInventoryAccess = true,
+                        HasInventoryAccess = false,
                         LastNewsAccessDate = new DateTime(),
                         CriterionLibrary = new CriterionLibraryDTO()
                     }

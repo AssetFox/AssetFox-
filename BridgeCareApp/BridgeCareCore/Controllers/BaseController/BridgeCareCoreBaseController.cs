@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -21,38 +20,16 @@ namespace BridgeCareCore.Controllers.BaseController
 
         protected readonly IHttpContextAccessor ContextAccessor;
 
-        private readonly IReadOnlyCollection<string> PathsToIgnore = new List<string>
-        {
-            "UserTokens", "RevokeToken", "RefreshToken"
-        };
-
         public BridgeCareCoreBaseController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor)
         {
             EsecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (RequestHasBearer())
+            if (ContextAccessor?.HttpContext?.Request != null)
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }
-        }
-
-        private bool RequestHasBearer()
-        {
-            if (ContextAccessor?.HttpContext?.Request != null)
-            {
-                var returnValue = !PathsToIgnore.Any(pathToIgnore =>
-                    ContextAccessor.HttpContext.Request.Path.Value.Contains(pathToIgnore));
-                if (returnValue)
-                {
-                    return returnValue;
-                }
-                throw new Exception("Funny business with PathsToIgnore!!!");
-            }
-            throw new Exception("No bearer!!!!!!");
-
-            return false;
         }
 
         public void SetUserInfo(HttpRequest request) => UserInfo = EsecSecurity.GetUserInformation(request);
@@ -73,9 +50,9 @@ namespace BridgeCareCore.Controllers.BaseController
 
         private void CheckIfUserExist()
         {
-            if (!string.IsNullOrEmpty(UserInfo.Name))
+            if (string.IsNullOrEmpty(UserInfo.Name))
             {
-                if (!UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
+                if (UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
                 {
                     UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
                 }
@@ -90,7 +67,7 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             if (UnitOfWork.UserEntity == null || !UnitOfWork.Context.Simulation.Any(_ =>
@@ -104,7 +81,7 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             if (!UnitOfWork.Context.Simulation.Any(_ =>

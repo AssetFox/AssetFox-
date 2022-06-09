@@ -93,6 +93,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
+            var assets = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.Id == simulation.Id)
+                .Include(_ => _.MaintainableAssetLocation)
+                .ToList();
 
             var projects = _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulation.Id)
@@ -104,16 +108,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ShadowForSameTreatment = project.ShadowForSameTreatment,
                     Cost = project.Cost,
                     Year = project.Year,
-                    MaintainableAsset =
-                        new MaintainableAssetEntity
-                        {
-                            Id = project.MaintainableAssetId,
-                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting,
-                            MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                            {
-                                LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
-                            }
-                        },
                     CommittedProjectLocation = project.CommittedProjectLocation,
                     ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
@@ -122,12 +116,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             Id = consequence.Id,
                             ChangeValue = consequence.ChangeValue,
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
-                        }).ToList()
+                        }).ToList(),
                 }).AsNoTracking().ToList();
 
             if (projects.Any())
             {
-                projects.ForEach(_ => _.CreateCommittedProject(simulation));
+                projects.ForEach(_ => {
+                    var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
+                    if (asset != null)
+                    {
+                        _.CreateCommittedProject(simulation, asset.Id);
+                    }
+                });
             }
 
         }
@@ -148,20 +148,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ShadowForSameTreatment = project.ShadowForSameTreatment,
                     Cost = project.Cost,
                     ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-                    MaintainableAsset = new MaintainableAssetEntity
-                    {
-                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                        {
-                            LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation
-                                .LocationIdentifier
-                        }
-                    },
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {
                             Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
                             ChangeValue = consequence.ChangeValue
-                        }).ToList()
+                        }).ToList(),
+                    CommittedProjectLocation = project.CommittedProjectLocation
                 })
                 .ToList();
         }

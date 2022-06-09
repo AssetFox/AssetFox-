@@ -136,10 +136,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation)
+        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation, Guid maintainableAssetId)
         {
             var asset = simulation.Network.Assets.Single(_ =>
-                _.Id == entity.MaintainableAsset.Id);
+                _.Id == maintainableAssetId);
 
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;

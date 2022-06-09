@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -22,10 +23,10 @@ namespace BridgeCareCore.Services
 
         public const string UnknownBudgetName = "Unknown";
 
+        private readonly string _keyFieldName = "BRKEY_";
+
         private static readonly List<string> InitialHeaders = new List<string>
         {
-            "BRKEY",
-            "BMSID",
             "TREATMENT",
             "YEAR",
             "YEARANY",
@@ -45,12 +46,19 @@ namespace BridgeCareCore.Services
          */
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
         {
-            for (var column = 0; column < InitialHeaders.Count; column++)
+            var keyValues = _unitOfWork.AssetDataRepository.KeyProperties;
+            var keyColumns = keyValues.Keys.ToList();
+            for (var keyColumnIndex = 0; keyColumnIndex < keyColumns.Count; keyColumnIndex++)
             {
-                worksheet.Cells[1, column + 1].Value = InitialHeaders[column];
+                worksheet.Cells[1, keyColumnIndex + 1].Value = keyColumns[keyColumnIndex];
             }
 
-            var attributeColumn = InitialHeaders.Count;
+            for (var column = 0; column < InitialHeaders.Count; column++)
+            {
+                worksheet.Cells[1, column + keyColumns.Count + 1].Value = InitialHeaders[column];
+            }
+
+            var attributeColumn = InitialHeaders.Count + keyColumns.Count;
             attributeNames.ForEach(attributeName => worksheet.Cells[1, ++attributeColumn].Value = attributeName);
         }
 
@@ -60,11 +68,12 @@ namespace BridgeCareCore.Services
         private void AddDataCells(ExcelWorksheet worksheet, List<CommittedProjectEntity> committedProjectEntities)
         {
             var row = 2;
-            committedProjectEntities.OrderBy(_ => _.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier)
+            committedProjectEntities.OrderBy(_ => _.CommittedProjectLocation.LocationIdentifier)
                 .ThenByDescending(_ => _.Year).ForEach(
                     project =>
                     {
                         var column = 1;
+
                         var brKeyBmsIdSplit =
                             project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier.Split('-');
                         worksheet.Cells[row, column++].Value = brKeyBmsIdSplit[0];
@@ -220,8 +229,8 @@ namespace BridgeCareCore.Services
 
             for (var row = 2; row <= end.Row; row++)
             {
-                var brKey = worksheet.GetCellValue<string>(row, 1);
-                var bmsId = worksheet.GetCellValue<string>(row, 2);
+                //var brKey = worksheet.GetCellValue<string>(row, 1);
+                //var bmsId = worksheet.GetCellValue<string>(row, 2);
                 var projectYear = worksheet.GetCellValue<int>(row, 4);
                 var searchList = maintainableAssetIdsPerLocationIdentifier.Keys.ToList();
                 var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
@@ -261,7 +270,7 @@ namespace BridgeCareCore.Services
                     Id = Guid.NewGuid(),
                     SimulationId = simulationEntity.Id,
                     ScenarioBudgetId = budgetEntity.Id,
-                    MaintainableAssetId = maintainableAssetIdsPerLocationIdentifier[locationIdentifier],
+                    CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, locationIdentifier),
                     Name = worksheet.GetCellValue<string>(row, 3),
                     Year = projectYear,
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, 5),
@@ -306,7 +315,7 @@ namespace BridgeCareCore.Services
                             Id = noTreatmentProjectId,
                             SimulationId = project.SimulationId,
                             ScenarioBudgetId = project.ScenarioBudgetId,
-                            MaintainableAssetId = project.MaintainableAssetId,
+                            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, locationIdentifierAndYearTuple.Item1),
                             Name = NoTreatment,
                             Year = year,
                             ShadowForAnyTreatment = project.ShadowForAnyTreatment,

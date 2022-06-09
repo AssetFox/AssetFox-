@@ -246,7 +246,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        //[Fact(Skip = "Broken as of 10:38am 2 June 2022, not when run by itself, but yes when run as part of a full run. WjTodo if time arises for it?")]
         [Fact]
         public async Task ShouldValidateCriterion()
         {

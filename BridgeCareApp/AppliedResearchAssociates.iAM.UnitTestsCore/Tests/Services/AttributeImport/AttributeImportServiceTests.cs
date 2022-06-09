@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
 using Xunit;
-using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
@@ -19,6 +15,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         private const string SampleAttributeDataFilename = "SampleAttributeData.xlsx";
+        private const string SampleAttributeDataWithSuffRateFilename = "SampleAttributeDataWithSuffRate.xlsx";
         private const string SampleAttributeDataWithSpuriousEmptyFirstRowFilename = "SampleAttributeDataWithSpuriousEmptyFirstRow.xlsx";
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
@@ -29,19 +26,42 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             return returnValue;
         }
 
-        private void EnsureDistrictAttributeExists()
+        private const string DistrictAttributeName = "DISTRICT";
+        private const string SuffRateAttributeName = "SUFF_RATE";
+
+        private static void EnsureDistrictAttributeExists()
         {
-            var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName("DISTRICT");
+            var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(DistrictAttributeName);
             if (existingDistrictAttribute == null)
             {
                 var dto = new AttributeDTO
                 {
-                    Name = "DISTRICT",
+                    Name = DistrictAttributeName,
                     AggregationRuleType = TextAttributeAggregationRules.Predominant,
                     Id = Guid.NewGuid(),
                     Command = "DistrictCommand",
                     DefaultValue = "",
                     Type = DataPersistenceConstants.AttributeTextDataType,
+                    IsAscending = false,
+                    IsCalculated = false,
+                };
+                _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
+            }
+        }
+
+        private static void EnsureSuffRateAttributeExists()
+        {
+            var existingSuffRateAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(SuffRateAttributeName);
+            if (existingSuffRateAttribute == null)
+            {
+                var dto = new AttributeDTO
+                {
+                    Name = SuffRateAttributeName,
+                    AggregationRuleType = NumericAttributeAggregationRules.Average,
+                    Id = Guid.NewGuid(),
+                    Command = "SuffRateCommand",
+                    DefaultValue = "0",
+                    Type = DataPersistenceConstants.AttributeNumericDataType,
                     IsAscending = false,
                     IsCalculated = false,
                 };
@@ -57,6 +77,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             return returnValue;
         }
 
+        private static string SampleAttributeDataPathWithSuffRatePath()
+        {
+            var filename = SampleAttributeDataWithSuffRateFilename;
+            var folder = Directory.GetCurrentDirectory();
+            var returnValue = Path.Combine(folder, "SampleData", filename);
+            return returnValue;
+        }
         private static string SampleAttributeDataWithSpuriousEmptyFirstRowPath()
         {
             var filename = SampleAttributeDataWithSpuriousEmptyFirstRowFilename;
@@ -123,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
-        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_IdkWhat()
+        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
         {
             _testHelper.CreateAttributes();
             EnsureDistrictAttributeExists();
@@ -137,6 +164,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var networkId = result.NetworkId.Value;
             var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
             var assetCount = assets.Count;
+            Assert.Equal(4, assetCount);
+            var datum0 = assets[0].AssignedData[0];
+            var stringDatum0 = datum0 as AttributeDatum<string>;
+            Assert.NotNull(stringDatum0);
+            Assert.NotNull(stringDatum0.Value);
+        }
+
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttribute_CreatesNetworkAndAttributes()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            EnsureSuffRateAttributeExists();
+            var path = SampleAttributeDataPathWithSuffRatePath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.True(string.IsNullOrEmpty(warningMessage));
+            var networkId = result.NetworkId.Value;
+            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assetCount = assets.Count;
+            var datum0 = assets[0].AssignedData[0];
+            var doubleDatum0 = datum0 as AttributeDatum<double>;
+            Assert.NotNull(doubleDatum0);
             Assert.Equal(4, assetCount);
         }
 
@@ -171,6 +224,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             
         }
 
-        // WjTodo -- after writing that the 7 test failures were "consistent" over 3 trials, I tried moving the repo back then forward, and the failures went away. Then Running just UnitTestsCore saw 24 failures.
     }
 }

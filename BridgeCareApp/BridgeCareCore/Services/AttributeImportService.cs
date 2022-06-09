@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Helpers;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -23,10 +25,11 @@ You can attempt to match the attribute names in the first row of the excel sheet
 >> If you find a unique match for each column, great!  start importing data
 >> If there are column names that do not have a matching Attribute.Name in the Attributes table, reject the upload and let the user know what fields need to be added
 The network is defined by these attributes - in other words, you cannot have a mismatch between assets and attributes
-Do not try and create attributes here - juset verify they exist.  We can tackle making the attributes later given our timeframe
+Do not try and create attributes here - just verify they exist.  We can tackle making the attributes later given our timeframe
     */
     public class AttributeImportService
     {
+        // WjTodo THURSDAY -- need to think about attribute values, which may be non-string. Parse to the correct type, as defined by the existing attribute in the db?
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
@@ -182,11 +185,26 @@ Do not try and create attributes here - juset verify they exist.  We can tackle 
             };
         }
 
-        private AttributeDatum<string> CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
+        private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
+            // Wjwjwj -- currently returns null if we fail. Not sure if that's the right end state.
             var domainAttribute = AttributeMapper.ToDomain(attribute);
             var attributeId = Guid.NewGuid();
-            var returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
+            var attributeType = domainAttribute.DataType;
+            IAttributeDatum returnValue = null;
+            switch (attributeType)
+            {
+            case DataPersistenceConstants.AttributeTextDataType:
+                returnValue = new AttributeDatum<string>(attributeId, domainAttribute, attributeValue.ToString(), location, inspectionDate);
+                break;
+            case DataPersistenceConstants.AttributeNumericDataType:
+                var nullableDoubleValue = DoubleParseHelper.TryParseNullableDouble(attributeValue);
+                if (nullableDoubleValue.HasValue)
+                {
+                    returnValue = new AttributeDatum<double>(attributeId, domainAttribute, nullableDoubleValue.Value, location, inspectionDate);
+                }
+                break;
+            }
             return returnValue;
         }
 

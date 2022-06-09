@@ -52,6 +52,9 @@
     <None Update="SampleData\SampleAttributeDataWithSpuriousEmptyFirstRow.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="SampleData\SampleAttributeDataWithSuffRate.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

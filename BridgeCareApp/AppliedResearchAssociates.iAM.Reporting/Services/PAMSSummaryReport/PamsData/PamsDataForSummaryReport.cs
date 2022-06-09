@@ -214,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["CNTY"];
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SR"];
-                worksheet.Cells[rowNo, columnNo++].Value = ""; //sectionSummary.ValuePerNumericAttribute["SEGMENT"];
+                worksheet.Cells[rowNo, columnNo++].Value = "UNKNOWN"; //sectionSummary.ValuePerNumericAttribute["SEGMENT"]; //This column will go away in future according to Jake
 
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SEGMENT_LENGTH"];
                 worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WIDTH"];
@@ -398,14 +398,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
 
-            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["OPI"];
-            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_IRI"];
-            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_RUTTING"];
-            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_FAULTING"];
-            worksheet.Cells[row, ++column].Value = (int)selectedSection.ValuePerNumericAttribute["HPMS_CRACKING"];
+            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["OPI"]);
+            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_IRI"]);
+            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_RUTTING"], 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_FAULTING"], 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_CRACKING"], 1);
 
-            if (row % 2 == 0)
-            {
+            if (row % 2 == 0) {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
             }
 

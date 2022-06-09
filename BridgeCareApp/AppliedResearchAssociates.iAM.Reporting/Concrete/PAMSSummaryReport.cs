@@ -146,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //var simulation = network.Simulations.First();
             //_unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            //_unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null); // to do: bimal
+            //_unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             //_unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 

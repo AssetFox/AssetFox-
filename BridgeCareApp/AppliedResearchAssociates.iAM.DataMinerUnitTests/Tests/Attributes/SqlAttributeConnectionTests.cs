@@ -5,13 +5,14 @@ using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
     public class SqlAttributeConnectionTests
     {
         private Mock<Attribute> mockAttribute;
-        private readonly string testConnection = "data source=localhost;initial catalog=IAMv2;persist security info=True;user id=sqluser;password=su1Local*;MultipleActiveResultSets=True;App=EntityFramework";
         private string testCommand = string.Empty;         
 
         [Fact]
@@ -29,12 +30,24 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             var resultElements = result.ToList();            
             Assert.Single(resultElements);
             Assert.IsType<AttributeDatum<string>>(resultElements[0]);
-        }        
+        }
+
+        private static string GetConnectionString()
+        {
+
+            var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("testConnections.json")
+                .Build();
+            var returnValue = config.GetConnectionString("BridgeCareConnexRealDb");
+            return returnValue;
+        }
 
         private void Init(string type, string dataColumn)
         {
             testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + dataColumn + " AS DATA_ FROM dbo.Attribute";
-            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, testCommand, Data.ConnectionType.MSSQL, testConnection, false, false);
+            var connectionString = GetConnectionString();
+            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, testCommand, Data.ConnectionType.MSSQL, connectionString, false, false);
         }
     }
 }

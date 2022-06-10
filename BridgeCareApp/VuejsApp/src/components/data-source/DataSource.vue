@@ -6,6 +6,8 @@
                     <v-subheader class="ghd-control-label ghd-md-gray">Data Source</v-subheader>
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border ds-style"
+                      :items="DataSourceType"
+                      v-model="librarySelectItemValue"
                       outline
                       outlined
                     >
@@ -48,13 +50,25 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 
 @Component({
 
 })
 export default class DataSource extends Vue {
-    
+    DataSourceType = [
+        {text: "BAMS SQL", value: "BAMS SQL"},
+        {text: "EXCEL", value: "Excel"}
+    ];
+    librarySelectItemValue: string | null = '';
+
+    mounted() {
+    }
+    @Watch('librarySelectItemValue')
+        onLibrarySelectItemValueChanged() {
+            //set toggle for active bams or excel
+    }
 }
 </script>
 

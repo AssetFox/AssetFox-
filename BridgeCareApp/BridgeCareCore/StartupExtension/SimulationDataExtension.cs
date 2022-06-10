@@ -22,9 +22,6 @@ namespace BridgeCareCore.StartupExtension
         {
             services.AddScoped<ISimulationOutputFileRepository, SimulationOutputFileRepository>();
 
-            services.AddScoped<IBridgeDataForSummaryReport, BridgeDataForSummaryReport>();
-            services.AddScoped<IPamsDataForSummaryReport, PamsDataForSummaryReport>();
-
             services.AddSingleton<SequentialWorkQueue>();
             services.AddHostedService<SequentialWorkBackgroundService>();
             services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();

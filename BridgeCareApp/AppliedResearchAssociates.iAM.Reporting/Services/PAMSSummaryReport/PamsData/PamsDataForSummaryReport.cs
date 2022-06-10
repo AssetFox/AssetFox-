@@ -241,7 +241,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
         private void FillDynamicData(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
         {
-            var initialRow = 4;
+            //initial row to populate data.
+            const int initialRow = 4;
+
             var row = 4; // Data starts here
             var startingRow = row;
             var column = currentCell.Column;

@@ -496,8 +496,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.TreatmentLibraryId == libraryId && entityId == _.Id);
                       
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
-                _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
+                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||                                _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
             _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
@@ -542,8 +541,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
                 _.SimulationId == simulationId && _.Id == entityId);
 
-            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>                (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
                     && _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId)
                 ||
                 (_.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence

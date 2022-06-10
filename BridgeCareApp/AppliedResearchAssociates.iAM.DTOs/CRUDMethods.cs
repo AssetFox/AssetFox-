@@ -14,6 +14,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public Action<L> UpsertLibrary { get; set; }
         public Func<List<L>> RetrieveLibrary { get; set; }
         public Action<Guid> DeleteLibrary { get; set; }
+        public Action<TreatmentDTO, Guid> DeleteTreatment { get; set; }
+        public Action<TreatmentDTO, Guid> DeleteScenarioTreatment { get; set; }
     }
 
     public class NoLibraryCRUDMethods<S> where S : BaseDTO

@@ -27,9 +27,9 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
             // Assert
             Assert.NotNull(result);
-            var resultElements = result.ToList();            
-            Assert.Single(resultElements);
-            Assert.IsType<AttributeDatum<string>>(resultElements[0]);
+            var resultElements = result.ToList();
+            var resultElement = resultElements.Single();
+            Assert.IsType<AttributeDatum<string>>(resultElement);
         }
 
         private static string GetConnectionString()

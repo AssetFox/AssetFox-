@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
@@ -23,7 +24,10 @@ namespace BridgeCareCore.Services
 
         public const string UnknownBudgetName = "Unknown";
 
-        private readonly string _keyFieldName = "BRKEY_";
+        // TODO: Determine based on associated network
+        private readonly string _networkKeyField = "BRKEY";
+
+        private readonly List<string> _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.ToList();
 
         private static readonly List<string> InitialHeaders = new List<string>
         {
@@ -46,43 +50,46 @@ namespace BridgeCareCore.Services
          */
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
         {
-            var keyValues = _unitOfWork.AssetDataRepository.KeyProperties;
-            var keyColumns = keyValues.Keys.ToList();
-            for (var keyColumnIndex = 0; keyColumnIndex < keyColumns.Count; keyColumnIndex++)
+            for (var keyColumnIndex = 0; keyColumnIndex < _keyFields.Count; keyColumnIndex++)
             {
-                worksheet.Cells[1, keyColumnIndex + 1].Value = keyColumns[keyColumnIndex];
+                worksheet.Cells[1, keyColumnIndex + 1].Value = _keyFields[keyColumnIndex];
             }
 
             for (var column = 0; column < InitialHeaders.Count; column++)
             {
-                worksheet.Cells[1, column + keyColumns.Count + 1].Value = InitialHeaders[column];
+                worksheet.Cells[1, column + _keyFields.Count + 1].Value = InitialHeaders[column];
             }
 
-            var attributeColumn = InitialHeaders.Count + keyColumns.Count;
+            var attributeColumn = InitialHeaders.Count + _keyFields.Count;
             attributeNames.ForEach(attributeName => worksheet.Cells[1, ++attributeColumn].Value = attributeName);
         }
 
         /**
          * Adds excel worksheet cell values for Committed Project Export
          */
-        private void AddDataCells(ExcelWorksheet worksheet, List<CommittedProjectEntity> committedProjectEntities)
+        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs)
         {
             var row = 2;
-            committedProjectEntities.OrderBy(_ => _.CommittedProjectLocation.LocationIdentifier)
+            committedProjectDTOs.OrderBy(_ => _.LocationKeys[_networkKeyField])
                 .ThenByDescending(_ => _.Year).ForEach(
                     project =>
                     {
                         var column = 1;
 
-                        var brKeyBmsIdSplit =
-                            project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier.Split('-');
-                        worksheet.Cells[row, column++].Value = brKeyBmsIdSplit[0];
-                        worksheet.Cells[row, column++].Value = brKeyBmsIdSplit[1];
-                        worksheet.Cells[row, column++].Value = project.Name;
+                        foreach (var pair in project.LocationKeys)
+                        {
+                            if (_keyFields.Contains(pair.Key))
+                            {
+                                worksheet.Cells[row, column++].Value = pair.Value;
+                            }
+                        }
+
+                        worksheet.Cells[row, column++].Value = project.Treatment;
                         worksheet.Cells[row, column++].Value = project.Year;
                         worksheet.Cells[row, column++].Value = project.ShadowForAnyTreatment;
                         worksheet.Cells[row, column++].Value = project.ShadowForSameTreatment;
-                        var budgetName = project.ScenarioBudget.Name;
+                        var linkedBudget = _unitOfWork.BudgetRepo.GetScenarioBudgets(project.SimulationId).FirstOrDefault(_ => _.Id == project.ScenarioBudgetId);
+                        var budgetName = linkedBudget?.Name ?? UnknownBudgetName;
                         if (budgetName == UnknownBudgetName)
                         {
                             budgetName = "";
@@ -90,7 +97,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
-                        project.CommittedProjectConsequences.OrderBy(_ => _.Attribute.Name).ForEach(consequence =>
+                        project.Consequences.OrderBy(_ => _.Attribute).ForEach(consequence =>
                         {
                             worksheet.Cells[row, column++].Value = consequence.ChangeValue;
                         });
@@ -100,7 +107,8 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
-            var committedProjectEntities = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            //var sectionCommittedProjects = committedProjectDTOs.Where(_ => _ is SectionCommittedProjectDTO).Select(_ => (SectionCommittedProjectDTO)_).ToList();
 
             var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
                 .Select(simulation => new SimulationEntity { Name = simulation.Name }).Single();
@@ -110,15 +118,15 @@ namespace BridgeCareCore.Services
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
 
-            if (committedProjectEntities.Any())
+            if (committedProjectDTOs.Any())
             {
-                var attributeNames = committedProjectEntities
+                var attributeNames = committedProjectDTOs
                     .SelectMany(_ =>
-                        _.CommittedProjectConsequences.Select(__ => __.Attribute.Name).Distinct().OrderBy(__ => __))
+                        _.Consequences.Select(__ => __.Attribute).Distinct().OrderBy(__ => __))
                     .Distinct()
                     .ToList();
                 AddHeaderCells(worksheet, attributeNames);
-                AddDataCells(worksheet, committedProjectEntities);
+                AddDataCells(worksheet, committedProjectDTOs);
             }
 
             return new FileInfoDTO
@@ -197,7 +205,7 @@ namespace BridgeCareCore.Services
         /**
          * Creates CommittedProjectEntity data for Committed Project Import
          */
-        private List<CommittedProjectEntity> CreateCommittedProjectEntitiesForImport(Guid simulationId,
+        private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
@@ -345,11 +353,11 @@ namespace BridgeCareCore.Services
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
             var committedProjectEntities =
-                CreateCommittedProjectEntitiesForImport(simulationId, excelPackage, filename, applyNoTreatment);
+                CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 
-            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(committedProjectEntities);
+            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(committedProjectEntities.Select(_ => (BaseCommittedProjectDTO)_).ToList());
         }
     }
 }

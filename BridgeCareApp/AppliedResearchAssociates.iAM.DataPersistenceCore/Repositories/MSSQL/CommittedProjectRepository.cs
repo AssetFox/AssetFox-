@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -132,35 +133,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         }
 
-        public List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId)
+        public List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
-                .Select(project => new CommittedProjectEntity
-                {
-                    Name = project.Name,
-                    Year = project.Year,
-                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                    Cost = project.Cost,
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-                        new CommittedProjectConsequenceEntity
-                        {
-                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
-                            ChangeValue = consequence.ChangeValue
-                        }).ToList(),
-                    CommittedProjectLocation = project.CommittedProjectLocation
-                })
+            //var entity = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
+            //    .Select(project => new CommittedProjectEntity
+            //    {
+            //        Name = project.Name,
+            //        Year = project.Year,
+            //        ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+            //        ShadowForSameTreatment = project.ShadowForSameTreatment,
+            //        Cost = project.Cost,
+            //        ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
+            //        CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+            //            new CommittedProjectConsequenceEntity
+            //            {
+            //                Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
+            //                ChangeValue = consequence.ChangeValue
+            //            }).ToList(),
+            //        CommittedProjectLocation = project.CommittedProjectLocation
+            //    })
+            //    .Select(_ => _.ToDTO()) // TODO:  Just create the DTO directly?
+            //    .ToList();
+
+            return _unitOfWork.Context.CommittedProject
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjectConsequences)
+                .Include(_ => _.CommittedProjectLocation)
+                .Select(_ => _.ToDTO())
                 .ToList();
         }
 
-        public void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities)
+        public void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjects)
         {
+            var committedProjectEntities = committedProjects.Select(_ => _.ToEntity(_unitOfWork.Context.Attribute.ToList())).ToList();
+
             _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 
             var committedProjectConsequenceEntities = committedProjectEntities

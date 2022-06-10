@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -11,9 +12,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void GetSimulationCommittedProjects(Simulation simulation);
 
-        List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId);
+        List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId);
 
-        void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities);
+        void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjectEntities);
 
         void DeleteCommittedProjects(Guid simulationId);
     }

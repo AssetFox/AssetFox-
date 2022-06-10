@@ -49,6 +49,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         SimulationId = entity.SimulationId,
                         Treatment = entity.Name,
                         Year = entity.Year,
+                        ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
+                        ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
@@ -70,8 +72,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Name = dto.Treatment,
                 Cost = dto.Cost,
                 ScenarioBudgetId = dto.ScenarioBudgetId,
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
+                ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
+                ShadowForSameTreatment = dto.ShadowForSameTreatment,
                 Year = dto.Year,
                 CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };

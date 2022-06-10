@@ -52,6 +52,16 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public int Year { get; set; }
 
         /// <summary>
+        /// The number of years until any other treatment may be performed
+        /// </summary>
+        public int ShadowForAnyTreatment { get; set; }
+
+        /// <summary>
+        /// The number of years until the same treatment may be performed
+        /// </summary>
+        public int ShadowForSameTreatment { get; set; }
+
+        /// <summary>
         /// Verifies the LocationsKeys provided result in a valid location for the network type
         /// </summary>
         /// <returns>

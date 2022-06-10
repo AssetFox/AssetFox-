@@ -68,6 +68,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingUser = _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault();
             if (existingUser == null)
             {
+                // This is satisfactory given the frontend only needs
+                // the username. The was introduced when the asynchronicity
+                // was implemented for getting the user. It may try to obtain
+                // a user before it is created in the database, hence this code.
                 return Task.Factory.StartNew(() =>
                     new UserDTO
                     {

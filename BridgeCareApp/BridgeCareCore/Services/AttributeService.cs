@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -24,7 +25,6 @@ namespace BridgeCareCore.Services
             {
                 return new List<AttributeSelectValuesResult>();
             }
-
             return _unitOfWork.Context.AggregatedResult
                 .Where(_ => attributeNames.Contains(_.Attribute.Name))
                 .Select(aggregatedResult => new AggregatedResultEntity
@@ -42,36 +42,46 @@ namespace BridgeCareCore.Services
                 .Select(keyValuePair =>
                 {
                     var values = new List<string>();
-
                     if (keyValuePair.Value.All(aggregatedResultEntity =>
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
                             .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString()).ToList();
                     }
-
                     if (keyValuePair.Value.All(aggregatedResultEntity =>
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                     }
-                    // limit returned values to 500 or enable
-                    // manual text entry for values
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
-                        Values = values.Count > 1
+                        Values = !HasAlphaValues(values)
                             ? new List<string>()
                             : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
-                            : values.Count > 1
+                            : !HasAlphaValues(values)
                                 ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
                                 : "Success",
-                        ResultType = !values.Any() || values.Count > 1 ? "warning" : "success"
+                        ResultType = !values.Any() || !HasAlphaValues(values) ? "warning" : "success"
                     };
                 }).ToList();
+        }
+        // Check list of values and determine
+        // if alphabetical characters are in the
+        // list.
+        public bool HasAlphaValues(List<string> vals)
+        {
+            bool found = false;
+
+            foreach (string val in vals)
+            {
+                Regex rg = new Regex(@"^[a-zA-Z\s,]*$");
+                found = rg.IsMatch(val);
+            }
+            return found;
         }
     }
 }

@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data
     {
         public static AttributeConnection Build(Attribute attribute)
         {
+            // wjwjwj run this thing.
             switch (attribute.ConnectionType)
             {
             case ConnectionType.MSSQL:

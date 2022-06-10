@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 
 namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
+    // wjwjwj Write a test that invokes the GetData() method. Watch it in action.
     public class SqlAttributeConnection : AttributeConnection
     {
         public SqlAttributeConnection(Attribute attribute) : base(attribute)

@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
         private const string DistrictAttributeName = "DISTRICT";
         private const string SuffRateAttributeName = "SUFF_RATE";
-      
+
         private static void EnsureAttributeExists(AttributeDTO dto)
         {
             var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
@@ -46,7 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             AggregationRuleType = TextAttributeAggregationRules.Predominant,
             Id = Guid.NewGuid(),
             Command = "DistrictCommand",
-            DefaultValue = "",
+            DefaultValue = "Default District",
             Type = DataPersistenceConstants.AttributeTextDataType,
             IsAscending = false,
             IsCalculated = false,
@@ -304,6 +304,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
             var warningMessage = result.WarningMessage;
             Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
+        }
+
+        public void ImportSpreadsheet_EmptyDatum_AddsAttributeWithDefaultValue()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
+            worksheet.Cells[2, 2].Value = "";
+            var service = CreateAttributeImportService();
+            var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
+            var warningMessage = result.WarningMessage;
+            Assert.True(string.IsNullOrEmpty(warningMessage));
+            var networkId = result.NetworkId.Value;
+            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assetCount = assets.Count;
+            Assert.Equal(4, assetCount);
+            var assetNamed1 = assets.Single(a => a.Location.LocationIdentifier == "1");
+            var datum0 = assetNamed1.AssignedData[0];
+            var stringDatum0 = datum0 as AttributeDatum<string>;
+            Assert.NotNull(stringDatum0);
+            Assert.Equal("Default District", stringDatum0.Value);
         }
     }
 }

@@ -56,7 +56,8 @@ namespace BridgeCareCore.Services
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                     }
-
+                    // limit returned values to 500 or enable
+                    // manual text entry for values
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,

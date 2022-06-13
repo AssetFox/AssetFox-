@@ -553,9 +553,20 @@ export default class TreatmentEditor extends Vue {
         }
     }
 
+    // Delete treatment operation ..check if library or scenario
+    // invoke new api for delete treatment
     onDeleteTreatment(treatmentId: string | number) {
         if (any(propEq('id', treatmentId.toString()), this.treatments)) {
             this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
+        }
+
+        if(this.hasScenario)
+        {
+
+        }
+        else
+        {
+            
         }
     }
 

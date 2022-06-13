@@ -74,4 +74,26 @@ export default class TreatmentService {
                   `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
               );
     }
+
+    static deleteTreatment(
+        treatment: Treatment,
+        libraryId: string
+    ):
+        AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Treatment}/DeleteTreatment/${libraryId}`,
+            treatment,
+        );
+    }
+
+    static deleteScenarioSelectableTreatment(
+        scenarioSelectableTreatment: Treatment,
+        simulationId: string
+    ):
+        AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Treatment}/DeleteScenarioSelectableTreatment/${simulationId}`,
+            scenarioSelectableTreatment,
+        );
+    }
 }

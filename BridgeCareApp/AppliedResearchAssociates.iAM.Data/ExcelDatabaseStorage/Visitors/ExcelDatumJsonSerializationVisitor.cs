@@ -9,7 +9,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
     {
         public string Visit(StringExcelCellDatum datum, Unit helper)
         {
-            var returnValue = @$"{datum.Value}";
+            var returnValue = @$"""{datum.Value}""";
             return returnValue;
         }
         public string Visit(DoubleExcelCellDatum datum, Unit helper)

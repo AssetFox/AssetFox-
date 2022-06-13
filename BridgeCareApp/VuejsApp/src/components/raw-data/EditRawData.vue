@@ -18,7 +18,9 @@
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon class="sidebar-icon">
-                                    <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
+                                    <AttributesSvg style="height: 38px; width: 34px"  class="raw-data-icon" v-if="navigationTab.tabName === 'Attributes'"/>    
+                                    <DataSourceSvg style="height: 30px; width: 36px" class="raw-data-icon" v-if="navigationTab.tabName === 'DataSource'"/>
+                                    <NetworksSvg  style="height: 34px; width: 34px" class="raw-data-icon" v-if="navigationTab.tabName === 'Networks'"/>                            
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -48,8 +50,12 @@ import { any, clone, isNil, propEq } from 'ramda';
 import { Network } from '@/shared/models/iAM/network';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import AttributesSvg from '@/shared/icons/AttributesSvg.vue';
+import DataSourceSvg from '@/shared/icons/DataSourceSvg.vue';
+import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
 
 @Component({
+    components: { AttributesSvg, DataSourceSvg, NetworksSvg}
 })
 export default class EditRawData extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
@@ -60,27 +66,26 @@ export default class EditRawData extends Vue {
     navigationTabs: NavigationTab[] = [
         {
             tabName: 'DataSource',
-            tabIcon: 'fas fa-chart-line',
+            tabIcon: "",
             navigation: {
                 path: '/DataSource/',
             },
         },
         {
             tabName: 'Attributes',
-            tabIcon: 'fas fa-plus-square',
+            tabIcon: "",
             navigation: {
                 path: '/Attributes/',
             },
         },
         {
             tabName: 'Networks',
-            tabIcon: 'fas fa-tools',
+            tabIcon: "",
             navigation: {
                 path: '/Networks/',
             },
         },
     ];
-
     
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -169,6 +174,14 @@ export default class EditRawData extends Vue {
 
 .selected-sidebar-icon .v-icon{
     visibility: hidden !important;
+}
+
+.primary--text .raw-data-icon{
+    stroke: #333333 !important;
+}
+
+.raw-data-icon {
+    stroke: #999999 !important;
 }
 
 </style>

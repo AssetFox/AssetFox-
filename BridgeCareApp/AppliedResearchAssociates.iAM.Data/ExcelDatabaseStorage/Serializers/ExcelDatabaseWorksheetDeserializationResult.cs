@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
-    internal class ExcelDatabaseWorksheetDeserializationResult
+    public class ExcelDatabaseWorksheetDeserializationResult
     {
         public ExcelDatabaseWorksheet Worksheet { get; set; }
         public string Message { get; set; }

@@ -12,13 +12,12 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
 {
     public class ExcelCellDatumSerializationTests
     {
+
+
         [Fact]
         public void StringCell_SerializeThenDeserialize_RoundTrips()
         {
-            var cell = new StringExcelCellDatum
-            {
-                Value = "hello"
-            };
+            var cell = TestExcelCellData.HelloDatum();
             var serialized = ExcelCellDatumSerializer.Serialize(cell);
             var deserialized = ExcelCellDatumSerializer.Deserialize(serialized);
             var stringDeserialized = (StringExcelCellDatum)deserialized.Datum;
@@ -28,16 +27,12 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
         [Fact]
         public void DoubleCell_SerializeThenDeserialize_RoundTrips()
         {
-            var cell = new DoubleExcelCellDatum
-            {
-                Value = 3.14159,
-            };
+            var cell = TestExcelCellData.PiDatum();
             var serialized = ExcelCellDatumSerializer.Serialize(cell);
             var deserialized = ExcelCellDatumSerializer.Deserialize(serialized);
             var doubleDeserialized = (DoubleExcelCellDatum)deserialized.Datum;
-            Assert.Equal(3.14159, doubleDeserialized.Value);
+            Assert.Equal(Math.PI, doubleDeserialized.Value);
         }
-
 
         [Fact]
         public void DateTimeCell_SerializeThenDeserialize_RoundTrips()

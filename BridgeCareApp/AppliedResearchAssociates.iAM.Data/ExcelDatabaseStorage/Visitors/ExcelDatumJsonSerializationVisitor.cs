@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using AppliedResearchAssociates.iAM.Data.Helpers;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
@@ -17,5 +18,12 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
             var stringifiedContent = datum.Value.ToString("R");
             return stringifiedContent;
         }
+
+        public string Visit(DateTimeExcelCellDatum datum, Unit helper)
+        {
+            var returnValue = JsonSerializer.Serialize(datum.Value);
+            return returnValue;
+        }
     }
 }
+

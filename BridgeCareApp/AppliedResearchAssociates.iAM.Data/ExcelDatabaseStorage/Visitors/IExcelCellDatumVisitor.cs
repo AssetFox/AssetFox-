@@ -10,5 +10,6 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
     {
         TOutput Visit(StringExcelCellDatum datum, THelper helper);
         TOutput Visit(DoubleExcelCellDatum datum, THelper helper);
+        TOutput Visit(DateTimeExcelCellDatum datum, THelper helper);
     }
 }

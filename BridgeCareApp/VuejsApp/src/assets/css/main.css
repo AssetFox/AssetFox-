@@ -387,7 +387,7 @@ v-list-item.ghd-control-text {
     color: black !important;
 }
 
-.ghd-navigation-rawdata-list {
+/* .ghd-navigation-rawdata-list {
     background-color: #FFFFFF !important;
     color: #999999 !important;
 }
@@ -400,7 +400,7 @@ v-list-item.ghd-control-text {
 .ghd-navigation-rawdata-list .sidebar-icon .v-icon {
     background-color: #FFFFFF !important;
     color: #999999 ! important;
-}
+} */
 
 .ghd-dialog {
     padding:30px !important;

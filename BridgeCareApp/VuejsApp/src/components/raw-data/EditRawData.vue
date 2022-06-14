@@ -6,7 +6,7 @@
                 height="100%"
                 elevation="0"
             >
-                <div class="raw-data-list-header">
+                <div class="raw-data-list-header" style="padding-right: 175px !important">
                     Raw Data
                 </div>
                 <v-list class="ghd-navigation-list">
@@ -33,7 +33,7 @@
                     </v-list-item-group>
                 </v-list>
             </v-card>
-            <v-flex xs12 style="padding-left:200px !important">
+            <v-flex xs12 class="ghd-content">
                 <v-container fluid grid-list-xs style="padding-left:20px;padding-right:20px;">
                     <router-view></router-view>
                 </v-container>

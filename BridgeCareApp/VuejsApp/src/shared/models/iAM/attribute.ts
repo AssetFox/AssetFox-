@@ -40,5 +40,5 @@ export const emptyAttribute: Attribute = {
     minimum: 0,
     maximum: 0,
     name: '',
-    type: ''
+    type: 'STRING'
 }

@@ -5,6 +5,7 @@ import {
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { clone } from 'ramda';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import { Attribute } from './attribute';
 
 // order is important
 export enum TreatmentCategory {
@@ -116,6 +117,7 @@ export const emptyTreatmentDetails: TreatmentDetails = {
     category: TreatmentCategory.preservation,
     assetType: AssetType.bridge,
 };
+
 export const assetTypeMap: Map<string, AssetType> = new Map([
     ['Bridge', 0],
     ['Culvert', 1],

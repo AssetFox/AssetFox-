@@ -40,6 +40,7 @@ const mutations = {
                   state.attributes,
               )
             : append(attribute, state.attributes);
+        (state.attributes as Attribute[]).sort((one, two) => (one.name.toUpperCase() < two.name.toUpperCase() ? -1 : 1));
     },
     attributesMutatorClone(state: any,
         attributes: Attribute[]){

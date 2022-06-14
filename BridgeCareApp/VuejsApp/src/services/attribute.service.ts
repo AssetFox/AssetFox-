@@ -13,14 +13,14 @@ export default class AttributeService {
 
     static upsertAttribute(data: Attribute){
         return coreAxiosInstance.post(
-            `${API.BudgetPriority}/CreateAttribute`,
+            `${API.Attribute}/CreateAttribute`,
             data
         );
     }
 
     static upsertAttributes(data: Attribute[]){
         return coreAxiosInstance.post(
-            `${API.BudgetPriority}/CreateAttributes`,
+            `${API.Attribute}/CreateAttributes`,
             data
         );
     }

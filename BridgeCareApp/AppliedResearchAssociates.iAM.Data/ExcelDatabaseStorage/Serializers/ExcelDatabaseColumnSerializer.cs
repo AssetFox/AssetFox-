@@ -14,9 +14,19 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
             return returnValue;
         }
 
+        public static ExcelDatabaseColumnDeserializationResult Deserialize(string doubleSerializedColumn)
+        {
+            var stringList = JsonSerializer.Deserialize<List<string>>(doubleSerializedColumn);
+            var result = Deserialize(stringList);
+            return result;
+        }
+
         public static ExcelDatabaseColumnDeserializationResult Deserialize(List<string> serializedColumn)
         {
-            var column = new ExcelDatabaseColumn();
+            var column = new ExcelDatabaseColumn
+            {
+                Entries = new List<IExcelCellDatum>(),
+            };
             foreach (var str in serializedColumn)
             {
                 var deserializeStr = ExcelCellDatumSerializer.Deserialize(str);

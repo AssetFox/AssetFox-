@@ -178,6 +178,13 @@ export default class EditScenario extends Vue {
                 path: '/CashFlowEditor/Scenario/',
             },
         },
+        {
+            tabName: 'Committed Projects',
+            tabIcon: 'fas fa-clipboard',
+            navigation: {
+                path: '/CommitedProjectsEditor/Scenario'
+            },
+        },
     ];
     alertData: AlertData = clone(emptyAlertData);
     alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };

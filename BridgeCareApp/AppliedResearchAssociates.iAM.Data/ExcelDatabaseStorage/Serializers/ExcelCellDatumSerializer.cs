@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors;
 using AppliedResearchAssociates.iAM.Data.Helpers;
 
@@ -50,6 +51,29 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
                 {
                     Datum = doubleDatum,
                 };
+            }
+            if (serializedDatum.StartsWith("D"))
+            {
+                var remainder = serializedDatum.Substring(1);
+                try
+                {
+                    var dateTime = JsonSerializer.Deserialize<DateTime>(remainder);
+                    return new ExcelCellDatumDeserializationResult
+                    {
+                        Datum = new DateTimeExcelCellDatum
+                        {
+                            Value = dateTime,
+                        }
+                    };
+                }
+                catch (Exception ex)
+                {
+                    var dateTimeMessage = $@"Cell content started with the letter ""D"", which caused the deserializer to expect a date. However, no date was found. The content is {serializedDatum}";
+                    return new ExcelCellDatumDeserializationResult
+                    {
+                        Message = dateTimeMessage,
+                    };
+                }
             }
             var message = $"Deserializer failed to deserialize cell content. The value was {serializedDatum}.";
             return new ExcelCellDatumDeserializationResult

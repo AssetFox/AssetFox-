@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
 
         public string Visit(DateTimeExcelCellDatum datum, Unit helper)
         {
-            var returnValue = JsonSerializer.Serialize(datum.Value);
+            var returnValue = "D" + JsonSerializer.Serialize(datum.Value);
             return returnValue;
         }
     }

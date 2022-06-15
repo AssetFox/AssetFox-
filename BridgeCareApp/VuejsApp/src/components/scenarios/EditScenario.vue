@@ -182,7 +182,7 @@ export default class EditScenario extends Vue {
             tabName: 'Committed Projects',
             tabIcon: 'fas fa-clipboard',
             navigation: {
-                path: '/CommitedProjectsEditor/Scenario'
+                path: '/CommittedProjectsEditor/Scenario/',
             },
         },
     ];

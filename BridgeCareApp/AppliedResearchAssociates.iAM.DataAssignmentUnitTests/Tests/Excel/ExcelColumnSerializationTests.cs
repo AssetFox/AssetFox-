@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
@@ -32,8 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
             var deserialized = ExcelDatabaseColumnSerializer.Deserialize(serialized);
             Assert.Equal(column.Entries.Count, deserialized.Column.Entries.Count);
             Assert.Null(deserialized.Message);
-            var reserialized = ExcelDatabaseColumnSerializer.Serialize(deserialized.Column);
-            Assert.Equal(serialized, reserialized);
+            ObjectAssertions.Equivalent(column, deserialized.Column);
         }
     }
 }

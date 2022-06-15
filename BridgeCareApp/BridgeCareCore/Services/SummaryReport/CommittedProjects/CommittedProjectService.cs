@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -25,7 +26,7 @@ namespace BridgeCareCore.Services
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
-        private readonly string _networkKeyField = "BRKEY";
+        private readonly string _networkKeyField = "BRKEY_";
 
         private readonly List<string> _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.ToList();
 
@@ -208,6 +209,7 @@ namespace BridgeCareCore.Services
         private List<SectionCommittedProjectDTO> CreateSectionCommittedProjectsForImport(Guid simulationId,
             ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
+            // First, get the simulation
             var simulationEntity = GetSimulationEntityForCommittedProjectImport(simulationId);
 
             if (simulationEntity.InvestmentPlan == null)
@@ -215,126 +217,160 @@ namespace BridgeCareCore.Services
                 throw new RowNotInTableException("Simulation has no investment plan.");
             }
 
-            if (!simulationEntity.Budgets.Any())
-            {
-                throw new RowNotInTableException("Simulation has no budgets.");
-            }
-
-            var networkId = simulationEntity.NetworkId;
+            // Get the Excel file workshhet containing the data to import
             var worksheet = excelPackage.Workbook.Worksheets[0];
-            var end = worksheet.Dimension.End;
 
+            // Extract the names of the consequence headers and link them to their associated attribute IDs
             var headers = worksheet.Cells.GroupBy(cell => cell.Start.Row).First().Select(_ => _.GetValue<string>())
                 .ToList();
-            var consequenceAttributeNames = headers.Skip(9).ToList();
+            var consequenceAttributeNames = headers.Skip(_keyFields.Count + InitialHeaders.Count).ToList();
+            var attributeIdsPerAttributeName = GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
+            var end = worksheet.Dimension.End;  // Contains both column and row ends
 
-            var attributeIdsPerAttributeName =
-                GetAttributeIdsPerAttributeName(consequenceAttributeNames.Distinct().ToList());
+            // Get the location => asset ID lookup for all maintainable assets in the network
+            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(simulationEntity.NetworkId);
 
-            var maintainableAssetIdsPerLocationIdentifier = GetMaintainableAssetsPerLocationIdentifier(networkId);
+            // Get the column ID for the network's key field
+            if (!headers.Contains(_networkKeyField))
+            {
+                throw new RowNotInTableException($"Unable to find a column in the committed project sheet named {_networkKeyField}.  This is a required column for the network associated with the specified scenario");
+            }
+            var locationColumnNames = new Dictionary<int, string>();
+            var keyColumn = 0;
+            for (var column = 1; column <= _keyFields.Count; column++)
+            {
+                var columnName = worksheet.GetCellValue<string>(1, column);
+                if (!_keyFields.Contains(columnName))
+                {
+                    var keyFieldList = new StringBuilder();
+                    foreach (var field in _keyFields)
+                    {
+                        keyFieldList.Append(field);
+                    }
+                    throw new RowNotInTableException($"{columnName} is not a key field of the provided network.  Possible key fields are {keyFieldList}");
+                }
+                locationColumnNames.Add(column, columnName);
+                if (columnName == _networkKeyField)
+                {
+                    keyColumn = column;
+                }
+            }
+            if (keyColumn == 0)
+            {
+                // This should never be reached since we checked for existence unless there is a coding error
+                throw new RowNotInTableException($"The key location column for this network was found in the locations, but its specific column number was not identified");
+            }
 
-            var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), CommittedProjectEntity>();
+            // Create the output lookup
+            var projectsPerLocationIdentifierAndYearTuple = new Dictionary<(string, int), SectionCommittedProjectDTO>();
 
+            // Read in the data by row
             for (var row = 2; row <= end.Row; row++)
             {
-                //var brKey = worksheet.GetCellValue<string>(row, 1);
-                //var bmsId = worksheet.GetCellValue<string>(row, 2);
-                var projectYear = worksheet.GetCellValue<int>(row, 4);
-                var searchList = maintainableAssetIdsPerLocationIdentifier.Keys.ToList();
-                var locationSearchResult = LocationMatchFinder.FindUniqueMatch(searchList, brKey, bmsId);
-                var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
-                if (locationSearchResult.Message != null)
-                {
-                    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: {locationSearchResult.Message}";
-                    throw new Exception(exceptionMessage);
-                }
-                var locationIdentifier = locationSearchResult.LocationIdentifier;
+                // Get the project year for this work
+                var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
 
-                if (projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifier, projectYear)))
+                // Get the location information of the project
+                var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
+                //if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
+                //{
+                //    // The location does not match any asset in the network
+                //    var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
+                //    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: Unable to find matching asset in network.";
+                //    throw new Exception(exceptionMessage);
+                //}
+                var locationInformation = new Dictionary<string, string>();
+                for (var column = 1; column <= _keyFields.Count; column++)
                 {
-                    continue;
+                    locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
                 }
 
-                var budgetName = worksheet.GetCellValue<string>(row, 7);
+                // Determine the appropriate budget entity to assign if any
+                var budgetName = worksheet.GetCellValue<string>(row, _keyFields.Count + 5); // Assumes that InitialHeaders stays constant
                 var budgetNameIsEmpty = string.IsNullOrWhiteSpace(budgetName);
-                ScenarioBudgetEntity budgetEntity = null;
+                Guid? budgetId = null;
 
-                if (budgetNameIsEmpty)
-                {
-                    budgetEntity = _unitOfWork.BudgetRepo.EnsureExistenceOfUnknownBudgetForSimulation(simulationId);
-                }
-                else 
+                if (!budgetNameIsEmpty)
                 {
                     if (simulationEntity.Budgets.All(_ => _.Name != budgetName))
                     {
                         throw new RowNotInTableException(
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
-                    budgetEntity = simulationEntity.Budgets.Single(_ => _.Name == budgetName);
+                    budgetId = simulationEntity.Budgets.Single(_ => _.Name == budgetName).Id;
                 } 
 
-                var project = new CommittedProjectEntity
+                // Build the committed project object
+                var project = new SectionCommittedProjectDTO
                 {
                     Id = Guid.NewGuid(),
                     SimulationId = simulationEntity.Id,
-                    ScenarioBudgetId = budgetEntity.Id,
-                    CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, locationIdentifier),
-                    Name = worksheet.GetCellValue<string>(row, 3),
+                    ScenarioBudgetId = budgetId,
+                    LocationKeys = locationInformation,
+                    Treatment = worksheet.GetCellValue<string>(row, _keyFields.Count + 1), // Assumes that InitialHeaders stays constant
                     Year = projectYear,
-                    ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, 5),
-                    ShadowForSameTreatment = worksheet.GetCellValue<int>(row, 6),
-                    Cost = worksheet.GetCellValue<double>(row, 8),
-                    CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                    ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
+                    ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
+                    Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
+                    Consequences = new List<CommittedProjectConsequenceDTO>()
                 };
 
-                if (end.Column >= 10)
+                if (end.Column > _keyFields.Count + InitialHeaders.Count)
                 {
-                    for (var column = 10; column <= end.Column; column++)
+                    // There are consequences in the committed project file - add them to the DTO
+                    for (var column = _keyFields.Count + InitialHeaders.Count + 1; column <= end.Column; column++)
                     {
-                        project.CommittedProjectConsequences.Add(new CommittedProjectConsequenceEntity
+                        project.Consequences.Add(new CommittedProjectConsequenceDTO
                         {
                             Id = Guid.NewGuid(),
                             CommittedProjectId = project.Id,
-                            AttributeId = attributeIdsPerAttributeName[worksheet.GetCellValue<string>(1, column)],
+                            Attribute = worksheet.GetCellValue<string>(1, column),
                             ChangeValue = worksheet.GetCellValue<string>(row, column)
                         });
                     }
                 }
 
+                // Add to the list of projects
                 projectsPerLocationIdentifierAndYearTuple.Add((locationIdentifier, projectYear), project);
             }
 
+            // Apply required no treatment entries if required by the user
             if (applyNoTreatment && projectsPerLocationIdentifierAndYearTuple.Keys.Any(_ =>
                 _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod))
             {
+                // Loop through committed projects that do not start in the initial year
+                // (Projects in the initial year do not require No Treatment variables)
                 var locationIdentifierAndYearTuples = projectsPerLocationIdentifierAndYearTuple.Keys
                     .Where(_ => _.Item2 > simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod).ToList();
                 locationIdentifierAndYearTuples.ForEach(locationIdentifierAndYearTuple =>
                 {
                     var project = projectsPerLocationIdentifierAndYearTuple[locationIdentifierAndYearTuple];
+
+                    // Add no treatment projects for each year from the first year of the analysis to the year
+                    // prior to the committed project
                     var year = simulationEntity.InvestmentPlan.FirstYearOfAnalysisPeriod;
                     while (year < project.Year &&
                            !projectsPerLocationIdentifierAndYearTuple.ContainsKey((locationIdentifierAndYearTuple.Item1,
                                year)))
                     {
                         var noTreatmentProjectId = Guid.NewGuid();
-                        var noTreatmentProject = new CommittedProjectEntity
+                        var noTreatmentProject = new SectionCommittedProjectDTO
                         {
                             Id = noTreatmentProjectId,
                             SimulationId = project.SimulationId,
-                            ScenarioBudgetId = project.ScenarioBudgetId,
-                            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, locationIdentifierAndYearTuple.Item1),
-                            Name = NoTreatment,
+                            ScenarioBudgetId = null,
+                            LocationKeys = project.LocationKeys,
+                            Treatment = NoTreatment,
                             Year = year,
-                            ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                            ShadowForSameTreatment = project.ShadowForSameTreatment,
+                            ShadowForAnyTreatment = 0,
+                            ShadowForSameTreatment = 0,
                             Cost = 0,
-                            CommittedProjectConsequences = project.CommittedProjectConsequences.Select(_ =>
-                                new CommittedProjectConsequenceEntity
+                            Consequences = project.Consequences.Select(_ =>
+                                new CommittedProjectConsequenceDTO
                                 {
                                     Id = Guid.NewGuid(),
                                     CommittedProjectId = noTreatmentProjectId,
-                                    AttributeId = _.AttributeId,
+                                    Attribute = _.Attribute,
                                     ChangeValue = "+0"
                                 }).ToList()
                         };
@@ -352,12 +388,12 @@ namespace BridgeCareCore.Services
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
-            var committedProjectEntities =
+            var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 
-            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(committedProjectEntities.Select(_ => (BaseCommittedProjectDTO)_).ToList());
+            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(committedProjectDTOs.Select(_ => (BaseCommittedProjectDTO)_).ToList());
         }
     }
 }

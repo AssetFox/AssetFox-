@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         // TODO:  Change this once the data source for section-based networks has been added
         //        to ensure the key field is being added.  Also verify budget versus scenario
-        public override bool VerifyLocation() => LocationKeys.Count == 2 ? true : false;
+        public override bool VerifyLocation() => LocationKeys.Count == 3 ? true : false;
 
     }
 }

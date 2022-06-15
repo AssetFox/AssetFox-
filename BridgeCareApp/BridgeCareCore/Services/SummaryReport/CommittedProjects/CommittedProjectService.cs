@@ -277,16 +277,16 @@ namespace BridgeCareCore.Services
                 // Get the project year for this work
                 var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
 
-                // Get the location information of the project
+                // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
                 var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
-                //if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
-                //{
-                //    // The location does not match any asset in the network
-                //    var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
-                //    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: Unable to find matching asset in network.";
-                //    throw new Exception(exceptionMessage);
-                //}
-                var locationInformation = new Dictionary<string, string>();
+                if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
+                {
+                    // The location does not match any asset in the network
+                    var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
+                    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: Unable to find matching asset in network.";
+                    throw new Exception(exceptionMessage);
+                }
+                var locationInformation = new Dictionary<string, string>() { { "ID", maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString() } };
                 for (var column = 1; column <= _keyFields.Count; column++)
                 {
                     locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));

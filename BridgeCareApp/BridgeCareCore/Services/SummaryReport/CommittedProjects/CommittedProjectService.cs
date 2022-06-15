@@ -68,7 +68,7 @@ namespace BridgeCareCore.Services
         /**
          * Adds excel worksheet cell values for Committed Project Export
          */
-        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs)
+        private void AddDataCells(ExcelWorksheet worksheet, List<BaseCommittedProjectDTO> committedProjectDTOs, List<string> orderedAttributeNames)
         {
             var row = 2;
             committedProjectDTOs.OrderBy(_ => _.LocationKeys[_networkKeyField])
@@ -98,9 +98,11 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
-                        project.Consequences.OrderBy(_ => _.Attribute).ForEach(consequence =>
+                        // Cycling through the existing attributes will ensure the change values are matched to the correct attribute
+                        orderedAttributeNames.ForEach(attribute =>
                         {
-                            worksheet.Cells[row, column++].Value = consequence.ChangeValue;
+                            var specificChangeValue = project.Consequences.FirstOrDefault(_ => _.Attribute == attribute)?.ChangeValue ?? "";
+                            worksheet.Cells[row, column++].Value = specificChangeValue;
                         });
                         row++;
                     });
@@ -127,8 +129,13 @@ namespace BridgeCareCore.Services
                     .Distinct()
                     .ToList();
                 AddHeaderCells(worksheet, attributeNames);
-                AddDataCells(worksheet, committedProjectDTOs);
+                AddDataCells(worksheet, committedProjectDTOs, attributeNames);
             }
+            else
+            {
+                // Return a template
+            }
+            
 
             return new FileInfoDTO
             {

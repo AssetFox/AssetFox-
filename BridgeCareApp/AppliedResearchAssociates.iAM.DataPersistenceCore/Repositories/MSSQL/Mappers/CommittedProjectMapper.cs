@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (dto is SectionCommittedProjectDTO)
             {
                 // TODO:  Switch to looking up key field in datasource object
-                string keyField = "BRKEY";
+                string keyField = "BRKEY_";
 
                 if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID"))
                 {

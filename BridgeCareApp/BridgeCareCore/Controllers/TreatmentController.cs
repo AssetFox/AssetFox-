@@ -346,7 +346,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("DeleteTreatment")]
+        [Route("DeleteTreatment/{libraryId}")]
         [Authorize]
         public async Task<IActionResult> DeleteTreatment(TreatmentDTO treatment, Guid libraryId)
         {
@@ -375,7 +375,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("DeleteScenarioSelectableTreatment")]
+        [Route("DeleteScenarioSelectableTreatment/{simulationId}")]
         [Authorize]
         public async Task<IActionResult> DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment, Guid simulationId)
         {

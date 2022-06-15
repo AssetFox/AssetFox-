@@ -9,7 +9,7 @@
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
                         outline                        
-                        v-model='librarySelectItemValue'
+                        v-model='librarySelectItemValue' 
                     >
                     </v-select>
                 </v-flex>
@@ -23,6 +23,16 @@
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
+                </v-flex>
+                <v-flex style="padding-top:30px;">
+                    <v-btn
+                        @click='onDeleteTreatment(selectedTreatment.id)'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
+                        v-show='hasSelectedTreatment'
+                    >
+                        Delete Treatment
+                    </v-btn>
                 </v-flex>
                 <v-flex xs4>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
@@ -349,7 +359,8 @@ export default class TreatmentEditor extends Vue {
     importScenarioTreatmentsFileAction: any;
     @Action('importLibraryTreatmentsFile')
     importLibraryTreatmentsFileAction: any;
-
+    @Action('deleteTreatment') deleteTreatmentAction: any;
+    @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
@@ -556,18 +567,19 @@ export default class TreatmentEditor extends Vue {
     // Delete treatment operation ..check if library or scenario
     // invoke new api for delete treatment
     onDeleteTreatment(treatmentId: string | number) {
-        if (any(propEq('id', treatmentId.toString()), this.treatments)) {
-            this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
-        }
-
         if(this.hasScenario)
         {
-
+            this.deleteScenarioSelectableTreatmentAction({ scenarioSelectableTreatment: this.selectedTreatment, simulationId: this.selectedScenarioId });
         }
         else
         {
-            
+            this.deleteTreatmentAction({ treatment: this.selectedTreatment, libraryId: this.selectedTreatmentLibrary.id });
         }
+        if (any(propEq('id', treatmentId.toString()), this.treatments)) {
+            this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
+        }
+        this.hasUnsavedChanges = false;
+        this.setHasUnsavedChangesAction({value: false});
     }
 
     onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {

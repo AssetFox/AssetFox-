@@ -507,21 +507,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
                 _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
-
-            if (treatment.Costs.Any())
-            {
-                var treatmentCostPerTreatmentId = new Dictionary<Guid, List<TreatmentCostDTO>>();
-                treatmentCostPerTreatmentId.Add(treatment.Id, treatment.Costs);
-                _unitOfWork.TreatmentCostRepo.UpsertOrDeleteTreatmentCosts(treatmentCostPerTreatmentId, libraryId);
-            }
-
-            if (treatment.Consequences.Any())
-            {
-                var consequencesPerTreatmentId = new Dictionary<Guid, List<TreatmentConsequenceDTO>>();
-                consequencesPerTreatmentId.Add(treatment.Id, treatment.Consequences);
-                _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteTreatmentConsequences(consequencesPerTreatmentId,
-                    libraryId);
-            }
         }
 
         public void DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment,
@@ -532,7 +517,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            //var scenarioSelectableTreatmentEntity = scenarioSelectableTreatment.ToScenarioEntity(simulationId);
             var entityId = scenarioSelectableTreatment.Id;
             
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
@@ -559,21 +543,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
                 _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
                 && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
-
-            if (scenarioSelectableTreatment.Costs.Any())
-            {
-                var costsPerTreatmentId = new Dictionary<Guid, List<TreatmentCostDTO>>();
-                costsPerTreatmentId.Add(scenarioSelectableTreatment.Id, scenarioSelectableTreatment.Costs);                    
-                _unitOfWork.TreatmentCostRepo.UpsertOrDeleteScenarioTreatmentCosts(costsPerTreatmentId, simulationId);
-            }
-
-            if (scenarioSelectableTreatment.Consequences.Any())
-            {
-                var consequencesPerTreatmentId = new Dictionary<Guid, List<TreatmentConsequenceDTO>>();
-                consequencesPerTreatmentId.Add(scenarioSelectableTreatment.Id, scenarioSelectableTreatment.Consequences);
-                _unitOfWork.TreatmentConsequenceRepo.UpsertOrDeleteScenarioTreatmentConsequences(
-                    consequencesPerTreatmentId, simulationId);
-            }  
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);

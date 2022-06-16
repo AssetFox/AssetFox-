@@ -131,6 +131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
+        public virtual DbSet<ExcelWorksheetEntity> ExcelWorksheets { get; set; }
 
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 
@@ -1213,6 +1214,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Expression).IsRequired();
             });
+
+
+            modelBuilder.Entity<ExcelWorksheetEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.SerializedWorksheetContent).IsRequired();
+            });
+
 
             modelBuilder.Entity<InvestmentPlanEntity>(entity =>
             {

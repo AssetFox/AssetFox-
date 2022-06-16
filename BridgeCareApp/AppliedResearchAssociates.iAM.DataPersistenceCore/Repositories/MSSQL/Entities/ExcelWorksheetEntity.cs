@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    internal class ExcelWorksheetEntity
+    public class ExcelWorksheetEntity
     {
         public Guid Id { get; set; }
         public string SerializedWorksheetContent { get; set; }

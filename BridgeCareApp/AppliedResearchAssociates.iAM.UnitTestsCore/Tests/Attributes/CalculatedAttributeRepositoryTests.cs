@@ -36,88 +36,42 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
 
         public CalculatedAttributeRepositoryTests()
         {
-            // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
-
+            // Create main test context
             _mockedContext = new Mock<IAMContext>();
 
             var libraryRepo = TestDataForCalculatedAttributesRepository.GetLibraryRepo();
-            _mockLibrary = new Mock<DbSet<CalculatedAttributeLibraryEntity>>();
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.Provider).Returns(libraryRepo.Provider);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.Expression).Returns(libraryRepo.Expression);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.ElementType).Returns(libraryRepo.ElementType);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.GetEnumerator()).Returns(libraryRepo.GetEnumerator());
-
-            var mockEntry = new Mock<Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<CalculatedAttributeLibraryEntity>>(It.IsAny<string>());
-            mockEntry.Setup(_ => _.Entity).Returns(libraryRepo.First);
-            //var test = mockEntry.Object;
-            _mockLibrary.Setup(_ => _.Add(It.IsAny<CalculatedAttributeLibraryEntity>())).Returns <CalculatedAttributeDTO>(null);
-
-            _mockedContext.Setup(_ => _.CalculatedAttributeLibrary).Returns(_mockLibrary.Object);
-            _mockedContext.Setup(_ => _.Set<CalculatedAttributeLibraryEntity>()).Returns(_mockLibrary.Object);
+            _mockLibrary = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CalculatedAttributeLibrary, libraryRepo);
+            _mockLibrary.Setup(_ => _.Add(It.IsAny<CalculatedAttributeLibraryEntity>())).Returns<CalculatedAttributeDTO>(null);
 
             var scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo();
-            _mockScenarioCalculations = new Mock<DbSet<ScenarioCalculatedAttributeEntity>>();
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Provider).Returns(scenarioRepo.Provider);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Expression).Returns(scenarioRepo.Expression);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.ElementType).Returns(scenarioRepo.ElementType);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(scenarioRepo.GetEnumerator());
-            _mockedContext.Setup(_ => _.ScenarioCalculatedAttribute).Returns(_mockScenarioCalculations.Object);
-            _mockedContext.Setup(_ => _.Set<ScenarioCalculatedAttributeEntity>()).Returns(_mockScenarioCalculations.Object);
+            _mockScenarioCalculations = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioCalculatedAttribute, scenarioRepo);
 
             var attributeRepo = TestDataForCalculatedAttributesRepository.GetAttributeRepo();
-            _mockAttributes = new Mock<DbSet<AttributeEntity>>();
-            _mockAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.Provider).Returns(attributeRepo.Provider);
-            _mockAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.Expression).Returns(attributeRepo.Expression);
-            _mockAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.ElementType).Returns(attributeRepo.ElementType);
-            _mockAttributes.As<IQueryable<AttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(attributeRepo.GetEnumerator());
-            _mockedContext.Setup(_ => _.Attribute).Returns(_mockAttributes.Object);
-            _mockedContext.Setup(_ => _.Set<AttributeEntity>()).Returns(_mockAttributes.Object);
+            _mockAttributes = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, attributeRepo);
 
             var simulationRepo = TestDataForCalculatedAttributesRepository.GetSimulations();
-            var simulationLibrary = new Mock<DbSet<SimulationEntity>>();
-            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.Provider).Returns(simulationRepo.Provider);
-            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.Expression).Returns(simulationRepo.Expression);
-            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.ElementType).Returns(simulationRepo.ElementType);
-            simulationLibrary.As<IQueryable<SimulationEntity>>().Setup(_ => _.GetEnumerator()).Returns(simulationRepo.GetEnumerator());
-            _mockedContext.Setup(_ => _.Simulation).Returns(simulationLibrary.Object);
-            _mockedContext.Setup(_ => _.Set<SimulationEntity>()).Returns(simulationLibrary.Object);
+            var simulationLibrary = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, simulationRepo);
 
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             _testRepo = mockedRepo;
 
+            // Create empty test context
             _emptyMockedContext = new Mock<IAMContext>();
 
             libraryRepo = new List<CalculatedAttributeLibraryEntity>().AsQueryable();
-            _mockLibrary = new Mock<DbSet<CalculatedAttributeLibraryEntity>>();
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.Provider).Returns(libraryRepo.Provider);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.Expression).Returns(libraryRepo.Expression);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.ElementType).Returns(libraryRepo.ElementType);
-            _mockLibrary.As<IQueryable<CalculatedAttributeLibraryEntity>>().Setup(_ => _.GetEnumerator()).Returns(libraryRepo.GetEnumerator());
-            _emptyMockedContext.Setup(_ => _.CalculatedAttributeLibrary).Returns(_mockLibrary.Object);
-            _emptyMockedContext.Setup(_ => _.Set<CalculatedAttributeLibraryEntity>()).Returns(_mockLibrary.Object);
+            _mockLibrary = MockedContextBuilder.AddDataSet(_emptyMockedContext, _ => _.CalculatedAttributeLibrary, libraryRepo);
 
             scenarioRepo = new List<ScenarioCalculatedAttributeEntity>().AsQueryable();
-            _mockScenarioCalculations = new Mock<DbSet<ScenarioCalculatedAttributeEntity>>();
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Provider).Returns(scenarioRepo.Provider);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Expression).Returns(scenarioRepo.Expression);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.ElementType).Returns(scenarioRepo.ElementType);
-            _mockScenarioCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(scenarioRepo.GetEnumerator());
-            _emptyMockedContext.Setup(_ => _.ScenarioCalculatedAttribute).Returns(_mockScenarioCalculations.Object);
-            _emptyMockedContext.Setup(_ => _.Set<ScenarioCalculatedAttributeEntity>()).Returns(_mockScenarioCalculations.Object);
+            _mockScenarioCalculations = MockedContextBuilder.AddDataSet(_emptyMockedContext, _ => _.ScenarioCalculatedAttribute, scenarioRepo);
 
             var emptyMockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _emptyMockedContext.Object);
             _emptyTestRepo = emptyMockedRepo;
 
+            // Create calculated test context (using objects from the prior creation
             var isCalcultedContext = new Mock<IAMContext>();
 
             scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo(false);
-            var _mockScenarioLimitedCalculations = new Mock<DbSet<ScenarioCalculatedAttributeEntity>>();
-            _mockScenarioLimitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Provider).Returns(scenarioRepo.Provider);
-            _mockScenarioLimitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.Expression).Returns(scenarioRepo.Expression);
-            _mockScenarioLimitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.ElementType).Returns(scenarioRepo.ElementType);
-            _mockScenarioLimitedCalculations.As<IQueryable<ScenarioCalculatedAttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(scenarioRepo.GetEnumerator());
-            isCalcultedContext.Setup(_ => _.ScenarioCalculatedAttribute).Returns(_mockScenarioLimitedCalculations.Object);
-            isCalcultedContext.Setup(_ => _.Set<ScenarioCalculatedAttributeEntity>()).Returns(_mockScenarioLimitedCalculations.Object);
+            var _mockScenarioLimitedCalculations = MockedContextBuilder.AddDataSet(isCalcultedContext, _ => _.ScenarioCalculatedAttribute, scenarioRepo);
 
             isCalcultedContext.Setup(_ => _.CalculatedAttributeLibrary).Returns(_mockLibrary.Object);
             isCalcultedContext.Setup(_ => _.Set<CalculatedAttributeLibraryEntity>()).Returns(_mockLibrary.Object);

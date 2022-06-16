@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Moq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
@@ -29,6 +31,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             context.Setup(_ => _.Set<T>()).Returns(newDataSet.Object);
 
             return newDataSet;
+        }
+
+        public static void AddConfigurationKeys(Mock<IConfiguration> configuration, string keyName, List<string> configurationValues)
+        {
+            var mockedKeySection = new Mock<IConfigurationSection>();
+            var mockedKeySectionList = new List<IConfigurationSection>();
+            foreach (var value in configurationValues)
+            {
+                var section = new Mock<IConfigurationSection>();
+                section.Setup(_ => _.Value).Returns(value);
+                mockedKeySectionList.Add(section.Object);
+            }
+            mockedKeySection.Setup(_ => _.GetChildren()).Returns(mockedKeySectionList.AsEnumerable());
+            configuration.Setup(_ => _.GetSection(keyName)).Returns(mockedKeySection.Object);
         }
     }
 }

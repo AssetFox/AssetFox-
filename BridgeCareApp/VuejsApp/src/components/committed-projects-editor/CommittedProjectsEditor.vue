@@ -6,9 +6,9 @@
             <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family" outline>Exports Projects</v-btn>
             <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family" outline>Delete All</v-btn>
         </v-layout>
-        <v-checkbox class='Montserrat-font-family' label='No Treatments Before Committed Projects' />
+        <v-checkbox class='Montserrat-font-family ghd-checkbox' label='No Treatments Before Committed Projects' />
         <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Treatment Library</v-subheader>
-        <v-layout class="vl1-style">
+        <v-layout class="vl1-style" align-center>
             <v-flex xs3 d-flex>
          <v-select
            outline
@@ -34,26 +34,33 @@
           :headers="cpGridHeaders"
           :items="cpItems"
           :search="searchItems"
+          class="elevation-1 fixed-header v-table__overflow"
         >
         <template slot="items" slot-scope="props">
-                                        <td class="Montserrat-font-family btn-style">
-                                            {{props.item.brkey}}
-                                        </td>
-                                        <td class="Montserrat-font-family btn-style">
-                                            {{props.item.year}}
-                                        </td>
-                                        <td class="Montserrat-font-family btn-style">
-                                            {{props.item.treatment}}
-                                        </td>
-                                        <td class="Montserrat-font-family btn-style">
-                                            {{props.item.budget}}
-                                        </td>
-                                        <td class="Montserrat-font-family btn-style">
-                                            {{props.item.cost}}
-                                        </td>
-                                        <td class="Montserrat-font-family btn-style">
-                                            <v-icon class="ghd-blue">fas fa-trash</v-icon>
-                                        </td>
+            <td>
+                <v-checkbox
+                  hide-details
+                  primary
+                ></v-checkbox>
+            </td>
+            <td class="Montserrat-font-family ">
+                {{props.item.brkey}}
+            </td>
+            <td class="Montserrat-font-family ">
+                {{props.item.year}}
+            </td>
+            <td class="Montserrat-font-family ">
+                {{props.item.treatment}}
+            </td>
+            <td class="Montserrat-font-family ">
+                {{props.item.budget}}
+            </td>
+            <td class="Montserrat-font-family ">
+                {{props.item.cost}}
+            </td>
+            <td class="Montserrat-font-family ">
+                <v-icon class="ghd-blue">fas fa-trash</v-icon>
+            </td>
         </template>
         <template v-slot:footer>
             <td>
@@ -108,12 +115,20 @@ export default class CommittedProjectsEditor extends Vue  {
     ];
     cpGridHeaders: DataTableHeader[] = [
         {
+            text: '',
+            value: '',
+            align: '',
+            sortable: false,
+            class: 'header-border',
+            width: '10%',
+        },
+        {
             text: 'BRKEY',
             value: 'brkey',
             align: 'left',
             sortable: true,
             class: 'header-border',
-            width: '',
+            width: '10%',
         },
         {
             text: 'Year',
@@ -121,7 +136,7 @@ export default class CommittedProjectsEditor extends Vue  {
             align: 'left',
             sortable: true,
             class: 'header-border',
-            width: '',
+            width: '10%',
         },
         {
             text: 'Treatment',
@@ -129,7 +144,7 @@ export default class CommittedProjectsEditor extends Vue  {
             align: 'left',
             sortable: true,
             class: 'header-border',
-            width: '',
+            width: '10%',
         },
         {
             text: 'Budget',
@@ -137,7 +152,7 @@ export default class CommittedProjectsEditor extends Vue  {
             align: 'left',
             sortable: true,
             class: 'header-border',
-            width: '',
+            width: '10%',
         },
         {
             text: 'Cost',
@@ -145,7 +160,7 @@ export default class CommittedProjectsEditor extends Vue  {
             align: 'left',
             sortable: true,
             class: 'header-border',
-            width: '',
+            width: '10%',
         },
         {
             text: 'Actions',

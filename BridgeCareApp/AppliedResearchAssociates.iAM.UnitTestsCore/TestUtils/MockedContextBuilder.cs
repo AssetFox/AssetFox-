@@ -33,6 +33,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return newDataSet;
         }
 
+        /// <summary>
+        /// Add specific configuration keys to a mocked configuration for use in the creation of a mocked context
+        /// </summary>
+        /// <param name="configuration">The mocked configuration that the keys will be added to</param>
+        /// <param name="keyName">The name of the configuration key.  It may be a subordinate key such as "InventoryData:KeyProperties"</param>
+        /// <param name="configurationValues">The values that the keyName will provide</param>
+        /// <remarks>It is also possible to do this as one key, but that will only be added if required</remarks>
         public static void AddConfigurationKeys(Mock<IConfiguration> configuration, string keyName, List<string> configurationValues)
         {
             var mockedKeySection = new Mock<IConfigurationSection>();

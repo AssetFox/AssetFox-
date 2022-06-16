@@ -210,6 +210,8 @@ const actions = {
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
+                    const treatmentLibrary: TreatmentLibrary[] = [payload.treatmentLibrary];
+                    commit('treatmentLibrariesMutator', treatmentLibrary);
                     commit('selectedTreatmentLibraryMutator', payload.libraryId);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted treatment',
@@ -228,7 +230,7 @@ const actions = {
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                    //commit('scenarioSelectableTreatmentsMutator', payload.treatments);
+                    commit('scenarioSelectableTreatmentsMutator', payload.treatments);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted scenario treatment',
                     });

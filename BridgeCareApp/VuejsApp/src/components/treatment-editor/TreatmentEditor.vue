@@ -563,23 +563,22 @@ export default class TreatmentEditor extends Vue {
             this.treatmentSelectItemValue = null;
         }
     }
-
-    // Delete treatment operation ..check if library or scenario
-    // invoke new api for delete treatment
+    
     onDeleteTreatment(treatmentId: string | number) {
         if(this.hasScenario)
-        {
-            this.deleteScenarioSelectableTreatmentAction({ scenarioSelectableTreatment: this.selectedTreatment, simulationId: this.selectedScenarioId });
+        {         
+            const treatments : Treatment[] = reject(propEq('id', treatmentId.toString()), this.treatments);
+            this.deleteScenarioSelectableTreatmentAction({ scenarioSelectableTreatment: this.selectedTreatment, simulationId: this.selectedScenarioId, treatments});
         }
         else
         {
-            this.deleteTreatmentAction({ treatment: this.selectedTreatment, libraryId: this.selectedTreatmentLibrary.id });
-        }
-        if (any(propEq('id', treatmentId.toString()), this.treatments)) {
-            this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
-        }
-        this.hasUnsavedChanges = false;
-        this.setHasUnsavedChangesAction({value: false});
+            if (any(propEq('id', treatmentId.toString()), this.treatments)) {            
+            const treatmentLibrary: TreatmentLibrary = {
+            ...clone(this.selectedTreatmentLibrary),
+            treatments: reject(propEq('id', treatmentId.toString()), this.treatments)};
+            this.deleteTreatmentAction({ treatment: this.selectedTreatment, libraryId: this.selectedTreatmentLibrary.id, treatmentLibrary});
+            }            
+        }                
     }
 
     onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {

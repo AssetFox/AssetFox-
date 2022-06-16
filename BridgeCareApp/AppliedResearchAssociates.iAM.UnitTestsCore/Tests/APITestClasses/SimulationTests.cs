@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
@@ -77,6 +78,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
+                var committedProjectEnity = new CommittedProjectEntity
+                {
+                    Id = Guid.NewGuid(),
+                    Cost = 500000,
+                    Name = "Committed Project",
+                    Year = DateTime.Now.Year,
+                    ShadowForAnyTreatment = 1,
+                    ShadowForSameTreatment = 1,
+                    ScenarioBudgetId = budgetId,
+                    CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>
+                    {
+                        new CommittedProjectConsequenceEntity
+                        {
+                            Id = Guid.NewGuid(), AttributeId = attribute.Id, ChangeValue = "+1"
+                        }
+                    }
+                };
+                committedProjectEnity.CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceConstants.SectionLocation, "FacilitySection")
+                {
+                    CommittedProjectId = committedProjectEnity.Id
+                };
                 _testSimulationToClone = new SimulationEntity
                 {
                     Id = Guid.NewGuid(),
@@ -205,36 +227,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     CommittedProjects =
                         new List<CommittedProjectEntity>
                         {
-                        new CommittedProjectEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            Cost = 500000,
-                            Name = "Committed Project",
-                            Year = DateTime.Now.Year,
-                            ShadowForAnyTreatment = 1,
-                            ShadowForSameTreatment = 1,
-                            ScenarioBudgetId = budgetId,
-                            MaintainableAsset = new MaintainableAssetEntity
-                            {
-                                Id = Guid.NewGuid(),
-                                NetworkId = _testHelper.TestNetwork.Id,
-                                AssetName = "Asset",
-                                SpatialWeighting = "SpatialWeighting",
-                                MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                                {
-                                    Id = Guid.NewGuid(),
-                                    Discriminator = "SectionLocation",
-                                    LocationIdentifier = "FacilitySection",
-                                }
-                            },
-                            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>
-                            {
-                                new CommittedProjectConsequenceEntity
-                                {
-                                    Id = Guid.NewGuid(), AttributeId = attribute.Id, ChangeValue = "+1"
-                                }
-                            }
-                        }
+                            committedProjectEnity
                         },
                     PerformanceCurves =
                         new List<ScenarioPerformanceCurveEntity>

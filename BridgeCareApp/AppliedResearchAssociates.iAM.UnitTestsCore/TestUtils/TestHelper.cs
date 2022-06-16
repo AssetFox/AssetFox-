@@ -53,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
+                .AddJsonFile("..\\BridgeCareCore\\appsettings.json")
                 .Build();
             MockTreatmentService = new Mock<ITreatmentService>();
             MockEsecSecurityAuthorized = new Mock<IEsecSecurity>();

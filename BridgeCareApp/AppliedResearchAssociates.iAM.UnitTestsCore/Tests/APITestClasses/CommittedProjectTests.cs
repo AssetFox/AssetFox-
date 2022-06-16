@@ -75,19 +75,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         SimulationId = simulationId,
                         Name = "Test Name"
                     },
-                MaintainableAsset =
-                    new MaintainableAssetEntity
-                    {
-                        Id = Guid.NewGuid(),
-                        NetworkId = _testHelper.TestNetwork.Id,
-                        SpatialWeighting = "[DECK_AREA]",
-                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            LocationIdentifier = "1-2",
-                            Discriminator = "SectionLocation"
-                        }
-                    },
                 Name = "Rehabilitation",
                 Year = 2021,
                 ShadowForAnyTreatment = 1,
@@ -102,6 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         ChangeValue = "1"
                     }).ToList()
             };
+            _testProject.CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "1-2") { CommittedProjectId = _testProject.Id };
             _testHelper.UnitOfWork.Context.AddEntity(_testProject);
 
 
@@ -179,7 +167,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Name = project.Name,
                     SimulationId = project.SimulationId,
                     ScenarioBudgetId = project.ScenarioBudgetId,
-                    MaintainableAssetId = project.MaintainableAssetId,
+                    CommittedProjectLocation = project.CommittedProjectLocation,
                     Cost = project.Cost,
                     Year = project.Year,
                     ShadowForAnyTreatment = project.ShadowForAnyTreatment,

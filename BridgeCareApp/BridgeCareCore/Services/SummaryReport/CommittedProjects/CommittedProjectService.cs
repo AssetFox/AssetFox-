@@ -113,9 +113,8 @@ namespace BridgeCareCore.Services
             var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
             //var sectionCommittedProjects = committedProjectDTOs.Where(_ => _ is SectionCommittedProjectDTO).Select(_ => (SectionCommittedProjectDTO)_).ToList();
 
-            var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId)
-                .Select(simulation => new SimulationEntity { Name = simulation.Name }).Single();
-            var fileName = $"CommittedProjects_{simulationEntity.Name.Trim().Replace(" ", "_")}.xlsx";
+            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+            var fileName = $"CommittedProjects_{simulationName.Trim().Replace(" ", "_")}.xlsx";
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
@@ -167,8 +166,8 @@ namespace BridgeCareCore.Services
          */
         private Dictionary<string, Guid> GetAttributeIdsPerAttributeName(List<string> consequenceAttributeNames)
         {
-            var attributeEntities = _unitOfWork.Context.Attribute.ToList();
-            var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
+            var attributeDTOs = _unitOfWork.AttributeRepo.GetAttributes();
+            var attributeNames = attributeDTOs.Select(_ => _.Name).ToList();
 
             if (consequenceAttributeNames.Any(name => !attributeNames.Contains(name)))
             {
@@ -182,7 +181,7 @@ namespace BridgeCareCore.Services
                     $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
             }
 
-            return attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
+            return attributeDTOs.ToDictionary(_ => _.Name, _ => _.Id);
         }
 
         /**
@@ -190,24 +189,25 @@ namespace BridgeCareCore.Services
          */
         private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
         {
-            if (!_unitOfWork.Context.MaintainableAsset.Any())
+            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            if (!assets.Any())
             {
                 throw new RowNotInTableException("There are no maintainable assets in the database.");
             }
 
-            var maintainableAssetsInNetwork = _unitOfWork.Context.MaintainableAsset
-                .Where(_ => _.NetworkId == networkId);
+            // Not sure if there is something else going on here
+            //var oldReturn = _unitOfWork.Context.MaintainableAssetLocation
+            //    .Where(_ => maintainableAssetsInNetwork.Any(__ => __.Id == _.MaintainableAssetId))
+            //    .Select(maintainableAssetLocation => new MaintainableAssetEntity
+            //    {
+            //        Id = maintainableAssetLocation.MaintainableAssetId,
+            //        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+            //        {
+            //            LocationIdentifier = maintainableAssetLocation.LocationIdentifier
+            //        }
+            //    }).ToDictionary(_ => _.MaintainableAssetLocation.LocationIdentifier, _ => _.Id);
 
-            return _unitOfWork.Context.MaintainableAssetLocation
-                .Where(_ => maintainableAssetsInNetwork.Any(__ => __.Id == _.MaintainableAssetId))
-                .Select(maintainableAssetLocation => new MaintainableAssetEntity
-                {
-                    Id = maintainableAssetLocation.MaintainableAssetId,
-                    MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                    {
-                        LocationIdentifier = maintainableAssetLocation.LocationIdentifier
-                    }
-                }).ToDictionary(_ => _.MaintainableAssetLocation.LocationIdentifier, _ => _.Id);
+            return assets.ToDictionary(_ => _.Location.LocationIdentifier, _ => _.Id);
         }
 
         /**

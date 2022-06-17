@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 Id = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
                 Name = "Test",
-                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7") },
+                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"), FirstYearOfAnalysisPeriod = 2022 },
                 Budgets = ScenarioBudgetEntities,
                 NetworkId = _networkId
             },
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 Id = Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"),
                 Name = "Test 2",
-                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("dab41545-f70b-4747-9112-6790599ff583") },
+                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("dab41545-f70b-4747-9112-6790599ff583"), FirstYearOfAnalysisPeriod = 2022 },
                 Budgets = ScenarioBudgetEntities,
                 NetworkId = _networkId
             },

@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestCommittedProjects.xlsx");
+                "TestCommittedProjects_Good.xlsx");
             using var stream = File.OpenRead(filePath);
             var memStream = new MemoryStream();
             stream.CopyTo(memStream);

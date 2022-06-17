@@ -104,7 +104,95 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         };
 
+        public static List<AttributeEntity> AttribureEntities => new List<AttributeEntity>()
+        {
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
+                Name = "BRKEY_"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("cbdc2aac-f2b7-405e-8ff8-21f2785330c1"),
+                Name = "BMSID"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("67abf485-b3bc-4899-b492-f9165b571040"),
+                Name = "DECK_SEEDED"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("fb86603f-7bc5-4e29-b643-cd739ef065e3"),
+                Name = "SUP_SEEDED"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("cea45b74-f6c2-4e5c-8d2c-3102a85bf339"),
+                Name = "SUB_SEEDED"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("e276df35-a96b-4bdd-b57b-31236a0ddbc9"),
+                Name = "CULV_SEEDED"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("a0c921cc-c40a-41e4-a1d6-33f810397abe"),
+                Name = "DECK_DURATION_N"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("8f81bdf8-f492-40d9-b790-f87ad7de26a5"),
+                Name = "SUP_DURATION_N"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("eb6d72ec-5801-4ec0-bd8b-c5641c291f58"),
+                Name = "SUB_DURATION_N"
+            },
+            new AttributeEntity()
+            {
+                Id = Guid.Parse("f7693cfe-8705-4f58-8d16-9be6e5d9a2af"),
+                Name = "CULV_DURATION_N"
+            }
+        };
+
         public static List<MaintainableAsset> MaintainableAssets => CompleteMaintainableAssets;
+
+        public static List<MaintainableAssetEntity> MaintainableAssetEntities => new List<MaintainableAssetEntity>()
+        {
+            new MaintainableAssetEntity() {
+                Id = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
+                NetworkId = _networkId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
+                SpatialWeighting = "[DECK_AREA]"
+            },
+            new MaintainableAssetEntity() {
+                Id = Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
+                NetworkId = _networkId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
+                SpatialWeighting = "[DECK_AREA]"
+            },
+            new MaintainableAssetEntity() {
+                Id = Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
+                NetworkId = _networkId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"3"),
+                SpatialWeighting = "[DECK_AREA]"
+            },
+            new MaintainableAssetEntity() {
+                Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
+                NetworkId = _networkId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"4"),
+                SpatialWeighting = "[DECK_AREA]"
+            },
+            new MaintainableAssetEntity() {
+                Id = Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
+                NetworkId = _networkId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"5"),
+                SpatialWeighting = "[DECK_AREA]"
+            }
+        };
 
         public static List<BaseCommittedProjectDTO> ValidCommittedProjects => new List<BaseCommittedProjectDTO>()
         {
@@ -170,6 +258,66 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     }
                 }
             },
+        };
+
+        public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
+        {
+            new CommittedProjectEntity()
+            {
+                Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+                Year = 2022,
+                Name = "Something",
+                ShadowForAnyTreatment = 1,
+                ShadowForSameTreatment = 1,
+                Cost = 10000,
+                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
+                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
+                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
+                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                {
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        ChangeValue = "+3"
+                    },
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        ChangeValue = "1"
+                    }
+                }
+            },
+            new CommittedProjectEntity()
+            {
+                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
+                Year = 2023,
+                Name = "Simple",
+                ShadowForAnyTreatment = 1,
+                ShadowForSameTreatment = 3,
+                Cost = 200000,
+                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
+                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
+                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
+                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                {
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        ChangeValue = "9"
+                    },
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        ChangeValue = "1"
+                    }
+                }
+            }
         };
 
         public static List<BaseCommittedProjectDTO> UnmatchedAssetCommittedProjects()

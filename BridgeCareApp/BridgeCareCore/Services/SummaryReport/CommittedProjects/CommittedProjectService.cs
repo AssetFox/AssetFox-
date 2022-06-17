@@ -46,7 +46,7 @@ namespace BridgeCareCore.Services
         public CommittedProjectService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.ToList();
+            _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.Where(_ => _ != "ID").ToList();
         }
 
         /**
@@ -113,10 +113,14 @@ namespace BridgeCareCore.Services
 
         public FileInfoDTO ExportCommittedProjectsFile(Guid simulationId)
         {
-            var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
-            //var sectionCommittedProjects = committedProjectDTOs.Where(_ => _ is SectionCommittedProjectDTO).Select(_ => (SectionCommittedProjectDTO)_).ToList();
-
             var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+            if (simulationName == null)
+            {
+                throw new ArgumentException($"Unable to find simulation with ID of {simulationId}");
+            }
+
+            var committedProjectDTOs = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+                        
             var fileName = $"CommittedProjects_{simulationName.Trim().Replace(" ", "_")}.xlsx";
 
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
@@ -136,6 +140,7 @@ namespace BridgeCareCore.Services
             else
             {
                 // Return a template
+                AddHeaderCells(worksheet, new List<string>());
             }
             
 

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
-    public class UnitOfDataPersistenceWork : IDisposable
+    public class UnitOfDataPersistenceWork : IDisposable, IUnitOfWork
     {
         public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
@@ -147,14 +147,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
-
-        public UserEntity UserEntity { get; private set; }
+        // TODO: Refactor to an persistence independent object
+        public UserEntity UserEntity { get; private set; } 
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
+        // End Refactor
 
         public void SetUser(string username)
         {

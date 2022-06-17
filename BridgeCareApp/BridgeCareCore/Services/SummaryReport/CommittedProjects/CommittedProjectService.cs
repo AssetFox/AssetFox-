@@ -21,14 +21,14 @@ namespace BridgeCareCore.Services
 {
     public class CommittedProjectService : ICommittedProjectService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
 
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
         private readonly string _networkKeyField = "BRKEY_";
 
-        private readonly List<string> _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.ToList();
+        private readonly List<string> _keyFields;
 
         private static readonly List<string> InitialHeaders = new List<string>
         {
@@ -43,8 +43,11 @@ namespace BridgeCareCore.Services
 
         private static readonly string NoTreatment = "No Treatment";
 
-        public CommittedProjectService(UnitOfDataPersistenceWork unitOfWork) =>
+        public CommittedProjectService(IUnitOfWork unitOfWork)
+        {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.ToList();
+        }
 
         /**
          * Adds excel worksheet header row cell values for Committed Project Export

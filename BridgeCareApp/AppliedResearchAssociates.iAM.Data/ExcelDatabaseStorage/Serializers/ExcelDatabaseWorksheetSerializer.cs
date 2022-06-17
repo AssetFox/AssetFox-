@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
     {
         public static string Serialize(ExcelDatabaseWorksheet worksheet)
         {
-            var serializeColumns = new List<string>();
+            var serializeColumns = new List<List<string>>();
             foreach (var column in worksheet.Columns)
             {
                 var serializeColumn = ExcelDatabaseColumnSerializer.Serialize(column);
@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 
         public static ExcelDatabaseWorksheetDeserializationResult Deserialize(string serializedWorksheet)
         {
-            var stringLists = JsonSerializer.Deserialize<List<string>> (serializedWorksheet);
+            var stringLists = JsonSerializer.Deserialize<List<List<string>>> (serializedWorksheet);
             var returnValue = new ExcelDatabaseWorksheetDeserializationResult();
             var columns = new List<ExcelDatabaseColumn>();
             foreach (var stringList in stringLists)

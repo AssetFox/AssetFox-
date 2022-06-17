@@ -7,18 +7,10 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
     public static class ExcelDatabaseColumnSerializer
     {
-        public static string Serialize(ExcelDatabaseColumn column)
+        public static List<string> Serialize(ExcelDatabaseColumn column)
         {
             var serializeValues = column.Entries.Select(e => ExcelCellDatumSerializer.Serialize(e)).ToList();
-            var returnValue = JsonSerializer.Serialize(serializeValues);
-            return returnValue;
-        }
-
-        public static ExcelDatabaseColumnDeserializationResult Deserialize(string doubleSerializedColumn)
-        {
-            var stringList = JsonSerializer.Deserialize<List<string>>(doubleSerializedColumn);
-            var result = Deserialize(stringList);
-            return result;
+            return serializeValues;
         }
 
         public static ExcelDatabaseColumnDeserializationResult Deserialize(List<string> serializedColumn)

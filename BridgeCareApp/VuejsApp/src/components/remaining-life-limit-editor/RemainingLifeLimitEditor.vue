@@ -1,6 +1,63 @@
 <template>
     <v-layout column>
-        <v-flex xs12>
+        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
+
+        <v-layout row class="px-2">
+            <v-select
+            class="ghd-select ghd-text-field ghd-text-field-border"
+            :items="remainingLifeLimitItems"
+            outline
+            outlined
+            >
+            </v-select>
+            <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Add Remaining Life Limit</v-btn>
+        </v-layout>
+            <v-data-table
+              :headers="gridHeaders"
+              :items="rlDataTableItems"
+              class="elevation-1 fixed-header v-table__overflow"
+            >
+                <template v-slot:headers="props">
+                    <tr>
+                        <th
+                          v-for="header in props.headers"
+                          :key="header.text"
+                        >
+                            {{header.text}}
+                        </th>
+                    </tr>
+                </template>
+                <template v-slot:items="props">
+                    <tr :active="props.selected" @click="props.selected = !props.selected">
+                        <td>{{ props.item.attribute }}</td>
+                        <td>{{ props.item.value}}</td>
+                        <td>
+                            {{ props.item.criteria}}
+                            <v-icon class="ghd-blue">edit</v-icon>
+                        </td>
+                        <td>
+                            <v-icon class="ghd-blue"> delete </v-icon>
+                        </td>
+                    </tr>
+                </template>
+                </v-data-table>
+                <v-layout justify-start align-center class="px-2">
+                    <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+                    <v-text class="ghd-control-text" v-else>No results found!</v-text>
+                    <v-divider vertical class="mx-3"/>
+                    <v-btn flat right
+                      class="ghd-control-label ghd-blue"
+                    > Delete Selected 
+                    </v-btn>
+                </v-layout>
+
+                <v-divider></v-divider>
+                <v-layout justify-center row>
+                    <v-btn class="ghd-blue" flat>Cancel</v-btn>
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Create as New Library</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>
+                </v-layout>
+        <!-- <v-flex xs12>
             <v-layout justify-center>
                 <v-flex xs3>
                     <v-btn
@@ -60,110 +117,6 @@
             v-show="hasSelectedLibrary || hasScenario"
         >
             <div class="remaining-life-limit-data-table">
-                <v-data-table
-                    :headers="gridHeaders"
-                    :items="remainingLifeLimits"
-                    class="elevation-1 fixed-header v-table__overflow"
-                >
-                    <template slot="items" slot-scope="props">
-                        <td>
-                            <v-edit-dialog
-                                :return-value.sync="props.item.attribute"
-                                large
-                                lazy
-                                persistent
-                                @save="
-                                    onEditRemainingLifeLimitProperty(
-                                        props.item,
-                                        'attribute',
-                                        props.item.attribute,
-                                    )
-                                "
-                            >
-                                <v-text-field
-                                    readonly
-                                    single-line
-                                    class="sm-txt"
-                                    :value="props.item.attribute"
-                                    :rules="[
-                                        rules['generalRules'].valueIsNotEmpty,
-                                    ]"
-                                />
-                                <template slot="input">
-                                    <v-select
-                                        :items="numericAttributeSelectItems"
-                                        label="Select an Attribute"
-                                        outline
-                                        v-model="props.item.attribute"
-                                        :rules="[
-                                            rules['generalRules']
-                                                .valueIsNotEmpty,
-                                        ]"
-                                    />
-                                </template>
-                            </v-edit-dialog>
-                        </td>
-                        <td>
-                            <v-edit-dialog
-                                :return-value.sync="props.item.value"
-                                large
-                                lazy
-                                persistent
-                                @save="
-                                    onEditRemainingLifeLimitProperty(
-                                        props.item,
-                                        'value',
-                                        props.item.value,
-                                    )
-                                "
-                            >
-                                <v-text-field
-                                    readonly
-                                    single-line
-                                    class="sm-txt"
-                                    :value="props.item.value"
-                                    :rules="[
-                                        rules['generalRules'].valueIsNotEmpty,
-                                    ]"
-                                />
-                                <template slot="input">
-                                    <v-text-field
-                                        label="Edit"
-                                        single-line
-                                        :mask="'##########'"
-                                        v-model.number="props.item.value"
-                                        :rules="[
-                                            rules['generalRules']
-                                                .valueIsNotEmpty,
-                                        ]"
-                                    />
-                                </template>
-                            </v-edit-dialog>
-                        </td>
-                        <td>
-                            <v-text-field
-                                :value="
-                                    props.item.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                                readonly
-                            >
-                                <template slot="append-outer">
-                                    <v-icon
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog(
-                                                props.item,
-                                            )
-                                        "
-                                        class="edit-icon"
-                                    >
-                                        fas fa-edit
-                                    </v-icon>
-                                </template>
-                            </v-text-field>
-                        </td>
-                    </template>
-                </v-data-table>
             </div>
         </v-flex>
         <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
@@ -242,7 +195,7 @@
         <CriterionLibraryEditorDialog
             :dialogData="criterionLibraryEditorDialogData"
             @submit="onEditRemainingLifeLimitCriterionLibrary"
-        />
+        /> -->
     </v-layout>
 </template>
 
@@ -289,6 +242,12 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+
+export interface RemainingLifeLimits {
+    attribute: string;
+    value: number;
+    criteria: string | null;
+}
 
 @Component({
     components: {
@@ -364,7 +323,39 @@ export default class RemainingLifeLimitEditor extends Vue {
             class: '',
             width: '75%',
         },
+        {
+            text: 'Actions',
+            value: 'Actions',
+            align: 'left',
+            sortable: false,
+            class: '',
+            width: ''
+        }
     ];
+    remainingLifeLimitItems: any[] = [
+        {
+            text: "item1",
+            value: "item1"
+        },
+        {
+            text: "item2",
+            value: "item2"
+        }
+    ];
+    rlDataTableItems: RemainingLifeLimits[] = [
+        {
+            attribute: "DTYEAR",
+            value: 3,
+            criteria: "[BRIDGE_TYPE]='B'",
+        },
+        {
+            attribute: "AGE",
+            value: 23,
+            criteria: "[BRIDGE_TYPE]='B'",
+        }
+    ];
+    dataPerPage: number = 0;
+    totalDataFound: number = 5;
     remainingLifeLimits: RemainingLifeLimit[] = [];
     numericAttributeSelectItems: SelectItem[] = [];
     createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(

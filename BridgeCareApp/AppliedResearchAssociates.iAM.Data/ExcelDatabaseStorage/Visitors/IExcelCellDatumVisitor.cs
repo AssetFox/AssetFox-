@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
@@ -11,5 +12,6 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
         TOutput Visit(StringExcelCellDatum datum, THelper helper);
         TOutput Visit(DoubleExcelCellDatum datum, THelper helper);
         TOutput Visit(DateTimeExcelCellDatum datum, THelper helper);
+        TOutput Visit(EmptyExcelCellDatum datum, THelper helper);
     }
 }

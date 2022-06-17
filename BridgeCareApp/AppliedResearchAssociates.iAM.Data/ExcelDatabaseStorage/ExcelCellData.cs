@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
     public static class ExcelCellData
     {
+        private static EmptyExcelCellDatum _Empty { get; } = new EmptyExcelCellDatum();
         public static DateTimeExcelCellDatum DateTime(DateTime dateTime)
             => new DateTimeExcelCellDatum
             {
@@ -23,5 +25,8 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
             {
                 Value = value,
             };
+
+        public static EmptyExcelCellDatum Empty
+            => _Empty;
     }
 }

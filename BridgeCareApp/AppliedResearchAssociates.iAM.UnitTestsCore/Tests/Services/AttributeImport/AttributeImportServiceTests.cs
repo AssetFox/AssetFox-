@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
 using OfficeOpenXml;
@@ -15,9 +16,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     public class AttributeImportServiceTests
     {
         private static TestHelper _testHelper => TestHelper.Instance;
-        private const string SampleAttributeDataFilename = "SampleAttributeData.xlsx";
-        private const string SampleAttributeDataWithSuffRateFilename = "SampleAttributeDataWithSuffRate.xlsx";
-        private const string SampleAttributeDataWithSpuriousEmptyFirstRowFilename = "SampleAttributeDataWithSpuriousEmptyFirstRow.xlsx";
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
@@ -81,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
         private static string SampleAttributeDataPath()
         {
-            var filename = SampleAttributeDataFilename;
+            var filename = SampleAttributeDataFilenames.Sample;
             var folder = Directory.GetCurrentDirectory();
             var returnValue = Path.Combine(folder, "SampleData", filename);
             return returnValue;
@@ -89,14 +87,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
         private static string SampleAttributeDataPathWithSuffRatePath()
         {
-            var filename = SampleAttributeDataWithSuffRateFilename;
+            var filename = SampleAttributeDataFilenames.WithSuffRate;
             var folder = Directory.GetCurrentDirectory();
             var returnValue = Path.Combine(folder, "SampleData", filename);
             return returnValue;
         }
         private static string SampleAttributeDataWithSpuriousEmptyFirstRowPath()
         {
-            var filename = SampleAttributeDataWithSpuriousEmptyFirstRowFilename;
+            var filename = SampleAttributeDataFilenames.WithSpuriousEmptyFirstRow;
             var folder = Directory.GetCurrentDirectory();
             var returnValue = Path.Combine(folder, "SampleData", filename);
             return returnValue;

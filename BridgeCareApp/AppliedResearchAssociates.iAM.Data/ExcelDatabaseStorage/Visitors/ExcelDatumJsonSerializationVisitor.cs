@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 using AppliedResearchAssociates.iAM.Data.Helpers;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
@@ -23,6 +24,11 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Visitors
         {
             var returnValue = "D" + JsonSerializer.Serialize(datum.Value);
             return returnValue;
+        }
+
+        public string Visit(EmptyExcelCellDatum datum, Unit helper)
+        {
+            return "";
         }
     }
 }

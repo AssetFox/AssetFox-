@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using Xunit;
 
@@ -38,10 +39,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
         public void DateTimeCell_SerializeThenDeserialize_RoundTrips()
         {
             var now = DateTime.Now;
-            var cell = new DateTimeExcelCellDatum
-            {
-                Value = now,
-            };
+            var cell = ExcelCellData.DateTime(now);
             var serialized = ExcelCellDatumSerializer.Serialize(cell);
             var deserialized = ExcelCellDatumSerializer.Deserialize(serialized);
             var dateTimeDeserialized = (DateTimeExcelCellDatum)deserialized.Datum;

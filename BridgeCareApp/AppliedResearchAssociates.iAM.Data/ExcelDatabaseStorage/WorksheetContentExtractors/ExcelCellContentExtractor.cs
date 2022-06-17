@@ -24,10 +24,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.WorksheetConte
             }
             if (cellValue is DateTime dt)
             {
-                return new DateTimeExcelCellDatum
-                {
-                    Value = dt
-                };
+                return ExcelCellData.DateTime(dt);
             }
             return new StringExcelCellDatum
             {

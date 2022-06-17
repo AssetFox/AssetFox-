@@ -223,6 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
+        // WJ Saw a HeisenFailure here 6/16/2022 2:40pm. The ValidationResult was not valid. No idea why.
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange

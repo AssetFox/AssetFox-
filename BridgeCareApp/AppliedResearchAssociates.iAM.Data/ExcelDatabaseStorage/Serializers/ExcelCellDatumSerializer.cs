@@ -60,10 +60,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
                     var dateTime = JsonSerializer.Deserialize<DateTime>(remainder);
                     return new ExcelCellDatumDeserializationResult
                     {
-                        Datum = new DateTimeExcelCellDatum
-                        {
-                            Value = dateTime,
-                        }
+                        Datum = ExcelCellData.DateTime(dateTime),
                     };
                 }
                 catch (Exception ex)

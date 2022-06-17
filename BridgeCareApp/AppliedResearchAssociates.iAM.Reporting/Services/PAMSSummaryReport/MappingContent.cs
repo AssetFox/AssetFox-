@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 {
     public static class MappingContent
     {
-        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, SectionDetail prevYearSection)
+        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, AssetDetail prevYearSection)
         {
             if (prevYearSection.TreatmentCause == treatmentCause)
             {

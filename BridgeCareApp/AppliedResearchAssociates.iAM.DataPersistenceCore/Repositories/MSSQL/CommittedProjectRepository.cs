@@ -29,13 +29,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
             var assets = _unitOfWork.Context.MaintainableAsset
-                .Where(_ => _.Id == simulation.Id)
+                .Where(_ => _.NetworkId == simulation.Network.Id)
                 .Include(_ => _.MaintainableAssetLocation)
                 .ToList();
 
             var projects = _unitOfWork.Context.CommittedProject
-                .Where(_ => _.SimulationId == simulation.Id)
-                .Select(project => new CommittedProjectEntity
+                .Where(_ => _.SimulationId == simulation.Id).ToList();
+            foreach (var project in projects)
+            {
+                new CommittedProjectEntity
                 {
                     Id = project.Id,
                     Name = project.Name,
@@ -44,15 +46,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Cost = project.Cost,
                     Year = project.Year,
                     CommittedProjectLocation = project.CommittedProjectLocation,
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
+                    ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {
                             Id = consequence.Id,
                             ChangeValue = consequence.ChangeValue,
-                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
+                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name }
                         }).ToList(),
-                }).AsNoTracking().ToList();
+                };
+            }
+                //.Select(project => new CommittedProjectEntity
+                //{
+                //    Id = project.Id,
+                //    Name = project.Name,
+                //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                //    ShadowForSameTreatment = project.ShadowForSameTreatment,
+                //    Cost = project.Cost,
+                //    Year = project.Year,
+                //    CommittedProjectLocation = project.CommittedProjectLocation,
+                //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
+                //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+                //        new CommittedProjectConsequenceEntity
+                //        {
+                //            Id = consequence.Id,
+                //            ChangeValue = consequence.ChangeValue,
+                //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
+                //        }).ToList(),
+                //}).AsNoTracking().ToList();
 
             if (projects.Any())
             {

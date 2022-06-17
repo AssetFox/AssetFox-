@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForCommittedProjects
     {
-        private static Guid _networkId = Guid.Parse("7940d27c-c9b1-4ef2-b5e7-2f1d8240a064");
+        public static Guid NetworkId => Guid.Parse("7940d27c-c9b1-4ef2-b5e7-2f1d8240a064");
 
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
         public static Dictionary<string,List<KeySegmentDatum>> KeyProperties()
@@ -30,23 +30,41 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<SimulationEntity> Simulations => new List<SimulationEntity>()
         {
-            // Must be complete, but only need ID and associated libraries
             new SimulationEntity()
             {
                 Id = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
                 Name = "Test",
-                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"), FirstYearOfAnalysisPeriod = 2022 },
+                InvestmentPlan = new InvestmentPlanEntity()
+                {
+                    Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                    SimulationId = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
+                    FirstYearOfAnalysisPeriod = 2022,
+                    InflationRatePercentage = 3,
+                    MinimumProjectCostLimit = 1000,
+                    NumberOfYearsInAnalysisPeriod = 3
+                },
                 Budgets = ScenarioBudgetEntities,
-                NetworkId = _networkId
+                NetworkId = NetworkId,
+                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             },
+
             new SimulationEntity()
             {
                 Id = Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"),
-                Name = "Test 2",
-                InvestmentPlan = new InvestmentPlanEntity() { Id = Guid.Parse("dab41545-f70b-4747-9112-6790599ff583"), FirstYearOfAnalysisPeriod = 2022 },
+                Name = "No Commit",
+                InvestmentPlan = new InvestmentPlanEntity()
+                {
+                    Id = Guid.Parse("dab41545-f70b-4747-9112-6790599ff583"),
+                    SimulationId = Guid.Parse("dae1c62c-adba-4510-bfe5-61260c49ec99"),
+                    FirstYearOfAnalysisPeriod = 2022,
+                    InflationRatePercentage = 3,
+                    MinimumProjectCostLimit = 1000,
+                    NumberOfYearsInAnalysisPeriod = 3
+                },
                 Budgets = ScenarioBudgetEntities,
-                NetworkId = _networkId
-            },
+                NetworkId = NetworkId,
+                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
+            }
         };
 
         public static List<AttributeDTO> Attributes => new List<AttributeDTO>()
@@ -55,52 +73,62 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeDTO()
             {
                 Id = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
-                Name = "BRKEY_"
+                Name = "BRKEY_",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("cbdc2aac-f2b7-405e-8ff8-21f2785330c1"),
-                Name = "BMSID"
+                Name = "BMSID",
+                Type = "STRING"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("67abf485-b3bc-4899-b492-f9165b571040"),
-                Name = "DECK_SEEDED"
+                Name = "DECK_SEEDED",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("fb86603f-7bc5-4e29-b643-cd739ef065e3"),
-                Name = "SUP_SEEDED"
+                Name = "SUP_SEEDED",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("cea45b74-f6c2-4e5c-8d2c-3102a85bf339"),
-                Name = "SUB_SEEDED"
+                Name = "SUB_SEEDED",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("e276df35-a96b-4bdd-b57b-31236a0ddbc9"),
-                Name = "CULV_SEEDED"
+                Name = "CULV_SEEDED",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("a0c921cc-c40a-41e4-a1d6-33f810397abe"),
-                Name = "DECK_DURATION_N"
+                Name = "DECK_DURATION_N",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("8f81bdf8-f492-40d9-b790-f87ad7de26a5"),
-                Name = "SUP_DURATION_N"
+                Name = "SUP_DURATION_N",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("eb6d72ec-5801-4ec0-bd8b-c5641c291f58"),
-                Name = "SUB_DURATION_N"
+                Name = "SUB_DURATION_N",
+                Type = "NUMBER"
             },
             new AttributeDTO()
             {
                 Id = Guid.Parse("f7693cfe-8705-4f58-8d16-9be6e5d9a2af"),
-                Name = "CULV_DURATION_N"
+                Name = "CULV_DURATION_N",
+                Type = "NUMBER"
             }
         };
 
@@ -109,52 +137,62 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             new AttributeEntity()
             {
                 Id = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c"),
-                Name = "BRKEY_"
+                Name = "BRKEY_",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("cbdc2aac-f2b7-405e-8ff8-21f2785330c1"),
-                Name = "BMSID"
+                Name = "BMSID",
+                DataType = "STRING"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("67abf485-b3bc-4899-b492-f9165b571040"),
-                Name = "DECK_SEEDED"
+                Name = "DECK_SEEDED",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("fb86603f-7bc5-4e29-b643-cd739ef065e3"),
-                Name = "SUP_SEEDED"
+                Name = "SUP_SEEDED",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("cea45b74-f6c2-4e5c-8d2c-3102a85bf339"),
-                Name = "SUB_SEEDED"
+                Name = "SUB_SEEDED",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("e276df35-a96b-4bdd-b57b-31236a0ddbc9"),
-                Name = "CULV_SEEDED"
+                Name = "CULV_SEEDED",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("a0c921cc-c40a-41e4-a1d6-33f810397abe"),
-                Name = "DECK_DURATION_N"
+                Name = "DECK_DURATION_N",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("8f81bdf8-f492-40d9-b790-f87ad7de26a5"),
-                Name = "SUP_DURATION_N"
+                Name = "SUP_DURATION_N",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("eb6d72ec-5801-4ec0-bd8b-c5641c291f58"),
-                Name = "SUB_DURATION_N"
+                Name = "SUB_DURATION_N",
+                DataType = "NUMBER"
             },
             new AttributeEntity()
             {
                 Id = Guid.Parse("f7693cfe-8705-4f58-8d16-9be6e5d9a2af"),
-                Name = "CULV_DURATION_N"
+                Name = "CULV_DURATION_N",
+                DataType = "NUMBER"
             }
         };
 
@@ -164,31 +202,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
-                NetworkId = _networkId,
+                NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
                 SpatialWeighting = "[DECK_AREA]"
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
-                NetworkId = _networkId,
+                NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
                 SpatialWeighting = "[DECK_AREA]"
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
-                NetworkId = _networkId,
+                NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"3"),
                 SpatialWeighting = "[DECK_AREA]"
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
-                NetworkId = _networkId,
+                NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"4"),
                 SpatialWeighting = "[DECK_AREA]"
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
-                NetworkId = _networkId,
+                NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"5"),
                 SpatialWeighting = "[DECK_AREA]"
             }
@@ -280,12 +318,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     {
                         Id = Guid.NewGuid(),
                         AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
                         ChangeValue = "+3"
                     },
                     new CommittedProjectConsequenceEntity()
                     {
                         Id = Guid.NewGuid(),
                         AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
                         ChangeValue = "1"
                     }
                 }
@@ -308,17 +348,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     {
                         Id = Guid.NewGuid(),
                         AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
                         ChangeValue = "9"
                     },
                     new CommittedProjectConsequenceEntity()
                     {
                         Id = Guid.NewGuid(),
                         AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
                         ChangeValue = "1"
                     }
                 }
             }
         };
+
+        public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()
+        {
+            var newProjects = CommittedProjectEntities;
+            newProjects.ForEach(entity =>
+            {
+                entity.ScenarioBudget = null;
+                entity.ScenarioBudgetId = null;
+            });
+            return newProjects;
+        }
 
         public static List<BaseCommittedProjectDTO> UnmatchedAssetCommittedProjects()
         {
@@ -390,6 +443,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<BudgetDTO> ScenarioBudgets => ScenarioBudgetDTOs();
 
+        public static List<InvestmentPlanEntity> InvestmentPlanEntities() 
+        {
+            var result = new List<InvestmentPlanEntity>();
+            foreach (var simulation in Simulations)
+            {
+                var simIP = simulation.InvestmentPlan;
+                // The simulation reference must be added here - this avoids the circular reference
+                simIP.Simulation = simulation;
+                result.Add(simIP);
+            }
+
+            return result;
+        }
+
         #region Helpers
         private static List<ScenarioBudgetEntity> ScenarioBudgetEntities => new List<ScenarioBudgetEntity>()
         {
@@ -446,31 +513,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             new MaintainableAsset(
                 Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
-                _networkId,
+                NetworkId,
                 new SectionLocation(Guid.NewGuid(), "1"),
                 "[DECK_AREA]"
             ),
             new MaintainableAsset(
                 Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
-                _networkId,
+                NetworkId,
                 new SectionLocation(Guid.NewGuid(), "2"),
                 "[DECK_AREA]"
             ),
             new MaintainableAsset(
                 Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
-                _networkId,
+                NetworkId,
                 new SectionLocation(Guid.NewGuid(), "3"),
                 "[DECK_AREA]"
             ),
             new MaintainableAsset(
                 Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
-                _networkId,
+                NetworkId,
                 new SectionLocation(Guid.NewGuid(), "4"),
                 "[DECK_AREA]"
             ),
             new MaintainableAsset(
                 Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
-                _networkId,
+                NetworkId,
                 new SectionLocation(Guid.NewGuid(), "5"),
                 "[DECK_AREA]"
             )

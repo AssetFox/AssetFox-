@@ -65,7 +65,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Task<UserDTO> GetUserByUserName(string userName)
         {
-            return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
+            var existingUser = _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault();
+            if (existingUser == null)
+            {
+                // This is satisfactory given the frontend only needs
+                // the username. The was introduced when the asynchronicity
+                // was implemented for getting the user. It may try to obtain
+                // a user before it is created in the database, hence this code.
+                return Task.Factory.StartNew(() =>
+                    new UserDTO
+                    {
+                        Id = Guid.Empty,
+                        Username = userName,
+                        HasInventoryAccess = false,
+                        LastNewsAccessDate = new DateTime(),
+                        CriterionLibrary = new CriterionLibraryDTO()
+                    }
+                    );
+            }
+            else return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
         }
 
         public Task<UserDTO> GetUserById(Guid id)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
@@ -60,22 +61,28 @@ namespace BridgeCareCore.Controllers.BaseController
                 if (_userInfo != value)
                 {
                     _userInfo = value;
-                    CheckIfUserExist();
+                    new Task(async () =>
+                    {
+                        await CheckIfUserExist();
+                    });
                 }
             }
         }
 
-        private void CheckIfUserExist()
+        private async Task CheckIfUserExist()
         {
-            if (!string.IsNullOrEmpty(UserInfo.Name))
+            await Task.Run(() =>
             {
-                if (!UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
+                if (!string.IsNullOrEmpty(UserInfo.Name))
                 {
-                    UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
-                }
+                    if (!UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
+                    {
+                        UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
+                    }
 
-                UnitOfWork.SetUser(_userInfo.Name);
-            }
+                    UnitOfWork.SetUser(_userInfo.Name);
+                }
+            });
         }
 
         private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;

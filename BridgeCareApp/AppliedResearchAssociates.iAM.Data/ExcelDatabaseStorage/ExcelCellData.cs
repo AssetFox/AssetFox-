@@ -36,9 +36,36 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
             if (content == null || content is string str && string.IsNullOrWhiteSpace(str))
             {
                 newCell = Empty;
-            } else if (content is JsonElement jsonElement)
+            }
+            else if (content is JsonElement jsonElement)
             {
-
+                switch (jsonElement.ValueKind)
+                {
+                case JsonValueKind.Number:
+                    if (jsonElement.TryGetDouble(out double d))
+                    {
+                        newCell = Double(d);
+                    }
+                    break;
+                case JsonValueKind.String:
+                    if (jsonElement.TryGetDateTime(out DateTime dt))
+                    {
+                        newCell = DateTime(dt);
+                    }
+                    else
+                    {
+                        var s = jsonElement.GetString();
+                        if (string.IsNullOrWhiteSpace(s))
+                        {
+                            newCell = Empty;
+                        }
+                        else
+                        {
+                            newCell = String(s);
+                        }
+                    }
+                    break;
+                }
             }
             else if (content is double doubleValue)
             {
@@ -61,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
                 newCell = String(content?.ToString() ?? "");
             }
 
-            return newCell;
+                return newCell;
+            }
         }
     }
-}

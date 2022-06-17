@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
             {
                 ExcelCellData.DateTime(now),
                 TestExcelCellData.PiDatum(),
+                ExcelCellData.Double(16),
             };
             var column1 = ExcelDatabaseColumns.WithEntries(data1);
             var column2 = ExcelDatabaseColumns.WithEntries(data2);

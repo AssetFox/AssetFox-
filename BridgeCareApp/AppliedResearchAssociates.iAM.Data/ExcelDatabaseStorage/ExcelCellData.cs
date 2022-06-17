@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
@@ -35,6 +36,9 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
             if (content == null || content is string str && string.IsNullOrWhiteSpace(str))
             {
                 newCell = Empty;
+            } else if (content is JsonElement jsonElement)
+            {
+
             }
             else if (content is double doubleValue)
             {

@@ -1,37 +1,45 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using AppliedResearchAssociates.iAM.Data.Helpers;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
     public static class ExcelDatabaseWorksheetSerializer
     {
+        private static readonly ExcelCellDatumValueGetter ValueGetter = new ExcelCellDatumValueGetter();
         public static string Serialize(ExcelDatabaseWorksheet worksheet)
         {
-            var serializeColumns = new List<List<string>>();
+            var worksheetObjects = new List<List<object>>();
             foreach (var column in worksheet.Columns)
             {
-                var serializeColumn = ExcelDatabaseColumnSerializer.Serialize(column);
-                serializeColumns.Add(serializeColumn);
+                var columnObjects = new List<object>();
+                foreach (var entry in column.Entries)
+                {
+                    var value = entry.Accept(ValueGetter, Unit.Default);
+                    columnObjects.Add(value);
+                }
+                worksheetObjects.Add(columnObjects);
             }
-            var returnValue = JsonSerializer.Serialize(serializeColumns);
+            var returnValue = JsonSerializer.Serialize(worksheetObjects);
             return returnValue;
         }
 
         public static ExcelDatabaseWorksheetDeserializationResult Deserialize(string serializedWorksheet)
         {
-            var stringLists = JsonSerializer.Deserialize<List<List<string>>> (serializedWorksheet);
+            var objectLists = JsonSerializer.Deserialize<List<List<object>>> (serializedWorksheet);
             var returnValue = new ExcelDatabaseWorksheetDeserializationResult();
             var columns = new List<ExcelDatabaseColumn>();
-            foreach (var stringList in stringLists)
+            foreach (var objectList in objectLists)
             {
-                var deserializeColumn = ExcelDatabaseColumnSerializer.Deserialize(stringList);
-                if (deserializeColumn.Message!=null)
+                var columnData = new List<IExcelCellDatum>();
+                foreach (var obj in objectList)
                 {
-                    returnValue.Message = deserializeColumn.Message;
-                    return returnValue;
+                    var datum = ExcelCellData.ForObject(obj);
+                    columnData.Add(datum);
                 }
-                columns.Add(deserializeColumn.Column);
+                var deserializeColumn = ExcelDatabaseColumns.WithEntries(columnData);
+                columns.Add(deserializeColumn);
             }
             returnValue.Worksheet = new ExcelDatabaseWorksheet
             {

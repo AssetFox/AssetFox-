@@ -28,5 +28,36 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 
         public static EmptyExcelCellDatum Empty
             => _Empty;
+
+        public static IExcelCellDatum ForObject(object content)
+        {
+            IExcelCellDatum newCell = null;
+            if (content == null || content is string str && string.IsNullOrWhiteSpace(str))
+            {
+                newCell = Empty;
+            }
+            else if (content is double doubleValue)
+            {
+                newCell = Double(doubleValue);
+            }
+            else if (content is int intValue)
+            {
+                newCell = Double(intValue);
+            }
+            else if (content is DateTime dateTimeValue)
+            {
+                newCell = DateTime(dateTimeValue);
+            }
+            else if (content is float floatValue)
+            {
+                newCell = Double(floatValue);
+            }
+            else
+            {
+                newCell = String(content?.ToString() ?? "");
+            }
+
+            return newCell;
+        }
     }
 }

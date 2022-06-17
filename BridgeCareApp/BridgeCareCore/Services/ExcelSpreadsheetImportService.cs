@@ -47,7 +47,7 @@ namespace BridgeCareCore.Services
                     for (var rowIndex = 1; rowIndex <= end.Row; rowIndex++)
                     {
                         var cellValue = cells[rowIndex, columnIndex].Value;
-                        var newCell = CreateNewCell(cellValue);
+                        var newCell = ExcelCellData.ForObject(cellValue);
                         columnCells.Add(newCell);
                     }
                     while (columnCells.Any() && columnCells.Last() is EmptyExcelCellDatum)
@@ -62,37 +62,6 @@ namespace BridgeCareCore.Services
             var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet);
             var returnValue = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
             return returnValue;
-        }
-
-        private static IExcelCellDatum CreateNewCell(object cellValue)
-        {
-            IExcelCellDatum newCell = null;
-            if (cellValue == null || cellValue is string str && string.IsNullOrWhiteSpace(str))
-            {
-                newCell = ExcelCellData.Empty;
-            }
-            else if (cellValue is double doubleValue)
-            {
-                newCell = ExcelCellData.Double(doubleValue);
-            }
-            else if (cellValue is int intValue)
-            {
-                newCell = ExcelCellData.Double(intValue);
-            }
-            else if (cellValue is DateTime dateTimeValue)
-            {
-                newCell = ExcelCellData.DateTime(dateTimeValue);
-            }
-            else if (cellValue is float floatValue)
-            {
-                newCell = ExcelCellData.Double(floatValue);
-            }
-            else
-            {
-                newCell = ExcelCellData.String(cellValue?.ToString() ?? "");
-            }
-
-            return newCell;
         }
     }
 }

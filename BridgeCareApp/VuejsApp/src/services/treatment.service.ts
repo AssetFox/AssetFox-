@@ -49,7 +49,7 @@ export default class TreatmentService {
         return forScenario            
             ? // TODO: check for api name after functionality for scenario based import is in place.
               coreAxiosInstance.post(
-                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
+                  `${API.Treatment}/ImportScenarioTreatmentsFile`,
                   formData,
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               )

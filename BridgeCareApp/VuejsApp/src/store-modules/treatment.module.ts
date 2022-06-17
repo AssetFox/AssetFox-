@@ -192,7 +192,7 @@ const actions = {
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 const library: TreatmentLibrary = response.data as TreatmentLibrary;
-                commit('treatmentLibrariesMutator', library);
+                commit('treatmentLibrariesMutator', [library]);
                 commit('selectedTreatmentLibraryMutator', library.id);               
                 dispatch('addSuccessNotification', {
                     message: 'Treatments Models file imported',

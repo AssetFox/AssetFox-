@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -290,6 +289,52 @@ namespace BridgeCareCore.Controllers
                     throw new ConstraintException("Request contained no treatment library id.");
                 }
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
+
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
+                });
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result.TreatmentLibrary);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ImportScenarioTreatmentsFile")]
+        [Authorize]
+        public async Task<IActionResult> ImportScenarioTreatmentsFile()
+        {
+            try
+            {
+                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+                {
+                    throw new ConstraintException("Request MIME type is invalid.");
+                }
+
+                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+                {
+                    throw new ConstraintException("Investment budgets file not found.");
+                }
+
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var simulationId))
+                {
+                    throw new ConstraintException("Request contained no treatment library id.");
+                }
+                //var treatmentLibraryId = Guid.Parse(simulationId.ToString());
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
 

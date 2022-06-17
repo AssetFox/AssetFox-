@@ -16,11 +16,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
     public class PamsDataForSummaryReport: IPamsDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
+        //private IHighlightWorkDoneCells _highlightWorkDoneCells;
+        //private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
+        private ISummaryReportHelper _summaryReportHelper;
+
+        // This is also used in Bridge Work Summary TAB
+        private readonly List<double> _previousYearInitialMinC = new List<double>();
+        private Dictionary<int, (int on, int off)> _poorOnOffCount = new Dictionary<int, (int on, int off)>();
+        private Dictionary<int, Dictionary<string, int>> _bpnPoorOnPerYear = new Dictionary<int, Dictionary<string, int>>();
+        private Dictionary<int, int> _nhsPoorOnPerYear = new Dictionary<int, int>();
+        private Dictionary<int, int> _nonNhsPoorOnPerYear = new Dictionary<int, int>();
+
+        // This will be used in Parameters TAB
+        private readonly ParametersModel _parametersModel = new ParametersModel();
 
         public PamsDataForSummaryReport()
         {
-            
+            //_highlightWorkDoneCells = new HighlightWorkDoneCells();
+            //if (_highlightWorkDoneCells == null) { throw new ArgumentNullException(nameof(_highlightWorkDoneCells)); }
+
+            _summaryReportHelper = new SummaryReportHelper();
+            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         private List<string> GetHeaders()
@@ -75,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         }
 
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
         {
             // Add data to excel.
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
@@ -100,7 +117,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var lastColumn = worksheet.Dimension.Columns + 1;
             worksheet.Column(lastColumn).Width = 3;
 
-            return;
+            var workSummaryModel = new WorkSummaryModel
+            {
+                PreviousYearInitialMinC = _previousYearInitialMinC,
+                PoorOnOffCount = _poorOnOffCount,
+                ParametersModel = _parametersModel,
+                BpnPoorOnPerYear = _bpnPoorOnPerYear,
+                NhsPoorOnPerYear = _nhsPoorOnPerYear,
+                NonNhsPoorOnPerYear = _nonNhsPoorOnPerYear,
+            };
+
+            return workSummaryModel;
         }
 
         private CurrentCell BuildHeaderAndSubHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
@@ -204,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         private void FillData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var rowNo = currentCell.Row; var columnNo = currentCell.Column;
-            foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
+            foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++; columnNo = 1;
                 
@@ -249,7 +276,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var column = currentCell.Column;
 
             var workDoneData = new List<int>();
-            if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]); }
+            if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Assets.Count]); }
 
             var isInitialYear = true;
             foreach (var yearlySectionData in outputResults.Years)
@@ -260,13 +287,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = PAMSConstants.NoTreatment;
                 var i = 0;
-                foreach (var section in yearlySectionData.Sections)
+                foreach (var section in yearlySectionData.Assets)
                 {
-                    SectionDetail prevYearSection = null;
+                    AssetDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
@@ -316,7 +343,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             row = 4; // setting row back to start
             var initialColumn = column + 1;
-            foreach (var intialsection in outputResults.InitialSectionSummaries)
+            foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
                 column = initialColumn; // This is to reset the column
                 column = AddSimulationYearData(worksheet, row, column, intialsection, null);
@@ -330,17 +357,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             {
                 row = currentCell.Row; // setting row back to start
                 currentCell.Column = column;
-                foreach (var section in sectionData.Sections)
+                foreach (var section in sectionData.Assets)
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
 
-                    SectionDetail prevYearSection = null;
+                    AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                     }
 
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
@@ -395,7 +422,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, SectionSummaryDetail initialSection, SectionDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;

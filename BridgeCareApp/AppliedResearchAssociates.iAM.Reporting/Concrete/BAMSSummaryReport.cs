@@ -69,8 +69,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             ReportTypeName = name;
 
-            //generate network id
-            _networkId = _unitOfWork.NetworkRepo.GetMainNetwork().Id;
+            ////generate network id
+            //_networkId = _unitOfWork.NetworkRepo.GetMainNetwork().Id;
 
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();

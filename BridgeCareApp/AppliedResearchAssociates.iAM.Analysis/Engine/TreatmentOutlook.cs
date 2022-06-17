@@ -18,9 +18,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 throw new ArgumentNullException(nameof(remainingLifeCalculatorFactories));
             }
 
-            RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
-
             AccumulationContext = new AssetContext(TemplateContext);
+
+            RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
 
             Run();
         }

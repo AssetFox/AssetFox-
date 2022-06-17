@@ -23,10 +23,10 @@ const EditScenario = () =>
     import(
         /* webpackChunkName: "editScenario" */ '@/components/scenarios/EditScenario.vue'
     );
-    const EditLibrary = () =>
-        import(
-            /* webpackChunkName: "editLibrary" */ '@/components/libraries/EditLibrary.vue'
-        );
+const EditLibrary = () =>
+    import(
+        /* webpackChunkName: "editLibrary" */ '@/components/libraries/EditLibrary.vue'
+    );
 const InvestmentEditor = () =>
     import(
         /* webpackChunkName: "investmentModule" */ '@/components/investment-editor/InvestmentEditor.vue'
@@ -88,6 +88,22 @@ const CashFlowEditor = () =>
 const CalculatedAttributeEditor = () =>
     import(
         /*webpackChunkName: "CalculatedAttributeEditor" */ '@/components/calculated-attribute-editor/CalculatedAttributeEditor.vue'
+    );
+const EditRawData = () =>
+    import(
+        /*webpackChunkName: "EditRawData" */ '@/components/raw-data/EditRawData.vue'
+    );
+const DataSource = () =>
+    import(
+        /*webpackChunkName: "DataSource" */ '@/components/data-source/DataSource.vue'
+    );
+const Attributes = () =>
+    import(
+        /*webpackChunkName: "Attributes" */ '@/components/attributes/Attributes.vue'
+    );
+const Networks = () =>
+    import(
+        /*webpackChunkName: "Networks" */ '@/components/networks/Networks.vue'
     );
 
 const onHandlingUnsavedChanges = (to: any, next: any): void => {
@@ -284,6 +300,43 @@ const router = new VueRouter({
                     component: CashFlowEditor,
                 },
             ],
+        },
+        {
+            path: '/EditRawData/',
+            name: 'EditRawData',
+            component: EditRawData,
+            children: [
+                {
+                    path: '/DataSource/',
+                    component: DataSource,
+                },
+                {
+                    path: '/Attributes/',
+                    component: Attributes,
+                },
+                {
+                    path: '/Networks/',
+                    component: Networks,
+                },
+            ],
+        },
+        {
+            path: '/DataSource/',
+            name: 'DataSource',
+            component: DataSource,
+            props: true,
+        },
+        {
+            path: '/Attributes/',
+            name: 'Attributes',
+            component: Attributes,
+            props: true,
+        },
+        {
+            path: '/Networks/',
+            name: 'Networks',
+            component: Networks,
+            props: true,
         },
         {
             path: '/InvestmentEditor/Library/',

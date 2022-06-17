@@ -12,8 +12,7 @@ module.exports = {
             new webpack.DefinePlugin({
                 'process.env': {
                     PACKAGE_VERSION: '"' + version + '"',
-                    PORT: '"' + port + '"',
-                    SECURITY_TYPE: '"' + security + '"'
+                    PORT: '"' + port + '"'
                 }
             })
         ],

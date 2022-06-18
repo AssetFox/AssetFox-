@@ -29,20 +29,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var mockedTestUOW = new Mock<IUnitOfWork>();
             _mockedContext = new Mock<IAMContext>();
 
-            var mockSimulationRepo = new Mock<ISimulationRepository>();
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Simulation, TestDataForCommittedProjects.Simulations.AsQueryable());
-
-            var mockMaintainableAssetRepo = new Mock<IMaintainableAssetRepository>();
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.MaintainableAsset, TestDataForCommittedProjects.MaintainableAssetEntities.AsQueryable());
-
-            var mockCommittedProjectsRepo = new Mock<ICommittedProjectRepository>();
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CommittedProject, TestDataForCommittedProjects.CommittedProjectEntities.AsQueryable());
-
-            var mockAttributeRepo = new Mock<IAttributeRepository>();
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, TestDataForCommittedProjects.AttribureEntities.AsQueryable());
-
-            var mockInvestmentPlan = new Mock<IInvestmentPlanRepository>();
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.InvestmentPlan, TestDataForCommittedProjects.InvestmentPlanEntities().AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestDataForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
 
             _testUOW = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
         }
@@ -62,58 +54,119 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Equal(210000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void GetForSimulationWorksWithoutCommittedProjects()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
+            // Act
+            repo.GetSimulationCommittedProjects(simulationDomain);
+
+            // Assert
+            Assert.Equal(0, simulationDomain.CommittedProjects.Count);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void GetForSimulationHandlesBadScenarioId()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var simulationDomain = CreateSimulation(_badScenario, false);
 
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.GetSimulationCommittedProjects(simulationDomain));
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void GetForExportWorksWithCommittedProjects()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act
+            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Equal(210000, result.Sum(_ => _.Cost));
+            Assert.True(result.First() is SectionCommittedProjectDTO);
+            Assert.Equal(2, result.First().Consequences.Count);
+            Assert.Equal(2, result.First().LocationKeys.Count);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void GetForExportWorksWithoutCommittedProjects()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act
+            var result = repo.GetCommittedProjectsForExport(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+
+            // Assert
+            Assert.Equal(0, result.Count);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void GetForExportHandlesBadScenarioId()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.GetCommittedProjectsForExport(_badScenario));
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact(Skip = "Unable to run with BulkExtensions")]
         public void CreateWorksForValidCommittedProjectData()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var newProjects = TestDataForCommittedProjects.ValidCommittedProjects;
+            newProjects.ForEach(_ => _.SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
+            // Act
+            repo.CreateCommittedProjects(newProjects);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void CreateHandlesBadSimulationId()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var newProjects = TestDataForCommittedProjects.ValidCommittedProjects;
+            newProjects.ForEach(_ => _.SimulationId = _badScenario);
 
+            // Act & Assert
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            Assert.Contains("simulation ID", exception.Message);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void CreateHandlesNonExistingBudgets()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var newProjects = TestDataForCommittedProjects.ValidCommittedProjects;
+            newProjects.ForEach(_ => _.ScenarioBudgetId = Guid.Parse("0d91f67d-d5f4-4c1b-861c-3a5a24aab100"));
 
+            // Act & Assert
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            Assert.Contains("budget IDs", exception.Message);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact(Skip = "Unable to run with BulkExtensions")]
         public void CreateWorksWithNullBudgets()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var newProjects = TestDataForCommittedProjects.ValidCommittedProjects;
+            newProjects.ForEach(_ => _.ScenarioBudgetId = null);
 
+            // Act
+            repo.CreateCommittedProjects(newProjects);
         }
 
         [Fact(Skip = "Not Implemented")]
@@ -135,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         #region Helpers
-        private Simulation CreateSimulation(Guid simulationId)
+        private Simulation CreateSimulation(Guid simulationId, bool populateInvestments = true)
         {
             var exp = _testUOW.AttributeRepo.GetExplorer();
             var testNetwork = exp.AddNetwork();
@@ -146,7 +199,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             }
             var simulation = testNetwork.AddSimulation();
             simulation.Id = simulationId;
-            _testUOW.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            // This has to be ignored to create a bad scenario object
+            if (populateInvestments) _testUOW.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             return simulation;
         }
 

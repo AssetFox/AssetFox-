@@ -246,6 +246,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
                 LocationKeys = new Dictionary<string, string>()
                 {
+                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
                     { "BRKEY_", "1" },
                     { "BMSID", "12345678" }
                 },
@@ -277,6 +278,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
                 LocationKeys = new Dictionary<string, string>()
                 {
+                    { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
@@ -456,9 +458,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             return result;
         }
-
-        #region Helpers
-        private static List<ScenarioBudgetEntity> ScenarioBudgetEntities => new List<ScenarioBudgetEntity>()
+                
+        public static List<ScenarioBudgetEntity> ScenarioBudgetEntities => new List<ScenarioBudgetEntity>()
         {
             new ScenarioBudgetEntity()
             {
@@ -481,6 +482,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 }
             }
         };
+
+        #region Helpers
 
         private static List<BudgetDTO> ScenarioBudgetDTOs()
         {

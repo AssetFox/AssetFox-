@@ -27,11 +27,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ChangeValue = entity.ChangeValue
             };
 
-        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, ICollection<AttributeEntity> attributes)
+        public static CommittedProjectConsequenceEntity ToEntity(this CommittedProjectConsequenceDTO dto, IList<AttributeEntity> attributes)
         {
             var attributeEntity = attributes.FirstOrDefault(_ => _.Name == dto.Attribute);
             if (attributeEntity == null)
-                throw new ArgumentException($"Unable to find ${dto.Attribute} in the provided list of attributes");
+                throw new ArgumentException($"Unable to find {dto.Attribute} in the provided list of attributes");
             return new CommittedProjectConsequenceEntity
             {
                 Id = dto.Id,

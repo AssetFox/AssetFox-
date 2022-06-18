@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, ICollection<AttributeEntity> attributes)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes)
         {
             var result = new CommittedProjectEntity
             {
@@ -125,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
         {
             // TODO:  Switch to looking up key field in datasource object
-            string keyField = "BRKEY";
+            string keyField = "BRKEY_";
 
             switch (entity.Discriminator)
             {

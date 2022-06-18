@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -10,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -126,7 +128,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjects)
         {
-            var committedProjectEntities = committedProjects.Select(_ => _.ToEntity(_unitOfWork.Context.Attribute.ToList())).ToList();
+            var simulationIds = committedProjects.Select(_ => _.SimulationId).Distinct().ToList();
+            foreach (var simulation in simulationIds)
+            {
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation))
+                {
+                    throw new RowNotInTableException($"Unable to find simulation ID {simulation} in database");
+                }
+            }
+
+            var budgetIds = _unitOfWork.Context.ScenarioBudget
+                .Where(_ => simulationIds.Contains(_.SimulationId))
+                .Select(_ => _.Id)
+                .ToList();
+            var badBudgets = committedProjects
+                .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
+                .ToList();
+            if (badBudgets.Any())
+            {
+                var budgetList = new StringBuilder();
+                badBudgets.ForEach(budget => budgetList.Append(budget.ToString() + ", "));
+                throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
+            }
+
+            var attributes = _unitOfWork.Context.Attribute.ToList();
+            var committedProjectEntities = committedProjects.Select(_ => _.ToEntity(attributes)).ToList();
 
             _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 

@@ -169,22 +169,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             repo.CreateCommittedProjects(newProjects);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact(Skip = "Unable to run with BulkExtensions")]
         public void DeleteWorksWithValidSimulation()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act
+            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void DeleteHandlesInvalidSimulation()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.DeleteCommittedProjects(_badScenario));
         }
 
-        [Fact(Skip = "Not Implemented")]
+        [Fact]
         public void DeleteHandlesSimulationWithNoCommitts()
         {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
 
+            // Act
+            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+
+            // No assert required as long as it works
         }
 
         #region Helpers

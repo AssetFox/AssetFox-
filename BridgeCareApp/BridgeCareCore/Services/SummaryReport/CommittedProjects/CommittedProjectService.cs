@@ -152,6 +152,24 @@ namespace BridgeCareCore.Services
             };
         }
 
+        public FileInfoDTO CreateCommittedProjectTemplate()
+        {
+            var fileName = $"CommittedProjectsTemplate.xlsx";
+
+            using var excelPackage = new ExcelPackage(new FileInfo(fileName));
+
+            var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
+
+            AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
+
+            return new FileInfoDTO
+            {
+                FileName = fileName,
+                FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            };
+        }
+
         /**
          * Gets SimulationEntity data for a Committed Project Import
          */

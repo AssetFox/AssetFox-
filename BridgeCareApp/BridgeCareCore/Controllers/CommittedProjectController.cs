@@ -184,6 +184,15 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("CommittedProjectTemplate")]
+        [Authorize]
+        public async Task<IActionResult> GetCommittedProjectTemplate()
+        {
+            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate());
+            return Ok(result);
+        }
+
         [HttpDelete]
         [Route("DeleteCommittedProjects/{simulationId}")]
         [Authorize]

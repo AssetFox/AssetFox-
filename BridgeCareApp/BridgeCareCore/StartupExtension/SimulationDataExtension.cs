@@ -33,7 +33,9 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IInvestmentBudgetsService, InvestmentBudgetsService>();
             services.AddScoped<IPerformanceCurvesService, PerformanceCurvesService>();
             services.AddScoped<ITreatmentService, TreatmentService>();
+            services.AddScoped<ICommittedProjectService, CommittedProjectService>();
             services.AddScoped<ExcelTreatmentLoader>();
+            services.AddScoped<IUnitOfWork, UnitOfDataPersistenceWork>();
             services.AddScoped<UnitOfDataPersistenceWork>();
         }
     }

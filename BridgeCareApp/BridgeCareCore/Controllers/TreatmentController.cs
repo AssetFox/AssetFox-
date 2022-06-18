@@ -101,6 +101,32 @@ namespace BridgeCareCore.Controllers
                 }
             }
 
+            void DeleteAnyTreatmentForLibrary(TreatmentDTO treatmentDTO, Guid libraryId) => UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatmentDTO, libraryId);
+
+            void DeletePermittedTreatmentForLibrary(TreatmentDTO treatmentDTO, Guid libraryId)
+            {
+                var dto = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
+
+                if (treatmentDTO == null || dto == null) return; // Mimic existing code that does not inform the user the library ID or treatment does not exist
+
+                if (dto.Owner == UserId)
+                {
+                    DeleteAnyTreatmentForLibrary(treatmentDTO, libraryId);
+                }
+                else
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
+                }
+            }
+
+            void DeleteAnyTreatmentForScenario(TreatmentDTO treatmentDTO, Guid simulationId) => UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatmentDTO, simulationId);
+
+            void DeletePermittedTreatmentForScenario(TreatmentDTO treatmentDTO, Guid simulationId)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                DeleteAnyTreatmentForScenario(treatmentDTO, simulationId);
+            }
+
             var AdminCRUDMethods = new CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>()
             {
                 UpsertScenario = UpsertAnyForScenario,
@@ -108,7 +134,9 @@ namespace BridgeCareCore.Controllers
                 DeleteScenario = DeleteAnyFromScenario,
                 UpsertLibrary = UpsertAnyForLibrary,
                 RetrieveLibrary = RetrieveAnyForLibraries,
-                DeleteLibrary = DeleteAnyForLibrary
+                DeleteLibrary = DeleteAnyForLibrary,
+                DeleteTreatment = DeleteAnyTreatmentForLibrary,
+                DeleteScenarioTreatment = DeleteAnyTreatmentForScenario
             };
 
             var PermittedCRUDMethods = new CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>()
@@ -118,7 +146,9 @@ namespace BridgeCareCore.Controllers
                 DeleteScenario = DeleteAnyFromScenario,
                 UpsertLibrary = UpsertPermittedForLibrary,
                 RetrieveLibrary = RetrievePermittedForLibraries,
-                DeleteLibrary = DeletePermittedForLibrary
+                DeleteLibrary = DeletePermittedForLibrary,
+                DeleteTreatment = DeletePermittedTreatmentForLibrary,
+                DeleteScenarioTreatment = DeletePermittedTreatmentForScenario
             };
 
             return new Dictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>>
@@ -192,6 +222,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
         [HttpGet]
         [Route("ExportScenarioTreatmentsExcelFile/{libraryId}")]
         [Authorize]
@@ -310,6 +341,63 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteTreatment/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTreatment(TreatmentDTO treatment, Guid libraryId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _treatmentCRUDMethods[UserInfo.Role].DeleteTreatment(treatment, libraryId);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteScenarioSelectableTreatment/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment, Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    _treatmentCRUDMethods[UserInfo.Role].DeleteScenarioTreatment(scenarioSelectableTreatment, simulationId);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }

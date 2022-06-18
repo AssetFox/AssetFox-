@@ -11,12 +11,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
+using System;
 
 namespace BridgeCareCore.Services
 {
     public class AttributeImportService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private object excelPackageId;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
         public const string WasFoundInRow = "was found in row";
@@ -50,6 +52,17 @@ namespace BridgeCareCore.Services
                 }
             }
             return true;
+        }
+
+        public AttributesImportResultDTO ImportExcelAttributes(
+            string keyColumnName,
+            string inspectionDateColumnName,
+            string spatialWeightingValue,
+            Guid excelPackageId
+            )
+        {
+            var excelRepo = _unitOfWork.ExcelWorksheetRepository;
+            var excelWorkbook = excelRepo.GetExcelWorksheet(excelPackageId);
         }
 
         public AttributesImportResultDTO ImportExcelAttributes(

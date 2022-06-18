@@ -22,6 +22,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
+        public static ExcelSpreadsheetDTO ToDTO(this ExcelWorksheetEntity entity)
+        {
+            var returnValue = new ExcelSpreadsheetDTO
+            {
+                Id = entity.Id,
+                SerializedWorksheetContent = entity.SerializedWorksheetContent,
+            };
+            return returnValue;
+        }
+
         public static ExcelSpreadsheetDTO ToDTO (this ExcelDatabaseWorksheet worksheet)
         {
             var serializedContent = ExcelDatabaseWorksheetSerializer.Serialize(worksheet);

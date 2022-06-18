@@ -6,5 +6,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     public interface IExcelWorksheetRepository
     {
         Guid AddExcelWorksheet(ExcelSpreadsheetDTO dto);
+        ExcelSpreadsheetDTO GetExcelWorksheet(Guid excelPackageId);
     }
 }

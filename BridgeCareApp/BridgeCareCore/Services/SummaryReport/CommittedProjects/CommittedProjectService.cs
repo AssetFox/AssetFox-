@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -27,7 +28,7 @@ namespace BridgeCareCore.Services
 
         // TODO: Determine based on associated network
         private readonly string _networkKeyField = "BRKEY_";
-
+        private readonly Dictionary<string, List<KeySegmentDatum>> _keyProperties;
         private readonly List<string> _keyFields;
 
         private static readonly List<string> InitialHeaders = new List<string>
@@ -46,7 +47,8 @@ namespace BridgeCareCore.Services
         public CommittedProjectService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _keyFields = _unitOfWork.AssetDataRepository.KeyProperties.Keys.Where(_ => _ != "ID").ToList();
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties.ToDictionary();
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
         }
 
         /**
@@ -54,18 +56,26 @@ namespace BridgeCareCore.Services
          */
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
         {
+            var column = 1;
+            if (_keyFields.Contains(_networkKeyField))
+            {
+                worksheet.Cells[1, column++].Value = _networkKeyField;
+            }
+
             for (var keyColumnIndex = 0; keyColumnIndex < _keyFields.Count; keyColumnIndex++)
             {
-                worksheet.Cells[1, keyColumnIndex + 1].Value = _keyFields[keyColumnIndex];
+                if (_keyFields[keyColumnIndex] != _networkKeyField)
+                {
+                    worksheet.Cells[1, column++].Value = _keyFields[keyColumnIndex];
+                }
             }
 
-            for (var column = 0; column < InitialHeaders.Count; column++)
+            for (var headerCount = 0; headerCount < InitialHeaders.Count; headerCount++)
             {
-                worksheet.Cells[1, column + _keyFields.Count + 1].Value = InitialHeaders[column];
+                worksheet.Cells[1, column++].Value = InitialHeaders[headerCount];
             }
 
-            var attributeColumn = InitialHeaders.Count + _keyFields.Count;
-            attributeNames.ForEach(attributeName => worksheet.Cells[1, ++attributeColumn].Value = attributeName);
+            attributeNames.ForEach(attributeName => worksheet.Cells[1, column++].Value = attributeName);
         }
 
         /**
@@ -79,13 +89,33 @@ namespace BridgeCareCore.Services
                     project =>
                     {
                         var column = 1;
-
-                        foreach (var pair in project.LocationKeys)
+                        var locationValue = String.Empty;
+                        if (project.LocationKeys.ContainsKey(_networkKeyField))
                         {
-                            if (_keyFields.Contains(pair.Key))
+                            locationValue = project.LocationKeys[_networkKeyField];
+                            worksheet.Cells[row, column++].Value = locationValue;
+                        }
+
+                        // Add other data from key fields based on ID
+                        var otherData = _keyFields.Where(_ => _ != _networkKeyField);
+                        if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
+                        {
+                            var assetId = _keyProperties[_networkKeyField].FirstOrDefault(_ => _.KeyValue.Value == locationValue);
+                            if (assetId != null)
                             {
-                                worksheet.Cells[row, column++].Value = pair.Value;
+                                foreach (var field in otherData)
+                                {
+                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId);
+                                }
                             }
+                            else
+                            {
+                                column += otherData.Count();
+                            }
+                        }
+                        else
+                        {
+                            column += otherData.Count();
                         }
 
                         worksheet.Cells[row, column++].Value = project.Treatment;

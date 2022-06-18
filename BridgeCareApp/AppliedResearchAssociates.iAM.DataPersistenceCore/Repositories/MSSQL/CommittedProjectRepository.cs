@@ -121,6 +121,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
+                .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
                 .Select(_ => _.ToDTO())
                 .ToList();

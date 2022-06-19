@@ -263,6 +263,70 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
+        [Fact]
+        public async Task GetSectionWorksOnValidUser()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
+                .Returns(TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => (SectionCommittedProjectDTO)_).ToList());
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+            var okResult = result as OkObjectResult;
+            var contents = okResult.Value as List<SectionCommittedProjectDTO>;
+            Assert.Equal(2, contents.Count);
+        }
+
+        [Fact]
+        public async Task GetSectionFailsOnUnauthorized()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+
+        [Fact]
+        public async Task GetSectionHandlesBadScenario()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
+                .Throws<RowNotInTableException>();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.GetCommittedProjects(_badScenario);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
         #region Helpers
         private bool SimulationInTestData(Guid simulationId) =>
             TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);

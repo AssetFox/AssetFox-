@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -88,6 +89,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 });
             }
 
+        }
+
+        public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var allProjectsInScenario = _unitOfWork.Context.CommittedProject
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjectConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.CommittedProjectLocation);
+
+            return allProjectsInScenario
+                .Where(_ => _.CommittedProjectLocation.Discriminator == DataPersistenceConstants.SectionLocation)
+                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO())
+                .ToList();
         }
 
         public List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId)

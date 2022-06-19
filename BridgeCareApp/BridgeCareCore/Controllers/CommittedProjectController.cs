@@ -17,6 +17,7 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
+    using CommittedProjectRetrieveMethod = Func<Guid, List<SectionCommittedProjectDTO>>;
     using CommittedProjectGetMethod = Func<Guid, FileInfoDTO>;
     using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, string, bool>;
     using CommittedProjectDeleteMethod = Action<Guid>;
@@ -25,9 +26,9 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CommittedProjectController : BridgeCareCoreBaseController
     {
-        private readonly IUnitOfWork _unitOfWork;
         private static ICommittedProjectService _committedProjectService;
 
+        private readonly IReadOnlyDictionary<string, CommittedProjectRetrieveMethod> _committedProjectRetrieveMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectCreateMethod> _committedProjectImportMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMethod> _committedProjectDeleteMethods;
@@ -38,9 +39,29 @@ namespace BridgeCareCore.Controllers
         {
             _committedProjectService = committedProjectService ??
                                        throw new ArgumentNullException(nameof(committedProjectService));
+            _committedProjectRetrieveMethods = CreateRetrieveMethods();
             _committedProjectExportMethods = CreateExportMethods();
             _committedProjectImportMethods = CreateImportMethods();
             _committedProjectDeleteMethods = CreateDeleteMethods();
+        }
+
+        private Dictionary<string, CommittedProjectRetrieveMethod> CreateRetrieveMethods()
+        {
+            List<SectionCommittedProjectDTO> GetAny(Guid simulationId) => UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+
+            List<SectionCommittedProjectDTO> GetPermitted(Guid simulationId)
+            {
+                CheckUserSimulationModifyAuthorization(simulationId);
+                return UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+            }
+
+            return new Dictionary<string, CommittedProjectRetrieveMethod>
+            {
+                [Role.Administrator] = GetAny,
+                [Role.DistrictEngineer] = GetPermitted,
+                [Role.Cwopa] = GetPermitted,
+                [Role.PlanningPartner] = GetPermitted
+            };
         }
 
         private Dictionary<string, CommittedProjectGetMethod> CreateExportMethods()
@@ -223,6 +244,32 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetScenarioCommittedProjects/{simulationId")]
+        [Authorize]
+        public async Task<IActionResult> GetCommittedProjects(Guid simulationId)
+        {
+            try
+            {
+                var result = _committedProjectRetrieveMethods[UserInfo.Role](simulationId);
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulation {simulationId}");
+            }
+            catch (Exception e)
+            {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
             }

@@ -201,6 +201,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // No assert required as long as it works
         }
 
+        [Fact]
+        public void CanGetSectionCommittedProjectsForSimulationWithProjects()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+
+            // Assert
+            Assert.Equal(2, result.Count);
+            Assert.Equal(210000, result.Sum(_ => _.Cost));
+            Assert.Equal(2, result.First().Consequences.Count);
+            Assert.Equal(2, result.First().LocationKeys.Count);
+        }
+
+        [Fact]
+        public void GetSectionCommittedProjectsHandlesSimulationWithoutProjects()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            var result = repo.GetSectionCommittedProjectDTOs(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+
+            // Assert
+            Assert.Equal(0, result.Count);
+            Assert.IsType<List<SectionCommittedProjectDTO>>(result);
+        }
+
+        [Fact]
+        public void GetSectionCommittedProjectsHandlesBadSimulations()
+        { 
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.GetSectionCommittedProjectDTOs(_badScenario));
+        }
+
         #region Helpers
         private Simulation CreateSimulation(Guid simulationId, bool populateInvestments = true)
         {

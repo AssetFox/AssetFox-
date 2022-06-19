@@ -215,6 +215,11 @@ namespace BridgeCareCore.Controllers
                 UnitOfWork.Rollback();
                 return Unauthorized();
             }
+            catch (RowNotInTableException)
+            {
+                UnitOfWork.Rollback();
+                return BadRequest($"Unable to find simulation {simulationId}");
+            }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();

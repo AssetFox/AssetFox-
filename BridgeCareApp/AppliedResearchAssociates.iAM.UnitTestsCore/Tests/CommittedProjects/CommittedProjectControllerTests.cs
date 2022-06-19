@@ -18,6 +18,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -26,6 +28,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         private TestHelper _testHelper => TestHelper.Instance;
         private Mock<IUnitOfWork> _mockUOW;
         private Mock<ICommittedProjectService> _mockService;
+        private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
+        private Guid _badScenario = Guid.Parse("0c66674c-8fcb-462b-8765-69d6815e0958");
 
         public CommittedProjectControllerTests()
         {
@@ -38,6 +42,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => !SimulationInTestData(_))))
                 .Throws<RowNotInTableException>();
             _mockUOW.Setup(_ => _.SimulationRepo).Returns(mockSimulationRepo.Object);
+
+            _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
+            _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
@@ -86,6 +93,176 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.IsType<UnauthorizedResult>(result);
         }
 
+        [Fact]
+        public async Task ImportWorksWithValidData()
+        {
+            // Arrange
+            var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            mockContextAccessor.Setup(_ => _.HttpContext)
+                .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                mockContextAccessor.Object);
+
+            // Act
+            var result = await controller.ImportCommittedProjects();
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task ImportFailsIfUserUnauthorized()
+        {
+            // Arrange
+            var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            mockContextAccessor.Setup(_ => _.HttpContext)
+                .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                mockContextAccessor.Object);
+
+            // Act
+            var result = await controller.ImportCommittedProjects();
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ImportFailsWithNoFile()
+        {
+            // Arrange
+            var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            mockContextAccessor.Setup(_ => _.HttpContext)
+                .Returns(CreateContextWithNoFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                mockContextAccessor.Object);
+
+            // Act
+            var result = await controller.ImportCommittedProjects();
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ImportFailsWithNoFormData()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.ImportCommittedProjects();
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task ImportFailsOnNoSimulation()
+        {
+            // Arrange
+            var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            mockContextAccessor.Setup(_ => _.HttpContext)
+                .Returns(CreateLoadedContextForSimulation(_badScenario));
+            _mockService.Setup(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .Throws<ArgumentException>();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                mockContextAccessor.Object);
+
+            // Act
+            var result = await controller.ImportCommittedProjects();
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task DeleteWorksWithValidSimulation()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task DeleteFailsOnUnauthorizedUser()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task DeleteFailsOnBadScenario()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.DeleteCommittedProjects(_badScenario);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+        }
+
         #region Helpers
         private bool SimulationInTestData(Guid simulationId) =>
             TestDataForCommittedProjects.Simulations.Any(_ => _.Id == simulationId);
@@ -96,6 +273,45 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             HasInventoryAccess = true,
             Id = TestDataForCommittedProjects.AuthorizedUser
         };
+
+        private HttpContext CreateLoadedContextForSimulation(Guid simulationId)
+        {
+            var httpContext = new DefaultHttpContext();
+            _testHelper.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestCommittedProjects_Good.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestCommittedProjects_Good.xlsx");
+
+            var formData = new Dictionary<string, StringValues>()
+            {
+                {"applyNoTreatment", new StringValues("0")},
+                {"simulationId", new StringValues(simulationId.ToString())}
+            };
+
+            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
+            return httpContext;
+        }
+
+        private HttpContext CreateContextWithNoFile(Guid simulationId)
+        {
+            var httpContext = new DefaultHttpContext();
+            _testHelper.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+            var formData = new Dictionary<string, StringValues>()
+            {
+                {"applyNoTreatment", new StringValues("0")},
+                {"simulationId", new StringValues(simulationId.ToString())}
+            };
+
+            httpContext.Request.Form = new FormCollection(formData);
+            return httpContext;
+        }
         #endregion
     }
 }

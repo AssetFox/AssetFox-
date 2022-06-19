@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
@@ -14,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         IConfiguration Config { get; }
 
         IAMContext Context { get; } // This needs to go ASAP
+
+        void BeginTransaction(); // This needs to go ASAP
 
         IAggregatedResultRepository AggregatedResultRepo { get; }
 
@@ -92,6 +95,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         IAnnouncementRepository AnnouncementRepo { get; }
 
         IDataSourceRepository DataSourceRepo { get; }
+
+        UserDTO CurrentUser { get; }
 
         void SetUser(string username);
 

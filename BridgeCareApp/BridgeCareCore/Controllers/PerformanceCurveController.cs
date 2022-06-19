@@ -22,7 +22,7 @@ namespace BridgeCareCore.Controllers
     public class PerformanceCurveController : BridgeCareCoreBaseController
     {
         private readonly IReadOnlyDictionary<string, PerformanceCurvesCRUDMethods> _performanceCRUDMethods;
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IPerformanceCurvesService _performanceCurvesService;
 
         public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,

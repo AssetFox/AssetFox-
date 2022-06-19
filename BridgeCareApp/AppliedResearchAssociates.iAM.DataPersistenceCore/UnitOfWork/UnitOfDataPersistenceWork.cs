@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
@@ -147,8 +149,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
+        public UserDTO CurrentUser => UserEntity?.ToDto();
+
         // TODO: Refactor to an persistence independent object
-        public UserEntity UserEntity { get; private set; } 
+        public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
 

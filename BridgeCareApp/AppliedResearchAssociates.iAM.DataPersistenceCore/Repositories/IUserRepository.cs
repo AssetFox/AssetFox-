@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         Task<UserDTO> GetUserByUserName(string username);
 
+        bool UserExists(string userName);
+
         Task<UserDTO> GetUserById(Guid id);
     }
 }

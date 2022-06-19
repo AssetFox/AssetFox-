@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services
             }
 
             if (!_unitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.UserEntity.Id && __.CanModify)))
+                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == _unitOfWork.CurrentUser.Id && __.CanModify)))
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify this simulation.");
             }

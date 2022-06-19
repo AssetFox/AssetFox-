@@ -25,6 +25,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CommittedProjectController : BridgeCareCoreBaseController
     {
+        private readonly IUnitOfWork _unitOfWork;
         private static ICommittedProjectService _committedProjectService;
 
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;

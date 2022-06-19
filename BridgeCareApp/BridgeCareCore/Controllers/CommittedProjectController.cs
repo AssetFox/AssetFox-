@@ -250,13 +250,14 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetScenarioCommittedProjects/{simulationId")]
+        [Route("GetScenarioCommittedProjects/{simulationId}")]
         [Authorize]
         public async Task<IActionResult> GetCommittedProjects(Guid simulationId)
         {
             try
             {
-                var result = _committedProjectRetrieveMethods[UserInfo.Role](simulationId);
+                var result = await Task.Factory.StartNew(() =>
+                    _committedProjectRetrieveMethods[UserInfo.Role](simulationId));
 
                 return Ok(result);
             }

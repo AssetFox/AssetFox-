@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Data;
@@ -7,9 +8,11 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -17,10 +20,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         public static Guid NetworkId => Guid.Parse("7940d27c-c9b1-4ef2-b5e7-2f1d8240a064");
 
+        public static Guid AuthorizedUser => Guid.Parse("b047f934-2a40-4cbb-b3cd-0a17c8a5af21");
+
+        public static Guid UnauthorizedUser => Guid.Parse("4be6302a-e8c8-484a-a64b-67d66b3e21a8");
+
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
-        public static Dictionary<string,List<KeySegmentDatum>> KeyProperties()
+        public static Dictionary<string, List<KeySegmentDatum>> KeyProperties()
         {
-            var result = new Dictionary<string,List<KeySegmentDatum>>();
+            var result = new Dictionary<string, List<KeySegmentDatum>>();
             var dummyAttribute = new AttributeDTO() { Id = Guid.Parse("25fba698-d19e-46bf-a1a9-1b61e9560165"), Name = "ID" };
             result.Add("ID", DummyKeySegmentDatum(dummyAttribute));
             result.Add("BRKEY_", DummyKeySegmentDatum(Attributes.Single(_ => _.Name == "BRKEY_")));
@@ -45,6 +52,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 },
                 Budgets = ScenarioBudgetEntities,
                 NetworkId = NetworkId,
+                Network = new NetworkEntity()
+                {
+                    Id = NetworkId,
+                    Name = "Primary"
+                },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             },
 
@@ -63,9 +75,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 },
                 Budgets = ScenarioBudgetEntities,
                 NetworkId = NetworkId,
+                Network = new NetworkEntity()
+                {
+                    Id = NetworkId,
+                    Name = "Primary"
+                },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             }
         };
+
+        public static List<SimulationDTO> AuthorizedSimulationDTOs()
+        {
+            var AuthorizedUserEntity = new SimulationUserDTO
+            {
+                UserId = AuthorizedUser,
+                Username = "pdsystbamsusr01",
+                IsOwner = true,
+                CanModify = true
+            };
+            var result = Simulations.Select(_ => _.ToDto(new UserEntity() { Id = AuthorizedUserEntity.UserId, Username = AuthorizedUserEntity.Username })).ToList();
+            foreach (var simulation in result)
+            {
+                simulation.Users.Add(AuthorizedUserEntity);
+            }
+            return result;
+        }
 
         public static List<AttributeDTO> Attributes => new List<AttributeDTO>()
         {
@@ -445,7 +479,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<BudgetDTO> ScenarioBudgets => ScenarioBudgetDTOs();
 
-        public static List<InvestmentPlanEntity> InvestmentPlanEntities() 
+        public static List<InvestmentPlanEntity> InvestmentPlanEntities()
         {
             var result = new List<InvestmentPlanEntity>();
             foreach (var simulation in Simulations)
@@ -458,7 +492,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             return result;
         }
-                
+
         public static List<ScenarioBudgetEntity> ScenarioBudgetEntities => new List<ScenarioBudgetEntity>()
         {
             new ScenarioBudgetEntity()
@@ -482,6 +516,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 }
             }
         };
+
+        public static FileInfoDTO GoodFile()
+        {
+            // Create the simplest committed proejct file possible
+            var fileName = "Good Result";
+            var package = new ExcelPackage(new FileInfo(fileName));
+            var worksheet = package.Workbook.Worksheets.Add("Committed Projects");
+            worksheet.Cells[1, 1].Value = "Some Data";
+
+            // Send the file back to the user
+            return new FileInfoDTO()
+            {
+                FileName = fileName,
+                FileData = Convert.ToBase64String(package.GetAsByteArray()),
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            };
+        }
 
         #region Helpers
 

@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
@@ -15,13 +16,13 @@ namespace BridgeCareCore.Controllers.BaseController
     {
         protected readonly IEsecSecurity EsecSecurity;
 
-        protected readonly UnitOfDataPersistenceWork UnitOfWork;
+        protected readonly IUnitOfWork UnitOfWork;
 
         protected readonly IHubService HubService;
 
         protected readonly IHttpContextAccessor ContextAccessor;
 
-        public BridgeCareCoreBaseController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor)
+        public BridgeCareCoreBaseController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor)
         {
             EsecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -58,7 +59,7 @@ namespace BridgeCareCore.Controllers.BaseController
             {
                 if (!string.IsNullOrEmpty(UserInfo.Name))
                 {
-                    if (!UnitOfWork.Context.User.Any(_ => _.Username == UserInfo.Name))
+                    if (!UnitOfWork.UserRepo.UserExists(UserInfo.Name))
                     {
                         UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
                     }
@@ -68,34 +69,46 @@ namespace BridgeCareCore.Controllers.BaseController
             });
         }
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public void CheckUserSimulationReadAuthorization(Guid simulationId)
         {
-            if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            var simulation = GetSimulationWithUsers(simulationId);
+
+            if (simulation.Users.Any(_ => _.UserId == UserId))
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
-            }
-
-            if (UnitOfWork.UserEntity == null || !UnitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == UserId)))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
             }
         }
 
         public void CheckUserSimulationModifyAuthorization(Guid simulationId)
         {
-            if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            var simulation = GetSimulationWithUsers(simulationId);
+
+            if (simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+            }
+        }
+
+        private SimulationDTO GetSimulationWithUsers(Guid simulationId)
+        {
+            SimulationDTO simulation = null;
+            try
+            {
+                simulation = UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+            }
+            catch
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
-            if (!UnitOfWork.Context.Simulation.Any(_ =>
-                _.Id == simulationId && _.SimulationUserJoins.Any(__ => __.UserId == UserId && __.CanModify)))
+            if (simulation.Users == null)
             {
-                throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                throw new RowNotInTableException($"No users assigned to requested simulation");
             }
+
+            return simulation;
         }
     }
 }

@@ -35,8 +35,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
 
-        public Mock<IEsecSecurity> MockEsecSecurityAuthorized { get; }
-        public Mock<IEsecSecurity> MockEsecSecurityNotAuthorized { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityAdmin { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityDBE { get; }
         public Mock<ITreatmentService> MockTreatmentService { get; }
         public ILog Logger { get; }
 
@@ -54,16 +54,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .AddJsonFile("testConnections.json")
                 .Build();
             MockTreatmentService = new Mock<ITreatmentService>();
-            MockEsecSecurityAuthorized = new Mock<IEsecSecurity>();
-            MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+            MockEsecSecurityAdmin = new Mock<IEsecSecurity>();
+            MockEsecSecurityAdmin.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
                     Role = "PD-BAMS-Administrator",
                     Email = "pdstseseca5@pa.gov"
                 });
-            MockEsecSecurityNotAuthorized = new Mock<IEsecSecurity>();
-            MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+            MockEsecSecurityDBE = new Mock<IEsecSecurity>();
+            MockEsecSecurityDBE.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
                     Name = "b-bamsadmin",

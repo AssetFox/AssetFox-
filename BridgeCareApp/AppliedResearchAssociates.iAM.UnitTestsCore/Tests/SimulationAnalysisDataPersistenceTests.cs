@@ -496,38 +496,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         //[Fact(Skip="Broken")]
         // Removed as the CreateCommittedProjects(CommittedProjectList, simulation ID is no longer used
         // Keeping as this may need to be converted to CreateCommittedProjects(CommittedProjectList) later
-        //public void TestCreateCommittedProjectEntity()
-        //{
-        //    var testHelper = CreateTestHelper();
-        //    try
-        //    {
-        //        // Arrange
-        //        testHelper.SetStandAloneSimulation(SimulationIdWithCommitted);
-        //        testHelper.ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(testHelper.StandAloneSimulation);
-        //        testHelper.SetupWithInvestmentPlan();
+        public void TestCreateCommittedProjectEntity()
+        {
+            var testHelper = CreateTestHelper();
+            try
+            {
+                // Arrange
+                testHelper.SetStandAloneSimulation(SimulationIdWithCommitted);
+                testHelper.ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(testHelper.StandAloneSimulation);
+                testHelper.SetupWithInvestmentPlan();
 
-        //        // Act
-        //        testHelper.UnitOfWork.BeginTransaction();
-        //        testHelper.UnitOfWork.CommittedProjectRepo.CreateCommittedProjects(
-        //            testHelper.StandAloneSimulation.CommittedProjects.ToList(), testHelper.StandAloneSimulation.Id);
-        //        testHelper.UnitOfWork.Commit();
+                // Act
+                testHelper.UnitOfWork.BeginTransaction();
+                //testHelper.UnitOfWork.CommittedProjectRepo.CreateCommittedProjects(
+                //    testHelper.StandAloneSimulation.CommittedProjects.ToList(), testHelper.StandAloneSimulation.Id);
+                testHelper.UnitOfWork.Commit();
 
-        //        // Assert
-        //        var explorer = testHelper.UnitOfWork.AttributeRepo.GetExplorer();
-        //        var dataSourceNetwork = testHelper.UnitOfWork.NetworkRepo
-        //            .GetSimulationAnalysisNetwork(testHelper.StandAloneSimulation.Network.Id, explorer);
-        //        testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
-        //        var dataSourceSimulation = dataSourceNetwork.Simulations.First();
-        //        testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
-        //        testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(dataSourceSimulation);
-        //        AssertCommittedProjectProperties(testHelper.StandAloneSimulation.CommittedProjects.ToList(), dataSourceSimulation.CommittedProjects.ToList());
-        //    }
-        //    finally
-        //    {
-        //        // CleanUp
-        //        CleanUp(testHelper);
-        //    }
-        //}
+                // Assert
+                var explorer = testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+                var dataSourceNetwork = testHelper.UnitOfWork.NetworkRepo
+                    .GetSimulationAnalysisNetwork(testHelper.StandAloneSimulation.Network.Id, explorer);
+                testHelper.UnitOfWork.SimulationRepo.GetAllInNetwork(dataSourceNetwork);
+                var dataSourceSimulation = dataSourceNetwork.Simulations.First();
+                testHelper.UnitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(dataSourceSimulation);
+                testHelper.UnitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(dataSourceSimulation);
+                AssertCommittedProjectProperties(testHelper.StandAloneSimulation.CommittedProjects.ToList(), dataSourceSimulation.CommittedProjects.ToList());
+            }
+            finally
+            {
+                // CleanUp
+                CleanUp(testHelper);
+            }
+        }
 
         private void AssertCommittedProjectProperties(List<CommittedProject> committedProjects, List<CommittedProject> dataSourceCommittedProjects)
         {

@@ -207,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -228,7 +228,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateCommittedProjectTestData(simulation.Id);
             CreateRequestWithFormData(simulation.Id);
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -248,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -268,7 +268,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -288,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             CreateRequestWithFormData(simulation.Id);
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -308,7 +308,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -328,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             CreateRequestWithFormData(simulation.Id);
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -349,7 +349,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -378,7 +378,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -405,7 +405,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             _testHelper.SetupDefaultHttpContext();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -423,7 +423,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateRequestForExceptionTesting();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -440,7 +440,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             _controller = new CommittedProjectController(service,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);

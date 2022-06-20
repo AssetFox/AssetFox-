@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             SetData();
             AddTestData();
             var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
-            var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }

@@ -34,6 +34,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         public CommittedProjectControllerTests()
         {
             _mockUOW = new Mock<IUnitOfWork>();
+            // This is the DEFAULT current user (a user in the admin role)
+            // It MUST be changed if testing for an unauthorized user.
             _mockUOW.Setup(_ => _.CurrentUser).Returns(AdminUser);
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
@@ -58,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -79,9 +81,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -102,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -122,9 +125,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             mockContextAccessor.Setup(_ => _.HttpContext)
                 .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -146,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(CreateContextWithNoFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -166,7 +170,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -190,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Throws<ArgumentException>();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -210,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -228,9 +232,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -250,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -272,7 +277,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => (SectionCommittedProjectDTO)_).ToList());
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -292,9 +297,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -315,7 +321,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Throws<RowNotInTableException>();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -336,6 +342,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Username = "Admin",
             HasInventoryAccess = true,
             Id = TestDataForCommittedProjects.AuthorizedUser
+        };
+
+        private UserDTO UnauthorizedUser => new UserDTO
+        {
+            Username = "Nonadmin",
+            HasInventoryAccess = true,
+            Id = TestDataForCommittedProjects.UnauthorizedUser
         };
 
         private HttpContext CreateLoadedContextForSimulation(Guid simulationId)

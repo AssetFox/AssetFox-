@@ -60,14 +60,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(
                 simulationAnalysisService,
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(simulationAnalysisService,
-                _testHelper.MockEsecSecurityNotAuthorized.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
 

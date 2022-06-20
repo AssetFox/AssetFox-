@@ -51,7 +51,7 @@ namespace BridgeCareCore.Controllers
 
             List<SectionCommittedProjectDTO> GetPermitted(Guid simulationId)
             {
-                CheckUserSimulationModifyAuthorization(simulationId);
+                CheckUserSimulationReadAuthorization(simulationId);
                 return UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
             }
 

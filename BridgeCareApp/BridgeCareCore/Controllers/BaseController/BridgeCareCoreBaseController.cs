@@ -22,11 +22,6 @@ namespace BridgeCareCore.Controllers.BaseController
 
         protected readonly IHttpContextAccessor ContextAccessor;
 
-        private readonly IReadOnlyCollection<string> PathsToIgnore = new List<string>
-        {
-            "UserTokens", "RevokeToken", "RefreshToken"
-        };
-
         public BridgeCareCoreBaseController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor contextAccessor)
         {
             EsecSecurity = esecSecurity ?? throw new ArgumentNullException(nameof(esecSecurity));
@@ -84,6 +79,7 @@ namespace BridgeCareCore.Controllers.BaseController
             {
                 throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
+        }
 
         public void CheckUserSimulationModifyAuthorization(Guid simulationId)
         {

@@ -12,6 +12,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
 using System;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
 namespace BridgeCareCore.Services
 {
@@ -63,13 +65,21 @@ namespace BridgeCareCore.Services
         {
             var excelRepo = _unitOfWork.ExcelWorksheetRepository;
             var excelWorkbook = excelRepo.GetExcelWorksheet(excelPackageId);
+            var deserializationResult = ExcelDatabaseWorksheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
+            var worksheet = deserializationResult.Worksheet;
+            var returnValue = ImportExcelAttributes(
+                keyColumnName,
+                inspectionDateColumnName,
+                spatialWeightingValue,
+                worksheet);
+            return returnValue;
         }
 
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,
             string spatialWeightingValue,
-            ExcelPackage excelPackage)
+            ExcelDatabaseWorksheet worksheet)
         {
             if (string.IsNullOrWhiteSpace(keyColumnName))
             {
@@ -78,24 +88,19 @@ namespace BridgeCareCore.Services
                     WarningMessage = NonemptyKeyIsRequired,
                 };
             }
-            var workbook = excelPackage.Workbook;
-            var worksheet = workbook.Worksheets[0];
-            if (TopRowIsEmpty(worksheet))
-            {
-                return new AttributesImportResultDTO
-                {
-                    WarningMessage = TopSpreadsheetRowIsEmpty,
-                };
-            }
-            var cells = worksheet.Cells;
+            //if (TopRowIsEmpty(worksheet))
+            //{
+            //    return new AttributesImportResultDTO
+            //    {
+            //        WarningMessage = TopSpreadsheetRowIsEmpty,
+            //    };
+            //}
             var rowIndex = 1;
-            var end = cells.End;
-            var endColumn = end.Column;
-            var endRow = end.Row;
-            var rowLength = cells.End.Column;
+            var endColumn = worksheet.Columns.Count;
+            var endRow = worksheet.Columns.Max(c => c.Entries.Count);
             var columnNameDictionary = new Dictionary<int, string>();
             var columnNameList = new List<string>();
-            var keyColumnIndex = FindKeyColumnIndex(keyColumnName, cells, rowIndex, rowLength, columnNameDictionary, columnNameList);
+            var keyColumnIndex = FindKeyColumnIndex(keyColumnName, worksheet, rowIndex, endColumn, columnNameDictionary, columnNameList);
             if (keyColumnIndex == -1)
             {
                 var warningMessage = BuildKeyNotFoundWarningMessage(keyColumnName, columnNameDictionary);
@@ -263,7 +268,23 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        private static int FindKeyColumnIndex(string keyColumnName, ExcelRange cells, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
+        private static object GetCellValueOrNull(ExcelDatabaseWorksheet worksheet, int columnIndex, int rowIndex)
+        {
+            if (columnIndex > worksheet.Columns.Count)
+            {
+                return null;
+            }
+            var column = worksheet.Columns[columnIndex-1];
+            if (rowIndex > column.Entries.Count)
+            {
+                return null;
+            }
+            var entry = column.Entries[rowIndex];
+            var returnValue = entry.Accept(new ExcelCellDatumValueGetter(), Unit.Default);
+            return returnValue;
+        }
+
+        private static int FindKeyColumnIndex(string keyColumnName, ExcelDatabaseWorksheet worksheet, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
         {
             var keyColumnIndex = -1;
             for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)

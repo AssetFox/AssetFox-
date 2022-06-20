@@ -35,5 +35,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var dto = ExcelDatabaseWorksheetMapper.ToDTO(entity);
             return dto;
         }
+
+        public ExcelSpreadsheetDTO GetExcelWorksheet(Guid excelPackageId)
+        {
+            var entity = _unitOfWork.Context.ExcelWorksheets.FirstOrDefault(ew => ew.Id == excelPackageId);
+            return ExcelDatabaseWorksheetMapper.ToDTONullPropagating(entity);
+        }
     }
 }

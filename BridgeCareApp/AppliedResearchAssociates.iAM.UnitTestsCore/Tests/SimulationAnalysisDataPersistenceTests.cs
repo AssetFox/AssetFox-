@@ -493,7 +493,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
                 
-        [Fact(Skip="Broken")]
+        //[Fact(Skip="Broken")]
         // Removed as the CreateCommittedProjects(CommittedProjectList, simulation ID is no longer used
         // Keeping as this may need to be converted to CreateCommittedProjects(CommittedProjectList) later
         //public void TestCreateCommittedProjectEntity()

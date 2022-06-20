@@ -6,7 +6,7 @@
                 <v-flex row xs6>
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border vs-style"
-                      :items="remainingLifeLimitItems"
+                      :items="selectListItems"
                        v-model="selectItemValue"
                       outline
                       outlined
@@ -14,7 +14,7 @@
                     </v-select>
                 </v-flex>
                 <div>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Add Remaining Life Limit</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onAddRemainingLifeLimit(selectedRemainingLifeLimit)" outline>Add Remaining Life Limit</v-btn>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
@@ -22,7 +22,7 @@
         <div v-show="selectItemValue != null || hasScenario">
             <v-data-table
             :headers="gridHeaders"
-            :items="rlDataTableItems"
+            :items="remainingLifeLimits"
             class="elevation-1 fixed-header v-table__overflow"
             >
                 <template v-slot:headers="props">
@@ -63,15 +63,18 @@
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
+                        v-model="selectedRemainingLifeLimitLibrary.description"
+                        @input="selectedRemainingLifeLimitLibrary = {...selectedRemainingLifeLimitLibrary, description: $event}"
                         outline
                     >
                     </v-textarea>
                 </v-flex>
                 <v-layout justify-center row>
-                    <v-btn class="ghd-blue" flat v-show="hasScenario">Cancel</v-btn>
-                    <v-btn class="ghd-blue" flat v-show="!hasScenario">Delete Library</v-btn>
-                    <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Create as New Library</v-btn>
-                    <v-btn class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges">Cancel</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits">Save</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
                 </v-layout>
         </div>
     </v-layout>
@@ -210,16 +213,6 @@ export default class RemainingLifeLimitEditor extends Vue {
             width: ''
         }
     ];
-    remainingLifeLimitItems: any[] = [
-        {
-            text: "item1",
-            value: "item1"
-        },
-        {
-            text: "item2",
-            value: "item2"
-        }
-    ];
     rlDataTableItems: RemainingLifeLimits[] = [
         {
             attribute: "DTYEAR",
@@ -285,6 +278,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                 value: remainingLifeLimitLibrary.id,
             }),
         );
+        console.log(this.selectListItems);
     }
 
     @Watch('selectItemValue')

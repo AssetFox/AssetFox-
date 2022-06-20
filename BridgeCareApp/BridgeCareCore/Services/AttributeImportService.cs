@@ -149,7 +149,7 @@ namespace BridgeCareCore.Services
             var foundAssetNames = new Dictionary<string, int>();
             for (var assetRowIndex = 2; assetRowIndex <= endRow; assetRowIndex++)
             {
-                var assetName = GetCellValueOrNull(worksheet, assetRowIndex, keyColumnIndex)?.ToString();
+                var assetName = GetCellValueOrNull(worksheet, keyColumnIndex, assetRowIndex)?.ToString();
                 if (!string.IsNullOrWhiteSpace(assetName))
                 {
                     var lowercaseAssetName = assetName.ToLowerInvariant();
@@ -175,7 +175,7 @@ namespace BridgeCareCore.Services
                     foreach (var attributeColumnIndex in columnIndexAttributeDictionary.Keys)
                     {
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
-                        var attributeValue = GetCellValueOrNull(worksheet, assetRowIndex, attributeColumnIndex);
+                        var attributeValue = GetCellValueOrNull(worksheet, attributeColumnIndex, assetRowIndex);
                         var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
                         if (attributeDatum == null)
                         {
@@ -268,18 +268,18 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        private static object GetCellValueOrNull(ExcelDatabaseWorksheet worksheet, int columnIndex, int rowIndex)
+        private static object GetCellValueOrNull(ExcelDatabaseWorksheet worksheet, int oneBasedColumnIndex, int oneBasedRowIndex)
         {
-            if (columnIndex > worksheet.Columns.Count || columnIndex < 1)
+            if (oneBasedColumnIndex > worksheet.Columns.Count || oneBasedColumnIndex < 1)
             {
                 return null;
             }
-            var column = worksheet.Columns[columnIndex-1];
-            if (rowIndex > column.Entries.Count || rowIndex < 1)
+            var column = worksheet.Columns[oneBasedColumnIndex-1];
+            if (oneBasedRowIndex > column.Entries.Count || oneBasedRowIndex < 1)
             {
                 return null;
             }
-            var entry = column.Entries[rowIndex];
+            var entry = column.Entries[oneBasedRowIndex - 1];
             var returnValue = entry.Accept(new ExcelCellDatumValueGetter(), Unit.Default);
             return returnValue;
         }
@@ -289,7 +289,7 @@ namespace BridgeCareCore.Services
             var keyColumnIndex = -1;
             for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
             {
-                var cellValue = GetCellValueOrNull(worksheet, keyColumnIndex, 1)?.ToString();
+                var cellValue = GetCellValueOrNull(worksheet, columnIndex, 1)?.ToString();
                 if (cellValue == null)
                 {
                     break;

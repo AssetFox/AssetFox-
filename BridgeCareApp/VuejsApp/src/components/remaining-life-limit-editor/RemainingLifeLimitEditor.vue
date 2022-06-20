@@ -7,19 +7,24 @@
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                       :items="remainingLifeLimitItems"
+                       v-model="selectItemValue"
                       outline
                       outlined
                     >
                     </v-select>
                 </v-flex>
+                <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Add Remaining Life Limit</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" v-show="!hasScenario" outline>Create New Library</v-btn>
+                </div>
             </v-layout>
         </v-flex>
-        <v-data-table
-          :headers="gridHeaders"
-          :items="rlDataTableItems"
-          class="elevation-1 fixed-header v-table__overflow"
-        >
+        <div v-show="selectItemValue != null || hasScenario">
+            <v-data-table
+            :headers="gridHeaders"
+            :items="rlDataTableItems"
+            class="elevation-1 fixed-header v-table__overflow"
+            >
                 <template v-slot:headers="props">
                     <tr>
                         <th
@@ -54,11 +59,21 @@
                     </v-btn>
                 </v-layout>
                 <v-divider></v-divider>
+                <v-flex v-show="!hasScenario" xs12>
+                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
+                    <v-textarea
+                        class="ghd-control-text ghd-control-border"
+                        outline
+                    >
+                    </v-textarea>
+                </v-flex>
                 <v-layout justify-center row>
-                    <v-btn class="ghd-blue" flat>Cancel</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="hasScenario">Cancel</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="!hasScenario">Delete Library</v-btn>
                     <v-btn class="ghd-white-bg ghd-blue ghd-button" outline>Create as New Library</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>
                 </v-layout>
+        </div>
     </v-layout>
 </template>
 

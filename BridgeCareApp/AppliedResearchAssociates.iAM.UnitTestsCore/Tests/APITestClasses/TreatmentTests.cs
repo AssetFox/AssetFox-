@@ -30,13 +30,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public void Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
         }
 
         private TreatmentController CreateAuthorizedController()

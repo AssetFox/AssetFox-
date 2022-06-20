@@ -22,12 +22,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
         public void Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
             _testHelper.CreateCalculatedAttributeLibrary();
         }
 
@@ -189,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsCalculated = false,
             };
             var validAttribute = AttributeTestSetup.NumericDto();
-            
+
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
             Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
             var attributesAfter = await repo.GetAttributesAsync();

@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestHelper
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
-        private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
 
@@ -106,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!HttpContextHasBeenSetup)
             {
-                lock (HttpContextSetupLock)
+                lock (HttpContextSetupLock) // WjTodo -- can we get rid of the lock?
                 {
                     if (!HttpContextHasBeenSetup)
                     {
@@ -154,13 +153,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return returnValue;
         }
 
-        public UserEntity TestUser { get; } = new UserEntity
-        {
-            Id = UserId,
-            Username = "pdsystbamsusr02",
-            HasInventoryAccess = true
-        };
-
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();
 
@@ -168,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!AttributesHaveBeenCreated)
             {
-                lock (AttributeLock) // it's possible a SemaphoreSlim is a better solution. I don't know. -- WJ.
+                lock (AttributeLock) // WjTodo -- can we get rid of the lock?
                 {
                     if (!AttributesHaveBeenCreated)
                     {
@@ -187,15 +179,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             SetupDefaultHttpContext();
         }
 
-        public virtual void CreateNetwork()
+        private static readonly object NetworkCreationLock = new object();
+
+        public void CreateNetwork()
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                UnitOfWork.Context.AddEntity(TestNetwork);
+                lock (NetworkCreationLock) // WjTodo -- can we get rid of the lock?
+                {
+                    if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
+                    {
+                        UnitOfWork.Context.AddEntity(TestNetwork);
+                    }
+                }
             }
         }
 
-        public virtual SimulationEntity CreateSimulation(Guid? id = null, string? name = null)
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null)
         {
             var entity = TestSimulation(id, name);
             UnitOfWork.Context.AddEntity(entity);

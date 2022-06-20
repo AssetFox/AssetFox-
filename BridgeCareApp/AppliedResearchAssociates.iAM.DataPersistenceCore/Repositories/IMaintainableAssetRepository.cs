@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         List<Data.Networking.MaintainableAsset> GetAllInNetworkWithAssignedDataAndLocations(Guid networkId);
 
+        [Obsolete("Not actually obsolete. But not currently under test and probably broken. Test before using. But Jake says that can't be done until new Network code is in place, which it is not as of June 20, 2022.")]
         MaintainableAsset GetAssetAtLocation(Location location);
 
         void CreateMaintainableAssets(List<MaintainableAsset> maintainableAssets, Guid networkId);

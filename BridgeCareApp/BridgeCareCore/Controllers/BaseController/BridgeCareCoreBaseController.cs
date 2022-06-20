@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,21 +33,10 @@ namespace BridgeCareCore.Controllers.BaseController
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (RequestHasBearer())
+            if (ContextAccessor?.HttpContext?.Request != null)
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }
-        }
-
-        private bool RequestHasBearer()
-        {
-            if (ContextAccessor?.HttpContext?.Request != null)
-            {
-                return !PathsToIgnore.Any(pathToIgnore =>
-                    ContextAccessor.HttpContext.Request.Path.Value.Contains(pathToIgnore));
-            }
-
-            return false;
         }
 
         public void SetUserInfo(HttpRequest request) => UserInfo = EsecSecurity.GetUserInformation(request);
@@ -94,9 +82,8 @@ namespace BridgeCareCore.Controllers.BaseController
 
             if (simulation.Users.Any(_ => _.UserId == UserId))
             {
-                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
-        }
 
         public void CheckUserSimulationModifyAuthorization(Guid simulationId)
         {
@@ -117,7 +104,7 @@ namespace BridgeCareCore.Controllers.BaseController
             }
             catch
             {
-                throw new RowNotInTableException($"No simulation found for given scenario.");
+                throw new RowNotInTableException($"No simulation found having id {simulationId}");
             }
 
             if (simulation.Users == null)

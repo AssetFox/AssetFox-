@@ -59,7 +59,8 @@ namespace BridgeCareCore.Services
                 }
             }
             var workseet = ExcelDatabaseWorksheets.WithColumns(columns);
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet);
+            var newId = Guid.NewGuid();
+            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, newId);
             var returnValue = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
             return returnValue;
         }

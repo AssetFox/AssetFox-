@@ -37,9 +37,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Spreadsheet
             var service = CreateExcelSpreadsheetImportService();
             var worksheet = excelPackage.Workbook.Worksheets[0];
             var result = service.ImportSpreadsheet(worksheet);
-            // We can do better . . .
-            //[["\u0022BRKEY\u0022","1","10","100","10001"],["\u0022DISTRICT\u0022","11","20","110","10011"],["\u0022Inspection_Date\u0022","D\u00222022-01-01T00:00:00\u0022","D\u00222022-02-01T00:00:00\u0022","D\u00222022-03-01T00:00:00\u0022","D\u00222022-04-01T00:00:00\u0022"]]
-            // [["BRKEY",1,10,100,10001],["DISTRICT",11,20,110,10011],["Inspection_Date","2022-01-01T00:00:00","2022-02-01T00:00:00","2022-03-01T00:00:00","2022-04-01T00:00:00"]]
             var entity = _testHelper.UnitOfWork.Context.ExcelWorksheets.Single(w => w.Id == result);
             var serializedContent = entity.SerializedWorksheetContent;
             var recoveredWorksheet = ExcelDatabaseWorksheetSerializer.Deserialize(serializedContent);

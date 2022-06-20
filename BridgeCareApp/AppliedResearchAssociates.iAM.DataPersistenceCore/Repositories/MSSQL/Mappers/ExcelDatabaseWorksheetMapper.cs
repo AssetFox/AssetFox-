@@ -32,21 +32,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
-        public static ExcelSpreadsheetDTO ToDTO (this ExcelDatabaseWorksheet worksheet)
+        public static ExcelSpreadsheetDTO ToDTO (this ExcelDatabaseWorksheet worksheet, Guid id)
         {
             var serializedContent = ExcelDatabaseWorksheetSerializer.Serialize(worksheet);
             var returnValue = new ExcelSpreadsheetDTO
             {
-                Id = Guid.Empty,
+                Id = id,
                 SerializedWorksheetContent = serializedContent,
             };
-            return returnValue;
-        }
-
-        public static ExcelWorksheetEntity ToEntity(this ExcelDatabaseWorksheet worksheet)
-        {
-            var dto = worksheet.ToDTO();
-            var returnValue = dto.ToEntity();
             return returnValue;
         }
 

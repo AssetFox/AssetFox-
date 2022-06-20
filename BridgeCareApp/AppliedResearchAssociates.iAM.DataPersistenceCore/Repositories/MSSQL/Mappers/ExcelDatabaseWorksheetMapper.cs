@@ -49,5 +49,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var returnValue = dto.ToEntity();
             return returnValue;
         }
+
+        internal static ExcelSpreadsheetDTO ToDTONullPropagating(ExcelWorksheetEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            return ToDTO(entity);
+        }
     }
 }

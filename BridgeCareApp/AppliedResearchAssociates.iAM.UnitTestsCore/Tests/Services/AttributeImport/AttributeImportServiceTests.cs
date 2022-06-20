@@ -157,27 +157,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         //}
 
-        //[Fact]
-        //public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
-        //{
-        //    _testHelper.CreateAttributes();
-        //    EnsureDistrictAttributeExists();
-        //    var path = SampleAttributeDataPath();
-        //    var stream = FileContent(path);
-        //    var excelPackage = new ExcelPackage(stream);
-        //    var service = CreateAttributeImportService();
-        //    var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
-        //    var warningMessage = result.WarningMessage;
-        //    Assert.True(string.IsNullOrEmpty(warningMessage));
-        //    var networkId = result.NetworkId.Value;
-        //    var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
-        //    var assetCount = assets.Count;
-        //    Assert.Equal(4, assetCount);
-        //    var datum0 = assets[0].AssignedData[0];
-        //    var stringDatum0 = datum0 as AttributeDatum<string>;
-        //    Assert.NotNull(stringDatum0);
-        //    Assert.NotNull(stringDatum0.Value);
-        //}
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var spreadsheetService = CreateExcelSpreadsheetImportService();
+            var attributeService = CreateAttributeImportService();
+            var spreadsheetId = spreadsheetService.ImportSpreadsheet(excelPackage.Workbook.Worksheets[0]);
+            var result = attributeService.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, spreadsheetId);
+            var warningMessage = result.WarningMessage;
+            Assert.True(string.IsNullOrEmpty(warningMessage));
+            var networkId = result.NetworkId.Value;
+            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assetCount = assets.Count;
+            Assert.Equal(4, assetCount);
+            var datum0 = assets[0].AssignedData[0];
+            var stringDatum0 = datum0 as AttributeDatum<string>;
+            Assert.NotNull(stringDatum0);
+            Assert.NotNull(stringDatum0.Value);
+        }
+
+        private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
+        {
+            var returnValue = new ExcelSpreadsheetImportService(_testHelper.UnitOfWork);
+            return returnValue;
+        }
 
         //[Fact]
         //public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttribute_CreatesNetworkAndAttributes()

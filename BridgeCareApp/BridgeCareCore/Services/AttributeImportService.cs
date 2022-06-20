@@ -270,12 +270,12 @@ namespace BridgeCareCore.Services
 
         private static object GetCellValueOrNull(ExcelDatabaseWorksheet worksheet, int columnIndex, int rowIndex)
         {
-            if (columnIndex > worksheet.Columns.Count)
+            if (columnIndex > worksheet.Columns.Count || columnIndex < 1)
             {
                 return null;
             }
             var column = worksheet.Columns[columnIndex-1];
-            if (rowIndex > column.Entries.Count)
+            if (rowIndex > column.Entries.Count || rowIndex < 1)
             {
                 return null;
             }

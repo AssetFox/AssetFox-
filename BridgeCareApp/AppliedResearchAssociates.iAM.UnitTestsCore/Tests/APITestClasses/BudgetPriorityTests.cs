@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityController CreateAuthorizedController()
         {
             var controller = new BudgetPriorityController(
-                _testHelper.MockEsecSecurityAuthorized.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private BudgetPriorityController CreateUnauthorizedController()
         {
-            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityNotAuthorized.Object,
+            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;

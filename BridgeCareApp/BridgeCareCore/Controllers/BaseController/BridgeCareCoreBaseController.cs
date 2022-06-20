@@ -75,9 +75,9 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             var simulation = GetSimulationWithUsers(simulationId);
 
-            if (simulation.Users.Any(_ => _.UserId == UserId))
+            if (!simulation.Users.Any(_ => _.UserId == UserId))
             {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
+                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
             }
         }
 
@@ -85,7 +85,7 @@ namespace BridgeCareCore.Controllers.BaseController
         {
             var simulation = GetSimulationWithUsers(simulationId);
 
-            if (simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
+            if (!simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
             {
                 throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
             }

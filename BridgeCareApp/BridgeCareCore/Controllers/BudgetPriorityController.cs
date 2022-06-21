@@ -25,7 +25,7 @@ namespace BridgeCareCore.Controllers
         //private readonly IReadOnlyDictionary<string, BudgetPriorityUpsertMethod> _budgetPriorityUpsertMethods;
         private readonly IReadOnlyDictionary<string, CRUDMethods<BudgetPriorityDTO, BudgetPriorityLibraryDTO>> _budgetPriorityMethods;
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public BudgetPriorityController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>

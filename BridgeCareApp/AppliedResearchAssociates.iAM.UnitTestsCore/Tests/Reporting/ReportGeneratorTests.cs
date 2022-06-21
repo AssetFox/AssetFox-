@@ -23,15 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         {
             var mockedContext = new Mock<IAMContext>();
             var testReportIndexList = TestDataForReportIndex.SimpleRepo().AsQueryable();
-
-            // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
-            var mockedReportIndexSet = new Mock<DbSet<ReportIndexEntity>>();
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Provider).Returns(testReportIndexList.Provider);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Expression).Returns(testReportIndexList.Expression);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.ElementType).Returns(testReportIndexList.ElementType);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.GetEnumerator()).Returns(testReportIndexList.GetEnumerator());
-
-            mockedContext.Setup(_ => _.ReportIndex).Returns(mockedReportIndexSet.Object);
+            var mockedReportIndexSet = MockedContextBuilder.AddDataSet(mockedContext, _ => _.ReportIndex, testReportIndexList);
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
             _testRepo = mockedRepo;
 

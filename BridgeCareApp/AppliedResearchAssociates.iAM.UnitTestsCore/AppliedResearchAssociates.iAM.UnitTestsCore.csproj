@@ -79,12 +79,16 @@
     <None Update="TestUtils\Files\TestInvestmentBudgets.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestUtils\Files\TestCommittedProjects.xlsx">
+    <None Update="TestUtils\Files\TestCommittedProjects_Good.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Mocks\" />
   </ItemGroup>
 
   <ItemGroup>

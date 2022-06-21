@@ -49,57 +49,58 @@ namespace BridgeCareCore.Controllers
                     var criteria = new List<CriterionLibraryEntity>();
                     var criterionJoins = new List<CriterionLibraryScenarioBudgetEntity>();
 
-                    committedProjects.ForEach(_ =>
-                    {
-                        if (budgets.All(budget => budget.Id != _.ScenarioBudgetId))
+                    committedProjects
+                        .ForEach(_ =>
                         {
-                            var budget = new ScenarioBudgetEntity
+                            if (budgets.All(budget => budget.Id != _.ScenarioBudgetId) && (_.ScenarioBudgetId != null))
                             {
-                                Id = _.ScenarioBudget.Id,
-                                Name = _.ScenarioBudget.Name,
-                                SimulationId = _.SimulationId,
-                                CreatedBy = _.ScenarioBudget.CreatedBy,
-                                LastModifiedBy = _.ScenarioBudget.LastModifiedBy,
-                            };
-                            budgets.Add(budget);
+                                var budget = new ScenarioBudgetEntity
+                                {
+                                    Id = _.ScenarioBudget.Id,
+                                    Name = _.ScenarioBudget.Name,
+                                    SimulationId = _.SimulationId,
+                                    CreatedBy = _.ScenarioBudget.CreatedBy,
+                                    LastModifiedBy = _.ScenarioBudget.LastModifiedBy,
+                                };
+                                budgets.Add(budget);
 
-                            if (_.ScenarioBudget.ScenarioBudgetAmounts.Any())
-                            {
-                                budgetAmounts.AddRange(_.ScenarioBudget.ScenarioBudgetAmounts.Select(amount =>
-                                    new ScenarioBudgetAmountEntity
+                                if (_.ScenarioBudget.ScenarioBudgetAmounts.Any())
+                                {
+                                    budgetAmounts.AddRange(_.ScenarioBudget.ScenarioBudgetAmounts.Select(amount =>
+                                        new ScenarioBudgetAmountEntity
+                                        {
+                                            Id = Guid.NewGuid(),
+                                            Year = amount.Year,
+                                            Value = amount.Value,
+                                            ScenarioBudgetId = budget.Id,
+                                            CreatedBy = amount.CreatedBy,
+                                            LastModifiedBy = amount.LastModifiedBy
+                                        }).ToList());
+                                }
+
+                                if (_.ScenarioBudget.CriterionLibraryScenarioBudgetJoin != null)
+                                {
+                                    var criterion = new CriterionLibraryEntity
                                     {
                                         Id = Guid.NewGuid(),
-                                        Year = amount.Year,
-                                        Value = amount.Value,
-                                        ScenarioBudgetId = budget.Id,
-                                        CreatedBy = amount.CreatedBy,
-                                        LastModifiedBy = amount.LastModifiedBy
-                                    }).ToList());
+                                        MergedCriteriaExpression =
+                                            _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
+                                                .MergedCriteriaExpression,
+                                        Name = $"{_.Name} Criterion",
+                                        IsSingleUse = true,
+                                        CreatedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.CreatedBy,
+                                        LastModifiedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
+                                            .LastModifiedBy
+                                    };
+                                    criteria.Add(criterion);
+                                    criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
+                                    {
+                                        ScenarioBudgetId = (Guid)_.ScenarioBudgetId,  // We have filtered out ScenarioBudgetId == null earlier
+                                        CriterionLibraryId = criterion.Id
+                                    });
+                                }
                             }
-
-                            if (_.ScenarioBudget.CriterionLibraryScenarioBudgetJoin != null)
-                            {
-                                var criterion = new CriterionLibraryEntity
-                                {
-                                    Id = Guid.NewGuid(),
-                                    MergedCriteriaExpression =
-                                        _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
-                                            .MergedCriteriaExpression,
-                                    Name = $"{_.Name} Criterion",
-                                    IsSingleUse = true,
-                                    CreatedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary.CreatedBy,
-                                    LastModifiedBy = _.ScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibrary
-                                        .LastModifiedBy
-                                };
-                                criteria.Add(criterion);
-                                criterionJoins.Add(new CriterionLibraryScenarioBudgetEntity
-                                {
-                                    ScenarioBudgetId = _.ScenarioBudgetId,
-                                    CriterionLibraryId = criterion.Id
-                                });
-                            }
-                        }
-                    });
+                        });
 
                     var entityIds = budgets.Select(_ => _.Id).ToList();
                     var existingEntityIds = _unitOfWork.Context.ScenarioBudget.AsNoTracking()

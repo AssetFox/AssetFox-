@@ -161,7 +161,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             });
         }
 
-
         public void AddTreatmentSupersessions()
         {
             var treatmentsList = StandAloneSimulation.Treatments.ToList();

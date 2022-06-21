@@ -17,10 +17,9 @@ using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
 namespace BridgeCareCore.Services
 {
-    public class AttributeImportService
+    public class AttributeImportService : IAttributeImportService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private object excelPackageId;
         public const string NoColumnFoundForId = "No column found for Id";
         public const string NoAttributeWasFoundWithName = "no attribute was found with name";
         public const string WasFoundInRow = "was found in row";
@@ -38,23 +37,7 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
         }
 
-        private bool TopRowIsEmpty(ExcelWorksheet worksheet)
-        {
-            var rowLength = worksheet.Cells.End.Column;
-            for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
-            {
-                var value = worksheet.Cells[1, columnIndex].Value?.ToString();
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    if (!double.TryParse(value, out double _))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-
+        [Obsolete("WjTodo leaving this in the code for now 6/21/2022, but should ask myself whether or not to get rid of it once the real attribute import is working.")]
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,
@@ -87,13 +70,6 @@ namespace BridgeCareCore.Services
                     WarningMessage = NonemptyKeyIsRequired,
                 };
             }
-            //if (TopRowIsEmpty(worksheet))
-            //{
-            //    return new AttributesImportResultDTO
-            //    {
-            //        WarningMessage = TopSpreadsheetRowIsEmpty,
-            //    };
-            //}
             var rowIndex = 1;
             var endColumn = worksheet.Columns.Count;
             var endRow = worksheet.Columns.Max(c => c.Entries.Count);
@@ -273,7 +249,7 @@ namespace BridgeCareCore.Services
             {
                 return null;
             }
-            var column = worksheet.Columns[oneBasedColumnIndex-1];
+            var column = worksheet.Columns[oneBasedColumnIndex - 1];
             if (oneBasedRowIndex > column.Entries.Count || oneBasedRowIndex < 1)
             {
                 return null;

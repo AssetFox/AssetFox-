@@ -10,7 +10,7 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
 {
-    public class ExcelSpreadsheetImportService
+    public class ExcelSpreadsheetImportService : IExcelSpreadsheetImportService
     {
 
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
@@ -31,14 +31,15 @@ namespace BridgeCareCore.Services
             )
         {
             var columnIndexesToInclude = new List<int>();
-            
+
             var cells = worksheet.Cells;
             var end = cells.End;
-            for (int i = 1; i<= end.Column; i++)
+            for (int i = 1; i <= end.Column; i++)
             {
                 var titleContent = cells[1, i].Value;
                 var shouldIncludeColumn = includeColumnsWithoutTitles || titleContent != null && !string.IsNullOrWhiteSpace(titleContent.ToString());
-                if (shouldIncludeColumn) {
+                if (shouldIncludeColumn)
+                {
                     columnIndexesToInclude.Add(i);
                 }
             }

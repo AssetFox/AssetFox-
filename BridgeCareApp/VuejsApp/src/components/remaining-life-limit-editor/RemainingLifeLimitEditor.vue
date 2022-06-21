@@ -152,7 +152,7 @@
                     <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges">Cancel</v-btn>
                     <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
                     <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
-                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits">Save</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
                 </v-layout>
         </div>
@@ -341,9 +341,6 @@ export default class RemainingLifeLimitEditor extends Vue {
     onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
         this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
         !contains(life.id, remainingLifeLimit.id));
-        // this.targetConditionGoalGridData = this.targetConditionGoalGridData.filter((goal: TargetConditionGoal) =>
-        //     !contains(goal.id, targetConditionGoal.id),
-        // );
     }
 
     onRemoveRemainingLifeLimit() {

@@ -112,7 +112,7 @@
                                 </template>
                             </v-edit-dialog>
                         </td>
-                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != ''" class="px-0">
+                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" class="px-0">
                             {{ props.item.criterionLibrary.mergedCriteriaExpression}}
                         </td>
                         <td v-else class="px-0">

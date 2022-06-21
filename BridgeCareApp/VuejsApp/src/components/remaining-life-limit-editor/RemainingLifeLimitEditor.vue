@@ -112,17 +112,17 @@
                                 </template>
                             </v-edit-dialog>
                         </td>
-                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" class="px-0">
+                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" >
                             {{ props.item.criterionLibrary.mergedCriteriaExpression}}
                         </td>
                         <td v-else class="px-0">
                         - 
                         </td>
                         <td class="px-0">
-                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">edit</v-icon>
+                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">fas fa-edit</v-icon>
                         </td>
                         <td justify-end>
-                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> delete </v-icon>
+                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> fas fa-trash </v-icon>
                         </td>
                     </tr>
                 </template>

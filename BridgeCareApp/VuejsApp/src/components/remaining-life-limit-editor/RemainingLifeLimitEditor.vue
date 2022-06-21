@@ -115,8 +115,7 @@
                         <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" >
                             {{ props.item.criterionLibrary.mergedCriteriaExpression}}
                         </td>
-                        <td v-else class="px-0">
-                        - 
+                        <td v-else>-
                         </td>
                         <td class="px-0">
                             <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">fas fa-edit</v-icon>

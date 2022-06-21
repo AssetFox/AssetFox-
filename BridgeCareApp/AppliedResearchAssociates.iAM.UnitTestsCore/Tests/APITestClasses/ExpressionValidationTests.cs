@@ -223,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WJ Saw a HeisenFailure here 6/16/2022 2:40pm. The ValidationResult was not valid. No idea why.
+        // WjTodo Saw a HeisenFailure here 6/16/2022 and again 6/21/2022. The ValidationResult was not valid. No idea why.
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
@@ -243,7 +243,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             var validationResult = (ValidationResult)Convert.ChangeType((result as OkObjectResult).Value,
                 typeof(ValidationResult));
-            Assert.True(validationResult.IsValid);
+            if (!validationResult.IsValid)
+            {
+                // Occasional test failure here. A breakpoint may hopefully catch it in the act someday.
+                Assert.Equal("dummy assert to print the message", validationResult.ValidationMessage);
+                Assert.True(validationResult.IsValid); 
+            }
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 

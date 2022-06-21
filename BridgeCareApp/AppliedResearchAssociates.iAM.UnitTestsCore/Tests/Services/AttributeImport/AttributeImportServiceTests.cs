@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Services;
@@ -24,6 +25,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var returnValue = new AttributeImportService(_testHelper.UnitOfWork);
             return returnValue;
         }
+
+        private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
+        {
+            var returnValue = new ExcelSpreadsheetImportService(_testHelper.UnitOfWork);
+            return returnValue;
+        }
+
 
         private const string DistrictAttributeName = "DISTRICT";
         private const string SuffRateAttributeName = "SUFF_RATE";
@@ -106,6 +114,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             return file;
         }
 
+        [Fact]
+        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var spreadsheetService = CreateExcelSpreadsheetImportService();
+            var attributeService = CreateAttributeImportService();
+            var dataSourceId = Guid.NewGuid();
+            var dataSourceDto = new ExcelDataSourceDTO
+            {
+                Id = dataSourceId,
+                Name = "DataSourceName",
+            };
+             _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+            var spreadsheetId = spreadsheetService.ImportSpreadsheet(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+            var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelWorksheet(spreadsheetId);
+            var expectedUpsertedSpreadsheet = new ExcelSpreadsheetDTO
+            {
+                Id = spreadsheetId,
+                DataSourceId = dataSourceId,
+                SerializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent,
+            };
+            ObjectAssertions.Equivalent(expectedUpsertedSpreadsheet, expectedUpsertedSpreadsheet);
+            // WjTodo -- Eventually, we will need a family of tests for actually creating networks. Something like the commented-out code below will go into that family of tests. 6/21/2022
+            //var result = attributeService.ImportExcelAttributes(/*"BRKEY", InspectionDateColumnTitle, SpatialWeighting, these fields should be in the dataSource object*/ spreadsheetId);
+            //var warningMessage = result.WarningMessage;
+            //Assert.True(string.IsNullOrEmpty(warningMessage));
+            //var networkId = result.NetworkId.Value;
+            //var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            //var assetCount = assets.Count;
+            //Assert.Equal(4, assetCount);
+            //var datum0 = assets[0].AssignedData[0];
+            //var stringDatum0 = datum0 as AttributeDatum<string>;
+            //Assert.NotNull(stringDatum0);
+            //Assert.NotNull(stringDatum0.Value);
+        }
+
         //[Fact]
         //public void ImportSpreadsheet_KeyColumnNameIsEmpty_FailsWithWarning()
         //{
@@ -157,35 +205,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    Assert.Contains(AttributeImportService.NoAttributeWasFoundWithName, warningMessage);
         //}
 
-        [Fact]
-        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
-        {
-            _testHelper.CreateAttributes();
-            EnsureDistrictAttributeExists();
-            var path = SampleAttributeDataPath();
-            var stream = FileContent(path);
-            var excelPackage = new ExcelPackage(stream);
-            var spreadsheetService = CreateExcelSpreadsheetImportService();
-            var attributeService = CreateAttributeImportService();
-            var spreadsheetId = spreadsheetService.ImportSpreadsheet(excelPackage.Workbook.Worksheets[0]);
-            var result = attributeService.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, spreadsheetId);
-            var warningMessage = result.WarningMessage;
-            Assert.True(string.IsNullOrEmpty(warningMessage));
-            var networkId = result.NetworkId.Value;
-            var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
-            var assetCount = assets.Count;
-            Assert.Equal(4, assetCount);
-            var datum0 = assets[0].AssignedData[0];
-            var stringDatum0 = datum0 as AttributeDatum<string>;
-            Assert.NotNull(stringDatum0);
-            Assert.NotNull(stringDatum0.Value);
-        }
-
-        private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
-        {
-            var returnValue = new ExcelSpreadsheetImportService(_testHelper.UnitOfWork);
-            return returnValue;
-        }
 
         //[Fact]
         //public void ImportSpreadsheet_ColumnHeaderIsNameOfDoubleAttribute_CreatesNetworkAndAttributes()

@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         private string testCommand = string.Empty;         
 
         [Fact]
-        public void GetDataWithStringTest()
+        public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
             Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);

@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
     public class ExcelSpreadsheetDTO
     {
         public Guid Id { get; set; }
+        public Guid DataSourceId { get; set; }
         public string SerializedWorksheetContent { get; set; }
     }
 }

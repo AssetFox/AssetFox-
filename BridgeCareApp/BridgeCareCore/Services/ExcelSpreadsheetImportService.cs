@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
         /// <summary>This import is not particularly generic. It skips over columns whose top cell is empty,
         /// effectively deleting them from the imported spreadsheet.</summary>
         public Guid ImportSpreadsheet(
-            ExcelWorksheet worksheet, bool includeColumnsWithoutTitles = false
+            Guid dataSourceId, ExcelWorksheet worksheet, bool includeColumnsWithoutTitles = false
             )
         {
             var columnIndexesToInclude = new List<int>();
@@ -60,7 +60,7 @@ namespace BridgeCareCore.Services
             }
             var workseet = ExcelDatabaseWorksheets.WithColumns(columns);
             var newId = Guid.NewGuid();
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, newId);
+            var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
             var returnValue = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
             return returnValue;
         }

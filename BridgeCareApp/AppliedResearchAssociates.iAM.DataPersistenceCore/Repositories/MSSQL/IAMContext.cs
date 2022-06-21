@@ -133,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
-        public virtual DbSet<ExcelWorksheetEntity> ExcelWorksheets { get; set; }
+        public virtual DbSet<ExcelWorksheetEntity> ExcelWorksheet { get; set; }
 
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 

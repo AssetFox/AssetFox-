@@ -6,18 +6,18 @@
                     {{dialogData.heading}}
                 </v-layout>
             </v-card-title>
-            <v-card-text>
+            <v-card-text class="px-4">
                 <div class="text--primary">
                 {{dialogData.message}}
                 </div>
             </v-card-text>
             <v-card-actions>
-                <v-layout justify-space-between row v-if="dialogData.choice">
-                    <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
-                        Proceed
-                    </v-btn>
-                    <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">
+                <v-layout justify-center row v-if="dialogData.choice">
+                    <v-btn @click="onSubmit(false)" class="ghd-blue ghd-button" flat>
                         Cancel
+                    </v-btn>
+                    <v-btn @click="onSubmit(true)" class="ghd-blue ghd-button" outline>
+                        Proceed
                     </v-btn>
                 </v-layout>
                 <v-layout justify-center v-if="!dialogData.choice">

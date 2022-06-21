@@ -24,6 +24,7 @@
             :headers="gridHeaders"
             :items="remainingLifeLimits"
             class="elevation-1 fixed-header v-table__overflow"
+            v-model="selectedGridRows"
             >
                 <template v-slot:headers="props">
                     <tr>
@@ -37,29 +38,107 @@
                 </template>
                 <template v-slot:items="props">
                     <tr :active="props.selected" @click="props.selected = !props.selected">
-                        <td>{{ props.item.attribute }}</td>
-                        <td>{{ props.item.value}}</td>
                         <td>
-                            {{ props.item.criteria}}
-                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">edit</v-icon>
+                            <v-edit-dialog
+                                :return-value.sync="props.item.attribute"
+                                large
+                                lazy
+                                persistent
+                                @save="
+                                    onEditRemainingLifeLimitProperty(
+                                        props.item,
+                                        'attribute',
+                                        props.item.attribute,
+                                    )
+                                "
+                            >
+                                <v-text-field
+                                    readonly
+                                    single-line
+                                    class="sm-txt"
+                                    :value="props.item.attribute"
+                                    :rules="[
+                                        rules['generalRules'].valueIsNotEmpty,
+                                    ]"
+                                />
+                                <template slot="input">
+                                    <v-select
+                                        :items="numericAttributeSelectItems"
+                                        label="Select an Attribute"
+                                        outline
+                                        v-model="props.item.attribute"
+                                        :rules="[
+                                            rules['generalRules']
+                                                .valueIsNotEmpty,
+                                        ]"
+                                    />
+                                </template>
+                            </v-edit-dialog>
                         </td>
                         <td>
+                            <v-edit-dialog
+                                :return-value.sync="props.item.value"
+                                large
+                                lazy
+                                persistent
+                                @save="
+                                    onEditRemainingLifeLimitProperty(
+                                        props.item,
+                                        'value',
+                                        props.item.value,
+                                    )
+                                "
+                            >
+                                <v-text-field
+                                    readonly
+                                    single-line
+                                    class="sm-txt"
+                                    :value="props.item.value"
+                                    :rules="[
+                                        rules['generalRules'].valueIsNotEmpty,
+                                    ]"
+                                />
+                                <template slot="input">
+                                    <v-text-field
+                                        label="Edit"
+                                        single-line
+                                        :mask="'##########'"
+                                        v-model.number="props.item.value"
+                                        :rules="[
+                                            rules['generalRules']
+                                                .valueIsNotEmpty,
+                                        ]"
+                                    />
+                                </template>
+                            </v-edit-dialog>
+                        </td>
+                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != ''" class="px-0">
+                            {{ props.item.criterionLibrary.mergedCriteriaExpression}}
+                        </td>
+                        <td v-else class="px-0">
+                        - 
+                        </td>
+                        <td class="px-0">
+                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">edit</v-icon>
+                        </td>
+                        <td justify-end>
                             <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> delete </v-icon>
                         </td>
                     </tr>
                 </template>
                 </v-data-table>
-                <v-layout justify-start align-center class="px-2">
+                <v-layout justify-start align-center class="pa-2">
                     <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
                     <v-text class="ghd-control-text" v-else>No results found!</v-text>
-                    <v-divider vertical class="mx-3"/>
+                    <!-- <v-divider vertical class="mx-3"/>
                     <v-btn flat right
                       class="ghd-control-label ghd-blue"
+                      @click="onRemoveRemainingLifeLimit"
                     > Delete Selected 
-                    </v-btn>
+                    </v-btn> -->
                 </v-layout>
                 <v-divider></v-divider>
-                <v-flex v-show="!hasScenario" xs12>
+                <v-flex v-show="!hasScenario" xs12 class="px-0">
                     <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea
                         class="ghd-control-text ghd-control-border"
@@ -74,7 +153,7 @@
                     <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
                     <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits">Save</v-btn>
-                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
                 </v-layout>
         </div>
 
@@ -108,6 +187,7 @@ import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
+import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { prepend, clone, findIndex, isNil, propEq, update, contains } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -140,12 +220,6 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
-
-export interface RemainingLifeLimits {
-    attribute: string;
-    value: number;
-    criteria: string | null;
-}
 
 @Component({
     components: {
@@ -192,6 +266,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(
         emptyRemainingLifeLimitLibrary,
     );
+    selectedGridRows: RemainingLifeLimit[] = [];
+    selectedRemainingLifeIds: string[] = [];
     selectedScenarioId: string = getBlankGuid();
     selectItemValue: string | null = '';
     selectListItems: SelectItem[] = [];
@@ -203,7 +279,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: true,
             class: '',
-            width: '12.4%',
+            width: '',
         },
         {
             text: 'Limit',
@@ -211,7 +287,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: true,
             class: '',
-            width: '12.4%',
+            width: '',
         },
         {
             text: 'Criteria',
@@ -219,27 +295,23 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: false,
             class: '',
-            width: '75%',
+            width: '50%',
+        },
+        {
+            text: '',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class:'',
+            width: ''
         },
         {
             text: 'Actions',
             value: 'Actions',
-            align: 'left',
+            align: 'right',
             sortable: false,
             class: '',
-            width: '10%'
-        }
-    ];
-    rlDataTableItems: RemainingLifeLimits[] = [
-        {
-            attribute: "DTYEAR",
-            value: 3,
-            criteria: "[BRIDGE_TYPE]='B'",
-        },
-        {
-            attribute: "AGE",
-            value: 23,
-            criteria: "[BRIDGE_TYPE]='B'",
+            width: ''
         }
     ];
     itemsPerPage:number = 5;
@@ -274,6 +346,15 @@ export default class RemainingLifeLimitEditor extends Vue {
         // );
     }
 
+    onRemoveRemainingLifeLimit() {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+            !contains(life.id, this.selectedRemainingLifeIds),
+        );
+    }
+    @Watch('selectedGridRows')
+        onSelectedGridRowsChanged() {
+            this.selectedRemainingLifeIds = getPropertyValues('id', this.selectedGridRows,) as string[];
+        }
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.selectItemValue = null;

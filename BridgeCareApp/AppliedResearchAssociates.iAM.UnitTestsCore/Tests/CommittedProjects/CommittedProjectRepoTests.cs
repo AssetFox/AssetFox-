@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void CreateWorksForValidCommittedProjectData()
+        public void UpsertWorksForValidCommittedProjectData()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -128,11 +128,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
             // Act
-            repo.CreateCommittedProjects(newProjects);
+            repo.UpsertCommittedProjects(newProjects);
         }
 
         [Fact]
-        public void CreateHandlesBadSimulationId()
+        public void UpsertHandlesBadSimulationId()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -140,12 +140,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.SimulationId = _badScenario);
 
             // Act & Assert
-            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.UpsertCommittedProjects(newProjects));
             Assert.Contains("simulation ID", exception.Message);
         }
 
         [Fact]
-        public void CreateHandlesNonExistingBudgets()
+        public void UpsertHandlesNonExistingBudgets()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -153,12 +153,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.ScenarioBudgetId = Guid.Parse("0d91f67d-d5f4-4c1b-861c-3a5a24aab100"));
 
             // Act & Assert
-            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.UpsertCommittedProjects(newProjects));
             Assert.Contains("budget IDs", exception.Message);
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void CreateWorksWithNullBudgets()
+        public void UpsertWorksWithNullBudgets()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.ScenarioBudgetId = null);
 
             // Act
-            repo.CreateCommittedProjects(newProjects);
+            repo.UpsertCommittedProjects(newProjects);
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]

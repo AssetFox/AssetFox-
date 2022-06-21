@@ -148,26 +148,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void CreateCommittedProjects(List<BaseCommittedProjectDTO> projects)
-        {
-            CheckCommittedProjectSimulationAndBudget(projects);
-
-            var attributes = _unitOfWork.Context.Attribute.ToList();
-            var committedProjectEntities = projects.Select(_ => _.ToEntity(attributes)).ToList();
-
-            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-
-            var committedProjectConsequenceEntities = committedProjectEntities
-                .Where(_ => _.CommittedProjectConsequences.Any())
-                .SelectMany(_ => _.CommittedProjectConsequences)
-                .ToList();
-
-            _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
-
-            var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
-            _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
-        }
-
         public void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
         {
             CheckCommittedProjectSimulationAndBudget(projects.Select(_ => (BaseCommittedProjectDTO)_).ToList());

@@ -124,13 +124,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var excelPackage = new ExcelPackage(stream);
             var spreadsheetService = CreateExcelSpreadsheetImportService();
             var dataSourceId = Guid.NewGuid();
+            var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
             var dataSourceDto = new ExcelDataSourceDTO
             {
                 Id = dataSourceId,
-                Name = "DataSourceName",
+                Name = dataSourceName,
             };
              _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
-            var spreadsheetId = spreadsheetService.ImportSpreadsheet(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+            var importResult = spreadsheetService.ImportSpreadsheet(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+            var spreadsheetId = importResult.SpreadsheetId;
             var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelWorksheet(spreadsheetId);
             var serializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent;
             Assert.StartsWith("[[", serializedWorksheetContent);
@@ -156,6 +158,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             //Assert.NotNull(stringDatum0);
             //Assert.NotNull(stringDatum0.Value);
         }
+
+        [Fact]
+        public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
+        {
+            _testHelper.CreateAttributes();
+            EnsureDistrictAttributeExists();
+            var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var dataSourceId = Guid.NewGuid();
+            var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
+            var dataSourceDto = new ExcelDataSourceDTO
+            {
+                Id = dataSourceId,
+                Name = dataSourceName,
+            };
+            _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+
+            var service = CreateExcelSpreadsheetImportService();
+            var result = service.ImportSpreadsheet(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+            var warningMessage = result.WarningMessage;
+            Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
+        }
+
 
         //[Fact]
         //public void ImportSpreadsheet_KeyColumnNameIsEmpty_FailsWithWarning()
@@ -318,20 +344,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
         //    var warningMessage = result.WarningMessage;
         //    Assert.Contains(AttributeImportService.WasFoundInRow, warningMessage);
-        //}
-
-        //[Fact]
-        //public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
-        //{
-        //    _testHelper.CreateAttributes();
-        //    EnsureDistrictAttributeExists();
-        //    var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
-        //    var stream = FileContent(path);
-        //    var excelPackage = new ExcelPackage(stream);
-        //    var service = CreateAttributeImportService();
-        //    var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
-        //    var warningMessage = result.WarningMessage;
-        //    Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
         //}
 
         //public void ImportSpreadsheet_EmptyDatum_AddsAttributeWithDefaultValue()

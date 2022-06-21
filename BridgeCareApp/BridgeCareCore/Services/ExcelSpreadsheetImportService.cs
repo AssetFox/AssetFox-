@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.CellData;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
@@ -22,7 +23,7 @@ namespace BridgeCareCore.Services
 
         /// <summary>This import is not particularly generic. It skips over columns whose top cell is empty,
         /// effectively deleting them from the imported spreadsheet.</summary>
-        public Guid ImportSpreadsheet(
+        public ExcelSpreadsheetImportResultDTO ImportSpreadsheet(
             Guid dataSourceId, ExcelWorksheet worksheet, bool includeColumnsWithoutTitles = false
             )
         {
@@ -61,8 +62,11 @@ namespace BridgeCareCore.Services
             var workseet = ExcelDatabaseWorksheets.WithColumns(columns);
             var newId = Guid.NewGuid();
             var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
-            var returnValue = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
-            return returnValue;
+            var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
+            return new ExcelSpreadsheetImportResultDTO
+            {
+                SpreadsheetId = returnId,
+            };
         }
     }
 }

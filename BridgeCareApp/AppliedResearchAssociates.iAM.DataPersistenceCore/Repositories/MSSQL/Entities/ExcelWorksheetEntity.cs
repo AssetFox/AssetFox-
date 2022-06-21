@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
         public string SerializedWorksheetContent { get; set; }
-        public Guid DataSourceId { get; set; } // WjTodo -- make this a foreign key to the DataSource table
+        public Guid DataSourceId { get; set; }
+        public virtual DataSourceEntity DataSource { get; set; }
     }
 }

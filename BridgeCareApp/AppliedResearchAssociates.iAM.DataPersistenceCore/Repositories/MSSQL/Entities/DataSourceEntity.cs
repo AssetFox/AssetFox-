@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
@@ -6,6 +7,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class DataSourceEntity
     {
+        public DataSourceEntity()
+        {
+            ExcelWorksheets = new HashSet<ExcelWorksheetEntity>();
+        }
         public Guid Id { get; set; }
 
         /// <summary>
@@ -33,5 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         /// The details for a SQL data source would be the connection string
         /// </example>
         public string Details { get; set; }
+
+        public virtual ICollection<ExcelWorksheetEntity> ExcelWorksheets { get; set; }
+
     }
 }

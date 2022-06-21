@@ -27,7 +27,9 @@ namespace BridgeCareCore.Services
         /// <summary>This import is not particularly generic. It skips over columns whose top cell is empty,
         /// effectively deleting them from the imported spreadsheet.</summary>
         public ExcelSpreadsheetImportResultDTO ImportSpreadsheet(
-            Guid dataSourceId, ExcelWorksheet worksheet, bool includeColumnsWithoutTitles = false
+            Guid dataSourceId,
+            ExcelWorksheet worksheet,
+            bool includeColumnsWithoutTitles = false
             )
         {
             var columnIndexesToInclude = new List<int>();

@@ -56,9 +56,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             ReportTypeName = name;
 
-            ////generate network id
-            //_networkId = _unitOfWork.NetworkRepo.GetMainNetwork().Id;
-
             //create summary report objects
             _pamsDataForSummaryReport = new PamsDataForSummaryReport();
             if (_pamsDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_pamsDataForSummaryReport)); }
@@ -198,15 +195,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
 
-
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
-            // Filling up parameters tab
-            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+            //// Filling up parameters tab
+            //_summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

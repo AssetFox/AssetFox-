@@ -223,14 +223,14 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("ExportScenarioTreatmentsExcelFile/{libraryId}")]
+        [Route("ExportLibraryTreatmentsExcelFile/{libraryId}")]
         [Authorize]
-        public async Task<IActionResult> ExportScenarioTreatmentsExcelFile(Guid libraryId)
+        public async Task<IActionResult> ExportLibraryTreatmentsExcelFile(Guid libraryId)
         {
             try
             {
                 var result =
-                    await Task.Factory.StartNew(() => _treatmentService.GenerateExcelFile(libraryId));
+                    await Task.Factory.StartNew(() => _treatmentService.ExportLibraryTreatmentsExcelFile(libraryId));
 
                 return Ok(result);
             }
@@ -240,7 +240,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
@@ -312,7 +312,7 @@ namespace BridgeCareCore.Controllers
 
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
-                    throw new ConstraintException("Investment budgets file not found.");
+                    throw new ConstraintException("Treatments file not found.");
                 }
 
                 if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("libraryId", out var libraryId))
@@ -327,7 +327,7 @@ namespace BridgeCareCore.Controllers
                 {
                     return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
                 });
-                if (result.WarningMessage != null)
+                if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                 }
@@ -339,7 +339,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
@@ -415,26 +415,25 @@ namespace BridgeCareCore.Controllers
 
                 if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
                 {
-                    throw new ConstraintException("Investment budgets file not found.");
+                    throw new ConstraintException("Treatments file not found.");
                 }
 
-                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var simulationId))
+                if (!ContextAccessor.HttpContext.Request.Form.TryGetValue("simulationId", out var id))
                 {
-                    throw new ConstraintException("Request contained no treatment library id.");
+                    throw new ConstraintException("Request contained no simulation id.");
                 }
-                //var treatmentLibraryId = Guid.Parse(simulationId.ToString());
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-
+                var simulationId = Guid.Parse(id.ToString());
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
+                    return _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
                 });
-                if (result.WarningMessage != null)
+                if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                 }
-                return Ok(result.TreatmentLibrary);
+                return Ok(result.Treatments);
             }
             catch (UnauthorizedAccessException)
             {
@@ -442,9 +441,34 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("ExportScenarioTreatmentsExcelFile/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> ExportScenarioTreatmentsExcelFile(Guid simulationId)
+        {
+            try
+            {
+                // Rename
+                var result =
+                    await Task.Factory.StartNew(() => _treatmentService.ExportScenarioTreatmentsExcelFile(simulationId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+        
     }
 }

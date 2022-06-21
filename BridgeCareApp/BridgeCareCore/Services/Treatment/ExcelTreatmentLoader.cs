@@ -227,6 +227,8 @@ namespace BridgeCareCore.Services.Treatment
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,
                 Consequences = loadConsequences.Consequences,
+                CriterionLibrary = new CriterionLibraryDTO(),
+                BudgetIds = new List<Guid>(), //TODO in case of scenario treatments, check/ask for excel format
             };
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);

@@ -47,7 +47,7 @@ export default class TreatmentService {
         formData.append(forScenario ? 'simulationId' : 'libraryId', id);
       
         return forScenario            
-            ? // TODO: check for api name after functionality for scenario based import is in place.
+            ?
               coreAxiosInstance.post(
                   `${API.Treatment}/ImportScenarioTreatmentsFile`,
                   formData,
@@ -65,13 +65,12 @@ export default class TreatmentService {
         forScenario: boolean = false,
     ): AxiosPromise {
         return forScenario
-            ?  // TODO: check for api name after functionality for scenario based export is in place.   
+            ?     
                coreAxiosInstance.get(               
                   `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
               )
-            : coreAxiosInstance.get(
-                // TODO: The api looks to be for library, its name need to be changed though
-                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
+            : coreAxiosInstance.get(                
+                  `${API.Treatment}/ExportLibraryTreatmentsExcelFile/${id}`,
               );
     }
 

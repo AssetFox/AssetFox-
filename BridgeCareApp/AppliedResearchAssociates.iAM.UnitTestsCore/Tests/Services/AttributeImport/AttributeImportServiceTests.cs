@@ -20,11 +20,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
-        private AttributeImportService CreateAttributeImportService()
-        {
-            var returnValue = new AttributeImportService(_testHelper.UnitOfWork);
-            return returnValue;
-        }
+        //private AttributeImportService CreateAttributeImportService()
+        //{
+        //    var returnValue = new AttributeImportService(_testHelper.UnitOfWork);
+        //    return returnValue;
+        //}
 
         private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
         {
@@ -123,7 +123,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
             var spreadsheetService = CreateExcelSpreadsheetImportService();
-            var attributeService = CreateAttributeImportService();
             var dataSourceId = Guid.NewGuid();
             var dataSourceDto = new ExcelDataSourceDTO
             {
@@ -133,11 +132,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
              _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
             var spreadsheetId = spreadsheetService.ImportSpreadsheet(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
             var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelWorksheet(spreadsheetId);
+            var serializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent;
+            Assert.StartsWith("[[", serializedWorksheetContent);
+            Assert.EndsWith("]]", serializedWorksheetContent);
+            Assert.Contains("2022-03-01", serializedWorksheetContent);
             var expectedUpsertedSpreadsheet = new ExcelSpreadsheetDTO
             {
                 Id = spreadsheetId,
                 DataSourceId = dataSourceId,
-                SerializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent,
+                SerializedWorksheetContent = serializedWorksheetContent,
             };
             ObjectAssertions.Equivalent(expectedUpsertedSpreadsheet, expectedUpsertedSpreadsheet);
             // WjTodo -- Eventually, we will need a family of tests for actually creating networks. Something like the commented-out code below will go into that family of tests. 6/21/2022

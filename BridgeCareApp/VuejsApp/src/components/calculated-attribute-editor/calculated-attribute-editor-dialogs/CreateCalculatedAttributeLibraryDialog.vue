@@ -15,13 +15,15 @@
                     <v-text-field
                         v-model="newCalculatedAttributeLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        outline/>
+                        outline
+                        class="ghd-text-field-border ghd-text-field"/>
                     <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
                     <v-textarea
                         v-model="newCalculatedAttributeLibrary.description"
                         no-resize
                         outline
-                        rows="3"/>
+                        rows="3"
+                        class="ghd-text-field-border"/>
                 </v-layout>
             </v-card-text>
             <v-card-actions class="ghd-dialog-box-padding-bottom">

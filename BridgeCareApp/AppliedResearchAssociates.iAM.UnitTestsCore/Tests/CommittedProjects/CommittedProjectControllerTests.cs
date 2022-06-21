@@ -274,7 +274,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
-                .Returns(TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => (SectionCommittedProjectDTO)_).ToList());
+                .Returns(TestDataForCommittedProjects.ValidCommittedProjects);
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _testHelper.MockEsecSecurityAdmin.Object,
@@ -328,6 +328,68 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Act
             var result = await controller.GetCommittedProjects(_badScenario);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpsertSectionWorksWithValidProjects()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task UpsertFailsOnUnauthorized()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task UpsertHandlesBadScenario()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
+                .Throws<RowNotInTableException>();
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

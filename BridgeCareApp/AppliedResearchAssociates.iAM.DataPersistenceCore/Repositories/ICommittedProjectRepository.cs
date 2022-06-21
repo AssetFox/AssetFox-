@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjectEntities);
 
+        void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects);
+
         void DeleteCommittedProjects(Guid simulationId);
     }
 }

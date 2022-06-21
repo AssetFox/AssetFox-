@@ -148,33 +148,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjects)
+        public void CreateCommittedProjects(List<BaseCommittedProjectDTO> projects)
         {
-            var simulationIds = committedProjects.Select(_ => _.SimulationId).Distinct().ToList();
-            foreach (var simulation in simulationIds)
-            {
-                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation))
-                {
-                    throw new RowNotInTableException($"Unable to find simulation ID {simulation} in database");
-                }
-            }
-
-            var budgetIds = _unitOfWork.Context.ScenarioBudget
-                .Where(_ => simulationIds.Contains(_.SimulationId))
-                .Select(_ => _.Id)
-                .ToList();
-            var badBudgets = committedProjects
-                .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
-                .ToList();
-            if (badBudgets.Any())
-            {
-                var budgetList = new StringBuilder();
-                badBudgets.ForEach(budget => budgetList.Append(budget.ToString() + ", "));
-                throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
-            }
+            CheckCommittedProjectSimulationAndBudget(projects);
 
             var attributes = _unitOfWork.Context.Attribute.ToList();
-            var committedProjectEntities = committedProjects.Select(_ => _.ToEntity(attributes)).ToList();
+            var committedProjectEntities = projects.Select(_ => _.ToEntity(attributes)).ToList();
 
             _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
 
@@ -184,6 +163,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+
+            var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+            _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
+        }
+
+        public void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        {
+            CheckCommittedProjectSimulationAndBudget(projects.Select(_ => (BaseCommittedProjectDTO)_).ToList());
+
+            var attributes = _unitOfWork.Context.Attribute.ToList();
+            var committedProjectEntities = projects.Select(_ => _.ToEntity(attributes)).ToList();
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+
+                var committedProjectConsequenceEntities = committedProjectEntities
+                    .Where(_ => _.CommittedProjectConsequences.Any())
+                    .SelectMany(_ => _.CommittedProjectConsequences)
+                    .ToList();
+
+                _unitOfWork.Context.UpsertAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+
+                var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+                _unitOfWork.Context.UpsertAll(locations, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Commit();
+            }
+            catch(Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void DeleteCommittedProjects(Guid simulationId)
@@ -203,6 +215,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
+        private void CheckCommittedProjectSimulationAndBudget(List<BaseCommittedProjectDTO> projects)
+        {
+            // Test for existing simulation
+            var simulationIds = projects.Select(_ => _.SimulationId).Distinct().ToList();
+            foreach (var simulation in simulationIds)
+            {
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation))
+                {
+                    throw new RowNotInTableException($"Unable to find simulation ID {simulation} in database");
+                }
+            }
+
+            // Test for existing budget
+            var budgetIds = _unitOfWork.Context.ScenarioBudget
+                .Where(_ => simulationIds.Contains(_.SimulationId))
+                .Select(_ => _.Id)
+                .ToList();
+            var badBudgets = projects
+                .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
+                .ToList();
+            if (badBudgets.Any())
+            {
+                var budgetList = new StringBuilder();
+                badBudgets.ForEach(budget => budgetList.Append(budget.ToString() + ", "));
+                throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
+            }
         }
     }
 }

@@ -9,9 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid SimulationId { get; set; }
 
-        public Guid ScenarioBudgetId { get; set; }
-
-        public Guid MaintainableAssetId { get; set; }
+        public Guid? ScenarioBudgetId { get; set; }
 
         public double Cost { get; set; }
 
@@ -21,8 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }
 
-        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
-
         public virtual ICollection<CommittedProjectConsequenceEntity> CommittedProjectConsequences { get; set; }
+
+        public virtual CommittedProjectLocationEntity CommittedProjectLocation { get; set; }
     }
 }

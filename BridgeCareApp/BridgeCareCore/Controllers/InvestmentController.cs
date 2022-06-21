@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, InvestmentCRUDMethods> _investmentCRUDMethods;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {

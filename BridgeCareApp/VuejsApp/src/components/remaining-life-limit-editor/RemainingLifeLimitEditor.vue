@@ -14,7 +14,7 @@
                     </v-select>
                 </v-flex>
                 <div>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onAddRemainingLifeLimit(selectedRemainingLifeLimit)" outline>Add Remaining Life Limit</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" outline>Add Remaining Life Limit</v-btn>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
@@ -41,10 +41,10 @@
                         <td>{{ props.item.value}}</td>
                         <td>
                             {{ props.item.criteria}}
-                            <v-icon class="ghd-blue">edit</v-icon>
+                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">edit</v-icon>
                         </td>
                         <td>
-                            <v-icon class="ghd-blue"> delete </v-icon>
+                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> delete </v-icon>
                         </td>
                     </tr>
                 </template>
@@ -77,6 +77,23 @@
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
                 </v-layout>
         </div>
+
+        <ConfirmDeleteAlert 
+          :dialogData="confirmDeleteAlertData"
+          @submit="onSubmitConfirmDeleteAlertResult"
+        />
+        <CreateRemainingLifeLimitLibraryDialog
+          :dialogData="createRemainingLifeLimitLibraryDialogData"
+          @submit="onSubmitCreateRemainingLifeLimitLibraryDialogResult"
+        />
+        <CreateRemainingLifeLimitDialog 
+          :dialogData="createRemainingLifeLimitDialogData"
+          @submit="onAddRemainingLifeLimit"
+        />
+        <CriterionLibraryEditorDialog 
+          :dialogData="criterionLibraryEditorDialogData"
+          @submit="onEditRemainingLifeLimitCriterionLibrary"
+        />
     </v-layout>
 </template>
 
@@ -91,7 +108,7 @@ import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
-import { prepend, clone, findIndex, isNil, propEq, update } from 'ramda';
+import { prepend, clone, findIndex, isNil, propEq, update, contains } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -210,7 +227,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: false,
             class: '',
-            width: ''
+            width: '10%'
         }
     ];
     rlDataTableItems: RemainingLifeLimits[] = [
@@ -248,6 +265,14 @@ export default class RemainingLifeLimitEditor extends Vue {
     currentUrl: string = window.location.href;
     hasCreatedLibrary: boolean = false;
 
+    onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+        !contains(life.id, remainingLifeLimit.id));
+        // this.targetConditionGoalGridData = this.targetConditionGoalGridData.filter((goal: TargetConditionGoal) =>
+        //     !contains(goal.id, targetConditionGoal.id),
+        // );
+    }
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.selectItemValue = null;
@@ -278,7 +303,6 @@ export default class RemainingLifeLimitEditor extends Vue {
                 value: remainingLifeLimitLibrary.id,
             }),
         );
-        console.log(this.selectListItems);
     }
 
     @Watch('selectItemValue')

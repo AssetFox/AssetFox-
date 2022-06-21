@@ -1,27 +1,34 @@
 <template>
   <v-dialog max-width="450px" persistent v-model="dialogData.showDialog">
     <v-card>
-      <v-card-title>
-        <v-layout justify-center>
-          <h3>New Remaining Life Limit</h3>
+            <v-card-title class="ghd-dialog-padding-top-title">
+        <v-layout justify-start>
+          <div class="dialog-header"><h5>Create New Target Condition Goal Library</h5></div>
         </v-layout>
+        <v-btn @click="onSubmit(false)" icon>
+                    <i class="fas fa-times fa-2x"></i>
+        </v-btn>
       </v-card-title>
       <v-card-text>
         <v-layout column>
-          <v-select :items="dialogData.numericAttributeSelectItems" label="Select an Attribute"
+          <v-subheader class="ghd-control-label ghd-md-gray">Select an Attribute</v-subheader>
+          <v-select :items="dialogData.numericAttributeSelectItems"
                     outline v-model="newRemainingLifeLimit.attribute"
-                    :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-          <v-text-field label="Limit" outline :mask="'##########'"
+                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                    class="ghd-control-text ghd-control-border"/>
+          <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
+          <v-text-field outline :mask="'##########'"
                         v-model.number="newRemainingLifeLimit.value"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"/>
+                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                        class="ghd-control-text ghd-control-border"/>
         </v-layout>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ara-blue-bg white--text">
+        <v-layout justify-center row>
+          <v-btn @click="onSubmit(false)" class="ghd-button" flat>Cancel</v-btn>
+          <v-btn :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" outline>
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

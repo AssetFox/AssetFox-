@@ -9,7 +9,7 @@
                     <i class="fas fa-times fa-2x"></i>
         </v-btn>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="ghd-dialog-text-field-padding">
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Select an Attribute</v-subheader>
           <v-select :items="dialogData.numericAttributeSelectItems"
@@ -23,8 +23,8 @@
                         class="ghd-control-text ghd-control-border"/>
         </v-layout>
       </v-card-text>
-      <v-card-actions>
-        <v-layout justify-center row>
+      <v-card-actions class="py-0">
+        <v-layout justify-center row class="ghd-dialog-padding-bottom-buttons">
           <v-btn @click="onSubmit(false)" class="ghd-button" flat>Cancel</v-btn>
           <v-btn :disabled="disableSubmitAction()" @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button" outline>
             Save

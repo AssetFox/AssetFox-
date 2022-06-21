@@ -19,7 +19,8 @@ namespace BridgeCareCore.Controllers
 {
     using CommittedProjectRetrieveMethod = Func<Guid, List<SectionCommittedProjectDTO>>;
     using CommittedProjectGetMethod = Func<Guid, FileInfoDTO>;
-    using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, string, bool>;
+    using CommittedProjectImportMethod = Action<Guid, ExcelPackage, string, bool>;
+    using CommittedProjectUpsertMethod = Action<List<SectionCommittedProjectDTO>>;
     using CommittedProjectDeleteMethod = Action<Guid>;
 
     [Route("api/[controller]")]
@@ -30,7 +31,8 @@ namespace BridgeCareCore.Controllers
 
         private readonly IReadOnlyDictionary<string, CommittedProjectRetrieveMethod> _committedProjectRetrieveMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;
-        private readonly IReadOnlyDictionary<string, CommittedProjectCreateMethod> _committedProjectImportMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectImportMethod> _committedProjectImportMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectUpsertMethod> _committedProjectUpsertMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMethod> _committedProjectDeleteMethods;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
@@ -42,6 +44,7 @@ namespace BridgeCareCore.Controllers
             _committedProjectRetrieveMethods = CreateRetrieveMethods();
             _committedProjectExportMethods = CreateExportMethods();
             _committedProjectImportMethods = CreateImportMethods();
+            _committedProjectUpsertMethods = CreateUpsertMethods();
             _committedProjectDeleteMethods = CreateDeleteMethods();
         }
 
@@ -86,7 +89,7 @@ namespace BridgeCareCore.Controllers
             };
         }
 
-        private Dictionary<string, CommittedProjectCreateMethod> CreateImportMethods()
+        private Dictionary<string, CommittedProjectImportMethod> CreateImportMethods()
         {
             void CreateAny(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
             {
@@ -99,12 +102,42 @@ namespace BridgeCareCore.Controllers
                 _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
             }
 
-            return new Dictionary<string, CommittedProjectCreateMethod>
+            return new Dictionary<string, CommittedProjectImportMethod>
             {
                 [Role.Administrator] = CreateAny,
                 [Role.DistrictEngineer] = CreatePermitted,
                 [Role.Cwopa] = CreatePermitted,
                 [Role.PlanningPartner] = CreatePermitted
+            };
+        }
+
+        private Dictionary<string, CommittedProjectUpsertMethod> CreateUpsertMethods()
+        {
+            void UpsertAny(List<SectionCommittedProjectDTO> projects)
+            {
+                UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
+            }
+
+            void UpsertPermitted(List<SectionCommittedProjectDTO> projects)
+            {
+                var simulationIds = projects
+                    .Where(_ => _.SimulationId != null)
+                    .Select(_ => _.SimulationId)
+                    .Distinct();
+                foreach (var simulation in simulationIds)
+                {
+                    CheckUserSimulationModifyAuthorization(simulation);
+                }
+
+                UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
+            }
+
+            return new Dictionary<string, CommittedProjectUpsertMethod>
+            {
+                [Role.Administrator] = UpsertAny,
+                [Role.DistrictEngineer] = UpsertPermitted,
+                [Role.Cwopa] = UpsertPermitted,
+                [Role.PlanningPartner] = UpsertPermitted
             };
         }
 
@@ -250,7 +283,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetScenarioCommittedProjects/{simulationId}")]
+        [Route("GetSectionCommittedProjects/{simulationId}")]
         [Authorize]
         public async Task<IActionResult> GetCommittedProjects(Guid simulationId)
         {
@@ -268,6 +301,33 @@ namespace BridgeCareCore.Controllers
             catch (RowNotInTableException)
             {
                 return BadRequest($"Unable to find simulation {simulationId}");
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertSectionCommittedProjects")]
+        [Authorize]
+        public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                    _committedProjectUpsertMethods[UserInfo.Role](projects));
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulations matching the project description");
             }
             catch (Exception e)
             {

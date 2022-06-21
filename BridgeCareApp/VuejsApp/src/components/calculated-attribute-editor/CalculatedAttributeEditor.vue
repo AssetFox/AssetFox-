@@ -1,281 +1,214 @@
 <template>
     <v-layout column>
+        <!-- top row -->
         <v-flex xs12>
-            <v-layout justify-center v-show="isAdmin">
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreateCalculatedAttributeLibraryDialog(false)
-                        "
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
-                    <v-select
-                        :items="librarySelectItems"
-                        label="Select a Calculated attribute Library"
-                        outline
-                        v-if="!hasSelectedLibrary"
-                        v-model="librarySelectItemValue"
-                    >
-                    </v-select>
-                    <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary"
-                        v-model="selectedCalculatedAttributeLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    >
-                        <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>
-                    <v-checkbox
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        class="sharing"
-                        label="Default Calculation"
-                        v-model="selectedCalculatedAttributeLibrary.isDefault"
-                    />
+            <v-layout justify-space-between>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout column>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
+                        <v-select
+                            :items="librarySelectItems"
+                            outline
+                            v-model="librarySelectItemValue"
+                            class="ghd-select ghd-text-field ghd-text-field-border">
+                        </v-select>                       
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 24px !important" class="shared-owner-flex-padding">
+                        <div class="header-text-content owner-padding" style="padding-top: 7px !important">
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider class="owner-shared-divider" inset vertical></v-divider>
+                        <v-switch
+                            class='sharing header-text-content'
+                            label="Default Calculation"
+                            v-model="selectedCalculatedAttributeLibrary.isDefault"/>
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 class="ghd-constant-header">
+                    <v-layout align-end>
+                        <v-text-field
+                                    append-icon="fas fa-search"
+                                    hide-details
+                                    lablel="Search"
+                                    placeholder="Search Calcultated Attribute"
+                                    single-line
+                                    v-model="gridSearchTerm"
+                                    outline
+                                    class="ghd-text-field-border ghd-text-field"
+                                    style="margin-top:20px !important"
+                                >
+                                </v-text-field>
+                        <v-btn
+                            @click="onShowCreateCalculatedAttributeLibraryDialog(false)"
+                            class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                            outline
+                            v-show="!hasScenario"
+                            style="top: 4px !important">
+                            Create New Library
+                        </v-btn>
+                    </v-layout>
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
-        <v-flex v-show="hasSelectedLibrary || hasScenario" xs12>
-            <v-layout class="header-height" justify-center>
-                <v-flex xs8>
-                    <v-btn
-                        @click="onAddCriterionEquationSet()"
-                        class="ara-blue-bg white--text"
-                        v-if="isAdmin"
-                        :disabled="
-                            attributeSelectItemValue == null ||
-                                attributeSelectItemValue == ''
-                        "
-                    >
-                        Add
-                    </v-btn>
-                </v-flex>
-            </v-layout>
-            <v-layout class="data-table" justify-center>
-                <v-flex xs8>
-                    <v-card>
-                        <v-card-title>
-                            <v-select
-                                :items="attributeSelectItems"
-                                v-if="!isAttributeSelectedItemValue"
-                                label="Attribute"
-                                outline
-                                v-model="attributeSelectItemValue"
-                            >
-                            </v-select>
-                            <v-text-field
-                                label="Attribute name"
-                                v-if="isAttributeSelectedItemValue"
-                                v-model="attributeSelectItemValue"
-                            >
-                                <template slot="append">
-                                    <v-btn
-                                        @click="attributeSelectItemValue = null"
-                                        class="ara-orange"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-caret-left</v-icon>
-                                    </v-btn>
-                                </template>
-                            </v-text-field>
-                            <v-select
-                                :items="attributeTimingSelectItems"
-                                v-if="!isTimingSelectedItemValue"
-                                label="Timing"
-                                outline
-                                v-model="attributeTimingSelectItemValue"
-                                :disabled="!isAdmin"
-                                v-on:change="setTiming"
-                            >
-                            </v-select>
-                            <v-text-field
-                                label="Timing"
-                                v-if="isTimingSelectedItemValue"
-                                v-model="attributeTimingSelectItemValue"
-                                :disabled="!isAdmin"
-                            >
-                                <template slot="append">
-                                    <v-btn
-                                        @click="
-                                            attributeTimingSelectItemValue = null
-                                        "
-                                        class="ara-orange"
-                                        icon
-                                    >
-                                        <v-icon>fas fa-caret-left</v-icon>
-                                    </v-btn>
-                                </template>
-                            </v-text-field>
-                            <v-spacer></v-spacer>
-                            <v-text-field
-                                append-icon="fas fa-search"
-                                hide-details
-                                lablel="Search"
-                                single-line
-                                v-model="gridSearchTerm"
-                            >
-                            </v-text-field>
-                        </v-card-title>
-                        <v-data-table
-                            :headers="calculatedAttributeGridHeaders"
-                            :items="selectedGridItem.equations"
-                            :search="gridSearchTerm"
-                            class="elevation-1 fixed-header v-table__overflow"
-                            item-key="calculatedAttributeLibraryEquationId"
-                        >
-                            <template slot="items" slot-scope="props">
-                                <td class="text-xs-center">
-                                    <v-text-field
-                                        readonly
-                                        class="sm-txt"
-                                        :value="props.item.equation.expression"
-                                        :disabled="!isAdmin"
-                                    >
-                                        <template slot="append-outer">
-                                            <v-btn
-                                                @click="
-                                                    onShowEquationEditorDialog(
-                                                        props.item.id,
-                                                    )
-                                                "
-                                                class="edit-icon"
-                                                icon
-                                                v-if="isAdmin"
-                                            >
-                                                <v-icon>fas fa-edit</v-icon>
-                                            </v-btn>
-                                        </template>
-                                    </v-text-field>
-                                </td>
-                                <td class="text-xs-center">
-                                    <v-text-field
-                                        readonly
-                                        class="sm-txt"
-                                        :value="
-                                            props.item.criteriaLibrary
-                                                .mergedCriteriaExpression
-                                        "
-                                        :disabled="!isAdmin"
-                                    >
-                                        <template slot="append-outer">
-                                            <v-btn
-                                                @click="
-                                                    onEditCalculatedAttributeCriterionLibrary(
-                                                        props.item.id,
-                                                    )
-                                                "
-                                                class="edit-icon"
-                                                icon
-                                                v-if="isAdmin"
-                                            >
-                                                <v-icon>fas fa-edit</v-icon>
-                                            </v-btn>
-                                        </template>
-                                    </v-text-field>
-                                </td>
-                                <td class="text-xs-center">
-                                    <v-btn
-                                        @click="
-                                            onRemoveCalculatedAttribute(
-                                                props.item.id,
-                                            )
-                                        "
-                                        class="ara-orange"
-                                        icon
-                                        :disabled="!isAdmin"
-                                    >
-                                        <v-icon>fas fa-trash</v-icon>
-                                    </v-btn>
-                                </td>
-                            </template>
-                        </v-data-table>
-                    </v-card>
-                </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-divider v-show="hasSelectedLibrary || hasScenario"></v-divider>
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
+        <!-- attributes and timing -->
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-layout justify-space-between>
                 <v-flex xs6>
-                    <v-textarea
-                        label="Description"
-                        no-resize
+                <v-layout column>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+                    <v-select
+                        :items="attributeSelectItems"
                         outline
-                        rows="4"
-                        v-model="selectedCalculatedAttributeLibrary.description"
-                        @input="
-                            selectedCalculatedAttributeLibrary = {
-                                ...selectedCalculatedAttributeLibrary,
-                                description: $event,
-                            }
-                        "
-                    />
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        v-model="attributeSelectItemValue">
+                    </v-select>
+                </v-layout>
+                <v-flex xs2>
+                </v-flex>
+                </v-flex>
+                <v-flex xs6>
+                <v-layout column>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
+                    <v-select
+                        :items="attributeTimingSelectItems"
+                        outline
+                        v-model="attributeTimingSelectItemValue"
+                        :disabled="!isAdmin"
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        v-on:change="setTiming">
+                    </v-select>
+                </v-layout>
                 </v-flex>
             </v-layout>
         </v-flex>
-        <v-flex xs12>
-            <v-layout
-                justify-end
-                row
-                v-show="hasSelectedLibrary || hasScenario"
-            >
+        <!-- data table -->
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-data-table
+                :headers="calculatedAttributeGridHeaders"
+                :items="selectedGridItem.equations"
+                :search="gridSearchTerm"
+                class="v-table__overflow ghd-table"
+                item-key="calculatedAttributeLibraryEquationId">
+                <template slot="items" slot-scope="props">
+                    <td class="text-xs-center">
+                        <v-text-field
+                            readonly
+                            class="sm-txt"
+                            :value="props.item.equation.expression"
+                            :disabled="!isAdmin">
+                            <template slot="append-outer">
+                                <v-btn
+                                    @click="onShowEquationEditorDialog(props.item.id) "
+                                    class="ghd-blue"
+                                    icon
+                                    v-if="isAdmin">
+                                    <v-icon>fas fa-edit</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-text-field>
+                    </td>
+                    <td class="text-xs-center">
+                        <v-text-field
+                            readonly
+                            class="sm-txt"
+                            :value="props.item.criteriaLibrary.mergedCriteriaExpression"
+                            :disabled="!isAdmin">
+                            <template slot="append-outer">
+                                <v-btn
+                                    @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
+                                    class="ghd-blue"
+                                    icon
+                                    v-if="isAdmin">
+                                    <v-icon>fas fa-edit</v-icon>
+                                </v-btn>
+                            </template>
+                        </v-text-field>
+                    </td>
+                    <td class="text-xs-center">
+                        <v-btn
+                            @click="
+                                onRemoveCalculatedAttribute(props.item.id)"
+                            class="ghd-blue"
+                            icon
+                            :disabled="!isAdmin">
+                            <v-icon>fas fa-trash</v-icon>
+                        </v-btn>
+                    </td>
+                </template>
+            </v-data-table>
+            <v-btn
+                @click="onAddCriterionEquationSet()"
+                class='ghd-blue ghd-button'
+                outline
+                v-if="isAdmin"
+                :disabled="
+                    attributeSelectItemValue == null ||
+                    attributeSelectItemValue == ''">
+                Add New Equation
+            </v-btn>
+        </v-flex>
+        <!-- description -->
+        <v-flex v-show='hasSelectedLibrary && !hasScenario' xs12>
+            <v-subheader class="ghd-subheader ">Description</v-subheader>
+            <v-textarea
+                no-resize
+                outline
+                class="ghd-text-field-border"
+                rows="4"
+                v-model="selectedCalculatedAttributeLibrary.description"
+                @input="
+                    selectedCalculatedAttributeLibrary = {
+                        ...selectedCalculatedAttributeLibrary,
+                        description: $event,
+                    }"/>
+        </v-flex>
+        <!-- buttons -->
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
+            <v-layout justify-center v-show='hasSelectedLibrary || hasScenario'>
+                <v-btn
+                    :disabled="!hasUnsavedChanges"
+                    v-if="isAdmin && hasScenario"
+                    @click="onDiscardChanges"
+                    class='ghd-blue ghd-button-text ghd-button'
+                    flat
+                    v-show="hasSelectedLibrary || hasScenario">
+                    Cancel
+                </v-btn>
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
-                    class="ara-blue-bg white--text"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
                     v-show="hasScenario && isAdmin"
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
-                >
+                    :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn>
                 <v-btn
-                    :disabled="disableCrudButton()"
-                    @click="onUpsertCalculatedAttributeLibrary"
-                    class="ara-blue-bg white--text"
+                    @click="onShowConfirmDeleteAlert"
+                    class='ghd-blue ghd-button-text ghd-button'
+                    flat
                     v-show="!hasScenario"
-                >
-                    Update Library
+                    :disabled="!hasSelectedLibrary">
+                    Delete Library
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButton()"
                     v-if="isAdmin"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
-                >
+                    outline
+                    class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
                     Create as New Library
                 </v-btn>
                 <v-btn
-                    @click="onShowConfirmDeleteAlert"
-                    class="ara-orange-bg white--text"
-                    v-show="!hasScenario"
-                    :disabled="!hasSelectedLibrary"
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn
-                    :disabled="!hasUnsavedChanges"
-                    v-if="isAdmin"
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
-                >
-                    Discard Changes
-                </v-btn>
+                    :disabled="disableCrudButton() || !hasUnsavedChanges"
+                    @click="onUpsertCalculatedAttributeLibrary"
+                    class='ghd-blue-bg white--text ghd-button-text ghd-outline-button-padding ghd-button'
+                    v-show="!hasScenario">
+                    Update Library
+                </v-btn> 
             </v-layout>
         </v-flex>
+     
         <ConfirmDeleteAlert
             :dialogData="confirmDeleteAlertData"
             @submit="onSubmitConfirmDeleteAlertResult"
@@ -452,23 +385,23 @@ export default class CalculatedAttributeEditor extends Vue {
         {
             text: 'Equation',
             value: 'equation',
-            align: 'center',
-            sortable: false,
+            align: 'left',
+            sortable: true,
             class: '',
             width: '',
         },
         {
             text: 'Criterion',
             value: 'criterionLibrary',
-            align: 'center',
-            sortable: false,
+            align: 'left',
+            sortable: true,
             class: '',
             width: '',
         },
         {
             text: '',
             value: '',
-            align: 'center',
+            align: 'left',
             sortable: false,
             class: '',
             width: '',

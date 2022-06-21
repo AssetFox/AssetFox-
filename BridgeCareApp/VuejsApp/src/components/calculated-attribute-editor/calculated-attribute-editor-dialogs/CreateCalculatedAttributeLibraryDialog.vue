@@ -1,43 +1,44 @@
 <template>
     <v-dialog v-model="dialogData.showDialog" max-width="450px" persistent>
         <v-card>
-            <v-card-title>
-                <v-layout justify-center>
-                    <h3>New Calculated Attribute Library</h3>
+            <v-card-title class="ghd-dialog-box-padding-top">
+                <v-layout justify-space-between align-center >
+                    <div class="ghd-control-dialog-header">New Calculated Attribute Library</div>
+                    <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+                        X
+                    </v-btn>
                 </v-layout>
             </v-card-title>
-            <v-card-text>
+            <v-card-text class="ghd-dialog-box-padding-center">
                 <v-layout column>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Name</v-subheader>
                     <v-text-field
                         v-model="newCalculatedAttributeLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
-                        label="Name"
-                        outline
-                    />
+                        outline/>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
                     <v-textarea
                         v-model="newCalculatedAttributeLibrary.description"
-                        label="Description"
                         no-resize
                         outline
-                        rows="3"
-                    />
+                        rows="3"/>
                 </v-layout>
             </v-card-text>
-            <v-card-actions>
-                <v-layout justify-space-between row>
+            <v-card-actions class="ghd-dialog-box-padding-bottom">
+                <v-layout justify-center>
                     <v-btn
-                        :disabled="newCalculatedAttributeLibrary.name === ''"
-                        class="ara-blue-bg white--text"
-                        @click="onSubmit(true)"
-                    >
-                        Save
-                    </v-btn>
-                    <v-btn
-                        class="ara-orange-bg white--text"
-                        @click="onSubmit(false)"
-                    >
+                        flat 
+                        class='ghd-blue ghd-button-text ghd-button'
+                        @click="onSubmit(false)">
                         Cancel
                     </v-btn>
+                    <v-btn
+                        :disabled="newCalculatedAttributeLibrary.name === ''"
+                        outline 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'
+                        @click="onSubmit(true)">
+                        Save
+                    </v-btn> 
                 </v-layout>
             </v-card-actions>
         </v-card>

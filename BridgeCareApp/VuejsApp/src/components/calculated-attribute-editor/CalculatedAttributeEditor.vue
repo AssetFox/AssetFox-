@@ -56,7 +56,7 @@
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-space-between>
                 <v-flex xs6>
-                <v-layout column>
+                <v-layout column style="float:left; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
                         :items="attributeSelectItems"
@@ -69,7 +69,7 @@
                 </v-flex>
                 </v-flex>
                 <v-flex xs6>
-                <v-layout column>
+                <v-layout column style="float:right; width: 100%">
                     <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
                         :items="attributeTimingSelectItems"
@@ -1023,3 +1023,9 @@ export default class CalculatedAttributeEditor extends Vue {
     }
 }
 </script>
+<style>
+.sharing {
+    padding-top: 0;
+    margin: 0;
+}
+</style>

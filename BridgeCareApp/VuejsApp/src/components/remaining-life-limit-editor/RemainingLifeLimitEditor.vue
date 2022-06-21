@@ -15,7 +15,7 @@
                 </v-flex>
                 <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" outline>Add Remaining Life Limit</v-btn>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" v-show="!hasScenario" outline>Create New Library</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
         </v-flex>
@@ -242,6 +242,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             criteria: "[BRIDGE_TYPE]='B'",
         }
     ];
+    itemsPerPage:number = 5;
     dataPerPage: number = 0;
     totalDataFound: number = 5;
     remainingLifeLimits: RemainingLifeLimit[] = [];
@@ -350,6 +351,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.stateSelectedRemainingLifeLimitLibrary);
 
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+        // Update total data found and "showing results portion"
+        this.totalDataFound = this.remainingLifeLimits.length;
+        (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
     @Watch('stateNumericAttributes')

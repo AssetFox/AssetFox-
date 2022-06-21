@@ -12,6 +12,9 @@ namespace BridgeCareCore.Services
 {
     public class ExcelSpreadsheetImportService
     {
+
+        public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
+
         private UnitOfDataPersistenceWork _unitOfWork;
 
         public ExcelSpreadsheetImportService(
@@ -38,6 +41,13 @@ namespace BridgeCareCore.Services
                 if (shouldIncludeColumn) {
                     columnIndexesToInclude.Add(i);
                 }
+            }
+            if (!columnIndexesToInclude.Any())
+            {
+                return new ExcelSpreadsheetImportResultDTO
+                {
+                    WarningMessage = TopSpreadsheetRowIsEmpty,
+                };
             }
             var columns = new List<ExcelDatabaseColumn>();
             for (var columnIndex = 1; columnIndex <= end.Column; columnIndex++)

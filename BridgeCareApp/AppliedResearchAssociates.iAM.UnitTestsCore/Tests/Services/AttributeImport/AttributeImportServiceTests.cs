@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var service = CreateExcelSpreadsheetImportService();
             var result = service.ImportSpreadsheet(dataSourceId, excelPackage.Workbook.Worksheets[0]);
             var warningMessage = result.WarningMessage;
-            Assert.Equal(warningMessage, AttributeImportService.TopSpreadsheetRowIsEmpty);
+            Assert.Equal(warningMessage, ExcelSpreadsheetImportService.TopSpreadsheetRowIsEmpty);
         }
 
 

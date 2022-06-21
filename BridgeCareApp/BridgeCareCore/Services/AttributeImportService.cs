@@ -26,7 +26,6 @@ namespace BridgeCareCore.Services
         public const string WasFoundInRow = "was found in row";
         public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
         public const string InspectionDateColumn = "InspectionDate column";
-        public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
         public const string FailedToCreateAValidAttributeDatum = "Failed to create a valid AttributeDatum";
         public const string NumberIsOutOfValidRange = "is out of the valid range";
         public const string IsNotLessThanOrEqualToTheMaximumValue = "is not less than or equal to the maximum value";

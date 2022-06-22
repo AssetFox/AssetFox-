@@ -1237,15 +1237,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<ExcelWorksheetEntity>(entity =>
             {
-                entity.HasIndex(e => e.Id).IsUnique();
-                entity.HasIndex(e => e.DataSourceId);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.SerializedWorksheetContent).IsRequired();
 
                 entity.Property(e => e.DataSourceId).IsRequired();
 
-                entity.HasOne<DataSourceEntity>()
+                entity.HasOne(e => e.DataSource)
                 .WithMany(ds => ds.ExcelWorksheets)
                     .HasForeignKey(w => w.DataSourceId)
                     .OnDelete(DeleteBehavior.Cascade);

@@ -112,5 +112,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var warningMessage = result.WarningMessage;
             Assert.Equal(warningMessage, ExcelSpreadsheetImportService.TopSpreadsheetRowIsEmpty);
         }
+
+
+        [Fact]
+        public void ImportSpreadsheet_DataSourceDoesNotExist_FailsWithWarning()
+        {
+            var path = SampleAttributeDataPath();
+            var stream = FileContent(path);
+            var excelPackage = new ExcelPackage(stream);
+            var spreadsheetService = CreateExcelSpreadsheetImportService();
+            var dataSourceId = Guid.NewGuid();
+            var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
+            var importResult = spreadsheetService.ImportSpreadsheet(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+            var warning = importResult.WarningMessage;
+        }
     }
 }

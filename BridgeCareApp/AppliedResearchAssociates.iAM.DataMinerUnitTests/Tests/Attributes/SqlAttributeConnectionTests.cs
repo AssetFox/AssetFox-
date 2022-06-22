@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         private Mock<Attribute> mockAttribute;
         private string testCommand = string.Empty;         
 
-        [Fact]
+        [Fact (Skip ="This is accessing the real db. It shouldn't. WjTodo fix that.")]
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
@@ -34,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
         private static string GetConnectionString()
         {
-
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")

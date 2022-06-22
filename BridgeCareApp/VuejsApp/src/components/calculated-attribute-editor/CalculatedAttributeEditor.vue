@@ -88,7 +88,7 @@
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <v-data-table
                 :headers="calculatedAttributeGridHeaders"
-                :items="selectedGridItem.equations"
+                :items="selectedGridItem"
                 :search="gridSearchTerm"
                 class="v-table__overflow ghd-table"
                 item-key="calculatedAttributeLibraryEquationId">
@@ -97,7 +97,7 @@
                         <v-text-field
                             readonly
                             class="sm-txt"
-                            :value="props.item.equation.expression"
+                            :value="props.item.equation"
                             :disabled="!isAdmin">
                             <template slot="append-outer">
                                 <v-btn
@@ -114,7 +114,7 @@
                         <v-text-field
                             readonly
                             class="sm-txt"
-                            :value="props.item.criteriaLibrary.mergedCriteriaExpression"
+                            :value="props.item.criteriaExpression"
                             :disabled="!isAdmin">
                             <template slot="append-outer">
                                 <v-btn
@@ -259,10 +259,12 @@ import {
 } from 'ramda';
 import {
     CalculatedAttribute,
+    CalculatedAttributeGridModel,
     CalculatedAttributeLibrary,
     CriterionAndEquationSet,
     emptyCalculatedAttribute,
     emptyCalculatedAttributeLibrary,
+    emptyCalculatedAttributeGridModel,
     emptyCriterionAndEquationSet,
     Timing,
     TimingMap,
@@ -380,7 +382,8 @@ export default class CalculatedAttributeEditor extends Vue {
     );
     calculatedAttributeGridData: CalculatedAttribute[] = [];
     activeCalculatedAttributeId: string = getBlankGuid();
-    selectedGridItem: CalculatedAttribute = clone(emptyCalculatedAttribute);
+    selectedGridItem: CalculatedAttributeGridModel[] = [];
+    selectedAttribute: CalculatedAttribute = clone(emptyCalculatedAttribute)
     hasCreatedLibrary: boolean = false;
 
     calculatedAttributeGridHeaders: DataTableHeader[] = [
@@ -394,7 +397,7 @@ export default class CalculatedAttributeEditor extends Vue {
         },
         {
             text: 'Criterion',
-            value: 'criterionLibrary',
+            value: 'criteriaExpression',
             align: 'left',
             sortable: true,
             class: '',
@@ -440,7 +443,12 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     beforeDestroy() {
         this.calculatedAttributeGridData = [] as CalculatedAttribute[];
-        this.selectedGridItem = clone(emptyCalculatedAttribute);
+        this.selectedAttribute = clone(emptyCalculatedAttribute);
+    }
+
+    @Watch('selectedAttribute')
+    onSelectedAttributeChanged(){
+        this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.selectedAttribute)
     }
 
     @Watch('isDefaultBool')
@@ -507,7 +515,7 @@ export default class CalculatedAttributeEditor extends Vue {
         ) {
             this.isAttributeSelectedItemValue = false;
             this.isTimingSelectedItemValue = false;
-            this.selectedGridItem = clone(emptyCalculatedAttribute);
+            this.selectedAttribute = clone(emptyCalculatedAttribute);
         } else {
             this.isAttributeSelectedItemValue = true;
             this.isTimingSelectedItemValue = true;
@@ -524,7 +532,7 @@ export default class CalculatedAttributeEditor extends Vue {
                     }
                 });
                 this.activeCalculatedAttributeId = item.id;
-                this.selectedGridItem = item;
+                this.selectedAttribute = item;
                 this.setTimingsMultiSelect(item.calculationTiming);
             } else {
                 // if the selected Calculated attribute data is not present in the grid
@@ -538,7 +546,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 };
                 this.calculatedAttributeGridData.push(newAttributeObject);
                 this.activeCalculatedAttributeId = newAttributeObject.id;
-                this.selectedGridItem = newAttributeObject;
+                this.selectedAttribute = newAttributeObject;
                 this.setTimingsMultiSelect(Timing.OnDemand);
             }
         }
@@ -559,7 +567,7 @@ export default class CalculatedAttributeEditor extends Vue {
             );
             if (item != undefined) {
                 item.calculationTiming = localTiming;
-                this.selectedGridItem = item;
+                this.selectedAttribute = item;
             }
         }
     }
@@ -701,10 +709,10 @@ export default class CalculatedAttributeEditor extends Vue {
                     this.calculatedAttributeGridData[0].calculationTiming,
                 );
                 this.activeCalculatedAttributeId = this.calculatedAttributeGridData[0].id;
-                this.selectedGridItem =
+                this.selectedAttribute =
                     this.calculatedAttributeGridData[0] != undefined
                         ? this.calculatedAttributeGridData[0]
-                        : this.selectedGridItem;
+                        : this.selectedCalculatedAttribute;
             } else {
                 this.isAttributeSelectedItemValue = false;
                 this.attributeSelectItemValue = null;
@@ -851,18 +859,20 @@ export default class CalculatedAttributeEditor extends Vue {
         newSet.equation.id = getNewGuid();
         newSet.criteriaLibrary.isSingleUse = true;
 
-        if (this.selectedGridItem.equations == undefined) {
-            this.selectedGridItem.equations = [];
+        if (this.selectedAttribute.equations == undefined) {
+            this.selectedAttribute.equations = [];
+            this.onSelectedAttributeChanged()
         }
-        this.selectedGridItem.equations.push(newSet);
+        this.selectedAttribute.equations.push(newSet);
         this.calculatedAttributeGridData = update(
             findIndex(
-                propEq('id', this.selectedGridItem.id),
+                propEq('id', this.selectedAttribute.id),
                 this.calculatedAttributeGridData,
             ),
-            { ...this.selectedGridItem },
+            { ...this.selectedAttribute },
             this.calculatedAttributeGridData,
         );
+        this.onSelectedAttributeChanged()
     }
     onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {
         var currItem = this.calculatedAttributeGridData.find(
@@ -920,6 +930,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 { ...currItem },
                 this.calculatedAttributeGridData,
             );
+            this.onSelectedAttributeChanged();
         }
 
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
@@ -954,6 +965,7 @@ export default class CalculatedAttributeEditor extends Vue {
                     ? (item.equation = equation)
                     : item.equation;
             });
+            this.onSelectedAttributeChanged();
         }
 
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
@@ -967,10 +979,11 @@ export default class CalculatedAttributeEditor extends Vue {
             propEq('id', criterionEquationSetId),
             currItem.equations,
         );
-        this.selectedGridItem.equations = reject(
+        this.selectedAttribute.equations = reject(
             propEq('id', criterionEquationSetId),
-            this.selectedGridItem.equations,
+            this.selectedAttribute.equations,
         );
+        this.onSelectedAttributeChanged()
     }
     onDiscardChanges() {
         this.librarySelectItemValue = null;
@@ -1000,15 +1013,16 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.isAttributeSelectedItemValue = true;
 
                 this.setTimingsMultiSelect(currItem.calculationTiming);
-                this.selectedGridItem = currItem;
+                this.selectedAttribute = currItem;
                 // Setting up default values for null object, because API is sending it as null.
-                this.selectedGridItem.equations.forEach(_ => {
+                this.selectedAttribute.equations.forEach(_ => {
                     if (isNil(_.criteriaLibrary)) {
                         _.criteriaLibrary = clone(emptyCriterionLibrary);
                         _.criteriaLibrary.id = getNewGuid();
                         _.criteriaLibrary.isSingleUse = true;
                     }
                 });
+                this.onSelectedAttributeChanged();
             } else if (this.calculatedAttributeGridData.length > 0) {
                 this.attributeSelectItemValue = this.calculatedAttributeGridData[0].attribute;
                 this.isAttributeSelectedItemValue = true;
@@ -1039,10 +1053,25 @@ export default class CalculatedAttributeEditor extends Vue {
 
         this.setTimingsMultiSelect(localCalculatedAttribute.calculationTiming);
         this.activeCalculatedAttributeId = localCalculatedAttribute.id;
-        this.selectedGridItem =
+        this.selectedAttribute =
             localCalculatedAttribute != undefined
                 ? localCalculatedAttribute
-                : this.selectedGridItem;
+                : this.selectedAttribute;
+    }
+
+    calculatedAttributeGridModelConverter(item: CalculatedAttribute): CalculatedAttributeGridModel[]{
+        let toReturn: CalculatedAttributeGridModel[] = []
+        if(!isNil(item.equations))
+        {
+            item.equations.forEach(_ =>{
+                toReturn.push({
+                    id: _.id,
+                    equation: isNil(_.equation) ? "" : _.equation.expression,
+                    criteriaExpression: isNil(_.criteriaLibrary) || isNil(_.criteriaLibrary.mergedCriteriaExpression) ? "" : _.criteriaLibrary.mergedCriteriaExpression
+                    })
+            })
+        }
+        return toReturn
     }
 }
 </script>
@@ -1050,5 +1079,12 @@ export default class CalculatedAttributeEditor extends Vue {
 .sharing {
     padding-top: 0;
     margin: 0;
+}
+.sharing .v-input__slot{
+    top: 4px !important;
+}
+
+.sharing .v-label{
+    margin-bottom: 0;
 }
 </style>

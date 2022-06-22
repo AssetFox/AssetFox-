@@ -23,7 +23,8 @@
                         <v-switch
                             class='sharing header-text-content'
                             label="Default Calculation"
-                            v-model="selectedCalculatedAttributeLibrary.isDefault"/>
+                            v-model="selected"
+                            />
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">
@@ -360,7 +361,7 @@ export default class CalculatedAttributeEditor extends Vue {
     isAttributeSelectedItemValue: boolean = false;
     isTimingSelectedItemValue: boolean = false;
     attributeTimingSelectItems: SelectItem[] = [];
-    attributeTimingSelectItemValue: string | null = '';
+    attributeTimingSelectItemValue: string | number | null = '';
     currentCriteriaEquationSetSelectedId: string | null = '';
 
     gridSearchTerm = '';
@@ -546,7 +547,7 @@ export default class CalculatedAttributeEditor extends Vue {
             this.isTimingSelectedItemValue = false;
         } else {
             this.isTimingSelectedItemValue = true;
-            var localTiming = TimingMap[this.attributeTimingSelectItemValue];
+            var localTiming = this.attributeTimingSelectItemValue as Timing;
             var item = this.calculatedAttributeGridData.find(
                 _ => _.attribute == this.attributeSelectItemValue,
             );
@@ -575,7 +576,7 @@ export default class CalculatedAttributeEditor extends Vue {
             this.resetGridData();
         }
     }
-    @Watch('calculatedAttributeGridData')
+    @Watch('calculatedAttributeGridData', {deep: true})
     onCalculatedAttributeGridDataChanged() {
         if (this.isAdmin) {
             const hasUnsavedChanges: boolean = this.hasScenario
@@ -678,7 +679,7 @@ export default class CalculatedAttributeEditor extends Vue {
         } else if (!this.hasScenario) {
             // If a user is in Lirabry page
             this.calculatedAttributeGridData = clone(
-                this.selectedCalculatedAttributeLibrary.calculatedAttributes,
+                this.stateSelectedCalculatedAttributeLibrary.calculatedAttributes,
             );
             if (
                 this.calculatedAttributeGridData != undefined &&
@@ -704,6 +705,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.isTimingSelectedItemValue = false;
             }
         }
+        this.onCalculatedAttributeGridDataChanged();
     }
     setTiming(selectedItem: number) {
         this.setTimingsMultiSelect(selectedItem);
@@ -736,7 +738,7 @@ export default class CalculatedAttributeEditor extends Vue {
         var localCalculatedAttributes = [] as CalculatedAttribute[];
         if (createAsNewLibrary) {
             // if library is getting created from a scenario. Assign new Ids
-            localCalculatedAttributes = this.calculatedAttributeGridData;
+            localCalculatedAttributes = clone(this.calculatedAttributeGridData);
             localCalculatedAttributes.forEach(val => {
                 val.id = getNewGuid();
                 val.equations.forEach(eq => {
@@ -787,12 +789,25 @@ export default class CalculatedAttributeEditor extends Vue {
             return false;
         }
         const dataIsValid = this.calculatedAttributeGridData.every(_ =>
+             this.rules['generalRules'].valueIsNotEmpty(_.equations) === true &&
+             (
+                _.equations.length < 2 || 
+                    (
+                        _.equations.filter((set: CriterionAndEquationSet) => 
+                        this.rules['generalRules'].valueIsNotEmpty(set.criteriaLibrary) === true &&
+                        this.rules['generalRules'].valueIsNotEmpty(set.criteriaLibrary.mergedCriteriaExpression) !== true).length < 2
+                    )
+             ) &&
             _.equations.every((set: CriterionAndEquationSet) => {
                 return (
-                    this.rules['generalRules'].valueIsNotEmpty(set.id) === true
+                    this.rules['generalRules'].valueIsNotEmpty(set.id) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(set.criteriaLibrary) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(set.equation.expression) === true                 
                 );
             }),
         );
+
+        
 
         if (this.hasSelectedLibrary) {
             return !(
@@ -1005,7 +1020,7 @@ export default class CalculatedAttributeEditor extends Vue {
         var localTiming = this.attributeTimingSelectItems.find(
             _ => _.value == selectedItem,
         )!.text;
-        this.attributeTimingSelectItemValue = localTiming;
+        this.attributeTimingSelectItemValue = selectedItem;
         this.isTimingSelectedItemValue = true;
     }
     setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {

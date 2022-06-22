@@ -23,7 +23,7 @@
                         <v-switch
                             class='sharing header-text-content'
                             label="Default Calculation"
-                            v-model="selected"
+                            v-model="selectedCalculatedAttributeLibrary.isDefault"
                             />
                     </v-layout>
                 </v-flex>
@@ -973,6 +973,7 @@ export default class CalculatedAttributeEditor extends Vue {
         setTimeout(() => {
             if (this.hasScenario) {
                 this.resetGridData();
+                this.onAttributeSelectItemValueChanged()
             }
         });
     }

@@ -229,6 +229,7 @@ namespace BridgeCareCore.Services.Treatment
                 Consequences = loadConsequences.Consequences,
                 CriterionLibrary = new CriterionLibraryDTO(),
                 BudgetIds = new List<Guid>(), //TODO in case of scenario treatments, check/ask for excel format
+                Budgets = new List<TreatmentBudgetDTO>() //TODO in case of scenario treatments, check if its going to come from excel else follow steps in TODO comment in Repo.
             };
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);

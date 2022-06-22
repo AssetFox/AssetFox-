@@ -405,7 +405,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
                     .ScenarioSelectableTreatment
                     .SimulationId == simulationId);
-
+            // TODO if for import budgetids to be assigned per ScenarioSelectableTreatmentScenarioBudgetEntity, then assign those in import obj making.
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                 _.ScenarioSelectableTreatment.SimulationId == simulationId);
 

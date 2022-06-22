@@ -1081,7 +1081,7 @@ export default class CalculatedAttributeEditor extends Vue {
     margin: 0;
 }
 .sharing .v-input__slot{
-    top: 4px !important;
+    top: 5px !important;
 }
 
 .sharing .v-label{

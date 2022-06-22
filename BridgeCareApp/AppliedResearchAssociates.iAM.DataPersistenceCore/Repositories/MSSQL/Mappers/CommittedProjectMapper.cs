@@ -84,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (dto is SectionCommittedProjectDTO)
             {
-                // TODO:  Switch to looking up key field in datasource object
+                // TODO:  Switch to looking up key field in network object
                 string keyField = "BRKEY_";
 
                 if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID"))
@@ -96,6 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         )
                     {
                         CommittedProjectId = result.Id,
+                        Id = Guid.NewGuid()
                     };
                 }
                 else

@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
@@ -12,7 +15,8 @@ namespace BridgeCareCore.Services.Treatment
     public class ExcelTreatmentLoader
     {
         private readonly IExpressionValidationService _expressionValidationService;
-        public ExcelTreatmentLoader(IExpressionValidationService expressionValidationService )
+
+        public ExcelTreatmentLoader(IExpressionValidationService expressionValidationService)
         {
             _expressionValidationService = expressionValidationService;
         }
@@ -41,7 +45,7 @@ namespace BridgeCareCore.Services.Treatment
             }
             if (returnValue == endIndex + 1)
             {
-                throw new Exception($"Cell with content {content} not found!");
+                returnValue = (content == TreatmentExportStringConstants.Budgets) ? 0 : throw new Exception($"Cell with content {content} not found!");
             }
 
             return returnValue;
@@ -144,8 +148,9 @@ namespace BridgeCareCore.Services.Treatment
             var consequences = new List<TreatmentConsequenceDTO>();
             var validationMessages = new List<string>();
             var consequencesRow = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Consequences, 3);
-            var height = worksheet.Dimension.End.Row;
-            for (int i = consequencesRow + 2; i <= height; i++)
+            var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, consequencesRow);
+            var height = budgetsLineIndex == 0 ? worksheet.Dimension.End.Row : budgetsLineIndex - 1;
+            for (var i = consequencesRow + 2; i <= height; i++)
             {
                 var attribute = worksheet.Cells[i, 1].Text;
                 var equation = worksheet.Cells[i, 3].Text;
@@ -203,6 +208,38 @@ namespace BridgeCareCore.Services.Treatment
             return returnValue;
         }
 
+        private TreatmentBudgetsLoadResult LoadBudgets(ExcelWorksheet worksheet, List<BudgetDTO> scenarioBudgets)
+        {
+            var budgetIds = new List<Guid>();
+            var validationMessages = new List<string>();
+
+            var budgetsLineIndex = FindRowWithFirstColumnContent(worksheet, TreatmentExportStringConstants.Budgets, 2);
+            if(budgetsLineIndex == 0)
+            {
+                throw new Exception($"Cell with content {TreatmentExportStringConstants.Budgets} not found!");
+            }
+
+            var height = worksheet.Dimension.End.Row;
+            for (var i = budgetsLineIndex + 2; i <= height; i++)
+            {
+                var budgetName = worksheet.Cells[i, 1].Text;
+                if (!string.IsNullOrEmpty(budgetName))
+                {
+                    var scenarioBudget = scenarioBudgets.Where(_ => _.Name == budgetName).FirstOrDefault();
+                    if (scenarioBudget != null)
+                    {
+                        budgetIds.Add(scenarioBudget.Id);
+                    }
+                    else
+                    {
+                        validationMessages.Add($"{ValidationLocation(worksheet.Name, i, 1)}: {"Invalid budget"}");
+                    }
+                }
+            }
+
+            return new TreatmentBudgetsLoadResult { budgetIds = budgetIds, ValidationMessages = validationMessages };
+        }
+
         public TreatmentLoadResult LoadTreatment(ExcelWorksheet worksheet)
         {
             var worksheetName = worksheet.Name;
@@ -227,9 +264,7 @@ namespace BridgeCareCore.Services.Treatment
                 ShadowForSameTreatment = ParseInt(yearsBeforeSame),
                 Costs = loadCosts.Costs,
                 Consequences = loadConsequences.Consequences,
-                CriterionLibrary = new CriterionLibraryDTO(),
-                BudgetIds = new List<Guid>(), //TODO in case of scenario treatments, check/ask for excel format
-                Budgets = new List<TreatmentBudgetDTO>() //TODO in case of scenario treatments, check if its going to come from excel else follow steps in TODO comment in Repo.
+                CriterionLibrary = new CriterionLibraryDTO()
             };
             var validationMessages = new List<string>();
             validationMessages.AddRange(loadCosts.ValidationMessages);
@@ -240,6 +275,17 @@ namespace BridgeCareCore.Services.Treatment
                 ValidationMessages = validationMessages,
             };
             return returnValue;
+        }
+
+        public TreatmentLoadResult LoadScenarioTreatment(ExcelWorksheet worksheet, List<BudgetDTO> scenarioBudgets)
+        {
+            var treatmentLoadResult = LoadTreatment(worksheet);
+             var loadBudgets = LoadBudgets(worksheet, scenarioBudgets);
+
+            treatmentLoadResult.Treatment.BudgetIds = loadBudgets.budgetIds;                        
+            treatmentLoadResult.ValidationMessages.AddRange(loadBudgets.ValidationMessages);
+
+            return treatmentLoadResult;
         }
     }
 }

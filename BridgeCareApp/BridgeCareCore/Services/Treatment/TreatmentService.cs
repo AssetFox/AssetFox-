@@ -100,9 +100,10 @@ namespace BridgeCareCore.Services
             var validationMessages = new List<string>();
             var scenarioTreatments = new List<TreatmentDTO>();
 
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
-            {
-                var treatmentLoadResult = _treatmentLoader.LoadTreatment(worksheet);
+            {                
+                var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
@@ -135,11 +136,12 @@ namespace BridgeCareCore.Services
         public FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId)
         {
             var fileInfoResult = new FileInfoDTO();
+            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
             var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
             if (scenarioTreatments.Any())
             {
                 var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
-                var filename = $"Export scenario treatments {dateString}";
+                var filename = $"Export scenario {scenarioName} treatments {dateString}";
                 var fileInfo = new FileInfo(filename);
                 using var package = new ExcelPackage(fileInfo);
                 var workbook = package.Workbook;

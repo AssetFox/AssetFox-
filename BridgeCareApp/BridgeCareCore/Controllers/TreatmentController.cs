@@ -429,6 +429,7 @@ namespace BridgeCareCore.Controllers
                 {
                     return _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
                 });
+
                 if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);

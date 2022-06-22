@@ -6,8 +6,6 @@ namespace BridgeCareCore.Services.Treatment
 {
     public static class TreatmentBudgetsRegion
     {
-        
-
         internal static RowBasedExcelRegionModel BudgetsRegion(TreatmentDTO dto)
         {
             var rows = new List<ExcelRowModel>

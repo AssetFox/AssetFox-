@@ -94,8 +94,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 1].Value = parametersModel.nHSModel.NonNHS;
 
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row, currentCell.Column, currentCell.Row + 2, currentCell.Column + 1]);
-            ExcelHelper.HorizontalCenterAlign(
-                worksheet.Cells[currentCell.Row + 1, currentCell.Column + 1, currentCell.Row + 2, currentCell.Column + 1]);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[currentCell.Row + 1, currentCell.Column + 1, currentCell.Row + 2, currentCell.Column + 1]);
 
             var rowNo = currentCell.Row + 4;
             ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
@@ -140,131 +139,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 10, currentCell.Column + 1]);
 
-            //rowNo = currentCell.Row + 17;
-            //ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
-            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.Gray);
-            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.White);
-            //worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1].Value = "Bridge Length";
-            //worksheet.Cells[rowNo + 1, currentCell.Column].Value = "8-20";
-            //worksheet.Cells[rowNo + 2, currentCell.Column].Value = "NBIS Length";
-
-            //worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = parametersModel.LengthBetween8and20;
-            //worksheet.Cells[rowNo + 2, currentCell.Column + 1].Value = parametersModel.LengthGreaterThan20;
-            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 1, currentCell.Column + 1, rowNo + 2, currentCell.Column + 1]);
-
-            //ExcelHelper.MergeCells(worksheet, rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1);
-            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.Gray);
-            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.White);
-            //worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1].Value = "Status";
-            //worksheet.Cells[rowNo + 5, currentCell.Column].Value = "Open";
-            //worksheet.Cells[rowNo + 6, currentCell.Column].Value = "Closed";
-            //worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
-            //worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
-
-            ////[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
-            //worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
-            //worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
-            //worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
-            //worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
-            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
-
-            //ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
-            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
-
-            //rowNo = currentCell.Row + 8; // currentCell.Row is equal to 6
-            //ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5);
-            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.Gray);
-            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.White);
-            //worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5].Value = "5A21 Owner";
-
-            //var rowNoForMap = currentCell.Row + 8;
-            //var ownerCodeValueTracker = new Dictionary<string, (int row, int col)> { {"01", (++rowNoForMap, currentCell.Column + 5)},
-            //    {"02", (++rowNoForMap, currentCell.Column + 5)},{"03",(++rowNoForMap, currentCell.Column + 5)},{"04",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"11",(++rowNoForMap, currentCell.Column + 5)},{"12",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"21",(++rowNoForMap, currentCell.Column + 5)},{"25",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"26",(++rowNoForMap, currentCell.Column + 5)},{"27",(++rowNoForMap, currentCell.Column + 5)},{"31",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"32",(++rowNoForMap, currentCell.Column + 5)},{"60",(++rowNoForMap, currentCell.Column + 5)},{"62",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"64",(++rowNoForMap, currentCell.Column + 5)},{"66",(++rowNoForMap, currentCell.Column + 5)},{"68",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"69",(++rowNoForMap, currentCell.Column + 5)},{"70",(++rowNoForMap, currentCell.Column + 5)},
-            //    {"80",(++rowNoForMap, currentCell.Column + 5)},{"XX",(++rowNoForMap, currentCell.Column + 5)} };
-
-            //foreach (var item in ownerCodeValueTracker)
-            //{
-            //    ExcelHelper.MergeCells(worksheet, item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1, false);
-            //    worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = MappingContent.OwnerCodeForReport(item.Key);
-            //}
-
-            //foreach (var item in ownerCodeValueTracker)
-            //{
-            //    if (parametersModel.OwnerCode.Contains(item.Key))
-            //    {
-            //        worksheet.Cells[item.Value.row, item.Value.col].Value = "Y";
-            //    }
-            //    else
-            //    {
-            //        worksheet.Cells[item.Value.row, item.Value.col].Value = "N";
-            //    }
-            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[item.Value.row, item.Value.col]);
-            //}
-
-            var rowForStyle = currentCell.Row + 8; // currentCell.Row is equal to 6
-            var colForStyle = currentCell.Column + 3;
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowForStyle, colForStyle, rowForStyle + 21, colForStyle + 2]);
-
-            ExcelHelper.MergeCells(worksheet, rowForStyle, colForStyle + 4, rowForStyle, colForStyle + 6);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowForStyle, colForStyle + 4, rowForStyle, colForStyle + 6], Color.Gray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowForStyle, colForStyle + 4, rowForStyle, colForStyle + 6], Color.White);
-            worksheet.Cells[rowForStyle, colForStyle + 4, rowForStyle, colForStyle + 6].Value = "5C22 Functional Class";
-
-            ExcelHelper.MergeCells(worksheet, rowForStyle + 1, colForStyle + 4, rowForStyle + 1, colForStyle + 6);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowForStyle + 1, colForStyle + 4, rowForStyle + 1, colForStyle + 6], Color.DimGray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowForStyle + 1, colForStyle + 4, rowForStyle + 1, colForStyle + 6], Color.White);
-            worksheet.Cells[rowForStyle + 1, colForStyle + 4, rowForStyle + 1, colForStyle + 6].Value = "Rural";
-
-            var functionalClassValueTracker = new Dictionary<string, (int row, int col)> { {"01",(rowForStyle + 2, colForStyle + 6)},
-                {"02",(rowForStyle + 3, colForStyle + 6)}, {"03",(rowForStyle + 4, colForStyle + 6)},{"06",(rowForStyle + 5, colForStyle + 6)},
-                {"07",(rowForStyle + 6, colForStyle + 6)},{"08",(rowForStyle + 7, colForStyle + 6)},{"09",(rowForStyle + 8, colForStyle + 6)},
-                {"NN",(rowForStyle + 9, colForStyle + 6)},{"11",(rowForStyle + 11, colForStyle + 6)},
-                {"12",(rowForStyle + 12, colForStyle + 6)},{"14",(rowForStyle + 13, colForStyle + 6)},{"16",(rowForStyle + 14, colForStyle + 6)},
-                {"17",(rowForStyle + 15, colForStyle + 6)},{"19",(rowForStyle + 16, colForStyle + 6)},
-                {"99",(rowForStyle + 18, colForStyle + 6)} };
-
-            foreach (var item in functionalClassValueTracker)
-            {
-                ExcelHelper.MergeCells(worksheet, item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1, false);
-                worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = _summaryReportHelper.FullFunctionalClassDescription(item.Key);
-            }
-
-            ExcelHelper.MergeCells(worksheet, rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6], Color.DimGray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6], Color.White);
-            worksheet.Cells[rowForStyle + 10, colForStyle + 4, rowForStyle + 10, colForStyle + 6].Value = "Urban";
-
-            ExcelHelper.MergeCells(worksheet, rowForStyle + 17, colForStyle + 4, rowForStyle + 17, colForStyle + 5, false);
-            worksheet.Cells[rowForStyle + 17, colForStyle + 4, rowForStyle + 17, colForStyle + 5].Value = _summaryReportHelper.FullFunctionalClassDescription("NN");
-
-            foreach (var item in functionalClassValueTracker)
-            {
-                if (parametersModel.FunctionalClass.Contains(item.Key))
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "Y";
-                }
-                else
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "N";
-                }
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[item.Value.row, item.Value.col]);
-            }
-            worksheet.Cells[rowForStyle + 17, colForStyle + 6].Value = worksheet.Cells[functionalClassValueTracker["NN"].row, functionalClassValueTracker["NN"].col].Value;
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowForStyle, colForStyle + 4, rowForStyle + 18, colForStyle + 6]);
-            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowForStyle + 17, colForStyle + 6]);
-
             return currentCell;
         }
 
         private CurrentCell FillSimulationDetails(ExcelWorksheet worksheet, int yearCount, Simulation simulation, CurrentCell currentCell)
         {
-            currentCell.Column += 5; // curr col is now 6
+            currentCell.Column += 3; // curr col is now 6
             var rowNo = currentCell.Row; // 6
             var colNo = currentCell.Column; // 6
             ExcelHelper.MergeCells(worksheet, rowNo, colNo, rowNo, colNo + 2);

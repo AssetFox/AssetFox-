@@ -1242,8 +1242,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<ExcelWorksheetEntity>(entity =>
             {
-
-                entity.HasIndex(e => e.DataSourceId).IsUnique();
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.DataSourceId);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.SerializedWorksheetContent).IsRequired();

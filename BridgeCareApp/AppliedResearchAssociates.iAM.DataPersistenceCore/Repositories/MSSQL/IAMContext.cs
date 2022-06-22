@@ -1169,6 +1169,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Secure).IsRequired();
 
+                entity.HasMany(d => d.ExcelWorksheets)
+                    .WithOne(p => p.DataSource)
+                    .HasForeignKey(d => d.DataSourceId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<DeficientConditionGoalEntity>(entity =>
@@ -1246,7 +1250,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.DataSourceId).IsRequired();
 
                 entity.HasOne(e => e.DataSource)
-                .WithMany(ds => ds.ExcelWorksheets)
+                    .WithMany(ds => ds.ExcelWorksheets)
                     .HasForeignKey(w => w.DataSourceId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

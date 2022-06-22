@@ -14,7 +14,7 @@
                     </v-select>
                 </v-flex>
                 <div>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" outline>Add Remaining Life Limit</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="selectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
@@ -337,20 +337,6 @@ export default class RemainingLifeLimitEditor extends Vue {
     currentUrl: string = window.location.href;
     hasCreatedLibrary: boolean = false;
 
-    onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
-        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
-        !contains(life.id, remainingLifeLimit.id));
-    }
-
-    onRemoveRemainingLifeLimit() {
-        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
-            !contains(life.id, this.selectedRemainingLifeIds),
-        );
-    }
-    @Watch('selectedGridRows')
-        onSelectedGridRowsChanged() {
-            this.selectedRemainingLifeIds = getPropertyValues('id', this.selectedGridRows,) as string[];
-        }
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.selectItemValue = null;
@@ -372,6 +358,10 @@ export default class RemainingLifeLimitEditor extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+    @Watch('selectedGridRows')
+        onSelectedGridRowsChanged() {
+            this.selectedRemainingLifeIds = getPropertyValues('id', this.selectedGridRows,) as string[];
+        }
 
     @Watch('stateRemainingLifeLimitLibraries')
     onStateRemainingLifeLimitLibrariesChanged() {
@@ -460,6 +450,16 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
         
         return getUserName();
+    }
+    onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+        !contains(life.id, remainingLifeLimit.id));
+    }
+
+    onRemoveRemainingLifeLimit() {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+            !contains(life.id, this.selectedRemainingLifeIds),
+        );
     }
 
     onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {

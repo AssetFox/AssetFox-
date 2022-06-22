@@ -27,59 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             return returnValue;
         }
 
-
-        private const string DistrictAttributeName = "DISTRICT";
-        private const string SuffRateAttributeName = "SUFF_RATE";
-
-        private static void EnsureAttributeExists(AttributeDTO dto)
-        {
-            var existingDistrictAttribute = _testHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
-            if (existingDistrictAttribute == null)
-            {
-                _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
-            }
-        }
-
-
-        private static AttributeDTO DistrictAttributeDto() => new AttributeDTO
-        {
-            Name = DistrictAttributeName,
-            AggregationRuleType = TextAttributeAggregationRules.Predominant,
-            Id = Guid.NewGuid(),
-            Command = "DistrictCommand",
-            DefaultValue = "Default District",
-            Type = DataPersistenceConstants.AttributeTextDataType,
-            IsAscending = false,
-            IsCalculated = false,
-        };
-
-        private static void EnsureSuffRateAttributeExists()
-        {
-            var dto = SuffRateAttributeDto();
-            EnsureAttributeExists(dto);
-        }
-
-        private static void EnsureDistrictAttributeExists()
-        {
-            var dto = DistrictAttributeDto();
-            EnsureAttributeExists(dto);
-        }
-
-
-        private static AttributeDTO SuffRateAttributeDto() => new AttributeDTO
-        {
-            Name = SuffRateAttributeName,
-            AggregationRuleType = NumericAttributeAggregationRules.Average,
-            Id = Guid.NewGuid(),
-            Command = "SuffRateCommand",
-            DefaultValue = "77",
-            Minimum = 0,
-            Maximum = 100,
-            Type = DataPersistenceConstants.AttributeNumericDataType,
-            IsAscending = false,
-            IsCalculated = false,
-        };
-
         private static string SampleAttributeDataPath()
         {
             var filename = SampleAttributeDataFilenames.Sample;
@@ -88,13 +35,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             return returnValue;
         }
 
-        private static string SampleAttributeDataPathWithSuffRatePath()
-        {
-            var filename = SampleAttributeDataFilenames.WithSuffRate;
-            var folder = Directory.GetCurrentDirectory();
-            var returnValue = Path.Combine(folder, "SampleData", filename);
-            return returnValue;
-        }
         private static string SampleAttributeDataWithSpuriousEmptyFirstRowPath()
         {
             var filename = SampleAttributeDataFilenames.WithSpuriousEmptyFirstRow;
@@ -112,8 +52,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         [Fact]
         public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
         {
-            _testHelper.CreateAttributes();
-            EnsureDistrictAttributeExists();
             var path = SampleAttributeDataPath();
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);
@@ -157,8 +95,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         [Fact]
         public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
         {
-            _testHelper.CreateAttributes();
-            EnsureDistrictAttributeExists();
             var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);

@@ -50,11 +50,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate, simulation.AnalysisMethod.Filter.Expression);
 
             currentCell = FillSimulationDetails(worksheet, simulationYearsCount, simulation, currentCell);
+
             currentCell = FillAnalysisDetails(worksheet, simulation, currentCell);
+
             currentCell = FillJurisdictionCriteria(worksheet, simulation, currentCell);
+
             currentCell = FillPriorities(worksheet, simulation, currentCell);
+
             FillBudgetSplitCriteria(worksheet, currentCell, simulation);
             FillInvestmentAndBudgetCriteria(worksheet, simulation);
+
             worksheet.Cells.AutoFitColumns(50);
         }
 
@@ -66,9 +71,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             var bpnValueCellTracker = new Dictionary<string, (int row, int col)>();
             var statusValueCellTracker = new Dictionary<string, (int row, int col)>();
 
-            worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = "BridgeCare Rules Creator:";
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = "PAMS Rules Creator:";
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 1].Value = "Central Office";
-            worksheet.Cells[currentCell.Row + 3, currentCell.Column].Value = "BridgeCare Rules Date:";
+            worksheet.Cells[currentCell.Row + 3, currentCell.Column].Value = "PAMS Rules Date:";
             worksheet.Cells[currentCell.Row + 3, currentCell.Column + 1].Value = lastModifiedDate.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column, currentCell.Row + 3, currentCell.Column + 1]);
 
@@ -135,72 +140,72 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Par
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 10, currentCell.Column + 1]);
 
-            rowNo = currentCell.Row + 17;
-            ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.Gray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.White);
-            worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1].Value = "Bridge Length";
-            worksheet.Cells[rowNo + 1, currentCell.Column].Value = "8-20";
-            worksheet.Cells[rowNo + 2, currentCell.Column].Value = "NBIS Length";
+            //rowNo = currentCell.Row + 17;
+            //ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
+            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.Gray);
+            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.White);
+            //worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1].Value = "Bridge Length";
+            //worksheet.Cells[rowNo + 1, currentCell.Column].Value = "8-20";
+            //worksheet.Cells[rowNo + 2, currentCell.Column].Value = "NBIS Length";
 
-            worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = parametersModel.LengthBetween8and20;
-            worksheet.Cells[rowNo + 2, currentCell.Column + 1].Value = parametersModel.LengthGreaterThan20;
-            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 1, currentCell.Column + 1, rowNo + 2, currentCell.Column + 1]);
+            //worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = parametersModel.LengthBetween8and20;
+            //worksheet.Cells[rowNo + 2, currentCell.Column + 1].Value = parametersModel.LengthGreaterThan20;
+            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 1, currentCell.Column + 1, rowNo + 2, currentCell.Column + 1]);
 
-            ExcelHelper.MergeCells(worksheet, rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.Gray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.White);
-            worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1].Value = "Status";
-            worksheet.Cells[rowNo + 5, currentCell.Column].Value = "Open";
-            worksheet.Cells[rowNo + 6, currentCell.Column].Value = "Closed";
-            worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
-            worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
+            //ExcelHelper.MergeCells(worksheet, rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1);
+            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.Gray);
+            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1], Color.White);
+            //worksheet.Cells[rowNo + 4, currentCell.Column, rowNo + 4, currentCell.Column + 1].Value = "Status";
+            //worksheet.Cells[rowNo + 5, currentCell.Column].Value = "Open";
+            //worksheet.Cells[rowNo + 6, currentCell.Column].Value = "Closed";
+            //worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
+            //worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
 
-            //[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
-            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
-            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
-            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
-            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
-            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
+            ////[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
+            //worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
+            //worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
+            //worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
+            //worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
+            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
-            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
+            //ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
+            //ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
 
-            rowNo = currentCell.Row + 8; // currentCell.Row is equal to 6
-            ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5);
-            ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.Gray);
-            ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.White);
-            worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5].Value = "5A21 Owner";
+            //rowNo = currentCell.Row + 8; // currentCell.Row is equal to 6
+            //ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5);
+            //ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.Gray);
+            //ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5], Color.White);
+            //worksheet.Cells[rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5].Value = "5A21 Owner";
 
-            var rowNoForMap = currentCell.Row + 8;
-            var ownerCodeValueTracker = new Dictionary<string, (int row, int col)> { {"01", (++rowNoForMap, currentCell.Column + 5)},
-                {"02", (++rowNoForMap, currentCell.Column + 5)},{"03",(++rowNoForMap, currentCell.Column + 5)},{"04",(++rowNoForMap, currentCell.Column + 5)},
-                {"11",(++rowNoForMap, currentCell.Column + 5)},{"12",(++rowNoForMap, currentCell.Column + 5)},
-                {"21",(++rowNoForMap, currentCell.Column + 5)},{"25",(++rowNoForMap, currentCell.Column + 5)},
-                {"26",(++rowNoForMap, currentCell.Column + 5)},{"27",(++rowNoForMap, currentCell.Column + 5)},{"31",(++rowNoForMap, currentCell.Column + 5)},
-                {"32",(++rowNoForMap, currentCell.Column + 5)},{"60",(++rowNoForMap, currentCell.Column + 5)},{"62",(++rowNoForMap, currentCell.Column + 5)},
-                {"64",(++rowNoForMap, currentCell.Column + 5)},{"66",(++rowNoForMap, currentCell.Column + 5)},{"68",(++rowNoForMap, currentCell.Column + 5)},
-                {"69",(++rowNoForMap, currentCell.Column + 5)},{"70",(++rowNoForMap, currentCell.Column + 5)},
-                {"80",(++rowNoForMap, currentCell.Column + 5)},{"XX",(++rowNoForMap, currentCell.Column + 5)} };
+            //var rowNoForMap = currentCell.Row + 8;
+            //var ownerCodeValueTracker = new Dictionary<string, (int row, int col)> { {"01", (++rowNoForMap, currentCell.Column + 5)},
+            //    {"02", (++rowNoForMap, currentCell.Column + 5)},{"03",(++rowNoForMap, currentCell.Column + 5)},{"04",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"11",(++rowNoForMap, currentCell.Column + 5)},{"12",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"21",(++rowNoForMap, currentCell.Column + 5)},{"25",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"26",(++rowNoForMap, currentCell.Column + 5)},{"27",(++rowNoForMap, currentCell.Column + 5)},{"31",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"32",(++rowNoForMap, currentCell.Column + 5)},{"60",(++rowNoForMap, currentCell.Column + 5)},{"62",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"64",(++rowNoForMap, currentCell.Column + 5)},{"66",(++rowNoForMap, currentCell.Column + 5)},{"68",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"69",(++rowNoForMap, currentCell.Column + 5)},{"70",(++rowNoForMap, currentCell.Column + 5)},
+            //    {"80",(++rowNoForMap, currentCell.Column + 5)},{"XX",(++rowNoForMap, currentCell.Column + 5)} };
 
-            foreach (var item in ownerCodeValueTracker)
-            {
-                ExcelHelper.MergeCells(worksheet, item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1, false);
-                worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = MappingContent.OwnerCodeForReport(item.Key);
-            }
+            //foreach (var item in ownerCodeValueTracker)
+            //{
+            //    ExcelHelper.MergeCells(worksheet, item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1, false);
+            //    worksheet.Cells[item.Value.row, item.Value.col - 2, item.Value.row, item.Value.col - 1].Value = MappingContent.OwnerCodeForReport(item.Key);
+            //}
 
-            foreach (var item in ownerCodeValueTracker)
-            {
-                if (parametersModel.OwnerCode.Contains(item.Key))
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "Y";
-                }
-                else
-                {
-                    worksheet.Cells[item.Value.row, item.Value.col].Value = "N";
-                }
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[item.Value.row, item.Value.col]);
-            }
+            //foreach (var item in ownerCodeValueTracker)
+            //{
+            //    if (parametersModel.OwnerCode.Contains(item.Key))
+            //    {
+            //        worksheet.Cells[item.Value.row, item.Value.col].Value = "Y";
+            //    }
+            //    else
+            //    {
+            //        worksheet.Cells[item.Value.row, item.Value.col].Value = "N";
+            //    }
+            //    ExcelHelper.HorizontalCenterAlign(worksheet.Cells[item.Value.row, item.Value.col]);
+            //}
 
             var rowForStyle = currentCell.Row + 8; // currentCell.Row is equal to 6
             var colForStyle = currentCell.Column + 3;

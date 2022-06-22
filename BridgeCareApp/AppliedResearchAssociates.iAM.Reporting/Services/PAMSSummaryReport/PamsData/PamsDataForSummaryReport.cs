@@ -301,6 +301,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 var i = 0;
                 foreach (var section in yearlySectionData.Assets)
                 {
+                    TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
+
+                    //bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
+
                     AssetDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
@@ -357,6 +361,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var initialColumn = column + 1;
             foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
+                TrackInitialYearDataForParametersTAB(intialsection);
+
                 column = initialColumn; // This is to reset the column
                 column = AddSimulationYearData(worksheet, row, column, intialsection, null);
                 row++;
@@ -450,6 +456,45 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
 
             return column;
+        }
+
+
+        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail intialsection)
+        {
+            // Get NHS record for Parameter TAB
+            if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
+            {
+                int.TryParse(intialsection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
+                if (numericValue > 0)
+                {
+                    _parametersModel.nHSModel.NHS = "Y";
+                    _parametersModel.nHSModel.NonNHS = "N"; //added by bimal
+                }
+                else
+                {
+                    _parametersModel.nHSModel.NonNHS = "Y";
+                    _parametersModel.nHSModel.NHS = "N"; //added by bimal
+                }
+            }
+            // Get BPN data for parameter TAB
+            if (!_parametersModel.BPNValues.Contains(intialsection.ValuePerTextAttribute["BUSIPLAN"]))
+            {
+                _parametersModel.BPNValues.Add(intialsection.ValuePerTextAttribute["BUSIPLAN"]);
+            }
+        }
+
+        private void TrackDataForParametersTAB(Dictionary<string, double> valuePerNumericAttribute, Dictionary<string, string> valuePerTextAttribute)
+        {
+            var structureLength = (int)valuePerNumericAttribute["SEGMENT_LENGTH"];
+
+            if (structureLength > 20 && _parametersModel.LengthGreaterThan20 != "Y")
+            {
+                _parametersModel.LengthGreaterThan20 = "Y";
+            }
+            if (structureLength >= 8 && structureLength <= 20 && _parametersModel.LengthBetween8and20 != "Y")
+            {
+                _parametersModel.LengthBetween8and20 = "Y";
+            }
         }
     }
 }

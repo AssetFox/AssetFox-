@@ -170,23 +170,23 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
-            //_unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            //_unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            //_unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
-            //var yearlyBudgetAmount = new Dictionary<string, Budget>();
-            //foreach (var budget in simulation.InvestmentPlan.Budgets)
-            //{
-            //    if (!yearlyBudgetAmount.ContainsKey(budget.Name))
-            //    {
-            //        yearlyBudgetAmount.Add(budget.Name, budget);
-            //    }
-            //    else
-            //    {
-            //        yearlyBudgetAmount[budget.Name] = budget;
-            //    }
-            //}
+            var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            foreach (var budget in simulation.InvestmentPlan.Budgets)
+            {
+                if (!yearlyBudgetAmount.ContainsKey(budget.Name))
+                {
+                    yearlyBudgetAmount.Add(budget.Name, budget);
+                }
+                else
+                {
+                    yearlyBudgetAmount[budget.Name] = budget;
+                }
+            }
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
@@ -201,8 +201,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
-            //// Filling up parameters tab
-            //_summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+            //Filling up parameters tab
+            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

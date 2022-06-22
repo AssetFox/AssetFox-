@@ -1243,6 +1243,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.SerializedWorksheetContent).IsRequired();
 
+                entity.Property(e => e.DataSourceId).IsRequired();
+
                 entity.HasOne<DataSourceEntity>()
                 .WithMany(ds => ds.ExcelWorksheets)
                     .HasForeignKey(w => w.DataSourceId)

@@ -17,6 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var returnValue = new ExcelWorksheetEntity
             {
                 Id = dto.Id,
+                DataSourceId = dto.DataSourceId,
                 SerializedWorksheetContent = dto.SerializedWorksheetContent,
             };
             return returnValue;

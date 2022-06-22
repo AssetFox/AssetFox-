@@ -330,6 +330,7 @@ namespace BridgeCareCore.Controllers
                 if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    return Ok(null);
                 }
                 return Ok(result.TreatmentLibrary);
             }
@@ -433,6 +434,7 @@ namespace BridgeCareCore.Controllers
                 if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                    return Ok(null);
                 }
                 return Ok(result.Treatments);
             }

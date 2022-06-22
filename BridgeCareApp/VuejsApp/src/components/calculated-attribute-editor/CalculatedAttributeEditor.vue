@@ -23,7 +23,7 @@
                         <v-switch
                             class='sharing header-text-content'
                             label="Default Calculation"
-                            v-model="selectedCalculatedAttributeLibrary.isDefault"
+                            v-model="isDefaultBool"
                             />
                     </v-layout>
                 </v-flex>
@@ -345,6 +345,7 @@ export default class CalculatedAttributeEditor extends Vue {
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     hasSelectedLibrary: boolean = false;
+    isDefaultBool: boolean = true;//this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
     hasScenario: boolean = false;
     rules: InputValidationRules = clone(rules);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
@@ -442,6 +443,11 @@ export default class CalculatedAttributeEditor extends Vue {
         this.selectedGridItem = clone(emptyCalculatedAttribute);
     }
 
+    @Watch('isDefaultBool')
+    onIsDefaultBoolChanged(){
+        this.selectedCalculatedAttributeLibrary.isDefault = this.isDefaultBool;
+        this.onSelectedCalculatedAttributeLibraryChanged();
+    }
     @Watch('stateCalculatedAttributes')
     onStateCalculatedAttributesChanged() {
         this.setAttributeSelectItems();
@@ -563,6 +569,7 @@ export default class CalculatedAttributeEditor extends Vue {
         this.selectedCalculatedAttributeLibrary = clone(
             this.stateSelectedCalculatedAttributeLibrary,
         );
+        this.isDefaultBool = this.selectedCalculatedAttributeLibrary.isDefault;
     }
     @Watch('stateScenarioCalculatedAttributes')
     onStateScenarioCalculatedAttributeChanged() {

@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
             // Assert
             Assert.NotNull(result);
-            var resultElements = result.ToList();
+            var resultElements = result.ToList();  // WjTodo seeing a failure here when the "real" db does not exist.
             var resultElement = resultElements.Single();
             Assert.IsType<AttributeDatum<string>>(resultElement);
         }

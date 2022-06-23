@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 
 using System.IO;
 
@@ -30,6 +31,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
 
         private readonly SummaryReportParameters _summaryReportParameters;
+        private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
         private Guid _simulationId;
@@ -62,6 +64,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _summaryReportParameters = new SummaryReportParameters();
             if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
+
+            _summaryReportGlossary = new SummaryReportGlossary();
+            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -203,6 +208,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+
+
+            // Simulation Legend TAB
+            reportDetailDto.Status = $"Creating Legends TAB";
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
+            _summaryReportGlossary.Fill(shortNameWorksheet);
+
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

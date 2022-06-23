@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
-        public void ImportSpreadsheet_ColumnHeaderIsAttributeName_CreatesNetworkAndAttributes()
+        public void ImportRawData_DataSourceExists_Succeeds()
         {
             var path = SampleAttributeDataPath();
             var stream = FileContent(path);
@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         }
 
         [Fact]
-        public void ImportSpreadsheet_TopLineIsBlank_FailsWithWarning()
+        public void ImportRawDataSpreadsheet_TopLineIsBlank_FailsWithWarning()
         {
             var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
             var stream = FileContent(path);
@@ -115,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
 
         [Fact]
-        public void ImportSpreadsheet_DataSourceDoesNotExist_FailsWithWarning()
+        public void ImportRawDataSpreadsheet_DataSourceDoesNotExist_FailsWithWarning()
         {
             // When this test is run, the ExcelWorksheet entity appears in the database, with no corresponding DataSource entity. The foreign key is not enforced. And that needs fixing.
             var path = SampleAttributeDataPath();

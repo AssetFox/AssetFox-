@@ -49,7 +49,54 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
+        [HttpGet]
+        [Route("GetAggregationRuleTypes")]
+        [Authorize]
+        public async Task<IActionResult> GetAggregationRuleTypes()
+        {
+            try
+            {
+                var result = await UnitOfWork.AttributeRepo.GetAggregationRuleTypes();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("GetAttributeDataTypes")]
+        [Authorize]
+        public async Task<IActionResult> GetAttributeDataTypes()
+        {
+            try
+            {
+                var result = await UnitOfWork.AttributeRepo.GetAttributeDataTypes();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+        [HttpGet]
+        [Route("GetAttributeDataSourceTypes")]
+        [Authorize]
+        public async Task<IActionResult> GetAttributeDataSourceTypes()
+        {
+            try
+            {
+                var result = await UnitOfWork.AttributeRepo.GetAttributeDataTypes();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
         [HttpPost]
         [Route("GetAttributesSelectValues")]
         [Authorize]

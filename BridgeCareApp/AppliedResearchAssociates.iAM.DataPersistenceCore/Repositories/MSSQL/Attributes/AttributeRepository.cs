@@ -210,7 +210,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
+        public Task<List<string>> GetAggregationRuleTypes()
+        {
+            var aggregationTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.AggregationRuleType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => aggregationTypes);
 
+        }
+        public Task<List<string>> GetAttributeDataTypes()
+        {
+            var dataTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.DataType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataTypes);
+        }
+        public Task<List<string>> GetAttributeDataSourceTypes()
+        {
+
+            var dataSourceTypes = _unitOfWork.Context.DataSource
+                .Select(_ => _.Type)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataSourceTypes);
+
+        }
         public List<AttributeDTO> GetAttributes()
         {
             if (!_unitOfWork.Context.Attribute.Any())

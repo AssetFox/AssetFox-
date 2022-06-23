@@ -142,6 +142,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BudgetIds = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()
                         ? entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => _.ScenarioBudgetId).ToList()
                         : new List<Guid>(),
+                Budgets = entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Any()
+                        ? entity.ScenarioSelectableTreatmentScenarioBudgetJoins.Select(_ => new TreatmentBudgetDTO
+                        { Id = _.ScenarioBudgetId, Name = _.ScenarioBudget.Name }).ToList()
+                        : new List<TreatmentBudgetDTO>(),
                 Consequences = entity.ScenarioTreatmentConsequences.Any()
                         ? entity.ScenarioTreatmentConsequences.Select(_ => _.ToDto()).ToList()
                         : new List<TreatmentConsequenceDTO>(),

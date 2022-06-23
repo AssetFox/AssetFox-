@@ -251,7 +251,7 @@ namespace BridgeCareCore.Controllers
         [HttpDelete]
         [Route("DeleteCommittedProjects/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> DeleteCommittedProjects(Guid simulationId)
+        public async Task<IActionResult> DeleteSimulationCommittedProjects(Guid simulationId)
         {
             try
             {

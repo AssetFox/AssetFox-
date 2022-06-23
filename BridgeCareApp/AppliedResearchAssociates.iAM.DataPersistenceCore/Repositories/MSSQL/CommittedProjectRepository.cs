@@ -232,7 +232,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void DeleteCommittedProjects(Guid simulationId)
+        public void DeleteSimulationCommittedProjects(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -250,6 +250,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
+
+        public void DeleteSpecificCommittedProjects(List<Guid> projectIds)
+        {
+            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id));
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
 
         private void AssignIdWhenNull(BaseCommittedProjectDTO dto)
         {

@@ -220,7 +220,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -241,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -261,7 +261,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(_badScenario);
+            var result = await controller.DeleteSimulationCommittedProjects(_badScenario);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

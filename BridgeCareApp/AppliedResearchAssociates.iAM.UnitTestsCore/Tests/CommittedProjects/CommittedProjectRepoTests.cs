@@ -170,33 +170,65 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void DeleteWorksWithValidSimulation()
+        public void DeleteSimulationWorksWithValidSimulation()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
         }
 
         [Fact]
-        public void DeleteHandlesInvalidSimulation()
+        public void DeleteSimulationHandlesInvalidSimulation()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act & Assert
-            Assert.Throws<RowNotInTableException>(() => repo.DeleteCommittedProjects(_badScenario));
+            Assert.Throws<RowNotInTableException>(() => repo.DeleteSimulationCommittedProjects(_badScenario));
         }
 
         [Fact]
-        public void DeleteHandlesSimulationWithNoCommitts()
+        public void DeleteSimulationHandlesSimulationWithNoCommitts()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+
+            // No assert required as long as it works
+        }
+
+        [Fact(Skip = "Not implemented")]
+        public void DeleteSpecificWorksWithValidSimulation()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            repo.DeleteSpecificCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+        }
+
+        [Fact(Skip = "Not implemented")]
+        public void DeleteSpecificHandlesInvalidSimulation()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.DeleteSpecificCommittedProjects(_badScenario));
+        }
+
+        [Fact(Skip = "Not implemented")]
+        public void DeleteSpecificHandlesSimulationWithNoCommitts()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            repo.DeleteSpecificCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
             // No assert required as long as it works
         }

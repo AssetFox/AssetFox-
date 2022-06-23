@@ -254,7 +254,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.DeleteCommittedProjects(simulation.Id);
+            var result = await _controller.DeleteSimulationCommittedProjects(simulation.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -314,7 +314,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await _controller.DeleteCommittedProjects(simulation.Id);
+            var result = await _controller.DeleteSimulationCommittedProjects(simulation.Id);
 
             // assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -384,7 +384,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            await _controller.DeleteCommittedProjects(simulation.Id);
+            await _controller.DeleteSimulationCommittedProjects(simulation.Id);
 
             // Assert
             var committedProjects = _testHelper.UnitOfWork.Context.CommittedProject

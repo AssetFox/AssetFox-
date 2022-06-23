@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
-    public class ExcelSpreadsheetImportResultDTO: WarningServiceResultDTO
+    public class ExcelRawDataDTO
     {
-        public Guid SpreadsheetId { get; set; }
-
+        public Guid Id { get; set; }
+        public Guid DataSourceId { get; set; }
+        public string SerializedWorksheetContent { get; set; }
     }
 }

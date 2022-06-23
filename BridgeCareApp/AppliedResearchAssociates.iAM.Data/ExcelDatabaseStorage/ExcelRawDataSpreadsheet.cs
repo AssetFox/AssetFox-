@@ -4,8 +4,8 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
-    public class ExcelDatabaseWorksheet
+    public class ExcelRawDataSpreadsheet
     {
-        public List<ExcelDatabaseColumn> Columns { get; set; }
+        public List<ExcelRawDataColumn> Columns { get; set; }
     }
 }

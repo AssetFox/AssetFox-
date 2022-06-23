@@ -46,8 +46,8 @@ namespace BridgeCareCore.Services
             )
         {
             var excelRepo = _unitOfWork.ExcelWorksheetRepository;
-            var excelWorkbook = excelRepo.GetExcelWorksheet(excelPackageId);
-            var deserializationResult = ExcelDatabaseWorksheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
+            var excelWorkbook = excelRepo.GetExcelRawData(excelPackageId);
+            var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
             var worksheet = deserializationResult.Worksheet;
             var returnValue = ImportExcelAttributes(
                 keyColumnName,
@@ -61,7 +61,7 @@ namespace BridgeCareCore.Services
             string keyColumnName,
             string inspectionDateColumnName,
             string spatialWeightingValue,
-            ExcelDatabaseWorksheet worksheet)
+            ExcelRawDataSpreadsheet worksheet)
         {
             if (string.IsNullOrWhiteSpace(keyColumnName))
             {
@@ -243,7 +243,7 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        private static object GetCellValueOrNull(ExcelDatabaseWorksheet worksheet, int oneBasedColumnIndex, int oneBasedRowIndex)
+        private static object GetCellValueOrNull(ExcelRawDataSpreadsheet worksheet, int oneBasedColumnIndex, int oneBasedRowIndex)
         {
             if (oneBasedColumnIndex > worksheet.Columns.Count || oneBasedColumnIndex < 1)
             {
@@ -259,7 +259,7 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        private static int FindKeyColumnIndex(string keyColumnName, ExcelDatabaseWorksheet worksheet, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
+        private static int FindKeyColumnIndex(string keyColumnName, ExcelRawDataSpreadsheet worksheet, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
         {
             var keyColumnIndex = -1;
             for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)

@@ -7,10 +7,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class ExcelWorksheetEntity: BaseEntity
+    public class ExcelRawDataEntity: BaseEntity
     {
         public Guid Id { get; set; }
-        public string SerializedWorksheetContent { get; set; }
+        public string SerializedContent { get; set; }
         public Guid DataSourceId { get; set; }
         public virtual DataSourceEntity DataSource { get; set; }
     }

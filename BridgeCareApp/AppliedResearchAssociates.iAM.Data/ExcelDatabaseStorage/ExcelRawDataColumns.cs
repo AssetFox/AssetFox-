@@ -4,11 +4,11 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
-    public static class ExcelDatabaseColumns
+    public static class ExcelRawDataColumns
     {
-        public static ExcelDatabaseColumn WithEntries(List<IExcelCellDatum> entries)
+        public static ExcelRawDataColumn WithEntries(List<IExcelCellDatum> entries)
         {
-            var returnValue = new ExcelDatabaseColumn
+            var returnValue = new ExcelRawDataColumn
             {
                 Entries = entries,
             };

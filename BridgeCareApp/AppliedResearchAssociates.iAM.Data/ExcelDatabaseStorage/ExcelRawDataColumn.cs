@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
-    public class ExcelDatabaseColumn
+    public class ExcelRawDataColumn
     {
         public List<IExcelCellDatum> Entries { get; set; }
     }

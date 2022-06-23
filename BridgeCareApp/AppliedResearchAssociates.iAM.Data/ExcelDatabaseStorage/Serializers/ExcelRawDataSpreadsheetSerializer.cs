@@ -5,10 +5,10 @@ using AppliedResearchAssociates.iAM.Data.Helpers;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
-    public static class ExcelDatabaseWorksheetSerializer
+    public static class ExcelRawDataSpreadsheetSerializer
     {
         private static readonly ExcelCellDatumValueGetter ValueGetter = new ExcelCellDatumValueGetter();
-        public static string Serialize(ExcelDatabaseWorksheet worksheet)
+        public static string Serialize(ExcelRawDataSpreadsheet worksheet)
         {
             var worksheetObjects = new List<List<object>>();
             foreach (var column in worksheet.Columns)
@@ -25,11 +25,11 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
             return returnValue;
         }
 
-        public static ExcelDatabaseWorksheetDeserializationResult Deserialize(string serializedWorksheet)
+        public static ExcelRawDataSpreadsheetDeserializationResult Deserialize(string serializedWorksheet)
         {
             var objectLists = JsonSerializer.Deserialize<List<List<object>>> (serializedWorksheet);
-            var returnValue = new ExcelDatabaseWorksheetDeserializationResult();
-            var columns = new List<ExcelDatabaseColumn>();
+            var returnValue = new ExcelRawDataSpreadsheetDeserializationResult();
+            var columns = new List<ExcelRawDataColumn>();
             foreach (var objectList in objectLists)
             {
                 var columnData = new List<IExcelCellDatum>();
@@ -38,10 +38,10 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
                     var datum = ExcelCellData.ForObject(obj);
                     columnData.Add(datum);
                 }
-                var deserializeColumn = ExcelDatabaseColumns.WithEntries(columnData);
+                var deserializeColumn = ExcelRawDataColumns.WithEntries(columnData);
                 columns.Add(deserializeColumn);
             }
-            returnValue.Worksheet = new ExcelDatabaseWorksheet
+            returnValue.Worksheet = new ExcelRawDataSpreadsheet
             {
                 Columns = columns,
             };

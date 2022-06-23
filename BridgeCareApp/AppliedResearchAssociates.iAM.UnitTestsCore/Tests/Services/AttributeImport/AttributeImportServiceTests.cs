@@ -26,9 +26,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    return returnValue;
         //}
 
-        private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
+        private ExcelRawDataImportService CreateExcelSpreadsheetImportService()
         {
-            var returnValue = new ExcelSpreadsheetImportService(_testHelper.UnitOfWork);
+            var returnValue = new ExcelRawDataImportService(_testHelper.UnitOfWork);
             return returnValue;
         }
 

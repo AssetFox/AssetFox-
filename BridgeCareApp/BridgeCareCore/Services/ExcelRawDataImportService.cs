@@ -10,14 +10,14 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Services
 {
-    public class ExcelSpreadsheetImportService : IExcelSpreadsheetImportService
+    public class ExcelRawDataImportService : IExcelRawDataImportService
     {
 
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
 
         private UnitOfDataPersistenceWork _unitOfWork;
 
-        public ExcelSpreadsheetImportService(
+        public ExcelRawDataImportService(
             UnitOfDataPersistenceWork unitOfWork
             )
         {
@@ -26,7 +26,7 @@ namespace BridgeCareCore.Services
 
         /// <summary>This import is not particularly generic. It skips over columns whose top cell is empty,
         /// effectively deleting them from the imported spreadsheet.</summary>
-        public ExcelSpreadsheetImportResultDTO ImportSpreadsheet(
+        public ExcelRawDataImportResultDTO ImportRawData(
             Guid dataSourceId,
             ExcelWorksheet worksheet,
             bool includeColumnsWithoutTitles = false
@@ -47,12 +47,12 @@ namespace BridgeCareCore.Services
             }
             if (!columnIndexesToInclude.Any())
             {
-                return new ExcelSpreadsheetImportResultDTO
+                return new ExcelRawDataImportResultDTO
                 {
                     WarningMessage = TopSpreadsheetRowIsEmpty,
                 };
             }
-            var columns = new List<ExcelDatabaseColumn>();
+            var columns = new List<ExcelRawDataColumn>();
             for (var columnIndex = 1; columnIndex <= end.Column; columnIndex++)
             {
                 if (columnIndexesToInclude.Contains(columnIndex))
@@ -68,17 +68,17 @@ namespace BridgeCareCore.Services
                     {
                         columnCells.RemoveAt(columnCells.Count - 1);
                     }
-                    var column = ExcelDatabaseColumns.WithEntries(columnCells);
+                    var column = ExcelRawDataColumns.WithEntries(columnCells);
                     columns.Add(column);
                 }
             }
-            var workseet = ExcelDatabaseWorksheets.WithColumns(columns);
+            var workseet = ExcelRawDataSpreadsheets.WithColumns(columns);
             var newId = Guid.NewGuid();
             var dto = ExcelDatabaseWorksheetMapper.ToDTO(workseet, dataSourceId, newId);
-            var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelWorksheet(dto);
-            return new ExcelSpreadsheetImportResultDTO
+            var returnId = _unitOfWork.ExcelWorksheetRepository.AddExcelRawData(dto);
+            return new ExcelRawDataImportResultDTO
             {
-                SpreadsheetId = returnId,
+                RawDataId = returnId,
             };
         }
     }

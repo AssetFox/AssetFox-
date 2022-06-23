@@ -12,31 +12,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class ExcelDatabaseWorksheetMapper
     {
-        public static ExcelWorksheetEntity ToEntity(this ExcelSpreadsheetDTO dto)
+        public static ExcelRawDataEntity ToEntity(this ExcelRawDataDTO dto)
         {
-            var returnValue = new ExcelWorksheetEntity
+            var returnValue = new ExcelRawDataEntity
             {
                 Id = dto.Id,
                 DataSourceId = dto.DataSourceId,
-                SerializedWorksheetContent = dto.SerializedWorksheetContent,
+                SerializedContent = dto.SerializedWorksheetContent,
             };
             return returnValue;
         }
 
-        public static ExcelSpreadsheetDTO ToDTO(this ExcelWorksheetEntity entity)
+        public static ExcelRawDataDTO ToDTO(this ExcelRawDataEntity entity)
         {
-            var returnValue = new ExcelSpreadsheetDTO
+            var returnValue = new ExcelRawDataDTO
             {
                 Id = entity.Id,
-                SerializedWorksheetContent = entity.SerializedWorksheetContent,
+                SerializedWorksheetContent = entity.SerializedContent,
             };
             return returnValue;
         }
 
-        public static ExcelSpreadsheetDTO ToDTO (this ExcelDatabaseWorksheet worksheet, Guid dataSourceID, Guid worksheetId)
+        public static ExcelRawDataDTO ToDTO (this ExcelRawDataSpreadsheet worksheet, Guid dataSourceID, Guid worksheetId)
         {
-            var serializedContent = ExcelDatabaseWorksheetSerializer.Serialize(worksheet);
-            var returnValue = new ExcelSpreadsheetDTO
+            var serializedContent = ExcelRawDataSpreadsheetSerializer.Serialize(worksheet);
+            var returnValue = new ExcelRawDataDTO
             {
                 Id = worksheetId,
                 DataSourceId = dataSourceID,
@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
-        internal static ExcelSpreadsheetDTO ToDTONullPropagating(ExcelWorksheetEntity entity)
+        internal static ExcelRawDataDTO ToDTONullPropagating(ExcelRawDataEntity entity)
         {
             if (entity == null)
             {

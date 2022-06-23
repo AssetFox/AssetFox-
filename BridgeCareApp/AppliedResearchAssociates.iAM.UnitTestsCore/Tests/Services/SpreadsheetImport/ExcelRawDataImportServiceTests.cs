@@ -14,16 +14,16 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
-    public class ExcelSpreadsheetImportServiceTests
+    public class ExcelRawDataImportServiceTests
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
 
-        private ExcelSpreadsheetImportService CreateExcelSpreadsheetImportService()
+        private ExcelRawDataImportService CreateExcelSpreadsheetImportService()
         {
-            var returnValue = new ExcelSpreadsheetImportService(_testHelper.UnitOfWork);
+            var returnValue = new ExcelRawDataImportService(_testHelper.UnitOfWork);
             return returnValue;
         }
 
@@ -64,14 +64,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
                 Name = dataSourceName,
             };
             _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
-            var importResult = spreadsheetService.ImportSpreadsheet(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
-            var spreadsheetId = importResult.SpreadsheetId;
-            var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelWorksheet(spreadsheetId);
+            var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
+            var spreadsheetId = importResult.RawDataId;
+            var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(spreadsheetId);
             var serializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent;
             Assert.StartsWith("[[", serializedWorksheetContent);
             Assert.EndsWith("]]", serializedWorksheetContent);
             Assert.Contains("2022-03-01", serializedWorksheetContent);
-            var expectedUpsertedSpreadsheet = new ExcelSpreadsheetDTO
+            var expectedUpsertedSpreadsheet = new ExcelRawDataDTO
             {
                 Id = spreadsheetId,
                 DataSourceId = dataSourceId,
@@ -108,9 +108,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
 
             var service = CreateExcelSpreadsheetImportService();
-            var result = service.ImportSpreadsheet(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+            var result = service.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
             var warningMessage = result.WarningMessage;
-            Assert.Equal(warningMessage, ExcelSpreadsheetImportService.TopSpreadsheetRowIsEmpty);
+            Assert.Equal(warningMessage, ExcelRawDataImportService.TopSpreadsheetRowIsEmpty);
         }
 
 
@@ -124,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var spreadsheetService = CreateExcelSpreadsheetImportService();
             var dataSourceId = Guid.NewGuid();
             var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
-            var importResult = spreadsheetService.ImportSpreadsheet(dataSourceId, excelPackage.Workbook.Worksheets[0]);
+            var importResult = spreadsheetService.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
             var warning = importResult.WarningMessage;
         }
     }

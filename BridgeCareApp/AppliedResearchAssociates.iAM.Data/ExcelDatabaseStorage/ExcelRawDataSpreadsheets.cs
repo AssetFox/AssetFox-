@@ -5,18 +5,18 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage
 {
-    public static class ExcelDatabaseWorksheets
+    public static class ExcelRawDataSpreadsheets
     {
-        public static ExcelDatabaseWorksheet WithColumns(List<ExcelDatabaseColumn> columns)
+        public static ExcelRawDataSpreadsheet WithColumns(List<ExcelRawDataColumn> columns)
         {
-            var returnValue = new ExcelDatabaseWorksheet
+            var returnValue = new ExcelRawDataSpreadsheet
             {
                 Columns = columns,
             };
             return returnValue;
         }
 
-        public static ExcelDatabaseWorksheet WithColumns(params ExcelDatabaseColumn[] columns)
+        public static ExcelRawDataSpreadsheet WithColumns(params ExcelRawDataColumn[] columns)
         {
             var columnsList = columns.ToList();
             return WithColumns(columnsList);

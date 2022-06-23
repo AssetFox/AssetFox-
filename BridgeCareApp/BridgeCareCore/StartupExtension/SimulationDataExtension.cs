@@ -20,7 +20,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ISimulationAnalysis, SimulationAnalysisService>();
             services.AddScoped<AttributeService>();
             services.AddScoped<AttributeImportService>();
-            services.AddScoped<IExcelSpreadsheetImportService, ExcelSpreadsheetImportService>();
+            services.AddScoped<IExcelRawDataImportService, ExcelRawDataImportService>();
             services.AddScoped<IExpressionValidationService, ExpressionValidationService>();
             services.AddScoped<IUserCriteriaRepository, UserCriteriaRepository>();
             services.AddScoped<IMaintainableAssetRepository, MaintainableAssetRepository>();

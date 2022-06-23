@@ -4,9 +4,9 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
-    public class ExcelDatabaseWorksheetDeserializationResult
+    public class ExcelRawDataSpreadsheetDeserializationResult
     {
-        public ExcelDatabaseWorksheet Worksheet { get; set; }
+        public ExcelRawDataSpreadsheet Worksheet { get; set; }
         public string Message { get; set; }
     }
 }

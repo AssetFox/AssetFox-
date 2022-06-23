@@ -21,16 +21,16 @@ namespace BridgeCareCore.Controllers
 {
 
     [Route("api/[controller]")]
-    public class ExcelSpreadsheetImportController : BridgeCareCoreBaseController
+    public class RawDataController : BridgeCareCoreBaseController
     {
-        private readonly IExcelSpreadsheetImportService _excelSpreadsheetImportService;
+        private readonly IExcelRawDataImportService _excelSpreadsheetImportService;
 
-        public ExcelSpreadsheetImportController(
+        public RawDataController(
             IEsecSecurity esecSecurity,
             IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor contextAccessor,
-            IExcelSpreadsheetImportService excelSpreadsheetImportService
+            IExcelRawDataImportService excelSpreadsheetImportService
             ) : base(esecSecurity, unitOfWork, hubService, contextAccessor)
         {
             _excelSpreadsheetImportService = excelSpreadsheetImportService;
@@ -59,7 +59,7 @@ namespace BridgeCareCore.Controllers
 
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _excelSpreadsheetImportService.ImportSpreadsheet(dataSourceId, worksheet);
+                    return _excelSpreadsheetImportService.ImportRawData(dataSourceId, worksheet);
                 });
 
                 if (result.WarningMessage != null)

@@ -11,34 +11,27 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public class ExcelWorksheetRepository : IExcelWorksheetRepository
+    public class ExcelRawDataRepository : IExcelRawDataRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
-        public ExcelWorksheetRepository(UnitOfDataPersistenceWork unitOfWork)
+        public ExcelRawDataRepository(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
-        public Guid AddExcelWorksheet(ExcelSpreadsheetDTO dto)
+        public Guid AddExcelRawData(ExcelRawDataDTO dto)
         {
             var entity = dto.ToEntity();
             var userId = _unitOfWork.UserEntity?.Id;
-            var entities = new List<ExcelWorksheetEntity> { entity };
+            var entities = new List<ExcelRawDataEntity> { entity };
             _unitOfWork.Context.AddAll(entities, userId);
             return entity.Id;
         }
 
-        public ExcelSpreadsheetDTO GetExcelSpreadsheet(Guid id)
+        public ExcelRawDataDTO GetExcelRawData(Guid excelPackageId)
         {
-            var entity = _unitOfWork.Context.ExcelWorksheet.Single(ew => ew.Id == id);
-            var dto = ExcelDatabaseWorksheetMapper.ToDTO(entity);
-            return dto;
-        }
-
-        public ExcelSpreadsheetDTO GetExcelWorksheet(Guid excelPackageId)
-        {
-            var entity = _unitOfWork.Context.ExcelWorksheet.FirstOrDefault(ew => ew.Id == excelPackageId);
+            var entity = _unitOfWork.Context.ExcelRawData.FirstOrDefault(ew => ew.Id == excelPackageId);
             return ExcelDatabaseWorksheetMapper.ToDTONullPropagating(entity);
         }
     }

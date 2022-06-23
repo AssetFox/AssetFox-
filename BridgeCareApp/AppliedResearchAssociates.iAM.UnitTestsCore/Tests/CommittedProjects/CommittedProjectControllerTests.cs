@@ -48,6 +48,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
+            var mockUserRepo = new Mock<IUserRepository>();
+            mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
+            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());

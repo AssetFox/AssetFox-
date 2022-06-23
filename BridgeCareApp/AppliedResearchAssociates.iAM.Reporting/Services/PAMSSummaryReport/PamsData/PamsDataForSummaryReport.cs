@@ -16,8 +16,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
     public class PamsDataForSummaryReport: IPamsDataForSummaryReport
     {
         private List<int> _spacerColumnNumbers;
-        //private IHighlightWorkDoneCells _highlightWorkDoneCells;
-        //private Dictionary<MinCValue, Func<ExcelWorksheet, int, int, Dictionary<string, double>, int>> _valueForMinC;
         private readonly List<int> _simulationYears = new List<int>();
         private ISummaryReportHelper _summaryReportHelper;
 
@@ -33,9 +31,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
         public PamsDataForSummaryReport()
         {
-            //_highlightWorkDoneCells = new HighlightWorkDoneCells();
-            //if (_highlightWorkDoneCells == null) { throw new ArgumentNullException(nameof(_highlightWorkDoneCells)); }
-
             _summaryReportHelper = new SummaryReportHelper();
             if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }

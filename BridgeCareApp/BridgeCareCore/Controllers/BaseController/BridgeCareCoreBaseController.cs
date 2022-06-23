@@ -62,18 +62,14 @@ namespace BridgeCareCore.Controllers.BaseController
                 if (_userInfo != value)
                 {
                     _userInfo = value;
-                    new Task(async () =>
-                    {
-                        await CheckIfUserExist();
-                    });
+                    CheckIfUserExist();
+                    
                 }
             }
         }
 
-        private async Task CheckIfUserExist()
+        private void CheckIfUserExist()
         {
-            await Task.Run(() =>
-            {
                 if (!string.IsNullOrEmpty(UserInfo.Name))
                 {
                     if (!UnitOfWork.UserRepo.UserExists(UserInfo.Name))
@@ -83,7 +79,6 @@ namespace BridgeCareCore.Controllers.BaseController
 
                     UnitOfWork.SetUser(_userInfo.Name);
                 }
-            });
         }
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;

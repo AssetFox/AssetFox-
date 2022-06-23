@@ -244,7 +244,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+            }
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
@@ -253,11 +262,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void DeleteSpecificCommittedProjects(List<Guid> projectIds)
         {
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id));
+            var simulationIds = _unitOfWork.Context.CommittedProject
+                .Where(_ => projectIds.Contains(_.Id))
+                .Select(_ => _.SimulationId);
+
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id));
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
 
             // Update last modified date
-            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
-            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+            foreach (var simulationId in simulationIds)
+            {
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+            }
         }
 
 

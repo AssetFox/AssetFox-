@@ -201,36 +201,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // No assert required as long as it works
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void DeleteSpecificWorksWithValidSimulation()
+        [Fact(Skip = "Unable to run with BulkExtensions")]
+        public void DeleteSpecificWorksWithValidProject()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
+            var projectsToDelete = TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => _.Id).ToList();
 
             // Act
-            repo.DeleteSpecificCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            repo.DeleteSpecificCommittedProjects(projectsToDelete);
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void DeleteSpecificHandlesInvalidSimulation()
+        [Fact]
+        public void DeleteSpecificHandlesInvalidProject()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
+            var projectsToDelete = new List<Guid>() { Guid.Parse("ba5645ae-4f13-4a9f-94fd-2c03d26de500") };
 
             // Act & Assert
-            Assert.Throws<RowNotInTableException>(() => repo.DeleteSpecificCommittedProjects(_badScenario));
-        }
-
-        [Fact(Skip = "Not implemented")]
-        public void DeleteSpecificHandlesSimulationWithNoCommitts()
-        {
-            // Arrange
-            var repo = new CommittedProjectRepository(_testUOW);
-
-            // Act
-            repo.DeleteSpecificCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
-
-            // No assert required as long as it works
+            // No assert here.  If a specific project does not exist but others do, we do not want to throw an error
         }
 
         [Fact]

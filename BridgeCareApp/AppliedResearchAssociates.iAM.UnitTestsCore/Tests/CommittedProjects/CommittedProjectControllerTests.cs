@@ -208,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
         [Fact]
@@ -228,7 +228,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Assert
             Assert.IsType<OkResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Once());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Once());
         }
 
         [Fact]
@@ -249,7 +249,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
         [Fact]
@@ -269,7 +269,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
         [Fact]

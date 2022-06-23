@@ -33,23 +33,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             _testDataSourceList = TestDataForDataSources.SimpleRepo().AsQueryable();
             _testAttributeSourceList = TestDataForDataSources.SimpleAttributeRepo().AsQueryable();
 
-            // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
-            _mockedDataSourceSet = new Mock<DbSet<DataSourceEntity>>();
-            _mockedDataSourceSet.As<IQueryable<DataSourceEntity>>().Setup(_ => _.Provider).Returns(_testDataSourceList.Provider);
-            _mockedDataSourceSet.As<IQueryable<DataSourceEntity>>().Setup(_ => _.Expression).Returns(_testDataSourceList.Expression);
-            _mockedDataSourceSet.As<IQueryable<DataSourceEntity>>().Setup(_ => _.ElementType).Returns(_testDataSourceList.ElementType);
-            _mockedDataSourceSet.As<IQueryable<DataSourceEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testDataSourceList.GetEnumerator());
-
-            _mockedAttributeSet = new Mock<DbSet<AttributeEntity>>();
-            _mockedAttributeSet.As<IQueryable<AttributeEntity>>().Setup(_ => _.Provider).Returns(_testAttributeSourceList.Provider);
-            _mockedAttributeSet.As<IQueryable<AttributeEntity>>().Setup(_ => _.Expression).Returns(_testAttributeSourceList.Expression);
-            _mockedAttributeSet.As<IQueryable<AttributeEntity>>().Setup(_ => _.ElementType).Returns(_testAttributeSourceList.ElementType);
-            _mockedAttributeSet.As<IQueryable<AttributeEntity>>().Setup(_ => _.GetEnumerator()).Returns(_testAttributeSourceList.GetEnumerator());
-
-            _mockedContext.Setup(_ => _.DataSource).Returns(_mockedDataSourceSet.Object);
-            _mockedContext.Setup(_ => _.Set<DataSourceEntity>()).Returns(_mockedDataSourceSet.Object);
-            _mockedContext.Setup(_ => _.Attribute).Returns(_mockedAttributeSet.Object);
-            _mockedContext.Setup(_ => _.Set<AttributeEntity>()).Returns(_mockedAttributeSet.Object);
+            _mockedDataSourceSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.DataSource, _testDataSourceList);
+            _mockedAttributeSet = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, _testAttributeSourceList);
 
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
             _testRepo = mockedRepo;

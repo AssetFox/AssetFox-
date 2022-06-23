@@ -25,11 +25,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
+            var hasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator;
             _unitOfWork.Context.User.Add(new UserEntity
             {
                 Id = Guid.NewGuid(),
                 Username = username,
-                HasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator
+                HasInventoryAccess = hasInventoryAccess,
             });
 
             _unitOfWork.Context.SaveChanges();
@@ -84,6 +85,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     );
             }
             else return Task.Factory.StartNew(() => _unitOfWork.Context.User.Where(_ => _.Username == userName).FirstOrDefault().ToDto());
+        }
+
+        public bool UserExists(string userName)
+        {
+            return _unitOfWork.Context.User.Any(_ => _.Username == userName);
         }
 
         public Task<UserDTO> GetUserById(Guid id)

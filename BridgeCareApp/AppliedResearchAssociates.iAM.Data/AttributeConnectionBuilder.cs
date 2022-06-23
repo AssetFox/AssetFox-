@@ -8,13 +8,14 @@ namespace AppliedResearchAssociates.iAM.Data
     {
         public static AttributeConnection Build(Attribute attribute)
         {
+            // wjwjwj run this thing.
             switch (attribute.ConnectionType)
             {
             case ConnectionType.MSSQL:
                 return new SqlAttributeConnection(attribute);
 
-            case ConnectionType.MONGO_DB:
-                throw new NotImplementedException("Mongo Db data retrieval has not been implemented");
+            case ConnectionType.EXCEL:
+                throw new NotImplementedException("Excel data retrieval has not been implemented");
             default:
                 throw new InvalidOperationException($"Invalid Connection type \"{attribute.ConnectionType}\".");
             }

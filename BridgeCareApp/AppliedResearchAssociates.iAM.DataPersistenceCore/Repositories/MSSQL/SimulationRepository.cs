@@ -121,7 +121,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.AddEntity(simulationEntity, _unitOfWork.UserEntity?.Id);
             if (dto.Users.Any())
             {
-                _unitOfWork.Context.AddAll(dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList(),
+                var usersToAdd = dto.Users.Select(_ => _.ToEntity(dto.Id)).ToList();
+                _unitOfWork.Context.AddAll(usersToAdd,
                     _unitOfWork.UserEntity?.Id);
             }
             ICalculatedAttributesRepository _calculatedAttributesRepo = _unitOfWork.CalculatedAttributeRepo;
@@ -158,7 +159,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .Single(_ => _.Id == simulationId);
 
-            return simulationEntity.ToDto(users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy));
+            var creatingUser = users.FirstOrDefault(_ => _.Id == simulationEntity.CreatedBy);
+            return simulationEntity.ToDto(creatingUser);
         }
 
         public string GetSimulationName(Guid simulationId)

@@ -22,7 +22,7 @@ namespace BridgeCareCore.Controllers
     {
         private readonly IReadOnlyDictionary<string, CRUDMethods<RemainingLifeLimitDTO, RemainingLifeLimitLibraryDTO>> _remainingLifeLimitMethods;
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>

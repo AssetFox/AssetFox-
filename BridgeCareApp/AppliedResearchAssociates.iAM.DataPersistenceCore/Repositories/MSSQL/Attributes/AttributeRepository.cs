@@ -241,11 +241,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeDTO GetSingleById(Guid attributeId)
         {
             var entity = _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId);
-            if (entity == null)
-            {
-                return null;
-            }
-            return AttributeMapper.ToDto(entity);
+            return AttributeMapper.ToDtoNullPropagating(entity);
+        }
+
+        public AttributeDTO GetSingleByName(string attributeName)
+        {
+            var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
+                a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
+            return AttributeMapper.ToDtoNullPropagating(entity);
         }
     }
 }

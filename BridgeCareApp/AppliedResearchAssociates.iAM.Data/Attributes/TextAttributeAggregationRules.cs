@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
-    internal class TextAttributeAggregationRules
+    public class TextAttributeAggregationRules
     {
         public const string Predominant = "PREDOMINANT";
         public static IEnumerable<string> ValidRuleNames()

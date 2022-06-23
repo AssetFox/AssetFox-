@@ -51,7 +51,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         private static TextAttribute ToText(AttributeDTO dto)
         {
-            // Chadwick says this should be in AttributeFactory.
             return new TextAttribute(
                 dto.DefaultValue,
                 dto.Id,
@@ -162,5 +161,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Maximum = entity.Maximum,
                 Minimum = entity.Minimum,
             };
+
+        /// <summary>Safe to call if the entity might be null. If it is
+        /// in fact null, the returned DTO will also be null.</summary>
+        public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            return ToDto(entity);
+        }
     }
 }

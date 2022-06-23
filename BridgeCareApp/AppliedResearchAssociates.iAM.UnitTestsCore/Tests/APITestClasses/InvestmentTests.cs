@@ -31,48 +31,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class InvestmentTests
     {
         private TestHelper _testHelper => TestHelper.Instance;
-        private InvestmentController _controller;
 
         private BudgetLibraryEntity _testBudgetLibrary;
         private BudgetEntity _testBudget;
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
-        private const int Year = 2022;
         private const string BudgetEntityName = "Budget";
 
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
 
         public InvestmentBudgetsService Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
             return service;
         }
 
-        private void CreateAuthorizedController(InvestmentBudgetsService service)
+        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            _controller = new InvestmentController(service, _testHelper.MockEsecSecurityAuthorized.Object,
+            var controller = new InvestmentController(service, _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+            return controller;
         }
 
-        private void CreateUnauthorizedController(InvestmentBudgetsService service)
+        private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            _controller = new InvestmentController(service, _testHelper.MockEsecSecurityNotAuthorized.Object,
+            var controller = new InvestmentController(service, _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+            return controller;
         }
 
         private void CreateLibraryTestData()
         {
+            var year = DateTime.Now.Year;
             _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
             _testHelper.UnitOfWork.Context.AddEntity(_testBudgetLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
@@ -85,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 BudgetAmounts =
                 new List<BudgetAmountEntity>
                 {
-                        new BudgetAmountEntity {Id = Guid.NewGuid(), Year = Year, Value = 500000}
+                   new BudgetAmountEntity {Id = Guid.NewGuid(), Year = year, Value = 500000}
                 },
                 CriterionLibraryBudgetJoin = new CriterionLibraryBudgetEntity
                 {
@@ -103,11 +101,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateScenarioTestData(Guid simulationId)
         {
+            var year = DateTime.Now.Year;
             _testInvestmentPlan = new InvestmentPlanEntity
             {
                 Id = Guid.NewGuid(),
                 SimulationId = simulationId,
-                FirstYearOfAnalysisPeriod = Year,
+                FirstYearOfAnalysisPeriod = year,
                 NumberOfYearsInAnalysisPeriod = 1,
                 MinimumProjectCostLimit = 500000,
                 InflationRatePercentage = 3
@@ -129,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         {
                         new ScenarioBudgetAmountEntity
                         {
-                            Id = Guid.NewGuid(), Year = Year, Value = 5000000
+                            Id = Guid.NewGuid(), Year = year, Value = 5000000
                         }
                         },
                 CriterionLibraryScenarioBudgetJoin = new CriterionLibraryScenarioBudgetEntity
@@ -264,10 +263,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
 
             // Act
-            var result = await _controller.GetBudgetLibraries();
+            var result = await controller.GetBudgetLibraries();
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -278,11 +277,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.GetInvestment(simulation.Id);
+            var result = await controller.GetInvestment(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -293,11 +292,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
 
             // Act
-            var result = await _controller.UpsertBudgetLibrary(dto);
+            var result = await controller.UpsertBudgetLibrary(dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -308,7 +307,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             var dto = new InvestmentDTO
             {
@@ -317,7 +316,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.UpsertInvestment(simulation.Id, dto);
+            var result = await controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -328,10 +327,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
 
             // Act
-            var result = await _controller.DeleteBudgetLibrary(Guid.Empty);
+            var result = await controller.DeleteBudgetLibrary(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -342,11 +341,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.GetBudgetLibraries();
+            var result = await controller.GetBudgetLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -377,11 +376,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
 
             // Act
-            var result = await _controller.GetInvestment(simulation.Id);
+            var result = await controller.GetInvestment(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -411,7 +410,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
@@ -422,7 +421,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Budgets[0].CriterionLibrary = new CriterionLibraryDTO();
 
             // Act
-            await _controller.UpsertBudgetLibrary(dto);
+            await controller.UpsertBudgetLibrary(dto);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
@@ -443,7 +442,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
 
@@ -458,7 +457,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
 
             // Act
-            await _controller.UpsertInvestment(simulation.Id, dto);
+            await controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             var modifiedBudgetDto =
@@ -483,11 +482,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
-            var result = await _controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
+            var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -507,7 +506,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateUnauthorizedController(service);
+            var controller = CreateUnauthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
             var dto = new InvestmentDTO
@@ -517,7 +516,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            var result = await _controller.UpsertInvestment(simulation.Id, dto);
+            var result = await controller.UpsertInvestment(simulation.Id, dto);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -530,12 +529,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateUnauthorizedController(service);
+            var controller = CreateUnauthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
-            var result = await _controller.ImportScenarioInvestmentBudgetsExcelFile();
+            var result = await controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -546,12 +545,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
+            var year = DateTime.Now.Year;
+
 
             // Act
-            await _controller.ImportLibraryInvestmentBudgetsExcelFile();
+            await controller.ImportLibraryInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
@@ -560,7 +561,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == Year));
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
             var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
@@ -592,8 +593,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
+            var year = DateTime.Now.Year;
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
 
@@ -601,18 +603,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
 
             var budgetAmount = _testBudget.BudgetAmounts.ToList()[0];
-            budgetAmount.Year = Year;
+            budgetAmount.Year = year;
             budgetAmount.Value = 4000000;
             _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
             // Act
-            await _controller.ImportLibraryInvestmentBudgetsExcelFile();
+            await controller.ImportLibraryInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts =
                 _testHelper.UnitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(_testBudgetLibrary.Id);
             Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == Year));
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
             var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
@@ -644,15 +646,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleLibraryBudgetsFile()
         {
             // Arrange
+            var year = DateTime.Now.Year;
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
             _testHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
 
             // Act
             var result =
-                await _controller.ExportLibraryInvestmentBudgetsExcelFile(_testBudgetLibrary.Id);
+                await controller.ExportLibraryInvestmentBudgetsExcelFile(_testBudgetLibrary.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -674,7 +677,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(4, worksheetBudgetNames.Count);
             Assert.True(worksheetBudgetNames.All(name => name.Contains("Sample Budget")));
 
-            var expectedYear = Year;
+            var expectedYear = year;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
                 .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
                 {
@@ -692,13 +695,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
             CreateRequestWithLibraryFormData();
+            var year = DateTime.Now.Year;
 
             // Act
             var result =
-                await _controller.ExportLibraryInvestmentBudgetsExcelFile(_testBudgetLibrary.Id);
+                await controller.ExportLibraryInvestmentBudgetsExcelFile(_testBudgetLibrary.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -722,7 +726,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            Assert.Equal(Year.ToString(), worksheetBudgetYearAndAmount[0]);
+            Assert.Equal(year.ToString(), worksheetBudgetYearAndAmount[0]);
             Assert.Equal(_testBudget.BudgetAmounts.ToList()[0].Value.ToString(), worksheetBudgetYearAndAmount[1]);
         }
 
@@ -731,12 +735,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             ResetHttpContextToDefault();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportLibraryInvestmentBudgetsExcelFile());
+                await controller.ImportLibraryInvestmentBudgetsExcelFile());
             Assert.Equal("Request MIME type is invalid.", exception.Message);
         }
 
@@ -745,12 +749,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateRequestForExceptionTesting();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportLibraryInvestmentBudgetsExcelFile());
+                await controller.ImportLibraryInvestmentBudgetsExcelFile());
             Assert.Equal("Investment budgets file not found.", exception.Message);
         }
 
@@ -759,14 +763,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             CreateRequestForExceptionTesting(file);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportLibraryInvestmentBudgetsExcelFile());
+                await controller.ImportLibraryInvestmentBudgetsExcelFile());
             Assert.Equal("Request contained no budget library id.", exception.Message);
         }
 
@@ -774,14 +778,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldImportScenarioBudgetsFromFile()
         {
             // Arrange
+            var year = DateTime.Now.Year;
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
-            await _controller.ImportScenarioInvestmentBudgetsExcelFile();
+            await controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
@@ -790,7 +795,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .ToList();
 
             Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == Year));
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
             var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
@@ -822,9 +827,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
+            var year = DateTime.Now.Year;
             var service = Setup();
             var simulation = _testHelper.CreateSimulation();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
@@ -832,18 +838,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
 
             var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
-            budgetAmount.Year = Year;
+            budgetAmount.Year = year;
             budgetAmount.Value = 4000000;
             _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
             // Act
-            await _controller.ImportScenarioInvestmentBudgetsExcelFile();
+            await controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts =
                 _testHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
             Assert.Equal(2, budgetAmounts.Count);
-            Assert.True(budgetAmounts.All(_ => _.Year == Year));
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
             var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
@@ -875,16 +881,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldExportSampleScenarioBudgetsFile()
         {
             // Arrange
+            var year = DateTime.Now.Year;
             var service = Setup();
             var simulationName = RandomStrings.Length11();
             var simulation = _testHelper.CreateSimulation(null, simulationName);
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
             // Act
             var result =
-                await _controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
+                await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -906,7 +913,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.True(worksheetBudgetNames.Count >= 1);
             Assert.True(worksheetBudgetNames.All(name => name.Contains(BudgetEntityName)));
 
-            var expetedYear = Year;
+            var expetedYear = year;
             worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
                 .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
                 {
@@ -926,12 +933,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             var simulationName = RandomStrings.Length11();
             var simulation = _testHelper.CreateSimulation(null, simulationName);
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
             // Act
             var result =
-                await _controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
+                await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -964,12 +971,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             ResetHttpContextToDefault();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportScenarioInvestmentBudgetsExcelFile());
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
             Assert.Equal("Request MIME type is invalid.", exception.Message);
         }
 
@@ -978,12 +985,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             CreateRequestForExceptionTesting();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportScenarioInvestmentBudgetsExcelFile());
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
             Assert.Equal("Investment budgets file not found.", exception.Message);
         }
 
@@ -992,14 +999,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            CreateAuthorizedController(service);
+            var controller = CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             CreateRequestForExceptionTesting(file);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await _controller.ImportScenarioInvestmentBudgetsExcelFile());
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
             Assert.Equal("Request contained no simulation id.", exception.Message);
         }
     }

@@ -494,6 +494,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
                 
         [Fact(Skip="Broken")]
+        // Removed as the CreateCommittedProjects(CommittedProjectList, simulation ID is no longer used
+        // Keeping as this may need to be converted to CreateCommittedProjects(CommittedProjectList) later
         public void TestCreateCommittedProjectEntity()
         {
             var testHelper = CreateTestHelper();
@@ -506,8 +508,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
                 // Act
                 testHelper.UnitOfWork.BeginTransaction();
-                testHelper.UnitOfWork.CommittedProjectRepo.CreateCommittedProjects(
-                    testHelper.StandAloneSimulation.CommittedProjects.ToList(), testHelper.StandAloneSimulation.Id);
+                //testHelper.UnitOfWork.CommittedProjectRepo.CreateCommittedProjects(
+                //    testHelper.StandAloneSimulation.CommittedProjects.ToList(), testHelper.StandAloneSimulation.Id);
                 testHelper.UnitOfWork.Commit();
 
                 // Assert

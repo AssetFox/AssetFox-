@@ -1,71 +1,43 @@
 <template>
     <v-layout column>
+        <v-subheader class="ghd-control-label ghd-md-gray">Remaining Life Limit Library</v-subheader>
         <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    <v-btn
-                        @click="
-                            onShowCreateRemainingLifeLimitLibraryDialog(false)
-                        "
-                        class="ara-blue-bg white--text"
-                        v-show="!hasScenario"
-                    >
-                        New Library
-                    </v-btn>
+            <v-layout justify-space-between>
+                <v-flex row xs6>
                     <v-select
-                        v-if="
-                            !hasSelectedLibrary || hasScenario
-                        "
-                        :items="selectListItems"
-                        label="Select a Remaining Life Limit Library"
-                        outline
-                        v-model="selectItemValue"
-                    />
-                    <v-text-field
-                        v-if="
-                            hasSelectedLibrary && !hasScenario
-                        "
-                        label="Library Name"
-                        v-model="selectedRemainingLifeLimitLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]"
+                      class="ghd-select ghd-text-field ghd-text-field-border vs-style"
+                      :items="selectListItems"
+                       v-model="selectItemValue"
+                      outline
+                      outlined
                     >
-                        <template slot="append">
-                            <v-btn
-                                @click="selectItemValue = null"
-                                class="ara-orange"
-                                icon
-                            >
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    <div v-if='hasSelectedLibrary && !hasScenario'>
-                        Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                    </div>                    
+                    </v-select>
                 </v-flex>
+                <div>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="selectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" v-show="!hasScenario" outline>Create New Library</v-btn>
+                </div>
             </v-layout>
-            <v-flex
-                xs3
-                v-show="hasSelectedLibrary || hasScenario"
-            >
-                <v-btn
-                    @click="onShowCreateRemainingLifeLimitDialog"
-                    class="ara-blue-bg white--text"
-                    >Add</v-btn
-                >
-            </v-flex>
         </v-flex>
-        <v-flex
-            xs12
-            v-show="hasSelectedLibrary || hasScenario"
-        >
-            <div class="remaining-life-limit-data-table">
-                <v-data-table
-                    :headers="gridHeaders"
-                    :items="remainingLifeLimits"
-                    class="elevation-1 fixed-header v-table__overflow"
-                >
-                    <template slot="items" slot-scope="props">
+        <div v-show="selectItemValue != null || hasScenario">
+            <v-data-table
+            :headers="gridHeaders"
+            :items="remainingLifeLimits"
+            class="elevation-1 fixed-header v-table__overflow"
+            v-model="selectedGridRows"
+            >
+                <template v-slot:headers="props">
+                    <tr>
+                        <th
+                          v-for="header in props.headers"
+                          :key="header.text"
+                        >
+                            {{header.text}}
+                        </th>
+                    </tr>
+                </template>
+                <template v-slot:items="props">
+                    <tr :active="props.selected" @click="props.selected = !props.selected">
                         <td>
                             <v-edit-dialog
                                 :return-value.sync="props.item.attribute"
@@ -140,108 +112,65 @@
                                 </template>
                             </v-edit-dialog>
                         </td>
-                        <td>
-                            <v-text-field
-                                :value="
-                                    props.item.criterionLibrary
-                                        .mergedCriteriaExpression
-                                "
-                                readonly
-                            >
-                                <template slot="append-outer">
-                                    <v-icon
-                                        @click="
-                                            onShowCriterionLibraryEditorDialog(
-                                                props.item,
-                                            )
-                                        "
-                                        class="edit-icon"
-                                    >
-                                        fas fa-edit
-                                    </v-icon>
-                                </template>
-                            </v-text-field>
+                        <td v-if="props.item.criterionLibrary.mergedCriteriaExpression != '' && props.item.criterionLibrary.mergedCriteriaExpression != null" >
+                            {{ props.item.criterionLibrary.mergedCriteriaExpression}}
                         </td>
-                    </template>
+                        <td v-else>-
+                        </td>
+                        <td class="px-0">
+                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">fas fa-edit</v-icon>
+                        </td>
+                        <td justify-end>
+                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> fas fa-trash </v-icon>
+                        </td>
+                    </tr>
+                </template>
                 </v-data-table>
-            </div>
-        </v-flex>
-        <v-flex v-show="hasSelectedLibrary && !hasScenario" xs12>
-            <v-layout justify-center>
-                <v-flex xs6>
+                <v-layout justify-start align-center class="pa-2">
+                    <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
+                    <v-text class="ghd-control-text" v-else>No results found!</v-text>
+                    <!-- <v-divider vertical class="mx-3"/>
+                    <v-btn flat right
+                      class="ghd-control-label ghd-blue"
+                      @click="onRemoveRemainingLifeLimit"
+                    > Delete Selected 
+                    </v-btn> -->
+                </v-layout>
+                <v-divider></v-divider>
+                <v-flex v-show="!hasScenario" xs12 class="px-0">
+                    <v-subheader class="ghd-control-label ghd-md-gray">Description</v-subheader>
                     <v-textarea
-                        label="Description"
-                        no-resize
-                        outline
-                        rows="4"
+                        class="ghd-control-text ghd-control-border"
                         v-model="selectedRemainingLifeLimitLibrary.description"
-                        @input='selectedRemainingLifeLimitLibrary = {...selectedRemainingLifeLimitLibrary, description: $event}'
+                        @input="selectedRemainingLifeLimitLibrary = {...selectedRemainingLifeLimitLibrary, description: $event}"
+                        outline
                     >
                     </v-textarea>
                 </v-flex>
-            </v-layout>
-        </v-flex>
-        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
-            <v-layout justify-end row>
-                <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="onUpsertScenarioRemainingLifeLimits"
-                    class="ara-blue-bg white--text"
-                    v-show="hasScenario"
-                >
-                    Save
-                </v-btn>
-                <v-btn
-                    :disabled="disableCrudButton() || !hasUnsavedChanges"
-                    @click="onUpsertRemainingLifeLimitLibrary"
-                    class="ara-blue-bg white--text"
-                    v-show="!hasScenario"
-                >
-                    Update Library
-                </v-btn>
-                <v-btn
-                    :disabled="disableCrudButton()"
-                    @click="onShowCreateRemainingLifeLimitLibraryDialog(true)"
-                    class="ara-blue-bg white--text"
-                >
-                    Create as New Library
-                </v-btn>
-                <v-btn
-                    v-show="!hasScenario"
-                    class="ara-orange-bg white--text"
-                    @click="onShowConfirmDeleteAlert"
-                    :disabled="!hasSelectedLibrary"
-                >
-                    Delete Library
-                </v-btn>
-                <v-btn :disabled='!hasUnsavedChanges'
-                    @click="onDiscardChanges"
-                    class="ara-orange-bg white--text"
-                    v-show="hasSelectedLibrary || hasScenario"
-                >
-                    Discard Changes
-                </v-btn>
-            </v-layout>
-        </v-flex>
+                <v-layout justify-center row>
+                    <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges">Cancel</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
+                    <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
+                    <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="!hasScenario" :disabled="disableCrudButton() || !hasUnsavedChanges" @click="onUpsertRemainingLifeLimitLibrary">Update Library</v-btn>
+                </v-layout>
+        </div>
 
-        <ConfirmDeleteAlert
-            :dialogData="confirmDeleteAlertData"
-            @submit="onSubmitConfirmDeleteAlertResult"
+        <ConfirmDeleteAlert 
+          :dialogData="confirmDeleteAlertData"
+          @submit="onSubmitConfirmDeleteAlertResult"
         />
-
         <CreateRemainingLifeLimitLibraryDialog
-            :dialogData="createRemainingLifeLimitLibraryDialogData"
-            @submit="onSubmitCreateRemainingLifeLimitLibraryDialogResult"
+          :dialogData="createRemainingLifeLimitLibraryDialogData"
+          @submit="onSubmitCreateRemainingLifeLimitLibraryDialogResult"
         />
-
-        <CreateRemainingLifeLimitDialog
-            :dialogData="createRemainingLifeLimitDialogData"
-            @submit="onAddRemainingLifeLimit"
+        <CreateRemainingLifeLimitDialog 
+          :dialogData="createRemainingLifeLimitDialogData"
+          @submit="onAddRemainingLifeLimit"
         />
-
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
-            @submit="onEditRemainingLifeLimitCriterionLibrary"
+        <CriterionLibraryEditorDialog 
+          :dialogData="criterionLibraryEditorDialogData"
+          @submit="onEditRemainingLifeLimitCriterionLibrary"
         />
     </v-layout>
 </template>
@@ -257,7 +186,8 @@ import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
-import { prepend, clone, findIndex, isNil, propEq, update } from 'ramda';
+import { getPropertyValues } from '@/shared/utils/getter-utils';
+import { prepend, clone, findIndex, isNil, propEq, update, contains } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
@@ -335,6 +265,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     selectedRemainingLifeLimitLibrary: RemainingLifeLimitLibrary = clone(
         emptyRemainingLifeLimitLibrary,
     );
+    selectedGridRows: RemainingLifeLimit[] = [];
+    selectedRemainingLifeIds: string[] = [];
     selectedScenarioId: string = getBlankGuid();
     selectItemValue: string | null = '';
     selectListItems: SelectItem[] = [];
@@ -346,7 +278,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: true,
             class: '',
-            width: '12.4%',
+            width: '',
         },
         {
             text: 'Limit',
@@ -354,7 +286,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: true,
             class: '',
-            width: '12.4%',
+            width: '',
         },
         {
             text: 'Criteria',
@@ -362,9 +294,28 @@ export default class RemainingLifeLimitEditor extends Vue {
             align: 'left',
             sortable: false,
             class: '',
-            width: '75%',
+            width: '50%',
         },
+        {
+            text: '',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class:'',
+            width: ''
+        },
+        {
+            text: 'Actions',
+            value: 'Actions',
+            align: 'right',
+            sortable: false,
+            class: '',
+            width: ''
+        }
     ];
+    itemsPerPage:number = 5;
+    dataPerPage: number = 0;
+    totalDataFound: number = 5;
     remainingLifeLimits: RemainingLifeLimit[] = [];
     numericAttributeSelectItems: SelectItem[] = [];
     createRemainingLifeLimitDialogData: CreateRemainingLifeLimitDialogData = clone(
@@ -407,6 +358,10 @@ export default class RemainingLifeLimitEditor extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+    @Watch('selectedGridRows')
+        onSelectedGridRowsChanged() {
+            this.selectedRemainingLifeIds = getPropertyValues('id', this.selectedGridRows,) as string[];
+        }
 
     @Watch('stateRemainingLifeLimitLibraries')
     onStateRemainingLifeLimitLibrariesChanged() {
@@ -463,6 +418,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.stateSelectedRemainingLifeLimitLibrary);
 
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+        // Update total data found and "showing results portion"
+        this.totalDataFound = this.remainingLifeLimits.length;
+        (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
     @Watch('stateNumericAttributes')
@@ -492,6 +450,16 @@ export default class RemainingLifeLimitEditor extends Vue {
         }
         
         return getUserName();
+    }
+    onRemoveRemainingLifeLimitIcon(remainingLifeLimit: RemainingLifeLimit) {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+        !contains(life.id, remainingLifeLimit.id));
+    }
+
+    onRemoveRemainingLifeLimit() {
+        this.remainingLifeLimits = this.remainingLifeLimits.filter((life: RemainingLifeLimit) =>
+            !contains(life.id, this.selectedRemainingLifeIds),
+        );
     }
 
     onShowCreateRemainingLifeLimitLibraryDialog(createAsNewLibrary: boolean) {
@@ -639,3 +607,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
 }
 </script>
+<style scoped>
+.vs-style {
+    width: 50%;
+}
+</style>

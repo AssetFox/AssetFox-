@@ -111,6 +111,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 return ("BAMS Pick CFB", "BAMS Pick CFE"); // first and last years
             }
         }
+
         public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
         {
             switch (treatmentCause)

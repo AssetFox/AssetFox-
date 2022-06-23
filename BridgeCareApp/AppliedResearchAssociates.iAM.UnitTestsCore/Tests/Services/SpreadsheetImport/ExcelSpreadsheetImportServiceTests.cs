@@ -117,6 +117,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         [Fact]
         public void ImportSpreadsheet_DataSourceDoesNotExist_FailsWithWarning()
         {
+            // When this test is run, the ExcelWorksheet entity appears in the database, with no corresponding DataSource entity. The foreign key is not enforced. And that needs fixing.
             var path = SampleAttributeDataPath();
             var stream = FileContent(path);
             var excelPackage = new ExcelPackage(stream);

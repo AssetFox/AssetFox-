@@ -19,6 +19,8 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
+
+    [Route("api/[controller]")]
     public class ExcelSpreadsheetImportController : BridgeCareCoreBaseController
     {
         private readonly IExcelSpreadsheetImportService _excelSpreadsheetImportService;
@@ -35,7 +37,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("ImportExcelSpreadsheet")]
+        [Route("ImportExcelSpreadsheet/{dataSourceId}")]
         [Authorize]
         public async Task<IActionResult> ImportExcelSpreadsheet(
             Guid dataSourceId)

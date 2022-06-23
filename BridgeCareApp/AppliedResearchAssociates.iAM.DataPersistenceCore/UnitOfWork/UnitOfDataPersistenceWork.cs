@@ -166,17 +166,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public void SetUser(string username)
         {
-            var user = Context.User
-                .Include(_ => _.UserCriteriaFilterJoin)
-                .FirstOrDefault(_ => _.Username == username);
-            UserEntity = user;
+            if (UserEntity?.Username != username)
+            {
+                var user = Context.User
+                    .Include(_ => _.UserCriteriaFilterJoin)
+                    .FirstOrDefault(_ => _.Username == username);
+                UserEntity = user;
+            }
         }
 
+        private static object AddUserLock = new object();
         public void AddUser(string username, string role)
         {
-            BeginTransaction();
-            UserRepo.AddUser(username, role);
-            Commit();
+            lock (AddUserLock)
+            {
+                if (!UserRepo.UserExists(username))
+                {
+                    BeginTransaction();
+                    UserRepo.AddUser(username, role);
+                    Commit();
+                }
+            }
         }
 
         public void Commit()

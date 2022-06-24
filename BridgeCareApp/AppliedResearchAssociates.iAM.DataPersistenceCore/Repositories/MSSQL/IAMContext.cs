@@ -133,6 +133,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
+        public virtual DbSet<ExcelRawDataEntity> ExcelRawData { get; set; }
 
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 
@@ -1160,6 +1161,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<DataSourceEntity>(entity =>
             {
+                entity.HasIndex(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
@@ -1168,6 +1170,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Secure).IsRequired();
 
+                entity.HasMany(d => d.ExcelRawData)
+                    .WithOne(p => p.DataSource)
+                    .HasForeignKey(d => d.DataSourceId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<DeficientConditionGoalEntity>(entity =>
@@ -1232,6 +1238,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Expression).IsRequired();
             });
+
+
+            modelBuilder.Entity<ExcelRawDataEntity>(entity =>
+            {
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.DataSourceId);
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.SerializedContent).IsRequired();
+
+                entity.Property(e => e.DataSourceId).IsRequired();
+
+                entity.HasOne(e => e.DataSource)
+                    .WithMany(ds => ds.ExcelRawData)
+                    .HasForeignKey(w => w.DataSourceId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
 
             modelBuilder.Entity<InvestmentPlanEntity>(entity =>
             {

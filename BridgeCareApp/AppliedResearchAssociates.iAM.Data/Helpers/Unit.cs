@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
+﻿namespace AppliedResearchAssociates.iAM.Data.Helpers
 {
     /// <summary>Think of this class as void.</summary>
     public class Unit

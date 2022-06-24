@@ -29,7 +29,7 @@
                         @click='onShowConfirmDeleteTreatmentAlert'
                         depressed
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
-                        v-show='hasSelectedTreatment'
+                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
                     >
                         Delete Treatment
                     </v-btn>
@@ -397,6 +397,7 @@ export default class TreatmentEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showImportTreatmentsDialog: boolean = false;
     confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
+    isNoTreatmentSelected: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -540,6 +541,8 @@ export default class TreatmentEditor extends Vue {
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
         };
+
+        this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
     }
 
     isSelectedTreatmentItem(treatmentId: string | number) {

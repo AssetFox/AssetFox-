@@ -22,7 +22,7 @@ namespace BridgeCareCore.Controllers
 
         public DataSourceController(
             IEsecSecurity esecSecurity,
-            UnitOfDataPersistenceWork unitOfWork,
+            IUnitOfWork unitOfWork,
             IHubService hubService,
             IHttpContextAccessor contextAccessor)
             : base(esecSecurity,
@@ -41,15 +41,12 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.DataSourceRepo.UpsertDatasource(dto);
-                    UnitOfWork.Commit();
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
                 throw;
             }
@@ -64,15 +61,12 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.DataSourceRepo.UpsertDatasource(dto);
-                    UnitOfWork.Commit();
                 });
                 return Ok();
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
                 throw;
             }
@@ -86,9 +80,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     UnitOfWork.DataSourceRepo.DeleteDataSource(dataSourceId);
-                    UnitOfWork.Commit();
                 });
 
                 return Ok();
@@ -125,6 +117,14 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId));
+                if (result is SQLDataSourceDTO)
+                {
+                    return Ok((SQLDataSourceDTO)result);
+                }
+                else if (result is ExcelDataSourceDTO)
+                {
+                    return Ok((ExcelDataSourceDTO)result);
+                }
                 return Ok(result);
             }
             catch (Exception e)

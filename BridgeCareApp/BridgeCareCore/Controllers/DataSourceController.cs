@@ -125,6 +125,14 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId));
+                if (result is SQLDataSourceDTO)
+                {
+                    return Ok((SQLDataSourceDTO)result);
+                }
+                else if (result is ExcelDataSourceDTO)
+                {
+                    return Ok((ExcelDataSourceDTO)result);
+                }
                 return Ok(result);
             }
             catch (Exception e)

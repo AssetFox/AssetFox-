@@ -148,9 +148,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjects)
+        public void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
         {
-            var simulationIds = committedProjects.Select(_ => _.SimulationId).Distinct().ToList();
+            // Test for existing simulation
+            var simulationIds = projects.Select(_ => _.SimulationId).Distinct().ToList();
             foreach (var simulation in simulationIds)
             {
                 if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation))
@@ -159,11 +160,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
 
+            // Test for existing budget
             var budgetIds = _unitOfWork.Context.ScenarioBudget
                 .Where(_ => simulationIds.Contains(_.SimulationId))
                 .Select(_ => _.Id)
                 .ToList();
-            var badBudgets = committedProjects
+            var badBudgets = projects
                 .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
                 .ToList();
             if (badBudgets.Any())
@@ -174,16 +176,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var attributes = _unitOfWork.Context.Attribute.ToList();
-            var committedProjectEntities = committedProjects.Select(_ => _.ToEntity(attributes)).ToList();
 
-            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-
+            // Create entities and assign IDs
+            var committedProjectEntities = projects.Select(p =>
+                {
+                    AssignIdWhenNull(p);
+                    return p.ToEntity(attributes);
+                }).ToList();
             var committedProjectConsequenceEntities = committedProjectEntities
-                .Where(_ => _.CommittedProjectConsequences.Any())
-                .SelectMany(_ => _.CommittedProjectConsequences)
-                .ToList();
+                    .Where(_ => _.CommittedProjectConsequences.Any())
+                    .SelectMany(_ => _.CommittedProjectConsequences)
+                    .ToList();
+            var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
-            _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+            // Determine the committed projects that exist
+            var allProvidedEntityIds = committedProjectEntities.Select(_ => _.Id).ToList();
+            var allExistingCommittedProjectIds = new List<Guid>();
+            foreach (var simulation in simulationIds)
+            {
+                var simulationProjects = _unitOfWork.Context.CommittedProject
+                    .Where(_ => _.SimulationId == simulation && allProvidedEntityIds.Contains(_.Id))
+                    .Select(_ => _.Id);
+                allExistingCommittedProjectIds.AddRange(simulationProjects);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                // UpsertAll does not work :(
+                // Use calculated attribute repository as an example
+                // TODO: Fix UpsertAll or remove
+
+                // Remove the location and consequence records from the database
+                _unitOfWork.Context.DeleteAll<CommittedProjectLocationEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
+                _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
+
+                // Update each existing committed project
+                _unitOfWork.Context.UpdateAll(committedProjectEntities.Where(_ => allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
+
+                // Add each new committed project
+                _unitOfWork.Context.AddAll(committedProjectEntities.Where(_ => !allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
+
+                // Add the locations for all objects to the database
+                _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
+
+                // Add the consequences for all objects to the database
+                _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Commit();
+            }
+            catch(Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
         }
 
         public void DeleteCommittedProjects(Guid simulationId)
@@ -203,6 +249,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
+        private void AssignIdWhenNull(BaseCommittedProjectDTO dto)
+        {
+            if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
+            dto.Consequences.Where(c => c.Id == Guid.Empty)
+                .ForEach(n => n.Id = Guid.NewGuid());
         }
     }
 }

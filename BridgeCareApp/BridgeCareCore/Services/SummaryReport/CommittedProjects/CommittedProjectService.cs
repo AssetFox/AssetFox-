@@ -456,7 +456,7 @@ namespace BridgeCareCore.Services
 
             _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
 
-            _unitOfWork.CommittedProjectRepo.CreateCommittedProjects(committedProjectDTOs.Select(_ => (BaseCommittedProjectDTO)_).ToList());
+            _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
     }
 }

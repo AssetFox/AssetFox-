@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId);
 
-        void CreateCommittedProjects(List<BaseCommittedProjectDTO> committedProjectEntities);
+        void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects);
 
         void DeleteCommittedProjects(Guid simulationId);
     }

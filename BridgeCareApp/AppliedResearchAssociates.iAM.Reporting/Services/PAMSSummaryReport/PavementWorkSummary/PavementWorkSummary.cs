@@ -12,37 +12,59 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 {
     public class PavementWorkSummary : IPavementWorkSummary
     {
+        private FullDepthAsphaltWorkSummary _fullDepthAsphaltWorkSummary;
+        private CompositeWorkSummary _compositeWorkSummary;
+        private ConcreteWorkSummary _concreteWorkSummary;
+        private TreatmentGroupsTotals _treatmentGroupsTotals;
+        private WorkTypeTotals _workTypeTotals;
+        private BudgetTotal _budgetTotal;
+        private BudgetAnalysis _budgetAnalysis;
 
         public PavementWorkSummary()
         {
+            _fullDepthAsphaltWorkSummary = new FullDepthAsphaltWorkSummary();
+            if (_fullDepthAsphaltWorkSummary == null) { throw new ArgumentNullException(nameof(_fullDepthAsphaltWorkSummary)); }
 
+            _compositeWorkSummary = new CompositeWorkSummary();
+            if (_compositeWorkSummary == null) { throw new ArgumentNullException(nameof(_compositeWorkSummary)); }
+
+            _concreteWorkSummary = new ConcreteWorkSummary();
+            if (_concreteWorkSummary == null) { throw new ArgumentNullException(nameof(_concreteWorkSummary)); }
+
+            _treatmentGroupsTotals = new TreatmentGroupsTotals();
+            if (_treatmentGroupsTotals == null) { throw new ArgumentNullException(nameof(_treatmentGroupsTotals)); }
+
+            _workTypeTotals = new WorkTypeTotals();
+            if (_workTypeTotals == null) { throw new ArgumentNullException(nameof(_workTypeTotals)); }
+
+            _budgetTotal = new BudgetTotal();
+            if (_budgetTotal == null) { throw new ArgumentNullException(nameof(_budgetTotal)); }
+
+            _budgetAnalysis = new BudgetAnalysis();
+            if (_budgetAnalysis == null) { throw new ArgumentNullException(nameof(_budgetAnalysis)); }
         }
 
-        public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
+            List<int> simulationYears,
+            WorkSummaryModel workSummaryModel,
+            Dictionary<string, Budget> yearlyBudgetAmount,
+            IReadOnlyCollection<SelectableTreatment> selectableTreatments)
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             worksheet.Calculate();
             worksheet.Cells.AutoFitColumns();
 
-            var chartRowsModel = new ChartRowsModel();
+            var chartRowsModel = _fullDepthAsphaltWorkSummary.FillSomething();
+            chartRowsModel = _compositeWorkSummary.FillSomething(chartRowsModel);
+            chartRowsModel = _concreteWorkSummary.FillSomething(chartRowsModel);
+            chartRowsModel = _treatmentGroupsTotals.FillSomething(chartRowsModel);
+            chartRowsModel = _workTypeTotals.FillSomething(chartRowsModel);
+            chartRowsModel = _budgetTotal.FillSomething(chartRowsModel);
+            chartRowsModel = _budgetAnalysis.FillSomething(chartRowsModel);
 
             return chartRowsModel;
         }
-
-        //public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
-        //    List<int> simulationYears, WorkSummaryModel workSummaryModel, Dictionary<string, Budget> yearlyBudgetAmount,
-        //    IReadOnlyCollection<SelectableTreatment> selectableTreatments)
-        //{
-        //    var currentCell = new CurrentCell { Row = 1, Column = 1 };
-
-        //    worksheet.Calculate();
-        //    worksheet.Cells.AutoFitColumns();
-
-        //    var chartRowsModel = new ChartRowsModel();
-
-        //    return chartRowsModel;
-        //}
 
         #region Private methods
 
@@ -160,4 +182,37 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         #endregion Private methods
     }
+
+
+
+    public class FullDepthAsphaltWorkSummary
+    {
+        public ChartRowsModel FillSomething() { return new ChartRowsModel(); }
+    };
+    public class CompositeWorkSummary
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+    public class ConcreteWorkSummary
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+    public class TreatmentGroupsTotals
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+    public class WorkTypeTotals
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+    public class BudgetTotal
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+    public class BudgetAnalysis
+    {
+        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
+    };
+
+
 }

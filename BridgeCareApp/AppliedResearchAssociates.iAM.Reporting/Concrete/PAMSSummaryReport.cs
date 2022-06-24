@@ -214,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PavementWorkSummary);
-            var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData);
+            var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             //// Bridge work summary TAB
             //var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");

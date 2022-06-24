@@ -25,6 +25,8 @@ namespace BridgeCareCore.Controllers
     [Route("api/[controller]")]
     public class RawDataController : BridgeCareCoreBaseController
     {
+        public const string RawDataError = "Raw data error::";
+
         private readonly IExcelRawDataImportService _excelSpreadsheetImportService;
 
         public RawDataController(
@@ -72,22 +74,48 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
                 throw;
             }
         }
 
 
         [HttpGet]
-        [Route("GetExcelSpreadsheetColumnHeaders/{excelRawDataId}")]
+        [Route("GetExcelSpreadsheetColumnHeaders/{dataSourceId}")]
         [Authorize]
-        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(Guid excelRawDataId)
+        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(Guid dataSourceId)
         {
             try {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    var dto = UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(excelRawDataId);
-                    var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(dto.SerializedWorksheetContent);
+                    var dataSource = UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId);
+                    string warningMessage = null;
+                    if (dataSource == null)
+                    {
+                        warningMessage = $"No dataSource found with id {dataSourceId}";
+                    }
+                    else if (dataSource.Type.ToLowerInvariant()!="EXCEL")
+                    {
+                        warningMessage = @$"DataSource found. Its type was {dataSource.Type}. Expected the type to be ""EXCEL""";
+                    }
+                    
+                    if (warningMessage!=null)
+                    {
+                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                        {
+                            WarningMessage = warningMessage,
+                        };
+                    }
+                    var excelSpreadsheet = UnitOfWork.ExcelWorksheetRepository.GetExcelRawDataByDataSourceId(dataSourceId);
+                    if (excelSpreadsheet == null)
+                    {
+                        warningMessage = $@"Found a DataSource with id {dataSourceId}. The DataSource was of type ""EXCEL"". However, we did not find an ExcelRawData with DataSourceId {dataSourceId}. This is unexpected.";
+                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                        {
+                            WarningMessage = warningMessage,
+                        };
+                    }
+                    var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(excelSpreadsheet.SerializedWorksheetContent);
                     var columnHeaders = worksheet.Worksheet.Columns.Select(c => c.Entries[0].ObjectValue().ToString()).ToList();
                     return new GetRawDataSpreadsheetColumnHeadersResultDTO
                     {
@@ -103,7 +131,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
                 throw;
             }
         }

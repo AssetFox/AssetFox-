@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Services;
 using System.Data;
 using OfficeOpenXml;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
 namespace BridgeCareCore.Controllers
 {
@@ -60,6 +62,38 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     return _excelSpreadsheetImportService.ImportRawData(dataSourceId, worksheet);
+                });
+
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetExcelSpreadsheetColumnHeaders/{excelRawDataId}")]
+        [Authorize]
+        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(
+            Guid excelRawDataId)
+        {
+            try {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    var dto = UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(excelRawDataId);
+                    var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(dto.SerializedWorksheetContent);
+                    var columnHeaders = worksheet.Worksheet.Columns.Select(c => c.Entries[0].ObjectValue().ToString()).ToList();
+                    return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                    {
+                        ColumnHeaders = columnHeaders,
+                    };
                 });
 
                 if (result.WarningMessage != null)

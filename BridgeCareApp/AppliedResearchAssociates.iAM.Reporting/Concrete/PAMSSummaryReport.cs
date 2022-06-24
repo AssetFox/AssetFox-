@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
 
             // Check for simulation existence      
-            if (simulationName == null)
+            if (string.IsNullOrEmpty(simulationName) || string.IsNullOrWhiteSpace(simulationName))
             {
                 IndicateError();
                 Errors.Add($"Failed to find name using simulation ID {_simulationId}.");

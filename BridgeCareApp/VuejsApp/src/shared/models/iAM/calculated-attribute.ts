@@ -41,6 +41,18 @@ export interface CriterionAndEquationSet {
     equation: Equation;
 }
 
+export interface CalculatedAttributeGridModel{
+    id: string
+    criteriaExpression: string;
+    equation: string;
+}
+
+export const emptyCalculatedAttributeGridModel: CalculatedAttributeGridModel = {
+    id: getBlankGuid(),
+    criteriaExpression: "",
+    equation: ""
+}
+
 export const emptyCalculatedAttribute: CalculatedAttribute = {
     id: getBlankGuid(),
     attribute: 'CONDITIONINDEX',

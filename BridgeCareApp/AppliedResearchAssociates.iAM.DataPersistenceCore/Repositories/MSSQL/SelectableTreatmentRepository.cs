@@ -407,7 +407,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
                     .ScenarioSelectableTreatment
                     .SimulationId == simulationId);
-
+           
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                 _.ScenarioSelectableTreatment.SimulationId == simulationId);
 

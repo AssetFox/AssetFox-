@@ -25,7 +25,8 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
             _treatmentLoader = treatmentLoader;
         }
-        public FileInfoDTO GenerateExcelFile(Guid libraryId)
+
+        public FileInfoDTO ExportLibraryTreatmentsExcelFile(Guid libraryId)
         {
             var library = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);
             var found = library != null;
@@ -36,7 +37,7 @@ namespace BridgeCareCore.Services
                 var fileInfo = new FileInfo(filename);
                 using var package = new ExcelPackage(fileInfo);
                 var workbook = package.Workbook;
-                TreatmentWorksheetGenerator.Fill(workbook, library);
+                TreatmentWorksheetGenerator.Fill(workbook, library.Treatments);
                 var bytes = package.GetAsByteArray();
                 var fileData = Convert.ToBase64String(bytes);
                 var returnValue = new FileInfoDTO
@@ -51,17 +52,21 @@ namespace BridgeCareCore.Services
             {
                 return null;
             }
-        }
+        }        
 
         public TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage)
         {
             var validationMessages = new List<string>();
+            var treatmentLibrary = _unitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
             var library = new TreatmentLibraryDTO
             {
                 Treatments = new List<TreatmentDTO>(),
                 Id = treatmentLibraryId,
+                Name = treatmentLibrary.Name,
+                Owner = treatmentLibrary.Owner,
+                Description = treatmentLibrary.Description
             };
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {
@@ -90,6 +95,69 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
+        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage)
+        {
+            var validationMessages = new List<string>();
+            var scenarioTreatments = new List<TreatmentDTO>();
+
+            var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            foreach (var worksheet in excelPackage.Workbook.Worksheets)
+            {                
+                var treatmentLoadResult = _treatmentLoader.LoadScenarioTreatment(worksheet, scenarioBudgets);
+                scenarioTreatments.Add(treatmentLoadResult.Treatment);
+                validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
+            }
+
+            var combinedValidationMessage = string.Empty;
+            if (validationMessages.Any())
+            {
+                var combinedValidationMessageBuilder = new StringBuilder();
+                foreach (var message in validationMessages)
+                {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
+            }
+
+            var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
+            {
+                Treatments = scenarioTreatments,
+                WarningMessage = combinedValidationMessage,
+            };
+
+            if (combinedValidationMessage.Length == 0)
+            {
+                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+            }
+
+            return scenarioTreatmentImportResult;
+        }
+
+        public FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId)
+        {
+            var fileInfoResult = new FileInfoDTO();
+            var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+            var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (scenarioTreatments.Any())
+            {
+                var dateString = DateTime.Now.ToString("yyyy-MM-dd-HH-mm");
+                var filename = $"Export scenario {scenarioName} treatments {dateString}";
+                var fileInfo = new FileInfo(filename);
+                using var package = new ExcelPackage(fileInfo);
+                var workbook = package.Workbook;
+                TreatmentWorksheetGenerator.Fill(workbook, scenarioTreatments);
+                var bytes = package.GetAsByteArray();
+                var fileData = Convert.ToBase64String(bytes);
+                fileInfoResult = new FileInfoDTO
+                {
+                    FileData = fileData,
+                    FileName = filename,
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                };
+            }
+            return fileInfoResult;
+        }
+
         private void SaveToDatabase(
             TreatmentImportResultDTO importResult)
         {
@@ -97,5 +165,6 @@ namespace BridgeCareCore.Services
             var importedTreatments = importResult.TreatmentLibrary.Treatments;
             _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
         }
+
     }
 }

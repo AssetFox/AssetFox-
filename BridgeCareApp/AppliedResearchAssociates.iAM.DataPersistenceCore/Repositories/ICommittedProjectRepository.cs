@@ -13,10 +13,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId);
 
+        Guid GetSimulationId(Guid projectId);
+
         List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId);
 
         void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects);
 
-        void DeleteCommittedProjects(Guid simulationId);
+        void DeleteSimulationCommittedProjects(Guid simulationId);
+
+        void DeleteSpecificCommittedProjects(List<Guid> projectIds);
     }
 }

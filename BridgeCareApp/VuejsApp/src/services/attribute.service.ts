@@ -9,4 +9,8 @@ export default class AttributeService {
     static getAttributeSelectValues(attributeNames: string[]): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/GetAttributesSelectValues`, attributeNames);
     }
+
+    static CheckSqlConnection(connectionString: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckSqlConnection/${connectionString}`);
+    }
 }

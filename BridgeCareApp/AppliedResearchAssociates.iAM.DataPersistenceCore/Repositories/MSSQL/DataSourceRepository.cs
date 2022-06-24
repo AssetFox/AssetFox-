@@ -41,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<string> GetDataSourceTypes()
         {
             var typesWithRepeats = _unitOfWork.Context.DataSource.Select(ds => ds.Type).ToList();
-            return typesWithRepeats.Distinct().ToList();
+            if (typesWithRepeats.Any()) return typesWithRepeats.Distinct().ToList();
+            return new List<string>();
         }
         public BaseDataSourceDTO GetDataSource(Guid id) =>
             _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO();

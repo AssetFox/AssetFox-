@@ -19,6 +19,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 
 using System.IO;
 
@@ -32,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IPavementWorkSummary _pavementWorkSummary;
 
         private readonly SummaryReportParameters _summaryReportParameters;
+        private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
         private Guid _simulationId;
@@ -67,6 +69,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _pavementWorkSummary = new PavementWorkSummary();
             if (_pavementWorkSummary == null) { throw new ArgumentNullException(nameof(_pavementWorkSummary)); }
+
+            _summaryReportGlossary = new SummaryReportGlossary();
+            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -198,12 +203,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
+            var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             //Filling up parameters tab
@@ -213,13 +218,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PavementWorkSummary);
+            var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
             var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             //// Bridge work summary TAB
             //var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             //var chartRowModel = _pavementWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
             //    simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+
+
+            // Simulation Legend TAB
+            reportDetailDto.Status = $"Creating Legends TAB";
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
+            _summaryReportGlossary.Fill(shortNameWorksheet);
+
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

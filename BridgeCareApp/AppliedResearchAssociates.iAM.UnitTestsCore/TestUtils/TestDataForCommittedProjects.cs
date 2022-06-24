@@ -266,7 +266,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         };
 
-        public static List<BaseCommittedProjectDTO> ValidCommittedProjects => new List<BaseCommittedProjectDTO>()
+        public static List<SectionCommittedProjectDTO> ValidCommittedProjects => new List<SectionCommittedProjectDTO>()
         {
             new SectionCommittedProjectDTO()
             {
@@ -409,7 +409,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return newProjects;
         }
 
-        public static List<BaseCommittedProjectDTO> UnmatchedAssetCommittedProjects()
+        public static List<SectionCommittedProjectDTO> UnmatchedAssetCommittedProjects()
         {
             var returnData = ValidCommittedProjects;
             returnData.Add(new SectionCommittedProjectDTO()
@@ -446,7 +446,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return returnData;
         }
 
-        public static List<BaseCommittedProjectDTO> NullBudgetCommittedProjects()
+        public static List<SectionCommittedProjectDTO> NullBudgetCommittedProjects()
         {
             var returnData = ValidCommittedProjects;
             returnData.Add(new SectionCommittedProjectDTO()

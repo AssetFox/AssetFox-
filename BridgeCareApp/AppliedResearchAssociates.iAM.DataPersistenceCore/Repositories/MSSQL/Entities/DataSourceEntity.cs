@@ -1,11 +1,15 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class DataSourceEntity
+    public class DataSourceEntity: BaseEntity
     {
+        public DataSourceEntity()
+        {
+            ExcelRawData = new HashSet<ExcelRawDataEntity>();
+        }
         public Guid Id { get; set; }
 
         /// <summary>
@@ -33,5 +37,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         /// The details for a SQL data source would be the connection string
         /// </example>
         public string Details { get; set; }
+
+        public virtual ICollection<ExcelRawDataEntity> ExcelRawData { get; set; }
+
     }
 }

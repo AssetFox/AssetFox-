@@ -88,11 +88,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Mocks\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="SampleData\" />
   </ItemGroup>
-
 </Project>

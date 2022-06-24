@@ -15,8 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         private Mock<Attribute> mockAttribute;
         private string testCommand = string.Empty;         
 
-        [Fact]
-        public void GetDataWithStringTest()
+        [Fact (Skip ="This is accessing the real db. It shouldn't. WjTodo fix that.")]
+        public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
             Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
@@ -27,14 +27,13 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
             // Assert
             Assert.NotNull(result);
-            var resultElements = result.ToList();
+            var resultElements = result.ToList();  // WjTodo seeing a failure here when the "real" db does not exist.
             var resultElement = resultElements.Single();
             Assert.IsType<AttributeDatum<string>>(resultElement);
         }
 
         private static string GetConnectionString()
         {
-
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")

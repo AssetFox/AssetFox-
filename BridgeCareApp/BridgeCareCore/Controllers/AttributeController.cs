@@ -116,44 +116,46 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("ImportAttributesExcelFile")]
-        [Authorize]
-        public async Task<IActionResult> ImportAttributesExcelFile(
-            string keyColumnName,
-            string inspectionDateColumnName,
-            string spatialWeighting)
-        {
-            try
-            {
-                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
-                {
-                    throw new ConstraintException("Request MIME type is invalid.");
-                }
+        // Wjwjwj commented out 6/20 8am while working on attribute import.
+        // I'm guessing in the new world this will no longer exist?
+        //[HttpPost]
+        //[Route("ImportAttributesExcelFile")]
+        //[Authorize]
+        //public async Task<IActionResult> ImportAttributesExcelFile(
+        //    string keyColumnName,
+        //    string inspectionDateColumnName,
+        //    string spatialWeighting)
+        //{
+        //    try
+        //    {
+        //        if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+        //        {
+        //            throw new ConstraintException("Request MIME type is invalid.");
+        //        }
 
-                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
-                {
-                    throw new ConstraintException("Attributes file not found.");
-                }
+        //        if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+        //        {
+        //            throw new ConstraintException("Attributes file not found.");
+        //        }
 
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+        //        var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
 
-                var result = await Task.Factory.StartNew(() =>
-                {
-                    return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
-                });
+        //        var result = await Task.Factory.StartNew(() =>
+        //        {
+        //            return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
+        //        });
 
-                if (result.WarningMessage != null)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-                throw;
-            }
-        }
+        //        if (result.WarningMessage != null)
+        //        {
+        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+        //        }
+        //        return Ok();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+        //        throw;
+        //    }
+        //}
     }
 }

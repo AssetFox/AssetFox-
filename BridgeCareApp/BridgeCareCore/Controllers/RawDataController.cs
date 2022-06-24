@@ -81,8 +81,7 @@ namespace BridgeCareCore.Controllers
         [HttpGet]
         [Route("GetExcelSpreadsheetColumnHeaders/{excelRawDataId}")]
         [Authorize]
-        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(
-            Guid excelRawDataId)
+        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(Guid excelRawDataId)
         {
             try {
                 var result = await Task.Factory.StartNew(() =>

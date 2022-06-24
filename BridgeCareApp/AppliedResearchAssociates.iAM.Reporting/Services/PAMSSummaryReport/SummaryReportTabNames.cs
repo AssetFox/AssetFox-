@@ -4,5 +4,6 @@
     {
         public const string PamsData = "PAMS Data";
         public const string Legend = "Legend";
+        public const string PavementWorkSummary = "Pavement Work Summary";
     }
 }

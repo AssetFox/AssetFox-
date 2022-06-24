@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
 
 using System.IO;
 
@@ -28,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         //private readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
+        private readonly IPavementWorkSummary _pavementWorkSummary;
 
         private readonly SummaryReportParameters _summaryReportParameters;
 
@@ -62,6 +64,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _summaryReportParameters = new SummaryReportParameters();
             if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
+
+            _pavementWorkSummary = new PavementWorkSummary();
+            if (_pavementWorkSummary == null) { throw new ArgumentNullException(nameof(_pavementWorkSummary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -203,6 +208,18 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+
+
+            //// Pavement Work Summary TAB
+            reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PavementWorkSummary);
+            var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData);
+
+            //// Bridge work summary TAB
+            //var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
+            //var chartRowModel = _pavementWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
+            //    simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

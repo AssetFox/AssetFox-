@@ -30,6 +30,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             _mockUOW = new Mock<IUnitOfWork>();
 
+            var mockUserRepo = new Mock<IUserRepository>();
+            mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
+            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+
             _mockDataSource = new Mock<IDataSourceRepository>();
             _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());
             _mockDataSource.Setup(_ => _.GetDataSourceTypes())

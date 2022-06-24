@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async Task DeleteWorksWithValidSimulation()
+        public async Task DeleteSimulationWorksWithValidSimulation()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -232,7 +232,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async Task DeleteFailsOnUnauthorizedUser()
+        public async Task DeleteSimulationFailsOnUnauthorizedUser()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -253,7 +253,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async Task DeleteFailsOnBadScenario()
+        public async Task DeleteSimulationFailsOnBadSimulation()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -270,6 +270,82 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
             _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
+        }
+
+        [Fact]
+        public async void DeleteSpecificWorksWithValidProject()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSpecificCommittedProjects(It.IsAny<List<Guid>>()), Times.Once());
+        }
+
+        [Fact]
+        public async void DeleteSpecificFailsOnUnauthorized()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            _mockCommittedProjectRepo.Setup(_ => _.GetSimulationId(It.IsAny<Guid>()))
+                .Returns(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSpecificCommittedProjects(It.IsAny<List<Guid>>()), Times.Never());
+        }
+
+        [Fact]
+        public async void DeleteSpecificHandlesBadProject()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                _badScenario
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]

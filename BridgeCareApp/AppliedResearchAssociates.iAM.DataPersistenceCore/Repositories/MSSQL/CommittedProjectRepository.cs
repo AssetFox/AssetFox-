@@ -286,6 +286,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        public Guid GetSimulationId(Guid projectId)
+        {
+            var project = _unitOfWork.Context.CommittedProject.FirstOrDefault(_ => _.Id == projectId);
+            if (project == null)
+            {
+                throw new RowNotInTableException($"Unable to find project with ID {projectId}");
+            }
+            return project.SimulationId;
+        }
 
         private void AssignIdWhenNull(BaseCommittedProjectDTO dto)
         {

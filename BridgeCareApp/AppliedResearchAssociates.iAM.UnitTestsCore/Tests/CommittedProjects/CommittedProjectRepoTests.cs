@@ -263,6 +263,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Throws<RowNotInTableException>(() => repo.GetSectionCommittedProjectDTOs(_badScenario));
         }
 
+        [Fact]
+        public void GetSimulationIdReturnsValidValue()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            var result = repo.GetSimulationId(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"));
+
+            // Assert
+            Assert.Equal(TestDataForCommittedProjects.Simulations.First(_ => _.Name == "Test").Id, result);
+        }
+
+        [Fact]
+        public void GetSimulationIdHandlesBadProject()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.GetSimulationId(Guid.Parse("aa84643a-24c0-4722-820c-6a1fed01ccac")));
+        }
+
         #region Helpers
         private Simulation CreateSimulation(Guid simulationId, bool populateInvestments = true)
         {

@@ -168,18 +168,26 @@ namespace BridgeCareCore.Controllers
 
         private Dictionary<string, CommittedProjectDeleteMultipleMethod> CreateDeleteSpecificProjectMethods()
         {
-            void DeleteAny(List<Guid> simulationIds)
+            void DeleteAny(List<Guid> projectIds)
             {
-                UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(simulationIds);
+                UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(projectIds);
             }
 
-            void DeletePermitted(List<Guid> simulationIds)
+            void DeletePermitted(List<Guid> projectIds)
             {
-                foreach (var simulation in simulationIds)
+                foreach (var project in projectIds)
                 {
-                    CheckUserSimulationModifyAuthorization(simulation);
+                    try
+                    {
+                        var simulationId = UnitOfWork.CommittedProjectRepo.GetSimulationId(project);
+                        CheckUserSimulationModifyAuthorization(simulationId);
+                    }
+                    catch (RowNotInTableException)
+                    {
+                        // Do nothing - project not found
+                    }
                 }
-                DeleteAny(simulationIds);
+                DeleteAny(projectIds);
             }
 
             return new Dictionary<string, CommittedProjectDeleteMultipleMethod>

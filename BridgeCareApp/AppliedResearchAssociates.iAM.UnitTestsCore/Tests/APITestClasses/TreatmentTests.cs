@@ -30,25 +30,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public void Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
         }
 
         private TreatmentController CreateAuthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }
 
         private TreatmentController CreateUnauthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityNotAuthorized.Object,
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;

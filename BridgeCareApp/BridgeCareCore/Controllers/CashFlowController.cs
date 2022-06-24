@@ -21,7 +21,7 @@ namespace BridgeCareCore.Controllers
     public class CashFlowController : BridgeCareCoreBaseController
     {
         private readonly IReadOnlyDictionary<string, CRUDMethods<CashFlowRuleDTO, CashFlowRuleLibraryDTO>> _cashFlowCRUDMethods;
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public CashFlowController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>

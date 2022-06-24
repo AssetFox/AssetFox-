@@ -17,6 +17,9 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
+
 using System.IO;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -26,6 +29,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         //private readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
+
+        private readonly SummaryReportParameters _summaryReportParameters;
+        private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
         private Guid _simulationId;
@@ -52,12 +58,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             ReportTypeName = name;
 
-            //generate network id
-            _networkId = _unitOfWork.NetworkRepo.GetMainNetwork().Id;
-
             //create summary report objects
             _pamsDataForSummaryReport = new PamsDataForSummaryReport();
             if (_pamsDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_pamsDataForSummaryReport)); }
+
+            _summaryReportParameters = new SummaryReportParameters();
+            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
+
+            _summaryReportGlossary = new SummaryReportGlossary();
+            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -89,12 +98,33 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             SimulationID = _simulationId;
 
-            // Check for simulation existence            
-            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(_simulationId);
-            if (simulationName == null)
+            var simulationName = ""; 
+            try
+            {
+                var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
+                simulationName = simulationObject.Name;
+                _networkId = simulationObject.NetworkId;
+            }
+            catch (Exception e)
+            {
+                IndicateError();
+                Errors.Add("Failed to find simulation");
+                Errors.Add(e.Message);
+                return;
+            }
+
+            // Check for simulation existence      
+            if (string.IsNullOrEmpty(simulationName) || string.IsNullOrWhiteSpace(simulationName))
             {
                 IndicateError();
                 Errors.Add($"Failed to find name using simulation ID {_simulationId}.");
+                return;
+            }
+
+            if (_networkId == Guid.Empty)
+            {
+                IndicateError();
+                Errors.Add($"Failed to find networkid using simulation ID {_simulationId}.");
                 return;
             }
 
@@ -144,35 +174,47 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
-            //var simulation = network.Simulations.First();
-            //_unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            //_unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            //_unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            var simulation = network.Simulations.First();
+            _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
-            //var yearlyBudgetAmount = new Dictionary<string, Budget>();
-            //foreach (var budget in simulation.InvestmentPlan.Budgets)
-            //{
-            //    if (!yearlyBudgetAmount.ContainsKey(budget.Name))
-            //    {
-            //        yearlyBudgetAmount.Add(budget.Name, budget);
-            //    }
-            //    else
-            //    {
-            //        yearlyBudgetAmount[budget.Name] = budget;
-            //    }
-            //}
+            var yearlyBudgetAmount = new Dictionary<string, Budget>();
+            foreach (var budget in simulation.InvestmentPlan.Budgets)
+            {
+                if (!yearlyBudgetAmount.ContainsKey(budget.Name))
+                {
+                    yearlyBudgetAmount.Add(budget.Name, budget);
+                }
+                else
+                {
+                    yearlyBudgetAmount[budget.Name] = budget;
+                }
+            }
 
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
-            //// Simulation parameters TAB
-            //var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
-            //reportDetailDto.Status = $"Creating Pams Data TAB";
-            //UpdateSimulationAnalysisDetail(reportDetailDto);
+            // Parameters TAB
+            reportDetailDto.Status = $"Creating Parameters TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
             // PAMS Data TAB
-            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
-            _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
+            reportDetailDto.Status = $"Creating Pams Data TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
+            var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
+
+            //Filling up parameters tab
+            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+
+
+            // Simulation Legend TAB
+            reportDetailDto.Status = $"Creating Legends TAB";
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
+            _summaryReportGlossary.Fill(shortNameWorksheet);
+
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

@@ -173,8 +173,8 @@ const actions = {
             true
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
-                const Treatments: Treatment[] = response.data as Treatment[];
-                commit('scenarioSelectableTreatmentsMutator', Treatments);
+                const treatments: Treatment[] = [response.data];
+                commit('scenarioSelectableTreatmentsMutator', treatments);                
                 dispatch('addSuccessNotification', {
                     message: 'Treatments file imported',
                 });
@@ -191,14 +191,53 @@ const actions = {
             false
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
+                const treatmentLibrary: TreatmentLibrary[] = [response.data];
+                commit('treatmentLibrariesMutator', treatmentLibrary);       
                 const library: TreatmentLibrary = response.data as TreatmentLibrary;
-                commit('treatmentLibrariesMutator', library);
                 commit('selectedTreatmentLibraryMutator', library.id);               
                 dispatch('addSuccessNotification', {
-                    message: 'Treatments Models file imported',
+                    message: 'Treatments file imported',
                 });
             }
         });
+    },
+    async deleteTreatment(
+        { dispatch, commit }: any,
+        payload: any,
+    ) {
+        await TreatmentService.deleteTreatment(payload.treatment, payload.libraryId).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    const treatmentLibrary: TreatmentLibrary[] = [payload.treatmentLibrary];
+                    commit('treatmentLibrariesMutator', treatmentLibrary);
+                    commit('selectedTreatmentLibraryMutator', payload.libraryId);
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted treatment',
+                    });
+                }
+            },
+        );
+    },
+    async deleteScenarioSelectableTreatment(
+        { dispatch, commit }: any,
+        payload: any,
+    ) {
+        await TreatmentService.deleteScenarioSelectableTreatment(payload.scenarioSelectableTreatment, payload.simulationId).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    commit('scenarioSelectableTreatmentsMutator', payload.treatments);
+                    dispatch('addSuccessNotification', {
+                        message: 'Deleted scenario treatment',
+                    });
+                }
+            },
+        );
     },
 };
 

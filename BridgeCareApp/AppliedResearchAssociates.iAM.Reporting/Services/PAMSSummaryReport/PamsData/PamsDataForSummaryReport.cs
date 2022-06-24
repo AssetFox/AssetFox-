@@ -17,10 +17,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
     {
         private List<int> _spacerColumnNumbers;
         private readonly List<int> _simulationYears = new List<int>();
+        private ISummaryReportHelper _summaryReportHelper;
+
+        // This is also used in Bridge Work Summary TAB
+        private readonly List<double> _previousYearInitialMinC = new List<double>();
+        private Dictionary<int, (int on, int off)> _poorOnOffCount = new Dictionary<int, (int on, int off)>();
+        private Dictionary<int, Dictionary<string, int>> _bpnPoorOnPerYear = new Dictionary<int, Dictionary<string, int>>();
+        private Dictionary<int, int> _nhsPoorOnPerYear = new Dictionary<int, int>();
+        private Dictionary<int, int> _nonNhsPoorOnPerYear = new Dictionary<int, int>();
+
+        // This will be used in Parameters TAB
+        private readonly ParametersModel _parametersModel = new ParametersModel();
 
         public PamsDataForSummaryReport()
         {
-            
+            _summaryReportHelper = new SummaryReportHelper();
+            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         private List<string> GetHeaders()
@@ -75,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
         }
 
 
-        public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
         {
             // Add data to excel.
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
@@ -100,7 +112,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var lastColumn = worksheet.Dimension.Columns + 1;
             worksheet.Column(lastColumn).Width = 3;
 
-            return;
+            var workSummaryModel = new WorkSummaryModel
+            {
+                PreviousYearInitialMinC = _previousYearInitialMinC,
+                PoorOnOffCount = _poorOnOffCount,
+                ParametersModel = _parametersModel,
+                BpnPoorOnPerYear = _bpnPoorOnPerYear,
+                NhsPoorOnPerYear = _nhsPoorOnPerYear,
+                NonNhsPoorOnPerYear = _nonNhsPoorOnPerYear,
+            };
+
+            return workSummaryModel;
         }
 
         private CurrentCell BuildHeaderAndSubHeaders(ExcelWorksheet worksheet, List<int> simulationYears)
@@ -199,40 +221,52 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             return column;
         }
 
+        private T checkAndGetValue<T>(object itemsArray, string itemName)
+        {
+            var itemValue = default(T);
+            if(itemsArray == null) { return itemValue; }
+            if (string.IsNullOrEmpty(itemName) || string.IsNullOrWhiteSpace(itemName)) { return itemValue; }
 
+            var dynamicObject = itemsArray as dynamic;
+            if (dynamicObject.ContainsKey(itemName)) { itemValue = dynamicObject[itemName]; }
+
+            //return value
+            return itemValue;
+        }
 
         private void FillData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
             var rowNo = currentCell.Row; var columnNo = currentCell.Column;
-            foreach (var sectionSummary in reportOutputData.InitialSectionSummaries)
+            foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
                 rowNo++; columnNo = 1;
-                
+
                 worksheet.Cells[rowNo, columnNo++].Value = ""; //Asset Management Section Column Blank
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DISTRICT"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["COUNTY"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["CNTY"];
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY"); 
 
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["SR"];
-                worksheet.Cells[rowNo, columnNo++].Value = "UNKNOWN"; //sectionSummary.ValuePerNumericAttribute["SEGMENT"]; //This column will go away in future according to Jake
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = "UNKNOWN"; //checkAndGetValue<string>(sectionSummary.ValuePerNumericAttribute, "SEGMENT"); //This column will go away in future according to Jake
 
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["WIDTH"];
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
                 worksheet.Cells[rowNo, columnNo++].Value = ""; // sectionSummary.ValuePerNumericAttribute["DEPTH"];
 
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["DIRECTION"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LANES"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["FAMILY"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["MPO_RPO"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["SURFACEID"] + "-" + sectionSummary.ValuePerTextAttribute["SURFACE_NAME"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerTextAttribute["BUSIPLAN"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YR_BUILT"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["YEAR_LAST_OVERLAY"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["LAST_STRUCTURAL_OVERLAY"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["AADT"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["TRK_PERCENT"];
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // sectionSummary.ValuePerNumericAttribute["ESLAS"];
-                worksheet.Cells[rowNo, columnNo++].Value = sectionSummary.ValuePerNumericAttribute["RISKSCORE"];
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_RPO");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SURFACEID").ToString() + "-" + checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SURFACE_NAME");
+
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUSIPLAN");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT");
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT");
+                worksheet.Cells[rowNo, columnNo++].Value = ""; //checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ESLAS"); 
+                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"); 
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
             }
@@ -249,7 +283,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var column = currentCell.Column;
 
             var workDoneData = new List<int>();
-            if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Sections.Count]); }
+            if (outputResults.Years.Count > 0) { workDoneData = new List<int>(new int[outputResults.Years[0].Assets.Count]); }
 
             var isInitialYear = true;
             foreach (var yearlySectionData in outputResults.Years)
@@ -260,13 +294,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = PAMSConstants.NoTreatment;
                 var i = 0;
-                foreach (var section in yearlySectionData.Sections)
+                foreach (var section in yearlySectionData.Assets)
                 {
-                    SectionDetail prevYearSection = null;
+                    TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
+
+                    //bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
+
+                    AssetDetail prevYearSection = null;
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
@@ -316,8 +354,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
             row = 4; // setting row back to start
             var initialColumn = column + 1;
-            foreach (var intialsection in outputResults.InitialSectionSummaries)
+            foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
+                TrackInitialYearDataForParametersTAB(intialsection);
+
                 column = initialColumn; // This is to reset the column
                 column = AddSimulationYearData(worksheet, row, column, intialsection, null);
                 row++;
@@ -330,17 +370,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             {
                 row = currentCell.Row; // setting row back to start
                 currentCell.Column = column;
-                foreach (var section in sectionData.Sections)
+                foreach (var section in sectionData.Assets)
                 {
                     column = currentCell.Column;
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
 
-                    SectionDetail prevYearSection = null;
+                    AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
-                            .Sections.FirstOrDefault(_ => _.SectionName == section.SectionName);
+                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
                     }
 
                     if (section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
@@ -395,22 +435,61 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             }
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, SectionSummaryDetail initialSection, SectionDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
 
-            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["OPI"]);
-            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_IRI"]);
-            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_RUTTING"], 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_FAULTING"], 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(selectedSection.ValuePerNumericAttribute["HPMS_CRACKING"], 1);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI")));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_IRI")));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_CRACKING")), 1);
 
             if (row % 2 == 0) {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
             }
 
             return column;
+        }
+
+
+        private void TrackInitialYearDataForParametersTAB(AssetSummaryDetail intialsection)
+        {
+            // Get NHS record for Parameter TAB
+            if (_parametersModel.nHSModel.NHS == null || _parametersModel.nHSModel.NonNHS == null)
+            {
+                int.TryParse(intialsection.ValuePerTextAttribute["NHS_IND"], out var numericValue);
+                if (numericValue > 0)
+                {
+                    _parametersModel.nHSModel.NHS = "Y";
+                    _parametersModel.nHSModel.NonNHS = "N"; //added by bimal
+                }
+                else
+                {
+                    _parametersModel.nHSModel.NonNHS = "Y";
+                    _parametersModel.nHSModel.NHS = "N"; //added by bimal
+                }
+            }
+            // Get BPN data for parameter TAB
+            if (!_parametersModel.BPNValues.Contains(intialsection.ValuePerTextAttribute["BUSIPLAN"]))
+            {
+                _parametersModel.BPNValues.Add(intialsection.ValuePerTextAttribute["BUSIPLAN"]);
+            }
+        }
+
+        private void TrackDataForParametersTAB(Dictionary<string, double> valuePerNumericAttribute, Dictionary<string, string> valuePerTextAttribute)
+        {
+            var structureLength = (int)valuePerNumericAttribute["SEGMENT_LENGTH"];
+
+            if (structureLength > 20 && _parametersModel.LengthGreaterThan20 != "Y")
+            {
+                _parametersModel.LengthGreaterThan20 = "Y";
+            }
+            if (structureLength >= 8 && structureLength <= 20 && _parametersModel.LengthBetween8and20 != "Y")
+            {
+                _parametersModel.LengthBetween8and20 = "Y";
+            }
         }
     }
 }

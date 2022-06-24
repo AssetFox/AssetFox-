@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -14,6 +15,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
@@ -22,10 +24,14 @@ namespace BridgeCareCore.Controllers
     public class AttributeController : BridgeCareCoreBaseController
     {
         private readonly AttributeService _attributeService;
+        private readonly AttributeImportService _attributeImportService;
 
-        public AttributeController(AttributeService attributeService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+        public AttributeController(AttributeService attributeService, AttributeImportService attributeImportService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _attributeService = attributeService ?? throw new ArgumentNullException(nameof(attributeService));
+            _attributeImportService = attributeImportService ?? throw new ArgumentNullException(nameof(attributeImportService));
+        }
 
         [HttpGet]
         [Route("GetAttributes")]
@@ -71,10 +77,8 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    // WjTodo -- next time I look at attributes, don't do it this way. Throw if something is wrong.
-                    var configurableAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(configurableAttributes);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDTOs);
                     UnitOfWork.Commit();
                 });
 
@@ -111,5 +115,47 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        // Wjwjwj commented out 6/20 8am while working on attribute import.
+        // I'm guessing in the new world this will no longer exist?
+        //[HttpPost]
+        //[Route("ImportAttributesExcelFile")]
+        //[Authorize]
+        //public async Task<IActionResult> ImportAttributesExcelFile(
+        //    string keyColumnName,
+        //    string inspectionDateColumnName,
+        //    string spatialWeighting)
+        //{
+        //    try
+        //    {
+        //        if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+        //        {
+        //            throw new ConstraintException("Request MIME type is invalid.");
+        //        }
+
+        //        if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+        //        {
+        //            throw new ConstraintException("Attributes file not found.");
+        //        }
+
+        //        var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+
+        //        var result = await Task.Factory.StartNew(() =>
+        //        {
+        //            return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
+        //        });
+
+        //        if (result.WarningMessage != null)
+        //        {
+        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+        //        }
+        //        return Ok();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+        //        throw;
+        //    }
+        //}
     }
 }

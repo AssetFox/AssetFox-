@@ -9,6 +9,8 @@ namespace BridgeCareCore.Interfaces
     {
         FileInfoDTO ExportCommittedProjectsFile(Guid simulationId);
 
+        FileInfoDTO CreateCommittedProjectTemplate();
+
         void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment);
     }
 }

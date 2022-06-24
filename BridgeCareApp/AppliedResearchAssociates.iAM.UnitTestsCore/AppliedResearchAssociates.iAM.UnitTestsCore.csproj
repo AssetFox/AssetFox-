@@ -86,8 +86,4 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="SampleData\" />
-  </ItemGroup>
 </Project>

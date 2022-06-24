@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id)
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
@@ -158,7 +158,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.ScenarioTreatmentSupersessions)
-                .ToList().ForEach(_ => _.CreateSelectableTreatment(simulation));
+                .ToList();
+
+            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
 
         public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)
@@ -405,7 +407,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
                     .ScenarioSelectableTreatment
                     .SimulationId == simulationId);
-
+           
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                 _.ScenarioSelectableTreatment.SimulationId == simulationId);
 

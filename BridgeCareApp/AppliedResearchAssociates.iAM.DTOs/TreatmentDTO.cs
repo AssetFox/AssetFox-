@@ -26,5 +26,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public List<TreatmentConsequenceDTO> Consequences { get; set; }
 
         public List<Guid> BudgetIds { get; set; }
+
+        public List<TreatmentBudgetDTO> Budgets { get; set; }
     }
 }

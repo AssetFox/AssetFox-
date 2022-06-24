@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
+            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -198,12 +198,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Parameters TAB
             reportDetailDto.Status = $"Creating Parameters TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Parameters_Tab);
 
             // PAMS Data TAB
             reportDetailDto.Status = $"Creating Pams Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.PamsData);
+            var worksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PAMSData_Tab);
             var workSummaryModel = _pamsDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             //Filling up parameters tab
@@ -212,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Simulation Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
-            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
+            var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
 

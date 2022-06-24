@@ -12,43 +12,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Sho
         public static List<IExcelWorksheetContentModel> Content
             => new List<IExcelWorksheetContentModel>
             {
-                TreatmentsRegion,
+                WorkTypesRegion,
                 ExcelWorksheetContentModels.AutoFitColumns(70),
-                ConditionRangeRegion,
-                GlossaryRegion,
                 ColorKeyRegion,
             };
 
-        public static AnchoredExcelRegionModel TreatmentsRegion
+        public static AnchoredExcelRegionModel WorkTypesRegion
             => new AnchoredExcelRegionModel
             {
-                Region = ShortNameGlossaryTreatmentModels.TreatmentsRows(),
+                Region = ShortNameGlossaryWorkTypeModels.WorkTypesRows(),
                 StartColumn = 1,
                 StartRow = 1,
-            };
-
-        public static AnchoredExcelRegionModel ConditionRangeRegion
-            => new AnchoredExcelRegionModel
-            {
-                Region = ShortNameGlossaryConditionRangeModels.ConditionRangeContent(),
-                StartRow = 1,
-                StartColumn = 4
-            };
-
-
-        public static AnchoredExcelRegionModel GlossaryRegion
-            => new AnchoredExcelRegionModel
-            {
-                Region = ShortNameGlossaryTabDefinitionsModels.GlossaryColumn(),
-                StartRow = 1,
-                StartColumn = 8,
             };
 
         public static AnchoredExcelRegionModel ColorKeyRegion
             => new AnchoredExcelRegionModel
             {
                 Region = ShortNameGlossaryColorKeyModels.ColorKeyRows(),
-                StartRow = 39,
+                StartRow = 82,
                 StartColumn = 1
             };
 

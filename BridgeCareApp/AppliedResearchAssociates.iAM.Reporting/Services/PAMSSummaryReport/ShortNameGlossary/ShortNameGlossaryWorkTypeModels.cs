@@ -3,22 +3,22 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsDat
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary
 {
-    public static class ShortNameGlossaryTreatmentModels
+    public static class ShortNameGlossaryWorkTypeModels
     {
 
-        public static RowBasedExcelRegionModel TreatmentsRows()
+        public static RowBasedExcelRegionModel WorkTypesRows()
         {
             var returnValue = RowBasedExcelRegionModels.WithRows(
                     ExcelRowModels.WithEntries(
-                        StackedExcelModels.LeftHeaderWrap("Bridge Care Work Type"),
-                        StackedExcelModels.LeftHeaderWrap("Short Bridge Care Work type"))
+                        StackedExcelModels.LeftHeaderWrap("PAMS Work Type"),
+                        StackedExcelModels.LeftHeaderWrap("Short PAMS Work type"))
                 );
-            var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
-            foreach (var treatment in abbreviatedTreatmentNames)
+            var abbreviatedWorkTypeNames = ShortNamesForWorkTypes.GetShortNamesForWorkTypes();
+            foreach (var workType in abbreviatedWorkTypeNames)
             {
                 var row = ExcelRowModels.WithEntries(
-                    ExcelValueModels.String(treatment.Key),
-                    ExcelValueModels.String(treatment.Value));
+                    ExcelValueModels.String(workType.Key),
+                    ExcelValueModels.String(workType.Value));
                 row.EveryCell = ExcelStyleModels.ThinBorder;
                 returnValue.Rows.Add(row);
             }

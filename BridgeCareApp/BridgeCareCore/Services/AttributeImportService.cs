@@ -11,10 +11,13 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using OfficeOpenXml;
+using System;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
 namespace BridgeCareCore.Services
 {
-    public class AttributeImportService
+    public class AttributeImportService : IAttributeImportService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const string NoColumnFoundForId = "No column found for Id";
@@ -22,7 +25,6 @@ namespace BridgeCareCore.Services
         public const string WasFoundInRow = "was found in row";
         public const string NonemptyKeyIsRequired = "A non-empty key column name is required.";
         public const string InspectionDateColumn = "InspectionDate column";
-        public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
         public const string FailedToCreateAValidAttributeDatum = "Failed to create a valid AttributeDatum";
         public const string NumberIsOutOfValidRange = "is out of the valid range";
         public const string IsNotLessThanOrEqualToTheMaximumValue = "is not less than or equal to the maximum value";
@@ -35,28 +37,31 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
         }
 
-        private bool TopRowIsEmpty(ExcelWorksheet worksheet)
+        [Obsolete("WjTodo leaving this in the code for now 6/21/2022, but should ask myself whether or not to get rid of it once the real attribute import is working.")]
+        public AttributesImportResultDTO ImportExcelAttributes(
+            string keyColumnName,
+            string inspectionDateColumnName,
+            string spatialWeightingValue,
+            Guid excelPackageId
+            )
         {
-            var rowLength = worksheet.Cells.End.Column;
-            for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
-            {
-                var value = worksheet.Cells[1, columnIndex].Value?.ToString();
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    if (!double.TryParse(value, out double _))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
+            var excelRepo = _unitOfWork.ExcelWorksheetRepository;
+            var excelWorkbook = excelRepo.GetExcelRawData(excelPackageId);
+            var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
+            var worksheet = deserializationResult.Worksheet;
+            var returnValue = ImportExcelAttributes(
+                keyColumnName,
+                inspectionDateColumnName,
+                spatialWeightingValue,
+                worksheet);
+            return returnValue;
         }
 
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,
             string spatialWeightingValue,
-            ExcelPackage excelPackage)
+            ExcelRawDataSpreadsheet worksheet)
         {
             if (string.IsNullOrWhiteSpace(keyColumnName))
             {
@@ -65,24 +70,12 @@ namespace BridgeCareCore.Services
                     WarningMessage = NonemptyKeyIsRequired,
                 };
             }
-            var workbook = excelPackage.Workbook;
-            var worksheet = workbook.Worksheets[0];
-            if (TopRowIsEmpty(worksheet))
-            {
-                return new AttributesImportResultDTO
-                {
-                    WarningMessage = TopSpreadsheetRowIsEmpty,
-                };
-            }
-            var cells = worksheet.Cells;
             var rowIndex = 1;
-            var end = cells.End;
-            var endColumn = end.Column;
-            var endRow = end.Row;
-            var rowLength = cells.End.Column;
+            var endColumn = worksheet.Columns.Count;
+            var endRow = worksheet.Columns.Max(c => c.Entries.Count);
             var columnNameDictionary = new Dictionary<int, string>();
             var columnNameList = new List<string>();
-            var keyColumnIndex = FindKeyColumnIndex(keyColumnName, cells, rowIndex, rowLength, columnNameDictionary, columnNameList);
+            var keyColumnIndex = FindKeyColumnIndex(keyColumnName, worksheet, rowIndex, endColumn, columnNameDictionary, columnNameList);
             if (keyColumnIndex == -1)
             {
                 var warningMessage = BuildKeyNotFoundWarningMessage(keyColumnName, columnNameDictionary);
@@ -131,7 +124,7 @@ namespace BridgeCareCore.Services
             var foundAssetNames = new Dictionary<string, int>();
             for (var assetRowIndex = 2; assetRowIndex <= endRow; assetRowIndex++)
             {
-                var assetName = worksheet.Cells[assetRowIndex, keyColumnIndex]?.Value?.ToString();
+                var assetName = GetCellValueOrNull(worksheet, keyColumnIndex, assetRowIndex)?.ToString();
                 if (!string.IsNullOrWhiteSpace(assetName))
                 {
                     var lowercaseAssetName = assetName.ToLowerInvariant();
@@ -147,7 +140,7 @@ namespace BridgeCareCore.Services
                     var location = new SectionLocation(Guid.NewGuid(), assetName);
                     var maintainableAssetId = Guid.NewGuid();
                     var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); // wjwjwj this "[Deck_Area]" is wrong and will need to change
-                    var inspectionDateObject = worksheet.Cells[assetRowIndex, inspectionDateColumnIndex].Value;
+                    var inspectionDateObject = GetCellValueOrNull(worksheet, assetRowIndex, inspectionDateColumnIndex);
                     DateTime inspectionDate = DateTime.MinValue;
                     if (inspectionDateObject is DateTime inspectionDateObjectDate)
                     {
@@ -157,7 +150,7 @@ namespace BridgeCareCore.Services
                     foreach (var attributeColumnIndex in columnIndexAttributeDictionary.Keys)
                     {
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
-                        var attributeValue = worksheet.Cells[assetRowIndex, attributeColumnIndex].Value;
+                        var attributeValue = GetCellValueOrNull(worksheet, attributeColumnIndex, assetRowIndex);
                         var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
                         if (attributeDatum == null)
                         {
@@ -250,12 +243,28 @@ namespace BridgeCareCore.Services
             return returnValue;
         }
 
-        private static int FindKeyColumnIndex(string keyColumnName, ExcelRange cells, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
+        private static object GetCellValueOrNull(ExcelRawDataSpreadsheet worksheet, int oneBasedColumnIndex, int oneBasedRowIndex)
+        {
+            if (oneBasedColumnIndex > worksheet.Columns.Count || oneBasedColumnIndex < 1)
+            {
+                return null;
+            }
+            var column = worksheet.Columns[oneBasedColumnIndex - 1];
+            if (oneBasedRowIndex > column.Entries.Count || oneBasedRowIndex < 1)
+            {
+                return null;
+            }
+            var entry = column.Entries[oneBasedRowIndex - 1];
+            var returnValue = entry.Accept(new ExcelCellDatumValueGetter(), Unit.Default);
+            return returnValue;
+        }
+
+        private static int FindKeyColumnIndex(string keyColumnName, ExcelRawDataSpreadsheet worksheet, int rowIndex, int rowLength, Dictionary<int, string> columnNameDictionary, List<string> columnNameList)
         {
             var keyColumnIndex = -1;
             for (var columnIndex = 1; columnIndex <= rowLength; columnIndex++)
             {
-                var cellValue = cells[rowIndex, columnIndex].Value?.ToString();
+                var cellValue = GetCellValueOrNull(worksheet, columnIndex, 1)?.ToString();
                 if (cellValue == null)
                 {
                     break;

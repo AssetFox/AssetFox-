@@ -384,6 +384,8 @@ iAM-legacy/DatabaseManager.dll
 
 # test connection file
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestCore/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
 
 # esec file
 /BridgeCareApp/BridgeCareCore/esec.json
@@ -398,7 +400,6 @@ iAM-legacy/DatabaseManager.dll
 /BridgeCareApp/BridgeCareCore/Logs
 /BridgeCareApp/BridgeCareCore/2020-12-14_log.txt
 BridgeCareApp/BridgeCareCore/coreConnection.json
-BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
 BridgeCareApp/BridgeCareCore/coreConnection.Development.json
 /BridgeCareApp/BridgeCareCore/metaData.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/MetaData/AttributeMetaData/metaData.json
@@ -412,4 +413,3 @@ BridgeCareApp/BridgeCareCore/b2c.json
 .Rproj.user
 /BridgeCareApp/BridgeCareCore/web.config
 
-BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json

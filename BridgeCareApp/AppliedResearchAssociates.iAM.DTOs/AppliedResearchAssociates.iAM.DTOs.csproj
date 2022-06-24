@@ -8,4 +8,8 @@
       <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Helpers\" />
+    </ItemGroup>
+
 </Project>

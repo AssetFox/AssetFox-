@@ -40,6 +40,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
+            foreach(var entityToAdd in entitiesToAdd)
+            {
+               DataSourceEntity dataSourceEntity = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Type == entityToAdd.ConnectionType.ToString());
+                entityToAdd.DataSource = dataSourceEntity;
+            }
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);
         }
@@ -243,8 +248,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-
-            return _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            var attrs = _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            foreach(var a in attrs)
+            {
+                if (a.DataSourceType == null) continue;
+                a.DataSourceType = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id.ToString() == a.DataSourceType).Type;
+            }
+            return attrs;
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()

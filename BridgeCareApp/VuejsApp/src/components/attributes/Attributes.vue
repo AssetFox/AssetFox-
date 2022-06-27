@@ -214,7 +214,7 @@ export default class Attributes extends Vue {
 
     @Watch('selectedAttribute', {deep: true})
     onSelectedAttributeChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedAttribute, this.stateSelectedAttribute)
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedAttribute, this.stateSelectedAttribute);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -249,10 +249,16 @@ export default class Attributes extends Vue {
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
             if(this.selectedAttribute.type === 'NUMBER'){
-                allValid = allValid && !isNaN(+this.selectedAttribute.defaultValue);
-                this.selectedAttribute.defaultValue = '';
+                if(isNaN(+this.selectedAttribute.defaultValue)){
+                    allValid = false;
+                    this.selectedAttribute.defaultValue = '';
+                }               
             }
-                
+            //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
+            if(!isNil(this.selectedAttribute.maximum) && this.selectedAttribute.maximum === "")  
+                this.selectedAttribute.maximum = null;
+            if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
+                this.selectedAttribute.minimum = null;
 
         return !allValid;
     }

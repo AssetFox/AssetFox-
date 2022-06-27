@@ -11,6 +11,7 @@ export interface Attribute {
     maximum: number | null;
     isCalculated: boolean;
     isAscending: boolean;
+    dataSourceType: string;
 }
 
 export interface NetworkAttributes {
@@ -40,5 +41,6 @@ export const emptyAttribute: Attribute = {
     minimum: 0,
     maximum: 0,
     name: '',
-    type: 'STRING'
+    type: 'STRING',
+    dataSourceType: ''
 }

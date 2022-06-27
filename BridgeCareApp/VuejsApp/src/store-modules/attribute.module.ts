@@ -10,7 +10,9 @@ const state = {
     selectedAttribute: clone(emptyAttribute) as Attribute,
     stringAttributes: [] as Attribute[],
     numericAttributes: [] as Attribute[],
-    attributesSelectValues: [] as AttributeSelectValues[]
+    attributesSelectValues: [] as AttributeSelectValues[],
+    attributeAggregationRuleTypes: [] as string[],
+    attributeDataSourceTypes: [] as string[]
 };
 
 const mutations = {
@@ -54,6 +56,12 @@ const mutations = {
     },
     attributesSelectValuesMutator(state: any, attributesSelectValues: AttributeSelectValues[]) {
         state.attributesSelectValues = [...state.attributesSelectValues, ...attributesSelectValues];
+    },
+    attributeAggregationRuleTypesMutator(state: any, attributeAggregationRuleTypes: string[]) {
+        state.attributeAggregationRuleTypes = clone(attributeAggregationRuleTypes);
+    },
+    attributeDataSourceTypesMutator(state: any, attributeDataSourceTypes: string[]) {
+        state.attributeDataSourceTypes = clone(attributeDataSourceTypes);
     }
 };
 
@@ -151,6 +159,22 @@ const actions = {
                 }
             },
         );
+    },
+    async getAttributeAggregationRuleTypes({commit}: any) {
+        await AttributeService.GetAttributeAggregationRuleTypes()
+            .then((response: AxiosResponse<Attribute[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('attributeAggregationRuleTypesMutator', response.data);
+                }
+            });
+    },
+    async getAttributeDataSourceTypes({commit}: any) {
+        await AttributeService.GetAttributeDataSourceTypes()
+            .then((response: AxiosResponse<Attribute[]>) => {
+                if (hasValue(response, 'data')) {
+                    commit('attributeDataSourceTypesMutator', response.data);
+                }
+            });
     }
 };
 

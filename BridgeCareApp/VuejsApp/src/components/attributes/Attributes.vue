@@ -152,30 +152,35 @@ export default class Attributes extends Vue {
     hasSelectedAttribute: boolean = false;
     selectAttributeItemValue: string | null = null;
     selectAttributeItems: SelectItem[] = [];
+    selectAggregationRuleTypeItems: SelectItem[] = [];
     selectedAttribute: Attribute = clone(emptyAttribute);
     currentDataSource: string  = 'None';
     rules: InputValidationRules = rules;
 
-    aggregationRuleSelectValues: SelectItem[] = [
-        {text: 'PREDOMINANT', value: 'PREDOMINANT'},
-        {text: 'AVERAGE', value: 'AVERAGE'}
-    ];
+    aggregationRuleSelectValues: SelectItem[] = []
+    //     {text: 'PREDOMINANT', value: 'PREDOMINANT'},
+    //     {text: 'AVERAGE', value: 'AVERAGE'}
+    // ];
     typeSelectValues: SelectItem[] = [
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
     ];
-    dataSourceSelectValues: SelectItem[] = [
-        {text: 'MS SQL', value: 'MS SQL'},
-        {text: 'Excel', value: 'Excel'},
-        {text: 'None', value: 'None'}
-    ];
+    dataSourceSelectValues: SelectItem[] = []
+    //     {text: 'MS SQL', value: 'MS SQL'},
+    //     {text: 'Excel', value: 'Excel'},
+    //     {text: 'None', value: 'None'}
+    // ];
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    @State(state => state.attributeModule.attributeAggregationRuleTypes) stateAttributeAggregationRuleTypes: string[];
+    @State(state => state.attributeModule.attributeDataSourceTypes) stateAttributeDataSourceTypes: string[];
     @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     
     @Action('getAttributes') getAttributes: any;
+    @Action('getAttributeAggregationRuleTypes') getAttributeAggregationRuleTypes: any;
+    @Action('getAttributeDataSourceTypes') getAttributeDataSourceTypes: any;
     @Action('selectAttribute') selectAttributeAction: any;
     @Action('upsertAttribute') upsertAttributeAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -184,8 +189,9 @@ export default class Attributes extends Vue {
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
-            vm.librarySelectItemValue = null;
             vm.getAttributes();
+            vm.getAttributeAggregationRuleTypes();
+            vm.getAttributeDataSourceTypes();
         });
     }
 
@@ -201,11 +207,28 @@ export default class Attributes extends Vue {
         }));
     }
 
+    @Watch('stateAttributeDataSourceTypes')
+    onStateAttributeDataSourceTypesChanged() {
+        this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
+            text: type,
+            value: type,
+        }));
+    }
+
+    @Watch('stateAttributeAggregationRuleTypes')
+    onStateAttributeAggregationRuleTypesChanged() {
+        this.aggregationRuleSelectValues = this.stateAttributeAggregationRuleTypes.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
+    }
+
     @Watch('selectAttributeItemValue')
     onSelectAttributeItemValueChanged() {
         this.selectAttributeAction(this.selectAttributeItemValue);
         this.hasSelectedAttribute = true;
     }
+    
 
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {

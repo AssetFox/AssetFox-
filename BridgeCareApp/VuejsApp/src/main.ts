@@ -24,9 +24,18 @@ import VuejsDialog from 'vuejs-dialog';
 // @ts-ignore
 import VuejsDialogMixin from 'vuejs-dialog/dist/vuejs-dialog-mixin.min.js';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
+import TestSvg from '@/shared/icons/TestSvg.vue';
 
 Vue.use(Vuetify, {
     iconfont: 'fa',
+    icons: {
+        'product': {
+          component: TestSvg, // you can use string here if component is registered globally
+          props: { // pass props to your component if needed
+            name: 'product'
+          }
+        }
+    }
 });
 
 Vue.use(VueWorker);

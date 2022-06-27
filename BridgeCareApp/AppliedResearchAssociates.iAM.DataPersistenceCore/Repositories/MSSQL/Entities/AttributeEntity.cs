@@ -50,6 +50,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public DataSourceEntity DataSource { get; set; }
 
+        public Guid? DataSourceId { get; set; }
+
         public string DefaultValue { get; set; }
 
         public double? Minimum { get; set; }

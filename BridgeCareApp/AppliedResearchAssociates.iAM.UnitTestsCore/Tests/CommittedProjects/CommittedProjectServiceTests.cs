@@ -42,7 +42,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockCommittedProjectRepo.Setup(_ => _.GetCommittedProjectsForExport(It.IsAny<Guid>()))
-                .Returns<Guid>(_ => TestDataForCommittedProjects.ValidCommittedProjects.Where(q => q.SimulationId == _).ToList());
+                .Returns<Guid>(_ => TestDataForCommittedProjects.ValidCommittedProjects
+                    .Where(q => q.SimulationId == _)
+                    .Select(p => (BaseCommittedProjectDTO)p)
+                    .ToList());
             mockedTestUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
             _mockedSimulationRepo = new Mock<ISimulationRepository>();
@@ -132,9 +135,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         public void ImportCreatesValidRecordsWithoutNoTreatment()
         {
             // Arrange
-            List<BaseCommittedProjectDTO> testInput = new List<BaseCommittedProjectDTO>();
-            _mockCommittedProjectRepo.Setup(_ => _.CreateCommittedProjects(It.IsAny<List<BaseCommittedProjectDTO>>()))
-                .Callback<List<BaseCommittedProjectDTO>>(_ => {
+            List<SectionCommittedProjectDTO> testInput = new List<SectionCommittedProjectDTO>();
+            _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
+                .Callback<List<SectionCommittedProjectDTO>>(_ => {
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
@@ -155,9 +158,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         public void ImportCreatesValidRecordsWithNoTreatment()
         {
             // Arrange
-            List<BaseCommittedProjectDTO> testInput = new List<BaseCommittedProjectDTO>();
-            _mockCommittedProjectRepo.Setup(_ => _.CreateCommittedProjects(It.IsAny<List<BaseCommittedProjectDTO>>()))
-                .Callback<List<BaseCommittedProjectDTO>>(_ => {
+            List<SectionCommittedProjectDTO> testInput = new List<SectionCommittedProjectDTO>();
+            _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
+                .Callback<List<SectionCommittedProjectDTO>>(_ => {
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);

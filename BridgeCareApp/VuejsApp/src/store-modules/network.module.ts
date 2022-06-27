@@ -6,6 +6,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import prepend from 'ramda/es/prepend';
 import { http2XX } from '@/shared/utils/http-utils';
 import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
+import AggregationService from '@/services/aggregation.service';
 
 const state = {
     networks: [] as Network[],
@@ -76,6 +77,16 @@ const actions = {
             }
         });
     },
+    async aggregateNetworkData({dispatch, commit}: any, payload: any){
+        return await AggregationService.AggregateNetworkData(payload.attributes, payload.networkId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {                 
+                  dispatch('addSuccessNotification', {
+                      message: 'Network data was successfully aggregated',
+                  });
+              }
+          });
+    }
 };
 
 const getters = {};

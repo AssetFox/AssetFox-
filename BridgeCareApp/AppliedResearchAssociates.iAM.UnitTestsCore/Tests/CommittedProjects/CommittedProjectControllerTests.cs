@@ -48,6 +48,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
+            var mockUserRepo = new Mock<IUserRepository>();
+            mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
+            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());
@@ -204,11 +208,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
         [Fact]
-        public async Task DeleteWorksWithValidSimulation()
+        public async Task DeleteSimulationWorksWithValidSimulation()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -220,15 +224,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
 
             // Assert
             Assert.IsType<OkResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Once());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Once());
         }
 
         [Fact]
-        public async Task DeleteFailsOnUnauthorizedUser()
+        public async Task DeleteSimulationFailsOnUnauthorizedUser()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -241,15 +245,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
         }
 
         [Fact]
-        public async Task DeleteFailsOnBadScenario()
+        public async Task DeleteSimulationFailsOnBadSimulation()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -261,11 +265,87 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object);
 
             // Act
-            var result = await controller.DeleteCommittedProjects(_badScenario);
+            var result = await controller.DeleteSimulationCommittedProjects(_badScenario);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
-            _mockCommittedProjectRepo.Verify(_ => _.DeleteCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
+        }
+
+        [Fact]
+        public async void DeleteSpecificWorksWithValidProject()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSpecificCommittedProjects(It.IsAny<List<Guid>>()), Times.Once());
+        }
+
+        [Fact]
+        public async void DeleteSpecificFailsOnUnauthorized()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            _mockCommittedProjectRepo.Setup(_ => _.GetSimulationId(It.IsAny<Guid>()))
+                .Returns(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+                Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00")
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.DeleteSpecificCommittedProjects(It.IsAny<List<Guid>>()), Times.Never());
+        }
+
+        [Fact]
+        public async void DeleteSpecificHandlesBadProject()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            var deleteList = new List<Guid>()
+            {
+                _badScenario
+            };
+
+            // Act
+            var result = await controller.DeleteSpecificCommittedProjects(deleteList);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
         }
 
         [Fact]
@@ -274,7 +354,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
-                .Returns(TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => (SectionCommittedProjectDTO)_).ToList());
+                .Returns(TestDataForCommittedProjects.ValidCommittedProjects);
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _testHelper.MockEsecSecurityAdmin.Object,
@@ -328,6 +408,68 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Act
             var result = await controller.GetCommittedProjects(_badScenario);
+
+            // Assert
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task UpsertSectionWorksWithValidProjects()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+
+            // Assert
+            Assert.IsType<OkResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()), Times.Once());
+        }
+
+        [Fact]
+        public async Task UpsertFailsOnUnauthorized()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityDBE.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+
+            // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+            _mockCommittedProjectRepo.Verify(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()), Times.Never());
+        }
+
+        [Fact]
+        public async Task UpsertHandlesBadScenario()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
+                .Throws<RowNotInTableException>();
+
+            // Act
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

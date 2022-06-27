@@ -221,18 +221,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             return column;
         }
 
-        private T checkAndGetValue<T>(object itemsArray, string itemName)
-        {
-            var itemValue = default(T);
-            if(itemsArray == null) { return itemValue; }
-            if (string.IsNullOrEmpty(itemName) || string.IsNullOrWhiteSpace(itemName)) { return itemValue; }
-
-            var dynamicObject = itemsArray as dynamic;
-            if (dynamicObject.ContainsKey(itemName)) { itemValue = dynamicObject[itemName]; }
-
-            //return value
-            return itemValue;
-        }
 
         private void FillData(ExcelWorksheet worksheet, SimulationOutput reportOutputData, CurrentCell currentCell)
         {
@@ -242,31 +230,31 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
                 rowNo++; columnNo = 1;
 
                 worksheet.Cells[rowNo, columnNo++].Value = ""; //Asset Management Section Column Blank
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY"); 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "CNTY"); 
 
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
-                worksheet.Cells[rowNo, columnNo++].Value = "UNKNOWN"; //checkAndGetValue<string>(sectionSummary.ValuePerNumericAttribute, "SEGMENT"); //This column will go away in future according to Jake
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SR");
+                worksheet.Cells[rowNo, columnNo++].Value = "UNKNOWN"; //_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerNumericAttribute, "SEGMENT"); //This column will go away in future according to Jake
 
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
-                worksheet.Cells[rowNo, columnNo++].Value = ""; // sectionSummary.ValuePerNumericAttribute["DEPTH"];
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SEGMENT_LENGTH");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WIDTH");
+                worksheet.Cells[rowNo, columnNo++].Value = ""; // _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DEPTH");
 
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_RPO");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SURFACEID").ToString() + "-" + checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SURFACE_NAME");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DIRECTION");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LANES");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_RPO");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SURFACEID").ToString() + "-" + _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SURFACE_NAME");
 
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUSIPLAN");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT");
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT");
-                worksheet.Cells[rowNo, columnNo++].Value = ""; //checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ESLAS"); 
-                worksheet.Cells[rowNo, columnNo++].Value = checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"); 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUSIPLAN");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YR_BUILT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_LAST_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LAST_STRUCTURAL_OVERLAY");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AADT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "TRK_PERCENT");
+                worksheet.Cells[rowNo, columnNo++].Value = ""; //_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ESLAS"); 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISKSCORE"); 
 
                 if (rowNo % 2 == 0) { ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGray); }
             }
@@ -440,11 +428,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
 
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_IRI")));
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
-            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_CRACKING")), 1);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "OPI")));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_IRI")));
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_RUTTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_FAULTING")), 3);
+            worksheet.Cells[row, ++column].Value = Math.Round(Convert.ToDecimal(_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "HPMS_CRACKING")), 1);
 
             if (row % 2 == 0) {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, initialColumnForShade, row, column], Color.LightGray);
@@ -480,7 +468,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pam
 
         private void TrackDataForParametersTAB(Dictionary<string, double> valuePerNumericAttribute, Dictionary<string, string> valuePerTextAttribute)
         {
-            var structureLength = (int)valuePerNumericAttribute["SEGMENT_LENGTH"];
+            var structureLength = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "SEGMENT_LENGTH");
 
             if (structureLength > 20 && _parametersModel.LengthGreaterThan20 != "Y")
             {

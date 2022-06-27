@@ -47,9 +47,9 @@ export default class TreatmentService {
         formData.append(forScenario ? 'simulationId' : 'libraryId', id);
       
         return forScenario            
-            ? // TODO: check for api name after functionality for scenario based import is in place.
+            ?
               coreAxiosInstance.post(
-                  `${API.Treatment}/ImportLibraryTreatmentsFile`,
+                  `${API.Treatment}/ImportScenarioTreatmentsFile`,
                   formData,
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               )
@@ -65,13 +65,34 @@ export default class TreatmentService {
         forScenario: boolean = false,
     ): AxiosPromise {
         return forScenario
-            ?  // TODO: check for api name after functionality for scenario based export is in place.   
+            ?     
                coreAxiosInstance.get(               
                   `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
               )
-            : coreAxiosInstance.get(
-                // TODO: The api looks to be for library, its name need to be changed though
-                  `${API.Treatment}/ExportScenarioTreatmentsExcelFile/${id}`,
+            : coreAxiosInstance.get(                
+                  `${API.Treatment}/ExportLibraryTreatmentsExcelFile/${id}`,
               );
+    }
+
+    static deleteTreatment(
+        treatment: Treatment,
+        libraryId: string
+    ):
+        AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Treatment}/DeleteTreatment/${libraryId}`,
+            treatment,
+        );
+    }
+
+    static deleteScenarioSelectableTreatment(
+        scenarioSelectableTreatment: Treatment,
+        simulationId: string
+    ):
+        AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Treatment}/DeleteScenarioSelectableTreatment/${simulationId}`,
+            scenarioSelectableTreatment,
+        );
     }
 }

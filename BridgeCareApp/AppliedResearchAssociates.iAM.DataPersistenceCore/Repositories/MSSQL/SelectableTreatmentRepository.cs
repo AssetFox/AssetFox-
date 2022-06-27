@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+            var treatments = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Where(_ => _.SimulationId == simulation.Id)
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
@@ -158,7 +158,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioTreatmentSchedulings)
                 .Include(_ => _.ScenarioTreatmentSupersessions)
-                .ToList().ForEach(_ => _.CreateSelectableTreatment(simulation));
+                .ToList();
+
+            treatments.ForEach(_ => _.CreateSelectableTreatment(simulation));
         }
 
         public TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId)
@@ -405,7 +407,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
                     .ScenarioSelectableTreatment
                     .SimulationId == simulationId);
-
+           
             _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
                 _.ScenarioSelectableTreatment.SimulationId == simulationId);
 
@@ -476,6 +478,73 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+
+            // Update last modified date
+            var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+            _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+        }
+
+        public void DeleteTreatment(TreatmentDTO treatment, Guid libraryId)
+        {
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException("The specified treatment library was not found.");
+            }
+
+            var selectableTreatmentEntity = treatment.ToLibraryEntity(libraryId);
+            var entityId = selectableTreatmentEntity.Id;
+           
+            _unitOfWork.Context.DeleteAll<SelectableTreatmentEntity>(_ =>
+                _.TreatmentLibraryId == libraryId && entityId == _.Id);
+                      
+            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
+                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||                                _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
+                    .TreatmentLibraryId == libraryId);
+
+            _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
+                _.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
+                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
+                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
+        }
+
+        public void DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment,
+            Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            var entityId = scenarioSelectableTreatment.Id;
+            
+            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentScenarioBudgetEntity>(_ =>
+                _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+
+            _unitOfWork.Context.DeleteAll<ScenarioSelectableTreatmentEntity>(_ =>
+                _.SimulationId == simulationId && _.Id == entityId);
+
+            _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>                (_.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                    && _.ScenarioTreatmentCostEquationJoin.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId)
+                ||
+                (_.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                    .ScenarioSelectableTreatment.SimulationId == simulationId
+                    && _.ScenarioConditionalTreatmentConsequenceEquationJoin.ScenarioConditionalTreatmentConsequence
+                    .ScenarioSelectableTreatment.Id == entityId));
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioSelectableTreatmentEntity>(_ =>
+                _.ScenarioSelectableTreatment.SimulationId == simulationId && _.ScenarioSelectableTreatment.Id == entityId);
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioTreatmentCostEntity>(_ =>
+                _.ScenarioTreatmentCost.ScenarioSelectableTreatment.SimulationId == simulationId
+                && _.ScenarioTreatmentCost.ScenarioSelectableTreatment.Id == entityId);
+
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioConditionalTreatmentConsequenceEntity>(_ =>
+                _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.SimulationId == simulationId
+                && _.ScenarioConditionalTreatmentConsequence.ScenarioSelectableTreatment.Id == entityId);
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);

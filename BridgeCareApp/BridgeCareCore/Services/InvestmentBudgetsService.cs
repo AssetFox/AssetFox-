@@ -349,9 +349,9 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.UserEntity?.Id);
-            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.UserEntity?.Id);
-            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.CurrentUser?.Id);
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.CurrentUser?.Id);
 
             var budgetsWithInvalidCriteria = new List<string>();
             var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
@@ -424,8 +424,8 @@ namespace BridgeCareCore.Services
                     HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
                     throw new InvalidOperationException(exceptionMessage);
                 }
-                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.CurrentUser?.Id);
+                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.CurrentUser?.Id);
             }
 
             var warningSb = new StringBuilder();
@@ -534,9 +534,9 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.UserEntity?.Id);
-            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.UserEntity?.Id);
-            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.AddAll(newBudgetEntities, _unitOfWork.CurrentUser?.Id);
+            _unitOfWork.Context.AddAll(newBudgetAmountEntities, _unitOfWork.CurrentUser?.Id);
+            _unitOfWork.Context.UpdateAll(budgetAmountsPerBudgetYearTuple.Values.ToList(), _unitOfWork.CurrentUser?.Id);
 
             var budgetsWithInvalidCriteria = new List<string>();
             var criteriaBudgetNamesNotPresentInBudgetTab = new List<string>();
@@ -609,8 +609,8 @@ namespace BridgeCareCore.Services
                     HubService.SendRealTimeMessage("", HubConstant.BroadcastError, sb.ToString());
                     throw new InvalidOperationException(exceptionMessage);
                 }
-                _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
-                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.UserEntity?.Id);
+                _unitOfWork.Context.AddAll(criteria, _unitOfWork.CurrentUser?.Id);
+                _unitOfWork.Context.AddAll(criteriaJoins, _unitOfWork.CurrentUser?.Id);
             }
 
             var warningSb = new StringBuilder();

@@ -24,4 +24,13 @@ export default class AttributeService {
             data
         );
     }
+    static GetAttributeAggregationRuleTypes(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Attribute}/GetAggregationRuleTypes`);
+    }
+    static GetAttributeDataSourceTypes(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
+    }
+    static CheckSqlConnection(connectionString: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckSqlConnection/${connectionString}`);
+    }
 }

@@ -6,10 +6,10 @@
                 height="100%"
                 elevation="0"
             >
-                <div class="raw-data-list-header">
+                <div class="raw-data-list-header" style="padding-right: 175px !important">
                     Raw Data
                 </div>
-                <v-list class="ghd-navigation-rawdata-list">
+                <v-list class="ghd-navigation-list">
                     <v-list-item-group
                         class="settings-list ghd-control-text"
                         :key="navigationTab.tabName"
@@ -26,9 +26,9 @@
                             <v-list-tile-content>
                                 <v-list-tile-title style="text-decoration: none">{{navigationTab.tabName}}</v-list-tile-title>
                             </v-list-tile-content>
-                            <v-list-tile-icon class="selected-sidebar-icon">
+                            <!-- <v-list-tile-icon class="selected-sidebar-icon">
                                     <v-icon class="mx-2 ghd-blue" slot="prependIcon">fa-thin fa-angle-right</v-icon>
-                            </v-list-tile-icon>
+                            </v-list-tile-icon> -->
                         </v-list-tile>
                     </v-list-item-group>
                 </v-list>
@@ -177,11 +177,18 @@ export default class EditRawData extends Vue {
 }
 
 .primary--text .raw-data-icon{
-    stroke: #333333 !important;
+    stroke: #FFFFFF !important;
 }
 
 .raw-data-icon {
     stroke: #999999 !important;
 }
 
+.raw-data-svg-fill {
+    fill: #FFFFFF;
+}
+
+.primary--text .raw-data-svg-fill {
+    fill: #2A578D;
+}
 </style>

@@ -164,7 +164,7 @@
                                     Raw Criteria
                                 </v-tab>
                                 <v-tab-item>
-                                    <vue-query-builder
+                                    <vue-query-builder 
                                         :labels="queryBuilderLabels"
                                         :maxDepth="25"
                                         :rules="queryBuilderRules"

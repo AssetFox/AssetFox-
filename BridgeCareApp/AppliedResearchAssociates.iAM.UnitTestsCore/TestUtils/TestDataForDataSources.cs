@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -38,6 +40,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             });
             return repo;
         }
+
+        public static List<BaseDataSourceDTO> SourceDTOs() => SimpleRepo()
+            .Where(_ => _.Type != "Other")
+            .Select(_ => _.ToDTO())
+            .ToList();
 
         public static List<AttributeEntity> SimpleAttributeRepo()
         {

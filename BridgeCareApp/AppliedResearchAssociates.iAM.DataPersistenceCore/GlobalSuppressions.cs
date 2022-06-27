@@ -5,4 +5,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "<Pending>", Scope = "member", Target = "~M:AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes.AttributeUpdateValidityChecker.OkToUpdate(System.Collections.Generic.List{AttributeEntity},AttributeEntity)~AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes.AttributeUpdateValidityCheckResult")]
+[assembly: SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "'If' is frequently more readable than conditional expression", Scope = "module")]
+[assembly: SuppressMessage("Style", "IDE0022:Use expression body for methods", Justification = "Nothing wrong with curly braces", Scope = "module")]

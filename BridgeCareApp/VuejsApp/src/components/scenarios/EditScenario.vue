@@ -166,7 +166,7 @@ export default class EditScenario extends Vue {
         },
         {
             tabName: 'Remaining Life Limit',
-            tabIcon: 'fas fa-business-time',
+            tabIcon: 'fas fa-battery-half',
             navigation: {
                 path: '/RemainingLifeLimitEditor/Scenario/',
             },

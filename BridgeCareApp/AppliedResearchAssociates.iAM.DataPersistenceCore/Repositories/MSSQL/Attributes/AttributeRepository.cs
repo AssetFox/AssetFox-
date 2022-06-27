@@ -37,9 +37,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (!updateValidity.Ok) {
                     throw new InvalidAttributeUpsertException(updateValidity.Message);
                 };
+                DataSourceEntity dataSourceEntity = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Type == updateEntity.ConnectionType.ToString());
+                updateEntity.DataSource = dataSourceEntity;
+                updateEntity.DataSourceId = dataSourceEntity.Id;
             }
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
+            foreach(var entityToAdd in entitiesToAdd)
+            {
+               DataSourceEntity dataSourceEntity = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Type == entityToAdd.ConnectionType.ToString());
+               entityToAdd.DataSource = dataSourceEntity;
+               entityToAdd.DataSourceId = dataSourceEntity.Id;
+            }
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);
         }
@@ -210,15 +219,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
+        public Task<List<string>> GetAggregationRuleTypes()
+        {
+            var aggregationTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.AggregationRuleType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => aggregationTypes);
 
+        }
+        public Task<List<string>> GetAttributeDataTypes()
+        {
+            var dataTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.DataType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataTypes);
+        }
+        public Task<List<string>> GetAttributeDataSourceTypes()
+        {
+
+            var dataSourceTypes = _unitOfWork.Context.DataSource
+                .Select(_ => _.Type)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataSourceTypes);
+
+        }
         public List<AttributeDTO> GetAttributes()
         {
             if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-
-            return _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            var attrs = _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            foreach(var a in attrs)
+            {
+                if (a.DataSourceType == null) { a.DataSourceType = "None"; continue; }
+                a.DataSourceType = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id.ToString() == a.DataSourceType).Type;
+            }
+            return attrs;
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()
@@ -241,11 +281,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeDTO GetSingleById(Guid attributeId)
         {
             var entity = _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId);
-            if (entity == null)
-            {
-                return null;
-            }
-            return AttributeMapper.ToDto(entity);
+            return AttributeMapper.ToDtoNullPropagating(entity);
+        }
+
+        public AttributeDTO GetSingleByName(string attributeName)
+        {
+            var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
+                a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
+            return AttributeMapper.ToDtoNullPropagating(entity);
         }
     }
 }

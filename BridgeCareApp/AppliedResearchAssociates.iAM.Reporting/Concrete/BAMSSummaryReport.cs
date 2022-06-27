@@ -69,9 +69,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             ReportTypeName = name;
 
-            //generate network id
-            _networkId = _unitOfWork.NetworkRepo.GetMainNetwork().Id;
-
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
             if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
@@ -236,7 +233,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null); // to do: bimal
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 

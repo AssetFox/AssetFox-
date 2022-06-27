@@ -34,13 +34,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public void Setup()
         {
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
         }
 
         public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary { get; } = new PerformanceCurveLibraryEntity
@@ -131,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
 
             // Act
             var result = await _controller.GetPerformanceCurveLibraries();
@@ -146,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
 
             // Act
             var result = await _controller
@@ -163,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
 
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
 
             // Act
             var result = await _controller.DeletePerformanceCurveLibrary(Guid.Empty);
@@ -179,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
 
             // Act
             var result = await _controller.GetScenarioPerformanceCurves(simulation.Id);
@@ -194,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             var performanceCurve = TestScenarioPerformanceCurve(simulation.Id);
             performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
@@ -213,7 +210,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             SetupForGet();
 
             // Act
@@ -238,7 +235,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -276,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await _controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
@@ -314,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             SetupForScenarioCurveGet(simulation.Id);
 
             // Act
@@ -336,7 +333,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
-            SetupController(_testHelper.MockEsecSecurityAuthorized);
+            SetupController(_testHelper.MockEsecSecurityAdmin);
             var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             var deletedCurveId = Guid.NewGuid();

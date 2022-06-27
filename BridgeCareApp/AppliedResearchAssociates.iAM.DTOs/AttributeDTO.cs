@@ -24,5 +24,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public bool IsAscending { get; set; }
 
+        public string DataSourceType { get; set; }
     }
 }

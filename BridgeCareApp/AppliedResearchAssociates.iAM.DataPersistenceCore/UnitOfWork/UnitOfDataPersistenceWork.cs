@@ -46,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
+        private IExcelRawDataRepository _excelWorksheetRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
@@ -100,6 +101,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICriterionLibraryRepository CriterionLibraryRepo => _criterionLibraryRepo ??= new CriterionLibraryRepository(this);
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
+
+        public IExcelRawDataRepository ExcelWorksheetRepository => _excelWorksheetRepo ?? new ExcelRawDataRepository(this);
 
         public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(this);
 
@@ -163,17 +166,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public void SetUser(string username)
         {
-            var user = Context.User
-                .Include(_ => _.UserCriteriaFilterJoin)
-                .FirstOrDefault(_ => _.Username == username);
-            UserEntity = user;
+            if (UserEntity?.Username != username)
+            {
+                var user = Context.User
+                    .Include(_ => _.UserCriteriaFilterJoin)
+                    .FirstOrDefault(_ => _.Username == username);
+                UserEntity = user;
+            }
         }
 
+        private static object AddUserLock = new object();
         public void AddUser(string username, string role)
         {
-            BeginTransaction();
-            UserRepo.AddUser(username, role);
-            Commit();
+            lock (AddUserLock)
+            {
+                if (!UserRepo.UserExists(username))
+                {
+                    BeginTransaction();
+                    UserRepo.AddUser(username, role);
+                    Commit();
+                }
+            }
         }
 
         public void Commit()

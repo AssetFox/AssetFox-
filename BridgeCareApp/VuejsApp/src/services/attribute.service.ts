@@ -21,10 +21,10 @@ export default class AttributeService {
     static GetAttributeAggregationRuleTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAggregationRuleTypes`);
     }
-    static GetAttributeDataTypes(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataTypes`);
-    }
     static GetAttributeDataSourceTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
+    }
+    static CheckSqlConnection(connectionString: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckSqlConnection/${connectionString}`);
     }
 }

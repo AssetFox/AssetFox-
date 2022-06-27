@@ -120,7 +120,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void CreateWorksForValidCommittedProjectData()
+        public void UpsertWorksForValidCommittedProjectData()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -128,11 +128,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.SimulationId = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
             // Act
-            repo.CreateCommittedProjects(newProjects);
+            repo.UpsertCommittedProjects(newProjects);
         }
 
         [Fact]
-        public void CreateHandlesBadSimulationId()
+        public void UpsertHandlesBadSimulationId()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -140,12 +140,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.SimulationId = _badScenario);
 
             // Act & Assert
-            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.UpsertCommittedProjects(newProjects));
             Assert.Contains("simulation ID", exception.Message);
         }
 
         [Fact]
-        public void CreateHandlesNonExistingBudgets()
+        public void UpsertHandlesNonExistingBudgets()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -153,12 +153,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.ScenarioBudgetId = Guid.Parse("0d91f67d-d5f4-4c1b-861c-3a5a24aab100"));
 
             // Act & Assert
-            var exception = Assert.Throws<RowNotInTableException>(() => repo.CreateCommittedProjects(newProjects));
+            var exception = Assert.Throws<RowNotInTableException>(() => repo.UpsertCommittedProjects(newProjects));
             Assert.Contains("budget IDs", exception.Message);
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void CreateWorksWithNullBudgets()
+        public void UpsertWorksWithNullBudgets()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
@@ -166,39 +166,61 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             newProjects.ForEach(_ => _.ScenarioBudgetId = null);
 
             // Act
-            repo.CreateCommittedProjects(newProjects);
+            repo.UpsertCommittedProjects(newProjects);
         }
 
         [Fact(Skip = "Unable to run with BulkExtensions")]
-        public void DeleteWorksWithValidSimulation()
+        public void DeleteSimulationWorksWithValidSimulation()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
         }
 
         [Fact]
-        public void DeleteHandlesInvalidSimulation()
+        public void DeleteSimulationHandlesInvalidSimulation()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act & Assert
-            Assert.Throws<RowNotInTableException>(() => repo.DeleteCommittedProjects(_badScenario));
+            Assert.Throws<RowNotInTableException>(() => repo.DeleteSimulationCommittedProjects(_badScenario));
         }
 
         [Fact]
-        public void DeleteHandlesSimulationWithNoCommitts()
+        public void DeleteSimulationHandlesSimulationWithNoCommitts()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
 
             // Act
-            repo.DeleteCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
+            repo.DeleteSimulationCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "No Commit").Id);
 
             // No assert required as long as it works
+        }
+
+        [Fact(Skip = "Unable to run with BulkExtensions")]
+        public void DeleteSpecificWorksWithValidProject()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var projectsToDelete = TestDataForCommittedProjects.ValidCommittedProjects.Select(_ => _.Id).ToList();
+
+            // Act
+            repo.DeleteSpecificCommittedProjects(projectsToDelete);
+        }
+
+        [Fact]
+        public void DeleteSpecificHandlesInvalidProject()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var projectsToDelete = new List<Guid>() { Guid.Parse("ba5645ae-4f13-4a9f-94fd-2c03d26de500") };
+
+            // Act & Assert
+            // No assert here.  If a specific project does not exist but others do, we do not want to throw an error
         }
 
         [Fact]
@@ -239,6 +261,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             // Act & Assert
             Assert.Throws<RowNotInTableException>(() => repo.GetSectionCommittedProjectDTOs(_badScenario));
+        }
+
+        [Fact]
+        public void GetSimulationIdReturnsValidValue()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act
+            var result = repo.GetSimulationId(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"));
+
+            // Assert
+            Assert.Equal(TestDataForCommittedProjects.Simulations.First(_ => _.Name == "Test").Id, result);
+        }
+
+        [Fact]
+        public void GetSimulationIdHandlesBadProject()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+
+            // Act & Assert
+            Assert.Throws<RowNotInTableException>(() => repo.GetSimulationId(Guid.Parse("aa84643a-24c0-4722-820c-6a1fed01ccac")));
         }
 
         #region Helpers

@@ -16,7 +16,6 @@ namespace AppliedResearchAssociates.iAM.Data.Helpers
 
         public static double? TryParseNullableDouble(object input)
         {
-            // WjTodo -- can we improve this using IsAssignableFrom on the types?
             if (input is double value)
             {
                 return (double)value;

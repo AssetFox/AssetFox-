@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using Microsoft.Data.SqlClient;
 
 namespace BridgeCareCore.Controllers
 {
@@ -82,6 +83,37 @@ namespace BridgeCareCore.Controllers
             }
         }
         [HttpPost]
+        [Route("CheckSqlConnection/{connectionString}")]
+        [Authorize]
+        public async Task<IActionResult> CheckSqlConnection(string connectionString)
+        {
+            try
+            {
+                try
+                {
+                    await Task.Factory.StartNew(() =>
+                    {
+                        using (SqlConnection conn = new SqlConnection(connectionString))
+                        {
+                            conn.Open(); // throws if invalid
+                        }
+                    });
+                    return Ok("Connection string is valid");
+                }
+                catch(Exception ex)
+                {
+                    return Ok("Connection string is not valid: " + ex.Message);
+                }
+                
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
         [Route("GetAttributesSelectValues")]
         [Authorize]
         public async Task<IActionResult> GetAttributeSelectValues([FromBody] List<string> attributeNames)
@@ -147,44 +179,46 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("ImportAttributesExcelFile")]
-        [Authorize]
-        public async Task<IActionResult> ImportAttributesExcelFile(
-            string keyColumnName,
-            string inspectionDateColumnName,
-            string spatialWeighting)
-        {
-            try
-            {
-                if (!ContextAccessor.HttpContext.Request.HasFormContentType)
-                {
-                    throw new ConstraintException("Request MIME type is invalid.");
-                }
+        // Wjwjwj commented out 6/20 8am while working on attribute import.
+        // I'm guessing in the new world this will no longer exist?
+        //[HttpPost]
+        //[Route("ImportAttributesExcelFile")]
+        //[Authorize]
+        //public async Task<IActionResult> ImportAttributesExcelFile(
+        //    string keyColumnName,
+        //    string inspectionDateColumnName,
+        //    string spatialWeighting)
+        //{
+        //    try
+        //    {
+        //        if (!ContextAccessor.HttpContext.Request.HasFormContentType)
+        //        {
+        //            throw new ConstraintException("Request MIME type is invalid.");
+        //        }
 
-                if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
-                {
-                    throw new ConstraintException("Attributes file not found.");
-                }
+        //        if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
+        //        {
+        //            throw new ConstraintException("Attributes file not found.");
+        //        }
 
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
+        //        var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
 
-                var result = await Task.Factory.StartNew(() =>
-                {
-                    return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
-                });
+        //        var result = await Task.Factory.StartNew(() =>
+        //        {
+        //            return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
+        //        });
 
-                if (result.WarningMessage != null)
-                {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
-                }
-                return Ok();
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-                throw;
-            }
-        }
+        //        if (result.WarningMessage != null)
+        //        {
+        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+        //        }
+        //        return Ok();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+        //        throw;
+        //    }
+        //}
     }
 }

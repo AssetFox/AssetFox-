@@ -160,8 +160,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DefaultValue = entity.DefaultValue,
                 Maximum = entity.Maximum,
                 Minimum = entity.Minimum,
+                DataSourceType = entity.DataSourceId?.ToString()
             };
-
         /// <summary>Safe to call if the entity might be null. If it is
         /// in fact null, the returned DTO will also be null.</summary>
         public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)

@@ -9,9 +9,10 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using Writer = System.Threading.Channels.ChannelWriter<AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs.NetworkRollupDetailDTO>;
+using BridgeCareCore.Models;
+using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
-namespace BridgeCareCore.Services
+namespace BridgeCareCore.Services.Aggregation
 {
     public class AggregationService : IAggregationService
     {
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Services
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state)
+        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, UserInfo userInfo)
         {
             var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
 
@@ -41,11 +42,11 @@ namespace BridgeCareCore.Services
                 var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
 
                 _status = "Preparing";
-                var getResult = Task.Factory.StartNew(() =>
+                var getTask = Task.Factory.StartNew(() =>
                 {
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
-                        // Get/create configurable attributes
+                    // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
 
                     var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
@@ -53,7 +54,7 @@ namespace BridgeCareCore.Services
                     if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                     {
                         var broadcastError = $"Error : Metadata.json file has duplicate Ids"; // Wjwjwj error message here is outdated
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }
 
@@ -61,23 +62,23 @@ namespace BridgeCareCore.Services
                     if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                     {
                         var broadcastError = $"Error : Metadata.json file has duplicate names";
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }
 
-                        // get all maintainable assets in the network with their assigned data (if any) and locations
+                    // get all maintainable assets in the network with their assigned data (if any) and locations
                     maintainableAssets = _unitOfWork.MaintainableAssetRepo
                         .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
 
-                        // Create list of attribute ids we are allowed to update with assigned data.
+                    // Create list of attribute ids we are allowed to update with assigned data.
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
 
-                        // create list of attribute data from configuration attributes (exclude attributes
-                        // that don't have command text as there will be no way to select data for them from
-                        // the data source)
+                    // create list of attribute data from configuration attributes (exclude attributes
+                    // that don't have command text as there will be no way to select data for them from
+                    // the data source)
                     try
                     {
                         attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
@@ -87,19 +88,19 @@ namespace BridgeCareCore.Services
                     catch (Exception e)
                     {
                         var broadcastError = $"Error: Fetching data for the attributes ::{e.Message}";
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         isError = true;
                         errorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
 
-                        // get the attribute ids for assigned data that can be deleted (attribute is present
-                        // in the data source and meta data file)
+                    // get the attribute ids for assigned data that can be deleted (attribute is present
+                    // in the data source and meta data file)
                     attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
                         .Intersect(networkAttributeIds).Distinct().ToList();
                 });
 
-                CheckCurrentLongRunningTask(getResult);
+                CheckCurrentLongRunningTask(getTask);
 
                 var aggregatedResults = new List<IAggregatedResult>();
 
@@ -107,17 +108,17 @@ namespace BridgeCareCore.Services
                 var i = 0.0;
 
                 _status = "Aggregating";
-                var aggregationResult = Task.Factory.StartNew(() =>
+                var aggregationTask = Task.Factory.StartNew(() =>
                 {
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
-                        // loop over maintainable assets and remove assigned data that has an attribute id
-                        // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
-                        // that was created
+                    // loop over maintainable assets and remove assigned data that has an attribute id
+                    // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
+                    // that was created
                     foreach (var maintainableAsset in maintainableAssets)
                     {
                         if (i % 500 == 0)
                         {
-                            _percentage = Math.Round((i / totalAssets) * 100, 1);
+                            _percentage = Math.Round(i / totalAssets * 100, 1);
                         }
                         i++;
 
@@ -125,10 +126,10 @@ namespace BridgeCareCore.Services
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                         maintainableAsset.AssignAttributeData(attributeData);
 
-                            //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
+                        //maintainableAsset.AssignSpatialWeighting(benefitQuantifierEquation.Equation.Expression);
                         try
                         {
-                                // aggregate numeric data
+                            // aggregate numeric data
                             if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "NUMBER"))
                             {
                                 aggregatedResults.AddRange(maintainableAsset.AssignedData
@@ -140,7 +141,7 @@ namespace BridgeCareCore.Services
                                     .ToList());
                             }
 
-                                //aggregate text data
+                            //aggregate text data
                             if (maintainableAsset.AssignedData.Any(_ => _.Attribute.DataType == "STRING"))
                             {
                                 aggregatedResults.AddRange(maintainableAsset.AssignedData
@@ -153,16 +154,16 @@ namespace BridgeCareCore.Services
                         catch (Exception e)
                         {
                             var broadcastError = $"Error: Creating aggregation rule(s) for the attributes :: {e.Message}";
-                            DoublyBroadcastError(broadcastError);
+                            WriteError(writer, broadcastError);
                             throw;
                         }
                     }
                 });
 
-                CheckCurrentLongRunningTask(aggregationResult);
+                CheckCurrentLongRunningTask(aggregationTask);
 
                 _status = "Saving";
-                var crudResult = Task.Factory.StartNew(() =>
+                var crudTask = Task.Factory.StartNew(() =>
                 {
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
@@ -173,7 +174,7 @@ namespace BridgeCareCore.Services
                     catch (Exception e)
                     {
                         var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         isError = true;
                         errorMessage = e.Message;
                         throw new Exception(e.StackTrace);
@@ -185,7 +186,7 @@ namespace BridgeCareCore.Services
                     catch (Exception e)
                     {
                         var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         isError = true;
                         errorMessage = e.Message;
                         throw new Exception(e.StackTrace);
@@ -198,7 +199,7 @@ namespace BridgeCareCore.Services
                     catch (Exception e)
                     {
                         var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
-                        DoublyBroadcastError(broadcastError);
+                        WriteError(writer, broadcastError);
                         isError = true;
                         errorMessage = e.Message;
                         throw new Exception(e.StackTrace);
@@ -206,7 +207,7 @@ namespace BridgeCareCore.Services
                 });
 
 
-                CheckCurrentLongRunningTask(crudResult);
+                CheckCurrentLongRunningTask(crudTask);
 
                 if (!isError)
                 {
@@ -214,19 +215,44 @@ namespace BridgeCareCore.Services
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
                     _unitOfWork.Commit();
 
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                    new NetworkRollupDetailDTO { NetworkId = _networkId, Status = _status }, _percentage);
+                    WriteState(writer, state);
                 }
                 else
                 {
                     _status = $"Error in data aggregation {errorMessage}";
                     _unitOfWork.Rollback();
                     _percentage = 0;
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                    new NetworkRollupDetailDTO { NetworkId = _networkId, Status = _status }, _percentage);
+                    WriteState(writer, state);
                 }
             });
             return !isError;
+        }
+
+        private static void WriteError(Writer writer, string error)
+        {
+            var status = new AggregationStatusMemo
+            {
+                ErrorMessage = error,
+            };
+            writer.TryWrite(status);
+        }
+
+        private static void WriteState(Writer writer, AggregationState state)
+        {
+            var dto = new NetworkRollupDetailDTO
+            {
+                NetworkId = state.NetworkId,
+                Status = state.Status,
+
+            };
+            var memo = new AggregationStatusMemo
+            {
+                ErrorMessage = null,
+                Percentage = state.Percentage,
+                rollupDetailDto = dto,
+            };
+            writer.TryWrite(memo);
+            
         }
     }
 }

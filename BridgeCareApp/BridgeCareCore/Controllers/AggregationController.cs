@@ -21,7 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Channels;
-using BridgeCareCore.Services;
+using BridgeCareCore.Services.Aggregation;
 
 namespace BridgeCareCore.Controllers
 {
@@ -51,11 +51,11 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
-            var channel = Channel.CreateUnbounded<NetworkRollupDetailDTO>();
+            var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
             }
             catch (Exception e)
             {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BridgeCareCore.Services
+namespace BridgeCareCore.Services.Aggregation
 {
     public class AggregationState
     {

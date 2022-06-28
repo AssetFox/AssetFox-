@@ -47,6 +47,7 @@ namespace BridgeCareCore.Controllers
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
             var timer = KeepUserInformedOfState(state);
+            var readTask = ReadMessages(channel.Reader);
             try
             {
                 var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
@@ -73,6 +74,20 @@ namespace BridgeCareCore.Controllers
                 NotifyUserOfState(state);
                 timer.Stop();
                 timer.Close();
+                readTask.Dispose();
+            }
+        }
+
+        private async Task ReadMessages(ChannelReader<AggregationStatusMemo> reader)
+        {
+
+            while (await reader.WaitToReadAsync())
+            {
+                while (reader.TryRead(out AggregationStatusMemo status))
+                {
+                    var error = status.ErrorMessage;
+                    DoublyBroadcastError(error);
+                }
             }
         }
 

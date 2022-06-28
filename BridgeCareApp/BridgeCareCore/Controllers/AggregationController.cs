@@ -29,19 +29,9 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-        private int _count;
-        private string _status = string.Empty;
-        private double _percentage;
-        private Guid _networkId = Guid.Empty;
+
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
-
-        public AggregationController(
-            IAggregationService aggregationService
-            )
-        {
-            _aggregationService = aggregationService;
-        }
 
         private void DoublyBroadcastError(string broadcastError)
         {

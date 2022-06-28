@@ -7,6 +7,7 @@ namespace BridgeCareCore.Services
 {
     public interface IAggregationService
     {
-        Task AggregateNetworkData(ChannelWriter<NetworkRollupDetailDTO> writer, Guid networkId);
+        /// <summary>Returns true if the aggregation succeeded</summary> 
+        Task<bool> AggregateNetworkData(ChannelWriter<NetworkRollupDetailDTO> writer, Guid networkId);
     }
 }

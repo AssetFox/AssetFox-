@@ -87,15 +87,9 @@ export default class InvestmentService {
     }
 
     static downloadInvestmentBudgetsTemplate(
-        forScenario: boolean = false,
     ): AxiosPromise {
-        return forScenario
-            ?     
-               coreAxiosInstance.get(               
-                  `${API.Investment}/DownloadScenarioInvestmentBudgetsTemplate`,
-              )
-            : coreAxiosInstance.get(                
-                  `${API.Investment}/DownloadLibraryInvestmentBudgetsTemplate`,
+            return coreAxiosInstance.get(               
+                  `${API.Investment}/DownloadInvestmentBudgetsTemplate`,
               );
-    }
+        }
 }

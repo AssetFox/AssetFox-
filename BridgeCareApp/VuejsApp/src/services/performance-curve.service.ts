@@ -85,16 +85,10 @@ export default class PerformanceCurveService {
               );
     }
 
-    static downloadPerformanceCurvesTemplate(
-        forScenario: boolean = false,
-    ): AxiosPromise {
-        return forScenario
-            ?     
-               coreAxiosInstance.get(               
-                  `${API.PerformanceCurve}/DownloadScenarioPerformanceCurvesTemplate`,
-              )
-            : coreAxiosInstance.get(                
-                  `${API.PerformanceCurve}/DownloadLibraryPerformanceCurvesTemplate`,
-              );
+    static downloadPerformanceCurvesTemplate()
+    : AxiosPromise {
+        return coreAxiosInstance.get(               
+            `${API.PerformanceCurve}/DownloadPerformanceCurvesTemplate`,
+        );
     }
 }

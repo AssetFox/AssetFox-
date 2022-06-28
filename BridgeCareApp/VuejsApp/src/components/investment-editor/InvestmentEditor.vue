@@ -766,7 +766,7 @@ export default class InvestmentEditor extends Vue {
 
     OnDownloadTemplateClick()
     {
-         InvestmentService.downloadInvestmentBudgetsTemplate(this.hasScenario)
+         InvestmentService.downloadInvestmentBudgetsTemplate()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;

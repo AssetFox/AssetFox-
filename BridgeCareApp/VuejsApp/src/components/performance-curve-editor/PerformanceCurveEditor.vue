@@ -971,7 +971,7 @@ export default class PerformanceCurveEditor extends Vue {
 
     OnDownloadTemplateClick()
     {
-        PerformanceCurveService.downloadPerformanceCurvesTemplate(this.hasScenario)
+        PerformanceCurveService.downloadPerformanceCurvesTemplate()
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;

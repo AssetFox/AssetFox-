@@ -454,7 +454,7 @@ namespace BridgeCareCore.Services
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
 
-            _unitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
+            _unitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
 
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }

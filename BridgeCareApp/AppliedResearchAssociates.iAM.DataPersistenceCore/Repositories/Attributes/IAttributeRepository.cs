@@ -19,6 +19,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<AttributeDTO> GetAttributes();
 
+        Task<List<string>> GetAggregationRuleTypes();
+        Task<List<string>> GetAttributeDataTypes();
+        Task<List<string>> GetAttributeDataSourceTypes();
         Task<List<AttributeDTO>> GetAttributesAsync();
 
         Task<List<AttributeDTO>> CalculatedAttributes();

@@ -26,9 +26,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
             DateColumn = hydrated.DateColumn;
         }
 
-        // TODO:  Create a field that provides a reference to the Excel
-        //        data on the server
-
         private class ExcelDataSourceDetails
         {
             public string LocationColumn { get; set; }

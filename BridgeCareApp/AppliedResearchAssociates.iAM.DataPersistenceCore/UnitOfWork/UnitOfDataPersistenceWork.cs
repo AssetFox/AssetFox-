@@ -5,13 +5,15 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
-    public class UnitOfDataPersistenceWork : IDisposable
+    public class UnitOfDataPersistenceWork : IDisposable, IUnitOfWork
     {
         public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
@@ -44,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
+        private IExcelRawDataRepository _excelWorksheetRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
@@ -99,6 +102,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
 
+        public IExcelRawDataRepository ExcelWorksheetRepository => _excelWorksheetRepo ?? new ExcelRawDataRepository(this);
+
         public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(this);
 
         public IMaintainableAssetRepository MaintainableAssetRepo => _maintainableAssetRepo ??= new MaintainableAssetRepository(this);
@@ -147,7 +152,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
+        public UserDTO CurrentUser => UserEntity?.ToDto();
 
+        // TODO: Refactor to an persistence independent object
         public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
@@ -155,20 +162,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
+        // End Refactor
 
         public void SetUser(string username)
         {
-            var user = Context.User
-                .Include(_ => _.UserCriteriaFilterJoin)
-                .FirstOrDefault(_ => _.Username == username);
-            UserEntity = user;
+            if (UserEntity?.Username != username)
+            {
+                var user = Context.User
+                    .Include(_ => _.UserCriteriaFilterJoin)
+                    .FirstOrDefault(_ => _.Username == username);
+                UserEntity = user;
+            }
         }
 
+        private static object AddUserLock = new object();
         public void AddUser(string username, string role)
         {
-            BeginTransaction();
-            UserRepo.AddUser(username, role);
-            Commit();
+            lock (AddUserLock)
+            {
+                if (!UserRepo.UserExists(username))
+                {
+                    BeginTransaction();
+                    UserRepo.AddUser(username, role);
+                    Commit();
+                }
+            }
         }
 
         public void Commit()

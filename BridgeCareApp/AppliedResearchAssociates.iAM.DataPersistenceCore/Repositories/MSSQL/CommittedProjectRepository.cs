@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -9,6 +10,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using MoreLinq;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -21,78 +25,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public void CreateCommittedProjects(List<CommittedProject> committedProjects, Guid simulationId)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException("No simulation found for given scenario.");
-            }
-
-            var simulationEntity = _unitOfWork.Context.Simulation
-                    .Include(s => s.Network)
-                    .ThenInclude(n => n.MaintainableAssets)                    
-                    .Include(s => s.Budgets)
-                .Where(_ => _.Id == simulationId).Single();
-
-            // Update last modified date
-            _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
-
-            if (!simulationEntity.Network.MaintainableAssets.Any())
-            {
-                throw new RowNotInTableException("No maintainable assets found for given scenario.");
-            }
-
-            if (!simulationEntity.Budgets.Any())
-            {
-                throw new RowNotInTableException("No budgets found for given scenario.");
-            }
-
-            var committedProjectEntities = committedProjects
-                .Select(_ => _.ToEntity(simulationEntity)).ToList();
-
-            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
-
-            if (committedProjects.Any(_ => _.Consequences.Any()))
-            {
-                var allConsequences = committedProjects.Where(_ => _.Consequences.Any()).SelectMany(_ => _.Consequences)
-                    .ToList();
-                var attributeEntities = _unitOfWork.Context.Attribute.ToList();
-                var attributeNames = attributeEntities.Select(_ => _.Name).ToList();
-                if (!allConsequences.All(_ => attributeNames.Contains(_.Attribute.Name)))
-                {
-                    var missingAttributes = allConsequences.Select(_ => _.Attribute.Name)
-                        .Except(attributeNames).ToList();
-                    if (missingAttributes.Count == 1)
-                    {
-                        throw new RowNotInTableException($"No attribute found having name {missingAttributes[0]}.");
-                    }
-
-                    throw new RowNotInTableException(
-                        $"No attributes found having the names: {string.Join(", ", missingAttributes)}.");
-                }
-
-                var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
-
-                var consequenceAttributeIdTuplePerProjectId = committedProjects
-                    .Where(_ => _.Consequences.Any())
-                    .ToDictionary(_ => _.Id,
-                        _ => _.Consequences.Select(__ => (attributeIdPerName[__.Attribute.Name], __)).ToList());
-
-                _unitOfWork.CommittedProjectConsequenceRepo.CreateCommittedProjectConsequences(
-                    consequenceAttributeIdTuplePerProjectId);
-            }
-        }
-
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
+            var assets = _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.NetworkId == simulation.Network.Id)
+                .Include(_ => _.MaintainableAssetLocation)
+                .ToList();
 
             var projects = _unitOfWork.Context.CommittedProject
-                .Where(_ => _.SimulationId == simulation.Id)
-                .Select(project => new CommittedProjectEntity
+                .Where(_ => _.SimulationId == simulation.Id).ToList();
+            foreach (var project in projects)
+            {
+                new CommittedProjectEntity
                 {
                     Id = project.Id,
                     Name = project.Name,
@@ -100,80 +48,191 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     ShadowForSameTreatment = project.ShadowForSameTreatment,
                     Cost = project.Cost,
                     Year = project.Year,
-                    MaintainableAsset =
-                        new MaintainableAssetEntity
-                        {
-                            Id = project.MaintainableAssetId,
-                            SpatialWeighting = project.MaintainableAsset.SpatialWeighting,
-                            MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                            {
-                                LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation.LocationIdentifier
-                            }
-                        },
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
+                    CommittedProjectLocation = project.CommittedProjectLocation,
+                    ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {
                             Id = consequence.Id,
                             ChangeValue = consequence.ChangeValue,
-                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
-                        }).ToList()
-                }).AsNoTracking().ToList();
+                            Attribute = new AttributeEntity { Name = consequence.Attribute.Name }
+                        }).ToList(),
+                };
+            }
+                //.Select(project => new CommittedProjectEntity
+                //{
+                //    Id = project.Id,
+                //    Name = project.Name,
+                //    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+                //    ShadowForSameTreatment = project.ShadowForSameTreatment,
+                //    Cost = project.Cost,
+                //    Year = project.Year,
+                //    CommittedProjectLocation = project.CommittedProjectLocation,
+                //    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
+                //    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+                //        new CommittedProjectConsequenceEntity
+                //        {
+                //            Id = consequence.Id,
+                //            ChangeValue = consequence.ChangeValue,
+                //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
+                //        }).ToList(),
+                //}).AsNoTracking().ToList();
 
             if (projects.Any())
             {
-                projects.ForEach(_ => _.CreateCommittedProject(simulation));
+                projects.ForEach(_ => {
+                    var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
+                    if (asset != null)
+                    {
+                        _.CreateCommittedProject(simulation, asset.Id);
+                    }
+                });
             }
 
         }
 
-        public List<CommittedProjectEntity> GetCommittedProjectsForExport(Guid simulationId)
+        public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            return _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
-                .Select(project => new CommittedProjectEntity
-                {
-                    Name = project.Name,
-                    Year = project.Year,
-                    ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-                    ShadowForSameTreatment = project.ShadowForSameTreatment,
-                    Cost = project.Cost,
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = project.ScenarioBudget.Name},
-                    MaintainableAsset = new MaintainableAssetEntity
-                    {
-                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
-                        {
-                            LocationIdentifier = project.MaintainableAsset.MaintainableAssetLocation
-                                .LocationIdentifier
-                        }
-                    },
-                    CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-                        new CommittedProjectConsequenceEntity
-                        {
-                            Attribute = new AttributeEntity {Name = consequence.Attribute.Name},
-                            ChangeValue = consequence.ChangeValue
-                        }).ToList()
-                })
+            var allProjectsInScenario = _unitOfWork.Context.CommittedProject
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjectConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.CommittedProjectLocation);
+
+            return allProjectsInScenario
+                .Where(_ => _.CommittedProjectLocation.Discriminator == DataPersistenceConstants.SectionLocation)
+                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO())
                 .ToList();
         }
 
-        public void CreateCommittedProjects(List<CommittedProjectEntity> committedProjectEntities)
+        public List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId)
         {
-            _unitOfWork.Context.AddAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
 
-            var committedProjectConsequenceEntities = committedProjectEntities
-                .Where(_ => _.CommittedProjectConsequences.Any())
-                .SelectMany(_ => _.CommittedProjectConsequences)
+            //var entity = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
+            //    .Select(project => new CommittedProjectEntity
+            //    {
+            //        Name = project.Name,
+            //        Year = project.Year,
+            //        ShadowForAnyTreatment = project.ShadowForAnyTreatment,
+            //        ShadowForSameTreatment = project.ShadowForSameTreatment,
+            //        Cost = project.Cost,
+            //        ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
+            //        CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
+            //            new CommittedProjectConsequenceEntity
+            //            {
+            //                Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
+            //                ChangeValue = consequence.ChangeValue
+            //            }).ToList(),
+            //        CommittedProjectLocation = project.CommittedProjectLocation
+            //    })
+            //    .Select(_ => _.ToDTO()) // TODO:  Just create the DTO directly?
+            //    .ToList();
+
+            return _unitOfWork.Context.CommittedProject
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjectConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.CommittedProjectLocation)
+                .Select(_ => _.ToDTO())
                 .ToList();
-
-            _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
         }
 
-        public void DeleteCommittedProjects(Guid simulationId)
+        public void UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        {
+            // Test for existing simulation
+            var simulationIds = projects.Select(_ => _.SimulationId).Distinct().ToList();
+            foreach (var simulation in simulationIds)
+            {
+                if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation))
+                {
+                    throw new RowNotInTableException($"Unable to find simulation ID {simulation} in database");
+                }
+            }
+
+            // Test for existing budget
+            var budgetIds = _unitOfWork.Context.ScenarioBudget
+                .Where(_ => simulationIds.Contains(_.SimulationId))
+                .Select(_ => _.Id)
+                .ToList();
+            var badBudgets = projects
+                .Where(_ => _.ScenarioBudgetId != null && !budgetIds.Contains(_.ScenarioBudgetId ?? Guid.Empty))
+                .ToList();
+            if (badBudgets.Any())
+            {
+                var budgetList = new StringBuilder();
+                badBudgets.ForEach(budget => budgetList.Append(budget.ToString() + ", "));
+                throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
+            }
+
+            var attributes = _unitOfWork.Context.Attribute.ToList();
+
+            // Create entities and assign IDs
+            var committedProjectEntities = projects.Select(p =>
+                {
+                    AssignIdWhenNull(p);
+                    return p.ToEntity(attributes);
+                }).ToList();
+            var committedProjectConsequenceEntities = committedProjectEntities
+                    .Where(_ => _.CommittedProjectConsequences.Any())
+                    .SelectMany(_ => _.CommittedProjectConsequences)
+                    .ToList();
+            var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
+
+            // Determine the committed projects that exist
+            var allProvidedEntityIds = committedProjectEntities.Select(_ => _.Id).ToList();
+            var allExistingCommittedProjectIds = new List<Guid>();
+            foreach (var simulation in simulationIds)
+            {
+                var simulationProjects = _unitOfWork.Context.CommittedProject
+                    .Where(_ => _.SimulationId == simulation && allProvidedEntityIds.Contains(_.Id))
+                    .Select(_ => _.Id);
+                allExistingCommittedProjectIds.AddRange(simulationProjects);
+            }
+
+            _unitOfWork.BeginTransaction();
+            try
+            {
+                // UpsertAll does not work :(
+                // Use calculated attribute repository as an example
+                // TODO: Fix UpsertAll or remove
+
+                // Remove the location and consequence records from the database
+                _unitOfWork.Context.DeleteAll<CommittedProjectLocationEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
+                _unitOfWork.Context.DeleteAll<CommittedProjectConsequenceEntity>(_ => allExistingCommittedProjectIds.Contains(_.CommittedProjectId));
+
+                // Update each existing committed project
+                _unitOfWork.Context.UpdateAll(committedProjectEntities.Where(_ => allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
+
+                // Add each new committed project
+                _unitOfWork.Context.AddAll(committedProjectEntities.Where(_ => !allExistingCommittedProjectIds.Contains(_.Id)).ToList(), _unitOfWork.UserEntity?.Id);
+
+                // Add the locations for all objects to the database
+                _unitOfWork.Context.AddAll(locations, _unitOfWork.UserEntity?.Id);
+
+                // Add the consequences for all objects to the database
+                _unitOfWork.Context.AddAll(committedProjectConsequenceEntities, _unitOfWork.UserEntity?.Id);
+
+                _unitOfWork.Commit();
+            }
+            catch(Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+        }
+
+        public void DeleteSimulationCommittedProjects(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -185,11 +244,63 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return;
             }
 
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => _.SimulationId == simulationId);
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+            }
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
+        public void DeleteSpecificCommittedProjects(List<Guid> projectIds)
+        {
+            var simulationIds = _unitOfWork.Context.CommittedProject
+                .Where(_ => projectIds.Contains(_.Id))
+                .Select(_ => _.SimulationId);
+
+            try
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ => projectIds.Contains(_.Id));
+                _unitOfWork.Commit();
+            }
+            catch (Exception e)
+            {
+                _unitOfWork.Rollback();
+                throw;
+            }
+
+            // Update last modified date
+            foreach (var simulationId in simulationIds)
+            {
+                var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
+                _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+            }
+        }
+
+        public Guid GetSimulationId(Guid projectId)
+        {
+            var project = _unitOfWork.Context.CommittedProject.FirstOrDefault(_ => _.Id == projectId);
+            if (project == null)
+            {
+                throw new RowNotInTableException($"Unable to find project with ID {projectId}");
+            }
+            return project.SimulationId;
+        }
+
+        private void AssignIdWhenNull(BaseCommittedProjectDTO dto)
+        {
+            if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
+            dto.Consequences.Where(c => c.Id == Guid.Empty)
+                .ForEach(n => n.Id = Guid.NewGuid());
         }
     }
 }

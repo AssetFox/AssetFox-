@@ -1,0 +1,12 @@
+﻿in PowerShell. The "xxxxxxxx" is the migration name. You need to pick a fresh one every time.
+
+PS C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.DataPersistenceCore> 
+dotnet ef migrations add xxxxxxxxx -c IAMContext -o Migrations
+
+Then . . .
+
+PS C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.DataPersistenceCore> 
+dotnet ef database update -c IAMContext
+
+The first of the above commands gives a bunch of warnings (in yellow text) in the Powershell window.
+WjTodo: clean up the warnings.

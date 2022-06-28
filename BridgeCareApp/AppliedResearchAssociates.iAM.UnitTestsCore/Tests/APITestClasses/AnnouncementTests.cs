@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
-            _controller = new AnnouncementController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            _controller = new AnnouncementController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
         }
 

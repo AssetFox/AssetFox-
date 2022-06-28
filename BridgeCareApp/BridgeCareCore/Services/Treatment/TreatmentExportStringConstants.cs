@@ -16,5 +16,7 @@
         public const string Attribute = "Attribute";
         public const string ChangeVal = "ChangeVal";
         public const string ConsequenceCriterion = "Consequence Criterion";
+        public const string Budgets = "Budgets";
+        public const string BudgetName = "Budget Name";
     }
 }

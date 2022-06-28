@@ -23,7 +23,7 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, CRUDMethods<TargetConditionGoalDTO, TargetConditionGoalLibraryDTO>>
             _targetConditionCRUDMethods;
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public TargetConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>

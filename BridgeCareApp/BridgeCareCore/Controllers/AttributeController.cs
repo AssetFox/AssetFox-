@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
@@ -10,13 +11,15 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
+using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
@@ -73,7 +76,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await UnitOfWork.AttributeRepo.GetAttributeDataTypes();
+                var result = await UnitOfWork.AttributeRepo.GetAttributeDataSourceTypes();
                 return Ok(result);
             }
             catch (Exception e)
@@ -170,6 +173,35 @@ namespace BridgeCareCore.Controllers
                 });
 
                 return Ok();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("CheckCommand/{sqlCommand}")]
+        [Authorize]
+        public async Task<IActionResult> CheckCommand(string sqlCommand)
+        {
+            try
+            {
+                IList<ParseError> errors = null; ;
+                await Task.Factory.StartNew(() =>
+                {
+                    TSql100Parser parser = new TSql100Parser(false);
+
+                    parser.Parse(new StringReader(sqlCommand), out errors);
+                });
+
+                if(errors != null && errors.Count > 0)
+                {
+                    return Ok(new ValidationResult() { IsValid = false, ValidationMessage = "This sql command has the following error: " + errors.First().Message });
+                }
+                return Ok(new ValidationResult() { IsValid = true, ValidationMessage = "This sql command is valid"});
             }
             catch (Exception e)
             {

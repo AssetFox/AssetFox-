@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
     internal class UnfundedPavementProjects : IUnfundedPavementProjects
     {
         private ISummaryReportHelper _summaryReportHelper;
-        private double PAVEMENT_AREA_THRESHOLD = 28500;
+        private double PAVEMENT_AREA_THRESHOLD = 0;
 
         public UnfundedPavementProjects()
         {
@@ -97,7 +97,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
 
         public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
         {
-            var untreatedSections = simulationYearDetail.Assets.Where(s => s.TreatmentCause == TreatmentCause.NoSelection && s.TreatmentOptions.Count > 0).ToList();
+            var untreatedSections = simulationYearDetail.Assets.Where(s =>
+            s.TreatmentCause == TreatmentCause.NoSelection
+            //&& (!string.IsNullOrEmpty(s.ValuePerTextAttribute["NHS_IND"]) && !string.IsNullOrWhiteSpace(s.ValuePerTextAttribute["NHS_IND"]) && int.Parse(s.ValuePerTextAttribute["NHS_IND"]) == 1)
+            && s.TreatmentOptions.Count > 0).ToList();
             return untreatedSections;
         }
 
@@ -115,17 +118,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
                 //get unfunded IDs
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SEGMENT"))));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName)));
                     firstYear = false; if (simulationOutput.Years.Count > 1) { continue; }
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SEGMENT")))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "CNTY") + _summaryReportHelper.checkAndGetValue<string>(_.ValuePerNumericAttribute, "SR") + _.AssetName))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "SEGMENT"));
+                    var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "CNTY");
+                    segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "SR");
+                    segmentNumber += section.AssetName;
+
+                    var facilityId = Convert.ToInt32(segmentNumber);
 
                     var treatmentOptions = section.TreatmentOptions.Where(_ => section.TreatmentConsiderations.Exists(a => a.TreatmentName == _.TreatmentName)).ToList();
                     treatmentOptions.Sort((a, b) => b.Benefit.CompareTo(a.Benefit));
@@ -173,9 +180,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Unf
 
             worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
             worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
-
             worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
-            worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerNumericAttribute, "SEGMENT");
+
+            var segmentNumber = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "CNTY");
+            segmentNumber += _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "SR");
+            segmentNumber += section.AssetName;
+            worksheet.Cells[rowNo, columnNo++].Value = segmentNumber;
 
             //calculate area
             double pavementLength = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SEGMENT_LENGTH");

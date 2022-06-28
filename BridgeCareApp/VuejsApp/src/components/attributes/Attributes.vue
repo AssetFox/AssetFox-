@@ -87,7 +87,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
                         outline  
-                        v-model='currentDataSource'
+                        v-model='selectedAttribute.dataSourceType'
                         :items='dataSourceSelectValues'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>                           
@@ -95,17 +95,27 @@
             </v-flex>
         </v-flex>
         <!-- Command text area -->
-        <v-flex xs12 v-if="hasSelectedAttribute && currentDataSource == 'MS SQL'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSourceType == 'MS SQL'">
             <v-layout justify-center>
                 <v-flex >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
                     <v-textarea no-resize outline rows='4' class="ghd-text-field-border" v-model='selectedAttribute.command'>
                     </v-textarea>
+                    <v-subheader
+                        v-if="validationErrorMessage != ''" class="ghd-subheader "
+                        style="top: -24px; position: relative; color: red">
+                        {{validationErrorMessage}}
+                    </v-subheader>
+                    <v-subheader
+                        v-if="ValidationSuccessMessage != ''" class="ghd-subheader "
+                        style="top: -24px; position: relative; color: green">
+                        {{ValidationSuccessMessage}}
+                    </v-subheader>
                 </v-flex>
             </v-layout>
         </v-flex>
         <!-- Data source combobox -->
-        <v-flex xs12 v-if="hasSelectedAttribute && currentDataSource == 'Excel'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSourceType == 'Excel'">
             <v-flex xs6>
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
@@ -122,7 +132,9 @@
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn v-if="currentDataSource != 'Excel'" :disabled="currentDataSource == 'None'" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn v-if="selectedAttribute.dataSourceType != 'Excel'" :disabled="selectedAttribute.dataSourceType == 'None'" 
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'
+                    @click="CheckSqlCommand">
                     Test
                 </v-btn>
                 <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
@@ -134,11 +146,15 @@
 </template>
 
 <script lang='ts'>
+import AttributeService from '@/services/attribute.service';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
+import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { hasValue } from '@/shared/utils/has-value-util';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
+import { AxiosResponse } from 'axios';
 import { clone, isNil } from 'ramda';
 import Vue from 'vue';
 import Component from 'vue-class-component';
@@ -156,6 +172,10 @@ export default class Attributes extends Vue {
     selectedAttribute: Attribute = clone(emptyAttribute);
     currentDataSource: string  = 'None';
     rules: InputValidationRules = rules;
+    validationErrorMessage: string = '';
+    ValidationSuccessMessage: string = '';
+    commandIsValid = true
+    checkedCommand = '';
 
     aggregationRuleSelectValues: SelectItem[] = []
     //     {text: 'PREDOMINANT', value: 'PREDOMINANT'},
@@ -165,11 +185,11 @@ export default class Attributes extends Vue {
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
     ];
-    dataSourceSelectValues: SelectItem[] = []
-    //     {text: 'MS SQL', value: 'MS SQL'},
-    //     {text: 'Excel', value: 'Excel'},
-    //     {text: 'None', value: 'None'}
-    // ];
+    dataSourceSelectValues: SelectItem[] = [
+         {text: 'MS SQL', value: 'MS SQL'},
+         {text: 'Excel', value: 'Excel'},
+         {text: 'None', value: 'None'}
+     ];
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.attributeModule.attributeAggregationRuleTypes) stateAttributeAggregationRuleTypes: string[];
@@ -207,13 +227,13 @@ export default class Attributes extends Vue {
         }));
     }
 
-    @Watch('stateAttributeDataSourceTypes')
-    onStateAttributeDataSourceTypesChanged() {
-        this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
-            text: type,
-            value: type,
-        }));
-    }
+    // @Watch('stateAttributeDataSourceTypes')
+    // onStateAttributeDataSourceTypesChanged() {
+    //     this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
+    //         text: type,
+    //         value: type,
+    //     }));
+    // }
 
     @Watch('stateAttributeAggregationRuleTypes')
     onStateAttributeAggregationRuleTypesChanged() {
@@ -233,6 +253,8 @@ export default class Attributes extends Vue {
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {
         this.selectedAttribute = clone(this.stateSelectedAttribute);
+        this.checkedCommand = this.selectedAttribute.command
+        this.commandIsValid = true;
     }
 
     @Watch('selectedAttribute', {deep: true})
@@ -283,7 +305,31 @@ export default class Attributes extends Vue {
             if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
                 this.selectedAttribute.minimum = null;
 
+            if(this.selectedAttribute.dataSourceType === 'MS SQL'){
+                allValid = allValid &&
+                this.checkedCommand === this.selectedAttribute.command &&
+                this.commandIsValid
+            }
+
         return !allValid;
+    }
+
+    CheckSqlCommand(){
+        AttributeService.CheckCommand(this.selectedAttribute.command)
+            .then((response: AxiosResponse) => {
+          if (hasValue(response, 'data')) {
+            const result: ValidationResult = response.data as ValidationResult;
+            this.commandIsValid = result.isValid;
+            this.checkedCommand = this.selectedAttribute.command;
+            if (result.isValid) {
+              this.ValidationSuccessMessage = result.validationMessage;
+              this.validationErrorMessage = '';
+            } else {
+              this.validationErrorMessage = result.validationMessage;
+              this.ValidationSuccessMessage = '';            
+            }
+          }
+        });
     }
 }
 

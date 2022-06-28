@@ -42,5 +42,5 @@ export const emptyAttribute: Attribute = {
     maximum: 0,
     name: '',
     type: 'STRING',
-    dataSourceType: ''
+    dataSourceType: 'None'
 }

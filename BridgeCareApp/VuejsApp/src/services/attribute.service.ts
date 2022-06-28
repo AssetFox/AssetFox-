@@ -33,4 +33,7 @@ export default class AttributeService {
     static CheckSqlConnection(connectionString: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/CheckSqlConnection/${connectionString}`);
     }
+    static CheckCommand(sqlCommand: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
+    }
 }

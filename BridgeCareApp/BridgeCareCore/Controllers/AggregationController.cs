@@ -55,6 +55,7 @@ namespace BridgeCareCore.Controllers
         {
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
+            var timer = KeepUserInformedOfState(state);
             try
             {
                 var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
@@ -76,11 +77,23 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
                 throw;
             }
+            finally
+            {
+                NotifyUserOfState(state);
+                timer.Stop();
+                timer.Close();
+            }
         }
 
         private void NotifyUserOfState(AggregationState state)
         {
-
+            try
+            {
+                SendCurrentStatusMessage(state);
+            } catch
+            {
+                // ingore the error
+            }
         }
 
         private System.Timers.Timer KeepUserInformedOfState(AggregationState state)

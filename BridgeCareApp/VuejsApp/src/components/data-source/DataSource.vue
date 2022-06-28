@@ -7,7 +7,7 @@
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
                       :items="dsItems"
-                      v-model="dsItems"
+                      v-model="sourceTypeItem"
                       outline
                       outlined
                     >
@@ -22,7 +22,7 @@
             <v-select
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
-              v-model="dsTypeItems"
+              v-model="dataSourceTypeItem"
               outline
               outlined
             >
@@ -103,24 +103,17 @@ import {Datasource, DataSourceType} from '@/shared/models/iAM/data-source';
 })
 export default class DataSource extends Vue {
     
-    @State(state => state.DataSource) dataSources: Datasource[];
-    @State(state => state.DataSourceType) dataSourceTypes: DataSourceType[];
+    @State(state => state.datasourceModule.dataSources) dataSources: Datasource[];
+    @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
-    DataSourceType = [
-        {text: "BAMS SQL", value: "BAMS SQL"},
-        {text: "Excel", value: "EXCEL"}
-    ];
-    SourceType = [
-        {text: "MS SQL", value: "MS SQL"},
-        {text: "Excel", value: "Excel"}
-    ];
-    dsTypeItems: DataSourceType[] = [];
-    dsItems: Datasource[] = [];
+    dsTypeItems: string[] = [];
+    dsItems: any;
     assetNumber: number = 0;
     invalidColumn: string = '';
     sourceTypeItem: string | null = '';
     dataSourceTypeItem: string | null = '';
+    datasourceNames: string[] = [];
     showMssql: boolean = false;
     showExcel: boolean = false;
     mounted() {
@@ -129,32 +122,28 @@ export default class DataSource extends Vue {
     }
     @Watch('dataSources')
         onGetDataSources() {
-            // load the state 
             this.dsItems = clone(this.dataSources);
+            this.dsItems = this.dataSources.map(
+                (ds: Datasource) => ({
+                    text: ds.name,
+                    value: ds.name
+                }),
+            );
         }
     @Watch('dataSourceTypes')
         onGetDataSourceTypes() {
-            // load the state
             this.dsTypeItems = clone(this.dataSourceTypes);
         }
-    @Watch('librarySelectItemValue')
-        onLibrarySelectItemValueChanged() {
-            //set toggle for active bams or excel
-    }
-    @Watch('sourceTypeItem')
+    @Watch('dataSourceTypeItem')
         onSourceTypeChanged() {
-            if (this.sourceTypeItem==="MS SQL") {
+            if (this.dataSourceTypeItem==="SQL") {
                 this.showMssql = true;
                 this.showExcel = false;
             }
-            if (this.sourceTypeItem==="Excel") {
+            if (this.dataSourceTypeItem==="Excel") {
                 this.showExcel = true;
                 this.showMssql = false;
             }
-        }
-    @Watch('dataSourceTypeItem') 
-        onDataSourceTypeChanged() {
-            // do something...?
         }
 }
 </script>

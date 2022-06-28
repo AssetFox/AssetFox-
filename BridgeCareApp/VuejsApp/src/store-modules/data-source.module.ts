@@ -6,11 +6,11 @@ import DataSourceService from '@/services/data-source.service';
 
 const state = {
     dataSources: [] as Datasource[],
-    dataSourceTypes: [] as DataSourceType[]
+    dataSourceTypes: [] as string[]
 };
 
 const mutations = {
-    dataSourceMutator(state: any, dataSources: string[]) {
+    dataSourceMutator(state: any, dataSources: Datasource[]) {
         state.dataSources = clone(dataSources);
     },
     dataSourceTypesMutator(state: any, dataSourceTypes: string[]) {
@@ -28,9 +28,9 @@ const actions = {
     },
     async getDataSourceTypes({commit}: any) {
         await DataSourceService.getDataSourceTypes()
-        .then((response: AxiosResponse<DataSourceType[]>) => {
+        .then((response: AxiosResponse<string[]>) => {
             if (hasValue(response, 'data')) {
-                commit('dataSourceTypes', response.data);
+                commit('dataSourceTypesMutator', response.data);
             }
         });
     }

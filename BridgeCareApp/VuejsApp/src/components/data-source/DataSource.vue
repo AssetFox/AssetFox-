@@ -6,8 +6,8 @@
                     <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Data Source</v-subheader>
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
-                      :items="DataSourceType"
-                      v-model="dataSourceTypeItem"
+                      :items="dsItems"
+                      v-model="dsItems"
                       outline
                       outlined
                     >
@@ -21,8 +21,8 @@
             <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
             <v-select
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
-              :items="SourceType"
-              v-model="sourceTypeItem"
+              :items="dsTypeItems"
+              v-model="dsTypeItems"
               outline
               outlined
             >
@@ -83,17 +83,28 @@
 
 <script lang='ts'>
 import Vue from 'vue';
+import {
+    clone,
+    contains,
+    findIndex,
+    isNil,
+    prepend,
+    propEq,
+    reject,
+    update,
+} from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, Getter, State } from 'vuex-class';
+import { Action, State } from 'vuex-class';
 import {Datasource, DataSourceType} from '@/shared/models/iAM/data-source';
+
 @Component({
 
 })
 export default class DataSource extends Vue {
     
-    @State(state => state.DataSource) dataSources: Datasource;
-    @State(state => state.DataSourceType) dataSourceTypes: DataSourceType;
+    @State(state => state.DataSource) dataSources: Datasource[];
+    @State(state => state.DataSourceType) dataSourceTypes: DataSourceType[];
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
     DataSourceType = [
@@ -104,6 +115,8 @@ export default class DataSource extends Vue {
         {text: "MS SQL", value: "MS SQL"},
         {text: "Excel", value: "Excel"}
     ];
+    dsTypeItems: DataSourceType[] = [];
+    dsItems: Datasource[] = [];
     assetNumber: number = 0;
     invalidColumn: string = '';
     sourceTypeItem: string | null = '';
@@ -111,7 +124,19 @@ export default class DataSource extends Vue {
     showMssql: boolean = false;
     showExcel: boolean = false;
     mounted() {
+        this.getDataSourcesAction();
+        this.getDataSourceTypesAction();
     }
+    @Watch('dataSources')
+        onGetDataSources() {
+            // load the state 
+            this.dsItems = clone(this.dataSources);
+        }
+    @Watch('dataSourceTypes')
+        onGetDataSourceTypes() {
+            // load the state
+            this.dsTypeItems = clone(this.dataSourceTypes);
+        }
     @Watch('librarySelectItemValue')
         onLibrarySelectItemValueChanged() {
             //set toggle for active bams or excel

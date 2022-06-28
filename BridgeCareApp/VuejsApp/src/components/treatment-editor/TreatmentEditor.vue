@@ -79,6 +79,14 @@
                 >
                     Add Treatment
                 </v-btn>
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
+                <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -797,6 +805,17 @@ export default class TreatmentEditor extends Vue {
                 }
             });
      }
+
+     OnDownloadTemplateClick()
+    {
+         Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+    }
 }
 </script>
 

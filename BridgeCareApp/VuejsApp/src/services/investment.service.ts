@@ -85,4 +85,17 @@ export default class InvestmentService {
                   { headers: { 'Content-Type': 'multipart/form-data' } },
               );
     }
+
+    static downloadInvestmentBudgetsTemplate(
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ?     
+               coreAxiosInstance.get(               
+                  `${API.Investment}/DownloadScenarioInvestmentBudgetsTemplate`,
+              )
+            : coreAxiosInstance.get(                
+                  `${API.Investment}/DownloadLibraryInvestmentBudgetsTemplate`,
+              );
+    }
 }

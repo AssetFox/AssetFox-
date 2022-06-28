@@ -58,14 +58,9 @@
                 </v-layout>
             </v-layout>            
         </v-flex>
-
-
-
-
-
         <v-flex>
             <v-layout row style="height:48px;">
-                <v-flex xs10 v-show="!hasScenario">
+                <v-flex xs9 v-show="!hasScenario">
                     <v-layout row>
                             <div style="margin-top:6px;"
                                 v-if='hasSelectedLibrary && !hasScenario'
@@ -73,7 +68,7 @@
                             > 
                                 Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                             </div>
-                            <v-divider class="owner-shared-divider" style="margin-left:10px;" inset vertical>
+                            <v-divider v-if='hasSelectedLibrary && !hasScenario' class="owner-shared-divider" style="margin-left:10px;" inset vertical>
                             </v-divider>                        
                             <v-switch style="margin-left:10px;margin-top:4px;"
                                 class="sharing ghd-checkbox"
@@ -83,7 +78,7 @@
                             />               
                     </v-layout>
                 </v-flex>
-                <v-flex xs10 v-show="hasScenario">
+                <v-flex xs9 v-show="hasScenario">
                 </v-flex>
                 <v-flex xs2 v-show="hasScenario || hasSelectedLibrary">
                     <v-layout row align-end style="margin-top:-4px;height:40px;">
@@ -96,6 +91,12 @@
                         <v-btn :disabled='false' @click='exportPerformanceCurves()'
                             flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Download
+                        </v-btn>
+                        <v-divider class="upload-download-divider" inset vertical>
+                        </v-divider>
+                        <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Download Template
                         </v-btn>
                     </v-layout>            
                 </v-flex>
@@ -966,6 +967,17 @@ export default class PerformanceCurveEditor extends Vue {
 
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
+    }
+
+    OnDownloadTemplateClick()
+    {
+        PerformanceCurveService.downloadPerformanceCurvesTemplate(this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
     }
 
     exportPerformanceCurves() {

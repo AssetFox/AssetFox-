@@ -84,4 +84,17 @@ export default class PerformanceCurveService {
                   `${API.PerformanceCurve}/ExportLibraryPerformanceCurvesExcelFile/${id}`,
               );
     }
+
+    static downloadPerformanceCurvesTemplate(
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ?     
+               coreAxiosInstance.get(               
+                  `${API.PerformanceCurve}/DownloadScenarioPerformanceCurvesTemplate`,
+              )
+            : coreAxiosInstance.get(                
+                  `${API.PerformanceCurve}/DownloadLibraryPerformanceCurvesTemplate`,
+              );
+    }
 }

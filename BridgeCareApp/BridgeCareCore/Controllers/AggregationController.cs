@@ -51,14 +51,19 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
-
+            var channel = Channel.CreateUnbounded<NetworkRollupDetailDTO>();
+            var state = new AggregationState();
+            try
+            {
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state);
+            }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                _status = "Aggregation failed";
-                UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                state.Status = "Aggregation failed";
+                UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                    new NetworkRollupDetailDTO { NetworkId = _networkId, Status = _status }, 0.0);
+                    new NetworkRollupDetailDTO { NetworkId = networkId, Status = state.Status}, 0.0);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
                 throw;
             }

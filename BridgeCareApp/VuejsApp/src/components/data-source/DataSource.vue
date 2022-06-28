@@ -58,7 +58,7 @@
                         <v-textarea
                           class="ghd-control-border Montserrat-font-family"
                           v-show="showMssql"
-                          label="Description"
+                          v-model="selectedConnection"
                           no-resize
                           outline
                         >
@@ -114,6 +114,7 @@ export default class DataSource extends Vue {
     sourceTypeItem: string | null = '';
     dataSourceTypeItem: string | null = '';
     datasourceNames: string[] = [];
+    selectedConnection: string = 'test';
     showMssql: boolean = false;
     showExcel: boolean = false;
     mounted() {

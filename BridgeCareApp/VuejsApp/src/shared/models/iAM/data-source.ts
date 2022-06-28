@@ -1,6 +1,7 @@
 export interface Datasource {
+    id: string;
     name: string;
-    details: string;
+    connectionString: string;
     secure: boolean;
     type: string;
 }

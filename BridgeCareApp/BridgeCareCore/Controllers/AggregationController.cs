@@ -20,6 +20,8 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Channels;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -39,16 +41,19 @@ namespace BridgeCareCore.Controllers
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, broadcastError);
         }
 
-        public AggregationController(ILog log, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public AggregationController(ILog log,
+            IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) :
-            base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
             _log = log ?? throw new ArgumentNullException(nameof(log));
-
+        }
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributeDTOs)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
+            var allAttributes = UnitOfWork.AttributeRepo.GetAttributes();
             // Wjwjwj pull this out into a service. This is step 2 of my current NetworkController call.
             try
             {
@@ -70,7 +75,7 @@ namespace BridgeCareCore.Controllers
                         UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
 
                         // Get/create configurable attributes
-                        var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(attributeDTOs);
+                        var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
 
                         var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 
@@ -192,7 +197,7 @@ namespace BridgeCareCore.Controllers
 
                         try
                         {
-                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, attributeDTOs);
+                            UnitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, allAttributes);
                         }
                         catch (Exception e)
                         {

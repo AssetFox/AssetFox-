@@ -31,9 +31,9 @@ namespace BridgeCareCore.Services.Aggregation
 
             state.NetworkId = networkId;
             var isError = false;
-            var errorMessage = "";
+            state.ErrorMessage = "";
 
-            await Task.Factory.StartNew(() =>
+            await Task.Run(() =>
             {
                 _unitOfWork.BeginTransaction();
 
@@ -90,7 +90,7 @@ namespace BridgeCareCore.Services.Aggregation
                         var broadcastError = $"Error: Fetching data for the attributes ::{e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
-                        errorMessage = e.Message;
+                        state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
 
@@ -99,8 +99,8 @@ namespace BridgeCareCore.Services.Aggregation
                     attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
                         .Intersect(networkAttributeIds).Distinct().ToList();
                 });
-
-                CheckCurrentLongRunningTask(getTask);
+                state.CurrentRunningTask = getTask;
+                getTask.Wait();
 
                 var aggregatedResults = new List<IAggregatedResult>();
 
@@ -159,8 +159,8 @@ namespace BridgeCareCore.Services.Aggregation
                         }
                     }
                 });
-
-                CheckCurrentLongRunningTask(aggregationTask);
+                state.CurrentRunningTask = aggregationTask;
+                aggregationTask.Wait();
 
                 _status = "Saving";
                 var crudTask = Task.Factory.StartNew(() =>
@@ -176,7 +176,7 @@ namespace BridgeCareCore.Services.Aggregation
                         var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
-                        errorMessage = e.Message;
+                        state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
                     try
@@ -188,7 +188,7 @@ namespace BridgeCareCore.Services.Aggregation
                         var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
-                        errorMessage = e.Message;
+                        state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
 
@@ -201,13 +201,13 @@ namespace BridgeCareCore.Services.Aggregation
                         var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
-                        errorMessage = e.Message;
+                        state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
                 });
 
-
-                CheckCurrentLongRunningTask(crudTask);
+                state.CurrentRunningTask = crudTask;
+                crudTask.Wait();
 
                 if (!isError)
                 {
@@ -219,7 +219,7 @@ namespace BridgeCareCore.Services.Aggregation
                 }
                 else
                 {
-                    _status = $"Error in data aggregation {errorMessage}";
+                    _status = $"Error in data aggregation {state.ErrorMessage}";
                     _unitOfWork.Rollback();
                     _percentage = 0;
                     WriteState(writer, state);

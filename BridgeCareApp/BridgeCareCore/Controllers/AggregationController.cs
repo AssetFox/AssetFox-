@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Channels;
 using BridgeCareCore.Services.Aggregation;
+using System.Timers;
 
 namespace BridgeCareCore.Controllers
 {
@@ -45,6 +46,7 @@ namespace BridgeCareCore.Controllers
             base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
         }
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
@@ -56,6 +58,13 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
+                if (result)
+                {
+                    return Ok();
+                } else
+                {
+                    return StatusCode(500, state.ErrorMessage);
+                }
             }
             catch (Exception e)
             {
@@ -69,51 +78,34 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        private void CheckCurrentLongRunningTask(Task currentLongRunningTask)
+        private void NotifyUserOfState(AggregationState state)
         {
-            _count = 0;
-            var cts = new CancellationTokenSource();
 
-            var currentStatusMessageTask = CreateCurrentStatusMessageTask(cts.Token);
-
-            while (!currentLongRunningTask.IsCompleted)
-            {
-                if (currentStatusMessageTask.IsCompleted)
-                {
-                    currentStatusMessageTask = CreateCurrentStatusMessageTask(cts.Token);
-                }
-            }
-
-            if (!currentStatusMessageTask.IsCompleted)
-            {
-                cts.Cancel();
-            }
         }
 
-        private Task CreateCurrentStatusMessageTask(CancellationToken token) =>
-            Task.Run(async () =>
-            {
-                await Task.Delay(3000, token);
-                if (_count > 3)
-                {
-                    _count = 0;
-                }
-                SendCurrentStatusMessage();
-                _count++;
-            }, token);
-
-        private void SendCurrentStatusMessage()
+        private System.Timers.Timer KeepUserInformedOfState(AggregationState state)
         {
-            var message = _count switch
+            var timer = new System.Timers.Timer(3000);
+            timer.Elapsed += delegate
             {
-                0 => $"{_status}.",
-                1 => $"{_status}..",
-                2 => $"{_status}...",
-                _ => _status
+                SendCurrentStatusMessage(state);
+            };
+            timer.Start();
+            return timer;
+        }
+        private void SendCurrentStatusMessage(AggregationState state)
+        {
+            var count = state.Count % 3;
+            var message =  count switch
+            {
+                0 => $"{state.Status}.",
+                1 => $"{state.Status}..",
+                2 => $"{state.Status}...",
+                _ => state.Status
             };
 
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                new NetworkRollupDetailDTO { NetworkId = _networkId, Status = message }, _percentage);
+                new NetworkRollupDetailDTO { NetworkId = state.NetworkId, Status = message }, state.Percentage);
         }
     }
 }

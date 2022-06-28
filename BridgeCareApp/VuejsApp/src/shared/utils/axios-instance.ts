@@ -46,5 +46,6 @@ export const API = {
     AnalysisDefaultData: '/api/AnalysisDefaultData',
     InvestmentDefaultData: '/api/InvestmentDefaultData',
     CalculatedAttributes: '/api/CalculatedAttributes',
-    Aggregation: '/api/Aggregation'
+    Aggregation: '/api/Aggregation',
+    DataSource: '/api/Aggregation'
 };

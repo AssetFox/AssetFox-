@@ -85,11 +85,17 @@
 import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-
+import { Action, Getter, State } from 'vuex-class';
+import {Datasource, DataSourceType} from '@/shared/models/iAM/data-source';
 @Component({
 
 })
 export default class DataSource extends Vue {
+    
+    @State(state => state.DataSource) dataSources: Datasource;
+    @State(state => state.DataSourceType) dataSourceTypes: DataSourceType;
+    @Action('getDataSources') getDataSourcesAction: any;
+    @Action('getDataSourceTypes') getDataSourceTypesAction: any;
     DataSourceType = [
         {text: "BAMS SQL", value: "BAMS SQL"},
         {text: "Excel", value: "EXCEL"}

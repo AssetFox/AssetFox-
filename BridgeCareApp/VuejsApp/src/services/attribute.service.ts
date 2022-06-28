@@ -24,7 +24,4 @@ export default class AttributeService {
     static GetAttributeDataSourceTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
     }
-    static CheckSqlConnection(connectionString: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Attribute}/CheckSqlConnection/${connectionString}`);
-    }
 }

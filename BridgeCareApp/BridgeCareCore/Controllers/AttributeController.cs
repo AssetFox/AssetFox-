@@ -82,36 +82,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        [HttpPost]
-        [Route("CheckSqlConnection/{connectionString}")]
-        [Authorize]
-        public async Task<IActionResult> CheckSqlConnection(string connectionString)
-        {
-            try
-            {
-                try
-                {
-                    await Task.Factory.StartNew(() =>
-                    {
-                        using (SqlConnection conn = new SqlConnection(connectionString))
-                        {
-                            conn.Open(); // throws if invalid
-                        }
-                    });
-                    return Ok("Connection string is valid");
-                }
-                catch(Exception ex)
-                {
-                    return Ok("Connection string is not valid: " + ex.Message);
-                }
-                
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
-                throw;
-            }
-        }
+        
 
         [HttpPost]
         [Route("GetAttributesSelectValues")]

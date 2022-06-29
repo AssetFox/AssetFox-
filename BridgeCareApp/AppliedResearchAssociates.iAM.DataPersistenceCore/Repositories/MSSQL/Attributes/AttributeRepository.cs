@@ -243,7 +243,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-            return _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            // WjJake -- calling out the .Include I added here. It's needed for my code likely but idk about other peoples' code.
+            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()

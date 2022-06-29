@@ -26,7 +26,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                         available.ConnectionType,
                         available.ConnectionString,
                         available.IsCalculated,
-                        available.IsAscending);
+                        available.IsAscending,
+                        Guid.Empty);
 
                     break;
                 }
@@ -40,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                         available.ConnectionType,
                         available.ConnectionString,
                         available.IsCalculated,
-                        available.IsAscending);
+                        available.IsAscending,
+                        Guid.Empty);
 
                     break;
                 }

@@ -16,8 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = name ?? RandomStrings.Length11();
-            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", Data.ConnectionType.MSSQL, "connectionString", true, false);
-            return attribute;
+            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", Data.ConnectionType.MSSQL, "connectionString", true, false, Guid.Empty);            return attribute;
         }
 
         public static AttributeDTO NumericDto(Guid? id = null, string name = null)
@@ -31,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = RandomStrings.Length11();
-            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", false, true);
+            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", false, true, Guid.Empty);
             return attribute;
         }
     }

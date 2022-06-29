@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
             attributeData = new List<IAttributeDatum>();
             sectionLocation = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
             sectionLocationUnmatched = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier2);
-            mockAttribute = new Mock<Attribute>(guId, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, Data.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttribute = new Mock<Attribute>(guId, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, Data.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);
             mockAggregationRule = new Mock<AverageAggregationRule>();
             
         }

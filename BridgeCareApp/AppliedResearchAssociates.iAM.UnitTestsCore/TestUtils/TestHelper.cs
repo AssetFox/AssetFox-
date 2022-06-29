@@ -164,7 +164,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     if (!AttributesHaveBeenCreated)
                     {
+                        SQLDataSourceDTO dataSourceToApply = null;
+                        if (!UnitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
+                        {
+                            dataSourceToApply = new SQLDataSourceDTO
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Test SQL DataSource",
+                                ConnectionString = Config.GetConnectionString("BridgeCareConnex")
+                            };
+                            UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
+                        }
+                        else
+                        {
+                            dataSourceToApply = (SQLDataSourceDTO)UnitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
+                        }
                         var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        foreach (var attribute in attributesToInsert)
+                        {
+                            attribute.DataSource = dataSourceToApply;
+                        }
                         UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
                         AttributesHaveBeenCreated = true;
                     }

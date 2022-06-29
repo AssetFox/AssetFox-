@@ -48,9 +48,10 @@ namespace BridgeCareCore.Controllers
         {
             if (UpdateAttributes)
             {
-                var allAttributes = UnitOfWork.AttributeMetaDataRepo.GetAttributes();
-                var domainAttributes = allAttributes.Select(AttributeMapper.ToDomain).ToList();
-                UnitOfWork.AttributeRepo.UpsertAttributes(domainAttributes);
+                var metadataAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                var dbAttributes = UnitOfWork.AttributeRepo.GetAttributes();
+                UnitOfWork.AttributeRepo.UpsertAttributes(metadataAttributes);
+                var dbAttributesAfter = UnitOfWork.AttributeRepo.GetAttributes();
             }
 
 

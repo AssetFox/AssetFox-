@@ -102,11 +102,24 @@
     <None Update="DownloadedNewReports\df71ac9b-b90a-425c-a519-7b2d6b531ddc\SummaryReportTestData.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="DownloadTemplates\DeteriorationModels_template.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DownloadTemplates\Investment_budgets_template.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DownloadTemplates\Library_treatments_template.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="DownloadTemplates\Scenario_treatments_template.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Interfaces\Inventory\" />
     <Folder Include="MetaData\AttributeMetaData\" />
+    <Folder Include="DownloadTemplates\" />
     <Folder Include="Services\SummaryReport\Models\" />
   </ItemGroup>
 

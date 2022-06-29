@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 {
     public class AttributeMetaDataRepository : IAttributeMetaDataRepository
     {
-        public List<Attribute> GetAllAttributes()
+        public List<Attribute> GetAllAttributes(Guid dataSourceId)
         {
             // set the attribute meta data json file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -51,12 +51,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
             }
 
             // convert meta data into attribute domain models
-            var attributes = attributeMetaData.Select(AttributeFactory.Create).ToList();
+            var attributes = attributeMetaData.Select(a => AttributeFactory.Create(a, dataSourceId)).ToList();
 
             return attributes;
         }
 
-        public (Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute()
+        public (Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute(Guid dataSourceId)
         {
             // get the network definition rules file path
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
                 .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>), DefaultEquation = default(string) });
 
             // convert meta data into attribute domain models
-            var attributes = metaData.AttributeMetaData.Select(AttributeFactory.Create).ToList();
+            var attributes = metaData.AttributeMetaData.Select(a => AttributeFactory.Create(a, dataSourceId)).ToList();
 
             // return only the first attribute from the list, or null if there isn't any
             return (attributes.FirstOrDefault(), metaData.DefaultEquation);

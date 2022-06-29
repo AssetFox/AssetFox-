@@ -48,10 +48,24 @@ namespace BridgeCareCore.Controllers
         {
             if (UpdateAttributes)
             {
-                var metadataAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes();
+                var dataSources = UnitOfWork.DataSourceRepo.GetDataSources();
+                var metadataDataSource = dataSources.FirstOrDefault(ds => ds.Name == "MetaData.Json");
+                var metadataDataSourceId = metadataDataSource.Id;
+                var metadataAttributes = UnitOfWork.AttributeMetaDataRepo.GetAllAttributes(metadataDataSourceId);
                 var dbAttributes = UnitOfWork.AttributeRepo.GetAttributes();
                 UnitOfWork.AttributeRepo.UpsertAttributes(metadataAttributes);
                 var dbAttributesAfter = UnitOfWork.AttributeRepo.GetAttributes();
+                var dbAttributeIdsAfter = dbAttributesAfter.Select(a => a.Id).ToList();
+                var metadataAttributeIds = metadataAttributes.Select(a => a.Id).ToList();
+                var attributeIdsToDelete = dbAttributeIdsAfter.Except(metadataAttributeIds).ToList();
+                UnitOfWork.AttributeRepo.DeleteAttributesShouldNeverBeNeededButSometimesIs(attributeIdsToDelete);
+                var dbAttributesAfterDeletion = UnitOfWork.AttributeRepo.GetAttributes();
+                var dbAttributeIdsAfterDeletion = dbAttributesAfterDeletion.Select(a => a.Id).ToList();
+                var attributeIdsNotDeleted = dbAttributeIdsAfterDeletion.Except(metadataAttributeIds).ToList();
+                if (attributeIdsNotDeleted.Any())
+                {
+                    throw new Exception("Failed to delete attributes we don't want");
+                }
             }
 
 

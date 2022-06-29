@@ -276,5 +276,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
             return AttributeMapper.ToDtoNullPropagating(entity);
         }
+
+        public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
+        {
+            foreach (var id in attributeIdsToDelete)
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteEntity<AttributeEntity>(_ => _.Id == id);
+                _unitOfWork.Commit();
+            }
+        }
     }
 }

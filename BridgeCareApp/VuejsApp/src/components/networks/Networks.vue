@@ -68,7 +68,8 @@
                                     <v-btn
                                         style="padding-right:20px !important;"
                                         class="edit-icon ghd-control-label"
-                                        icon>
+                                        icon
+                                        @click="onShowEquationEditorDialog">
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-flex>
@@ -93,7 +94,7 @@
                                 </v-btn>
                             </v-layout>
                             <v-data-table :headers='dataSourceGridHeaders' :items='attributeRows'
-                                class='v-table__overflow ghd-table' item-key='value' select-all
+                                class='v-table__overflow ghd-table' item-key='id' select-all
                                 v-model="selectedAttributeRows"
                                 :must-sort='true'
                                 hide-actions
@@ -102,12 +103,15 @@
                                     <td>
                                         <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
                                     </td>
-                                    <td>{{ props.item.string }}</td> 
+                                    <td>{{ props.item.name }}</td> 
                                     <td>{{ props.item.dataSourceType }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
-                                <v-pagination class="ghd-pagination ghd-button-text" v-model="pagination.page" :length="pages()"></v-pagination>
+                                <v-pagination class="ghd-pagination ghd-button-text" 
+                                    v-model="pagination.page" 
+                                    :length="pages()"
+                                    ></v-pagination>
                             </div>
                         </div>               
                     </v-layout>
@@ -124,11 +128,11 @@
                 <v-btn class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' 
+                <v-btn @click='createNetwork' :disabled='disableCrudButtons() || !hasUnsavedChanges' 
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Save
                 </v-btn>    
-                <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges'
+                <v-btn @click='createNetwork' :disabled='disableCrudButtons() || !hasUnsavedChanges'
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
@@ -161,6 +165,7 @@ import { clone, filter, findIndex, isNil, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
+import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 
 @Component({
     components: {
@@ -176,13 +181,14 @@ export default class Networks extends Vue {
     
     @Action('getNetworks') getNetworks: any;
     @Action('getAttributes') getAttributes: any;
-    @Action('selectNetowrk') selectNetworkAction: any;
+    @Action('selectNetwork') selectNetworkAction: any;
     @Action('createNetwork') createNetworkAction: any;
     @Action('aggregateNetworkData') aggreegateNetworkAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
+    rules: InputValidationRules = rules;
 
     dataSourceGridHeaders: DataTableHeader[] = [
         { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
@@ -285,31 +291,12 @@ export default class Networks extends Vue {
     }
     disableCrudButtons() {
         let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.type) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.aggregationRuleType) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.defaultValue) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
-            if(this.selectedAttribute.type === 'NUMBER'){
-                if(isNaN(+this.selectedAttribute.defaultValue)){
-                    allValid = false;
-                    this.selectedAttribute.defaultValue = '';
-                }               
-            }
-            //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
-            if(!isNil(this.selectedAttribute.maximum) && this.selectedAttribute.maximum === "")  
-                this.selectedAttribute.maximum = null;
-            if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
-                this.selectedAttribute.minimum = null;
 
-            if(this.selectedAttribute.dataSourceType === 'MS SQL'){
-                allValid = allValid &&
-                this.checkedCommand === this.selectedAttribute.command &&
-                this.commandIsValid
-            }
 
         return !allValid;
+    }
+    createNetwork(){
+
     }
     
     pages() {

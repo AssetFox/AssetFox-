@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 dto.AggregationRuleType,
                 dto.Command,
                 MapDTODataSourceTypes(dto.DataSource?.Type),
-                GetConnectionString(dto.DataSource.ToEntity()),
+                GetConnectionString(dto.DataSource?.ToEntity()),
                 dto.IsCalculated,
                 dto.IsAscending,
                 dto.DataSource?.Id);
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     dto.AggregationRuleType,
                     dto.Command,
                     MapDTODataSourceTypes(dto.DataSource?.Type),
-                    GetConnectionString(dto.DataSource.ToEntity()),
+                    GetConnectionString(dto.DataSource?.ToEntity()),
                     dto.IsCalculated,
                     dto.IsAscending,
                     dto.DataSource?.Id)

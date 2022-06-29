@@ -17,9 +17,6 @@ namespace BridgeCareCore.Services.Aggregation
     public class AggregationService : IAggregationService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private int _count;
-        private string _status = string.Empty;
-        private double _percentage;
         public AggregationService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -40,10 +37,10 @@ namespace BridgeCareCore.Services.Aggregation
                 var attributeData = new List<IAttributeDatum>();
                 var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
 
-                _status = "Preparing";
+                state.Status = "Preparing";
                 var getTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
                     // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
@@ -106,10 +103,10 @@ namespace BridgeCareCore.Services.Aggregation
                 var totalAssets = (double)maintainableAssets.Count;
                 var i = 0.0;
 
-                _status = "Aggregating";
+                state.Status = "Aggregating";
                 var aggregationTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
@@ -117,7 +114,7 @@ namespace BridgeCareCore.Services.Aggregation
                     {
                         if (i % 500 == 0)
                         {
-                            _percentage = Math.Round(i / totalAssets * 100, 1);
+                            state.Percentage = Math.Round(i / totalAssets * 100, 1);
                         }
                         i++;
 
@@ -161,10 +158,10 @@ namespace BridgeCareCore.Services.Aggregation
                 state.CurrentRunningTask = aggregationTask;
                 aggregationTask.Wait();
 
-                _status = "Saving";
+                state.Status = "Saving";
                 var crudTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
                     try
                     {
@@ -210,17 +207,17 @@ namespace BridgeCareCore.Services.Aggregation
 
                 if (!isError)
                 {
-                    _status = "Aggregated all network data";
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
+                    state.Status = "Aggregated all network data";
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     _unitOfWork.Commit();
 
                     WriteState(writer, state);
                 }
                 else
                 {
-                    _status = $"Error in data aggregation {state.ErrorMessage}";
+                    state.Status = $"Error in data aggregation {state.ErrorMessage}";
                     _unitOfWork.Rollback();
-                    _percentage = 0;
+                    state.Percentage = 0;
                     WriteState(writer, state);
                 }
             });

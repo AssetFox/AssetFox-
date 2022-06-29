@@ -30,7 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.ConnectionType,
                     "",
                     entity.IsCalculated,
-                    entity.IsAscending);
+                    entity.IsAscending,
+                    entity.DataSourceId);
             }
 
             if (entity.DataType == "STRING")
@@ -43,7 +44,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.ConnectionType,
                     "",
                     entity.IsCalculated,
-                    entity.IsAscending);
+                    entity.IsAscending,
+                    entity.DataSourceId);
             }
 
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
@@ -60,7 +62,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ConnectionType.MSSQL,
                 "",
                 dto.IsCalculated,
-                dto.IsAscending);
+                dto.IsAscending,
+                dto.DataSource?.Id);
         }
 
         private static NumericAttribute ToNumeric(AttributeDTO dto)
@@ -77,7 +80,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     ConnectionType.MSSQL,
                     "",
                     dto.IsCalculated,
-                    dto.IsAscending)
+                    dto.IsAscending,
+                    dto.DataSource?.Id)
                 : null;
         }
 
@@ -102,11 +106,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
-        public static AttributeEntity ToEntity(this Attribute domain)
+        public static AttributeEntity ToEntity(this Attribute domain, IDataSourceRepository dataSources = null)
         {
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null Attribute domain to Attribute entity");
+            }
+
+            var dataSource = new DataSourceEntity()
+            {
+                Id = Guid.Empty,
+                Type = "None"
+            };
+
+            if (domain.DataSourceId != null && domain.DataSourceId != Guid.Empty)
+            {
+                var possibleDataSource = dataSources?.GetDataSource((Guid)domain.DataSourceId).ToEntity();
+                if (possibleDataSource != null) dataSource = possibleDataSource;
             }
 
             var entity = new AttributeEntity
@@ -118,8 +134,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Command = domain.Command,
                 ConnectionType = domain.ConnectionType,
                 IsCalculated = domain.IsCalculated,
-                IsAscending = domain.IsAscending
+                IsAscending = domain.IsAscending,
             };
+
+            if (dataSource.Type != "None")
+            {
+                entity.DataSource = dataSource;
+                entity.DataSourceId = dataSource.Id;
+            }
 
             if (domain is NumericAttribute numericAttribute)
             {
@@ -160,8 +182,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DefaultValue = entity.DefaultValue,
                 Maximum = entity.Maximum,
                 Minimum = entity.Minimum,
+                DataSource = entity.DataSource?.ToDTO()
             };
-
         /// <summary>Safe to call if the entity might be null. If it is
         /// in fact null, the returned DTO will also be null.</summary>
         public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)

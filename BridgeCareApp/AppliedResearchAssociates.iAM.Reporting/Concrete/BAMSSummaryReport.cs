@@ -122,8 +122,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
             }
             SimulationID = _simulationId;
 
-            // Check for simulation existence            
-            var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(_simulationId);
+            var simulationName = "";
+            try
+            {
+                var simulationObject = _unitOfWork.SimulationRepo.GetSimulation(_simulationId);
+                simulationName = simulationObject.Name;
+                _networkId = simulationObject.NetworkId;
+            }
+            catch (Exception e)
+            {
+                IndicateError();
+                Errors.Add("Failed to find simulation");
+                Errors.Add(e.Message);
+                return;
+            }
+
+            // Check for simulation existence                        
             if (simulationName == null)
             {
                 IndicateError();

@@ -9,9 +9,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using AppliedResearchAssociates.iAM;
 using Microsoft.Data.SqlClient;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -217,6 +219,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = repo.GetSingleById(Guid.NewGuid());
             Assert.Null(attribute);
+        }
+
+        [Fact]
+        public void AddAttributeWithDataSourceWithConnectionString_LoadFromDb_ConnectionStringIsThere()
+        {
+            Setup();
+            var dataSourceId = Guid.NewGuid();
+            var randomName = RandomStrings.Length11();
+            var dataSource = new SQLDataSourceDTO
+            {
+                ConnectionString = "connectionString123",
+                Id = dataSourceId,
+                Name = randomName,
+            };
+            var dataSourceRepo = _testHelper.UnitOfWork.DataSourceRepo;
+            dataSourceRepo.UpsertDatasource(dataSource);
+            var attributeId = Guid.NewGuid();
+            var attributeName = RandomStrings.WithPrefix("AttributeName");
+            var attributeDto = new AttributeDTO
+            {
+                Id = attributeId,
+                AggregationRuleType = TextAttributeAggregationRules.Predominant,
+                Command = "Command",
+                DataSource = dataSource,
+                Name = attributeName,
+                Type = "STRING"//AppliedResearchAssociates.iAM.AttributeTypeNames.String
+            };
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+            var attributeAfter = _testHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
+            var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
+            Assert.Equal("connectionString123", sqlDataSourceAfter.ConnectionString);
+            var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter);
+            Assert.Equal("connectionString123", domainAttributeAfter.ConnectionString);
         }
     }
 }

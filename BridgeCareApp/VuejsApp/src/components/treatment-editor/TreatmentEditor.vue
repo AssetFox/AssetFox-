@@ -808,7 +808,7 @@ export default class TreatmentEditor extends Vue {
 
      OnDownloadTemplateClick()
     {
-         Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
+        Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;

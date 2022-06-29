@@ -26,10 +26,10 @@
                 </v-flex>
                 <v-flex style="padding-top:30px;">
                     <v-btn
-                        @click='onDeleteTreatment(selectedTreatment.id)'
+                        @click='onShowConfirmDeleteTreatmentAlert'
                         depressed
                         class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
-                        v-show='hasSelectedTreatment'
+                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
                     >
                         Delete Treatment
                     </v-btn>
@@ -260,6 +260,11 @@
 
         <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
             @submit='onSubmitImportTreatmentsDialogResult' />
+
+        <ConfirmDeleteTreatmentAlert
+            :dialogData='confirmBeforeDeleteTreatmentAlertData'
+            @submit='onSubmitConfirmDeleteTreatmentAlertResult'
+        />
     </v-layout>
 </template>
 
@@ -334,6 +339,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
         CreateTreatmentDialog,
         CreateTreatmentLibraryDialog,
         ConfirmDeleteAlert: Alert,
+        ConfirmDeleteTreatmentAlert: Alert
     },
 })
 export default class TreatmentEditor extends Vue {
@@ -397,7 +403,9 @@ export default class TreatmentEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
-    showImportTreatmentsDialog: boolean = false;    
+    showImportTreatmentsDialog: boolean = false;
+    confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
+    isNoTreatmentSelected: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -541,6 +549,8 @@ export default class TreatmentEditor extends Vue {
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
         };
+
+        this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
     }
 
     isSelectedTreatmentItem(treatmentId: string | number) {
@@ -572,6 +582,24 @@ export default class TreatmentEditor extends Vue {
         }
     }
     
+    onShowConfirmDeleteTreatmentAlert() {
+        this.confirmBeforeDeleteTreatmentAlertData = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message: 'Are you sure you want to delete?',
+        };
+    }
+
+    onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
+        this.confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
+
+        if (submit) {
+            this.onDeleteTreatment(this.selectedTreatment.id);
+        }
+    }
+
+
     onDeleteTreatment(treatmentId: string | number) {
         if(this.hasScenario)
         {         

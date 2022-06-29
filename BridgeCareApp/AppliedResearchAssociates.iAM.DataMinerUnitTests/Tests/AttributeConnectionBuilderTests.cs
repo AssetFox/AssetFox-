@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 
         private void Init(ConnectionType connectionType)
         {
-            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, connectionType, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, connectionType, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);
         }
     }
 }

@@ -5,12 +5,15 @@
                 <v-layout>
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Network</v-subheader>
-                        <v-select :items='testNetworks'
-                            outline                           
+                        <v-select :items='selectNetworkItems'
+                            outline  
+                            v-model='selectNetworkItemValue'                         
                             class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
-                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        @click="addNetwork">
                         Add Network
                     </v-btn>
                 </v-layout>
@@ -27,7 +30,8 @@
                         <v-select
                             outline                           
                             class="ghd-select ghd-text-field ghd-text-field-border"
-                            :items='testAttributes'>
+                            v-model="selectedKeyAttributeItem"
+                            :items='selectKeyAttributeItems'>
                         </v-select>  
                     </v-layout>                         
                 </v-flex>
@@ -38,9 +42,12 @@
                         :items="dataSourceSelectValues"  
                         style="margin-top: 18px !important;"                  
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
-                        label="Data Source">
+                        label="Data Source"
+                        v-model="selectDataSourceTypevalue">
                     </v-select>  
-                    <v-btn style="margin-top: 20px !important;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline>
+                    <v-btn style="margin-top: 20px !important;" 
+                        class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        @click="selectAllFromSource">
                         Select All From Source
                     </v-btn>                            
                 </v-layout>  
@@ -66,25 +73,28 @@
                                     </v-btn>
                                 </v-flex>
                             </v-layout>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field" />                         
+                        <v-text-field outline class="ghd-text-field-border ghd-text-field" 
+                            v-model="spatialWeightingEquationValue.expression"/>                         
                     </v-layout>
                 </v-flex>
                 <v-flex xs5>
                     <v-layout column>
                         <div class='priorities-data-table'>
                             <v-layout justify-center>
-                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                    @click="onAddAll">
                                     Add All
                                 </v-btn>
                                 <v-divider class="investment-divider" inset vertical>
                                 </v-divider>
-                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                                <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                                    @click="onRemoveAll">
                                     Remove All
                                 </v-btn>
                             </v-layout>
-                            <v-data-table :headers='budgetPriorityGridHeaders' :items='testAttributeRows'
+                            <v-data-table :headers='dataSourceGridHeaders' :items='attributeRows'
                                 class='v-table__overflow ghd-table' item-key='value' select-all
-                                v-model="selectedTestNetworkRows"
+                                v-model="selectedAttributeRows"
                                 :must-sort='true'
                                 hide-actions
                                 :pagination.sync="pagination">
@@ -92,8 +102,8 @@
                                     <td>
                                         <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
                                     </td>
-                                    <td>{{ props.item.text }}</td> 
-                                    <td>Excel</td> 
+                                    <td>{{ props.item.string }}</td> 
+                                    <td>{{ props.item.dataSourceType }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
@@ -107,25 +117,33 @@
         <!-- The Buttons  -->
         <v-flex xs12 >        
             <v-layout justify-center style="padding-top: 30px !important">
-                <v-btn flat class='ghd-blue ghd-button-text ghd-button'>
+                <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
+                    flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
                 <v-btn class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges' 
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Save
                 </v-btn>    
-                <v-btn class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn @click='saveAttribute' :disabled='disableCrudButtons() || !hasUnsavedChanges'
+                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
             </v-layout>
         </v-flex>
+        <EquationEditorDialog
+            :dialogData="equationEditorDialogData"
+            :isFromPerformanceCurveEditor=false
+            @submit="onSubmitEquationEditorDialogResult"
+        />
     </v-layout>
 </template>
 
 <script lang='ts'>
-import { Network } from '@/shared/models/iAM/network';
+import { emptyNetwork, Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -133,119 +151,174 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, Getter, State } from 'vuex-class';
+import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
+import {
+    emptyEquationEditorDialogData,
+    EquationEditorDialogData,
+} from '@/shared/models/modals/equation-editor-dialog-data';
+import { Attribute } from '@/shared/models/iAM/attribute';
+import { clone, filter, findIndex, isNil, propEq, update } from 'ramda';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 
 @Component({
-
+    components: {
+        EquationEditorDialog,
+    },
 })
 export default class Networks extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.networkModule.selectedNetwork) stateSelectedNetwork: Network;
+    @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     
-    @Action('getNetworks') getNetowrks: any;
+    @Action('getNetworks') getNetworks: any;
+    @Action('getAttributes') getAttributes: any;
     @Action('selectNetowrk') selectNetworkAction: any;
     @Action('createNetwork') createNetworkAction: any;
+    @Action('aggregateNetworkData') aggreegateNetworkAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
 
-    budgetPriorityGridHeaders: DataTableHeader[] = [
+    dataSourceGridHeaders: DataTableHeader[] = [
         { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
     pagination: Pagination = emptyPagination;
-
-    testNetworks: SelectItem[] = [
-        {text:"Net 1", value: "Net 1"},
-        {text:"Net 2", value: "Net 2"}
-    ]
-
-    testAttributes: SelectItem[] = [
-        {text:"Att 1", value: "Att 1"},
-        {text:"Att 2", value: "Att 2"}
-    ]
-
-    testAttributeRows: SelectItem[] =[
-        {text:"Att 1", value: "Att 1"},
-        {text:"Att 2", value: "Att 2"},
-        {text:"Att 3", value: "Att 3"},
-        {text:"Att 4", value: "Att 4"},
-        {text:"Att 5", value: "Att 5"},
-        {text:"Att 6", value: "Att 6"}
-    ]
-
-    selectedTestNetworkRows: SelectItem[] = [];
-
+    selectNetworkItems: SelectItem[] = [];
+    selectKeyAttributeItems: SelectItem[] = [];
+    attributeRows: Attribute[] =[];
+    attributes: Attribute[] = [];
+    selectedAttributeRows: Attribute[] = [];
     dataSourceSelectValues: SelectItem[] = [
         {text: 'MS SQL', value: 'MS SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
     ]; 
 
-    pages() {
-        this.pagination.totalItems = this.testAttributeRows.length
-        if (this.pagination.rowsPerPage == null || this.pagination.totalItems == null) 
-            return 0
+    selectedKeyAttributeItem: string = ''; //placeholder until network dto and api changes
+    selectedNetwork: Network = clone(emptyNetwork);
+    selectNetworkItemValue: string = '';
+    selectDataSourceTypevalue: string = '';
+    hasSelectedNetwork: boolean = false;
+    spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
+    equationEditorDialogData: EquationEditorDialogData = clone(
+        emptyEquationEditorDialogData,
+    );
 
-        return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
-      }
-
-      @Watch('stateAttributes')
+    beforeRouteEnter(to: any, from: any, next: any) {
+        next((vm: any) => {
+            vm.getAttributes();
+            vm.getNetworks();
+        });
+    }
+    
+    @Watch('stateNetworks')
+    onStateNetworksChanged() {
+        this.selectNetworkItems = this.stateNetworks.map((network: Network) => ({
+            text: network.name,
+            value: network.id,
+        }));
+    }
+    @Watch('stateAttributes')
     onStateAttributesChanged() {
-        this.selectAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
+        this.selectKeyAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
     }
-
-    // @Watch('stateAttributeDataSourceTypes')
-    // onStateAttributeDataSourceTypesChanged() {
-    //     this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
-    //         text: type,
-    //         value: type,
-    //     }));
-    // }
-
-    @Watch('stateAttributeAggregationRuleTypes')
-    onStateAttributeAggregationRuleTypesChanged() {
-        this.aggregationRuleSelectValues = this.stateAttributeAggregationRuleTypes.map((rule: string) => ({
-            text: rule,
-            value: rule,
-        }));
-    }
-
-    @Watch('selectAttributeItemValue')
-    onSelectAttributeItemValueChanged() {
-        this.selectAttributeAction(this.selectAttributeItemValue);
-        this.hasSelectedAttribute = true;
+    @Watch('selectNetworkItemValue')
+    onSelectNetworkItemValueChanged() {
+        this.selectNetworkAction(this.selectNetworkItemValue);
+        this.hasSelectedNetwork = true;
     }
     
-
-    @Watch('stateSelectedAttribute')
-    onStateSelectedAttributeChanged() {
-        this.selectedAttribute = clone(this.stateSelectedAttribute);
-        this.checkedCommand = this.selectedAttribute.command
-        this.commandIsValid = true;
+    @Watch('stateSelectedNetwork')
+    onStateSelectedNetworkChanged() {
+        this.selectedNetwork = clone(this.stateSelectedNetwork);
     }
-
-    @Watch('selectedAttribute', {deep: true})
-    onSelectedAttributeChanged() {
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedAttribute, this.stateSelectedAttribute);
+    @Watch('selectedNetwork', {deep: true})
+    onSelectedNetworkChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    addAttribute()
+    addNetwork()
     {
-        this.selectAttributeItemValue = getBlankGuid()
+        this.selectNetworkItemValue = getBlankGuid()
     }
-
     onDiscardChanges() {
-        this.selectedAttribute = clone(this.stateSelectedAttribute);
+        this.selectedNetwork = clone(this.stateSelectedNetwork);
     }
+    onSubmitEquationEditorDialogResult(equation: Equation) {
+        this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
+        if (!isNil(equation)) {
+            this.spatialWeightingEquationValue = clone(equation)
+        }
+    }
+    onShowEquationEditorDialog() {
+        this.equationEditorDialogData = {
+            showDialog: true,
+            equation: this.spatialWeightingEquationValue,
+        };      
+    }
+    selectAllFromSource(){
+        this.attributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSourceType === this.selectDataSourceTypevalue))
+    }
+    onAddAll(){
+        this.selectedAttributeRows = clone(this.attributeRows)
+    }
+    onRemoveAll(){
+        this.selectedAttributeRows = [];
+    }
+    aggregateNetworkData(){
+        this.aggreegateNetworkAction({
+            attributes: this.selectedAttributeRows,
+            networkId: this.selectNetworkItemValue
+        });
+    }
+    disableCrudButtons() {
+        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.type) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.aggregationRuleType) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.defaultValue) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
+            if(this.selectedAttribute.type === 'NUMBER'){
+                if(isNaN(+this.selectedAttribute.defaultValue)){
+                    allValid = false;
+                    this.selectedAttribute.defaultValue = '';
+                }               
+            }
+            //when the parameter and ui sync an empty string is assigned to the parameter instead of null if the text box is empty
+            if(!isNil(this.selectedAttribute.maximum) && this.selectedAttribute.maximum === "")  
+                this.selectedAttribute.maximum = null;
+            if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
+                this.selectedAttribute.minimum = null;
+
+            if(this.selectedAttribute.dataSourceType === 'MS SQL'){
+                allValid = allValid &&
+                this.checkedCommand === this.selectedAttribute.command &&
+                this.commandIsValid
+            }
+
+        return !allValid;
+    }
+    
+    pages() {
+        this.pagination.totalItems = this.attributeRows.length
+        if (this.pagination.rowsPerPage == null || this.pagination.totalItems == null) 
+            return 0
+
+        return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
+    }
 }
 </script>
 

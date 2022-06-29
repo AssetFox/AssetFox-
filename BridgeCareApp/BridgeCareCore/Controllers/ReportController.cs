@@ -8,9 +8,7 @@ using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using System.IO;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
@@ -146,7 +144,6 @@ namespace BridgeCareCore.Controllers
         }
 
         #endregion
-
 
         #region "Internal functions"
 

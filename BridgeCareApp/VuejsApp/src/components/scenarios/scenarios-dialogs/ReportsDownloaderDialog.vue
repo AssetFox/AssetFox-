@@ -72,6 +72,7 @@ export default class ReportsDownloaderDialog extends Vue {
     reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
     errorMessage: string = '';
     isDownloading: boolean = false;
+    reportIndexID: string = getBlankGuid();
 
     async onGenerateReport(download: boolean) {
         if (download) {
@@ -84,8 +85,12 @@ export default class ReportsDownloaderDialog extends Vue {
             ).then((response: AxiosResponse<any>) => {
                 this.isDownloading = false;
                 if (response.status == 200) {
+                    if (hasValue(response, 'data')) {
+                        reportIndexID = response.data.reportIndexID;
+                    }
+
                     this.addSuccessNotificationAction({
-                        message: 'Summary report is being generated',
+                        message: 'Summary report is generated.',
                     });
                 } else {
                     this.addErrorNotificationAction({
@@ -103,10 +108,9 @@ export default class ReportsDownloaderDialog extends Vue {
     async onDownloadReports() {
         this.errorMessage = '';
         this.isDownloading = true;
-        this.dialogData.showModal = false;
+        this.dialogData.showModal = false;        
         await ReportsService.downloadReport(
-            this.dialogData.networkId,
-            this.dialogData.scenarioId,
+            this.reportIndexID
         ).then((response: AxiosResponse<any>) => {
             this.isDownloading = false;
             if (hasValue(response, 'data')) {

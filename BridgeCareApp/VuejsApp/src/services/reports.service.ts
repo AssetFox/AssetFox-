@@ -21,12 +21,12 @@ export default class ReportsService {
         });
     }
     
-    static downloadReport(networkId: string, scenarioId: string): AxiosPromise {
+    static downloadReport(reportIndexID: string): AxiosPromise {
         return coreAxiosInstance.request({
             method: 'POST',
-            url: `${API.Report}/DownloadReport/${networkId}/${scenarioId}`,
+            url: `${API.Report}/DownloadReport/${reportIndexID}`,
             headers: {'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'},
             responseType: 'arraybuffer'
         });
-    }
+    }    
 }

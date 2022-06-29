@@ -48,5 +48,5 @@ export const API = {
     CalculatedAttributes: '/api/CalculatedAttributes',
     Aggregation: '/api/Aggregation',
     DataSource: '/api/DataSource',
-    RawData: '/api/RawData/',
+    RawData: '/api/RawData',
 };

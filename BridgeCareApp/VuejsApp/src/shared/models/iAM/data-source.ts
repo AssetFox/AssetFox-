@@ -12,6 +12,14 @@ export interface DataSourceType {
     type: string;
 }
 
+export interface DataSourceExcelColumns {
+    locationColumn: string,
+    dateColumn: string
+}
+export interface RawDataColumns {
+    columnHeaders: string[],
+    warningMessage: string
+}
 export const emptyDatasource: Datasource = {
     id: getNewGuid(),
     name: '',

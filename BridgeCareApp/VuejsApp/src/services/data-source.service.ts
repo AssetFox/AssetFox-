@@ -26,11 +26,23 @@ export default class DataSourceService {
             data
         );
     }
-    static importExcelSpreadsheet(
+    static getExcelSpreadsheetColumnHeaders(
         datasourceId: string
     ): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.RawData}/GetExcelSpreadsheetColumnHeaders/${datasourceId}`
+        );
+    }
+    static importExcelSpreadsheet(
+        file: File,
+        id: string,
+    ) {
+        let formData = new FormData();
+        formData.append('file', file);
         return coreAxiosInstance.post(
-            `${API.RawData}/ImportExcelSpreadsheet/${datasourceId}`
+            `${API.RawData}/ImportExcelSpreadsheet/${id}`,
+            formData,
+            {headers: {'Content-Type': 'multipart/form-data'}},
         );
     }
 }

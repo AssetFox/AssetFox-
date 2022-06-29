@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
@@ -21,7 +23,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-
+        public const bool UpdateAttributes = true;
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
 
@@ -44,6 +46,14 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
+            if (UpdateAttributes)
+            {
+                var allAttributes = UnitOfWork.AttributeMetaDataRepo.GetAttributes();
+                var domainAttributes = allAttributes.Select(AttributeMapper.ToDomain).ToList();
+                UnitOfWork.AttributeRepo.UpsertAttributes(domainAttributes);
+            }
+
+
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
             var timer = KeepUserInformedOfState(state);

@@ -97,6 +97,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         IDataSourceRepository DataSourceRepo { get; }
 
         UserDTO CurrentUser { get; }
+        IAttributeMetaDataRepository AttributeMetaDataRepo { get; }
 
         void SetUser(string username);
 

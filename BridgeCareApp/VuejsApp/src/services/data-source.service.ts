@@ -26,4 +26,11 @@ export default class DataSourceService {
             data
         );
     }
+    static importExcelSpreadsheet(
+        datasourceId: string
+    ): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.RawData}/ImportExcelSpreadsheet/${datasourceId}`
+        );
+    }
 }

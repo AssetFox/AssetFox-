@@ -489,6 +489,28 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("DownloadInvestmentBudgetsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadInvestmentBudgetsTemplate()
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO());
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
     }
 
     internal class InvestmentCRUDMethods

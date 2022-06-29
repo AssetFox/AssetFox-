@@ -3,6 +3,7 @@ import {AxiosResponse} from 'axios';
 import {Datasource, DataSourceType} from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
+import { http2XX } from '@/shared/utils/http-utils';
 
 const state = {
     dataSources: [] as Datasource[],
@@ -31,6 +32,48 @@ const actions = {
         .then((response: AxiosResponse<string[]>) => {
             if (hasValue(response, 'data')) {
                 commit('dataSourceTypesMutator', response.data);
+            }
+        });
+    },
+    async upsertSqlDataSource(
+        {dispatch, commit }: any,
+        payload: Datasource,
+    ) {
+        await DataSourceService.upsertSqlDatasource(
+            payload
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit(
+                    'dataSourceMutator',
+                    payload
+                );
+                dispatch('addSuccessNotification', {
+                    message: 'Modified data sources',
+                });
+            }
+        });
+    },
+    async upsertExcelDataSource(
+        {dispatch, commit }: any,
+        payload: Datasource,
+    ) {
+        await DataSourceService.upsertExcelDatasource(
+            payload
+        ).then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit(
+                    'dataSourceMutator',
+                    payload
+                );
+                dispatch('addSuccessNotification', {
+                    message: 'Modified data sources',
+                });
             }
         });
     }

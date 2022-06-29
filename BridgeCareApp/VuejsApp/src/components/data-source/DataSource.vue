@@ -14,7 +14,7 @@
                     </v-select>
                 </v-layout>
                 </v-flex>
-                <v-btn class="ghd-white-bg ghd-blue Montserrat-font-family" outline>Add Data Source</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
             </v-layout>
             <v-divider></v-divider>
         <v-layout column>
@@ -34,9 +34,11 @@
                 <v-text-field
                     v-show="showExcel"
                     class="ghd-control-text ghd-control-border Montserrat-font-family"
+                    v-model="fileName"
                     outlined
                 ></v-text-field>
-                <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" outline>Add File</v-btn>
+                <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
+                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
             </v-layout>
             <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
             <v-select
@@ -63,10 +65,10 @@
                           outline
                         >
                         </v-textarea>
-                        <p class="p-success Montserrat-font-family">Connection Successful - Lorem ipsum dolor sit amet</p>
-                        <p class="p-fail Montserrat-font-family">Connnection Failed - Lorem ipsum dolor sit amet</p>
-                        <p class="p-success Montserrat-font-family">Success! {{assetNumber}} Number of Assets Added</p>
-                        <p class="p-fail Montserrat-font-family">Error! {{invalidColumn}} Column is invalid</p>
+                        <p class="p-success Montserrat-font-family" v-show="false">Connection Successful - Lorem ipsum dolor sit amet</p>
+                        <p class="p-fail Montserrat-font-family" v-show="false">Connnection Failed - Lorem ipsum dolor sit amet</p>
+                        <p class="p-success Montserrat-font-family" v-show="false">Success! {{assetNumber}} Number of Assets Added</p>
+                        <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
             </v-layout>
         </v-layout>
@@ -74,32 +76,34 @@
             <v-flex xs6>
                 <v-btn class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
-                <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text">Save</v-btn>
+                <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" class="ghd-blue-bg ghd-white ghd-button-text">Load</v-btn>
             </v-flex>
         </v-layout>
+
+        <CreateDataSourceDialog :dialogData='createDataSourceDialogData'
+                                @submit='onCreateNewDataSource' />
     </v-layout>
 </template>
 
 <script lang='ts'>
 import Vue from 'vue';
-import {
-    clone,
-    contains,
-    findIndex,
-    isNil,
-    prepend,
-    propEq,
-    reject,
-    update,
-} from 'ramda';
+import { clone, prop } from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State } from 'vuex-class';
-import {Datasource, DataSourceType} from '@/shared/models/iAM/data-source';
+import {Datasource, emptyDatasource, DSEXCEL, DSSQL} from '@/shared/models/iAM/data-source';
+import {hasValue} from '@/shared/utils/has-value-util';
+import {
+    CreateDataSourceDialogData,
+    emptyCreateDataSourceDialogData
+} from '@/shared/models/modals/data-source-dialog-data';
+import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs/CreateDataSourceDialog.vue';
 
 @Component({
-
+    components: {
+        CreateDataSourceDialog
+    },
 })
 export default class DataSource extends Vue {
     
@@ -107,23 +111,40 @@ export default class DataSource extends Vue {
     @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
+    @Action('upsertSqlDataSource') upsertSqlDataSourceAction: any;
+    @Action('upsertExcelDataSource') upsertExcelDataSourceAction: any;
+
     dsTypeItems: string[] = [];
-    dsItems: any;
+    dsItems: any = [];
+    
     assetNumber: number = 0;
     invalidColumn: string = '';
+
     sourceTypeItem: string | null = '';
     dataSourceTypeItem: string | null = '';
     datasourceNames: string[] = [];
+
+    currentDatasource: Datasource = emptyDatasource;
+    createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
+
     selectedConnection: string = 'test';
     showMssql: boolean = false;
     showExcel: boolean = false;
+
+    fileName: string | null = '';
+    fileSelect: HTMLInputElement = {} as HTMLInputElement;
+    files: File[] = [];
+    file: File | null = null;   
+
     mounted() {
+
+        this.fileSelect = document.getElementById('file-select') as HTMLInputElement;   
+
         this.getDataSourcesAction();
         this.getDataSourceTypesAction();
     }
     @Watch('dataSources')
         onGetDataSources() {
-            this.dsItems = clone(this.dataSources);
             this.dsItems = this.dataSources.map(
                 (ds: Datasource) => ({
                     text: ds.name,
@@ -137,15 +158,73 @@ export default class DataSource extends Vue {
         }
     @Watch('dataSourceTypeItem')
         onSourceTypeChanged() {
-            if (this.dataSourceTypeItem==="SQL") {
+            if (this.dataSourceTypeItem===DSSQL) {
                 this.showMssql = true;
                 this.showExcel = false;
             }
-            if (this.dataSourceTypeItem==="Excel") {
+            if (this.dataSourceTypeItem===DSEXCEL) {
                 this.showExcel = true;
                 this.showMssql = false;
             }
         }
+        @Watch('sourceTypeItem') 
+        onsourceTypeItemChanged() {
+            // get the current data source object
+            let currentDatasource = this.dataSources.find(f => f.name === this.sourceTypeItem);
+            currentDatasource ? this.currentDatasource = currentDatasource : this.currentDatasource = emptyDatasource;
+
+            // update the source type droplist
+            this.dataSourceTypeItem = this.currentDatasource.type;
+        }
+    @Watch('file')
+    onFileChanged() {
+        this.files = hasValue(this.file) ? [this.file as File] : [];                                   
+        this.$emit('submit', this.file);
+        this.file ? this.fileName = this.file.name : this.fileName = '';
+
+        (<HTMLInputElement>document.getElementById('file-select')!).value = '';
+    }
+    onSaveDatasource() {
+        // Do we have an excel or sql type
+
+        //console.log(this.currentDatasource);
+        if (this.dataSourceTypeItem ===DSSQL) {
+            this.upsertSqlDataSourceAction({
+                data: this.currentDatasource
+            }).then(() => (this.currentDatasource = emptyDatasource));
+        } else {
+        }
+    }
+    onShowCreateDataSourceDialog() {
+        this.createDataSourceDialogData = {
+            showDialog: true,
+        }
+    }
+    onCreateNewDataSource(datasource: Datasource) {
+        // add to the state
+        this.dataSources.push(datasource);
+    }
+    chooseFiles(){
+        if(document != null)
+        {
+            document.getElementById('file-select')!.click();
+        }
+    }
+    onSelect(fileList: FileList) {
+        if (hasValue(fileList)) {
+            const fileName: string = prop('name', fileList[0]) as string;
+
+            if (fileName.indexOf('xlsx') === -1) {
+                this.addErrorNotificationAction({
+                    message: 'Only .xlsx file types are allowed',
+                });
+            }
+
+            this.file = clone(fileList[0]);
+        }
+
+        this.fileSelect.value = '';
+    }
 }
 </script>
 

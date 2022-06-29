@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var updateAttribute = new NumericAttribute(
                 20, 100, 10, attribute.Id, attribute.Name, "AVERAGE",
                 "updatedCommand", Data.ConnectionType.MSSQL, "connectionString",
-                !attribute.IsCalculated, !attribute.IsAscending);
+                !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             var updateAttributes = new List<DataAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);
             var attributesAfter = await repo.GetAttributesAsync();
@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
-            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
+            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttribute));
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);

@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             string command,
             ConnectionType connectionType,
             string connectionString,
+            Guid? dataSourceId,
             bool isCalculated,
             bool isAscending)
         {
@@ -24,6 +25,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             ConnectionString = connectionString;
             IsCalculated = isCalculated;
             IsAscending = isAscending;
+            DataSourceId = dataSourceId;
         }
 
         public Guid Id { get; }
@@ -35,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
         public string ConnectionString { get; }
         public bool IsCalculated { get; set; }
         public bool IsAscending { get; set; }
+        public Guid? DataSourceId { get; }
 
         public bool Equals(Attribute other)
         {

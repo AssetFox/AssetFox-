@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Services;
 using System.Data;
 using OfficeOpenXml;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
 namespace BridgeCareCore.Controllers
 {
@@ -23,6 +25,8 @@ namespace BridgeCareCore.Controllers
     [Route("api/[controller]")]
     public class RawDataController : BridgeCareCoreBaseController
     {
+        public const string RawDataError = "Raw data error::";
+
         private readonly IExcelRawDataImportService _excelSpreadsheetImportService;
 
         public RawDataController(
@@ -70,7 +74,64 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
+                throw;
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetExcelSpreadsheetColumnHeaders/{dataSourceId}")]
+        [Authorize]
+        public async Task<IActionResult> GetExcelSpreadsheetColumnHeaders(Guid dataSourceId)
+        {
+            try {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    var dataSource = UnitOfWork.DataSourceRepo.GetDataSource(dataSourceId);
+                    string warningMessage = null;
+                    if (dataSource == null)
+                    {
+                        warningMessage = $"No dataSource found with id {dataSourceId}";
+                    }
+                    else if (dataSource.Type.ToLowerInvariant()!="EXCEL")
+                    {
+                        warningMessage = @$"DataSource found. Its type was {dataSource.Type}. Expected the type to be ""EXCEL""";
+                    }
+                    
+                    if (warningMessage!=null)
+                    {
+                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                        {
+                            WarningMessage = warningMessage,
+                        };
+                    }
+                    var excelSpreadsheet = UnitOfWork.ExcelWorksheetRepository.GetExcelRawDataByDataSourceId(dataSourceId);
+                    if (excelSpreadsheet == null)
+                    {
+                        warningMessage = $@"Found a DataSource with id {dataSourceId}. The DataSource was of type ""EXCEL"". However, we did not find an ExcelRawData with DataSourceId {dataSourceId}. This is unexpected.";
+                        return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                        {
+                            WarningMessage = warningMessage,
+                        };
+                    }
+                    var worksheet = ExcelRawDataSpreadsheetSerializer.Deserialize(excelSpreadsheet.SerializedWorksheetContent);
+                    var columnHeaders = worksheet.Worksheet.Columns.Select(c => c.Entries[0].ObjectValue().ToString()).ToList();
+                    return new GetRawDataSpreadsheetColumnHeadersResultDTO
+                    {
+                        ColumnHeaders = columnHeaders,
+                    };
+                });
+
+                if (result.WarningMessage != null)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
+                }
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
                 throw;
             }
         }

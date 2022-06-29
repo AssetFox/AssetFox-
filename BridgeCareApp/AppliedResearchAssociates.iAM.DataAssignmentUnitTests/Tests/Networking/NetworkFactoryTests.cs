@@ -10,21 +10,21 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
 {
     public class NetworkFactoryTests
     {
-        private readonly Guid guId = Guid.Empty;
+        private readonly Guid sectionLocationId = Guid.Empty;
         private readonly SectionLocation sectionLocation;
         List<IAttributeDatum> attributeData;
 
         public NetworkFactoryTests()
         {
-            sectionLocation = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
+            sectionLocation = new SectionLocation(sectionLocationId, CommonTestParameterValues.LocationIdentifier1);
             attributeData = new List<IAttributeDatum>();            
         }
 
         [Fact]
-        public void CreateNetworkFromAttributeDataRecordsTest()
+        public void CreateNetworkFromAttributeDataRecords_SectionLocationInDb_CreatesWithMaintainableAsset()
         {
             // Arrange
-            attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation, CommonTestParameterValues.TimeStamp));
+            attributeData.Add(new AttributeDatum<string>(sectionLocationId, null, CommonTestParameterValues.StringValue, sectionLocation, CommonTestParameterValues.TimeStamp));
 
             // Act
             var result = NetworkFactory.CreateNetworkFromAttributeDataRecords(attributeData, CommonTestParameterValues.DefaultEquation);

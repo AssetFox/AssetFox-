@@ -125,16 +125,32 @@
 </template>
 
 <script lang='ts'>
+import { Network } from '@/shared/models/iAM/network';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import Vue from 'vue';
 import Component from 'vue-class-component';
+import { Watch } from 'vue-property-decorator';
+import { Action, Getter, State } from 'vuex-class';
 
 @Component({
 
 })
 export default class Networks extends Vue {
+    @State(state => state.networkModule.networks) stateNetworks: Network[];
+    @State(state => state.networkModule.selectedNetwork) stateSelectedNetwork: Network;
+    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    
+    @Action('getNetworks') getNetowrks: any;
+    @Action('selectNetowrk') selectNetworkAction: any;
+    @Action('createNetwork') createNetworkAction: any;
+    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
+
+
     budgetPriorityGridHeaders: DataTableHeader[] = [
         { text: 'Name', value: 'name', align: 'left', sortable: true, class: '', width: '' },
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
@@ -176,6 +192,59 @@ export default class Networks extends Vue {
 
         return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
       }
+
+      @Watch('stateAttributes')
+    onStateAttributesChanged() {
+        this.selectAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
+            text: attribute.name,
+            value: attribute.id,
+        }));
+    }
+
+    // @Watch('stateAttributeDataSourceTypes')
+    // onStateAttributeDataSourceTypesChanged() {
+    //     this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
+    //         text: type,
+    //         value: type,
+    //     }));
+    // }
+
+    @Watch('stateAttributeAggregationRuleTypes')
+    onStateAttributeAggregationRuleTypesChanged() {
+        this.aggregationRuleSelectValues = this.stateAttributeAggregationRuleTypes.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
+    }
+
+    @Watch('selectAttributeItemValue')
+    onSelectAttributeItemValueChanged() {
+        this.selectAttributeAction(this.selectAttributeItemValue);
+        this.hasSelectedAttribute = true;
+    }
+    
+
+    @Watch('stateSelectedAttribute')
+    onStateSelectedAttributeChanged() {
+        this.selectedAttribute = clone(this.stateSelectedAttribute);
+        this.checkedCommand = this.selectedAttribute.command
+        this.commandIsValid = true;
+    }
+
+    @Watch('selectedAttribute', {deep: true})
+    onSelectedAttributeChanged() {
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedAttribute, this.stateSelectedAttribute);
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    addAttribute()
+    {
+        this.selectAttributeItemValue = getBlankGuid()
+    }
+
+    onDiscardChanges() {
+        this.selectedAttribute = clone(this.stateSelectedAttribute);
+    }
 
 }
 </script>

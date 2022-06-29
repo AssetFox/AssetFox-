@@ -20,7 +20,6 @@ namespace BridgeCareCore.Services.Aggregation
         private int _count;
         private string _status = string.Empty;
         private double _percentage;
-        private Guid _networkId = Guid.Empty;
         public AggregationService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -44,7 +43,7 @@ namespace BridgeCareCore.Services.Aggregation
                 _status = "Preparing";
                 var getTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
 
                     // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
@@ -110,7 +109,7 @@ namespace BridgeCareCore.Services.Aggregation
                 _status = "Aggregating";
                 var aggregationTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
@@ -165,7 +164,7 @@ namespace BridgeCareCore.Services.Aggregation
                 _status = "Saving";
                 var crudTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
 
                     try
                     {
@@ -212,7 +211,7 @@ namespace BridgeCareCore.Services.Aggregation
                 if (!isError)
                 {
                     _status = "Aggregated all network data";
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(_networkId, _status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, _status);
                     _unitOfWork.Commit();
 
                     WriteState(writer, state);

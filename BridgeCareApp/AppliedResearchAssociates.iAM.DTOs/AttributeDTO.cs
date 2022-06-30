@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
 {
@@ -24,6 +25,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public bool IsAscending { get; set; }
 
-        public string DataSourceType { get; set; }
+        public BaseDataSourceDTO DataSource { get; set; }
     }
 }

@@ -14,7 +14,6 @@ import deficientConditionGoalModule from '@/store-modules/deficient-condition-go
 import budgetPriorityModule from '@/store-modules/budget-priority.module';
 import targetConditionGoalModule from '@/store-modules/target-condition-goal.module';
 import remainingLifeLimitModule from '@/store-modules/remaining-life-limit.module';
-import rollupModule from '../store-modules/rollup.module';
 import pollingModule from '@/store-modules/polling.module';
 import announcementModule from '@/store-modules/announcement.module';
 import cashFlowModule from '@/store-modules/cash-flow.module';
@@ -27,6 +26,7 @@ import analysisDefaultDataModule from '@/store-modules/analysisDefaultData.modul
 import investmentDefaultDataModule from '@/store-modules/investmentDefaultData.module';
 import calculatedAttributeModule from '@/store-modules/calculated-attribute.module';
 import notificationModule from '@/store-modules/notification.module';
+import datasourceModule from '@/store-modules/data-source.module';
 
 Vue.use(Vuex);
 
@@ -45,7 +45,6 @@ export default new Vuex.Store({
         budgetPriorityModule,
         targetConditionGoalModule,
         remainingLifeLimitModule,
-        rollupModule,
         pollingModule,
         announcementModule,
         cashFlowModule,
@@ -58,5 +57,6 @@ export default new Vuex.Store({
         investmentDefaultDataModule,
         calculatedAttributeModule,
         notificationModule,
+        datasourceModule,
     },
 });

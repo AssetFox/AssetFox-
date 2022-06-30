@@ -40,7 +40,7 @@ namespace BridgeCareCore.Services.Aggregation
                     var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
 
                     state.Status = "Preparing";
-                    // WjTodo -- uncomment this and get it not to throw    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
@@ -101,7 +101,7 @@ namespace BridgeCareCore.Services.Aggregation
                     var i = 0.0;
 
                     state.Status = "Aggregating";
-                    // WjTodo -- uncomment this and get it not to throw     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
@@ -149,7 +149,7 @@ namespace BridgeCareCore.Services.Aggregation
                         }
                     }
                     state.Status = "Saving";
-                    // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
                     try
                     {
@@ -190,7 +190,7 @@ namespace BridgeCareCore.Services.Aggregation
                     if (!isError)
                     {
                         state.Status = "Aggregated all network data";
-                        // WjTodoJake -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                         _unitOfWork.Commit();
 
                         WriteState(writer, state);

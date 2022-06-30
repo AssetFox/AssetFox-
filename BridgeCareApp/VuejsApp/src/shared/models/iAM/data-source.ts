@@ -29,17 +29,27 @@ export interface DataSourceType {
 }
 
 export interface DataSourceExcelColumns {
-    locationColumn: string,
-    dateColumn: string
+    locationColumn: string[],
+    dateColumn: string[]
 }
 export interface RawDataColumns {
     columnHeaders: string[],
     warningMessage: string
 }
+export interface SqlCommandResponse {
+    isValid: boolean;
+    validationMessage: string
+}
+export const emptySqlCommandResponse: SqlCommandResponse = {
+    isValid: false,
+    validationMessage: ''
+}
 export const emptyDatasource: Datasource = {
     id: getNewGuid(),
     name: '',
     connectionString: '',
+    locationColumn: '',
+    dateColumn: '',
     secure: false,
     type: ''
 }

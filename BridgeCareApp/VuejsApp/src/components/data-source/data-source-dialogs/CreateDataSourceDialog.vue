@@ -44,7 +44,7 @@ export default class CreateDataSourceDialog extends Vue {
 
   newDataSource: Datasource = emptyDatasource;
   rules: InputValidationRules = rules;
-  datasourceName: string = '';
+  datasourceName: string = 'New Data Source';
 
 
   @Watch('datasourceName')
@@ -59,6 +59,8 @@ export default class CreateDataSourceDialog extends Vue {
         name: this.datasourceName,
         type: DSSQL,
         connectionString: '',
+        dateColumn: '',
+        locationColumn: '',
         secure: false
     };
   }

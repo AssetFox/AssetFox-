@@ -75,8 +75,8 @@
                           outline
                         >
                         </v-textarea>
-                        <p class="p-success Montserrat-font-family" v-show="false">Connection Successful - Lorem ipsum dolor sit amet</p>
-                        <p class="p-fail Montserrat-font-family" v-show="false">Connnection Failed - Lorem ipsum dolor sit amet</p>
+                        <p class="p-success Montserrat-font-family" v-show="sqlValid">{{sqlResponse}}Connection Successful - Lorem ipsum dolor sit amet</p>
+                        <p class="p-fail Montserrat-font-family" v-show="!sqlValid">{{sqlResponse}}Connnection Failed - Lorem ipsum dolor sit amet</p>
                         <p class="p-success Montserrat-font-family" v-show="false">Success! {{assetNumber}} Number of Assets Added</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
@@ -85,7 +85,7 @@
         <v-layout justify-center> 
             <v-flex xs6>
                 <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
-                <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
+                <v-btn v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn v-show="showMssql || showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
             </v-flex>
@@ -102,7 +102,16 @@ import { clone, prop } from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State } from 'vuex-class';
-import {Datasource, emptyDatasource, DSEXCEL, DSSQL, DataSourceExcelColumns, RawDataColumns, SqlDataSource, ExcelDataSource} from '@/shared/models/iAM/data-source';
+import {
+    Datasource, 
+    emptyDatasource, 
+    DSEXCEL, DSSQL, 
+    DataSourceExcelColumns, 
+    RawDataColumns, 
+    SqlDataSource, 
+    ExcelDataSource, 
+    SqlCommandResponse
+} from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {
     CreateDataSourceDialogData,
@@ -120,6 +129,7 @@ export default class DataSource extends Vue {
     @State(state => state.datasourceModule.dataSources) dataSources: Datasource[];
     @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
+    @State(state => state.datasourceModuel.sqlCommandResponse) sqlCommandResponse: SqlCommandResponse;
 
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
@@ -128,17 +138,20 @@ export default class DataSource extends Vue {
 
     @Action('importExcelSpreadsheetFile') importExcelSpreadsheetFileAction: any;
     @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
+    @Action('checkSqlCommand') checkSqlCommandAction: any;
 
     dsTypeItems: string[] = [];
     dsItems: any = [];
     
     assetNumber: number = 0;
     invalidColumn: string = '';
+    sqlResponse: string | null = '';
+    sqlValid: boolean = false;
 
     sourceTypeItem: string | null = '';
     dataSourceTypeItem: string | null = '';
     datasourceNames: string[] = [];
-    dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: '', dateColumn: ''};
+    dataSourceExcelColumns: DataSourceExcelColumns = { locationColumn: [], dateColumn: []};
 
     currentExcelLocationColumn: string = '';
     currentExcelDateColumn: string = '';
@@ -162,33 +175,34 @@ export default class DataSource extends Vue {
     mounted() {
 
         this.fileSelect = document.getElementById('file-select') as HTMLInputElement;   
-
         this.getDataSourcesAction();
         this.getDataSourceTypesAction();
     }
     @Watch('excelColumns')
         onExcelColumnsChanged() {
             this.dataSourceExcelColumns = {
-                locationColumn: this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders[0] : '',
-                dateColumn: this.excelColumns.columnHeaders? this.excelColumns.columnHeaders[this.excelColumns.columnHeaders.length-1] : ''
+                locationColumn: this.excelColumns ? this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders.length > 0 ? this.excelColumns.columnHeaders : [] : [] : [],
+                dateColumn: this.excelColumns ? this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders.length > 0 ? this.excelColumns.columnHeaders : [] : [] : []
             };
-            if (this.dataSourceExcelColumns.locationColumn != '') {
-                this.locColumns.push(this.dataSourceExcelColumns.locationColumn);
+            if (this.dataSourceExcelColumns.locationColumn.length > 0) {
+                this.locColumns = this.dataSourceExcelColumns.locationColumn;
                 this.currentExcelLocationColumn = this.currentDatasource ? this.currentDatasource.locationColumn : '';
             }
-            if (this.dataSourceExcelColumns.dateColumn !='') {
-                this.datColumns.push(this.dataSourceExcelColumns.dateColumn);
+            if (this.dataSourceExcelColumns.dateColumn.length > 0) {
+                this.datColumns = this.dataSourceExcelColumns.dateColumn; 
                 this.currentExcelDateColumn = this.currentDatasource ? this.currentDatasource.dateColumn : '';
             }
         }
     @Watch('dataSources')
         onGetDataSources() {
+            if (this.dataSources != null || this.dataSources != undefined) {
             this.dsItems = this.dataSources.map(
                 (ds: Datasource) => ({
                     text: ds.name,
                     value: ds.name
                 }),
             );
+            }
         }
     @Watch('dataSourceTypes')
         onGetDataSourceTypes() {
@@ -217,10 +231,18 @@ export default class DataSource extends Vue {
             this.allowSaveData = this.allowSave();
             // update the source type droplist
             this.dataSourceTypeItem = this.currentDatasource.type;
+            this.currentExcelDateColumn = this.currentDatasource.dateColumn;
+            this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
         }
         @Watch('selectedConnection')
         onSelectedConnectionChanged() {
             this.currentDatasource.connectionString = this.selectedConnection;
+        }
+        @Watch('sqlCommandResponse')
+        onSqlCommandResponseChanged() {
+            console.log("here");
+            this.sqlCommandResponse ? this.sqlResponse = this.sqlCommandResponse.validationMessage : '';
+            console.log(this.sqlCommandResponse);
         }
     @Watch('file')
     onFileChanged() {
@@ -231,25 +253,15 @@ export default class DataSource extends Vue {
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
     onLoadExcel() {
-
-        // let exldat : ExcelDataSource = {
-        //     id: this.currentDatasource.id,
-        //     name: this.currentDatasource.name,
-        //     locationColumn: this.currentExcelLocationColumn,
-        //     dateColumn: this.currentExcelDateColumn,
-        //     type: this.currentDatasource.type,
-        //     secure: this.currentDatasource.secure
-        // }
-        // this.upsertExcelDataSourceAction(exldat).then(() => {
-            if ( hasValue(this.file)) {
+        if ( hasValue(this.file)) {
             this.importExcelSpreadsheetFileAction({
-                file: this.file,
-                id: this.currentDatasource.id
-            }).then((response: any) => {
-                this.showImportMessage = true;
-            });
-            }
-        // });
+            file: this.file,
+            id: this.currentDatasource.id
+        }).then((response: any) => {
+            this.showImportMessage = true;
+            this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
+        });
+        }
     }
     onSaveDatasource() {
         if (this.dataSourceTypeItem ===DSSQL) {
@@ -280,19 +292,33 @@ export default class DataSource extends Vue {
     }
     onCreateNewDataSource(datasource: Datasource) {
         // add to the state
+        if (datasource != null || datasource != undefined) {
         this.dataSources.push(datasource);
+        this.currentDatasource = datasource;
+        this.sourceTypeItem = datasource.name;
+        this.dataSourceTypeItem = datasource.type;
+        this.datColumns = [];
+        this.locColumns = [];
+        }
     }
     allowSave(): boolean {
         let result: boolean = false;
         if (this.dataSources == undefined) return false;
-        let tempDS: Datasource | undefined = this.dataSources.find(f => f.name == this.currentDatasource.name);
-        tempDS ? tempDS.name === this.currentDatasource.name ? result = true : result = false : result = false; 
+        if (this.dataSourceTypeItem===DSEXCEL) {
+            if (this.datColumns.length === 0 && this.locColumns.length === 0) {
+                return true;
+            }
+        }
+        //let tempDS: Datasource | undefined = this.dataSources.find(f => f.name == this.currentDatasource.name);
+        //tempDS ? tempDS.name === this.currentDatasource.name ? result = true : result = false : result = false; 
         return result;
     }
     resetDataSource() {
         this.currentDatasource = emptyDatasource;
         this.sourceTypeItem = '';
         this.dataSourceTypeItem = '';
+        this.datColumns = [];
+        this.locColumns = [];
         this.showMssql = false;
         this.showExcel = false;
     }
@@ -316,6 +342,15 @@ export default class DataSource extends Vue {
         }
 
         this.fileSelect.value = '';
+    }
+    checkSQLConnection() {
+        if (this.currentDatasource != undefined) {
+            this.checkSqlCommandAction(this.currentDatasource.connectionString);
+            this.sqlValid = this.sqlCommandResponse.isValid;
+            this.sqlResponse = this.sqlCommandResponse.validationMessage;
+            console.log(this.sqlValid);
+            console.log(this.sqlResponse);
+        }
     }
 }
 </script>

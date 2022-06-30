@@ -33,6 +33,13 @@ export default class DataSourceService {
             `${API.RawData}/GetExcelSpreadsheetColumnHeaders/${datasourceId}`
         );
     }
+    static checkSqlConnection(
+        sqlCommand: string
+    ): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Attribute}/CheckCommand/${sqlCommand}`
+        );
+    }
     static importExcelSpreadsheet(
         file: File,
         id: string,

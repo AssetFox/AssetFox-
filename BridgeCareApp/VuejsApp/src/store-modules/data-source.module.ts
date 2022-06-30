@@ -1,6 +1,14 @@
 import {clone, any, propEq, update, findIndex, append} from 'ramda';
 import {AxiosResponse} from 'axios';
-import {Datasource, DataSourceType, ExcelDataSource, RawDataColumns, SqlDataSource} from '@/shared/models/iAM/data-source';
+import {
+    Datasource, 
+    DataSourceType, 
+    ExcelDataSource, 
+    RawDataColumns, 
+    SqlDataSource, 
+    SqlCommandResponse, 
+    emptySqlCommandResponse
+} from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
 import { http2XX } from '@/shared/utils/http-utils';
@@ -10,7 +18,8 @@ const state = {
     dataSources: [] as Datasource[],
     dataSourceTypes: [] as string[],
     excelColumns: [] as any[],
-    isSuccessfulImport: false
+    isSuccessfulImport: false as boolean,
+    sqlCommandResponse: emptySqlCommandResponse as SqlCommandResponse
 };
 
 const mutations = {
@@ -25,6 +34,9 @@ const mutations = {
     },
     isSuccessfulImportMutator(state: any, isSuccessful: boolean) {
         state.isSuccessfulImport = isSuccessful;
+    },
+    checkSqlCommandMutator(state: any, sqlresponse: SqlCommandResponse) {
+        state.sqlCommandResponse = sqlresponse;
     }
 }
 const actions = {
@@ -83,6 +95,20 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });
+            }
+        });
+    },
+    async checkSqlCommand(
+        {commit}: any,
+        payload: string
+    ) {
+        await DataSourceService.checkSqlConnection(
+            payload
+        ).then((response: AxiosResponse<SqlCommandResponse>) => {
+            if (
+                hasValue(response, 'status')
+            ) {
+                commit('checkSqlCommandMutator', response.data);
             }
         });
     },

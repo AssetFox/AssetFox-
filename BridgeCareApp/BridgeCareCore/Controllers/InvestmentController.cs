@@ -489,6 +489,35 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("DownloadInvestmentBudgetsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadInvestmentBudgetsTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Investment_budgets_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Investment_budgets_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
     }
 
     internal class InvestmentCRUDMethods

@@ -75,9 +75,9 @@
                           outline
                         >
                         </v-textarea>
-                        <p class="p-success Montserrat-font-family" v-show="sqlValid">{{sqlResponse}}Connection Successful - Lorem ipsum dolor sit amet</p>
-                        <p class="p-fail Montserrat-font-family" v-show="!sqlValid">{{sqlResponse}}Connnection Failed - Lorem ipsum dolor sit amet</p>
-                        <p class="p-success Montserrat-font-family" v-show="false">Success! {{assetNumber}} Number of Assets Added</p>
+                        <p class="p-success Montserrat-font-family" v-show="sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
+                        <p class="p-fail Montserrat-font-family" v-show="!sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
+                        <p class="p-success Montserrat-font-family" v-show="showSaveMessage">Successfully saved!</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
             </v-layout>
@@ -129,7 +129,7 @@ export default class DataSource extends Vue {
     @State(state => state.datasourceModule.dataSources) dataSources: Datasource[];
     @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
-    @State(state => state.datasourceModuel.sqlCommandResponse) sqlCommandResponse: SqlCommandResponse;
+    @State(state => state.datasourceModule.sqlCommandResponse) sqlCommandResponse: SqlCommandResponse;
 
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
@@ -161,7 +161,8 @@ export default class DataSource extends Vue {
     selectedConnection: string = 'test';
     showMssql: boolean = false;
     showExcel: boolean = false;
-    showImportMessage: boolean = false;
+    showSqlMessage: boolean = false;
+    showSaveMessage: boolean = false;
     allowSaveData: boolean = false;
 
     fileName: string | null = '';
@@ -175,8 +176,10 @@ export default class DataSource extends Vue {
     mounted() {
 
         this.fileSelect = document.getElementById('file-select') as HTMLInputElement;   
+
         this.getDataSourcesAction();
         this.getDataSourceTypesAction();
+        this.showSqlMessage = false;
     }
     @Watch('excelColumns')
         onExcelColumnsChanged() {
@@ -196,12 +199,12 @@ export default class DataSource extends Vue {
     @Watch('dataSources')
         onGetDataSources() {
             if (this.dataSources != null || this.dataSources != undefined) {
-            this.dsItems = this.dataSources.map(
-                (ds: Datasource) => ({
-                    text: ds.name,
-                    value: ds.name
-                }),
-            );
+                this.dsItems = this.dataSources.length > 0 ? this.dataSources.map(
+                    (ds: Datasource) => ({
+                        text: ds.name,
+                        value: ds.name
+                    }),
+                ) : []
             }
         }
     @Watch('dataSourceTypes')
@@ -226,13 +229,15 @@ export default class DataSource extends Vue {
         @Watch('sourceTypeItem') 
         onsourceTypeItemChanged() {
             // get the current data source object
-            let currentDatasource = this.dataSources ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource;
+            let currentDatasource = this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource;
             currentDatasource ? this.currentDatasource = currentDatasource : this.currentDatasource = emptyDatasource;
-            this.allowSaveData = this.allowSave();
+
             // update the source type droplist
             this.dataSourceTypeItem = this.currentDatasource.type;
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
+            this.selectedConnection = this.currentDatasource.connectionString;
+            this.showSqlMessage = false; this.showSaveMessage = false;
         }
         @Watch('selectedConnection')
         onSelectedConnectionChanged() {
@@ -240,9 +245,7 @@ export default class DataSource extends Vue {
         }
         @Watch('sqlCommandResponse')
         onSqlCommandResponseChanged() {
-            console.log("here");
             this.sqlCommandResponse ? this.sqlResponse = this.sqlCommandResponse.validationMessage : '';
-            console.log(this.sqlCommandResponse);
         }
     @Watch('file')
     onFileChanged() {
@@ -272,7 +275,10 @@ export default class DataSource extends Vue {
                     type: this.currentDatasource.type,
                     secure: this.currentDatasource.secure
             };
-            this.upsertSqlDataSourceAction(sqldat).then(() => (this.resetDataSource()));
+            this.upsertSqlDataSourceAction(sqldat).then(() => {
+                this.showSaveMessage = true;
+                this.getDataSourcesAction();
+            });
         } else {
             let exldat : ExcelDataSource = {
             id: this.currentDatasource.id,
@@ -282,7 +288,10 @@ export default class DataSource extends Vue {
             type: this.currentDatasource.type,
             secure: this.currentDatasource.secure
             }
-            this.upsertExcelDataSourceAction(exldat);
+            this.upsertExcelDataSourceAction(exldat).then(() => {
+                this.showSaveMessage = true;
+                this.getDataSourcesAction();
+            });
         }
     }
     onShowCreateDataSourceDialog() {
@@ -297,6 +306,7 @@ export default class DataSource extends Vue {
         this.currentDatasource = datasource;
         this.sourceTypeItem = datasource.name;
         this.dataSourceTypeItem = datasource.type;
+        this.selectedConnection = datasource.connectionString;
         this.datColumns = [];
         this.locColumns = [];
         }
@@ -309,8 +319,6 @@ export default class DataSource extends Vue {
                 return true;
             }
         }
-        //let tempDS: Datasource | undefined = this.dataSources.find(f => f.name == this.currentDatasource.name);
-        //tempDS ? tempDS.name === this.currentDatasource.name ? result = true : result = false : result = false; 
         return result;
     }
     resetDataSource() {
@@ -321,6 +329,9 @@ export default class DataSource extends Vue {
         this.locColumns = [];
         this.showMssql = false;
         this.showExcel = false;
+        this.showSqlMessage = false;
+        this.showSaveMessage = false;
+        this.selectedConnection = '';
     }
     chooseFiles(){
         if(document != null)
@@ -345,11 +356,11 @@ export default class DataSource extends Vue {
     }
     checkSQLConnection() {
         if (this.currentDatasource != undefined) {
-            this.checkSqlCommandAction(this.currentDatasource.connectionString);
-            this.sqlValid = this.sqlCommandResponse.isValid;
-            this.sqlResponse = this.sqlCommandResponse.validationMessage;
-            console.log(this.sqlValid);
-            console.log(this.sqlResponse);
+            this.checkSqlCommandAction(this.currentDatasource.connectionString).then(() => {
+                this.sqlValid = this.sqlCommandResponse.isValid;
+                this.sqlResponse = this.sqlCommandResponse.validationMessage;
+                this.showSqlMessage = true;
+            });
         }
     }
 }

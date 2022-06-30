@@ -16,10 +16,11 @@
                 </v-flex>
                 <v-btn class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
             </v-layout>
-            <v-divider></v-divider>
+            <v-divider v-show="showMssql || showExcel"></v-divider>
         <v-layout column>
-            <v-subheader class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
+            <v-subheader v-show="showMssql || showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
             <v-select
+              v-show="showMssql || showExcel"
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
               v-model="dataSourceTypeItem"
@@ -35,6 +36,7 @@
                     v-show="showExcel"
                     class="ghd-control-text ghd-control-border Montserrat-font-family"
                     v-model="fileName"
+                    outline
                     outlined
                 ></v-text-field>
                 <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
@@ -54,6 +56,7 @@
             <v-select
               :items="datColumns"
               v-show="showExcel"
+              v-model="currentExcelDateColumn"
               class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
               outline
               outlined
@@ -74,14 +77,14 @@
                         </v-textarea>
                         <p class="p-success Montserrat-font-family" v-show="false">Connection Successful - Lorem ipsum dolor sit amet</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Connnection Failed - Lorem ipsum dolor sit amet</p>
-                        <p class="p-success Montserrat-font-family" v-show="showImportMessage">Success! {{assetNumber}} Number of Assets Added</p>
+                        <p class="p-success Montserrat-font-family" v-show="false">Success! {{assetNumber}} Number of Assets Added</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
             </v-layout>
         </v-layout>
         <v-layout justify-center> 
             <v-flex xs6>
-                <v-btn class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
+                <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
@@ -99,7 +102,7 @@ import { clone, prop } from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State } from 'vuex-class';
-import {Datasource, emptyDatasource, DSEXCEL, DSSQL, DataSourceExcelColumns, RawDataColumns} from '@/shared/models/iAM/data-source';
+import {Datasource, emptyDatasource, DSEXCEL, DSSQL, DataSourceExcelColumns, RawDataColumns, SqlDataSource, ExcelDataSource} from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {
     CreateDataSourceDialogData,
@@ -165,11 +168,17 @@ export default class DataSource extends Vue {
     @Watch('excelColumns')
         onExcelColumnsChanged() {
             this.dataSourceExcelColumns = {
-                locationColumn: this.excelColumns.columnHeaders[0],
-                dateColumn: this.excelColumns.columnHeaders[this.excelColumns.columnHeaders.length-1]
+                locationColumn: this.excelColumns.columnHeaders ? this.excelColumns.columnHeaders[0] : '',
+                dateColumn: this.excelColumns.columnHeaders? this.excelColumns.columnHeaders[this.excelColumns.columnHeaders.length-1] : ''
             };
-            this.locColumns.push(this.dataSourceExcelColumns.locationColumn);
-            this.datColumns.push(this.dataSourceExcelColumns.dateColumn);
+            if (this.dataSourceExcelColumns.locationColumn != '') {
+                this.locColumns.push(this.dataSourceExcelColumns.locationColumn);
+                this.currentExcelLocationColumn = this.currentDatasource ? this.currentDatasource.locationColumn : '';
+            }
+            if (this.dataSourceExcelColumns.dateColumn !='') {
+                this.datColumns.push(this.dataSourceExcelColumns.dateColumn);
+                this.currentExcelDateColumn = this.currentDatasource ? this.currentDatasource.dateColumn : '';
+            }
         }
     @Watch('dataSources')
         onGetDataSources() {
@@ -220,21 +229,39 @@ export default class DataSource extends Vue {
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
     onLoadExcel() {
-        this.importExcelSpreadsheetFileAction({
-            file: this.file,
-            id: this.currentDatasource.id
-        }).then((response: any) => {
-            this.showImportMessage = true;
-        })
+
+        let exldat : ExcelDataSource = {
+            id: this.currentDatasource.id,
+            name: this.currentDatasource.name,
+            locationColumn: this.currentExcelLocationColumn,
+            dateColumn: this.currentExcelDateColumn,
+            type: this.currentDatasource.type,
+            secure: this.currentDatasource.secure
+        }
+        this.upsertExcelDataSourceAction(exldat).then(() => {
+            if ( hasValue(this.file)) {
+            this.importExcelSpreadsheetFileAction({
+                file: this.file,
+                id: this.currentDatasource.id
+            }).then((response: any) => {
+                this.showImportMessage = true;
+            });
+            }
+        });
+
+
+
     }
     onSaveDatasource() {
-        // Do we have an excel or sql type
-
-        //console.log(this.currentDatasource);
         if (this.dataSourceTypeItem ===DSSQL) {
-            this.upsertSqlDataSourceAction({
-                data: this.currentDatasource
-            }).then(() => (this.currentDatasource = emptyDatasource));
+            let sqldat : SqlDataSource = {
+                    id: this.currentDatasource.id,
+                    name: this.currentDatasource.name,
+                    connectionString: this.currentDatasource.connectionString,
+                    type: this.currentDatasource.type,
+                    secure: this.currentDatasource.secure
+            };
+            this.upsertSqlDataSourceAction(sqldat).then(() => (this.currentDatasource = emptyDatasource));
         } else {
         }
     }
@@ -246,6 +273,13 @@ export default class DataSource extends Vue {
     onCreateNewDataSource(datasource: Datasource) {
         // add to the state
         this.dataSources.push(datasource);
+    }
+    resetDataSource() {
+        this.currentDatasource = emptyDatasource;
+        this.sourceTypeItem = '';
+        this.dataSourceTypeItem = '';
+        this.showMssql = false;
+        this.showExcel = false;
     }
     chooseFiles(){
         if(document != null)

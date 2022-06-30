@@ -1,6 +1,6 @@
 import {clone, any, propEq, update, findIndex, append} from 'ramda';
 import {AxiosResponse} from 'axios';
-import {Datasource, DataSourceType, RawDataColumns} from '@/shared/models/iAM/data-source';
+import {Datasource, DataSourceType, ExcelDataSource, RawDataColumns, SqlDataSource} from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
 import { http2XX } from '@/shared/utils/http-utils';
@@ -46,7 +46,7 @@ const actions = {
     },
     async upsertSqlDataSource(
         {dispatch, commit }: any,
-        payload: Datasource,
+        payload: SqlDataSource,
     ) {
         await DataSourceService.upsertSqlDatasource(
             payload
@@ -67,7 +67,7 @@ const actions = {
     },
     async upsertExcelDataSource(
         {dispatch, commit }: any,
-        payload: Datasource,
+        payload: ExcelDataSource,
     ) {
         await DataSourceService.upsertExcelDatasource(
             payload

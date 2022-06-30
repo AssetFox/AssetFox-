@@ -1,6 +1,6 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import { Datasource } from '@/shared/models/iAM/data-source';
+import { Datasource, ExcelDataSource, SqlDataSource } from '@/shared/models/iAM/data-source';
 
 
 export default class DataSourceService {
@@ -11,15 +11,15 @@ export default class DataSourceService {
         return coreAxiosInstance.get(`${API.DataSource}/GetDataSources`);
     }
     static upsertSqlDatasource(
-        data: Datasource,
+        sqlDataSourceDTO: SqlDataSource,
     ): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.DataSource}/UpsertSqlDataSource/`,
-            data
+            `${API.DataSource}/UpsertSqlDataSource`,
+            sqlDataSourceDTO,
         );
     }
     static upsertExcelDatasource(
-        data: Datasource,
+        data: ExcelDataSource,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.DataSource}/UpsertExcelDataSource/`,

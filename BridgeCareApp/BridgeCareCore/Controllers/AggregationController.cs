@@ -87,7 +87,7 @@ namespace BridgeCareCore.Controllers
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var state = new AggregationState();
             var timer = KeepUserInformedOfState(state);
-            var readTask = ReadMessages(channel.Reader);
+            var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
                 var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
@@ -113,6 +113,7 @@ namespace BridgeCareCore.Controllers
                 NotifyUserOfState(state);
                 timer.Stop();
                 timer.Close();
+                channel.Writer.Complete();
                 readTask.Dispose();
             }
         }

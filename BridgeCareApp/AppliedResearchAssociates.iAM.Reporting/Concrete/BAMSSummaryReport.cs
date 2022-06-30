@@ -154,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             catch (Exception e)
             {
                 IndicateError();
-                Errors.Add("Failed to get generate summary report");
+                Errors.Add("Failed to generate summary report");
                 Errors.Add(e.Message);
                 return;
             }

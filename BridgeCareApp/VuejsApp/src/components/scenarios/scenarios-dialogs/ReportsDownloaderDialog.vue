@@ -20,23 +20,17 @@
       <v-card-text>
           <v-layout align-start row>
             <v-chip
-                        color="ara-blue-bg"
-                        text-color="white"
-                        @click="onGenerateReport(true)"
-                    >
-                        Generate Summary Report
-                    </v-chip>
-                    <v-divider vertical></v-divider>
+                color="ara-blue-bg"
+                text-color="white"
+                @click="onGenerateReport(true)"
+            >
+                Generate Summary Report
+            </v-chip>
+            <v-divider vertical></v-divider>
             <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
-                            Simulation Log
-                        </v-chip>
+                Simulation Log
+            </v-chip>
           </v-layout>
-        <v-alert :value="errorMessage !== ''"
-                 color="error"
-                 icon="warning"
-                 outline>
-          {{ errorMessage }}
-        </v-alert>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
@@ -71,14 +65,12 @@ export default class ReportsDownloaderDialog extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
-    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
-    errorMessage: string = '';
+    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];    
     isDownloading: boolean = false;
     reportIndexID: string = getBlankGuid();
 
     async onGenerateReport(download: boolean) {
-        if (download) {
-            this.errorMessage = '';
+        if (download) {            
             this.isDownloading = true;
             this.dialogData.showModal = false;
             await ReportsService.generateReport(
@@ -107,8 +99,7 @@ export default class ReportsDownloaderDialog extends Vue {
         }
     }
 
-    async onDownloadReport() {
-        this.errorMessage = '';
+    async onDownloadReport() {        
         this.isDownloading = true;
         this.dialogData.showModal = false;        
         await ReportsService.downloadReport(
@@ -129,8 +120,7 @@ export default class ReportsDownloaderDialog extends Vue {
     }
 
     async onDownloadSimulationLog(download: boolean) {
-        if (download) {
-            this.errorMessage = '';
+        if (download) {            
             this.isDownloading = true;
             this.dialogData.showModal = false;
             await ReportsService.downloadSimulationLog(

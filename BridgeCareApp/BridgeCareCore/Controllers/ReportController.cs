@@ -77,35 +77,36 @@ namespace BridgeCareCore.Controllers
 
             if (report == null)
             {
-                var message = new List<string>() { $"Failed to generate report object for '{reportName}'" };
-                return CreateErrorListing(message);
+                SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
+                return Ok(null);
             }
 
             // Handle a completed run with errors
             if (report.Errors.Any())
             {
-                return CreateErrorListing(report.Errors);
+                SendRealTimeMessage($"Failed to generate '{reportName}'");                
+                return Ok(null);
             }
 
             // Handle an incomplete run without errors
             if (!report.IsComplete)
-            {
-                var message = new List<string>() { $"{reportName} ran but never completed" };
-                return CreateErrorListing(message);
+            {                
+                SendRealTimeMessage($"{reportName} ran but never completed");
+                return Ok(null);
             }
 
             //create report index repository
             var reportIndexID = createReportIndexRepository(report);
 
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID)) {
-                var message = new List<string>() { $"Failed to create report repository index" };
-                return CreateErrorListing(message);
+            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+            {
+                SendRealTimeMessage($"Failed to create report repository index");
+                return Ok(null);
             }
 
             // Report is good, return the report repository index id
             return Ok(reportIndexID);
         }
-
 
         [HttpGet]
         [Route("DownloadReport/{reportIndexID}")]

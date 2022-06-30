@@ -163,50 +163,49 @@ namespace BridgeCareCore.Services.Aggregation
                             WriteError(writer, broadcastError);
                             throw;
                         }
-
-                        state.Status = "Saving";
-                        // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
-
-                        try
-                        {
-                            _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, allAttributes);
-                        }
-                        catch (Exception e)
-                        {
-                            var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
-                            WriteError(writer, broadcastError);
-                            isError = true;
-                            state.ErrorMessage = e.Message;
-                            throw new Exception(e.StackTrace);
-                        }
-                        try
-                        {
-                            _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
-                        }
-                        catch (Exception e)
-                        {
-                            var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
-                            WriteError(writer, broadcastError);
-                            isError = true;
-                            state.ErrorMessage = e.Message;
-                            throw new Exception(e.StackTrace);
-                        }
-
-                        try
-                        {
-                            _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
-                        }
-                        catch (Exception e)
-                        {
-                            var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
-                            WriteError(writer, broadcastError);
-                            isError = true;
-                            state.ErrorMessage = e.Message;
-                            throw new Exception(e.StackTrace);
-                        }
-
-
                     }
+
+                    state.Status = "Saving";
+                    // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+
+                    try
+                    {
+                        _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, allAttributes);
+                    }
+                    catch (Exception e)
+                    {
+                        var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
+                        WriteError(writer, broadcastError);
+                        isError = true;
+                        state.ErrorMessage = e.Message;
+                        throw new Exception(e.StackTrace);
+                    }
+                    try
+                    {
+                        _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
+                    }
+                    catch (Exception e)
+                    {
+                        var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
+                        WriteError(writer, broadcastError);
+                        isError = true;
+                        state.ErrorMessage = e.Message;
+                        throw new Exception(e.StackTrace);
+                    }
+
+                    try
+                    {
+                        _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+                    }
+                    catch (Exception e)
+                    {
+                        var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
+                        WriteError(writer, broadcastError);
+                        isError = true;
+                        state.ErrorMessage = e.Message;
+                        throw new Exception(e.StackTrace);
+                    }
+
                     if (!isError)
                     {
                         state.Status = "Aggregated all network data";

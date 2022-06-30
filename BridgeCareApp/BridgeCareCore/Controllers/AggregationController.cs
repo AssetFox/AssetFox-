@@ -25,7 +25,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-        public const bool UpdateAttributes = true;
+        public const bool UpdateAttributes = false;
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
 
@@ -44,8 +44,9 @@ namespace BridgeCareCore.Controllers
             _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
         }
 
-
         private static DateTime LatestAggregateDateTime = DateTime.MinValue;
+
+        private static bool FalseButCompilerDoesNotKnowThat => Guid.NewGuid() == Guid.Empty;
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
@@ -61,7 +62,7 @@ namespace BridgeCareCore.Controllers
             }
             LatestAggregateDateTime = now;
             var outerThreadId = Environment.CurrentManagedThreadId;
-            if (UpdateAttributes || Guid.NewGuid() == Guid.Empty) // Guid part is a hack to shut up the compiler warning
+            if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)
             {
                 var dataSources = UnitOfWork.DataSourceRepo.GetDataSources();
                 var metadataDataSource = dataSources.FirstOrDefault(ds => ds.Name == "MetaData.Json");

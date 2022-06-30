@@ -150,6 +150,7 @@ namespace BridgeCareCore.Controllers
 
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                 new NetworkRollupDetailDTO { NetworkId = state.NetworkId, Status = message }, state.Percentage);
+            state.Count++;
         }
     }
 }

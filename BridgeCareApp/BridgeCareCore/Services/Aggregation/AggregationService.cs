@@ -40,7 +40,7 @@ namespace BridgeCareCore.Services.Aggregation
                 state.Status = "Preparing";
                 var getTask = Task.Factory.StartNew(() =>
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);

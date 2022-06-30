@@ -100,6 +100,12 @@
                         flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                         Download
                     </v-btn>
+                     <v-divider class="upload-download-divider" inset vertical>
+                        </v-divider>
+                        <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Download Template
+                        </v-btn>
                 </v-layout>
             </v-flex>
         </v-layout>
@@ -756,6 +762,17 @@ export default class InvestmentEditor extends Vue {
         if (!isNil(budgets)) {
             this.budgets = clone(budgets);
         }
+    }
+
+    OnDownloadTemplateClick()
+    {
+         InvestmentService.downloadInvestmentBudgetsTemplate()
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
     }
 
     exportInvestmentBudgets()

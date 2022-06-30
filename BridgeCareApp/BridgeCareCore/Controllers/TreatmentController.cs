@@ -472,6 +472,64 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        
+
+        [HttpGet]
+        [Route("DownloadScenarioTreatmentsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadScenarioTreatmentsTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Scenario_treatments_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Scenario_treatments_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadLibraryTreatmentsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadLibraryTreatmentsTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Library_treatments_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Library_treatments_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
     }
 }

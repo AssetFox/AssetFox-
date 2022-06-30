@@ -95,4 +95,17 @@ export default class TreatmentService {
             scenarioSelectableTreatment,
         );
     }
+
+    static downloadTreatmentsTemplate(
+        forScenario: boolean = false,
+    ): AxiosPromise {
+        return forScenario
+            ?     
+               coreAxiosInstance.get(               
+                  `${API.Treatment}/DownloadScenarioTreatmentsTemplate`,
+              )
+            : coreAxiosInstance.get(                
+                  `${API.Treatment}/DownloadLibraryTreatmentsTemplate`,
+              );
+    }
 }

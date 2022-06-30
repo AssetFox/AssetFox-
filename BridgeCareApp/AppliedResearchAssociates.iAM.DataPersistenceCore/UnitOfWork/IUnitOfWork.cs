@@ -98,6 +98,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         UserDTO CurrentUser { get; }
         IAttributeMetaDataRepository AttributeMetaDataRepo { get; }
+        
+        IExcelRawDataRepository ExcelWorksheetRepository { get; }
 
         void SetUser(string username);
 

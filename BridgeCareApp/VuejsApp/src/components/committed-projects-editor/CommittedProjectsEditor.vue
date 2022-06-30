@@ -87,12 +87,18 @@ import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { CommittedProject } from '@/shared/models/iAM/committed-projects';
+import { Action } from 'vuex-class';
 @Component({
 })
 export default class CommittedProjectsEditor extends Vue  {
     searchItems = '';
     dataPerPage = 0;
     totalDataFound = 0;
+
+
+    @Action('getCommittedProjects') getCommittedProjects: any;
+
+
     cpItems: CommittedProject[] = [
         { 
             brkey: 1, 

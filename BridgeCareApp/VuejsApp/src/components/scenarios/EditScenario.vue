@@ -34,9 +34,9 @@
                         outlined>
                         Run Scenario
                     </v-btn>
-                    <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                    <!-- <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
                         Committed Projects
-                    </v-btn>
+                    </v-btn> -->
                 </div>
             </v-card>
             <v-flex xs12 class="ghd-content">

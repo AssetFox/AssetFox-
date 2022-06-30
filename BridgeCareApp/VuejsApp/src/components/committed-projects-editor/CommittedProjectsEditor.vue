@@ -1,6 +1,6 @@
 <template>
     <v-layout column>
-        <v-layout row>
+        <v-layout >
             <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family" outline>Get Template</v-btn>
             <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family" outline>Import Projects</v-btn>
             <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family" outline>Exports Projects</v-btn>
@@ -29,46 +29,42 @@
         <v-layout justify-end class="px-4">
         <p>Commited Projects: {{committedProjectsCount}}</p>
         </v-layout>
-
-        <v-data-table
-          :headers="cpGridHeaders"
-          :items="cpItems"
-          :search="searchItems"
-          class="elevation-1 fixed-header v-table__overflow"
-        >
-        <template slot="items" slot-scope="props">
-            <td>
-                <v-checkbox
-                  hide-details
-                  primary
-                ></v-checkbox>
-            </td>
-            <td class="Montserrat-font-family ">
-                {{props.item.brkey}}
-            </td>
-            <td class="Montserrat-font-family ">
-                {{props.item.year}}
-            </td>
-            <td class="Montserrat-font-family ">
-                {{props.item.treatment}}
-            </td>
-            <td class="Montserrat-font-family ">
-                {{props.item.budget}}
-            </td>
-            <td class="Montserrat-font-family ">
-                {{props.item.cost}}
-            </td>
-            <td class="Montserrat-font-family ">
-                <v-icon class="ghd-blue">fas fa-trash</v-icon>
-            </td>
-        </template>
-        <template v-slot:footer>
-            <td>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family btn-style" outline>Add Committed Project</v-btn>    
-            </td>
-        </template>
-        </v-data-table>    
-
+        
+        <v-layout>
+            <v-data-table
+            :headers="cpGridHeaders"
+            :items="cpItems"
+            :search="searchItems"
+            class=" fixed-header v-table__overflow">
+                <template slot="items" slot-scope="props">
+                    <td>
+                        <v-checkbox
+                        hide-details
+                        primary
+                        ></v-checkbox>
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        {{props.item.brkey}}
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        {{props.item.year}}
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        {{props.item.treatment}}
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        {{props.item.budget}}
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        {{props.item.cost}}
+                    </td>
+                    <td class="Montserrat-font-family ">
+                        <v-icon class="ghd-blue">fas fa-trash</v-icon>
+                    </td>
+                </template>
+            </v-data-table>    
+            <v-btn class="ghd-white-bg ghd-blue ghd-button Montserrat-font-family btn-style" outline>Add Committed Project</v-btn> 
+        </v-layout>
 
         <v-layout justify-start align-center>
             <v-text class="ghd-control-text Montserrat-font-family" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>

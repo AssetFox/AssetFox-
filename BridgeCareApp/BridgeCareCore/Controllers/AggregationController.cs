@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
@@ -138,18 +139,23 @@ namespace BridgeCareCore.Controllers
         }
         private void SendCurrentStatusMessage(AggregationState state)
         {
-            var count = state.Count % 3;
-            var message =  count switch
-            {
-                0 => $"{state.Status}.",
-                1 => $"{state.Status}..",
-                2 => $"{state.Status}...",
-                _ => state.Status
-            };
+            var count = state.Count % 10;
+            var periods = StringWithPeriods(count + 1);
+            var message = $"{state.Status}{periods}";
 
             HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                 new NetworkRollupDetailDTO { NetworkId = state.NetworkId, Status = message }, state.Percentage);
             state.Count++;
+        }
+
+        private static string StringWithPeriods(int count)
+        {
+            var builder = new StringBuilder();
+            for (int i=0; i<count; i++)
+            {
+                builder.Append(".");
+            }
+            return builder.ToString();
         }
     }
 }

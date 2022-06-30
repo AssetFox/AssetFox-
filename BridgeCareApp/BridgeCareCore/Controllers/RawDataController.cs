@@ -78,8 +78,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
-
         [HttpGet]
         [Route("GetExcelSpreadsheetColumnHeaders/{dataSourceId}")]
         [Authorize]
@@ -94,7 +92,7 @@ namespace BridgeCareCore.Controllers
                     {
                         warningMessage = $"No dataSource found with id {dataSourceId}";
                     }
-                    else if (dataSource.Type.ToLowerInvariant()!="EXCEL")
+                    else if (dataSource.Type.ToUpperInvariant()!="EXCEL")
                     {
                         warningMessage = @$"DataSource found. Its type was {dataSource.Type}. Expected the type to be ""EXCEL""";
                     }

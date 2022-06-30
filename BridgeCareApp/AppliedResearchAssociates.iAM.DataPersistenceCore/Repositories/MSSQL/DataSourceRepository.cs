@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 
         public void UpsertDatasource(BaseDataSourceDTO dataSource)
         {
-            if (_unitOfWork.Context.DataSource.Any(_ => _.Id != dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
+            if (!_unitOfWork.Context.DataSource.Any(_ => _.Id != dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
                 throw new ArgumentException("An existing data source with the same name already exists");
 
             if (!dataSource.Validate())

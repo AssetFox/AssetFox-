@@ -33,7 +33,7 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, InvestmentCRUDMethods> _investmentCRUDMethods;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
-        private Guid UserId => UnitOfWork.UserEntity?.Id ?? Guid.Empty;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
@@ -476,6 +476,35 @@ namespace BridgeCareCore.Controllers
             {
                 var result =
                     await Task.Factory.StartNew(() => _investmentBudgetsService.ExportLibraryInvestmentBudgetsFile(budgetLibraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadInvestmentBudgetsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadInvestmentBudgetsTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Investment_budgets_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Investment_budgets_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
 
                 return Ok(result);
             }

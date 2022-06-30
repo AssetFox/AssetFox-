@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Common\AppliedResearchAssociates.iAM.Common.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Data\AppliedResearchAssociates.iAM.Data.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.TestHelpers\AppliedResearchAssociates.iAM.TestHelpers.csproj" />
   </ItemGroup>
 
 </Project>

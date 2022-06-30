@@ -84,4 +84,11 @@ export default class PerformanceCurveService {
                   `${API.PerformanceCurve}/ExportLibraryPerformanceCurvesExcelFile/${id}`,
               );
     }
+
+    static downloadPerformanceCurvesTemplate()
+    : AxiosPromise {
+        return coreAxiosInstance.get(               
+            `${API.PerformanceCurve}/DownloadPerformanceCurvesTemplate`,
+        );
+    }
 }

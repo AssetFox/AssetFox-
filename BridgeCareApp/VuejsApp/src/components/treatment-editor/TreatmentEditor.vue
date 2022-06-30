@@ -9,7 +9,7 @@
                         class='ghd-control-border ghd-control-text ghd-control-width-dd ghd-select'
                         label='Select a Treatment Library'
                         outline                        
-                        v-model='librarySelectItemValue'
+                        v-model='librarySelectItemValue' 
                     >
                     </v-select>
                 </v-flex>
@@ -23,6 +23,16 @@
                         v-model='treatmentSelectItemValue'
                     >
                     </v-select>
+                </v-flex>
+                <v-flex style="padding-top:30px;">
+                    <v-btn
+                        @click='onShowConfirmDeleteTreatmentAlert'
+                        depressed
+                        class='ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding'                        
+                        v-show='hasSelectedTreatment && !isNoTreatmentSelected'                        
+                    >
+                        Delete Treatment
+                    </v-btn>
                 </v-flex>
                 <v-flex xs4>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
@@ -69,6 +79,14 @@
                 >
                     Add Treatment
                 </v-btn>
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
+                <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                    flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
+                    style='float:right;'
+                    >
+                    Download Template
+                </v-btn> 
+                <label style='float:right;padding-top:13px;' class="ghd-grey" v-show ='hasSelectedLibrary && !hasScenario'>|</label>
                 <v-btn :disabled='false' @click='OnExportTreamentsClick()'
                     flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                     style='float:right;'
@@ -242,6 +260,11 @@
 
         <ImportExportTreatmentsDialog :showDialog='showImportTreatmentsDialog'
             @submit='onSubmitImportTreatmentsDialogResult' />
+
+        <ConfirmDeleteTreatmentAlert
+            :dialogData='confirmBeforeDeleteTreatmentAlertData'
+            @submit='onSubmitConfirmDeleteTreatmentAlertResult'
+        />
     </v-layout>
 </template>
 
@@ -316,6 +339,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
         CreateTreatmentDialog,
         CreateTreatmentLibraryDialog,
         ConfirmDeleteAlert: Alert,
+        ConfirmDeleteTreatmentAlert: Alert
     },
 })
 export default class TreatmentEditor extends Vue {
@@ -349,7 +373,8 @@ export default class TreatmentEditor extends Vue {
     importScenarioTreatmentsFileAction: any;
     @Action('importLibraryTreatmentsFile')
     importLibraryTreatmentsFileAction: any;
-
+    @Action('deleteTreatment') deleteTreatmentAction: any;
+    @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedTreatmentLibrary: TreatmentLibrary = clone(emptyTreatmentLibrary);
@@ -378,7 +403,9 @@ export default class TreatmentEditor extends Vue {
     hasCreatedLibrary: boolean = false;
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
-    showImportTreatmentsDialog: boolean = false;    
+    showImportTreatmentsDialog: boolean = false;
+    confirmBeforeDeleteTreatmentAlertData: AlertData = clone(emptyAlertData);
+    isNoTreatmentSelected: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -522,6 +549,8 @@ export default class TreatmentEditor extends Vue {
             category: this.selectedTreatment.category,
             assetType: this.selectedTreatment.assetType,
         };
+
+        this.isNoTreatmentSelected = this.selectedTreatment.name == 'No Treatment';
     }
 
     isSelectedTreatmentItem(treatmentId: string | number) {
@@ -552,11 +581,40 @@ export default class TreatmentEditor extends Vue {
             this.treatmentSelectItemValue = null;
         }
     }
+    
+    onShowConfirmDeleteTreatmentAlert() {
+        this.confirmBeforeDeleteTreatmentAlertData = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message: 'Are you sure you want to delete?',
+        };
+    }
+
+    onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {
+        this.confirmBeforeDeleteTreatmentAlertData = clone(emptyAlertData);
+
+        if (submit) {
+            this.onDeleteTreatment(this.selectedTreatment.id);
+        }
+    }
+
 
     onDeleteTreatment(treatmentId: string | number) {
-        if (any(propEq('id', treatmentId.toString()), this.treatments)) {
-            this.treatments = reject(propEq('id', treatmentId.toString()), this.treatments);
+        if(this.hasScenario)
+        {         
+            const treatments : Treatment[] = reject(propEq('id', treatmentId.toString()), this.treatments);
+            this.deleteScenarioSelectableTreatmentAction({ scenarioSelectableTreatment: this.selectedTreatment, simulationId: this.selectedScenarioId, treatments});
         }
+        else
+        {
+            if (any(propEq('id', treatmentId.toString()), this.treatments)) {            
+            const treatmentLibrary: TreatmentLibrary = {
+            ...clone(this.selectedTreatmentLibrary),
+            treatments: reject(propEq('id', treatmentId.toString()), this.treatments)};
+            this.deleteTreatmentAction({ treatment: this.selectedTreatment, libraryId: this.selectedTreatmentLibrary.id, treatmentLibrary});
+            }            
+        }                
     }
 
     onShowCreateTreatmentLibraryDialog(createAsNewLibrary: boolean) {
@@ -775,6 +833,17 @@ export default class TreatmentEditor extends Vue {
                 }
             });
      }
+
+     OnDownloadTemplateClick()
+    {
+        Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    const fileInfo: FileInfo = response.data as FileInfo;
+                    FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
+                }
+            });
+    }
 }
 </script>
 

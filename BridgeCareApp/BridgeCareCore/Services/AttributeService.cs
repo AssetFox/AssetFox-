@@ -5,9 +5,9 @@ using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
-//using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -56,7 +56,6 @@ namespace BridgeCareCore.Services
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
                     }
-
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
@@ -72,5 +71,6 @@ namespace BridgeCareCore.Services
                     };
                 }).ToList();
         }
+
     }
 }

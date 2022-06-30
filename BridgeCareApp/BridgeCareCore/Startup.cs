@@ -78,7 +78,9 @@ namespace BridgeCareCore
             reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
             reportLookup.Add("InventoryLookup", typeof(InventoryReport));
             reportLookup.Add("ScenarioOutput", typeof(ScenarioOutputReport));
+
             reportLookup.Add("BAMSSummaryReport", typeof(BAMSSummaryReport));
+            reportLookup.Add("PAMSSummaryReport", typeof(PAMSSummaryReport));
 
             services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();

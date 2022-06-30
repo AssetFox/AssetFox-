@@ -15,20 +15,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
     public class PerformanceCurvesServiceTests
     {
-        private static readonly Guid performanceCurveLibraryId = Guid.NewGuid();                
+        private static readonly Guid performanceCurveLibraryId = Guid.NewGuid();
         private PerformanceCurvesService performanceCurvesService;
         private static TestHelper _testHelper => TestHelper.Instance;
 
         private Mock<IExpressionValidationService> SetupMock()
         {
             var dbContext = _testHelper.DbContext;
-            if (!dbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateAttributes();
+            _testHelper.CreateNetwork();
+            _testHelper.CreateSimulation();
+            _testHelper.SetupDefaultHttpContext();
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
             if (!dbContext.PerformanceCurveLibrary.Any())
             {
@@ -114,7 +111,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
-            var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
+            var dbContext = _testHelper.DbContext;
+            var simulationDbSet = dbContext.Simulation;
+            var simulationEntity = simulationDbSet.First();
+            var simulationId = simulationEntity.Id;
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert

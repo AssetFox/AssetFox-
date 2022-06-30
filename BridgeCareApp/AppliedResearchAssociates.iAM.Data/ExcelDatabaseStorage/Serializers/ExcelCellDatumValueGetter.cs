@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers
 {
     public class ExcelCellDatumValueGetter : IExcelCellDatumVisitor<Unit, object>
     {
+        public static ExcelCellDatumValueGetter Instance => new ExcelCellDatumValueGetter();
         public object Visit(StringExcelCellDatum datum, Unit helper)
         {
             return datum.Value;

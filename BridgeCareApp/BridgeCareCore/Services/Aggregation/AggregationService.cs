@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Reporting.Hubs;
 using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
@@ -28,11 +29,17 @@ namespace BridgeCareCore.Services.Aggregation
             state.NetworkId = networkId;
             var isError = false;
             state.ErrorMessage = "";
-
+            DateTime date1 = DateTime.MinValue;
+            DateTime date2 = DateTime.MinValue;
+            DateTime date3 = DateTime.MinValue;
+            DateTime date4 = DateTime.MinValue;
+            DateTime date5 = DateTime.MinValue;
+            int elapsed12, elapsed13, elapsed14, elapsed15;
             await Task.Run(() =>
             {
                 try
                 {
+                    date1 = DateTime.UtcNow;
                     _unitOfWork.BeginTransaction();
 
                     var maintainableAssets = new List<MaintainableAsset>();
@@ -67,6 +74,9 @@ namespace BridgeCareCore.Services.Aggregation
                         .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
 
+
+                    date2 = DateTime.UtcNow;
+                    elapsed12 = (int)(date2 - date1).TotalMilliseconds;
                     // Create list of attribute ids we are allowed to update with assigned data.
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
@@ -112,7 +122,12 @@ namespace BridgeCareCore.Services.Aggregation
                             state.Percentage = Math.Round(i / totalAssets * 100, 1);
                         }
                         i++;
-
+                        if (i == 100)
+                        {
+                            date3 = DateTime.UtcNow;
+                            elapsed13 = (int)(date3 - date1).TotalMilliseconds;
+                            int x = 666;
+                        }
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                         maintainableAsset.AssignAttributeData(attributeData);

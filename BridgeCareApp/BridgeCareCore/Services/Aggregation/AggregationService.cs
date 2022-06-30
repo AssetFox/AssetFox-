@@ -31,16 +31,16 @@ namespace BridgeCareCore.Services.Aggregation
 
             await Task.Run(() =>
             {
-                _unitOfWork.BeginTransaction();
-
-                var maintainableAssets = new List<MaintainableAsset>();
-                var attributeData = new List<IAttributeDatum>();
-                var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
-
-                state.Status = "Preparing";
-                var getTask = Task.Factory.StartNew(() =>
+                try
                 {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
+                    _unitOfWork.BeginTransaction();
+
+                    var maintainableAssets = new List<MaintainableAsset>();
+                    var attributeData = new List<IAttributeDatum>();
+                    var attributeIdsToBeUpdatedWithAssignedData = new List<Guid>();
+
+                    state.Status = "Preparing";
+                    // WjTodo -- uncomment this and get it not to throw    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
                     var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(allAttributes);
@@ -94,19 +94,14 @@ namespace BridgeCareCore.Services.Aggregation
                     // in the data source and meta data file)
                     attributeIdsToBeUpdatedWithAssignedData = configurationAttributes.Select(_ => _.Id)
                         .Intersect(networkAttributeIds).Distinct().ToList();
-                });
-                state.CurrentRunningTask = getTask;
-                getTask.Wait();
 
-                var aggregatedResults = new List<IAggregatedResult>();
+                    var aggregatedResults = new List<IAggregatedResult>();
 
-                var totalAssets = (double)maintainableAssets.Count;
-                var i = 0.0;
+                    var totalAssets = (double)maintainableAssets.Count;
+                    var i = 0.0;
 
-                state.Status = "Aggregating";
-                var aggregationTask = Task.Factory.StartNew(() =>
-                {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                    state.Status = "Aggregating";
+                    // WjTodo -- uncomment this and get it not to throw     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                     // loop over maintainable assets and remove assigned data that has an attribute id
                     // in attributeIdsToBeUpdatedWithAssignedData then assign the new attribute data
                     // that was created
@@ -153,74 +148,74 @@ namespace BridgeCareCore.Services.Aggregation
                             WriteError(writer, broadcastError);
                             throw;
                         }
-                    }
-                });
-                state.CurrentRunningTask = aggregationTask;
-                aggregationTask.Wait();
 
-                state.Status = "Saving";
-                var crudTask = Task.Factory.StartNew(() =>
-                {
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                        state.Status = "Saving";
+                        // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
-                    try
-                    {
-                        _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, allAttributes);
-                    }
-                    catch (Exception e)
-                    {
-                        var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
-                        WriteError(writer, broadcastError);
-                        isError = true;
-                        state.ErrorMessage = e.Message;
-                        throw new Exception(e.StackTrace);
-                    }
-                    try
-                    {
-                        _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
-                    }
-                    catch (Exception e)
-                    {
-                        var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
-                        WriteError(writer, broadcastError);
-                        isError = true;
-                        state.ErrorMessage = e.Message;
-                        throw new Exception(e.StackTrace);
-                    }
+                        try
+                        {
+                            _unitOfWork.AttributeDatumRepo.AddAssignedData(maintainableAssets, allAttributes);
+                        }
+                        catch (Exception e)
+                        {
+                            var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
+                            WriteError(writer, broadcastError);
+                            isError = true;
+                            state.ErrorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
+                        }
+                        try
+                        {
+                            _unitOfWork.MaintainableAssetRepo.UpdateMaintainableAssetsSpatialWeighting(maintainableAssets);
+                        }
+                        catch (Exception e)
+                        {
+                            var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
+                            WriteError(writer, broadcastError);
+                            isError = true;
+                            state.ErrorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
+                        }
 
-                    try
-                    {
-                        _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+                        try
+                        {
+                            _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+                        }
+                        catch (Exception e)
+                        {
+                            var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
+                            WriteError(writer, broadcastError);
+                            isError = true;
+                            state.ErrorMessage = e.Message;
+                            throw new Exception(e.StackTrace);
+                        }
+
+
                     }
-                    catch (Exception e)
+                    if (!isError)
                     {
-                        var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
-                        WriteError(writer, broadcastError);
-                        isError = true;
-                        state.ErrorMessage = e.Message;
-                        throw new Exception(e.StackTrace);
+                        state.Status = "Aggregated all network data";
+                        // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                        _unitOfWork.Commit();
+
+                        WriteState(writer, state);
                     }
-                });
-
-                state.CurrentRunningTask = crudTask;
-                crudTask.Wait();
-
-                if (!isError)
-                {
-                    state.Status = "Aggregated all network data";
-                    _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
-                    _unitOfWork.Commit();
-
-                    WriteState(writer, state);
+                    else
+                    {
+                        state.Status = $"Error in data aggregation {state.ErrorMessage}";
+                        _unitOfWork.Rollback();
+                        state.Percentage = 0;
+                        WriteState(writer, state);
+                    }
                 }
-                else
+                catch
                 {
-                    state.Status = $"Error in data aggregation {state.ErrorMessage}";
                     _unitOfWork.Rollback();
-                    state.Percentage = 0;
-                    WriteState(writer, state);
+                    throw;
                 }
+
             });
+
             return !isError;
         }
 
@@ -248,7 +243,7 @@ namespace BridgeCareCore.Services.Aggregation
                 rollupDetailDto = dto,
             };
             writer.TryWrite(memo);
-            
+
         }
     }
 }

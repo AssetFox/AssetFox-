@@ -86,7 +86,6 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
                 state.Status = "Aggregation failed";
                 UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,

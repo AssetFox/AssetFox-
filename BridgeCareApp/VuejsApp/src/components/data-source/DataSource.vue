@@ -86,7 +86,7 @@
             <v-flex xs6>
                 <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
-                <v-btn v-show="showMssql" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
+                <v-btn v-show="showMssql || showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
             </v-flex>
         </v-layout>
@@ -149,6 +149,7 @@ export default class DataSource extends Vue {
     showMssql: boolean = false;
     showExcel: boolean = false;
     showImportMessage: boolean = false;
+    allowSaveData: boolean = false;
 
     fileName: string | null = '';
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
@@ -204,15 +205,16 @@ export default class DataSource extends Vue {
                 this.showMssql = false;
                 
                 this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
-
+                this.currentExcelDateColumn = this.currentDatasource.dateColumn;
+                this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
             }
         }
         @Watch('sourceTypeItem') 
         onsourceTypeItemChanged() {
             // get the current data source object
-            let currentDatasource = this.dataSources.find(f => f.name === this.sourceTypeItem);
+            let currentDatasource = this.dataSources ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource;
             currentDatasource ? this.currentDatasource = currentDatasource : this.currentDatasource = emptyDatasource;
-
+            this.allowSaveData = this.allowSave();
             // update the source type droplist
             this.dataSourceTypeItem = this.currentDatasource.type;
         }
@@ -230,15 +232,15 @@ export default class DataSource extends Vue {
     }
     onLoadExcel() {
 
-        let exldat : ExcelDataSource = {
-            id: this.currentDatasource.id,
-            name: this.currentDatasource.name,
-            locationColumn: this.currentExcelLocationColumn,
-            dateColumn: this.currentExcelDateColumn,
-            type: this.currentDatasource.type,
-            secure: this.currentDatasource.secure
-        }
-        this.upsertExcelDataSourceAction(exldat).then(() => {
+        // let exldat : ExcelDataSource = {
+        //     id: this.currentDatasource.id,
+        //     name: this.currentDatasource.name,
+        //     locationColumn: this.currentExcelLocationColumn,
+        //     dateColumn: this.currentExcelDateColumn,
+        //     type: this.currentDatasource.type,
+        //     secure: this.currentDatasource.secure
+        // }
+        // this.upsertExcelDataSourceAction(exldat).then(() => {
             if ( hasValue(this.file)) {
             this.importExcelSpreadsheetFileAction({
                 file: this.file,
@@ -247,10 +249,7 @@ export default class DataSource extends Vue {
                 this.showImportMessage = true;
             });
             }
-        });
-
-
-
+        // });
     }
     onSaveDatasource() {
         if (this.dataSourceTypeItem ===DSSQL) {
@@ -261,8 +260,17 @@ export default class DataSource extends Vue {
                     type: this.currentDatasource.type,
                     secure: this.currentDatasource.secure
             };
-            this.upsertSqlDataSourceAction(sqldat).then(() => (this.currentDatasource = emptyDatasource));
+            this.upsertSqlDataSourceAction(sqldat).then(() => (this.resetDataSource()));
         } else {
+            let exldat : ExcelDataSource = {
+            id: this.currentDatasource.id,
+            name: this.currentDatasource.name,
+            locationColumn: this.currentExcelLocationColumn,
+            dateColumn: this.currentExcelDateColumn,
+            type: this.currentDatasource.type,
+            secure: this.currentDatasource.secure
+            }
+            this.upsertExcelDataSourceAction(exldat);
         }
     }
     onShowCreateDataSourceDialog() {
@@ -273,6 +281,13 @@ export default class DataSource extends Vue {
     onCreateNewDataSource(datasource: Datasource) {
         // add to the state
         this.dataSources.push(datasource);
+    }
+    allowSave(): boolean {
+        let result: boolean = false;
+        if (this.dataSources == undefined) return false;
+        let tempDS: Datasource | undefined = this.dataSources.find(f => f.name == this.currentDatasource.name);
+        tempDS ? tempDS.name === this.currentDatasource.name ? result = true : result = false : result = false; 
+        return result;
     }
     resetDataSource() {
         this.currentDatasource = emptyDatasource;

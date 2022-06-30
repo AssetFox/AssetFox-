@@ -69,6 +69,7 @@
                     <v-flex xs8>
                         <v-textarea
                           class="ghd-control-border Montserrat-font-family"
+                          placeholder="Enter a connection string"
                           v-show="showMssql"
                           v-model="selectedConnection"
                           no-resize
@@ -356,7 +357,11 @@ export default class DataSource extends Vue {
     }
     checkSQLConnection() {
         if (this.currentDatasource != undefined) {
-            this.checkSqlCommandAction(this.currentDatasource.connectionString).then(() => {
+            let connStr = this.currentDatasource.connectionString;
+            const regex1 = new RegExp(/\\/,'g');
+            connStr = connStr.replace(regex1, "%5C");
+
+            this.checkSqlCommandAction(connStr).then(() => {
                 this.sqlValid = this.sqlCommandResponse.isValid;
                 this.sqlResponse = this.sqlCommandResponse.validationMessage;
                 this.showSqlMessage = true;

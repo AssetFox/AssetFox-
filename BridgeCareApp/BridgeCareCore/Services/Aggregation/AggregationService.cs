@@ -29,17 +29,10 @@ namespace BridgeCareCore.Services.Aggregation
             state.NetworkId = networkId;
             var isError = false;
             state.ErrorMessage = "";
-            DateTime date1 = DateTime.MinValue;
-            DateTime date2 = DateTime.MinValue;
-            DateTime date3 = DateTime.MinValue;
-            DateTime date4 = DateTime.MinValue;
-            DateTime date5 = DateTime.MinValue;
-            int elapsed12, elapsed13, elapsed14, elapsed15;
             await Task.Run(() =>
             {
                 try
                 {
-                    date1 = DateTime.UtcNow;
                     _unitOfWork.BeginTransaction();
 
                     var maintainableAssets = new List<MaintainableAsset>();
@@ -74,9 +67,6 @@ namespace BridgeCareCore.Services.Aggregation
                         .GetAllInNetworkWithAssignedDataAndLocations(networkId)
                         .ToList();
 
-
-                    date2 = DateTime.UtcNow;
-                    elapsed12 = (int)(date2 - date1).TotalMilliseconds;
                     // Create list of attribute ids we are allowed to update with assigned data.
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
@@ -122,12 +112,6 @@ namespace BridgeCareCore.Services.Aggregation
                             state.Percentage = Math.Round(i / totalAssets * 100, 1);
                         }
                         i++;
-                        if (i == 100)
-                        {
-                            date3 = DateTime.UtcNow;
-                            elapsed13 = (int)(date3 - date1).TotalMilliseconds;
-                            int x = 666;
-                        }
                         maintainableAsset.AssignedData.RemoveAll(_ =>
                             attributeIdsToBeUpdatedWithAssignedData.Contains(_.Attribute.Id));
                         maintainableAsset.AssignAttributeData(attributeData);
@@ -164,7 +148,6 @@ namespace BridgeCareCore.Services.Aggregation
                             throw;
                         }
                     }
-
                     state.Status = "Saving";
                     // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
 
@@ -192,7 +175,6 @@ namespace BridgeCareCore.Services.Aggregation
                         state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
-
                     try
                     {
                         _unitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
@@ -205,11 +187,10 @@ namespace BridgeCareCore.Services.Aggregation
                         state.ErrorMessage = e.Message;
                         throw new Exception(e.StackTrace);
                     }
-
                     if (!isError)
                     {
                         state.Status = "Aggregated all network data";
-                        // WjTodo -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                        // WjTodoJake -- uncomment this and get it not to throw        _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                         _unitOfWork.Commit();
 
                         WriteState(writer, state);
@@ -229,7 +210,6 @@ namespace BridgeCareCore.Services.Aggregation
                 }
 
             });
-
             return !isError;
         }
 
@@ -248,7 +228,6 @@ namespace BridgeCareCore.Services.Aggregation
             {
                 NetworkId = state.NetworkId,
                 Status = state.Status,
-
             };
             var memo = new AggregationStatusMemo
             {
@@ -257,7 +236,6 @@ namespace BridgeCareCore.Services.Aggregation
                 rollupDetailDto = dto,
             };
             writer.TryWrite(memo);
-
         }
     }
 }

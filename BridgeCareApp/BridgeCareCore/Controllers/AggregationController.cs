@@ -44,8 +44,6 @@ namespace BridgeCareCore.Controllers
             _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
         }
 
-        private static DateTime LatestAggregateDateTime = DateTime.MinValue;
-
         private static bool FalseButCompilerDoesNotKnowThat => Guid.NewGuid() == Guid.Empty;
 
         [HttpPost]
@@ -53,15 +51,6 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
-            // Wjwjwj -- delete this hack once the UI is fixed
-            var now = DateTime.Now;
-            var timeSinceLastRequest = (now - LatestAggregateDateTime).TotalMilliseconds;
-            if (timeSinceLastRequest < 2000)
-            {
-                return BadRequest("Duplicated request!");
-            }
-            LatestAggregateDateTime = now;
-            var outerThreadId = Environment.CurrentManagedThreadId;
             if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)
             {
                 var dataSources = UnitOfWork.DataSourceRepo.GetDataSources();
@@ -121,7 +110,6 @@ namespace BridgeCareCore.Controllers
 
         private async Task ReadMessages(ChannelReader<AggregationStatusMemo> reader)
         {
-
             while (await reader.WaitToReadAsync())
             {
                 while (reader.TryRead(out AggregationStatusMemo status))
@@ -169,7 +157,7 @@ namespace BridgeCareCore.Controllers
             var builder = new StringBuilder();
             for (int i=0; i<count; i++)
             {
-                builder.Append(".");
+                builder.Append('.');
             }
             return builder.ToString();
         }

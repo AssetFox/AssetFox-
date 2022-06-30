@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
-        public const bool UpdateAttributes = true;
+        public const bool UpdateAttributes = false;
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
 
@@ -42,12 +43,25 @@ namespace BridgeCareCore.Controllers
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _aggregationService = aggregationService ?? throw new ArgumentNullException(nameof(aggregationService));
         }
+
+
+        private static DateTime LatestAggregateDateTime = DateTime.MinValue;
+
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId)
         {
-            if (UpdateAttributes)
+            // Wjwjwj -- delete this hack once the UI is fixed
+            var now = DateTime.Now;
+            var timeSinceLastRequest = (now - LatestAggregateDateTime).TotalMilliseconds;
+            if (timeSinceLastRequest < 2000)
+            {
+                return BadRequest("Duplicated request!");
+            }
+            LatestAggregateDateTime = now;
+            var outerThreadId = Thread.CurrentThread.ManagedThreadId;
+            if (UpdateAttributes || Guid.NewGuid() == Guid.Empty) // Guid part is a hack to shut up the compiler warning
             {
                 var dataSources = UnitOfWork.DataSourceRepo.GetDataSources();
                 var metadataDataSource = dataSources.FirstOrDefault(ds => ds.Name == "MetaData.Json");

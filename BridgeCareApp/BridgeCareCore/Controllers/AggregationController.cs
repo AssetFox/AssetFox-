@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,6 +9,7 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -49,7 +51,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributes)
         {
             if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)
             {
@@ -80,7 +82,7 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo, attributes);
                 if (result)
                 {
                     return Ok();

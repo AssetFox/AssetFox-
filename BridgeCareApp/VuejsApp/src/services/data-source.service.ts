@@ -34,10 +34,10 @@ export default class DataSourceService {
         );
     }
     static checkSqlConnection(
-        sqlCommand: string
+        connectionString: string
     ): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.Attribute}/CheckCommand/${sqlCommand}`
+            `${API.DataSource}/CheckSqlConnection/${connectionString}`
         );
     }
     static importExcelSpreadsheet(

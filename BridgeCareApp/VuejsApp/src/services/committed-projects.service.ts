@@ -1,8 +1,9 @@
 import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
+import { SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 
 export default class CommittedProjectsService { 
-    static GetCommittedProjectTemplate(): AxiosPromise {
+    static getCommittedProjectTemplate(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/CommittedProjectTemplate`,
         );
@@ -12,21 +13,21 @@ export default class CommittedProjectsService {
             `${API.CommittedProject}/ExportCommittedProjects/${scenarioId}`,
         );
     }
-    static GetCommittedProjects(scenarioId: string): AxiosPromise {
+    static getCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/GetSectionCommittedProjects/${scenarioId}`,
         );
     }
-    static DeleteSimulationCommittedProjects(scenarioId: string): AxiosPromise {
+    static deleteSimulationCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.delete(
             `${API.CommittedProject}/DeleteSimulationCommittedProjects/${scenarioId}`,
         );
     }
-    // static DeleteSpecificCommittedProjects(data: string[]): AxiosPromise {
-    //     return coreAxiosInstance.delete(
-    //         `${API.CommittedProject}/DeleteSimulationCommittedProjects`, data
-    //     );
-    // }
+    static deleteSpecificCommittedProjects(data: string[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/DeleteSimulationCommittedProjects`, data
+        );
+    }
     static importCommittedProjects(
         file: File,
         applyNoTreatment: boolean,
@@ -45,9 +46,9 @@ export default class CommittedProjectsService {
         );
     }   
 
-    static UpsertCommittedProjects(data: string): AxiosPromise {
+    static upsertCommittedProjects(data: SectionCommittedProject[]): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/UpsertSectionCommittedProjects/${scenarioId}`,
+            `${API.CommittedProject}/UpsertSectionCommittedProjects`, data
         );
     }
 }

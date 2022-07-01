@@ -95,7 +95,7 @@
             </v-flex>
         </v-flex>
         <!-- Command text area -->
-        <v-flex xs12 v-if="hasSelectedAttribute && currentDataSourceType == 'SQL'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
             <v-layout justify-center>
                 <v-flex >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
@@ -115,7 +115,7 @@
             </v-layout>
         </v-flex>
         <!-- Data source combobox -->
-        <v-flex xs12 v-if="hasSelectedAttribute && currentDataSourceType == 'Excel'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
             <v-flex xs6>
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
@@ -134,7 +134,7 @@
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn v-if="currentDataSourceType != 'Excel'" :disabled="currentDataSourceType == 'None'" 
+                <v-btn v-if="selectedAttribute.dataSource.type != 'Excel'" :disabled="selectedAttribute.dataSource.type == ''" 
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'
                     @click="CheckSqlCommand">
                     Test
@@ -177,7 +177,6 @@ export default class Attributes extends Vue {
     selectExcelColumns: SelectItem[] = [];
     selectedAttribute: Attribute = clone(emptyAttribute);
     selectedDataSource: Datasource | undefined = clone(emptyDatasource);
-    currentDataSourceType: string  = 'None';
     rules: InputValidationRules = rules;
     validationErrorMessage: string = '';
     ValidationSuccessMessage: string = '';
@@ -192,11 +191,6 @@ export default class Attributes extends Vue {
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
     ];
-    dataSourceSelectValues: SelectItem[] = [
-         {text: 'MS SQL', value: 'MS SQL'},
-         {text: 'Excel', value: 'Excel'},
-         {text: 'None', value: 'None'}
-     ];
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
@@ -242,20 +236,12 @@ export default class Attributes extends Vue {
     @Watch('stateDataSources')
     onStateDataSourcesChanged() {
         this.selectDatasourceItems = this.stateDataSources.map((datasource: Datasource) => ({
-            text: datasource.name,
+            text: datasource.name + ' - ' + datasource.type,
             value: datasource.id,
         }));
-
-        this.selectDatasourceItems.push({text: 'None', value: 'None'})
     }
 
-    // @Watch('stateAttributeDataSourceTypes')
-    // onStateAttributeDataSourceTypesChanged() {
-    //     this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
-    //         text: type,
-    //         value: type,
-    //     }));
-    // }
+ 
 
     @Watch('stateAttributeAggregationRuleTypes')
     onStateAttributeAggregationRuleTypesChanged() {
@@ -271,31 +257,27 @@ export default class Attributes extends Vue {
         this.hasSelectedAttribute = true;
         this.checkedCommand = "";
         this.commandIsValid = false;
-        this.currentDataSourceType = "None";
-        this.selectDatasourceItemValue = null;
+        // this.selectDatasourceItemValue = null;
     }
 
     @Watch('selectDatasourceItemValue')
     onSelectDatasourceItemValue(){
         if (any(propEq('id', this.selectDatasourceItemValue), this.stateDataSources)) {
-            this.selectedDataSource = find(
+            let ds = find(
                 propEq('id', this.selectDatasourceItemValue),
                 this.stateDataSources,
-            );
-            if(!isNil(this.selectedDataSource))
-                if(!isNil(this.selectedDataSource.type)){
-                    this.currentDataSourceType = this.selectedDataSource.type
-                    if(this.currentDataSourceType === "Excel"){
-                        this.getExcelSpreadsheetColumnHeadersAction(this.selectedDataSource.id)
-                    }              
-                }                  
-                else
-                    this.currentDataSourceType = "None"
+            )
+            if(!isNil(ds))
+            {
+                this.selectedAttribute.dataSource = ds
+                if(this.selectedAttribute.dataSource.type === "Excel"){
+                    this.getExcelSpreadsheetColumnHeadersAction(this.selectedAttribute.dataSource.id)
+                } 
+            }
+            else
+                this.selectedAttribute.dataSource = clone(emptyDatasource)
         } else {
-            this.selectedDataSource = clone(
-                emptyDatasource,
-            );
-            this.currentDataSourceType = "None"
+            this.selectedAttribute.dataSource = clone(emptyDatasource)
         }
     }
 
@@ -307,15 +289,11 @@ export default class Attributes extends Vue {
         }));
     }
 
-    @Watch('currentDataSourceType')
-    onCurrentDataSourceType(){
-        this.selectedAttribute.dataSourceType = this.currentDataSourceType
-        this.onSelectedAttributeChanged()
-    }
-
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {
         this.selectedAttribute = clone(this.stateSelectedAttribute);
+        if(isNil(this.selectedAttribute.dataSource))
+            this.selectedAttribute.dataSource = clone(emptyDatasource);
     }
 
     @Watch('selectedAttribute', {deep: true})
@@ -365,13 +343,13 @@ export default class Attributes extends Vue {
             if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
                 this.selectedAttribute.minimum = null;
 
-            if(this.selectedAttribute.dataSourceType === 'SQL'){
+            if(this.selectedAttribute.dataSource.type === 'SQL'){
                 allValid = allValid &&
                 this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true &&
                 this.checkedCommand === this.selectedAttribute.command &&
                 this.commandIsValid
             }
-            else if(this.selectedAttribute.dataSourceType === 'Excel'){
+            else if(this.selectedAttribute.dataSource.type === 'Excel'){
                 allValid = allValid &&
                 this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true 
             }

@@ -4,7 +4,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     public static class AttributeFactory
     {
-        public static Attribute Create(AttributeMetaDatum available)
+        // WjTodo after attributes calm down -- can this class be deleted? Can AttributeMetaDatum be deleted?
+        public static Attribute Create(AttributeMetaDatum available, Guid dataSourceId)
         {
             Attribute attribute;
             switch (available.Type)
@@ -26,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                         available.ConnectionType,
                         available.ConnectionString,
                         available.IsCalculated,
-                        available.IsAscending);
+                        available.IsAscending,
+                        dataSourceId);
 
                     break;
                 }
@@ -40,7 +42,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                         available.ConnectionType,
                         available.ConnectionString,
                         available.IsCalculated,
-                        available.IsAscending);
+                        available.IsAscending,
+                        dataSourceId);
 
                     break;
                 }

@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                          throw new ArgumentNullException(nameof(unitOfWork));
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo)).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
@@ -37,18 +37,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (!updateValidity.Ok) {
                     throw new InvalidAttributeUpsertException(updateValidity.Message);
                 };
-                DataSourceEntity dataSourceEntity = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Type == updateEntity.ConnectionType.ToString());
-                updateEntity.DataSource = dataSourceEntity;
-                updateEntity.DataSourceId = dataSourceEntity.Id;
             }
             var entitiesToAdd = upsertAttributeEntities.Where(_ => !existingAttributeIds.Contains(_.Id)).ToList();
 
-            foreach(var entityToAdd in entitiesToAdd)
-            {
-               DataSourceEntity dataSourceEntity = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Type == entityToAdd.ConnectionType.ToString());
-               entityToAdd.DataSource = dataSourceEntity;
-               entityToAdd.DataSourceId = dataSourceEntity.Id;
-            }
             _unitOfWork.Context.UpdateAll(entitiesToUpdate, _unitOfWork.UserEntity?.Id);
             _unitOfWork.Context.AddAll(entitiesToAdd, _unitOfWork.UserEntity?.Id);
         }
@@ -252,13 +243,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-            var attrs = _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
-            foreach(var a in attrs)
-            {
-                if (a.DataSourceType == null) { a.DataSourceType = "None"; continue; }
-                a.DataSourceType = _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id.ToString() == a.DataSourceType).Type;
-            }
-            return attrs;
+            // WjJake -- calling out the .Include I added here. It's needed for my code likely but idk about other peoples' code.
+            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()
@@ -289,6 +275,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
                 a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
             return AttributeMapper.ToDtoNullPropagating(entity);
+        }
+
+        public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
+        {
+            foreach (var id in attributeIdsToDelete)
+            {
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteEntity<AttributeEntity>(_ => _.Id == id);
+                _unitOfWork.Commit();
+            }
         }
     }
 }

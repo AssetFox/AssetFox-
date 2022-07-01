@@ -1,9 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
@@ -21,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
 
-        private ExcelRawDataImportService CreateExcelSpreadsheetImportService()
+        private static ExcelRawDataImportService CreateExcelSpreadsheetImportService()
         {
-            var returnValue = new ExcelRawDataImportService(_testHelper.UnitOfWork);
+            var returnValue = TestServices.CreateExcelSpreadsheetImportService(_testHelper.UnitOfWork);
             return returnValue;
         }
 
@@ -31,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         {
             var filename = SampleAttributeDataFilenames.Sample;
             var folder = Directory.GetCurrentDirectory();
-            var returnValue = Path.Combine(folder, "SampleData", filename);
+            var returnValue = Path.Combine(folder, SampleAttributeDataFolderNames.SampleData, filename);
             return returnValue;
         }
 
@@ -39,21 +35,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         {
             var filename = SampleAttributeDataFilenames.WithSpuriousEmptyFirstRow;
             var folder = Directory.GetCurrentDirectory();
-            var returnValue = Path.Combine(folder, "SampleData", filename);
+            var returnValue = Path.Combine(folder, SampleAttributeDataFolderNames.SampleData, filename);
             return returnValue;
-        }
-
-        private Stream FileContent(string path)
-        {
-            var file = File.OpenRead(path);
-            return file;
         }
 
         [Fact]
         public void ImportRawData_DataSourceExists_Succeeds()
         {
             var path = SampleAttributeDataPath();
-            var stream = FileContent(path);
+            var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
             var spreadsheetService = CreateExcelSpreadsheetImportService();
             var dataSourceId = Guid.NewGuid();
@@ -96,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         public void ImportRawDataSpreadsheet_TopLineIsBlank_FailsWithWarning()
         {
             var path = SampleAttributeDataWithSpuriousEmptyFirstRowPath();
-            var stream = FileContent(path);
+            var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
             var dataSourceId = Guid.NewGuid();
             var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
@@ -119,7 +109,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         {
             // When this test is run, the ExcelWorksheet entity appears in the database, with no corresponding DataSource entity. The foreign key is not enforced. And that needs fixing.
             var path = SampleAttributeDataPath();
-            var stream = FileContent(path);
+            var stream = File.OpenRead(path);
             var excelPackage = new ExcelPackage(stream);
             var spreadsheetService = CreateExcelSpreadsheetImportService();
             var dataSourceId = Guid.NewGuid();

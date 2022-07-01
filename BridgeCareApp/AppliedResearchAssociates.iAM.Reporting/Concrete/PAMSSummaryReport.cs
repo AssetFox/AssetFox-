@@ -19,9 +19,11 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 
 using System.IO;
+
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -29,10 +31,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         //private readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
-        private readonly IPavementWorkSummary _pavementWorkSummary;
 
         private readonly SummaryReportParameters _summaryReportParameters;
+        private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
+        private readonly IPavementWorkSummary _pavementWorkSummary;
+        private readonly UnfundedPavementProjects _unfundedPavementProjects;
+
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
@@ -69,6 +73,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _pavementWorkSummary = new PavementWorkSummary();
             if (_pavementWorkSummary == null) { throw new ArgumentNullException(nameof(_pavementWorkSummary)); }
+
+            _unfundedPavementProjects = new UnfundedPavementProjects();
+            if (_unfundedPavementProjects == null) { throw new ArgumentNullException(nameof(_unfundedPavementProjects)); }
 
             _summaryReportGlossary = new SummaryReportGlossary();
             if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
@@ -183,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
+            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -227,7 +234,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //    simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
 
-            // Simulation Legend TAB
+
+            // Unfunded Pavement Projects TAB
+            reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
+            var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
+            _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
+
+
+            // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);

@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
         {
             attributeData = new List<IAttributeDatum>();
             sectionLocation = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
-            mockAttribute = new Mock<Attribute>(guId, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, false, false);
+            mockAttribute = new Mock<Attribute>(guId, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);
         }
 
         [Fact]

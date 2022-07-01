@@ -6,10 +6,10 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using Microsoft.Data.SqlClient;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var updateAttribute = new NumericAttribute(
                 20, 100, 10, attribute.Id, attribute.Name, "AVERAGE",
                 "updatedCommand", Data.ConnectionType.MSSQL, "connectionString",
-                !attribute.IsCalculated, !attribute.IsAscending);
+                !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             var updateAttributes = new List<DataAttribute> { updateAttribute };
             repo.UpsertAttributes(updateAttributes);
             var attributesAfter = await repo.GetAttributesAsync();
@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
-            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending);
+            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttribute));
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -217,6 +217,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var attribute = repo.GetSingleById(Guid.NewGuid());
             Assert.Null(attribute);
+        }
+
+        [Fact]
+        public void AddAttributeWithDataSourceWithConnectionString_LoadFromDb_ConnectionStringIsThere()
+        {
+            Setup();
+            var dataSourceId = Guid.NewGuid();
+            var randomName = RandomStrings.Length11();
+            var dataSource = new SQLDataSourceDTO
+            {
+                ConnectionString = "connectionString123",
+                Id = dataSourceId,
+                Name = randomName,
+            };
+            var dataSourceRepo = _testHelper.UnitOfWork.DataSourceRepo;
+            dataSourceRepo.UpsertDatasource(dataSource);
+            var attributeId = Guid.NewGuid();
+            var attributeName = RandomStrings.WithPrefix("AttributeName");
+            var attributeDto = new AttributeDTO
+            {
+                Id = attributeId,
+                AggregationRuleType = TextAttributeAggregationRules.Predominant,
+                Command = "Command",
+                DataSource = dataSource,
+                Name = attributeName,
+                Type = "STRING"//AppliedResearchAssociates.iAM.AttributeTypeNames.String
+            };
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+            var attributeAfter = _testHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
+            var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
+            Assert.Equal("connectionString123", sqlDataSourceAfter.ConnectionString);
+            var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter);
+            Assert.Equal("connectionString123", domainAttributeAfter.ConnectionString);
         }
     }
 }

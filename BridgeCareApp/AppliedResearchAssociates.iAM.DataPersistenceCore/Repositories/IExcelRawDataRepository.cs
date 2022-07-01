@@ -7,5 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         Guid AddExcelRawData(ExcelRawDataDTO dto);
         ExcelRawDataDTO GetExcelRawData(Guid excelPackageId);
+        ExcelRawDataDTO GetExcelRawDataByDataSourceId(Guid dataSourceId);
     }
 }

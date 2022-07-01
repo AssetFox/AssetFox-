@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return source;
             }
 
-            if (entity.Type == DataSourceTypeStrings.Excel.ToString())
+            if (entity.Type.ToLowerInvariant() == DataSourceTypeStrings.Excel.ToString().ToLowerInvariant())
             {
                 var source = new ExcelDataSourceDTO
                 {

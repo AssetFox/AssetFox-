@@ -86,8 +86,10 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProject } from '@/shared/models/iAM/committed-projects';
-import { Action } from 'vuex-class';
+import { SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { Action, State } from 'vuex-class';
+import { Watch } from 'vue-property-decorator';
+import { getBlankGuid } from '../../shared/utils/uuid-utils';
 @Component({
 })
 export default class CommittedProjectsEditor extends Vue  {
@@ -95,26 +97,66 @@ export default class CommittedProjectsEditor extends Vue  {
     dataPerPage = 0;
     totalDataFound = 0;
 
-
+    @State(state => state.committedProjectsModule.sectionCommittedProjects) sectionCommittedProjects: SectionCommittedProject[];
     @Action('getCommittedProjects') getCommittedProjects: any;
 
+    scenarioId: string = getBlankGuid();
+    cpItems: SectionCommittedProjectTableData[] = [];
 
-    cpItems: CommittedProject[] = [
-        { 
-            brkey: 1, 
-            year: 2022,
-            treatment: "treatment1", 
-            budget: "test",
-            cost: "$10"
-        },
-        {
-            brkey: 2,
-            year: 2022,
-            treatment: "treatement2",
-            budget: "test2",
-            cost: "$20"
-        },
-    ];
+    onmounted() {
+    }
+    beforeRouteEnter(to: any, from: any, next:any) {
+        next((vm:any) => {
+            vm.selectedScenarioId = to.query.scenarioId;
+            if (vm.selectedScenarioId === vm.uuidNIL) {
+                vm.addErrorNotificationAction({
+                   message: 'Found no selected scenario for edit',
+                });
+                vm.$router.push('/Scenarios/');
+            }
+
+            // TODO: We need a simulation ID here not scenario ID, where does this come from?
+
+            // const simulationId = '17143BA8-6275-4C43-A261-1EC0306A46A8';
+            // vm.getCommittedProjects(simulationId);
+            vm.getCommittedProjects(vm.selectedScenarioId);
+            
+        });
+    }
+
+    @Watch('sectionCommittedProjects')
+    onSectionCommittedProjectsChanged() {
+
+        // TODO:
+        // push the data into table format
+        // budget, treatment, brkey need to be resolved.
+        this.sectionCommittedProjects.forEach((value, index) => {
+            this.cpItems.push({
+                brkey: value.locationKeys.values.toString(),
+                year: value.year,
+                cost: value.cost,
+                budget: value.scenarioBudgetId? value.scenarioBudgetId : '',
+                treatment: value.treatment
+            });
+        })
+    }
+    // Sample Data
+    // cpItems: CommittedProject[] = [
+    //     { 
+    //         brkey: 1, 
+    //         year: 2022,
+    //         treatment: "treatment1", 
+    //         budget: "test",
+    //         cost: "$10"
+    //     },
+    //     {
+    //         brkey: 2,
+    //         year: 2022,
+    //         treatment: "treatement2",
+    //         budget: "test2",
+    //         cost: "$20"
+    //     },
+    // ];
     cpGridHeaders: DataTableHeader[] = [
         {
             text: '',

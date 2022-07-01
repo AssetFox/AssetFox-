@@ -5,7 +5,7 @@ import { AxiosResponse } from "axios";
 import { any, append, clone, contains, findIndex, propEq, update } from "ramda";
 
 const state = {
-    sectionCommittedProjects: [] as SectionCommittedProject[]
+    sectionCommittedProjects: [] as SectionCommittedProject[],
 };
 
 const mutations = {
@@ -87,4 +87,9 @@ const actions = {
 
             });
     }
+}
+export default {
+    state,
+    actions,
+    mutations
 }

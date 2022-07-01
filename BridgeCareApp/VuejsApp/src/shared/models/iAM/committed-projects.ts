@@ -13,8 +13,15 @@ export interface BaseCommittedProject {
     locationKeys: Map<string, string>
     
 }
-
+export interface SectionCommittedProjectTableData {
+    brkey: string;
+    year: number;
+    treatment: string;
+    budget: string;
+    cost: number;
+}
 export interface SectionCommittedProject extends BaseCommittedProject{
+    name: string;
 
 }
 

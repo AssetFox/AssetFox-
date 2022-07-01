@@ -401,5 +401,15 @@ export default class Attributes extends Vue {
 </script>
 
 <style>
+    .sharing {
+    padding-top: 0 !important;
+}
+.sharing .v-input__slot{
+    top: -10px !important;
+}
 
+.sharing .v-label{
+    margin-bottom: 0;
+    padding-top: 0;
+}
 </style>

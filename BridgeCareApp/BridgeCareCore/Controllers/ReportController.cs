@@ -8,15 +8,14 @@ using AppliedResearchAssociates.iAM.Reporting;
 using BridgeCareCore.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using System.IO;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Controllers
 {
@@ -78,37 +77,36 @@ namespace BridgeCareCore.Controllers
 
             if (report == null)
             {
-                var message = new List<string>() { $"Failed to generate report object for '{reportName}'" };
-                return CreateErrorListing(message);
+                SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
+                return Ok(null);
             }
 
             // Handle a completed run with errors
             if (report.Errors.Any())
             {
-                return CreateErrorListing(report.Errors);
+                SendRealTimeMessage($"Failed to generate '{reportName}'");                
+                return Ok(null);
             }
 
             // Handle an incomplete run without errors
             if (!report.IsComplete)
-            {
-                var message = new List<string>() { $"{reportName} ran but never completed" };
-                return CreateErrorListing(message);
+            {                
+                SendRealTimeMessage($"{reportName} ran but never completed");
+                return Ok(null);
             }
 
             //create report index repository
             var reportIndexID = createReportIndexRepository(report);
 
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID)) {
-                var message = new List<string>() { $"Failed to create report repository index" };
-                return CreateErrorListing(message);
+            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+            {
+                SendRealTimeMessage($"Failed to create report repository index");
+                return Ok(null);
             }
 
             // Report is good, return the report repository index id
-            var validResult = Content(reportIndexID);
-            validResult.StatusCode = (int?)HttpStatusCode.OK;
-            return validResult;
+            return Ok(reportIndexID);
         }
-
 
         [HttpGet]
         [Route("DownloadReport/{reportIndexID}")]
@@ -122,7 +120,7 @@ namespace BridgeCareCore.Controllers
             }
 
             //get report path
-            var reportIndexEntity = this.UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
+            var reportIndexEntity = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
             var reportPath = reportIndexEntity?.Result ?? "";
 
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
@@ -132,21 +130,21 @@ namespace BridgeCareCore.Controllers
             }
 
             //read file from the specified location and return download response
-            var response = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
-
-            //set file download response
-            var downloadFileName = $"SummaryReport-\\{reportIndexEntity.SimulationID}\\.xlsx";
-            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            HttpContext.Response.ContentType = contentType;
-            HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");            
-            var fileContentResult = new FileContentResult(response, contentType) { FileDownloadName = downloadFileName };
+            var fileData = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationName((Guid)reportIndexEntity.SimulationID);
+            var downloadFileName = $"SummaryReport {simulationName}.xlsx";
+            var returnFileInfo = new FileInfoDTO
+            {
+                FileData = Convert.ToBase64String(fileData),
+                FileName = downloadFileName,
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            };
 
             // return the download response
-            return fileContentResult;
+            return Ok(returnFileInfo);
         }
 
         #endregion
-
 
         #region "Internal functions"
 

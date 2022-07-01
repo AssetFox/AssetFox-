@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(AttributeTypeNames.String, string.Empty);
 
             // Act
-            var result = AttributeFactory.Create(attributeMetaDatum);
+            var result = AttributeFactory.Create(attributeMetaDatum, Guid.Empty);
 
             // Assert
             Assert.NotNull(result);
@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(AttributeTypeNames.String, CommonTestParameterValues.StringValue);
 
             // Act
-            var result = AttributeFactory.Create(attributeMetaDatum);
+            var result = AttributeFactory.Create(attributeMetaDatum, Guid.Empty);
 
             // Assert
             Assert.NotNull(result);
@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(AttributeTypeNames.Number, CommonTestParameterValues.DoubleNumber);
 
             // Act
-            var result = AttributeFactory.Create(attributeMetaDatum);
+            var result = AttributeFactory.Create(attributeMetaDatum, Guid.Empty);
 
             // Assert
             Assert.NotNull(result);
@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(AttributeTypeNames.Number, CommonTestParameterValues.IntNumber);
 
             // Act
-            var result = AttributeFactory.Create(attributeMetaDatum);
+            var result = AttributeFactory.Create(attributeMetaDatum, Guid.Empty );
 
             // Assert
             Assert.NotNull(result);
@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(AttributeTypeNames.Number, string.Empty);
 
             // Act, Assert
-            Assert.Throws<InvalidCastException>(() => AttributeFactory.Create(attributeMetaDatum));
+            Assert.Throws<InvalidCastException>(() => AttributeFactory.Create(attributeMetaDatum, Guid.Empty));
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             Init(string.Empty, string.Empty);
 
             // Act, Assert
-            Assert.Throws<InvalidOperationException>(() => AttributeFactory.Create(attributeMetaDatum));
+            Assert.Throws<InvalidOperationException>(() => AttributeFactory.Create(attributeMetaDatum, Guid.Empty));
         }
 
         private void Init(string type, string defaultValue)

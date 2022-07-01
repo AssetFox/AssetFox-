@@ -4,13 +4,17 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -141,12 +145,44 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSourceTypes());
+                var dataSourceArray = (DataSourceTypeStrings[])Enum.GetValues(typeof(DataSourceTypeStrings));
+                var result = dataSourceArray.Select(v => v.ToString()).ToList();
                 return Ok(result);
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("CheckSqlConnection/{connectionString}")]
+        [Authorize]
+        public async Task<IActionResult> CheckSqlConnection(string connectionString)
+        {
+            try
+            {
+                try
+                {
+                    await Task.Factory.StartNew(() =>
+                    {
+                        using (SqlConnection conn = new SqlConnection(connectionString))
+                        {
+                            conn.Open(); // throws if invalid
+                        }
+                    });
+                    return Ok(new ValidationResult() { IsValid = true, ValidationMessage = "Connection string is valid"});
+                }
+                catch (Exception ex)
+                {
+                    return Ok(new ValidationResult() { IsValid = false, ValidationMessage = "Connection string is not valid: " + ex.Message });
+                }
+
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
                 throw;
             }
         }

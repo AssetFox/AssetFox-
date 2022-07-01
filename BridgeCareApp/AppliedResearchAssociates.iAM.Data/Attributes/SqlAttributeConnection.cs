@@ -16,8 +16,10 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             double? end = null;
             Direction? direction = null;
             string wellKnownText = null;
+            var connectionString = Attribute.ConnectionString;
 
-            using (var conn = new SqlConnection(Attribute.ConnectionString))
+
+            using (var conn = new SqlConnection(connectionString))
             {
                 var sqlCommand = new SqlCommand(Attribute.Command, conn);
                 sqlCommand.Connection.Open();

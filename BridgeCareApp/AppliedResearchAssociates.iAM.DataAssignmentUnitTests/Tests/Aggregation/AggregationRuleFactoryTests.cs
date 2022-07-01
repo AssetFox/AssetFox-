@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregatio
 
         public void Init(string aggregationRuleType)
         {
-            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, Data.ConnectionType.MSSQL, null, false, false);
+            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, Data.ConnectionType.MSSQL, null, Guid.Empty, false, false);
         }
     }
 }

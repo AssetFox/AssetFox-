@@ -87,15 +87,15 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
                         outline  
-                        v-model='selectedAttribute.dataSourceType'
-                        :items='dataSourceSelectValues'                     
+                        v-model='selectDatasourceItemValue'
+                        :items='selectDatasourceItems'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>                           
                 </v-layout>
             </v-flex>
         </v-flex>
         <!-- Command text area -->
-        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSourceType == 'MS SQL'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'SQL'">
             <v-layout justify-center>
                 <v-flex >
                     <v-subheader class="ghd-subheader ">Command</v-subheader>
@@ -115,13 +115,15 @@
             </v-layout>
         </v-flex>
         <!-- Data source combobox -->
-        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSourceType == 'Excel'">
+        <v-flex xs12 v-if="hasSelectedAttribute && selectedAttribute.dataSource.type == 'Excel'">
             <v-flex xs6>
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
                         outline                           
-                        class="ghd-select ghd-text-field ghd-text-field-border">
+                        class="ghd-select ghd-text-field ghd-text-field-border"
+                        :items='selectExcelColumns'
+                        v-model='selectedAttribute.command'>
                     </v-select>                           
                 </v-layout>
             </v-flex>
@@ -132,7 +134,7 @@
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges' flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn v-if="selectedAttribute.dataSourceType != 'Excel'" :disabled="selectedAttribute.dataSourceType == 'None'" 
+                <v-btn v-if="selectedAttribute.dataSource.type != 'Excel'" :disabled="selectedAttribute.dataSource.type == ''" 
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'
                     @click="CheckSqlCommand">
                     Test
@@ -148,6 +150,7 @@
 <script lang='ts'>
 import AttributeService from '@/services/attribute.service';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
+import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
 import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
@@ -155,7 +158,7 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
-import { clone, isNil } from 'ramda';
+import { any, clone, find, isNil, propEq } from 'ramda';
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
@@ -167,10 +170,13 @@ import { Action, Getter, State } from 'vuex-class';
 export default class Attributes extends Vue {
     hasSelectedAttribute: boolean = false;
     selectAttributeItemValue: string | null = null;
+    selectDatasourceItemValue: string | null = null;
     selectAttributeItems: SelectItem[] = [];
+    selectDatasourceItems: SelectItem[] = [];
     selectAggregationRuleTypeItems: SelectItem[] = [];
+    selectExcelColumns: SelectItem[] = [];
     selectedAttribute: Attribute = clone(emptyAttribute);
-    currentDataSource: string  = 'None';
+    selectedDataSource: Datasource | undefined = clone(emptyDatasource);
     rules: InputValidationRules = rules;
     validationErrorMessage: string = '';
     ValidationSuccessMessage: string = '';
@@ -185,22 +191,21 @@ export default class Attributes extends Vue {
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}
     ];
-    dataSourceSelectValues: SelectItem[] = [
-         {text: 'MS SQL', value: 'MS SQL'},
-         {text: 'Excel', value: 'Excel'},
-         {text: 'None', value: 'None'}
-     ];
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
     @State(state => state.attributeModule.attributeAggregationRuleTypes) stateAttributeAggregationRuleTypes: string[];
     @State(state => state.attributeModule.attributeDataSourceTypes) stateAttributeDataSourceTypes: string[];
+    @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
     @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     
     @Action('getAttributes') getAttributes: any;
+    @Action('getDataSources') getDataSourcesAction: any;
     @Action('getAttributeAggregationRuleTypes') getAttributeAggregationRuleTypes: any;
     @Action('getAttributeDataSourceTypes') getAttributeDataSourceTypes: any;
+    @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
     @Action('selectAttribute') selectAttributeAction: any;
     @Action('upsertAttribute') upsertAttributeAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
@@ -212,6 +217,7 @@ export default class Attributes extends Vue {
             vm.getAttributes();
             vm.getAttributeAggregationRuleTypes();
             vm.getAttributeDataSourceTypes();
+            vm.getDataSourcesAction();
         });
     }
 
@@ -227,13 +233,15 @@ export default class Attributes extends Vue {
         }));
     }
 
-    // @Watch('stateAttributeDataSourceTypes')
-    // onStateAttributeDataSourceTypesChanged() {
-    //     this.dataSourceSelectValues = this.stateAttributeDataSourceTypes.map((type: string) => ({
-    //         text: type,
-    //         value: type,
-    //     }));
-    // }
+    @Watch('stateDataSources')
+    onStateDataSourcesChanged() {
+        this.selectDatasourceItems = this.stateDataSources.map((datasource: Datasource) => ({
+            text: datasource.name + ' - ' + datasource.type,
+            value: datasource.id,
+        }));
+    }
+
+ 
 
     @Watch('stateAttributeAggregationRuleTypes')
     onStateAttributeAggregationRuleTypesChanged() {
@@ -247,14 +255,45 @@ export default class Attributes extends Vue {
     onSelectAttributeItemValueChanged() {
         this.selectAttributeAction(this.selectAttributeItemValue);
         this.hasSelectedAttribute = true;
+        this.checkedCommand = "";
+        this.commandIsValid = false;
+        // this.selectDatasourceItemValue = null;
     }
-    
+
+    @Watch('selectDatasourceItemValue')
+    onSelectDatasourceItemValue(){
+        if (any(propEq('id', this.selectDatasourceItemValue), this.stateDataSources)) {
+            let ds = find(
+                propEq('id', this.selectDatasourceItemValue),
+                this.stateDataSources,
+            )
+            if(!isNil(ds))
+            {
+                this.selectedAttribute.dataSource = ds
+                if(this.selectedAttribute.dataSource.type === "Excel"){
+                    this.getExcelSpreadsheetColumnHeadersAction(this.selectedAttribute.dataSource.id)
+                } 
+            }
+            else
+                this.selectedAttribute.dataSource = clone(emptyDatasource)
+        } else {
+            this.selectedAttribute.dataSource = clone(emptyDatasource)
+        }
+    }
+
+    @Watch('excelColumns')
+    onExcelColumnsChanged(){
+        this.selectExcelColumns = this.excelColumns.columnHeaders.map((header: string) => ({
+            text: header,
+            value: header,
+        }));
+    }
 
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {
         this.selectedAttribute = clone(this.stateSelectedAttribute);
-        this.checkedCommand = this.selectedAttribute.command
-        this.commandIsValid = true;
+        if(isNil(this.selectedAttribute.dataSource))
+            this.selectedAttribute.dataSource = clone(emptyDatasource);
     }
 
     @Watch('selectedAttribute', {deep: true})
@@ -289,7 +328,6 @@ export default class Attributes extends Vue {
         let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.name) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.type) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.aggregationRuleType) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.defaultValue) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isCalculated) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.isAscending) === true
@@ -305,10 +343,15 @@ export default class Attributes extends Vue {
             if(!isNil(this.selectedAttribute.minimum) && this.selectedAttribute.minimum === "")  
                 this.selectedAttribute.minimum = null;
 
-            if(this.selectedAttribute.dataSourceType === 'MS SQL'){
+            if(this.selectedAttribute.dataSource.type === 'SQL'){
                 allValid = allValid &&
+                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true &&
                 this.checkedCommand === this.selectedAttribute.command &&
                 this.commandIsValid
+            }
+            else if(this.selectedAttribute.dataSource.type === 'Excel'){
+                allValid = allValid &&
+                this.rules['generalRules'].valueIsNotEmpty(this.selectedAttribute.command) === true 
             }
 
         return !allValid;
@@ -336,5 +379,15 @@ export default class Attributes extends Vue {
 </script>
 
 <style>
+    .sharing {
+    padding-top: 0 !important;
+}
+.sharing .v-input__slot{
+    top: -10px !important;
+}
 
+.sharing .v-label{
+    margin-bottom: 0;
+    padding-top: 0;
+}
 </style>

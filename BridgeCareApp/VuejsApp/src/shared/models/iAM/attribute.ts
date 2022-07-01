@@ -1,4 +1,6 @@
 import { getBlankGuid } from "@/shared/utils/uuid-utils";
+import { clone } from "ramda";
+import { Datasource, emptyDatasource } from "./data-source";
 
 export interface Attribute {
     id: string
@@ -11,7 +13,7 @@ export interface Attribute {
     maximum: number | null;
     isCalculated: boolean;
     isAscending: boolean;
-    dataSourceType: string;
+    dataSource: Datasource;
 }
 
 export interface NetworkAttributes {
@@ -42,5 +44,5 @@ export const emptyAttribute: Attribute = {
     maximum: 0,
     name: '',
     type: 'STRING',
-    dataSourceType: 'None'
+    datasource: clone(emptyDatasource)
 }

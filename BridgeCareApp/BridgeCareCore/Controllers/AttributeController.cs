@@ -76,7 +76,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await UnitOfWork.AttributeRepo.GetAttributeDataTypes();
+                var result = await UnitOfWork.AttributeRepo.GetAttributeDataSourceTypes();
                 return Ok(result);
             }
             catch (Exception e)

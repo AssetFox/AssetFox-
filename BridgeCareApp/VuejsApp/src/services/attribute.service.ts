@@ -10,12 +10,18 @@ export default class AttributeService {
     static getAttributeSelectValues(attributeNames: string[]): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/GetAttributesSelectValues`, attributeNames);
     }
-    static upsertAttribute(
-        data: Attribute,
-    ): AxiosPromise {
+
+    static upsertAttribute(data: Attribute){
         return coreAxiosInstance.post(
-            `${API.Attribute}/CreateAttribute/`,
-            data,
+            `${API.Attribute}/CreateAttribute`,
+            data
+        );
+    }
+
+    static upsertAttributes(data: Attribute[]){
+        return coreAxiosInstance.post(
+            `${API.Attribute}/CreateAttributes`,
+            data
         );
     }
     static GetAttributeAggregationRuleTypes(): AxiosPromise {
@@ -23,6 +29,9 @@ export default class AttributeService {
     }
     static GetAttributeDataSourceTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
+    }
+    static CheckCommand(sqlCommand: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
     }
     static CheckCommand(sqlCommand: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);

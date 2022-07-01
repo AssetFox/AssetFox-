@@ -12,39 +12,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 {
     public class PavementWorkSummary : IPavementWorkSummary
     {
-        private FullDepthAsphaltWorkSummary _fullDepthAsphaltWorkSummary;
-        private CompositeWorkSummary _compositeWorkSummary;
-        private ConcreteWorkSummary _concreteWorkSummary;
-        private TreatmentGroupsTotals _treatmentGroupsTotals;
-        private WorkTypeTotals _workTypeTotals;
-        private BudgetTotal _budgetTotal;
-        private BudgetAnalysis _budgetAnalysis;
+        private CostBudgetsWorkSummary _costBudgetsWorkSummary;
+        private TreatmentsWorkSummary _treatmentsWorkSummary;
 
         public PavementWorkSummary()
         {
-            _fullDepthAsphaltWorkSummary = new FullDepthAsphaltWorkSummary();
-            if (_fullDepthAsphaltWorkSummary == null) { throw new ArgumentNullException(nameof(_fullDepthAsphaltWorkSummary)); }
+            var workSummaryModel = new WorkSummaryModel();
+            _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
+            if (_costBudgetsWorkSummary == null) { throw new ArgumentNullException(nameof(_costBudgetsWorkSummary)); }
 
-            _compositeWorkSummary = new CompositeWorkSummary();
-            if (_compositeWorkSummary == null) { throw new ArgumentNullException(nameof(_compositeWorkSummary)); }
-
-            _concreteWorkSummary = new ConcreteWorkSummary();
-            if (_concreteWorkSummary == null) { throw new ArgumentNullException(nameof(_concreteWorkSummary)); }
-
-            _treatmentGroupsTotals = new TreatmentGroupsTotals();
-            if (_treatmentGroupsTotals == null) { throw new ArgumentNullException(nameof(_treatmentGroupsTotals)); }
-
-            _workTypeTotals = new WorkTypeTotals();
-            if (_workTypeTotals == null) { throw new ArgumentNullException(nameof(_workTypeTotals)); }
-
-            _budgetTotal = new BudgetTotal();
-            if (_budgetTotal == null) { throw new ArgumentNullException(nameof(_budgetTotal)); }
-
-            _budgetAnalysis = new BudgetAnalysis();
-            if (_budgetAnalysis == null) { throw new ArgumentNullException(nameof(_budgetAnalysis)); }
+            _treatmentsWorkSummary = new TreatmentsWorkSummary(workSummaryModel);
+            if (_treatmentsWorkSummary == null) { throw new ArgumentNullException(nameof(_treatmentsWorkSummary)); }
         }
 
-        public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
+        public ChartRowsModel Fill(
+            ExcelWorksheet worksheet,
+            SimulationOutput reportOutputData,
             List<int> simulationYears,
             WorkSummaryModel workSummaryModel,
             Dictionary<string, Budget> yearlyBudgetAmount,
@@ -52,59 +35,120 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
+            // Getting list of treatments. It will be used in several places throughout this excel TAB
+            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+
+            foreach (var item in selectableTreatments)
+            {
+                //if (item.Name.ToLower() == BAMSConstants.NoTreatment) continue;
+                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+            }
+            simulationTreatments.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+
+
+            var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
+            //var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
+            //var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
+            //var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
+
+            FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear); //, yearlyCostCommittedProj, countForCompletedProject, countForCompletedCommittedProject);
+
+
+            //var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, simulationTreatments);
+
+            //var segmentMilesPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
+
+            _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+
+            var chartRowsModel = new ChartRowsModel(); // TODO: Get this fromto-be-implemented functions
+
             worksheet.Calculate();
             worksheet.Cells.AutoFitColumns();
-
-            var chartRowsModel = _fullDepthAsphaltWorkSummary.FillSomething();
-            chartRowsModel = _compositeWorkSummary.FillSomething(chartRowsModel);
-            chartRowsModel = _concreteWorkSummary.FillSomething(chartRowsModel);
-            chartRowsModel = _treatmentGroupsTotals.FillSomething(chartRowsModel);
-            chartRowsModel = _workTypeTotals.FillSomething(chartRowsModel);
-            chartRowsModel = _budgetTotal.FillSomething(chartRowsModel);
-            chartRowsModel = _budgetAnalysis.FillSomething(chartRowsModel);
 
             return chartRowsModel;
         }
 
         #region Private methods
 
-        private void FillDataToUseInExcel()
+        // TODO: private methods are direct cut/paste from BridgeWorkSummary; refactor/delete as necessary
+        private void FillDataToUseInExcel(
+            SimulationOutput reportOutputData,
+            //Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear
+            //Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> yearlyCostCommittedProj,
+            //Dictionary<int, Dictionary<string, int>> countForCompletedProject,
+            //Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject
+            )
         {
- 
+            //TODO: This is just cut-and-paste from BAMS, need to fix it for PAMS.
+
+            //var isInitialYear = true;
+            foreach (var yearData in reportOutputData.Years)
+            {
+                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int count)>());
+                //yearlyCostCommittedProj.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int count)>());
+                //costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
+                //countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
+                //countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
+
+                foreach (var section in yearData.Assets)
+                {
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    PopulateWorkedOnCostAndLength(yearData.Year, section, costAndLengthPerTreatmentPerYear, cost);
+
+                    //if (section.TreatmentCause == TreatmentCause.CommittedProject &&
+                    //    section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
+                    //var commitedCost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+
+                    //    if (!yearlyCostCommittedProj[yearData.Year].ContainsKey(section.AppliedTreatment))
+                    //    {
+                    //        yearlyCostCommittedProj[yearData.Year].Add(section.AppliedTreatment, (commitedCost, 1));
+                    //    }
+                    //    else
+                    //    {
+                    //        var treatmentCost = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].treatmentCost + commitedCost;
+                    //        var count = yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment].count + 1;
+                    //        yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = (treatmentCost, count);
+                    //    }
+
+                    //    //costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += commitedCost;
+
+                    //    // Adding count for completed committed project
+                    //    if (!countForCompletedCommittedProject[yearData.Year].ContainsKey(section.AppliedTreatment))
+                    //    {
+                    //        countForCompletedCommittedProject[yearData.Year].Add(section.AppliedTreatment, 1);
+                    //    }
+                    //    else
+                    //    {
+                    //        countForCompletedCommittedProject[yearData.Year][section.AppliedTreatment] += 1;
+                    //    }
+
+                    //PopulateCompletedProjectCount(yearData.Year, section, countForCompletedProject);
+
+                    //RemoveBridgesForCashFlowedProj(countForCompletedProject, section, isInitialYear, yearData.Year);
+
+                    // Fill cost per BPN per Year
+                    //costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
+                }
+                //isInitialYear = false;
+            }
         }
 
-        private void PopulateWorkedOnCostAndCount(int year, AssetDetail section,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndCountPerTreatmentPerYear, decimal cost)
+        private void PopulateWorkedOnCostAndLength(int year, AssetDetail section,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear, decimal cost)
         {
-            if (section.TreatmentCause == TreatmentCause.NoSelection)
+            var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
             {
-                //var culvert = BAMSConstants.CulvertPavementType;
-                //var nonCulvert = BAMSConstants.NonCulvertPavementType;
-                //// If Pavement type is culvert
-                //if (section.ValuePerTextAttribute["Pavement_TYPE"] == culvert)
-                //{
-                //    AddKeyValueForWorkedOn(costAndCountPerTreatmentPerYear[year], culvert, section.AppliedTreatment, cost);
-                //}
-                //// if Pavement is non-culvert
-                //else
-                //{
-                //    AddKeyValueForWorkedOn(costAndCountPerTreatmentPerYear[year], nonCulvert, section.AppliedTreatment, cost);
-                //}
+                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, (int) segmentLength));
             }
-            // if applied treatment is other than No Treatment
             else
             {
-                if (!costAndCountPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
-                {
-                    costAndCountPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, 1));
-                }
-                else
-                {
-                    var values = costAndCountPerTreatmentPerYear[year][section.AppliedTreatment];
-                    values.treatmentCost += cost;
-                    values.PavementCount += 1;
-                    costAndCountPerTreatmentPerYear[year][section.AppliedTreatment] = values;
-                }
+                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
+                values.treatmentCost += cost;
+                values.PavementCount += (int) segmentLength;
+                costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
             }
         }
 
@@ -182,37 +226,4 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         #endregion Private methods
     }
-
-
-
-    public class FullDepthAsphaltWorkSummary
-    {
-        public ChartRowsModel FillSomething() { return new ChartRowsModel(); }
-    };
-    public class CompositeWorkSummary
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-    public class ConcreteWorkSummary
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-    public class TreatmentGroupsTotals
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-    public class WorkTypeTotals
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-    public class BudgetTotal
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-    public class BudgetAnalysis
-    {
-        public ChartRowsModel FillSomething(ChartRowsModel chartRowsModel) { return chartRowsModel; }
-    };
-
-
 }

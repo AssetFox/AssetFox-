@@ -40,6 +40,48 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             AddPavementYearsHeaderRow(worksheet, simulationYears, currentCell, showPrevYearHeader);
         }
 
+
+        internal void SetPavementTreatmentExcelString(ExcelWorksheet worksheet,
+            List<string> simulationTreatments, ref int row, ref int column)
+        {
+            foreach (var item in simulationTreatments)
+            {
+                //if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
+                //{
+                //    if (item.Name == BAMSConstants.CulvertNoTreatment)
+                //    {
+                //        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
+                //    }
+                //    else
+                //    {
+                //        worksheet.Cells[row++, column].Value = item.Name;
+                //    }
+                //}
+                worksheet.Cells[row++, column].Value = item;
+            }
+        }
+
+        internal void SetPavementTreatmentExcelString(ExcelWorksheet worksheet,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments, ref int row, ref int column)
+        {
+            foreach (var item in simulationTreatments)
+            {
+                //if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
+                //{
+                //    if (item.Name == BAMSConstants.CulvertNoTreatment)
+                //    {
+                //        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
+                //    }
+                //    else
+                //    {
+                //        worksheet.Cells[row++, column].Value = item.Name;
+                //    }
+                //}
+                worksheet.Cells[row++, column].Value = item.Name;
+            }
+        }
+        
+
         public void InitializeLabelCells(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
         {
             SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);

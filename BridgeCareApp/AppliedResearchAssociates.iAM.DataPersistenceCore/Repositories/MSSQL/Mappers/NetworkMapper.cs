@@ -34,10 +34,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static NetworkEntity ToEntity(this Network domain) =>
-            new NetworkEntity {Id = domain.Id, Name = domain.Name};
+            new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
-            new NetworkEntity {Id = domain.Id, Name = domain.Name};
+            new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
         public static NetworkDTO ToDto(this NetworkEntity entity) =>
             new NetworkDTO
@@ -49,7 +49,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Status = entity.NetworkRollupDetail != null ? entity.NetworkRollupDetail.Status : "N/A",
                 BenefitQuantifier = entity.BenefitQuantifier != null
                     ? entity.BenefitQuantifier.ToDto()
-                    : new BenefitQuantifierDTO {NetworkId = entity.Id, Equation = new EquationDTO {Id = Guid.NewGuid()}}
+                    : new BenefitQuantifierDTO { NetworkId = entity.Id, Equation = new EquationDTO { Id = Guid.NewGuid() } },
+                KeyAttribute = entity.KeyAttributeId
+            };
+
+        public static NetworkEntity ToEntity(this NetworkDTO dto) =>
+            new NetworkEntity
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                CreatedDate = dto.CreatedDate,
+                LastModifiedDate = dto.LastModifiedDate,
+                KeyAttributeId = dto.KeyAttribute
             };
     }
 }

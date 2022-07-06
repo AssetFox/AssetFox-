@@ -22,6 +22,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
+        public Guid KeyAttributeId { get; set; }
+
+        public virtual AttributeEntity KeyAttribute { get; set; }
+
         public virtual NetworkRollupDetailEntity NetworkRollupDetail { get; set; }
 
         public virtual BenefitQuantifierEntity BenefitQuantifier { get; set; }

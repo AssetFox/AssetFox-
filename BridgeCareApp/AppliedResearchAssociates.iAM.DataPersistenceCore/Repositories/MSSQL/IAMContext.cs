@@ -1310,6 +1310,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.KeyAttributeId).IsRequired();
             });
 
             modelBuilder.Entity<PerformanceCurveEntity>(entity =>

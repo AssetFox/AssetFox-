@@ -14,5 +14,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Status { get; set; }
 
         public BenefitQuantifierDTO BenefitQuantifier { get; set; }
+
+        public Guid KeyAttribute { get; set; }
     }
 }

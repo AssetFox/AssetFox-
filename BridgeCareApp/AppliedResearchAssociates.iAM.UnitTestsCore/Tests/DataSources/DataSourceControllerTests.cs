@@ -36,8 +36,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 
             _mockDataSource = new Mock<IDataSourceRepository>();
             _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());
-            _mockDataSource.Setup(_ => _.GetDataSourceTypes())
-                .Returns(TestDataForDataSources.SimpleRepo().Select(_ => _.Type).ToList());
             _mockDataSource.Setup(_ => _.GetDataSource(It.IsAny<Guid>()))
                 .Returns<Guid>(p => TestDataForDataSources.SourceDTOs().Single(ds => ds.Id == p));
 
@@ -263,28 +261,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             Assert.IsType<List<string>>(objectResult.Value);
             var resultValue = objectResult.Value as List<string>;
             Assert.Equal(3, resultValue.Count);
-        }
-
-        [Fact]
-        public async Task GetTypesHandlesEmptyDataSource()
-        {
-            // Arrange
-            var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _mockUOW.Object,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
-            _mockDataSource.Setup(_ => _.GetDataSourceTypes()).Returns(new List<string>());
-
-            // Act
-            var result = await controller.GetDataSourceTypes();
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var objectResult = result as OkObjectResult;
-            Assert.IsType<List<string>>(objectResult.Value);
-            var resultValue = objectResult.Value as List<string>;
-            Assert.Equal(0, resultValue.Count);
         }
     }
 }

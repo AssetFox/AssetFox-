@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Enums
     public enum DataSourceTypeStrings
     {
         SQL,
-        Excel
+        Excel,
+        None
     }
 }

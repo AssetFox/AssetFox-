@@ -319,9 +319,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";
-            var relativeFolderPath = Path.Combine(Environment.CurrentDirectory, folderPathForSimulation);
-            Directory.CreateDirectory(relativeFolderPath);
-            var filePath = Path.Combine(relativeFolderPath, "SummaryReport.xlsx");
+            Directory.CreateDirectory(folderPathForSimulation);
+            var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
 
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);

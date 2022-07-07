@@ -207,9 +207,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 return ConnectionType.EXCEL;
             }
-            else
+            else if (dtoType == DataSourceTypeStrings.SQL.ToString())
             {
                 return ConnectionType.MSSQL;
+            }
+            else
+            {
+                return ConnectionType.NONE;
             }
         }
 

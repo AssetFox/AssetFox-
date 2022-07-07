@@ -14,6 +14,8 @@ namespace BridgeCareCore.Services
     {
 
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
+        private const int MaximumRows = 100000;
+        private const int MaximumColumns = 1000;
 
         private UnitOfDataPersistenceWork _unitOfWork;
 
@@ -36,6 +38,18 @@ namespace BridgeCareCore.Services
 
             var cells = worksheet.Cells;
             var end = cells.End;
+
+            // Check Excel file dimensions
+            // This addresses the case where Excel thinks it has far more rows or columns than it actually has
+            // TODO:  Implement file trimmer?
+            if (end.Column > MaximumColumns || end.Row > MaximumRows)
+            {
+                return new ExcelRawDataImportResultDTO
+                {
+                    WarningMessage = $"Excel file size unexpected.  Number of columns are {end.Column} and number of rows are {end.Row}"
+                };
+            }
+
             for (int i = 1; i <= end.Column; i++)
             {
                 var titleContent = cells[1, i].Value;

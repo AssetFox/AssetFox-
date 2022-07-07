@@ -6,6 +6,7 @@ using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -84,6 +85,7 @@ namespace BridgeCareCore
 
             services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
+            services.AddScoped<IAggregationService, AggregationService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

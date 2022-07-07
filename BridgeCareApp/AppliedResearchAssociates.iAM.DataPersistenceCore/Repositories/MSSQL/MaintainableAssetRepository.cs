@@ -162,8 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var networkId = maintainableAssets.First().NetworkId;
             var maintainableAssetEntities = maintainableAssets.Select(_ => _.ToEntity(networkId)).ToList();
 
-            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy", "FacilityName", "SectionName" };
-            var config = new BulkConfig { PropertiesToExclude = propsToExclude };
+            var propsToExclude = new List<string> { "CreatedDate", "CreatedBy", "AssetName" }; var config = new BulkConfig { PropertiesToExclude = propsToExclude };
 
             _unitOfWork.Context.UpdateAll(maintainableAssetEntities, _unitOfWork.UserEntity?.Id, config);
         }

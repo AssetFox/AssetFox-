@@ -121,8 +121,7 @@ namespace BridgeCareCore.Controllers
 
             //get report path
             var reportIndexEntity = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
-            var reportPath = reportIndexEntity?.Result ?? "";
-
+            var reportPath = reportIndexEntity?.Result != null ? Path.Combine(Environment.CurrentDirectory, reportIndexEntity.Result) : "";
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 var message = new List<string>() { $"Failed to get report path using the specified repository index" };

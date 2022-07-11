@@ -5,12 +5,14 @@ using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {
     public class AttributeConnectionBuilderTests
     {
         private Mock<Attribute> mockAttribute;
+        private Mock<SQLDataSourceDTO> mockSQLDataSourceDTO = new Mock<SQLDataSourceDTO>();
 
         [Fact]
         public void BuildWithMsSqlTest()
@@ -19,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
             Init(ConnectionType.MSSQL);
 
             // Act
-            var result = AttributeConnectionBuilder.Build(mockAttribute.Object);           
+            var result = AttributeConnectionBuilder.Build(mockAttribute.Object, mockSQLDataSourceDTO.Object);           
 
             // Assert
             Assert.IsType<SqlAttributeConnection>(result);

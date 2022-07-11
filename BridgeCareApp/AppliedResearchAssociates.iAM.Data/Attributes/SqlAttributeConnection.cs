@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
@@ -17,8 +19,20 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
         public const string DataColumnName = "DATA_";
         public const string LocationIdentifierString = "LOCATION_IDENTIFIER";
 
-        public SqlAttributeConnection(Attribute attribute) : base(attribute)
+        private readonly string _connectionString;
+
+        public SqlAttributeConnection(Attribute attribute, BaseDataSourceDTO dataSource) : base(attribute, dataSource)
         {
+            if (dataSource is SQLDataSourceDTO)
+            {
+                // This should always happen if this is being called from the connection builder
+                _connectionString = ((SQLDataSourceDTO)dataSource).ConnectionString;
+            }
+            else
+            {
+                if (dataSource == null) throw new ArgumentNullException("Data source passed to the SQL Attribute Connection was null");
+                throw new ArgumentException($"{dataSource.Name} has a type of {dataSource.Type}.  It should be SQL");
+            }
         }
 
         public override IEnumerable<IAttributeDatum> GetData<T>()
@@ -27,10 +41,8 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             double? end = null;
             Direction? direction = null;
             string wellKnownText = null;
-            var connectionString = Attribute.ConnectionString;
 
-
-            using (var conn = new SqlConnection(connectionString))
+            using (var conn = new SqlConnection(_connectionString))
             {
                 var sqlCommand = new SqlCommand(Attribute.Command, conn);
                 sqlCommand.Connection.Open();

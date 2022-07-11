@@ -63,7 +63,7 @@ namespace BridgeCareCore.Controllers
 
                     // create network domain model from attribute data created from the network attribute
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)), defaultEquation);
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, networkDefinitionAttribute.DataSource)), defaultEquation);
                     network.Name = networkName;
 
                     // insert network domain data into the data source

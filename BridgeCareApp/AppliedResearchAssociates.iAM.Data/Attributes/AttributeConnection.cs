@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
@@ -7,8 +8,14 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
     {
         public Attribute Attribute { get; }
 
-        public abstract IEnumerable<IAttributeDatum> GetData<T>();   
+        public BaseDataSourceDTO DataSource { get; }
 
-        protected AttributeConnection(Attribute attribute) => Attribute = attribute;
+        public abstract IEnumerable<IAttributeDatum> GetData<T>();
+
+        protected AttributeConnection(Attribute attribute, BaseDataSourceDTO dataSource)
+        {
+            Attribute = attribute;
+            DataSource = dataSource;
+        }
     }
 }

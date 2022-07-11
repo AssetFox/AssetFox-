@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using System;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
 using System.Linq;
@@ -13,6 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
     public class SqlAttributeConnectionTests
     {
         private Mock<Attribute> mockAttribute;
+        private Mock<SQLDataSourceDTO> mockSQLDataSource = new Mock<SQLDataSourceDTO>();
         private string testCommand = string.Empty;         
 
         [Fact (Skip ="This is accessing the real db. It shouldn't. WjTodo fix that.")]
@@ -20,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         {
             // Arrange
             Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
-            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute.Object);
+            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute.Object, mockSQLDataSource.Object);
 
             // Act
             var result = sqlAttributeConnection.GetData<string>();

@@ -30,6 +30,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual BenefitQuantifierEntity BenefitQuantifier { get; set; }
 
+        public virtual ICollection<NetworkAttributeEntity> AttributeJoins { get; set; }
+
         public virtual ICollection<MaintainableAssetEntity> MaintainableAssets { get; set; }
 
         public virtual ICollection<SimulationEntity> Simulations { get; set; }

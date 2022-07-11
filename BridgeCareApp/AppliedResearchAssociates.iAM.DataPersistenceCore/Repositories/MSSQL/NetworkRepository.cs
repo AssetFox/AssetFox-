@@ -49,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.BenefitQuantifier)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
+                .Include(_ => _.AttributeJoins)
                 .Select(_ => _.ToDto())
                 .ToList());
         }

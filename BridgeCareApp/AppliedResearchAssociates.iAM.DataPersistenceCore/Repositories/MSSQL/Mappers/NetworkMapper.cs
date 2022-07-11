@@ -50,8 +50,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 BenefitQuantifier = entity.BenefitQuantifier != null
                     ? entity.BenefitQuantifier.ToDto()
                     : new BenefitQuantifierDTO { NetworkId = entity.Id, Equation = new EquationDTO { Id = Guid.NewGuid() } },
-                KeyAttribute = entity.KeyAttributeId
-            };
+                KeyAttribute = entity.KeyAttributeId,
+                Attributes = entity.AttributeJoins.Select(_ => _.Attribute.ToDto()).ToList()
+            };       
 
         public static NetworkEntity ToEntity(this NetworkDTO dto) =>
             new NetworkEntity

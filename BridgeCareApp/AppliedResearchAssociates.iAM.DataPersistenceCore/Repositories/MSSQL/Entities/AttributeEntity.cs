@@ -62,10 +62,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool IsAscending { get; set; }
 
-        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins
-        {
-            get; set;
-        }
+        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins { get; set; }
+
+        public virtual ICollection<NetworkAttributeEntity> NetworkJoins { get; set; }
 
         public virtual ICollection<BenefitEntity> Benefits { get; set; }
 

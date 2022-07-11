@@ -1318,6 +1318,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<NetworkAttributeEntity>(entity =>
             {
+                entity.HasKey(e => new { e.AttributeId, e.NetworkId });
+
                 entity.Property(e => e.NetworkId).IsRequired();
 
                 entity.Property(e => e.AttributeId).IsRequired();

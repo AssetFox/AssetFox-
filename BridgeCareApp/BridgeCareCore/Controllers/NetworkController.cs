@@ -11,6 +11,7 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -58,12 +59,9 @@ namespace BridgeCareCore.Controllers
                         throw new InvalidOperationException("Network definition rules do not exist, or the default equation is not specified");
                     }
 
-                    // If this is an Excel-based attribute, ensure it haa valid source
-                    // This has to be done here because we need 
-
                     // create network domain model from attribute data created from the network attribute
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, networkDefinitionAttribute.DataSource)), defaultEquation);
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, networkDefinitionAttribute.DataSource, UnitOfWork)), defaultEquation);
                     network.Name = networkName;
 
                     // insert network domain data into the data source

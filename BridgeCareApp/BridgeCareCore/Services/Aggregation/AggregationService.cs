@@ -84,7 +84,7 @@ namespace BridgeCareCore.Services.Aggregation
                                 if (dataSource != null)
                                 {
                                     var specificData = AttributeDataBuilder
-                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource));
+                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
                                     attributeData.AddRange(specificData);
                                 }
                             }

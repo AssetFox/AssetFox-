@@ -6,6 +6,8 @@ using Moq;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {
@@ -13,6 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
     {
         private Mock<Attribute> mockAttribute;
         private Mock<SQLDataSourceDTO> mockSQLDataSourceDTO = new Mock<SQLDataSourceDTO>();
+        private Mock<IUnitOfWork> mockUnitOfWork = new Mock<IUnitOfWork>();
 
         [Fact]
         public void BuildWithMsSqlTest()
@@ -21,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
             Init(ConnectionType.MSSQL);
 
             // Act
-            var result = AttributeConnectionBuilder.Build(mockAttribute.Object, mockSQLDataSourceDTO.Object);           
+            var result = AttributeConnectionBuilder.Build(mockAttribute.Object, mockSQLDataSourceDTO.Object, mockUnitOfWork.Object);           
 
             // Assert
             Assert.IsType<SqlAttributeConnection>(result);

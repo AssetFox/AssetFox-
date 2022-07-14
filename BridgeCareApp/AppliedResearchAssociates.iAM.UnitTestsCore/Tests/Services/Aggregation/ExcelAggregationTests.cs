@@ -61,9 +61,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
 
             _testHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
             var networkId = network.Id;
+            var assetName = "AssetName";
             var location = new SectionLocation(Guid.NewGuid(), assetName);
             var maintainableAssetId = Guid.NewGuid();
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); // wjwjwj this "[Deck_Area]" is wrong and will need to change
+            var spatialWeightingValue = "[Deck_Area]";// wjwjwj this "[Deck_Area]" is wrong and will need to change
+            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); 
 
             var aggregationService = new AggregationService(_testHelper.UnitOfWork);
 

@@ -64,8 +64,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins { get; set; }
 
-        public virtual ICollection<NetworkAttributeEntity> NetworkJoins { get; set; }
-
         public virtual ICollection<BenefitEntity> Benefits { get; set; }
 
         public virtual ICollection<AggregatedResultEntity> AggregatedResults { get; set; }

@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
                 .Include(_ => _.AttributeJoins)
-                .Select(_ => _.ToDto())
+                .Select(_ => _.ToDto(_unitOfWork.Context.Attribute))
                 .ToList());
         }
 

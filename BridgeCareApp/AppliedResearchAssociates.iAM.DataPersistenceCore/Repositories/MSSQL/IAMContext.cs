@@ -1324,11 +1324,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.AttributeId).IsRequired();
 
-                entity.HasOne(j => j.Attribute)
-                    .WithMany(a => a.NetworkJoins)
-                    .HasForeignKey(j => j.AttributeId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
                 entity.HasOne(j => j.Network)
                     .WithMany(n => n.AttributeJoins)
                     .HasForeignKey(j => j.NetworkId)

@@ -37,7 +37,7 @@ namespace BridgeCareCore.Services
             var columnIndexesToInclude = new List<int>();
 
             var cells = worksheet.Cells;
-            var end = cells.End;
+            var end = worksheet.Dimension.End;
 
             // Check Excel file dimensions
             // This addresses the case where Excel thinks it has far more rows or columns than it actually has

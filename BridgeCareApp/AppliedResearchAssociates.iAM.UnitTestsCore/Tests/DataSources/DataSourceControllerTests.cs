@@ -16,6 +16,8 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {
@@ -262,29 +264,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             var objectResult = result as OkObjectResult;
             Assert.IsType<List<string>>(objectResult.Value);
             var resultValue = objectResult.Value as List<string>;
-            Assert.Equal(3, resultValue.Count);
-        }
-
-        [Fact]
-        public async Task GetTypesHandlesEmptyDataSource()
-        {
-            // Arrange
-            var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _mockUOW.Object,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
-            _mockDataSource.Setup(_ => _.GetDataSourceTypes()).Returns(new List<string>());
-
-            // Act
-            var result = await controller.GetDataSourceTypes();
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-            var objectResult = result as OkObjectResult;
-            Assert.IsType<List<string>>(objectResult.Value);
-            var resultValue = objectResult.Value as List<string>;
-            Assert.Equal(0, resultValue.Count);
+            var enumValues = Enum.GetValues<DataSourceTypeStrings>();
+            Assert.Equal(enumValues.Count(), resultValue.Count);
         }
     }
 }

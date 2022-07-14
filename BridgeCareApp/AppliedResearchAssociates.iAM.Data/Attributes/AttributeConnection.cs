@@ -5,7 +5,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     public abstract class AttributeConnection
     {
-        // WjTodo this is the class we need to test in item 19085.
+        // This is the class we need to test in item 19085.
         // First, test if the connection works.
         // Then, test if the command works.
         public Attribute Attribute { get; }

@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!HttpContextHasBeenSetup)
             {
-                lock (HttpContextSetupLock) // WjTodo -- can we get rid of the lock?
+                lock (HttpContextSetupLock) // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!HttpContextHasBeenSetup)
                     {
@@ -160,7 +160,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!AttributesHaveBeenCreated)
             {
-                lock (AttributeLock) // WjTodo -- can we get rid of the lock?
+                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!AttributesHaveBeenCreated)
                     {
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                lock (NetworkCreationLock) // WjTodo -- can we get rid of the lock?
+                lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
                     {

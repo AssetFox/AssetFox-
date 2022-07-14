@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return null;
         }
 
-        // WjTodo -- we probably don't want this. Instead, whine if something is bad.
+       
         public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs)
         {
             var returnValue = attributeDTOs

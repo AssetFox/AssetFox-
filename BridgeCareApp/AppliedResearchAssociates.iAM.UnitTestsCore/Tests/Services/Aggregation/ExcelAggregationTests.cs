@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             AttributeTestSetup.EnsureAttributeExists(dto);
         }
 
-        [Fact]
+        [Fact (Skip ="Unfinished")]
         public async Task Aggregate_ExcelDataSourceInDb_AttributesInDb_Aggregates()
         {
             var districtAttribute = AttributeDtos.District;
@@ -57,6 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             var explorer = new Explorer("Age");
             var network = explorer.AddNetwork();
             var networkName = RandomStrings.WithPrefix("Network");
+
             network.Name = networkName;
 
             _testHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
@@ -65,8 +66,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             var location = new SectionLocation(Guid.NewGuid(), assetName);
             var maintainableAssetId = Guid.NewGuid();
             var spatialWeightingValue = "[Deck_Area]";// wjwjwj this "[Deck_Area]" is wrong and will need to change
-            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); 
-
+            var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
+            var assetList = new List<MaintainableAsset> { newAsset };
+            _testHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
+            
             var aggregationService = new AggregationService(_testHelper.UnitOfWork);
 
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();

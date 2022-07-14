@@ -4,7 +4,6 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     public static class AttributeFactory
     {
-        // WjTodo after attributes calm down -- can this class be deleted? Can AttributeMetaDatum be deleted?
         public static Attribute Create(AttributeMetaDatum available, Guid dataSourceId)
         {
             Attribute attribute;

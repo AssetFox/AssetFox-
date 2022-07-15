@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
-            var returnValue = config.GetConnectionString("BridgeCareConnexRealDb");
+            var returnValue = config.GetConnectionString("BridgeCareConnex");
             return returnValue;
         }
 

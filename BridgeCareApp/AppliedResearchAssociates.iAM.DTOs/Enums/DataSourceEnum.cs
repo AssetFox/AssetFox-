@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Enums
     {
         SQL,
         Excel,
-        None
+        None,
+        All
     }
 }

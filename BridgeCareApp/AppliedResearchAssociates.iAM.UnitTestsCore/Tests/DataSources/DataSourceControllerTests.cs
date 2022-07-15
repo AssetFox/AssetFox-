@@ -260,7 +260,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             var objectResult = result as OkObjectResult;
             Assert.IsType<List<string>>(objectResult.Value);
             var resultValue = objectResult.Value as List<string>;
-            Assert.Equal(3, resultValue.Count);
+            Assert.Equal(4, resultValue.Count);
         }
     }
 }

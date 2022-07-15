@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -250,6 +252,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Assert.Equal("connectionString123", sqlDataSourceAfter.ConnectionString);
             var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter);
             Assert.Equal("connectionString123", domainAttributeAfter.ConnectionString);
+        }
+
+        [Fact]
+        public void GetAttributeIdsInNetwork_NetworkInDbWithAttribute_GetsAttributeId()
+        {
+            var networkId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var attributeName = RandomStrings.WithPrefix("attribute");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
+            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            var attributeId = Guid.NewGuid();
+            var attribute = AttributeTestSetup.Numeric(attributeId);
+
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
+            var aggregatedDatum = (2022, 123.4);
+            var triplet = (attribute, aggregatedDatum);
+            var triplets = new List<(DataAttribute, (int, double))> { triplet };
+            var aggregatedResultId = Guid.NewGuid();
+            var aggregatedResult = new AggregatedResult<double>(aggregatedResultId, maintainableAsset, triplets);
+            var aggregatedResults = new List<IAggregatedResult> { aggregatedResult };
+            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+
+            var attributeIds = _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
+            var actual = attributeIds.Single();
+            Assert.Equal(actual, attributeId);
         }
     }
 }

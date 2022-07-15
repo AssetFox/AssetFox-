@@ -11,25 +11,25 @@ using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
-    public class SqlAttributeConnectionTests
+    public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
     {
-        private Mock<Attribute> mockAttribute;
+        private Attribute? mockAttribute;
         private Mock<SQLDataSourceDTO> mockSQLDataSource = new Mock<SQLDataSourceDTO>();
         private string testCommand = string.Empty;         
 
-        [Fact (Skip ="This is accessing the real db. It shouldn't. WjTodo fix that.")]
+        [Fact]
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
             Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
-            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute.Object, mockSQLDataSource.Object);
+            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute, mockSQLDataSource.Object);
 
             // Act
             var result = sqlAttributeConnection.GetData<string>();
 
             // Assert
             Assert.NotNull(result);
-            var resultElements = result.ToList();  // WjTodo seeing a failure here when the "real" db does not exist.
+            var resultElements = result.ToList(); 
             var resultElement = resultElements.Single();
             Assert.IsType<AttributeDatum<string>>(resultElement);
         }
@@ -48,7 +48,18 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         {
             testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + dataColumn + " AS DATA_ FROM dbo.Attribute";
             var connectionString = GetConnectionString();
-            mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, testCommand, Data.ConnectionType.MSSQL, connectionString, false, false);
+            var dataSourceId = Guid.NewGuid();
+            mockAttribute = new TextAttribute(
+                "TextAttribute",
+                Guid.Empty,
+                CommonTestParameterValues.Name,
+                type,
+                testCommand,
+                Data.ConnectionType.MSSQL,
+                connectionString,
+                false,
+                false,
+                dataSourceId);
         }
     }
 }

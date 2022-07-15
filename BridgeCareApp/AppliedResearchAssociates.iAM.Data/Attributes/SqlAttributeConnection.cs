@@ -23,10 +23,10 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
 
         public SqlAttributeConnection(Attribute attribute, BaseDataSourceDTO dataSource) : base(attribute, dataSource)
         {
-            if (dataSource is SQLDataSourceDTO)
+            if (dataSource is SQLDataSourceDTO sqlDataSource)
             {
                 // This should always happen if this is being called from the connection builder
-                _connectionString = ((SQLDataSourceDTO)dataSource).ConnectionString;
+                _connectionString = sqlDataSource.ConnectionString;
             }
             else
             {

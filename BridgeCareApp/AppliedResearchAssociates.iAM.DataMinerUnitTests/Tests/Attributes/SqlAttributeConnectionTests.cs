@@ -8,20 +8,34 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using Microsoft.EntityFrameworkCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
     public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
     {
-        private Attribute? mockAttribute;
-        private string testCommand = string.Empty;         
+        private string testCommand = string.Empty;
 
         [Fact]
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
+            var connectionString = GetConnectionString();
+            var dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
+                .UseSqlServer(connectionString)
+                .Options);
+            var config = GetConfiguration();
+            var unitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
+            unitOfWork.Context.Database.EnsureDeleted();
+            unitOfWork.Context.Database.EnsureCreated();
             var dataSource = GetDataSource();
-            Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
+            var mockAttribute = GetAttribute(dataSource, AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
+            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
+            unitOfWork.AttributeRepo.UpsertAttributes(mockAttribute);
             var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute, dataSource);
 
             // Act
@@ -29,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 
             // Assert
             Assert.NotNull(result);
-            var resultElements = result.ToList(); 
+            var resultElements = result.ToList();
             var resultElement = resultElements.Single();
             Assert.IsType<AttributeDatum<string>>(resultElement);
         }
@@ -46,22 +60,28 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             return sqlDataSource;
         }
 
-        private static string GetConnectionString()
+        private static IConfiguration GetConfiguration()
         {
             var config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
+            return config;
+        }
+
+        private static string GetConnectionString()
+        {
+            var config = GetConfiguration();
             var returnValue = config.GetConnectionString("BridgeCareConnex");
             return returnValue;
         }
 
-        private void Init(string type, string dataColumn)
+        private TextAttribute GetAttribute(BaseDataSourceDTO dataSource, string type, string column)
         {
-            testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + dataColumn + " AS DATA_ FROM dbo.Attribute";
+            var dataSourceId = dataSource.Id;
+            testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + column + " AS DATA_ FROM dbo.Attribute";
             var connectionString = GetConnectionString();
-            var dataSourceId = Guid.NewGuid();
-            mockAttribute = new TextAttribute(
+            return new TextAttribute(
                 "TextAttribute",
                 Guid.Empty,
                 CommonTestParameterValues.Name,

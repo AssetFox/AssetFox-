@@ -127,7 +127,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (domain.DataSourceId != null && domain.DataSourceId != Guid.Empty)
             {
-                var possibleDataSource = dataSources?.GetDataSource((Guid)domain.DataSourceId).ToEntity();
+                var dataSourceFromDb = dataSources?.GetDataSource(domain.DataSourceId.Value);
+                var possibleDataSource = dataSourceFromDb.ToEntity();
                 if (possibleDataSource != null) dataSource = possibleDataSource;
             }
 

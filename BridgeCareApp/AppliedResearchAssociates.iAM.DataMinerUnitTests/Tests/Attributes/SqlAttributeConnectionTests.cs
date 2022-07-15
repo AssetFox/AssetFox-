@@ -14,15 +14,15 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
     public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
     {
         private Attribute? mockAttribute;
-        private Mock<SQLDataSourceDTO> mockSQLDataSource = new Mock<SQLDataSourceDTO>();
         private string testCommand = string.Empty;         
 
         [Fact]
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
+            var dataSource = GetDataSource();
             Init(AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
-            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute, mockSQLDataSource.Object);
+            var sqlAttributeConnection = new SqlAttributeConnection(mockAttribute, dataSource);
 
             // Act
             var result = sqlAttributeConnection.GetData<string>();
@@ -32,6 +32,18 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             var resultElements = result.ToList(); 
             var resultElement = resultElements.Single();
             Assert.IsType<AttributeDatum<string>>(resultElement);
+        }
+
+        private static SQLDataSourceDTO GetDataSource()
+        {
+            var connectionString = GetConnectionString();
+            var sqlDataSource = new SQLDataSourceDTO
+            {
+                ConnectionString = connectionString,
+                Id = Guid.NewGuid(),
+                Name = "TestDataSource",
+            };
+            return sqlDataSource;
         }
 
         private static string GetConnectionString()

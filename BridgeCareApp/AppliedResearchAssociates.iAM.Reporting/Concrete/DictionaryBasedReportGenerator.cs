@@ -78,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 var listEntry = new ReportListItem()
                 {
                     ReportId = item.Id,
-                    ReportName = item.ReportTypeName
+                    ReportName = item.Type
                 };
                 itemList.Add(listEntry);
             }

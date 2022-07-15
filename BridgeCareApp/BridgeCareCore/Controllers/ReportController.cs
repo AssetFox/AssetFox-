@@ -109,6 +109,27 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
+        [Route("ListReports/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSimulationReports(Guid simulationId)
+        {
+            // Since Guid cannot be null, if it is not provided, simulation ID will be Guid.Empty
+            if (simulationId == Guid.Empty)
+            {
+                var message = new List<string>() { $"No simulation ID provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            return Ok(UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId));
+        }
+
+        [HttpGet]
         [Route("DownloadReport/{reportIndexID}")]
         [Authorize]
         public async Task<IActionResult> DownloadReport(string reportIndexID)

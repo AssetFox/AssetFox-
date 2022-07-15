@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
@@ -267,7 +268,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
             var attributeId = Guid.NewGuid();
             var attribute = AttributeTestSetup.Numeric(attributeId);
-
             _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
             var aggregatedDatum = (2022, 123.4);
             var triplet = (attribute, aggregatedDatum);
@@ -278,8 +278,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
 
             var attributeIds = _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
+
             var actual = attributeIds.Single();
             Assert.Equal(actual, attributeId);
+        }
+
+        [Fact]
+        public void GetAttributeIdsInNetwork_NetworkNotInTable_Throws()
+        {
+
+            var networkId = Guid.NewGuid();
+
+            var exception = Assert.Throws<RowNotInTableException>(() => _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId));
+
         }
     }
 }

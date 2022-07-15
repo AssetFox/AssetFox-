@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return true;
         }
 
-        public ReportIndexEntity Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == reportId);
+        public ReportIndexDTO Get(Guid reportId) => _unitOfDataPersistenceWork.Context.ReportIndex.FirstOrDefault(_ => _.Id == reportId).ToDTO();
         public List<ReportIndexDTO> GetAllForScenario(Guid simulationId) =>
             _unitOfDataPersistenceWork.Context.ReportIndex.Where(_ => _.SimulationID == simulationId).Select(_ => _.ToDTO()).ToList();
     }

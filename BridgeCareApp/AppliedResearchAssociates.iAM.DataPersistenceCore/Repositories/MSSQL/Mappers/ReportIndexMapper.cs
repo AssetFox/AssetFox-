@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 Id = entity.Id,
                 SimulationId = entity.SimulationID,
+                CreationDate = entity.CreatedDate,
                 ExpirationDate = entity.ExpirationDate,
                 Result = entity.Result,
                 Type = entity.ReportTypeName

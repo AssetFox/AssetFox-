@@ -9,5 +9,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Type { get; set; }
         public string Result { get; set; }
         public DateTime? ExpirationDate { get; set; }
+        public DateTime CreationDate { get; set; }
     }
 }

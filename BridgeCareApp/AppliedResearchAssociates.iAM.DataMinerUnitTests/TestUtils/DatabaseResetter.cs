@@ -11,8 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests
     {
         public static void ResetDatabase(IUnitOfWork unitOfWork)
         {
-            unitOfWork.Context.Database.EnsureCreated();
             unitOfWork.Context.Database.EnsureDeleted();
+            unitOfWork.Context.Database.EnsureCreated();
         }
     }
 }

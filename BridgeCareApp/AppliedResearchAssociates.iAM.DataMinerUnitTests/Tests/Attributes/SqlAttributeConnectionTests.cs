@@ -18,8 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
     public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
     {
-        private string testCommand = string.Empty;
-
         [Fact]
         public void GetData_StringAttributeInDatabase_Gets()
         {
@@ -28,10 +26,9 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             var dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);
-            var config = GetConfiguration();
+            var config = TestConfiguration.Get();
             var unitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
-            unitOfWork.Context.Database.EnsureDeleted();
-            unitOfWork.Context.Database.EnsureCreated();
+            DatabaseResetter.ResetDatabase(unitOfWork);
             var dataSource = GetDataSource();
             var mockAttribute = GetAttribute(dataSource, AttributeTypeNames.String, CommonTestParameterValues.NameColumn);
             unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
@@ -60,18 +57,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             return sqlDataSource;
         }
 
-        private static IConfiguration GetConfiguration()
-        {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("testConnections.json")
-                .Build();
-            return config;
-        }
 
         private static string GetConnectionString()
         {
-            var config = GetConfiguration();
+            var config = TestConfiguration.Get();
             var returnValue = config.GetConnectionString("BridgeCareConnex");
             return returnValue;
         }
@@ -79,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         private TextAttribute GetAttribute(BaseDataSourceDTO dataSource, string type, string column)
         {
             var dataSourceId = dataSource.Id;
-            testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + column + " AS DATA_ FROM dbo.Attribute";
+            var testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + column + " AS DATA_ FROM dbo.Attribute";
             var connectionString = GetConnectionString();
             return new TextAttribute(
                 "TextAttribute",

@@ -22,12 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
-            var connectionString = GetConnectionString();
-            var dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
-                .UseSqlServer(connectionString)
-                .Options);
             var config = TestConfiguration.Get();
-            var unitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
+            var unitOfWork = UnitOfWorkSetup.New(config);
             DatabaseResetter.ResetDatabase(unitOfWork);
             var dataSource = GetDataSource();
             var mockAttribute = GetAttribute(dataSource, AttributeTypeNames.String, CommonTestParameterValues.NameColumn);

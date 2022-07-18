@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -13,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<string> _errorList;
         private string _reportTypeName;
 
-        public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
+        public HelloWorldReport(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
         {
             _id = Guid.NewGuid();
             _errorList = new List<string>();

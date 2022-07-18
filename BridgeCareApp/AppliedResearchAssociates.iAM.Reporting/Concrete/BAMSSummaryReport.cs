@@ -317,11 +317,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.Legend);
             _summaryReportGlossary.Fill(shortNameWorksheet);
 
-            //check and generate folder            
+            //check and generate folder
             var folderPathForSimulation = $"Reports\\{simulationId}";
-            if (Directory.Exists(folderPathForSimulation) == false) { Directory.CreateDirectory(folderPathForSimulation);  }
-
+            Directory.CreateDirectory(folderPathForSimulation);
             var filePath = Path.Combine(folderPathForSimulation, "SummaryReport.xlsx");
+
             var bin = excelPackage.GetAsByteArray();
             File.WriteAllBytes(filePath, bin);
 

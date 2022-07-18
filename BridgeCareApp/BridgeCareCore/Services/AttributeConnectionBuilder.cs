@@ -14,7 +14,6 @@ namespace BridgeCareCore.Services
     {
         public static AttributeConnection Build(Attribute attribute, BaseDataSourceDTO dataSource, IUnitOfWork unitOfWork)
         {
-            // wjwjwj run this thing.
             switch (attribute.ConnectionType)
             {
             case ConnectionType.MSSQL:

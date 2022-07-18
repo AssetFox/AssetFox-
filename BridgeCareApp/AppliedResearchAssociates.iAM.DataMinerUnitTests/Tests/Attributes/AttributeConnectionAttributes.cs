@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
 {
@@ -14,8 +15,9 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
         {
             var columnName = CommonTestParameterValues.NameColumn;
             var testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + columnName + " AS DATA_ FROM dbo.Attribute";
+            var attributeName = RandomStrings.WithPrefix("TextAttribute");
             var returnValue = new TextAttribute(
-                "TextAttribute",
+                attributeName,
                 Guid.Empty,
                 CommonTestParameterValues.Name,
                 AttributeTypeNames.String,

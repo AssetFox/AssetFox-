@@ -109,14 +109,15 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttributes")]
         [Authorize]
-        public async Task<IActionResult> CreateAttributes(List<AttributeDTO> attributeDTOs)
+        public async Task<IActionResult> CreateAttributes(List<AllAttributeDTO> attributeDTOs)
         {
             try
             {
+                var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDTOs);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
                     UnitOfWork.Commit();
                 });
 

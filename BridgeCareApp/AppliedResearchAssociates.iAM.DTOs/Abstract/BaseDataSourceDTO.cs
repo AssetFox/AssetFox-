@@ -32,19 +32,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public bool Secure { get; protected set; }
 
         /// <summary>
-        /// Maps tyhe data source's details to a string for data persistence
-        /// </summary>
-        public abstract string MapDetails();
-
-        /// <summary>
-        /// Builds the concrete data source object with the details provided as a string
-        /// </summary>
-        /// <param name="details">
-        /// Data source details provided as a string such as a connection string or JSON object
-        /// </param>
-        public abstract void PopulateDetails(string details);
-
-        /// <summary>
         /// Validates the details on the datasource
         /// </summary>
         /// <returns>

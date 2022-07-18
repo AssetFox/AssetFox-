@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
@@ -132,14 +133,15 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttribute")]
         [Authorize]
-        public async Task<IActionResult> CreateAttribute(AttributeDTO attributeDto)
+        public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
             {
+                var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
                     UnitOfWork.Commit();
                 });
 

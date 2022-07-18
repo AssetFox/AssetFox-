@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.IO;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -29,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexEntity results)
+        public ScenarioOutputReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
         {
             _unitofwork = unitOfWork;
             ReportTypeName = name;

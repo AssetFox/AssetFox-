@@ -45,13 +45,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return Task.Factory.StartNew(() => new List<NetworkDTO>());
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.Network
+            return Task.Factory.StartNew(() => {
+                var attributeDbSet = _unitOfWork.Context.Attribute.ToList();
+                return _unitOfWork.Context.Network
                 .Include(_ => _.BenefitQuantifier)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
                 .Include(_ => _.AttributeJoins)
-                .Select(_ => _.ToDto(_unitOfWork.Context.Attribute))
-                .ToList());
+                .Select(_ => _.ToDto(attributeDbSet))
+                .ToList();
+                });
         }
 
         public NetworkEntity GetMainNetwork()

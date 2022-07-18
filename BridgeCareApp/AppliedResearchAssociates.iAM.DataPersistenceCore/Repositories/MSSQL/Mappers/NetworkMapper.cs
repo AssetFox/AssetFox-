@@ -40,7 +40,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
             new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
-        public static NetworkDTO ToDto(this NetworkEntity entity, DbSet<AttributeEntity> attributeList)
+
+        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList)
         {
             var dto = new NetworkDTO
             {

@@ -40,10 +40,17 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                     }
                 }
 
-                // Ensure all three columns were populated
-                if (_idColumn == null || _dateColumn == null || _dataColumn == null)
+                if (_idColumn == null)
                 {
-                    throw new RowNotInTableException($"Provided data source did not have columns for {excelDataSource.LocationColumn}, {excelDataSource.DateColumn}, or {attribute.Name}");
+                    throw new RowNotInTableException($"Provided data source did not have column {excelDataSource.LocationColumn}");
+                }
+                if (_dateColumn == null)
+                {
+                    throw new RowNotInTableException($"Provided data source did not have column {excelDataSource.DateColumn}");
+                }
+                if (_dataColumn == null)
+                {
+                    throw new RowNotInTableException($"Provided data source did not have column {attribute.Name}");
                 }
             }
             else

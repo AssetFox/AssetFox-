@@ -13,31 +13,38 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
+using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
-    public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
+    public class ExcelAttributeConnectionTests
     {
         [Fact]
         public void GetData_StringAttributeInDatabase_Gets()
         {
             // Arrange
             var config = TestConfiguration.Get();
-            var connectionString = TestConnectionStrings.BridgeCare(config);
             var unitOfWork = UnitOfWorkSetup.New(config);
-            DatabaseResetter.EnsureDatabaseExists(unitOfWork);
-            var dataSource = SqlDataSourceDtos.WithConnectionString(connectionString);
-            var attribute = AttributeConnectionAttributes.String(connectionString, dataSource.Id);
+            DatabaseResetter.ResetDatabase(unitOfWork);
+            var dataSource = ExcelDataSourceDtos.WithColumnNames("Inspection_Date", "BRKEY");
+            var attribute = AttributeConnectionAttributes.ForExcelTestData(dataSource.Id);
+            var importedSpreadsheet = ExcelRawDataSetup.RawData(dataSource.Id);
+            var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(importedSpreadsheet.SerializedWorksheetContent);
+            var rawDataSpreadsheet = deserializationResult.Worksheet;
+
             unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
             unitOfWork.AttributeRepo.UpsertAttributes(attribute);
-            var sqlAttributeConnection = new SqlAttributeConnection(attribute, dataSource);
+
+            var excelAttributeConnection = new ExcelAttributeConnection(attribute, dataSource, rawDataSpreadsheet);
 
             // Act
-            var result = sqlAttributeConnection.GetData<string>();
+            var result = excelAttributeConnection.GetData<string>();
 
             // Assert
-            var resultElement = result.Single();
-            Assert.IsType<AttributeDatum<string>>(resultElement);
+            var resultList = result.ToList();
+            Assert.Equal(4, resultList.Count);
+            Assert.IsType<AttributeDatum<string>>(resultList[0]);
         }
     }
 }

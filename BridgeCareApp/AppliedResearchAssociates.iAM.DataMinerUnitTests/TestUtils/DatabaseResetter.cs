@@ -14,5 +14,10 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests
             unitOfWork.Context.Database.EnsureDeleted();
             unitOfWork.Context.Database.EnsureCreated();
         }
+
+        public static void EnsureDatabaseExists(IUnitOfWork unitOfWork)
+        {
+            unitOfWork.Context.Database.EnsureCreated();
+        }
     }
 }

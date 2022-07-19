@@ -34,7 +34,7 @@ namespace BridgeCareCore.Controllers.BaseController
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (RequestHasBearer()) // WjTodo -- test the behavior here.
+            if (RequestHasBearer()) 
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }

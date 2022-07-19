@@ -35,7 +35,7 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
         }
 
-        [Obsolete("WjTodo leaving this in the code for now 6/21/2022, but should ask myself whether or not to get rid of it once the real attribute import is working.")]
+        [Obsolete("Probably get rid of this once the real attribute import is working.")]
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,

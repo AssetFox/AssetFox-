@@ -451,7 +451,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
         }
 
-        [Fact] // WjTodo -- seems to be some connection with other tests here. For example I had a failure in an "unrelated" attribute import test that fried it.
+        [Fact] // Seems to be some connection with other tests here. For example, WJ had a failure in an "unrelated" attribute import test that fried it.
         public async Task ShouldDeleteSimulation()
         {
             var service = Setup();

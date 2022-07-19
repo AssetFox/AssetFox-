@@ -236,7 +236,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
 
             // Delete any committed projects that are not in the provided budget list and are in the simulation
-            // WjTodo -- can this be cleaned up?
             _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId ?? Guid.Empty));
 

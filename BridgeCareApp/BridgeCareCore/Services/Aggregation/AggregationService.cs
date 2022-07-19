@@ -23,7 +23,9 @@ namespace BridgeCareCore.Services.Aggregation
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, UserInfo userInfo, List<AttributeDTO> attributes)
+
+        /// <summary>AggregationState can be just new AggregationState() object. Purpose is to allow calling class to access the state.</summary>
+        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, List<AttributeDTO> attributes)
         {
             state.NetworkId = networkId;
             var isError = false;

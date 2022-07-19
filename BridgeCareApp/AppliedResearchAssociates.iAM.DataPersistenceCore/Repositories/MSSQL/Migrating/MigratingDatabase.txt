@@ -9,4 +9,3 @@ PS C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociat
 dotnet ef database update -c IAMContext
 
 The first of the above commands gives a bunch of warnings (in yellow text) in the Powershell window.
-WjTodo: clean up the warnings.

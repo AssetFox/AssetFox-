@@ -82,7 +82,7 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo, attributes);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, attributes);
                 if (result)
                 {
                     return Ok();

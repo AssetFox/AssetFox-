@@ -16,5 +16,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Result = entity.Result,
                 Type = entity.ReportTypeName
             };
+
+        public static ReportIndexDTO ToDTONullPropagating(this ReportIndexEntity entity)
+        {
+            if (entity == null)
+            {
+                return null;
+            }
+            return ToDTO(entity);
+        }
     }
 }

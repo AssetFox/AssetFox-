@@ -16,7 +16,6 @@ namespace BridgeCareCore.Services.Aggregation
             ChannelWriter<AggregationStatusMemo> writer,
             Guid networkId,
             AggregationState state,
-            UserInfo userInfo,
             List<AttributeDTO> attributes);
     }
 }

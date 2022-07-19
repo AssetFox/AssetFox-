@@ -7,6 +7,7 @@ using BridgeCareCore.Services;
 using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using BridgeCareCore.Models;
+using BridgeCareCore.Utils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -22,7 +23,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static TNetwork ModelForEntityInDbViaFactory(IUnitOfWork unitOfWork, DataAttribute attribute, NetworkCreationParameters parameters, string networkName)
         {
-            var attributeConnection = AttributeConnectionBuilder.Build(attribute, parameters.NetworkDefinitionAttribute.DataSource, unitOfWork);
+            var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
+            var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource); 
+            var attributeConnection = AttributeConnectionBuilder.Build(attribute, mappedDataSource, unitOfWork);
             var data = AttributeDataBuilder.GetData(attributeConnection);
             var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                   data, parameters.DefaultEquation);

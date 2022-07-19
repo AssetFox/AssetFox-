@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = dto.Id,
                 LocationColumn = dto.LocationColumn,
                 Name = dto.Name,
+                Type = "Excel",
             };
         }
     }

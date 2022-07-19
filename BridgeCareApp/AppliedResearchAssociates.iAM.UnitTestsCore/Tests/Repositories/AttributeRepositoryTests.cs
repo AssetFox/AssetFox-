@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -155,11 +156,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Setup();
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
-            var attribute = AttributeTestSetup.Numeric(null, randomName);
+            var attribute = AttributeTestSetup.Numeric(name: randomName); ;
             repo.UpsertAttributes(attribute);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
-            var attribute2 = AttributeTestSetup.Numeric(null, randomName);
+            var attribute2 = AttributeTestSetup.Numeric(name: randomName);
             Assert.ThrowsAny<Exception>(() => repo.UpsertAttributes(attribute2));
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -176,6 +177,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
+            var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(_testHelper.UnitOfWork);
             var attributeDto = new AttributeDTO
             {
                 Id = attributeId,
@@ -189,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsAscending = false,
                 IsCalculated = false,
             };
-            var validAttribute = AttributeTestSetup.NumericDto();
+            var validAttribute = AttributeTestSetup.NumericDto(dataSourceDto);
 
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
             Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
@@ -206,7 +208,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Setup();
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
-            var attribute = AttributeTestSetup.Numeric(null, randomName);
+            var attribute = AttributeTestSetup.Numeric(name: randomName);
             repo.UpsertAttributes(attribute);
 
             var attributeAfter = repo.GetSingleById(attribute.Id);

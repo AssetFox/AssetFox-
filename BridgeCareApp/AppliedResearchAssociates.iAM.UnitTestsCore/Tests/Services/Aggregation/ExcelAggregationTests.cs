@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             var assetName = "AssetName";
             var location = new SectionLocation(Guid.NewGuid(), assetName);
             var maintainableAssetId = Guid.NewGuid();
-            var spatialWeightingValue = "[Deck_Area]";// wjwjwj this "[Deck_Area]" is wrong and will need to change
+            var spatialWeightingValue = "[Deck_Area]";
             var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
             var assetList = new List<MaintainableAsset> { newAsset };
             _testHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);

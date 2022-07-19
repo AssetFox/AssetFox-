@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -8,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
@@ -85,8 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
 
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Context.Database.EnsureCreated();
+            DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
@@ -105,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!HttpContextHasBeenSetup)
             {
-                lock (HttpContextSetupLock) // WjTodo -- can we get rid of the lock?
+                lock (HttpContextSetupLock) // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!HttpContextHasBeenSetup)
                     {
@@ -160,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!AttributesHaveBeenCreated)
             {
-                lock (AttributeLock) // WjTodo -- can we get rid of the lock?
+                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!AttributesHaveBeenCreated)
                     {
@@ -204,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                lock (NetworkCreationLock) // WjTodo -- can we get rid of the lock?
+                lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
                     {

@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var reportList = _generator.GetAllReportsForScenario(scenarioId);
 
             // Assert
-            Assert.Equal(0, reportList.Count());
+            Assert.Empty(reportList);
         }
 
         [Fact]

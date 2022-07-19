@@ -4,6 +4,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Analysis;
 
@@ -34,13 +35,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static NetworkEntity ToEntity(this Network domain) =>
-            new NetworkEntity {Id = domain.Id, Name = domain.Name};
+            new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
-            new NetworkEntity {Id = domain.Id, Name = domain.Name};
+            new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
-        public static NetworkDTO ToDto(this NetworkEntity entity) =>
-            new NetworkDTO
+        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList)
+        {
+            var dto = new NetworkDTO
             {
                 Id = entity.Id,
                 Name = entity.Name,
@@ -49,7 +51,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Status = entity.NetworkRollupDetail != null ? entity.NetworkRollupDetail.Status : "N/A",
                 BenefitQuantifier = entity.BenefitQuantifier != null
                     ? entity.BenefitQuantifier.ToDto()
-                    : new BenefitQuantifierDTO {NetworkId = entity.Id, Equation = new EquationDTO {Id = Guid.NewGuid()}}
+                    : new BenefitQuantifierDTO { NetworkId = entity.Id, Equation = new EquationDTO { Id = Guid.NewGuid() } },
+                KeyAttribute = entity.KeyAttributeId,
+                Attributes = new List<AttributeDTO>()
+            };
+            foreach (var join in entity.AttributeJoins)
+            {
+                var networkAttribute = attributeList.FirstOrDefault(_ => _.Id == join.AttributeId);
+                if (networkAttribute != null)
+                {
+                    dto.Attributes.Add(networkAttribute.ToDto());
+                }
+            }
+            return dto;
+        }
+
+        public static NetworkEntity ToEntity(this NetworkDTO dto) =>
+            new NetworkEntity
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                CreatedDate = dto.CreatedDate,
+                LastModifiedDate = dto.LastModifiedDate,
+                KeyAttributeId = dto.KeyAttribute
             };
     }
 }

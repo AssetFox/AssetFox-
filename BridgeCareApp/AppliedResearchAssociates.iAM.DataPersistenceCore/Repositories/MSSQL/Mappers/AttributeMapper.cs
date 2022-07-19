@@ -102,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return null;
         }
 
-        // WjTodo -- we probably don't want this. Instead, whine if something is bad.
+       
         public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs)
         {
             var returnValue = attributeDTOs
@@ -127,7 +127,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (domain.DataSourceId != null && domain.DataSourceId != Guid.Empty)
             {
-                var possibleDataSource = dataSources?.GetDataSource((Guid)domain.DataSourceId).ToEntity();
+                var dataSourceFromDb = dataSources?.GetDataSource(domain.DataSourceId.Value);
+                var possibleDataSource = dataSourceFromDb.ToEntity();
                 if (possibleDataSource != null) dataSource = possibleDataSource;
             }
 
@@ -207,9 +208,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 return ConnectionType.EXCEL;
             }
-            else
+            else if (dtoType == DataSourceTypeStrings.SQL.ToString())
             {
                 return ConnectionType.MSSQL;
+            }
+            else
+            {
+                return ConnectionType.NONE;
             }
         }
 

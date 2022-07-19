@@ -109,9 +109,76 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("DownloadReport/{reportIndexID}")]
+        [Route("ListReports/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> DownloadReport(string reportIndexID)
+        public async Task<IActionResult> GetSimulationReports(Guid simulationId)
+        {
+            // Since Guid cannot be null, if it is not provided, simulation ID will be Guid.Empty
+            if (simulationId == Guid.Empty)
+            {
+                var message = new List<string>() { $"No simulation ID provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            return Ok(UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId));
+        }
+
+        [HttpGet]
+        [Route("DownloadReport/{simulationId}/{reportName}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadReport(Guid simulationId, string reportName)
+        {
+            if (simulationId == Guid.Empty || reportName == String.Empty)
+            {
+                var message = new List<string>() { $"No simulation or report name provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            var report = UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId)
+                .Where(_ => _.Type == reportName)
+                .OrderByDescending(_ => _.CreationDate)
+                .FirstOrDefault();
+            if (report == null)
+            {
+                var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for this simulation.  Did you run the report?" };
+                return CreateErrorListing(message);
+            }
+
+            var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
+            {
+                var message = new List<string>() { $"The report did not include any results" };
+                return CreateErrorListing(message);
+            }
+
+            FileInfoDTO result;
+            try
+            {
+                result = await GetReport(report);
+            }
+            catch (Exception e)
+            {
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("DownloadSpecificReport/{reportIndexID}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadSpecificReport(string reportIndexID)
         {
             if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
             {
@@ -120,28 +187,25 @@ namespace BridgeCareCore.Controllers
             }
 
             //get report path
-            var reportIndexEntity = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
-            var reportPath = reportIndexEntity?.Result ?? "";
-
+            var reportIndex = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
+            var reportPath = reportIndex?.Result != null ? Path.Combine(Environment.CurrentDirectory, reportIndex.Result) : "";
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 var message = new List<string>() { $"Failed to get report path using the specified repository index" };
                 return CreateErrorListing(message);
             }
 
-            //read file from the specified location and return download response
-            var fileData = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
-            var simulationName = UnitOfWork.SimulationRepo.GetSimulationName((Guid)reportIndexEntity.SimulationID);
-            var downloadFileName = $"SummaryReport {simulationName}.xlsx";
-            var returnFileInfo = new FileInfoDTO
-            {
-                FileData = Convert.ToBase64String(fileData),
-                FileName = downloadFileName,
-                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            };
-
             // return the download response
-            return Ok(returnFileInfo);
+            FileInfoDTO result;
+            try
+            {
+                result = await GetReport(reportIndex);
+            }
+            catch (Exception e)
+            {
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+            return Ok(result);
         }
 
         #endregion
@@ -189,6 +253,24 @@ namespace BridgeCareCore.Controllers
 
             //return object
             return reportObject;
+        }
+
+        private async Task<FileInfoDTO> GetReport(ReportIndexDTO reportIndex)
+        {
+            var reportPath = Path.Combine(Environment.CurrentDirectory, reportIndex.Result);
+            if (!System.IO.File.Exists(reportPath))
+            {
+                throw new InvalidOperationException($"Cannot get report for report {reportIndex.Type}");
+            }
+            var fileData = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
+            var simulationName = reportIndex.SimulationId != null ? UnitOfWork.SimulationRepo.GetSimulationName((Guid)reportIndex.SimulationId) : String.Empty;
+            var downloadFileName = $"{simulationName} {reportIndex.Type}.xlsx";
+            return new FileInfoDTO
+            {
+                FileData = Convert.ToBase64String(fileData),
+                FileName = downloadFileName,
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            };
         }
 
         private string createReportIndexRepository(IReport reportObject)

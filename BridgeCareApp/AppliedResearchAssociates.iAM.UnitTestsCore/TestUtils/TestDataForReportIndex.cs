@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Reporting;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
@@ -102,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
+        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
         {
             _repo = repository;
             _reportName = name;
@@ -114,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             else
             {
                 _id = results.Id;
-                _sid = results.SimulationID == null ? null : results.SimulationID;
+                _sid = results.SimulationId == null ? null : results.SimulationId;
             }
         }
 

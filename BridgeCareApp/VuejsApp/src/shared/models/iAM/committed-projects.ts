@@ -10,10 +10,10 @@ export interface BaseCommittedProject {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     consequences: CommittedProjectConsequence[];
-    locationKeys: Map<string, string>
-    
+    locationKeys: { [key: string]: string; }  
 }
 export interface SectionCommittedProjectTableData {
+    id: string;
     brkey: string;
     year: number;
     treatment: string;
@@ -22,7 +22,6 @@ export interface SectionCommittedProjectTableData {
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
-
 }
 
 export interface CommittedProjectConsequence {
@@ -42,7 +41,9 @@ export const emptySectionCommittedProject = {
     shadowForAnyTreatment: 0,
     shadowForSameTreatment: 0,
     consequences: [],
-    locationKeys: new Map<string, string>()
+    locationKeys: {},
+    name: '',
+
 }
 
 export const emptyCommittedProjectConsequence ={

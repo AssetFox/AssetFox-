@@ -21,9 +21,9 @@ export default class ReportsService {
         });
     }
 
-    static downloadReport(reportIndexID: string): AxiosPromise {
+    static downloadReport(scenarioId: string, reportName: string): AxiosPromise {
         return coreAxiosInstance.get(               
-            `${API.Report}/DownloadReport/${reportIndexID}`,
+            `${API.Report}/DownloadReport/${scenarioId}/${reportName}`,
         );
     }
 }

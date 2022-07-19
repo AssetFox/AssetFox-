@@ -1,8 +1,8 @@
-﻿using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+﻿using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 
-namespace BridgeCareCore.Services
+namespace AppliedResearchAssociates.iAM.Hubs.Services
 {
     public class HubService : IHubService
     {

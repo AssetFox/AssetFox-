@@ -7,8 +7,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.Validation;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
 

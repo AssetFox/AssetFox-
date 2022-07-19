@@ -9,7 +9,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;

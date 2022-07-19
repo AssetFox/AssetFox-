@@ -69,6 +69,8 @@ namespace BridgeCareCore.Services.Aggregation
                         .ToList();
 
                     // Create list of attribute ids we are allowed to update with assigned data.
+                    // wjwjwj test runs into trouble here. The problem is that we don't have any assigned data on our attribute.
+                    // Could hack it in, but what is the natural way to set it up?
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();

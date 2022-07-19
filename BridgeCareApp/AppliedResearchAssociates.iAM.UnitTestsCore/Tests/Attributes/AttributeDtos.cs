@@ -2,6 +2,7 @@
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
 {
@@ -80,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 IsAscending = true
             };
 
-        public static AttributeDTO District => new()
+        public static AttributeDTO District(BaseDataSourceDTO dataSourceDTO) => new()
         {
             Name = "DISTRICT",
             AggregationRuleType = TextAttributeAggregationRules.Predominant,
@@ -90,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             Type = "STRING",
             IsAscending = false,
             IsCalculated = false,
+            DataSource = dataSourceDTO,
         };
 
         public static AttributeDTO SubSeeded => new()

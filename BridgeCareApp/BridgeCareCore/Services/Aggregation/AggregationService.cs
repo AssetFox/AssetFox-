@@ -76,9 +76,19 @@ namespace BridgeCareCore.Services.Aggregation
                     // the data source)
                     try
                     {
-                        attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
-                            .Select(AttributeConnectionBuilder.Build)
-                            .SelectMany(AttributeDataBuilder.GetData).ToList();
+                        foreach (var attribute in configurationAttributes)
+                        {
+                            if (attribute.ConnectionType != ConnectionType.NONE)
+                            {
+                                var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
+                                if (dataSource != null)
+                                {
+                                    var specificData = AttributeDataBuilder
+                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
+                                    attributeData.AddRange(specificData);
+                                }
+                            }
+                        }
                     }
                     catch (Exception e)
                     {

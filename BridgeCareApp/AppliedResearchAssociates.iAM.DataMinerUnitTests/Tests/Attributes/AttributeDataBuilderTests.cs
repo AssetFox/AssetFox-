@@ -5,13 +5,14 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
 {
     public class AttributeDataBuilderTests
     {
         private Mock<Attribute> mockAttribute;
-        Mock<AttributeConnection> mockAttributeConnection;
+        private Mock<AttributeConnection> mockAttributeConnection;
 
         [Fact]
         public void GetDataForStringTypeTest()
@@ -50,7 +51,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
         private void Init(string type)
         {
             mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, Data.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);
-            mockAttributeConnection = new Mock<AttributeConnection>(mockAttribute.Object);
+            var mockDataSource = new Mock<SQLDataSourceDTO>();
+            mockAttributeConnection = new Mock<AttributeConnection>(mockAttribute.Object, mockDataSource.Object);
             mockAttributeConnection.Setup(m => m.GetData<It.IsAnyType>()).Returns(new List<IAttributeDatum>());
         }
     }

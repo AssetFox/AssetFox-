@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis
+﻿namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public enum SpendingStrategy
     {

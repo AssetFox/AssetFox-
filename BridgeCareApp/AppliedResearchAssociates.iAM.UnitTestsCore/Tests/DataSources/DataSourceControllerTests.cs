@@ -38,8 +38,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 
             _mockDataSource = new Mock<IDataSourceRepository>();
             _mockDataSource.Setup(_ => _.GetDataSources()).Returns(TestDataForDataSources.SourceDTOs());
-            _mockDataSource.Setup(_ => _.GetDataSourceTypes())
-                .Returns(TestDataForDataSources.SimpleRepo().Select(_ => _.Type).ToList());
             _mockDataSource.Setup(_ => _.GetDataSource(It.IsAny<Guid>()))
                 .Returns<Guid>(p => TestDataForDataSources.SourceDTOs().Single(ds => ds.Id == p));
 
@@ -264,8 +262,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             var objectResult = result as OkObjectResult;
             Assert.IsType<List<string>>(objectResult.Value);
             var resultValue = objectResult.Value as List<string>;
-            var enumValues = Enum.GetValues<DataSourceTypeStrings>();
-            Assert.Equal(enumValues.Count(), resultValue.Count);
+            Assert.Equal(4, resultValue.Count);
         }
     }
 }

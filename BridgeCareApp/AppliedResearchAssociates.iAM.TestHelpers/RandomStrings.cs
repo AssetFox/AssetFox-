@@ -5,8 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
-{
+namespace AppliedResearchAssociates.iAM.TestHelpers { 
     public static class RandomStrings
     {
         public static string Length11()

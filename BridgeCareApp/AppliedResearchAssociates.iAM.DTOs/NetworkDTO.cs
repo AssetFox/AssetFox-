@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DTOs
@@ -14,5 +15,9 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public string Status { get; set; }
 
         public BenefitQuantifierDTO BenefitQuantifier { get; set; }
+
+        public Guid KeyAttribute { get; set; }
+
+        public List<AttributeDTO> Attributes { get; set; }
     }
 }

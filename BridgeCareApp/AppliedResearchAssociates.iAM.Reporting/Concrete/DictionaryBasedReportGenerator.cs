@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <summary>
         /// Specific generator used to recreate reports from data persistence
         /// </summary>
-        private async Task<IReport> Generate(string reportName, ReportIndexEntity results)
+        private async Task<IReport> Generate(string reportName, ReportIndexDTO results)
         {
             if (!_reportLookup.ContainsKey(reportName))
             {
@@ -81,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 var listEntry = new ReportListItem()
                 {
                     ReportId = item.Id,
-                    ReportName = item.ReportTypeName
+                    ReportName = item.Type
                 };
                 itemList.Add(listEntry);
             }
@@ -94,11 +95,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportInformation = _dataRepository.ReportIndexRepository.Get(reportId);
             if (reportInformation == null) return null;
 
-            if (_reportLookup.ContainsKey(reportInformation.ReportTypeName))
+            if (_reportLookup.ContainsKey(reportInformation.Type))
             {
-                validReport = await Generate(reportInformation.ReportTypeName, reportInformation);
+                validReport = await Generate(reportInformation.Type, reportInformation);
                 validReport.ID = reportInformation.Id;
-                validReport.SimulationID = reportInformation.SimulationID;
+                validReport.SimulationID = reportInformation.SimulationId;
                 return validReport;
             }
             else

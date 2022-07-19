@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         public string Status { get; private set; }
 
 
-        public BAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexEntity results, IHubService hubService)
+        public BAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

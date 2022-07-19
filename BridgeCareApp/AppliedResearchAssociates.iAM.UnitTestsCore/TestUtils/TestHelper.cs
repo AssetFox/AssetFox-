@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -8,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
@@ -87,8 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
 
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Context.Database.EnsureCreated();
+            DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());

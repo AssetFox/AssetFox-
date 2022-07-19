@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -23,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private TestHelper _testHelper => TestHelper.Instance;
         private IAttributeRepository attributeRepository => _testHelper.UnitOfWork.AttributeRepo;
 
-        public void Setup()
+        private void Setup()
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
@@ -291,6 +292,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             var exception = Assert.Throws<RowNotInTableException>(() => _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId));
 
+        }
+
+        [Fact]
+        public async Task GetCalculatedAttributes_CalculatedAttributeInDb_Gets()
+        {
+            var attributeId = Guid.NewGuid();
+            var attribute = AttributeTestSetup.Text(attributeId, true);
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
+
+            var calculatedAttributes = await _testHelper.UnitOfWork.AttributeRepo.CalculatedAttributes();
+
+            var actual = calculatedAttributes.Single(a => a.Id == attribute.Id);
+            Assert.NotNull(actual);
         }
     }
 }

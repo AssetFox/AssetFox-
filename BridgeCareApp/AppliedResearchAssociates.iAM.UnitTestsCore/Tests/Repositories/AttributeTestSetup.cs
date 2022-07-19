@@ -27,11 +27,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var dto = AttributeMapper.ToDto(entity);
             return dto;
         }
-        public static TextAttribute Text(Guid? id = null)
+
+        public static TextAttribute Text(Guid? id = null, bool calculated = false)
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = RandomStrings.Length11();
-            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", false, true, Guid.Empty);
+            var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }
     }

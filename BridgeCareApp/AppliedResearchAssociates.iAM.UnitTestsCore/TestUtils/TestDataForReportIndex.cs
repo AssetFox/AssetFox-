@@ -6,17 +6,18 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestDataForReportIndex
     {
-        public static Dictionary<string, Type> SimpleReportLibrary()
+        public static List<IReportFactory> SimpleReportLibrary()
         {
-            var testReportLibrary = new Dictionary<string, Type>();
-            testReportLibrary.Add("Test Report File", typeof(TestReportFile));
-            testReportLibrary.Add("Test HTML File", typeof(TestHTMLFile));
-            testReportLibrary.Add("Bad Report", typeof(TestBadReport));
+            var testReportLibrary = new List<IReportFactory>();
+            testReportLibrary.Add(new TestReportFactory());
+            testReportLibrary.Add(new TestHTMLFileFactory());
+            testReportLibrary.Add(new TestBadReportFactory());
             return testReportLibrary;
         }
 
@@ -52,6 +53,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         }
     }
 
+    public class TestReportFactory : IReportFactory
+    {
+        public string Name => "Test Report File";
+
+        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        {
+            return new TestReportFile(uow, Name, results);
+        }
+    }
+
     // Test Reports
     public class TestReportFile : IReport
     {
@@ -61,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results, IHubService hubService)
+        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
         {
             _repo = repository;
             _reportName = name;
@@ -75,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             else
             {
                 _id = results.Id;
-                _sid = results.SimulationID == null ? _newSid : results.SimulationID;
+                _sid = results.SimulationId == null ? _newSid : results.SimulationId;
             }
         }
 
@@ -96,6 +107,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public Task Run(string parameters) => throw new NotImplementedException();
     }
 
+    public class TestHTMLFileFactory : IReportFactory
+    {
+        public string Name => "Test HTML File";
+
+        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        {
+            return new TestHTMLFile(uow, Name, results);
+        }
+    }
+
     public class TestHTMLFile : IReport
     {
         private List<string> _blankErrorList = new List<string>();
@@ -104,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results, IHubService hubService)
+        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
         {
             _repo = repository;
             _reportName = name;
@@ -135,6 +156,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public string Status => "Report finished running";
 
         public Task Run(string parameters) => throw new NotImplementedException();
+    }
+
+    public class TestBadReportFactory : IReportFactory
+    {
+        public string Name => "Bad Report";
+
+        public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
+        {
+            var report = new TestBadReport(uow);
+            return report;
+        }
     }
 
     public class TestBadReport : IReport

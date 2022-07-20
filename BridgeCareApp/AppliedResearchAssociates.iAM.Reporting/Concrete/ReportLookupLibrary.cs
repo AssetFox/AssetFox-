@@ -18,5 +18,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         public Dictionary<string, Type> Lookup { get; set; }
+
+        public IReport GetReport(string reportName) => throw new NotImplementedException();
+        public bool CanGenerateReport(string type) => throw new NotImplementedException();
     }
 }

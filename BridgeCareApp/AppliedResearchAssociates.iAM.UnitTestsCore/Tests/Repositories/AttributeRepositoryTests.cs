@@ -264,7 +264,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var networkId = Guid.NewGuid();
             var assetId = Guid.NewGuid();
             var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var attributeName = RandomStrings.WithPrefix("attribute");
             var location = Locations.Section(locationIdentifier);
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };

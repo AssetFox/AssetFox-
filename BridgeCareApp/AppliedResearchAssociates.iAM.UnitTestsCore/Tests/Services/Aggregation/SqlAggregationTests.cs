@@ -34,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
 
             var networkName = RandomStrings.WithPrefix("Network");
-            var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
             var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
 
             var networkDefinitionAttribute = AllAttributeDtos.BrKey(allDataSourceDto);

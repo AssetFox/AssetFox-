@@ -7,6 +7,8 @@ using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -18,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         private ReportLookupLibrary _testReportLibrary;
         private UnitOfDataPersistenceWork _testRepo;
         private DictionaryBasedReportGenerator _generator;
+        private TestHelper _testHelper => TestHelper.Instance;
 
         public ReportGeneratorTests()
         {
@@ -29,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
 
             _testReportLibrary = new ReportLookupLibrary(TestDataForReportIndex.SimpleReportLibrary());
 
-            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary);
+            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary, _testHelper.MockHubService.Object);
         }
 
         [Fact]

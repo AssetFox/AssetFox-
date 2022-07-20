@@ -1,7 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Utils
@@ -19,15 +18,33 @@ namespace BridgeCareCore.Utils
             };
             return returnValue;
         }
+
+        private static SQLDataSourceDTO ToSql(AllDataSource allDataSource)
+        {
+            var returnValue = new SQLDataSourceDTO
+            {
+                ConnectionString = allDataSource.ConnectionString,
+                Id = allDataSource.Id,
+                Name = allDataSource.Name,
+            };
+            return returnValue;
+        }
+
         public static BaseDataSourceDTO ToSpecificDto(AllDataSource allDataSource)
         {
+            BaseDataSourceDTO specificDto;
             switch (allDataSource.Type.ToLower())
             {
             case "excel":
-                return ToExcel(allDataSource);
+                specificDto = ToExcel(allDataSource);
+                break;
+            case "sql":
+                specificDto = ToSql(allDataSource);
+                break;
             default:
                 throw new NotImplementedException();
             }
+            return specificDto;
         }
     }
 }

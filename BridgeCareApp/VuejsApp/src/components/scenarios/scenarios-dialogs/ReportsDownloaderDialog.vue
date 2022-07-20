@@ -84,7 +84,7 @@ export default class ReportsDownloaderDialog extends Vue {
                     }
 
                     this.addSuccessNotificationAction({
-                        message: 'Summary report is generated.',
+                        message: 'Summary report generation started.',
                     });
                 } else {
                     this.addErrorNotificationAction({
@@ -103,7 +103,7 @@ export default class ReportsDownloaderDialog extends Vue {
         this.isDownloading = true;
         this.dialogData.showModal = false;        
         await ReportsService.downloadReport(
-            this.reportIndexID
+            this.dialogData.scenarioId, "BAMSSummaryReport"
         ).then((response: AxiosResponse<any>) => {
             this.isDownloading = false;
             if (hasValue(response, 'data')) {

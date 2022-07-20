@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
@@ -11,11 +12,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         private Dictionary<string, Type> _reportLookup;
         private UnitOfDataPersistenceWork _dataRepository;
+        private readonly IHubService _hubService;
 
-        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary)
+        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary, IHubService hubService)
         {
             _dataRepository = dataRepository;
             _reportLookup = lookupLibrary.Lookup;
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
         /// <summary>
@@ -45,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IReport generatedReport;
                 try
                 {
-                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results);
+                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results, _hubService);
                 }
                 catch
                 {

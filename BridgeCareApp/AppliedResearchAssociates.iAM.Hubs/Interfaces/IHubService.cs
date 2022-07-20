@@ -1,4 +1,4 @@
-﻿namespace BridgeCareCore.Interfaces
+﻿namespace AppliedResearchAssociates.iAM.Hubs.Interfaces
 {
     public interface IHubService
     {

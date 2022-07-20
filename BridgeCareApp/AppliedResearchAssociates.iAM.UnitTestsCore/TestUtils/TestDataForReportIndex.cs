@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
@@ -60,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results)
+        public TestReportFile(UnitOfDataPersistenceWork repository, string name, ReportIndexEntity results, IHubService hubService)
         {
             _repo = repository;
             _reportName = name;
@@ -103,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         private UnitOfDataPersistenceWork _repo;
         private string _reportName;
 
-        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results)
+        public TestHTMLFile(UnitOfDataPersistenceWork repository, string name, ReportIndexDTO results, IHubService hubService)
         {
             _repo = repository;
             _reportName = name;

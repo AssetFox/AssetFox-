@@ -42,8 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 await failure.Run($"No report was found with the name {reportName}");
                 return await Task.FromResult(failure);
             }
-            await generatedReport.Run($"{reportName} did not have a constructor with repository and name parameters.");
-                return generatedReport;
+            return generatedReport;
         }
 
         /// <summary>

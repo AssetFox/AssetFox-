@@ -230,7 +230,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             ////Graph TABs
             //reportDetailDto.Status = $"Creating Graph TABs";
             //UpdateSimulationAnalysisDetail(reportDetailDto);
-            //_addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+            //_addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";

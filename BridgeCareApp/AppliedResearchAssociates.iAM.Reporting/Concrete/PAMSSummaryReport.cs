@@ -35,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
 
+        private readonly IAddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
@@ -71,6 +72,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _unfundedPavementProjects = new UnfundedPavementProjects();
             if (_unfundedPavementProjects == null) { throw new ArgumentNullException(nameof(_unfundedPavementProjects)); }
+
+            //_addGraphsInTabs = new AddGraphsInTabs();
+            //if (_addGraphsInTabs == null) { throw new ArgumentNullException(nameof(_addGraphsInTabs)); }
 
             _summaryReportGlossary = new SummaryReportGlossary();
             if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
@@ -223,6 +227,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
+            ////Graph TABs
+            //reportDetailDto.Status = $"Creating Graph TABs";
+            //UpdateSimulationAnalysisDetail(reportDetailDto);
+            //_addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";

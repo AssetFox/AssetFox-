@@ -67,5 +67,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
 
         public const string NoTreatment = "no treatment";
         public const string NoTreatmentForWorkSummary = "No Treatment";
+
+        public const string Poor = "Poor";
+        public const string Fair = "Fair";
+        public const string Good = "Good";        
+        public const string Excellent = "Excellent";
     }
 }

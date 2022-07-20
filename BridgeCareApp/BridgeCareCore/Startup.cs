@@ -92,7 +92,7 @@ namespace BridgeCareCore
             reportFactoryList.Add(new BAMSSummaryReportFactory());
             reportFactoryList.Add(new ScenarioOutputReportFactory());
             reportFactoryList.Add(new PAMSSummaryReportFactory());
-            services.AddSingleton(service => new ReportLookupLibrary(reportFactoryList));
+            services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

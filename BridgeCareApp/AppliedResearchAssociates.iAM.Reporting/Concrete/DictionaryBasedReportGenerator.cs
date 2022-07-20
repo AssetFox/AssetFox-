@@ -10,11 +10,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class DictionaryBasedReportGenerator : IReportGenerator
     {
-        private readonly ReportLookupLibrary _reportLookup;
+        private readonly IReportLookupLibrary _reportLookup;
         private UnitOfDataPersistenceWork _dataRepository;
         private readonly IHubService _hubService;
 
-        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary, IHubService hubService)
+        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, IReportLookupLibrary lookupLibrary, IHubService hubService)
         {
             _dataRepository = dataRepository;
             _reportLookup = lookupLibrary;
@@ -36,7 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// </summary>
         private async Task<IReport> Generate(string reportName, ReportIndexDTO results)
         {
-            var generatedReport = _reportLookup.GetReport(reportName);
+            var generatedReport = _reportLookup.GetReport(reportName, _dataRepository, results, _hubService);
+            //Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results, _hubService);
             if (generatedReport is FailureReport failure) { 
                 await failure.Run($"No report was found with the name {reportName}");
                 return await Task.FromResult(failure);

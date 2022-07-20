@@ -23,5 +23,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Type = "Excel",
             };
         }
+
+        public static AllDataSource ToAll(SQLDataSourceDTO dto)
+        {
+            return new AllDataSource
+            {
+                ConnectionString = dto.ConnectionString,
+                Id = dto.Id,
+                Name = dto.Name,
+                Type = "SQL",
+            };
+        }
     }
 }

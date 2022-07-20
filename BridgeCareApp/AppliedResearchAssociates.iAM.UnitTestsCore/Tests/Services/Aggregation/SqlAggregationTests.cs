@@ -5,11 +5,11 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataMinerUnitTests;
 using AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.SampleData;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
@@ -19,30 +19,19 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
 {
-    public class ExcelAggregationTests
+    public class SqlAggregationTests
     {
         private static TestHelper _testHelper => TestHelper.Instance;
 
-        private static string SampleAttributeDataPath()
-        {
-            var filename = SampleAttributeDataFilenames.Sample;
-            var folder = Directory.GetCurrentDirectory();
-            var returnValue = Path.Combine(folder, SampleAttributeDataFolderNames.SampleData, filename);
-            return returnValue;
-        }
-
         [Fact]
-        public async Task Aggregate_ExcelDataSourceInDb_AttributesInDb_Aggregates()
+        public async Task Aggregate_SqlDataSourceInDb_AttributesInDb_Aggregates()
         {
-            var spreadsheetService = TestServices.CreateExcelSpreadsheetImportService(_testHelper.UnitOfWork);
-            var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(_testHelper.UnitOfWork);
-            var districtAttribute = AttributeDtos.District(dataSourceDto);
-            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute);
+            var config = _testHelper.Config;
+            var connectionString = TestConnectionStrings.BridgeCare(config);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
+            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-            var path = SampleAttributeDataPath();
-            var stream = File.OpenRead(path);
-            var excelPackage = new ExcelPackage(stream);
-            var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
 
             var networkName = RandomStrings.WithPrefix("Network");
             var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
@@ -66,7 +55,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
             var assetList = new List<MaintainableAsset> { newAsset };
             _testHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
-
 
             var aggregationService = new AggregationService(_testHelper.UnitOfWork);
 

@@ -87,8 +87,9 @@ namespace BridgeCareCore.Services
                 Minimum = allAttribute.Minimum,
                 Type = allAttribute.Type
             };
+            var dataSourceType = allAttribute.DataSource.Type;
 
-            switch (allAttribute.DataSource.Type)
+            switch (dataSourceType)
             {
             case "SQL":
                 var sqlSource = new SQLDataSourceDTO

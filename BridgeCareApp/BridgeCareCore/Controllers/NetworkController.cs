@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using BridgeCareCore.Utils;
 
 namespace BridgeCareCore.Controllers
 {
@@ -63,6 +64,8 @@ namespace BridgeCareCore.Controllers
                     }
 
                     // create network domain model from attribute data created from the network attribute
+                    var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
+                    var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                         AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, parameters.NetworkDefinitionAttribute.DataSource, UnitOfWork)), parameters.DefaultEquation);
                     network.Name = networkName;

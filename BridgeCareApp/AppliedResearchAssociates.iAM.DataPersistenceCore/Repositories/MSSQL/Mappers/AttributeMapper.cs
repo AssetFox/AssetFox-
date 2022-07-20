@@ -5,6 +5,7 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
@@ -174,6 +175,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             return filteredAttribute;
+        }
+
+        public static AttributeDTO ToDto(this Attribute domain, BaseDataSourceDTO dataSourceDTO)
+        {
+            double? maximum = null;
+            double? minimum = null;
+            string defaultValue = "";
+            if (domain is NumericAttribute numericAttribute)
+            {
+                maximum = numericAttribute.Maximum;
+                minimum = numericAttribute.Minimum;
+                defaultValue = numericAttribute.DefaultValue.ToString();
+            }
+            if (domain is TextAttribute textAttribute)
+            {
+                defaultValue = textAttribute.DefaultValue;
+            }
+
+            AttributeDTO dto = new()
+            {
+                Name = domain.Name,
+                Type = domain.DataType,
+                Id = domain.Id,
+                IsAscending = domain.IsAscending,
+                IsCalculated = domain.IsCalculated,
+                AggregationRuleType = domain.AggregationRuleType,
+                Command = domain.Command,
+                DefaultValue = defaultValue,
+                Maximum = maximum,
+                Minimum = minimum,
+                DataSource = dataSourceDTO,
+            };
+            return dto;
         }
 
         public static AttributeDTO ToDto(this AttributeEntity entity) =>

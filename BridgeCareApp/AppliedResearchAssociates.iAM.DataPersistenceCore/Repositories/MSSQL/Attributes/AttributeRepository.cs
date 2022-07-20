@@ -217,8 +217,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Distinct()
                 .ToList();
             return Task.Factory.StartNew(() => aggregationTypes);
-
         }
+
         public Task<List<string>> GetAttributeDataTypes()
         {
             var dataTypes = _unitOfWork.Context.Attribute
@@ -243,7 +243,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-            // WjJake -- calling out the .Include I added here. It's needed for my code likely but idk about other peoples' code.
             return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
         }
 

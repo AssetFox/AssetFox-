@@ -27,6 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var networkName = RandomStrings.WithPrefix("Network");
             var config = _testHelper.Config;
+            var allNetworksBefore = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
             var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);

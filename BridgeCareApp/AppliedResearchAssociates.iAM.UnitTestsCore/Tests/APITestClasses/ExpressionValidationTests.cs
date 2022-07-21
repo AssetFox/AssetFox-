@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
+        private static readonly Guid MaintainableAssetLocationId = Guid.Parse("14580d3b-d99a-45f6-b854-adaa3f78910d");
 
         private ExpressionValidationController SetupController()
         {
@@ -42,7 +43,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private AttributeEntity TextAttribute { get; set; }
 
         private MaintainableAssetEntity TestMaintainableAsset { get; } =
-            new MaintainableAssetEntity { Id = MaintainableAssetId };
+            new MaintainableAssetEntity {
+                Id = MaintainableAssetId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                {
+                    Id = MaintainableAssetLocationId,
+                    LocationIdentifier = "TestLocationIdentifier2",
+                    Discriminator = DataPersistenceConstants.SectionLocation,
+                    MaintainableAssetId = MaintainableAssetId,
+                }
+            };
 
         private AggregatedResultEntity TestNumericAggregatedResult { get; } = new AggregatedResultEntity
         {
@@ -84,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 TestDataHaveBeenAdded = true;
                 TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
                 _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-
+                var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
                 TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
                 TestTextAggregatedResult.AttributeId = TextAttribute.Id;
                 _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
@@ -229,8 +239,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var controller = SetupController();
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
-            // on passing runs, the attribute is CULV_DURATION_N.
+                .First(_ => _.Name == "CULV_DURATION_N");
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),

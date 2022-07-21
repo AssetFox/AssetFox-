@@ -8,13 +8,16 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
+using BridgeCareCore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using BridgeCareCore.Utils;
 
 namespace BridgeCareCore.Controllers
 {
@@ -45,22 +48,26 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
         [Authorize]
-        public async Task<IActionResult> CreateNetwork(string networkName, AttributeDTO networkDefinitionAttribute, string defaultEquation)
+        public async Task<IActionResult> CreateNetwork(string networkName, NetworkCreationParameters parameters)
         {
             try
             {
-                var attribute = AttributeMapper.ToDomain(networkDefinitionAttribute);
+                var idAttribute = AttributeService.ConvertAllAttribute(parameters.NetworkDefinitionAttribute);
+
+                var attribute = AttributeMapper.ToDomain(idAttribute);
                 var result = await Task.Factory.StartNew(() =>
                 {
                     // throw an exception if not network definition attribute is present
-                    if (attribute == null || string.IsNullOrEmpty(defaultEquation))
+                    if (attribute == null || string.IsNullOrEmpty(parameters.DefaultEquation))
                     {
                         throw new InvalidOperationException("Network definition rules do not exist, or the default equation is not specified");
                     }
 
                     // create network domain model from attribute data created from the network attribute
+                    var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
+                    var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute)), defaultEquation);
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, parameters.NetworkDefinitionAttribute.DataSource, UnitOfWork)), parameters.DefaultEquation);
                     network.Name = networkName;
 
                     // insert network domain data into the data source

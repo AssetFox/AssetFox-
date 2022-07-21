@@ -1,5 +1,8 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
 {
@@ -77,6 +80,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
                 IsCalculated = false,
                 IsAscending = true
             };
+
+        public static AttributeDTO District(BaseDataSourceDTO dataSourceDTO) => new()
+        {
+            Name = "DISTRICT",
+            AggregationRuleType = TextAttributeAggregationRules.Predominant,
+            Id = Guid.NewGuid(),
+            Command = "DistrictCommand",
+            DefaultValue = "Default District",
+            Type = "STRING",
+            IsAscending = false,
+            IsCalculated = false,
+            DataSource = dataSourceDTO,
+        };
+
         public static AttributeDTO SubSeeded => new()
         {
             Id = Guid.Parse("2ea9ef40-a59d-4cdf-ae75-f5596d4030a5"),

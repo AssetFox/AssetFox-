@@ -72,5 +72,49 @@ namespace BridgeCareCore.Services
                 }).ToList();
         }
 
+        public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)
+        {
+            var result = new AttributeDTO
+            {
+                Id = allAttribute.Id,
+                Name = allAttribute.Name,
+                AggregationRuleType = allAttribute.AggregationRuleType,
+                Command = allAttribute.Command,
+                DefaultValue = allAttribute.DefaultValue,
+                IsAscending = allAttribute.IsAscending,
+                IsCalculated = allAttribute.IsCalculated,
+                Maximum = allAttribute.Maximum,
+                Minimum = allAttribute.Minimum,
+                Type = allAttribute.Type
+            };
+            var dataSourceType = allAttribute.DataSource.Type;
+
+            switch (dataSourceType)
+            {
+            case "SQL":
+                var sqlSource = new SQLDataSourceDTO
+                {
+                    Id = allAttribute.DataSource.Id,
+                    Name = allAttribute.DataSource.Name,
+                    ConnectionString = allAttribute.DataSource.ConnectionString
+                };
+                result.DataSource = sqlSource;
+                return result;
+            case "Excel":
+                var excelSource = new ExcelDataSourceDTO
+                {
+                    Id = allAttribute.DataSource.Id,
+                    Name = allAttribute.DataSource.Name,
+                    LocationColumn = allAttribute.DataSource.LocationColumn,
+                    DateColumn = allAttribute.DataSource.DateColumn
+                };
+                result.DataSource = excelSource;
+                return result;
+            case "None":
+                return result;
+            default:
+                throw new ArgumentException($"Unable to convert All Attribute Data with a type of {allAttribute.Type}");
+            }
+        }
     }
 }

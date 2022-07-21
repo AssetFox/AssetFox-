@@ -11,8 +11,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
@@ -82,7 +82,7 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, UserInfo, attributes);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, attributes);
                 if (result)
                 {
                     return Ok();

@@ -2298,6 +2298,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.ToTable("MaintainableAssetLocation");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkAttributeEntity", b =>
+                {
+                    b.Property<Guid>("AttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("NetworkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("AttributeId", "NetworkId");
+
+                    b.HasIndex("NetworkId");
+
+                    b.ToTable("NetworkAttribute");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2309,6 +2336,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("KeyAttributeId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
@@ -4679,6 +4709,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Navigation("MaintainableAsset");
                 });
 
+            modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkAttributeEntity", b =>
+                {
+                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
+                        .WithMany("AttributeJoins")
+                        .HasForeignKey("NetworkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Network");
+                });
+
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkRollupDetailEntity", b =>
                 {
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", "Network")
@@ -5664,6 +5705,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.NetworkEntity", b =>
                 {
                     b.Navigation("AnalysisMaintainableAssets");
+
+                    b.Navigation("AttributeJoins");
 
                     b.Navigation("BenefitQuantifier");
 

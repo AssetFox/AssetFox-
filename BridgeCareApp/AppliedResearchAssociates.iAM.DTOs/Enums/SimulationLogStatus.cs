@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis.Engine
+﻿namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public enum SimulationLogStatus
     {

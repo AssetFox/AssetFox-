@@ -1,12 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
     </PropertyGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
-    </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Helpers\" />

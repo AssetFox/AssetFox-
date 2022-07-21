@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -10,11 +12,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
     {
         private Dictionary<string, Type> _reportLookup;
         private UnitOfDataPersistenceWork _dataRepository;
+        private readonly IHubService _hubService;
 
-        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary)
+        public DictionaryBasedReportGenerator(UnitOfDataPersistenceWork dataRepository, ReportLookupLibrary lookupLibrary, IHubService hubService)
         {
             _dataRepository = dataRepository;
             _reportLookup = lookupLibrary.Lookup;
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
         /// <summary>
@@ -30,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         /// <summary>
         /// Specific generator used to recreate reports from data persistence
         /// </summary>
-        private async Task<IReport> Generate(string reportName, ReportIndexEntity results)
+        private async Task<IReport> Generate(string reportName, ReportIndexDTO results)
         {
             if (!_reportLookup.ContainsKey(reportName))
             {
@@ -44,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 IReport generatedReport;
                 try
                 {
-                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results);
+                    generatedReport = (IReport)Activator.CreateInstance(_reportLookup[reportName], _dataRepository, reportName, results, _hubService);
                 }
                 catch
                 {
@@ -78,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 var listEntry = new ReportListItem()
                 {
                     ReportId = item.Id,
-                    ReportName = item.ReportTypeName
+                    ReportName = item.Type
                 };
                 itemList.Add(listEntry);
             }
@@ -91,11 +95,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var reportInformation = _dataRepository.ReportIndexRepository.Get(reportId);
             if (reportInformation == null) return null;
 
-            if (_reportLookup.ContainsKey(reportInformation.ReportTypeName))
+            if (_reportLookup.ContainsKey(reportInformation.Type))
             {
-                validReport = await Generate(reportInformation.ReportTypeName, reportInformation);
+                validReport = await Generate(reportInformation.Type, reportInformation);
                 validReport.ID = reportInformation.Id;
-                validReport.SimulationID = reportInformation.SimulationID;
+                validReport.SimulationID = reportInformation.SimulationId;
                 return validReport;
             }
             else

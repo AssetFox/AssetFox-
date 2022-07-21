@@ -20,28 +20,22 @@
       <v-card-text>
           <v-layout align-start row>
             <v-chip
-                        color="ara-blue-bg"
-                        text-color="white"
-                        @click="onGenerateReport(true)"
-                    >
-                        Generate Summary Report
-                    </v-chip>
-                    <v-divider vertical></v-divider>
+                color="ara-blue-bg"
+                text-color="white"
+                @click="onGenerateReport(true)"
+            >
+                Generate Summary Report
+            </v-chip>
+            <v-divider vertical></v-divider>
             <v-chip color='ara-blue-bg' text-color='white' @click="onDownloadSimulationLog(true)">
-                            Simulation Log
-                        </v-chip>
+                Simulation Log
+            </v-chip>
           </v-layout>
-        <v-alert :value="errorMessage !== ''"
-                 color="error"
-                 icon="warning"
-                 outline>
-          {{ errorMessage }}
-        </v-alert>
       </v-card-text>
       <v-divider></v-divider>
       <v-card-actions>
           <v-chip
-                 @click="onDownloadReports()"
+                 @click="onDownloadReport()"
                  class="green darken-2 white--text">
             Download summary report
           </v-chip>
@@ -55,9 +49,11 @@ import Vue from 'vue';
 import {Component, Prop} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {ReportsDownloaderDialogData} from '@/shared/models/modals/reports-downloader-dialog-data';
-import FileDownload from 'js-file-download';
 import ReportsService from '@/services/reports.service';
 import {AxiosResponse} from 'axios';
+import { FileInfo } from '@/shared/models/iAM/file-info';
+import FileDownload from 'js-file-download';
+import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
 
 @Component({})
@@ -69,23 +65,26 @@ export default class ReportsDownloaderDialog extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
-    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];
-    errorMessage: string = '';
+    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];    
     isDownloading: boolean = false;
+    reportIndexID: string = getBlankGuid();
 
     async onGenerateReport(download: boolean) {
-        if (download) {
-            this.errorMessage = '';
+        if (download) {            
             this.isDownloading = true;
             this.dialogData.showModal = false;
             await ReportsService.generateReport(
-                this.dialogData.networkId,
-                this.dialogData.scenarioId,
+                this.dialogData.scenarioId
             ).then((response: AxiosResponse<any>) => {
                 this.isDownloading = false;
                 if (response.status == 200) {
+                    if (hasValue(response, 'data')) {
+                        const resultId: string = response.data as string;
+                        this.reportIndexID = resultId;
+                    }
+
                     this.addSuccessNotificationAction({
-                        message: 'Summary report is being generated',
+                        message: 'Summary report generation started.',
                     });
                 } else {
                     this.addErrorNotificationAction({
@@ -100,36 +99,28 @@ export default class ReportsDownloaderDialog extends Vue {
         }
     }
 
-    async onDownloadReports() {
-        this.errorMessage = '';
+    async onDownloadReport() {        
         this.isDownloading = true;
-        this.dialogData.showModal = false;
+        this.dialogData.showModal = false;        
         await ReportsService.downloadReport(
-            this.dialogData.networkId,
-            this.dialogData.scenarioId,
+            this.dialogData.scenarioId, "BAMSSummaryReport"
         ).then((response: AxiosResponse<any>) => {
             this.isDownloading = false;
             if (hasValue(response, 'data')) {
-                this.addSuccessNotificationAction({
-                    message: 'Report downloaded',
-                });
-                FileDownload(
-                    response.data,
-                    `Summary Report ${this.dialogData.name}.xlsx`,
-                );
+                const fileInfo: FileInfo = response.data as FileInfo;
+                FileDownload(convertBase64ToArrayBuffer(fileInfo.fileData), fileInfo.fileName, fileInfo.mimeType);
             } else {
                 this.addErrorNotificationAction({
-                    message: 'Failed to generate report.',
+                    message: 'Failed to download report.',
                     longMessage:
-                        'Failed to generate the summary report. Make sure the scenario has been run',
+                        'Failed to download the summary report. Make sure the scenario has been run',
                 });
             }
         });
     }
 
     async onDownloadSimulationLog(download: boolean) {
-        if (download) {
-            this.errorMessage = '';
+        if (download) {            
             this.isDownloading = true;
             this.dialogData.showModal = false;
             await ReportsService.downloadSimulationLog(

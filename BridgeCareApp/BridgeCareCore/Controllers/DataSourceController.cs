@@ -4,15 +4,17 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using System.Linq;
 
 namespace BridgeCareCore.Controllers
 {
@@ -143,7 +145,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.DataSourceRepo.GetDataSourceTypes());
+                var dataSourceArray = (DataSourceTypeStrings[])Enum.GetValues(typeof(DataSourceTypeStrings));
+                var result = dataSourceArray.Select(v => v.ToString()).ToList();
                 return Ok(result);
             }
             catch (Exception e)

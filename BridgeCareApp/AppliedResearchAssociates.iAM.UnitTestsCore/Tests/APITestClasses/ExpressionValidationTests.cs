@@ -79,7 +79,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void AddTestData()
         {
-            // WjTodo -- can/should this work via a repo?
             if (!TestDataHaveBeenAdded)
             {
                 TestDataHaveBeenAdded = true;
@@ -223,7 +222,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjTodo Saw a HeisenFailure here 6/16/2022 and again 6/21/2022. The ValidationResult was not valid. No idea why.
+        // Saw a HeisenFailure here 6/16/2022 and again 6/21/2022. The ValidationResult was not valid. No idea why.
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
@@ -276,7 +275,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]
+        [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself.")]
         public void ShouldInvalidatePiecewiseEquations()
         {
             // Act + Assert

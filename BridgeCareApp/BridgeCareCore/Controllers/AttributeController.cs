@@ -9,8 +9,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
@@ -76,7 +78,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await UnitOfWork.AttributeRepo.GetAttributeDataTypes();
+                var result = await UnitOfWork.AttributeRepo.GetAttributeDataSourceTypes();
                 return Ok(result);
             }
             catch (Exception e)
@@ -108,14 +110,15 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttributes")]
         [Authorize]
-        public async Task<IActionResult> CreateAttributes(List<AttributeDTO> attributeDTOs)
+        public async Task<IActionResult> CreateAttributes(List<AllAttributeDTO> attributeDTOs)
         {
             try
             {
+                var convertedAttributes = attributeDTOs.Select(AttributeService.ConvertAllAttribute).ToList();
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDTOs);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributes);
                     UnitOfWork.Commit();
                 });
 
@@ -132,14 +135,15 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttribute")]
         [Authorize]
-        public async Task<IActionResult> CreateAttribute(AttributeDTO attributeDto)
+        public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
             {
+                var convertedAttributeDto = AttributeService.ConvertAllAttribute(attributeDto);
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+                    UnitOfWork.AttributeRepo.UpsertAttributes(convertedAttributeDto);
                     UnitOfWork.Commit();
                 });
 
@@ -181,47 +185,5 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
-        // Wjwjwj commented out 6/20 8am while working on attribute import.
-        // I'm guessing in the new world this will no longer exist?
-        //[HttpPost]
-        //[Route("ImportAttributesExcelFile")]
-        //[Authorize]
-        //public async Task<IActionResult> ImportAttributesExcelFile(
-        //    string keyColumnName,
-        //    string inspectionDateColumnName,
-        //    string spatialWeighting)
-        //{
-        //    try
-        //    {
-        //        if (!ContextAccessor.HttpContext.Request.HasFormContentType)
-        //        {
-        //            throw new ConstraintException("Request MIME type is invalid.");
-        //        }
-
-        //        if (ContextAccessor.HttpContext.Request.Form.Files.Count < 1)
-        //        {
-        //            throw new ConstraintException("Attributes file not found.");
-        //        }
-
-        //        var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-
-        //        var result = await Task.Factory.StartNew(() =>
-        //        {
-        //            return _attributeImportService.ImportExcelAttributes(keyColumnName, inspectionDateColumnName, spatialWeighting, excelPackage);
-        //        });
-
-        //        if (result.WarningMessage != null)
-        //        {
-        //            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
-        //        }
-        //        return Ok();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
-        //        throw;
-        //    }
-        //}
     }
 }

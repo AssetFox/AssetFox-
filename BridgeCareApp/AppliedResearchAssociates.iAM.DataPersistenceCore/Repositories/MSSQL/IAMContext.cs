@@ -143,6 +143,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<NetworkEntity> Network { get; set; }
 
+        public virtual DbSet<NetworkAttributeEntity> NetworkAttribute { get; set; }
+
         public virtual DbSet<PerformanceCurveEntity> PerformanceCurve { get; set; }
 
         public virtual DbSet<PerformanceCurveEquationEntity> PerformanceCurveEquation { get; set; }
@@ -1310,6 +1312,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.KeyAttributeId).IsRequired();
+            });
+
+            modelBuilder.Entity<NetworkAttributeEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.AttributeId, e.NetworkId });
+
+                entity.Property(e => e.NetworkId).IsRequired();
+
+                entity.Property(e => e.AttributeId).IsRequired();
+
+                entity.HasOne(j => j.Network)
+                    .WithMany(n => n.AttributeJoins)
+                    .HasForeignKey(j => j.NetworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<PerformanceCurveEntity>(entity =>

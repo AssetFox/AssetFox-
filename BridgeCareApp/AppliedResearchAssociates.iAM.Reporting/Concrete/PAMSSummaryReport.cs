@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexEntity results)
+        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

@@ -386,6 +386,7 @@ export const convertCriteriaExpressionToCriteriaObject = (
 ) => {
     try {
         if (hasValue(expression)) {
+            expression = expression.replace(/  +/g, ' ');
             return createCriteriaObject(
                 expression.trim(),
                 clone(emptyCriteria),

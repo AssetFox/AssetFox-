@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -42,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private List<SegmentAttributeDatum> segmentData;
         private InventoryParameters segmentIds;
 
-        public InventoryReport(UnitOfDataPersistenceWork uow, string name, ReportIndexEntity results)
+        public InventoryReport(UnitOfDataPersistenceWork uow, string name, ReportIndexDTO results)
         {
             _unitofwork = uow;
             ReportTypeName = name;

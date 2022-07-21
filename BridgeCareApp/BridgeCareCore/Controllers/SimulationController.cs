@@ -8,7 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Static;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
@@ -245,7 +246,7 @@ namespace BridgeCareCore.Controllers
                     });
                 }
 
-                await analysisHandle.WorkCompletion;
+                //await analysisHandle.WorkCompletion;
                 return Ok();
             }
             catch (Exception e)

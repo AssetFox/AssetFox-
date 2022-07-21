@@ -25,6 +25,7 @@ using Xunit;
 using MoreLinq;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {

@@ -1,6 +1,19 @@
+import { getBlankGuid } from "@/shared/utils/uuid-utils";
+import { clone } from "ramda";
+import { Datasource, emptyDatasource } from "./data-source";
+
 export interface Attribute {
+    id: string
     name: string;
     type: string;
+    aggregationRuleType: string;
+    command: string;
+    defaultValue: string;
+    minimum: number | null;
+    maximum: number | null;
+    isCalculated: boolean;
+    isAscending: boolean;
+    dataSource: Datasource;
 }
 
 export interface NetworkAttributes {
@@ -18,4 +31,18 @@ export interface AttributeSelectValuesResult {
     values: string[];
     resultMessage: string;
     resultType: string;
+}
+
+export const emptyAttribute: Attribute = {
+    id: getBlankGuid(),
+    isAscending: false,
+    isCalculated: false,
+    aggregationRuleType: '',
+    command: '',
+    defaultValue: '',
+    minimum: 0,
+    maximum: 0,
+    name: '',
+    type: 'STRING',
+    datasource: clone(emptyDatasource)
 }

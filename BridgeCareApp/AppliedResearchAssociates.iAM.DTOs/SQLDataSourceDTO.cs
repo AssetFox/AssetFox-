@@ -12,13 +12,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string ConnectionString { get; set; }
 
-        public override string MapDetails() => ConnectionString;
-
-        public override void PopulateDetails(string details)
-        {
-            ConnectionString = details;
-        }
-
         public override bool Validate() => true;
     }
 }

@@ -26,10 +26,18 @@
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Common\AppliedResearchAssociates.iAM.Common.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.Data\AppliedResearchAssociates.iAM.Data.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.TestHelpers\AppliedResearchAssociates.iAM.TestHelpers.csproj" />
+    <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="DataTestSetup\SampleAttributeData.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="testConnections.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="xunit.runner.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

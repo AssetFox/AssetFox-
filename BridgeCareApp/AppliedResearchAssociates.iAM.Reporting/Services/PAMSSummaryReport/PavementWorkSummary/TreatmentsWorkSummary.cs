@@ -45,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -56,24 +56,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
             AddFullDepthAsphaltTreatmentSegmentMiles(worksheet, currentCell,
-                segmentMilesPerTreatmentPerYear,
+                lengthPerTreatmentPerYear,
                 categoryHTreatments
                 );
         }
 
 
         private void AddFullDepthAsphaltTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-            worksheet.Cells[row++, column].Value = PAMSConstants.Total;
+            worksheet.Cells[row++, column].Value = PAMSConstants.AsphaltTotal;
             column++;
             var fromColumn = column + 1;
-            foreach (var yearlyValues in segmentMilesPerTreatmentPerYear)
+            foreach (var yearlyValues in lengthPerTreatmentPerYear)
             {
                 row = startRow;
                 column = ++column;
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.segmentMiles;
+                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
                     //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                     row++;
                 }
@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         ExcelWorksheet worksheet,
         CurrentCell currentCell,
         List<int> simulationYears,
-        Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+        Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
         List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
         )
     {
@@ -110,24 +110,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             categoryHTreatments.AddRange(simulationTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)));
 
             AddCompositeTreatmentSegmentMiles(worksheet, currentCell,
-            segmentMilesPerTreatmentPerYear,
+            lengthPerTreatmentPerYear,
             categoryHTreatments
             );
     }
 
 
     private void AddCompositeTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-        Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+        Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
         List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
         )
     {
         int startRow, startColumn, row, column;
         _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
         _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-        worksheet.Cells[row++, column].Value = PAMSConstants.Total;
+        worksheet.Cells[row++, column].Value = PAMSConstants.CompositeTotal;
         column++;
         var fromColumn = column + 1;
-        foreach (var yearlyValues in segmentMilesPerTreatmentPerYear)
+        foreach (var yearlyValues in lengthPerTreatmentPerYear)
         {
             row = startRow;
             column = ++column;
@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             foreach (var treatment in simulationTreatments)
             {
                 yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                worksheet.Cells[row, column].Value = costAndLength.segmentMiles;
+                worksheet.Cells[row, column].Value = costAndLength.length / 5280;
                 //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                 row++;
             }
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
@@ -162,24 +162,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Segment Miles of Concrete Pavement Treatments", "PAMS Concrete Treatments");
             AddConcreteTreatmentSegmentMiles(worksheet, currentCell,
-                segmentMilesPerTreatmentPerYear,
+                lengthPerTreatmentPerYear,
                 categoryJTreatments
                 );
         }
 
 
         private void AddConcreteTreatmentSegmentMiles(ExcelWorksheet worksheet, CurrentCell currentCell,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int segmentMiles)>> segmentMilesPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> lengthPerTreatmentPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, simulationTreatments, ref row, ref column);
-            worksheet.Cells[row++, column].Value = PAMSConstants.Total;
+            worksheet.Cells[row++, column].Value = PAMSConstants.ConcreteTotal;
             column++;
             var fromColumn = column + 1;
-            foreach (var yearlyValues in segmentMilesPerTreatmentPerYear)
+            foreach (var yearlyValues in lengthPerTreatmentPerYear)
             {
                 row = startRow;
                 column = ++column;
@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.segmentMiles;
+                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
                     //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
                     row++;
                 }

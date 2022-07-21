@@ -47,11 +47,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
             var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
+            var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
+
             //var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             //var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
             //var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
 
-            FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear); //, yearlyCostCommittedProj, countForCompletedProject, countForCompletedCommittedProject);
+            FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear); //, yearlyCostCommittedProj, countForCompletedProject, countForCompletedCommittedProject);
 
 
             //var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
@@ -75,7 +77,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         private void FillDataToUseInExcel(
             SimulationOutput reportOutputData,
             //Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             //Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> yearlyCostCommittedProj,
             //Dictionary<int, Dictionary<string, int>> countForCompletedProject,
             //Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject
@@ -86,16 +89,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             //var isInitialYear = true;
             foreach (var yearData in reportOutputData.Years)
             {
-                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int count)>());
-                //yearlyCostCommittedProj.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int count)>());
-                //costPerBPNPerYear.Add(yearData.Year, new Dictionary<string, decimal>());
-                //countForCompletedProject.Add(yearData.Year, new Dictionary<string, int>());
-                //countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
+                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
 
                 foreach (var section in yearData.Assets)
                 {
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
-                    PopulateWorkedOnCostAndLength(yearData.Year, section, costAndLengthPerTreatmentPerYear, cost);
+                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
 
                     //if (section.TreatmentCause == TreatmentCause.CommittedProject &&
                     //    section.AppliedTreatment.ToLower() != PAMSConstants.NoTreatment)
@@ -135,8 +136,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
         }
 
-        private void PopulateWorkedOnCostAndLength(int year, AssetDetail section,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear, decimal cost)
+        private void PopulateTreatmentCostAndLength(
+            int year,
+            AssetDetail section,
+            decimal cost,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear
+            )
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
             if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
@@ -150,6 +155,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 values.PavementCount += (int) segmentLength;
                 costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
             }
+        }
+
+        private void PopulateTreatmentGroupCostAndLength(
+            int year,
+            AssetDetail section,
+            decimal cost,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear
+            )
+        {
+            var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+            var treatmentGroups = GetTreatmentGroups(section.AppliedTreatment);
+
+
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
+            {
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
+            }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
+                values.treatmentCost += cost;
+                values.PavementCount += (int)segmentLength;
+                costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
+            }
+        }
+
+
+        List<string> GetTreatmentGroups(string appliedTreatment)
+        {
+            var treatments = appliedTreatment.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         }
 
         private void PopulateCompletedProjectCount(int year, AssetDetail section, Dictionary<int, Dictionary<string, int>> countForCompletedProject)

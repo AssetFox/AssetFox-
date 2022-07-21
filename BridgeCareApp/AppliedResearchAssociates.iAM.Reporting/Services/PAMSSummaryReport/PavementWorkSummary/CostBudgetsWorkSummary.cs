@@ -79,7 +79,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Full Depth Asphalt Work", "PAMS Full Depth Asphalt Work");
 
             var categoryHTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("h")).ToList();
-            categoryHTreatments.AddRange(simulationTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)));
 
             var workTypeTotalFullDepthAsphalt = AddCostsOfFullDepthAsphaltWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryHTreatments);
 
@@ -198,7 +197,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Composite Work", "PAMS Composite Work");
 
             var categoryHTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("h")).ToList();
-            categoryHTreatments.AddRange(simulationTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)));
 
             var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryHTreatments);
 
@@ -321,7 +319,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Concrete Work", "PAMS Concrete Work");
 
             var categoryJTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("j")).ToList();
-            categoryJTreatments.AddRange(simulationTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)));
 
             var workTypeConcrete = AddCostsOfConcreteWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryJTreatments);
 

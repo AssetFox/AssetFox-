@@ -9,7 +9,7 @@ using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
 {
     public class PredominantAggregationRuleTests
     {

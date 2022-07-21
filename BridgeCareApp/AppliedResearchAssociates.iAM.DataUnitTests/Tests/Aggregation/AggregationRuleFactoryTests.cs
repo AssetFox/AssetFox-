@@ -4,7 +4,7 @@ using System;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
 {
     public class AggregationRuleFactoryTests
     {

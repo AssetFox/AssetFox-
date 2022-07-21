@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Excel
 {
     public static class TestExcelCellData
     {

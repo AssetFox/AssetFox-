@@ -10,7 +10,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Networking
 {
     public class MaintainableAssetTests
     {

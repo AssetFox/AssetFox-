@@ -6,7 +6,7 @@ using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Excel
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Excel
 {
     public class ExcelRawDataSerializationTests
     {

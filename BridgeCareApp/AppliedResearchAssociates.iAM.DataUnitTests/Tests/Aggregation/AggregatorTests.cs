@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
 {
     public class AggregatorTests
     {

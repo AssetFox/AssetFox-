@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Helpers;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Parsing
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Parsing
 {
     public class DoubleParseHelperTests
     {

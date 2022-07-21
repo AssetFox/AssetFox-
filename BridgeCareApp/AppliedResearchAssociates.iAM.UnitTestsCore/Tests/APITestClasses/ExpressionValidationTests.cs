@@ -230,6 +230,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var controller = SetupController();
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
                 .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
+            // on passing runs, the attribute is CULV_DURATION_N.
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -246,7 +247,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             if (!validationResult.IsValid)
             {
                 // Occasional test failure here. A breakpoint may hopefully catch it in the act someday.
-                Assert.Equal("dummy assert to print the message", validationResult.ValidationMessage);
+                Assert.Equal("dummy assert to print the message", NumericAttribute.Name + " " + validationResult.ValidationMessage);
                 Assert.True(validationResult.IsValid); 
             }
             Assert.Equal("Success", validationResult.ValidationMessage);

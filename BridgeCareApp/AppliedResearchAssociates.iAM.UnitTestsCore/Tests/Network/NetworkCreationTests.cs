@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         private TestHelper _testHelper => TestHelper.Instance;
 
         [Fact]
-        public void CreateNetworkViaFactoryAndRepository_Does()
+        public async Task CreateNetworkViaFactoryAndRepository_Does()
         {
             var networkName = RandomStrings.WithPrefix("Network");
             var config = _testHelper.Config;
@@ -51,7 +51,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // insert network domain data into the data source
             _testHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
 
-            var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            List<TNetwork> allNetworks = null;
+            await Task.Delay(10000);
+            try
+            {
+                allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            }
+            catch
+            {
+                Assert.False(true, $"failed on network {network.Id} with asset {network.MaintainableAssets.Single().Id}");
+            }
             var actual = allNetworks.Single(n => n.Id == networkId);
         }
     }

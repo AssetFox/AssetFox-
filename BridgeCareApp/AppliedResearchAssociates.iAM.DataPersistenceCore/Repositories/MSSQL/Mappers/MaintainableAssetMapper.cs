@@ -10,6 +10,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     {
         public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
         {
+            if (entity.MaintainableAssetLocation == null)
+            {
+                int x = 666;
+            }
             var maintainableAsset = new MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);
 

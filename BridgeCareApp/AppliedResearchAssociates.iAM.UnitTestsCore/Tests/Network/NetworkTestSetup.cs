@@ -33,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // insert network domain data into the data source
             unitOfWork.NetworkRepo.CreateNetwork(network);
+            var allNetworks = unitOfWork.NetworkRepo.GetAllNetworks();
             return network;
         }
     }

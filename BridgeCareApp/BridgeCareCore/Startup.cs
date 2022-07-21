@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace BridgeCareCore
 {
@@ -74,18 +75,24 @@ namespace BridgeCareCore
                 sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
-            // Setup reporting
+            SetupReporting(services);
             var reportLookup = new Dictionary<string, Type>();
-            reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
-            reportLookup.Add("InventoryLookup", typeof(InventoryReport));
-            reportLookup.Add("ScenarioOutput", typeof(ScenarioOutputReport));
 
-            reportLookup.Add("BAMSSummaryReport", typeof(BAMSSummaryReport));
             reportLookup.Add("PAMSSummaryReport", typeof(PAMSSummaryReport));
 
-            services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
+        }
+
+        private void SetupReporting(IServiceCollection services)
+        {
+            var reportFactoryList = new List<IReportFactory>();
+            reportFactoryList.Add(new HelloWorldReportFactory());
+            reportFactoryList.Add(new InventoryReportFactory());
+            reportFactoryList.Add(new BAMSSummaryReportFactory());
+            reportFactoryList.Add(new ScenarioOutputReportFactory());
+            reportFactoryList.Add(new PAMSSummaryReportFactory());
+            services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

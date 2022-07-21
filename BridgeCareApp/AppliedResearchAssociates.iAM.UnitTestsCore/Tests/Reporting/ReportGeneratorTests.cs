@@ -66,21 +66,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         }
 
         [Fact]
-        public async Task GeneeratorReturnsFailureReportWhenReportIsMissingProperConstructor()
-        {
-            // Arrange
-            string badReport = "Bad Report";
-
-            // Act
-            IReport report = await _generator.Generate(badReport);
-
-            // Assert
-            Assert.Equal(ReportType.HTML, report.Type);
-            Assert.Equal("Failure Report", report.ReportTypeName);
-            Assert.True(report.Errors.Count() > 0);
-        }
-
-        [Fact]
         public void GeneratorReturnsAllScenarioReports()
         {
             // Arrange

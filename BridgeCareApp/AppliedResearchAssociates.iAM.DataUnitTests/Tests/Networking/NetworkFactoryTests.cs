@@ -1,10 +1,10 @@
 ﻿using Xunit;
 using System;
-using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
 {

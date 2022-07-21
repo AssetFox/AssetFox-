@@ -1,6 +1,5 @@
 ﻿using Xunit;
 using System;
-using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Data.Attributes;
@@ -9,6 +8,7 @@ using Moq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Networking
 {

@@ -3,7 +3,6 @@ using Moq;
 using System;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
-using AppliedResearchAssociates.iAM.DataAssignmentUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataAssignmentUnitTests.Tests.Aggregation
 {

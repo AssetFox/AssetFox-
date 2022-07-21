@@ -167,17 +167,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
             var treatmentGroups = GetTreatmentGroups(section.AppliedTreatment);
 
-
-            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
-            {
-                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
-            }
-            else
-            {
-                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
-                values.treatmentCost += cost;
-                values.PavementCount += (int)segmentLength;
-                costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
+            foreach (var treatmentGroup in treatmentGroups)
+            { 
+                if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
+                {
+                    costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
+                }
+                else
+                {
+                    var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
+                    values.treatmentCost += cost;
+                    values.PavementCount += (int)segmentLength;
+                    costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
+                }
             }
         }
 
@@ -185,6 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         List<string> GetTreatmentGroups(string appliedTreatment)
         {
             var treatments = appliedTreatment.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            return treatments.ToList();
         }
 
         private void PopulateCompletedProjectCount(int year, AssetDetail section, Dictionary<int, Dictionary<string, int>> countForCompletedProject)

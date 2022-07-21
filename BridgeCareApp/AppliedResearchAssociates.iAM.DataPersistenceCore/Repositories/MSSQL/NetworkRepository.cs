@@ -28,9 +28,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             //_unitOfWork.Context.Upsert(networkEntity, networkEntity.Id, _unitOfWork.UserEntity?.Id);
 
+            _unitOfWork.BeginTransaction();
             _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(network.MaintainableAssets.ToList(), network.Id);
+            _unitOfWork.Commit();
         }
 
         public void CreateNetwork(Analysis.Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);

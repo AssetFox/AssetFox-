@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
                 attributeName,
                 Guid.Empty,
                 CommonTestParameterValues.Name,
-                AttributeTypeNames.String,
+                AggregationRuleTypeNames.Predominant,
                 testCommand,
                 Data.ConnectionType.MSSQL,
                 connectionString,

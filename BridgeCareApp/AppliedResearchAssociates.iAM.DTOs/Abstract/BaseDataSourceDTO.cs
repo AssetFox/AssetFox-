@@ -8,9 +8,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
     public abstract class BaseDataSourceDTO : BaseDTO
     {
+        private string _type;
+
         public BaseDataSourceDTO(string typeName)
         {
-            Type = typeName;
+            _type = typeName;
         }
 
         /// <summary>
@@ -21,7 +23,10 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// <summary>
         /// The type of data source, provided by the specific instance of the data source
         /// </summary>
-        public string Type { get; private set; }
+        public virtual string Type {
+            get { return _type; }
+            set { /* Do Nothing */ }
+        }
 
         /// <summary>
         /// Indicates if the details should be obscured in the database

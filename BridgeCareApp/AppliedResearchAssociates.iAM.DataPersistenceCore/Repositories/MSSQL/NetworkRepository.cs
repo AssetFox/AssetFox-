@@ -140,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
             {
-                throw new RowNotInTableException("The specified network was not found."); // wjwjwj first failure here
+                throw new RowNotInTableException("The specified network was not found.");
             }
 
             var networkRollupDetailEntity = new NetworkRollupDetailEntity {NetworkId = networkId, Status = status};

@@ -26,9 +26,8 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var unitOfWork = UnitOfWorkSetup.New(config);
             DatabaseResetter.EnsureDatabaseExists(unitOfWork);
-            var dataSource = SqlDataSourceDtos.WithConnectionString(connectionString);
+            var dataSource = DataSourceTestSetup.DtoForSqlDataSourceInDb(unitOfWork, connectionString);
             var attribute = AttributeConnectionAttributes.String(connectionString, dataSource.Id);
-            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
             unitOfWork.AttributeRepo.UpsertAttributes(attribute);
             var sqlAttributeConnection = new SqlAttributeConnection(attribute, dataSource);
 

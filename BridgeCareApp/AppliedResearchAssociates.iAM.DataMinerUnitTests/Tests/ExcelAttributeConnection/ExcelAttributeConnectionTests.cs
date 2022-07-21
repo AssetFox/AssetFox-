@@ -27,13 +27,12 @@ namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
             var config = TestConfiguration.Get();
             var unitOfWork = UnitOfWorkSetup.New(config);
             DatabaseResetter.ResetDatabase(unitOfWork);
-            var dataSource = ExcelDataSourceDtos.WithColumnNames("Inspection_Date", "BRKEY");
+            var dataSource = DataSourceTestSetup.DtoForExcelDataSourceInDb(unitOfWork);
             var attribute = AttributeConnectionAttributes.ForExcelTestData(dataSource.Id);
             var importedSpreadsheet = ExcelRawDataSetup.RawData(dataSource.Id);
             var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(importedSpreadsheet.SerializedWorksheetContent);
             var rawDataSpreadsheet = deserializationResult.Worksheet;
 
-            unitOfWork.DataSourceRepo.UpsertDatasource(dataSource);
             unitOfWork.AttributeRepo.UpsertAttributes(attribute);
 
             var excelAttributeConnection = new ExcelAttributeConnection(attribute, dataSource, rawDataSpreadsheet);

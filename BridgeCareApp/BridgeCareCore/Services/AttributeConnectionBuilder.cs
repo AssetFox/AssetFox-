@@ -7,6 +7,7 @@ using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
@@ -14,6 +15,10 @@ namespace BridgeCareCore.Services
     {
         public static AttributeConnection Build(Attribute attribute, BaseDataSourceDTO dataSource, IUnitOfWork unitOfWork)
         {
+            if (dataSource is AllDataSource)
+            {
+                throw new InvalidOperationException("DataSource passed into AttributeConnection should not be an AllDataSource");
+            }
             switch (attribute.ConnectionType)
             {
             case ConnectionType.MSSQL:

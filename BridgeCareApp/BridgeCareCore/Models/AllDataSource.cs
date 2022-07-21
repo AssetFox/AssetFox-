@@ -10,6 +10,7 @@ namespace BridgeCareCore.Models
             Secure = false;
         }
 
+        public override string Type { get; set; }
         public string ConnectionString { get; set; }
         public string LocationColumn { get; set; }
         public string DateColumn { get; set; }

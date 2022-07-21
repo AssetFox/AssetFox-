@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
@@ -118,7 +119,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             AssetContexts = Simulation.Network.Assets
 #if !DEBUG
-                .AsParallel()
+                .AsParallel().
+                WithDegreeOfParallelism(Environment.ProcessorCount - 1)
 #endif
                 .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
@@ -282,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 action(item);
             }
 #else
-            _ = System.Threading.Tasks.Parallel.ForEach(items, action);
+            _ = System.Threading.Tasks.Parallel.ForEach(items, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount - 1 }, action);
 #endif
         }
 

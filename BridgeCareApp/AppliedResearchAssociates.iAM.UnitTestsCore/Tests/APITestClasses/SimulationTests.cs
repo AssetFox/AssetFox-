@@ -49,7 +49,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             _testHelper.CreateCalculatedAttributeLibrary();
 

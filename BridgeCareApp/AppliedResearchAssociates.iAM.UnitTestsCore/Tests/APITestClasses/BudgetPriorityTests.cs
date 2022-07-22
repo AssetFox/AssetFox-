@@ -213,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetPriorityLibraryDTO>));
-            Assert.True(dtos.Any(b => b.Name == BudgetPriorityLibraryEntityName));
+            Assert.Contains(dtos, b => b.Name == BudgetPriorityLibraryEntityName);
             var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
             Assert.True(dtos[0].BudgetPriorities.Count() > 0);
             Assert.Equal(_testBudgetPriority.PriorityLevel, budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel);

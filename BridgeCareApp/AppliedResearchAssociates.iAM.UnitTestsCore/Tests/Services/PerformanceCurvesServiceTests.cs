@@ -24,7 +24,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var dbContext = _testHelper.DbContext;
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.CreateSimulation();
             _testHelper.SetupDefaultHttpContext();
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
             if (!dbContext.PerformanceCurveLibrary.Any())

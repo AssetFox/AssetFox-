@@ -384,7 +384,7 @@ iAM-legacy/DatabaseManager.dll
 
 # test connection file
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestCore/testConnections.json
-/BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.DataUnitTests/testConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
 
 # esec file

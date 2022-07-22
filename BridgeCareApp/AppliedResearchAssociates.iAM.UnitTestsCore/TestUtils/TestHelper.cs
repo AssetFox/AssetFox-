@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             MockHubService = new Mock<HubService>(MockHubContext.Object);
-            var connectionString = Config.GetConnectionString("BridgeCareConnex");
+            var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);

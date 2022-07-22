@@ -307,7 +307,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
-            await Task.Delay(5000);
             var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id)[0];
             Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
             Assert.Equal(dtos[0].Year, modifiedDto.Year);

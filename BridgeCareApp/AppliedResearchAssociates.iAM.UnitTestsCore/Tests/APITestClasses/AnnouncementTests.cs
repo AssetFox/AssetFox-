@@ -16,12 +16,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnnouncementTests
     {
-        private readonly TestHelper _testHelper;
+        private readonly TestHelper _testHelper = TestHelper.Instance;
         private readonly AnnouncementController _controller;
 
         public AnnouncementTests()
         {
-            _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
             _controller = new AnnouncementController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);

@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndCountPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj,
             //Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
@@ -43,9 +43,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             //localSimulationTreatments.Remove((PAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
             //localSimulationTreatments.Remove((PAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
             //var costPerAsphaltTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
-            var totalFullDepthAsphaltWork = FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndCountPerTreatmentPerYear, localSimulationTreatments);
-            var totalCompositeWork = FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndCountPerTreatmentPerYear, localSimulationTreatments);
-            var totalConcreteWork = FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndCountPerTreatmentPerYear, localSimulationTreatments);
+            var totalFullDepthAsphaltWork = FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
+            var totalCompositeWork = FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
+            var totalConcreteWork = FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
 
 
             var totalTreatmentGroups = FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears);
@@ -111,9 +111,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             // Filling in the cost per treatment per year in the excel TAB
             foreach (var yearlyValues in costAndCountPerTreatmentPerYear)
             {
-                decimal asphaltTotalCost = 0;
                 row = startRow;
                 column = ++column;
+                decimal asphaltTotalCost = 0;
 
                 foreach (var treatment in simulationTreatments)
                 {
@@ -147,10 +147,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 asphaltTotalRow = row;
                 TotalAsphaltSpent.Add(yearlyValues.Key, asphaltTotalCost);
             }
+            // Format Data Cells
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(198, 224, 180));
 
+            // Format Total Cells
             ExcelHelper.ApplyColor(worksheet.Cells[asphaltTotalRow, fromColumn, asphaltTotalRow, column], Color.FromArgb(55, 86, 35));
             ExcelHelper.SetTextColor(worksheet.Cells[asphaltTotalRow, fromColumn, asphaltTotalRow, column], Color.White);
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);

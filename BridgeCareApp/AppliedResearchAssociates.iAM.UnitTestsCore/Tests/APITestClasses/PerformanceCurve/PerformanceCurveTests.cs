@@ -53,17 +53,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Shift = false
         };
 
-        public ScenarioPerformanceCurveEntity TestScenarioPerformanceCurve(Guid simulationId)
-        {
-            return new ScenarioPerformanceCurveEntity
-            {
-                Id = ScenarioPerformanceCurveId,
-                SimulationId = simulationId,
-                Name = "Test Name",
-                Shift = false,
-            };
-        }
-
         public EquationEntity TestEquation { get; } = new EquationEntity
         {
             Id = EquationId,
@@ -109,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(Guid simulationId)
         {
-            var performanceCurve = TestScenarioPerformanceCurve(simulationId);
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulationId, PerformanceCurveId);
             performanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
             _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
             _testHelper.UnitOfWork.Context.SaveChanges();
@@ -191,7 +180,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             SetupController(_testHelper.MockEsecSecurityAdmin);
-            var performanceCurve = TestScenarioPerformanceCurve(simulation.Id);
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, PerformanceCurveId);
             performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act
@@ -403,7 +392,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Email = "fake@pa.gov"
                 });
             SetupController(mockedUnauthorized);
-            var performanceCurve = TestScenarioPerformanceCurve(simulation.Id);
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, PerformanceCurveId);
             performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act

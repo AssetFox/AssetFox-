@@ -52,16 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // insert network domain data into the data source
             _testHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
 
-            List<TNetwork> allNetworks = null;
-            await Task.Delay(10000);
-            try
-            {
-                allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
-            }
-            catch
-            {
-                Assert.False(true, $"failed on network {network.Id} with asset {network.MaintainableAssets.Single().Id}");
-            }
+            var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var actual = allNetworks.Single(n => n.Id == networkId);
         }
     }

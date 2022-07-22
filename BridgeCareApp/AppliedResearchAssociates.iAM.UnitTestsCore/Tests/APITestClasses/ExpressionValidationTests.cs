@@ -94,7 +94,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 TestDataHaveBeenAdded = true;
                 TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
                 _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-                var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
                 TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
                 TestTextAggregatedResult.AttributeId = TextAttribute.Id;
                 _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>

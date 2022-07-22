@@ -18,7 +18,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var resolvedNetworkId = networkId ?? Guid.NewGuid();
             var network = new TNetwork(maintainableAssets, resolvedNetworkId);
             unitOfWork.NetworkRepo.CreateNetwork(network);
-            var allNetworks = unitOfWork.NetworkRepo.GetAllNetworks();
             return network;
         }
 

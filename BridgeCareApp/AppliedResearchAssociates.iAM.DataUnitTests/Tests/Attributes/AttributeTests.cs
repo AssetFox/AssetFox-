@@ -2,9 +2,9 @@ using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Xunit;
 using Moq;
 using System;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
 {
     public class AttributeTests
     {

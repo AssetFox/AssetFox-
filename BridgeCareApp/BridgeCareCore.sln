@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.i
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.ExcelHelpers", "AppliedResearchAssociates.iAM.ExcelHelpers\AppliedResearchAssociates.iAM.ExcelHelpers.csproj", "{972DE295-F120-4647-9E5E-3CA75D45F69E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataUnitTests", "AppliedResearchAssociates.iAM.DataMinerUnitTests\AppliedResearchAssociates.iAM.DataUnitTests.csproj", "{A29961E0-12F6-4400-BB35-525111B59422}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataUnitTests", "AppliedResearchAssociates.iAM.DataUnitTests\AppliedResearchAssociates.iAM.DataUnitTests.csproj", "{A29961E0-12F6-4400-BB35-525111B59422}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.DataAssignmentUnitTests", "AppliedResearchAssociates.iAM.DataAssignmentUnitTests\AppliedResearchAssociates.iAM.DataAssignmentUnitTests.csproj", "{9AE9E989-F7DC-4338-883E-099BF9D2DC2C}"
 EndProject

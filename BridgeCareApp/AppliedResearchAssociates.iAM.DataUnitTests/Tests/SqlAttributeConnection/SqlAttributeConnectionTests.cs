@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
 {
     public class SqlAttributeConnectionTests// also create tests for ExcelAttributeConnection
     {

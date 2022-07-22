@@ -4,10 +4,10 @@ using System;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
 {
     public class AttributeDataBuilderTests
     {

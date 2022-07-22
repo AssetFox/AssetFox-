@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests
+namespace AppliedResearchAssociates.iAM.DataUnitTests
 {
     public static class UnitOfWorkSetup
     {

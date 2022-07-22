@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public static class DataSourceTestSetup
     {

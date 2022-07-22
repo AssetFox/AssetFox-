@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.TestHelpers;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public static class AttributeConnectionAttributes
     {

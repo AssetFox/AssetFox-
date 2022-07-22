@@ -1,9 +1,9 @@
 ﻿using Xunit;
 using System;
 using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests.Attributes
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
 {
     public class AttributeFactoryTests
     {

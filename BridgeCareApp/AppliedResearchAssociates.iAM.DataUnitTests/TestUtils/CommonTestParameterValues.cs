@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils
+﻿namespace AppliedResearchAssociates.iAM.DataUnitTests.TestUtils
 {
     public static class CommonTestParameterValues
     {

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests
+namespace AppliedResearchAssociates.iAM.DataUnitTests
 {
     public static class TestConnectionStrings
     {

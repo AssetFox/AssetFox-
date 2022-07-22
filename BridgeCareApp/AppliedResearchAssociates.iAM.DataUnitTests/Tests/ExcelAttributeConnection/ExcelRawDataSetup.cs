@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using OfficeOpenXml;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public static class ExcelRawDataSetup
     {

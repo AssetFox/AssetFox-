@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests
+namespace AppliedResearchAssociates.iAM.DataUnitTests
 {
     public static class DatabaseResetter
     {

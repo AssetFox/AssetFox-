@@ -3,7 +3,7 @@ using Moq;
 using AppliedResearchAssociates.iAM.Data;
 using System;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public class SectionLocationTests
     {

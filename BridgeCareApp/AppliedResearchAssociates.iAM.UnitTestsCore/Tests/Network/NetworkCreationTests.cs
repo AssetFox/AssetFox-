@@ -13,8 +13,8 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {

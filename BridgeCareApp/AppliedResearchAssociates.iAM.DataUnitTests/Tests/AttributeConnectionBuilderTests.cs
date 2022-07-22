@@ -4,12 +4,12 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using Moq;
 using AppliedResearchAssociates.iAM.Data;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.TestUtils;
+using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public class AttributeConnectionBuilderTests
     {

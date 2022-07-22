@@ -2,7 +2,7 @@
 using Moq;
 using AppliedResearchAssociates.iAM.Data;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public class DirectionalRouteTests
     {

@@ -3,7 +3,7 @@ using AppliedResearchAssociates.iAM.Data;
 using System;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 
-namespace AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
     public class LocationBuilderTests
     {

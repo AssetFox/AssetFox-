@@ -75,7 +75,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 mockedEsecSecurity.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object, null);
+                _testHelper.MockHttpContextAccessor.Object,
+                TestServices.PerformanceCurves);
 
         private void SetupForGet()
         {
@@ -122,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criterionLibrary;
         }
 
-        [Fact(Skip = "Broken as of 10:18am 2 June 2022, even when run by itself")]
+        [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
             Setup();

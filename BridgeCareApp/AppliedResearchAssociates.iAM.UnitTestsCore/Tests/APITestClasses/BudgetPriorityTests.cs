@@ -30,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void Setup()
         {
             _testHelper.CreateSingletons();
-            _testHelper.CreateSimulation();
         }
 
         private BudgetPriorityController CreateAuthorizedController()

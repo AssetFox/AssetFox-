@@ -124,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async Task GetPerformanceCurveLibraries_Ok()
         {
             Setup();
             // Arrange
@@ -137,9 +137,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip = "Broken as of 10:20am 2 June 2022, even when run by itself")]
+        [Fact]
 
-        public async Task ShouldReturnOkResultOnPost()
+        public async Task UpsertPerformanceCurveLibrary_Ok()
         {
             Setup();
             // Arrange
@@ -153,9 +153,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken as of 10:22am 2 June 2022, even when run by itself")]
-
-        public async Task ShouldReturnOkResultOnDelete()
+        [Fact]
+        public async Task Delete_PerformanceCurveLibraryDoesNotExist_Ok()
         {
             Setup();
 
@@ -163,14 +162,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             SetupController(_testHelper.MockEsecSecurityAdmin);
 
             // Act
-            var result = await _controller.DeletePerformanceCurveLibrary(Guid.Empty);
+            var result = await _controller.DeletePerformanceCurveLibrary(Guid.NewGuid());
 
             // Assert
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken as of 10:22am 2 June 2022, even when run by itself")]
-        public async Task ShouldReturnOkResultOnScenarioCurveGet()
+        [Fact]
+        public async Task GetScenarioPerformanceCurves_SimulationExists_Ok()
         {
             Setup();
 
@@ -185,8 +184,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(result);
         }
 
-        [Fact(Skip = "Broken as of 10:23am 2 June 2022, even when run by itself")]
-        public async Task ShouldReturnOkResultOnScenarioCurvePost()
+        [Fact]
+        public async Task UpsertScenarioPerformanceCurves_SimulationExists_Ok()
         {
             Setup();
             // Arrange
@@ -204,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
-        [Fact(Skip = "Broken as of 10:24am 2 June 2022, even when run by itself")]
+        [Fact(Skip = "Broken as of 22 July 2022, even when run by itself")]
 
         public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
@@ -230,7 +229,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(PerformanceCurveId, dtos[0].PerformanceCurves[0].Id);
         }
 
-        [Fact(Skip = "Broken. Had a timer.")]
+        [Fact(Skip = "Broken 7/22/22. Had a timer.")]
         public async Task ShouldModifyPerformanceCurveData()
         {
             Setup();
@@ -267,9 +266,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         }
 
-        [Fact(Skip = "Broken as of 10:18am 2 June 2022, even when run by itself")]
-
-        public async Task ShouldDeletePerformanceCurveData()
+        [Fact]
+        public async Task Delete_PerformanceCurveLibraryExists_Deletes()
         {
             Setup();
             // Arrange
@@ -304,7 +302,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
         }
 
-        [Fact(Skip = "Broken as of 10:21am 2 June 2022, even when run by itself")]
+        [Fact(Skip = "Broken as of 22 July 2022, even when run by itself")]
 
         public async Task ShouldGetAllScenarioPerformanceCurveData()
         {
@@ -389,9 +387,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
         }
 
-        [Fact(Skip = "Broken as of 10:21am 2 June 2022, even when run by itself")]
-
-        public async Task ShouldReturnUnauthorizedOnPost()
+        [Fact]
+        public async Task Post_UserIsUnauthorized_ReturnsUnauthorized()
         {
             Setup();
             // Arrange

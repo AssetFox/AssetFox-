@@ -1,6 +1,7 @@
 import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
+import { Network } from '@/shared/models/iAM/network';
 
 export default class CommittedProjectsService { 
     static getCommittedProjectTemplate(): AxiosPromise {
@@ -49,6 +50,24 @@ export default class CommittedProjectsService {
     static upsertCommittedProjects(data: SectionCommittedProject[]): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.CommittedProject}/UpsertSectionCommittedProjects`, data
+        );
+    }
+
+    static ValidateBRKEY(data: Network, brkeyValue: string){
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/ValidateAssetExistence/${brkeyValue}`, data
+        );
+    }
+
+    static GetTreatmetCost(data: SectionCommittedProject, brkeyValue: string){
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/GetTreatmetCost/${brkeyValue}`, data
+        );
+    }
+
+    static GetValidConsequences(data: SectionCommittedProject, brkeyValue: string){
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/GetTreatmetCost/${brkeyValue}`, data
         );
     }
 }

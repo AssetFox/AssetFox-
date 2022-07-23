@@ -299,6 +299,82 @@ namespace BridgeCareCore.Services
             }
         }
 
+        public CriterionValidationResult ValidateExpressionByAssetId(ValidationParameter model, Guid assetId)
+        {
+            try
+            {
+
+                if (!string.IsNullOrEmpty(model.Expression))
+                {
+                    return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "There is no criterion expression." };
+                }
+
+                // Appending the criteria filtering clause for non-admin users
+                if (model.CurrentUserCriteriaFilter.HasCriteria)
+                {
+                    model.CurrentUserCriteriaFilter.Criteria = "(" + model.CurrentUserCriteriaFilter.Criteria + ")";
+                    model.Expression = $"({model.Expression}) AND { model.CurrentUserCriteriaFilter.Criteria }";
+                }
+                CheckAttributes(model.Expression);
+
+                var modifiedExpression = model.Expression
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+
+                var pattern = "\\[[^\\]]*\\]";
+                var rg = new Regex(pattern);
+                var match = rg.Matches(model.Expression);
+                var hashMatch = new HashSet<string>();
+                foreach (Match m in match)
+                {
+                    hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+                }
+
+                var attributes = _unitOfWork.Context.Attribute
+                    .Where(_ => hashMatch.Contains(_.Name))
+                    .Select(attribute => new AttributeEntity
+                    {
+                        Name = attribute.Name,
+                        DataType = attribute.DataType
+                    }).AsNoTracking().ToList();
+
+                var compiler = new CalculateEvaluateCompiler();
+
+                attributes.ForEach(attribute =>
+                {
+                    compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                        ? CalculateEvaluateParameterType.Number
+                        : CalculateEvaluateParameterType.Text;
+                });
+
+                compiler.GetEvaluator(modifiedExpression);
+
+                var customAttribute = new List<(string name, string datatype)>();
+                foreach (var attribute in attributes)
+                {
+                    customAttribute.Add((attribute.Name, attribute.DataType));
+                }
+
+                if (EvaluateExpressionByAssetId(modifiedExpression, customAttribute, model.NetworkId, assetId))
+                    return new CriterionValidationResult { IsValid = true, ResultsCount = 1, ValidationMessage = "Success" };
+                else
+                    return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = "Fail" };
+            }
+            catch (CalculateEvaluateException e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
+            }
+            catch (Exception e)
+            {
+                _log.Error($"{e.Message}\r\n{e.StackTrace}");
+                return new CriterionValidationResult { IsValid = false, ResultsCount = 0, ValidationMessage = e.Message };
+            }
+        }
+
         private void CheckAttributes(string target)
         {
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
@@ -365,6 +441,29 @@ namespace BridgeCareCore.Services
                 flattenedDataTable.Rows.Add(row);
             });
 
+        private void AddToFlattenDataTable( DataTable flattenedDataTable, Dictionary<string, (string data, string type)> valuePerAttributeName, Guid maintainableAssetId)
+        {
+            var row = flattenedDataTable.NewRow();
+            row["MaintainableAssetId"] = maintainableAssetId;
+            valuePerAttributeName.Keys.ForEach(attributeName =>
+            {
+                var currData = valuePerAttributeName[attributeName];
+
+                if (currData.type.Equals("NUMBER", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (double.TryParse(valuePerAttributeName[attributeName].data, out var res))
+                    {
+                        row[attributeName] = res;
+                    }
+                }
+                else
+                {
+                    row[attributeName] = valuePerAttributeName[attributeName].data;
+                }
+            });
+            flattenedDataTable.Rows.Add(row);
+        }
+
         private int GetResultsCount(string expression, List<(string name, string dataType)> attributes, Guid networkId)
         {
             var flattenedDataTable = CreateFlattenedDataTable(attributes);
@@ -405,6 +504,43 @@ namespace BridgeCareCore.Services
             AddToFlattenedDataTable(flattenedDataTable, valuePerAttributeNamePerMaintainableAssetId);
 
             return flattenedDataTable.Select(expression).Length;
+        }
+
+        private bool EvaluateExpressionByAssetId(string expression, List<(string name, string dataType)> attributes, Guid networkId, Guid managedAssetId)
+        {
+            var flattenedDataTable = CreateFlattenedDataTable(attributes);
+
+            var attributeNames = new List<string>();
+            foreach (var attribute in attributes)
+            {
+                attributeNames.Add(attribute.name);
+            }
+
+            var valuePerAttributeName = _unitOfWork.Context.AggregatedResult.Include(_ => _.MaintainableAsset)
+                .Where(_ => attributeNames.Contains(_.Attribute.Name) && _.MaintainableAsset.NetworkId == networkId)
+                .Select(aggregatedResult => new AggregatedResultEntity
+                {
+                    MaintainableAssetId = aggregatedResult.MaintainableAssetId,
+                    TextValue = aggregatedResult.TextValue,
+                    NumericValue = aggregatedResult.NumericValue,
+                    Attribute = new AttributeEntity
+                    {
+                        Name = aggregatedResult.Attribute.Name,
+                        DataType = aggregatedResult.Attribute.DataType
+                    }
+                }).AsNoTracking().AsSplitQuery().AsEnumerable()
+                .ToDictionary(_ => _.Attribute.Name, aggregatedResult =>
+                {
+                    var value = (data: aggregatedResult.Attribute.DataType == DataPersistenceConstants.AttributeNumericDataType
+                            ? aggregatedResult.NumericValue?.ToString()
+                            : aggregatedResult.TextValue,
+                            type: aggregatedResult.Attribute.DataType);
+                    return value;
+                });
+
+            AddToFlattenDataTable(flattenedDataTable, valuePerAttributeName, managedAssetId);
+
+            return flattenedDataTable.Select(expression).Length > 0;
         }
     }
 }

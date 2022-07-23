@@ -458,5 +458,34 @@ namespace BridgeCareCore.Services
 
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
+
+        public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
+        {
+            var simOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+
+            var network = _unitOfWork.Context.Simulation.Include(_ => _.Network).ThenInclude(_ => _.Simulations).FirstOrDefault(_ => _.Id == simulationId)?.Network;
+            if (network == null)
+                return 0;
+            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            if (attrEntity == null)
+                return 0;
+
+            var aggResult = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == brkey) :
+                    _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == brkey);
+
+            if (aggResult == null)
+                return 0;
+
+            var treatmentOption = simOutput.Years.FirstOrDefault(_ => _.Year == year)?.Assets.FirstOrDefault(_ => _.AssetName == aggResult.MaintainableAsset.AssetName)?.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+
+            if (treatmentOption == null)
+                return 0;
+            else
+                return treatmentOption.Cost;
+        }
     }
 }

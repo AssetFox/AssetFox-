@@ -1,4 +1,6 @@
 import { getBlankGuid } from "@/shared/utils/uuid-utils";
+import { TreatmentConsequence } from "./treatment";
+import {ValidationParameter} from "./expression-validation"
 
 export interface BaseCommittedProject {
     id: string;
@@ -17,8 +19,11 @@ export interface SectionCommittedProjectTableData {
     brkey: string;
     year: number;
     treatment: string;
+    treatmentId: string;
+    scenarioBudgetId: string;
     budget: string;
     cost: number;
+    errors: string[];
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
@@ -29,6 +34,11 @@ export interface CommittedProjectConsequence {
     committedProjectId: string;
     attribute: string;
     changeValue: string;
+}
+
+export interface GetValidTreatmentConsequenceParameters {
+    consequences: TreatmentConsequence[];
+    ValidationParameters: ValidationParameter;
 }
 
 export const emptySectionCommittedProject = {

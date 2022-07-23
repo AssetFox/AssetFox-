@@ -13,5 +13,6 @@ namespace BridgeCareCore.Interfaces
 
         CriterionValidationResult ValidateCriterionWithoutResults(string mergedCriteriaExpression,
             UserCriteriaDTO currentUserCriteriaFilter);
+        CriterionValidationResult ValidateExpressionByAssetId(ValidationParameter model, Guid assetId);
     }
 }

@@ -9,6 +9,8 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Hubs;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +31,7 @@ namespace BridgeCareCore.Controllers
     public class CommittedProjectController : BridgeCareCoreBaseController
     {
         private static ICommittedProjectService _committedProjectService;
+        private static IExpressionValidationService _expressionValidationService;
 
         private readonly IReadOnlyDictionary<string, CommittedProjectRetrieveMethod> _committedProjectRetrieveMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;
@@ -38,11 +41,14 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMultipleMethod> _committedProjectDeleteSpecificMethods;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
+            IExpressionValidationService expressionValidationService,
             IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(
             esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _committedProjectService = committedProjectService ??
                                        throw new ArgumentNullException(nameof(committedProjectService));
+            _expressionValidationService = expressionValidationService ??
+                                       throw new ArgumentNullException(nameof(expressionValidationService));
             _committedProjectRetrieveMethods = CreateRetrieveMethods();
             _committedProjectExportMethods = CreateExportMethods();
             _committedProjectImportMethods = CreateImportMethods();
@@ -262,6 +268,74 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ValidateAssetExistence/{brkeyValue}")]
+        [Authorize]
+        public async Task<IActionResult> ValidateAssetExistence(NetworkDTO network, string brkeyValue)
+        {
+            try
+            {
+                var isValid = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    isValid = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValueExists(network.Id, brkeyValue);
+                });
+                return Ok(isValid);
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetTreatmetCost/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetTreatmetCost(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetValidConsequences/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetValidConsequences(GetValidTreatmentConsequenceParameters consequenceParameters, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    var consequencesToReturn = new List<TreatmentConsequenceDTO>();
+                    var asset = UnitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(consequenceParameters.ValidationParameters.NetworkId, brkey);
+                    if (asset == null)
+                        return consequencesToReturn;
+                    consequenceParameters.Consequences.ForEach(_ =>
+                    {
+                        if (_expressionValidationService.ValidateExpressionByAssetId(consequenceParameters.ValidationParameters, asset.Id).IsValid)
+                            consequencesToReturn.Add(_);
+                    });
+                    return consequencesToReturn;
+                });
+                return Ok(result);
             }
             catch (Exception e)
             {

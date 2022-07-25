@@ -53,9 +53,9 @@ export default class CommittedProjectsService {
         );
     }
 
-    static ValidateBRKEY(data: Network, brkeyValue: string){
+    static ValidateBRKEY(data: Network, brkey: string){
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/ValidateAssetExistence/${brkeyValue}`, data
+            `${API.CommittedProject}/ValidateAssetExistence/${brkey}`, data
         );
     }
 

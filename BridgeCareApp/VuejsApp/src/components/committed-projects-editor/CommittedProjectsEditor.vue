@@ -79,12 +79,12 @@
                                             <v-text-field v-if="header.value === 'budget'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.budget"
+                                                :value="props.item[header.value]"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.value === 'treatment'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.treatment"
+                                                :value="props.item[header.value]"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.value === 'brkey'"
                                                 readonly
@@ -103,14 +103,14 @@
                                                 <v-select v-if="header.value === 'treatment'"
                                                     :items="treatmentSelectItems"
                                                     label="Select a Treatment"
-                                                    v-model="props.item.treatmentId"
+                                                    v-model="props.item[header.value]"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]">
                                                 </v-select>
 
                                                 <v-select v-if="header.value === 'budget'"
                                                     :items="budgetSelectItems"
                                                     label="Select a Budget"
-                                                    v-model="props.item.scenarioBudgetId"
+                                                    v-model="props.item[header.value]"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]">
                                                 </v-select>
 
@@ -157,7 +157,7 @@
                 <v-flex xs12>
                     <v-layout justify-center>
                         <v-btn @click="onCancelClick" :disabled='!hasUnsavedChanges' class="ghd-white-bg ghd-blue ghd-button-text" flat>Cancel</v-btn>    
-                        <v-btn @click="OnSaveClick" :disabled='!hasUnsavedChanges' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
+                        <v-btn @click="OnSaveClick" :disabled='!hasUnsavedChanges || disableCrudButtons()' class="ghd-blue-bg ghd-white ghd-button">Save</v-btn>    
                     </v-layout>
                 </v-flex> 
             </v-layout>
@@ -252,6 +252,10 @@
             @submit="onSubmitImportExportCommittedProjectsDialogResult"
             @delete="onDeleteCommittedProjects"
         />
+        <Alert
+            :dialogData="alertDataForDeletingCommittedProjects"
+            @submit="onDeleteCommittedProjectsSubmit"
+        />
 
         <CreateConsequenceDialog :showDialog='showCreateCommittedProjectConsequenceDialog' @submit='onAddCommittedProjectConsequenc' />
     </v-layout>
@@ -290,10 +294,13 @@ import NetworkService from '@/services/network.service';
 import { AsyncComponentFactory } from 'vue/types/options';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { ValidationParameter } from '@/shared/models/iAM/expression-validation';
+import Alert from '@/shared/modals/Alert.vue';
+import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        CreateConsequenceDialog
+        CreateConsequenceDialog,
+        Alert
     },
 })
 export default class CommittedProjectsEditor extends Vue  {
@@ -307,6 +314,7 @@ export default class CommittedProjectsEditor extends Vue  {
     treatmentSelectItems: SelectItem[] = [];
     budgetSelectItems: SelectItem[] = [];
     scenarioId: string = getBlankGuid();
+    networkId: string = getBlankGuid();
     rules: InputValidationRules = rules;
     network: Network = clone(emptyNetwork);
 
@@ -316,12 +324,14 @@ export default class CommittedProjectsEditor extends Vue  {
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
+    @State(state => state.networkModule.networks) networks: Network[];
 
     @Action('getCommittedProjects') getCommittedProjects: any;
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
     @Action('getInvestment') getInvestmentAction: any;
     @Action('getAttributes') getAttributesAction: any;
+    @Action('getNetworks') getNetworksAction: any;
     @Action('deleteSpecificCommittedProjects') deleteSpecificCommittedProjectsAction: any;
     @Action('deleteSimulationCommittedProjects') deleteSimulationCommittedProjectsAction: any;
     @Action('upsertCommittedProjects') upsertCommittedProjectsAction: any;
@@ -335,6 +345,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     cpItems: SectionCommittedProjectTableData[] = [];
+    cpItemsFront: SectionCommittedProjectTableData[] = [];
     selectedCpItems: SectionCommittedProjectTableData[] = [];
     sectionCommittedProjects: SectionCommittedProject[] = [];
     selectedConsequences: CommittedProjectConsequence[] = [];
@@ -345,6 +356,7 @@ export default class CommittedProjectsEditor extends Vue  {
     selectedCommittedProject: string  = '';
     showCreateCommittedProjectConsequenceDialog: boolean = false;
     disableCrudButtonsResult: boolean = true;
+    alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
     
     brkey_: string = 'BRKEY_'
 
@@ -406,7 +418,7 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '10%',
         },
     ];
-    consequenceHeaders: DataTableHeader[] =[
+    consequenceHeaders: DataTableHeader[] = [
         {
             text: 'Attribute',
             value: 'attribute',
@@ -433,7 +445,8 @@ export default class CommittedProjectsEditor extends Vue  {
         }
     ];
     
-    onmounted() {
+    mounted() {
+
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -441,39 +454,36 @@ export default class CommittedProjectsEditor extends Vue  {
     beforeRouteEnter(to: any, from: any, next:any) {
         next((vm:any) => {
             vm.scenarioId = to.query.scenarioId;
+            vm.networkId = to.query.networkId;
             vm.librarySelectItemValue = null;
             
-            if (vm.scenarioId === vm.uuidNIL) {
+            if (vm.scenarioId === vm.uuidNIL || vm.networkId == vm.uuidNIL) {
                 vm.addErrorNotificationAction({
                    message: 'Found no selected scenario for edit',
                 });
                 vm.$router.push('/Scenarios/');
             }
-
+      
             vm.getTreatmentLibrariesAction();
             vm.getCommittedProjects(vm.scenarioId);      
             vm.getInvestmentAction(vm.scenarioId);     
             vm.getAttributesAction();
-            ScenarioService.getScenarios().then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    const scenarios = response.data as Scenario[]
-                    const scenario = scenarios.find(s => s.id == vm.scenarioId)
-                    if(!isNil(scenario))
-                        NetworkService.getNetworks().then((response: AxiosResponse) =>{
-                            if(hasValue(response, 'data')){
-                                const networks = response.data as Network[]
-                                const network = networks.find(n => n.id == scenario.networkId)
-                                if(!isNil(network))
-                                    vm.network = network;
-                            }
-                        })
-                    
-                }
-            })
+            vm.getNetworksAction();
         });
     }
 
     //Watch
+    @Watch('networks')
+    onStateNetworksChanged(){
+        const network = this.networks.find(o => o.id == this.networkId)
+        if(!isNil(network)){
+            this.network = network;
+            this.cpItems.forEach(o => {
+                this.checkBrkey(o, o.brkey)
+            })
+        }           
+    }
+
     @Watch('stateTreatmentLibraries')
     onStateTreatmentLibrariesChanged() {
         this.librarySelectItems = this.stateTreatmentLibraries.map(
@@ -489,7 +499,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.treatmentSelectItems = this.selectedLibraryTreatments.map(
             (treatment: Treatment) => ({
                 text: treatment.name,
-                value: treatment.id
+                value: treatment.name
             }),
         );
     }
@@ -509,7 +519,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.budgetSelectItems = this.stateScenarioBudgets.map(
             (budget: Budget) => ({
                 text: budget.name,
-                value: budget.id
+                value: budget.name
             }),
         );
     }
@@ -599,7 +609,9 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
         this.sectionCommittedProjects.push(newRow);
-        this.cpItems.push(this.cpItemFactory(newRow));
+        const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
+        newCpRow.errors = ['BRKEY does not exist']
+        this.cpItems.push(newCpRow);
      }
      
      OnAddConsequenceClick(){
@@ -626,9 +638,13 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnDeleteAllClick(){
-        this.deleteAllClicked = true;
-        this.sectionCommittedProjects = [];
-        this.cpItems = [];
+        this.alertDataForDeletingCommittedProjects = {
+            showDialog: true,
+            heading: 'Are you sure?',
+            message:
+                "You are about to delete all of this scenario's committed projects.",
+            choice: true,
+        };
      }
 
      OnDeleteClick(id: string){
@@ -643,13 +659,13 @@ export default class CommittedProjectsEditor extends Vue  {
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                this.handleTreatmentChange(scp, scp.treatmentId, row)                  
+                this.handleTreatmentChange(scp, value, row)                  
             }
             else if(property == 'brkey'){
                 this.handleBrkeyChange(row, scp, value);
             }            
             else if(property === 'budget'){
-                this.handleBudgetChange(row, scp)
+                this.handleBudgetChange(row, scp, value)
             }
             else{
                 this.sectionCommittedProjects = update(
@@ -715,6 +731,7 @@ export default class CommittedProjectsEditor extends Vue  {
                             longMessage:
                                 'Successfully uploaded committed projects.',
                         });
+                        this.getCommittedProjects(this.scenarioId);
                     }
                 });
             } else {
@@ -738,6 +755,16 @@ export default class CommittedProjectsEditor extends Vue  {
         };
     }   
 
+    onDeleteCommittedProjectsSubmit(doDelete: boolean) {
+        this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
+
+        if (doDelete) {
+            this.deleteSimulationCommittedProjectsAction(this.scenarioId);
+            this.sectionCommittedProjects = [];
+            this.cpItems = [];
+        }
+    }
+
     //Subroutines
 
     disableCrudButtons() {
@@ -753,6 +780,12 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.rules['generalRules'].valueIsNotEmpty(
                         scp.cost,
                     ) === true &&
+                    this.rules['generalRules'].valueIsNotEmpty(
+                        scp.treatment
+                    ) == true &&
+                    this.rules['generalRules'].valueIsNotEmpty(
+                        scp.locationKeys[this.brkey_]
+                    ) == true &&
                     scp.consequences.every(consequence => 
                         this.rules['generalRules'].valueIsNotEmpty(
                         consequence.attribute,
@@ -790,40 +823,41 @@ export default class CommittedProjectsEditor extends Vue  {
     setCpItems(){
         this.cpItems = this.sectionCommittedProjects.map(o => 
         {          
-            const budget = this.stateScenarioBudgets.find(b => b.id === o.scenarioBudgetId);
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
+            if(this.network.id !== getBlankGuid())
+                this.checkBrkey(row, o.locationKeys[this.brkey_])
             return row
         })
     }
 
     cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
         const budget = this.stateScenarioBudgets.find(b => b.id === scp.scenarioBudgetId)
-            const row: SectionCommittedProjectTableData = {
-                brkey:  scp.locationKeys[this.brkey_],
-                year: scp.year,
-                cost: scp.cost,
-                scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
-                budget: budget? budget.name : '',
-                treatment: scp.treatment,
-                treatmentId: '',
-                id: scp.id,
-                errors: []              
-            }
-            return row
+        const row: SectionCommittedProjectTableData = {
+            brkey:  scp.locationKeys[this.brkey_],
+            year: scp.year,
+            cost: scp.cost,
+            scenarioBudgetId: scp.scenarioBudgetId? scp.scenarioBudgetId : '',
+            budget: budget? budget.name : '',
+            treatment: scp.treatment,
+            treatmentId: '',
+            id: scp.id,
+            errors: []              
+        }
+        return row
     }
 
-    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentId: string, row: SectionCommittedProject){
-        const treatment = this.selectedLibraryTreatments.find(o => o.id == treatmentId)
+    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
+        const treatment = this.selectedLibraryTreatments.find(o => o.name == treatmentName)
         if(!isNil(treatment)){
-            scp.treatment = treatment.name;
-            this.updateCommittedProjects(row, treatment.name, 'treatment')  
+            row.treatment = treatmentName
+            this.updateCommittedProjects(row, treatmentName, 'treatment')  
             const parameters: GetValidTreatmentConsequenceParameters = 
             {
                 consequences: treatment.consequences, 
                 ValidationParameters: {
                     expression: '', 
                     currentUserCriteriaFilter: this.currentUserCriteriaFilter,
-                    networkId: this.network.id
+                    networkId: this.networkId
                 } as ValidationParameter}
             CommittedProjectsService.GetValidConsequences(parameters, row.locationKeys[this.brkey_])
             .then((response: AxiosResponse) => {
@@ -852,27 +886,29 @@ export default class CommittedProjectsEditor extends Vue  {
             });                                                
         }
     }
-    handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData){
-        const budget = this.stateScenarioBudgets.find(o => o.id == scp.scenarioBudgetId)
+    handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
+        const budget = this.stateScenarioBudgets.find(o => o.name == budgetName)
         if(!isNil(budget)){
-            scp.budget = budget.name;
-            this.updateCommittedProjectTableData(scp, budget.name, 'budget')
-            row.scenarioBudgetId = scp.scenarioBudgetId
-            this.updateCommittedProjects(row, scp.scenarioBudgetId, 'scenarioBudgetId')  
+            row.scenarioBudgetId = budget.id;
+            this.updateCommittedProjects(row, row.scenarioBudgetId, 'scenarioBudgetId')  
         }        
     }
 
     handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
         row.locationKeys[this.brkey_] = brkey;
-        this.updateCommittedProjects(row, brkey, 'brkey')
+        this.updateCommittedProjects(row, brkey, 'brkey');
+        this.checkBrkey(scp, brkey);
+    }
+
+    checkBrkey(scp: SectionCommittedProjectTableData, brkey: string){
         CommittedProjectsService.ValidateBRKEY(this.network, brkey).then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    if(!response.data)
-                        scp.errors = ['BRKEY does not exist'];
-                    else
-                        scp.errors = [];
-                }
-            });
+            if (hasValue(response, 'data')) {
+                if(!response.data)
+                    scp.errors = ['BRKEY does not exist'];
+                else
+                    scp.errors = [];
+            }
+        });
     }
 
     updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){

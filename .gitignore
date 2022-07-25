@@ -383,9 +383,7 @@ iAM-legacy/DatabaseManager.dll
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataPersistenceCore/Repositories/MSSQL/migrationConnection.json
 
 # test connection file
-/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestCore/testConnections.json
-/BridgeCareApp/AppliedResearchAssociates.iAM.DataUnitTests/testConnections.json
-/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
 
 # esec file
 /BridgeCareApp/BridgeCareCore/esec.json
@@ -413,3 +411,5 @@ BridgeCareApp/BridgeCareCore/b2c.json
 .Rproj.user
 /BridgeCareApp/BridgeCareCore/web.config
 
+
+BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json

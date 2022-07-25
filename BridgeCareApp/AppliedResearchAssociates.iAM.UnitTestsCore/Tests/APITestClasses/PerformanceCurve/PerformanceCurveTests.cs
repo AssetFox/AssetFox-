@@ -28,7 +28,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private static readonly Guid PerformanceCurveLibraryId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
         private static readonly Guid PerformanceCurveId = Guid.Parse("ce1c926b-4df7-4c3c-987f-9146756111b8");
-        private static readonly Guid ScenarioPerformanceCurveId = Guid.Parse("5451c55f-05a7-4dda-8fc0-e925b52d7af1");
         private static readonly Guid EquationId = Guid.Parse("a6c65132-e45c-4a48-a0b2-72cd274c9cc2");
 
         private void Setup()
@@ -98,18 +97,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return AddTestCriterionLibrary();
         }
 
-        private ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(Guid simulationId)
+        private ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(Guid simulationId, Guid performanceCurveId)
         {
-            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulationId, PerformanceCurveId);
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulationId, performanceCurveId);
             performanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
             _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return performanceCurve;
         }
 
-        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete(Guid simulationId)
+        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete(Guid simulationId, Guid performanceCurveId)
         {
-            SetupForScenarioCurveGet(simulationId);
+            SetupForScenarioCurveGet(simulationId, performanceCurveId);
             var criterionLibrary = AddTestCriterionLibrary();
             return criterionLibrary;
         }
@@ -181,8 +180,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var simulation = _testHelper.CreateSimulation();
+            var performanceCurveId = Guid.NewGuid();
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, PerformanceCurveId);
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, performanceCurveId);
             performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act
@@ -246,7 +246,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveLibraryDtosAfter = _testHelper.UnitOfWork.PerformanceCurveRepo
                 .GetPerformanceCurveLibraries();
             var performanceCurveLibraryDtoAfter = performanceCurveLibraryDtosAfter.Single(pcl => pcl.Id == performanceCurveLibraryDto.Id);
-            
+
             Assert.Equal(performanceCurveLibraryDto.Description, performanceCurveLibraryDtoAfter.Description);
 
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
@@ -303,7 +303,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulation = _testHelper.CreateSimulation();
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            SetupForScenarioCurveGet(simulation.Id);
+            var performanceCurveId = Guid.NewGuid();
+            SetupForScenarioCurveGet(simulation.Id, performanceCurveId);
 
             // Act
             var result = await controller.GetScenarioPerformanceCurves(simulation.Id);
@@ -315,10 +316,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dtos = (List<PerformanceCurveDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<PerformanceCurveDTO>));
             Assert.Single(dtos);
-            Assert.Equal(PerformanceCurveId, dtos[0].Id);
+            Assert.Equal(performanceCurveId, dtos[0].Id);
         }
 
-       // [Fact(Skip = "Broken. Had a timer.")]
+        // [Fact(Skip = "Broken. Had a timer.")]
         [Fact]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
@@ -337,8 +338,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Shift = false,
                 Name = "Deleted"
             });
+            var performanceCurveId = Guid.NewGuid();
 
-            var criterionLibrary = SetupForScenarioCurveUpsertOrDelete(simulation.Id);
+            var criterionLibrary = SetupForScenarioCurveUpsertOrDelete(simulation.Id, performanceCurveId);
 
             var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
                 .GetScenarioPerformanceCurves(simulation.Id);
@@ -382,11 +384,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Single(_ => _.Id == idToUpdate);
             Assert.Equal(localUpdatedCurve.Name, serverUpdatedCurve.Name);
             Assert.Equal(localUpdatedCurve.Attribute, serverUpdatedCurve.Attribute);
-        //    Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
-        // Wjwjwj revisit the above and the below after understanding the situation with the similar error in the previous test
+            //    Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
+            // Wjwjwj revisit the above and the below after understanding the situation with the similar error in the previous test
             Assert.Equal(localUpdatedCurve.CriterionLibrary.MergedCriteriaExpression,
                 serverUpdatedCurve.CriterionLibrary.MergedCriteriaExpression);
-        //    Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
+            //    Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
 
             Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
         }

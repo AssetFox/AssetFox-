@@ -245,6 +245,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         criterionJoins.Add(new CriterionLibraryPerformanceCurveEntity
                         {
                             CriterionLibraryId = criterion.Id, PerformanceCurveId = curve.Id
+                            // Wjwjwj ShouldModifyPerformanceCurves test is failing because it
+                            // hits this code. But that may be an error in the way I wrote
+                            // the test? In particular not sure about the MergedCriteriaExpression.
                         });
                         return criterion;
                     }).ToList();

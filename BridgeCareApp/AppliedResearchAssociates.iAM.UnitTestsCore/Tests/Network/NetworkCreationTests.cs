@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         private TestHelper _testHelper => TestHelper.Instance;
 
         [Fact]
-        public async Task CreateNetworkViaFactoryAndRepository_Does()
+        public void CreateNetworkViaFactoryAndRepository_Does()
         {
             var networkName = RandomStrings.WithPrefix("Network");
             var config = _testHelper.Config;

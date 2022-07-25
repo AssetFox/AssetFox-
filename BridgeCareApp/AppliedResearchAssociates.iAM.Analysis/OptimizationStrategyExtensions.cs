@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.Analysis
+﻿using AppliedResearchAssociates.iAM.DTOs.Enums;
+
+namespace AppliedResearchAssociates.iAM.Analysis
 {
     public static class OptimizationStrategyExtensions
     {

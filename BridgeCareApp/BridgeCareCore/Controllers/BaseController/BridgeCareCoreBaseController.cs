@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -34,7 +34,7 @@ namespace BridgeCareCore.Controllers.BaseController
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (RequestHasBearer()) // WjTodo -- test the behavior here.
+            if (RequestHasBearer()) 
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }

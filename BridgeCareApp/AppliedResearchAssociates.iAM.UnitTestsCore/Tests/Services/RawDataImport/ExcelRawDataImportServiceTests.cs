@@ -68,18 +68,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
                 SerializedWorksheetContent = serializedWorksheetContent,
             };
             ObjectAssertions.Equivalent(expectedUpsertedSpreadsheet, expectedUpsertedSpreadsheet);
-            // WjTodo -- Eventually, we will need a family of tests for actually creating networks. Something like the commented-out code below will go into that family of tests. 6/21/2022
-            //var result = attributeService.ImportExcelAttributes(/*"BRKEY", InspectionDateColumnTitle, SpatialWeighting, these fields should be in the dataSource object*/ spreadsheetId);
-            //var warningMessage = result.WarningMessage;
-            //Assert.True(string.IsNullOrEmpty(warningMessage));
-            //var networkId = result.NetworkId.Value;
-            //var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
-            //var assetCount = assets.Count;
-            //Assert.Equal(4, assetCount);
-            //var datum0 = assets[0].AssignedData[0];
-            //var stringDatum0 = datum0 as AttributeDatum<string>;
-            //Assert.NotNull(stringDatum0);
-            //Assert.NotNull(stringDatum0.Value);
         }
 
         [Fact]

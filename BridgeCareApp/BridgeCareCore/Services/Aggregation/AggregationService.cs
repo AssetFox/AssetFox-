@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Reporting.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
@@ -23,7 +23,9 @@ namespace BridgeCareCore.Services.Aggregation
         {
             _unitOfWork = unitOfWork;
         }
-        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, UserInfo userInfo, List<AttributeDTO> attributes)
+
+        /// <summary>AggregationState can be just new AggregationState() object. Purpose is to allow calling class to access the state.</summary>
+        public async Task<bool> AggregateNetworkData(Writer writer, Guid networkId, AggregationState state, List<AttributeDTO> attributes)
         {
             state.NetworkId = networkId;
             var isError = false;
@@ -67,6 +69,7 @@ namespace BridgeCareCore.Services.Aggregation
                         .ToList();
 
                     // Create list of attribute ids we are allowed to update with assigned data.
+                    // Could hack it in, but what is the natural way to set it up?
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();
@@ -76,9 +79,19 @@ namespace BridgeCareCore.Services.Aggregation
                     // the data source)
                     try
                     {
-                        attributeData = configurationAttributes.Where(_ => !string.IsNullOrEmpty(_.Command))
-                            .Select(AttributeConnectionBuilder.Build)
-                            .SelectMany(AttributeDataBuilder.GetData).ToList();
+                        foreach (var attribute in configurationAttributes)
+                        {
+                            if (attribute.ConnectionType != ConnectionType.NONE)
+                            {
+                                var dataSource = attributes.FirstOrDefault(_ => _.Id == attribute.Id)?.DataSource;
+                                if (dataSource != null)
+                                {
+                                    var specificData = AttributeDataBuilder
+                                        .GetData(AttributeConnectionBuilder.Build(attribute, dataSource, _unitOfWork));
+                                    attributeData.AddRange(specificData);
+                                }
+                            }
+                        }
                     }
                     catch (Exception e)
                     {

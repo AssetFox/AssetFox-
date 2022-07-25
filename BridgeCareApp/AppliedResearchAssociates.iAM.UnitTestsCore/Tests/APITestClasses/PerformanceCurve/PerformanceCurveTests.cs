@@ -26,8 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     {
         private TestHelper _testHelper => TestHelper.Instance;
 
-        private static readonly Guid PerformanceCurveLibraryId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
-        private static readonly Guid PerformanceCurveId = Guid.Parse("ce1c926b-4df7-4c3c-987f-9146756111b8");
         private static readonly Guid EquationId = Guid.Parse("a6c65132-e45c-4a48-a0b2-72cd274c9cc2");
 
         private void Setup()
@@ -37,19 +35,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.SetupDefaultHttpContext();
         }
 
-        public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary { get; } = new PerformanceCurveLibraryEntity
+        public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary(Guid id)
         {
-            Id = PerformanceCurveLibraryId,
-            Name = "Test Name"
-        };
+            var entity = new PerformanceCurveLibraryEntity
+            {
+                Id = id,
+                Name = "Test Name"
+            };
+            return entity;
+        }
 
-        public PerformanceCurveEntity TestPerformanceCurve { get; } = new PerformanceCurveEntity
+        public PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
         {
-            Id = PerformanceCurveId,
-            PerformanceCurveLibraryId = PerformanceCurveLibraryId,
-            Name = "Test Name",
-            Shift = false
-        };
+            var returnValue = new PerformanceCurveEntity
+            {
+                Id = curveId,
+                PerformanceCurveLibraryId = libraryId,
+                Name = "Test Name",
+                Shift = false
+            };
+            return returnValue;
+        }
 
         public EquationEntity TestEquation { get; } = new EquationEntity
         {
@@ -68,19 +74,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return controller;
         }
 
-        private void SetupForGet()
+        private void SetupForGet(Guid performanceCurveLibraryId, Guid performanceCurveId)
         {
-            if (!_testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any())
-            {
-                _testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Add(TestPerformanceCurveLibrary);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
-            if (!_testHelper.UnitOfWork.Context.PerformanceCurve.Any())
-            {
-                TestPerformanceCurve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-                _testHelper.UnitOfWork.Context.PerformanceCurve.Add(TestPerformanceCurve);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+            var testLibrary = TestPerformanceCurveLibrary(performanceCurveLibraryId);
+            _testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Add(testLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            var curve = TestPerformanceCurve(performanceCurveLibraryId, performanceCurveId);
+            curve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
+            _testHelper.UnitOfWork.Context.PerformanceCurve.Add(curve);
+            _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private CriterionLibraryEntity AddTestCriterionLibrary()
@@ -91,9 +93,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criterionLibrary;
         }
 
-        private CriterionLibraryEntity SetupForUpsertOrDelete()
+        private CriterionLibraryEntity SetupForUpsertOrDelete(Guid performanceCurveLibaryId, Guid performanceCurveId)
         {
-            SetupForGet();
+            SetupForGet(performanceCurveLibaryId, performanceCurveId);
             return AddTestCriterionLibrary();
         }
 
@@ -134,10 +136,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
+            var libraryId = Guid.NewGuid();
 
             // Act
             var result = await controller
-                .UpsertPerformanceCurveLibrary(TestPerformanceCurveLibrary.ToDto());
+                .UpsertPerformanceCurveLibrary(TestPerformanceCurveLibrary(libraryId).ToDto());
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -198,9 +201,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
         {
             Setup();
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
             // Arrange
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            SetupForGet();
+            SetupForGet(libraryId, curveId);
 
             // Act
             var result = await controller.GetPerformanceCurveLibraries();
@@ -211,12 +216,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
-            var dto = dtos.Single(pc => pc.Id == PerformanceCurveLibraryId);
+            var dto = dtos.Single(pc => pc.Id == libraryId);
 
-            Assert.Equal(PerformanceCurveLibraryId, dtos[0].Id);
-            Assert.Single(dtos[0].PerformanceCurves);
+            Assert.Single(dto.PerformanceCurves);
 
-            Assert.Equal(PerformanceCurveId, dtos[0].PerformanceCurves[0].Id);
+            Assert.Equal(curveId, dto.PerformanceCurves[0].Id);
         }
 
         [Fact(Skip = "Still broken 7/25/2022. Need to talk to Jake.")]
@@ -224,8 +228,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             Setup();
             // Arrange
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete(libraryId, curveId);
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
@@ -266,7 +272,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             // Arrange
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = SetupForUpsertOrDelete();
+            var performanceCurveLibraryId = Guid.NewGuid();
+            var performanceCurveId = Guid.NewGuid();
+            var criterionLibrary = SetupForUpsertOrDelete(performanceCurveLibraryId, performanceCurveId);
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
@@ -278,19 +286,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDTO);
 
             // Act
-            var result = controller.DeletePerformanceCurveLibrary(PerformanceCurveLibraryId);
+            var result = controller.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
 
             // Assert
             Assert.IsType<OkResult>(result.Result);
 
-            Assert.False(_testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == PerformanceCurveLibraryId));
-            Assert.False(_testHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == PerformanceCurveId));
+            Assert.False(_testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId));
+            Assert.False(_testHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == performanceCurveId));
             Assert.False(
                 _testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.Any(_ =>
-                    _.PerformanceCurveId == PerformanceCurveId));
+                    _.PerformanceCurveId == performanceCurveId));
             Assert.False(
                 _testHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
-                    _.PerformanceCurveId == PerformanceCurveId));
+                    _.PerformanceCurveId == performanceCurveId));
             Assert.False(_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
             Assert.False(
                 _testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
@@ -409,7 +417,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Email = "fake@pa.gov"
                 });
             var controller = SetupController(mockedUnauthorized);
-            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, PerformanceCurveId);
+            var performanceCurveId = Guid.NewGuid();
+            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, performanceCurveId);
             performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
 
             // Act

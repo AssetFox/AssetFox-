@@ -230,8 +230,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // Saw a HeisenFailure here 6/16/2022 and again 6/21/2022. The ValidationResult was not valid. No idea why.
-        // Error is Offending token "0" at line 1, column 1.
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange

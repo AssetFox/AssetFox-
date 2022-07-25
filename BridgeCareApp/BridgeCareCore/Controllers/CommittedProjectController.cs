@@ -330,7 +330,8 @@ namespace BridgeCareCore.Controllers
                         return consequencesToReturn;
                     consequenceParameters.Consequences.ForEach(_ =>
                     {
-                        if (_expressionValidationService.ValidateExpressionByAssetId(consequenceParameters.ValidationParameters, asset.Id).IsValid)
+                        consequenceParameters.ValidationParameters.Expression = _.CriterionLibrary.MergedCriteriaExpression;
+                        if (_.CriterionLibrary.MergedCriteriaExpression == null ||_expressionValidationService.ValidateExpressionByAssetId(consequenceParameters.ValidationParameters, asset.Id).IsValid )
                             consequencesToReturn.Add(_);
                     });
                     return consequencesToReturn;
@@ -380,7 +381,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Route("DeleteSpecificCommittedProjects")]
         [Authorize]
         public async Task<IActionResult> DeleteSpecificCommittedProjects(List<Guid> projectIds)

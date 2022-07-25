@@ -79,7 +79,7 @@
                                             <v-text-field v-if="header.value === 'budget'"
                                                 readonly
                                                 class="sm-txt"
-                                                :value="props.item.scenarioBudgetId"
+                                                :value="props.item.budget"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"/>
                                             <v-text-field v-if="header.value === 'treatment'"
                                                 readonly
@@ -260,11 +260,11 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySectionCommittedProject, GetValidTreatmentConsequenceParameters, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { Treatment, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { Treatment, TreatmentConsequence, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -288,6 +288,8 @@ import { Scenario } from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import NetworkService from '@/services/network.service';
 import { AsyncComponentFactory } from 'vue/types/options';
+import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { ValidationParameter } from '@/shared/models/iAM/expression-validation';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -330,6 +332,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
+    @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     cpItems: SectionCommittedProjectTableData[] = [];
     selectedCpItems: SectionCommittedProjectTableData[] = [];
@@ -555,6 +558,11 @@ export default class CommittedProjectsEditor extends Vue  {
             this.selectedCommittedProject = this.selectedCpItems[0].id;
     }
 
+    @Watch('cpItems')
+    onCpItemsChanged(){
+        var foo = this.cpItems;
+    }
+
     //Events
     onCancelClick() {
         this.sectionCommittedProjects = clone(this.stateSectionCommittedProjects);
@@ -635,68 +643,28 @@ export default class CommittedProjectsEditor extends Vue  {
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                const treatment = this.selectedLibraryTreatments.find(o => o.id == value)
-                if(!isNil(treatment)){
-                    scp.treatment = treatment.name;
-                    property = 'treatment'
-                    value = treatment.name;
-
-                        row.consequences = [];
-                        const projectId = row.id
-                        const consequences = treatment.consequences.map(con => {
-                            const consequence: CommittedProjectConsequence = {
-                                id: getNewGuid(),
-                                committedProjectId: projectId,
-                                attribute: con.attribute,
-                                changeValue: con.changeValue
-                            }
-                            return consequence
-                        })
-
-                        row.consequences = consequences;
-
-                        this.sectionCommittedProjects  = update(
-                        findIndex(
-                            propEq('id', scp.id),
-                            this.sectionCommittedProjects,
-                        ),
-                        setItemPropertyValue(
-                            'consequences',
-                            consequences,
-                            row,
-                        ) as SectionCommittedProject,
-                        this.sectionCommittedProjects,
-                        );    
-                        this.onSelectedCommittedProject()                                  
-                }
-                    
+                this.handleTreatmentChange(scp, scp.treatmentId, row)                  
             }
-            if(property == 'brkey')
-                CommittedProjectsService.ValidateBRKEY(this.network, value).then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                        if(!response.data)
-                            scp.errors = ['BRKEY does not exist'];
-                        else
-                            scp.errors = [];
-                }
-            });
-            this.sectionCommittedProjects = update(
-            findIndex(
-                propEq('id', scp.id),
+            else if(property == 'brkey'){
+                this.handleBrkeyChange(row, scp, value);
+            }            
+            else if(property === 'budget'){
+                this.handleBudgetChange(row, scp)
+            }
+            else{
+                this.sectionCommittedProjects = update(
+                findIndex(
+                    propEq('id', scp.id),
+                    this.sectionCommittedProjects,
+                ),
+                setItemPropertyValue(
+                    property,
+                    value,
+                    row,
+                ) as SectionCommittedProject,
                 this.sectionCommittedProjects,
-            ),
-            setItemPropertyValue(
-                property,
-                value,
-                row,
-            ) as SectionCommittedProject,
-            this.sectionCommittedProjects,
-            );
-            if(property === 'budget'){
-                const budget = this.stateScenarioBudgets.find(o => o.id == scp.scenarioBudgetId)
-                if(!isNil(budget))
-                    scp.budget = budget.name;
-            }          
+                );
+            }    
         }       
     }
 
@@ -768,9 +736,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 "You are about to delete all of this scenario's committed projects.",
             choice: true,
         };
-    }
-
-    
+    }   
 
     //Subroutines
 
@@ -823,8 +789,7 @@ export default class CommittedProjectsEditor extends Vue  {
 
     setCpItems(){
         this.cpItems = this.sectionCommittedProjects.map(o => 
-        {
-            
+        {          
             const budget = this.stateScenarioBudgets.find(b => b.id === o.scenarioBudgetId);
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
             return row
@@ -845,6 +810,99 @@ export default class CommittedProjectsEditor extends Vue  {
                 errors: []              
             }
             return row
+    }
+
+    handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentId: string, row: SectionCommittedProject){
+        const treatment = this.selectedLibraryTreatments.find(o => o.id == treatmentId)
+        if(!isNil(treatment)){
+            scp.treatment = treatment.name;
+            this.updateCommittedProjects(row, treatment.name, 'treatment')  
+            const parameters: GetValidTreatmentConsequenceParameters = 
+            {
+                consequences: treatment.consequences, 
+                ValidationParameters: {
+                    expression: '', 
+                    currentUserCriteriaFilter: this.currentUserCriteriaFilter,
+                    networkId: this.network.id
+                } as ValidationParameter}
+            CommittedProjectsService.GetValidConsequences(parameters, row.locationKeys[this.brkey_])
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    row.consequences = [];
+                    const consequences = (response.data as TreatmentConsequence[]).map(con => {
+                        const consequence: CommittedProjectConsequence = {
+                                id: getNewGuid(),
+                                committedProjectId: row.id,
+                                attribute: con.attribute,
+                                changeValue: con.changeValue
+                            }
+                            return consequence
+                        })
+                        row.consequences = consequences;
+                        this.updateCommittedProjects(row, consequences, 'consequences');
+                        this.onSelectedCommittedProject();
+                }
+                CommittedProjectsService.GetTreatmetCost(row, row.locationKeys[this.brkey__])
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        row.cost = response.data;
+                        this.updateCommittedProjects(row, response.data, 'cost')  
+                    }
+                });                   
+            });                                                
+        }
+    }
+    handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData){
+        const budget = this.stateScenarioBudgets.find(o => o.id == scp.scenarioBudgetId)
+        if(!isNil(budget)){
+            scp.budget = budget.name;
+            this.updateCommittedProjectTableData(scp, budget.name, 'budget')
+            row.scenarioBudgetId = scp.scenarioBudgetId
+            this.updateCommittedProjects(row, scp.scenarioBudgetId, 'scenarioBudgetId')  
+        }        
+    }
+
+    handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
+        row.locationKeys[this.brkey_] = brkey;
+        this.updateCommittedProjects(row, brkey, 'brkey')
+        CommittedProjectsService.ValidateBRKEY(this.network, brkey).then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    if(!response.data)
+                        scp.errors = ['BRKEY does not exist'];
+                    else
+                        scp.errors = [];
+                }
+            });
+    }
+
+    updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){
+        this.sectionCommittedProjects = update(
+            findIndex(
+                propEq('id', row.id),
+                this.sectionCommittedProjects,
+            ),
+            setItemPropertyValue(
+                property,
+                value,
+                row,
+            ) as SectionCommittedProject,
+            this.sectionCommittedProjects,
+        );
+    }
+
+    updateCommittedProjectTableData(row: SectionCommittedProjectTableData, value: any, property: string ){
+        this.cpItems = update(
+            findIndex(
+                propEq('id', row.id),
+                this.cpItems,
+            ),
+            setItemPropertyValue(
+                property,
+                value,
+                row,
+            ) as SectionCommittedProjectTableData,
+            this.cpItems,
+        );
     }
 }
 </script>

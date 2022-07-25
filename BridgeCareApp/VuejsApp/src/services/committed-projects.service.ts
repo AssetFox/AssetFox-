@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
-import { SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
+import { GetValidTreatmentConsequenceParameters, SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 import { Network } from '@/shared/models/iAM/network';
 
 export default class CommittedProjectsService { 
@@ -26,7 +26,7 @@ export default class CommittedProjectsService {
     }
     static deleteSpecificCommittedProjects(data: string[]): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/DeleteSimulationCommittedProjects`, data
+            `${API.CommittedProject}/DeleteSpecificCommittedProjects`, data
         );
     }
     static importCommittedProjects(
@@ -65,9 +65,9 @@ export default class CommittedProjectsService {
         );
     }
 
-    static GetValidConsequences(data: SectionCommittedProject, brkeyValue: string){
+    static GetValidConsequences(data: GetValidTreatmentConsequenceParameters, brkeyValue: string){
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/GetTreatmetCost/${brkeyValue}`, data
+            `${API.CommittedProject}/GetValidConsequences/${brkeyValue}`, data
         );
     }
 }

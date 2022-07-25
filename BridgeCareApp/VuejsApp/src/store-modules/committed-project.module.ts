@@ -1,6 +1,7 @@
 import CommittedProjectsService from "@/services/committed-projects.service";
 import { SectionCommittedProject } from "@/shared/models/iAM/committed-projects";
 import { hasValue } from "@/shared/utils/has-value-util";
+import { http2XX } from "@/shared/utils/http-utils";
 import { AxiosResponse } from "axios";
 import { any, append, clone, contains, findIndex, propEq, update } from "ramda";
 
@@ -16,17 +17,17 @@ const mutations = {
         sectionCommittedProjects.forEach((proj: SectionCommittedProject) => {
             state.sectionCommittedProjects = any(
                 propEq('id', proj.id),
-                state.budgetPriorityLibraries,
+                state.sectionCommittedProjects,
             )
                 ? update(
                       findIndex(
                           propEq('id', proj.id),
-                          state.budgetPriorityLibraries,
+                          state.sectionCommittedProjects,
                       ),
                       proj,
-                      state.budgetPriorityLibraries,
+                      state.sectionCommittedProjects,
                   )
-                : append(proj, state.budgetPriorityLibraries);
+                : append(proj, state.sectionCommittedProjects);
         })
     },
     deleteSelectedCommittedProjectMutator(state: any, ids: string[]){
@@ -41,14 +42,14 @@ const actions = {
         await CommittedProjectsService.getCommittedProjects(scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('sectionCommittedProjectsCloneMutator',response.data as SectionCommittedProject[],);
+                    commit('sectionCommittedProjectsCloneMutator',response.data as SectionCommittedProject[]);
                 }
         });
     },
     async deleteSpecificCommittedProjects({commit, dispatch}: any, ids: string[]){
         await CommittedProjectsService.deleteSpecificCommittedProjects(ids)
             .then((response: AxiosResponse) => {
-                if(hasValue(response, 'data')){
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     commit('deleteSelectedCommittedProjectMutator', ids);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted selected committed projects',
@@ -59,7 +60,7 @@ const actions = {
     async deleteSimulationCommittedProjects({commit, dispatch}: any, scenarioId: string){
         await CommittedProjectsService.deleteSimulationCommittedProjects(scenarioId)
             .then((response: AxiosResponse) => {
-                if(hasValue(response, 'data')){
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     commit('sectionCommittedProjectsCloneMutator', []);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted committed projects',
@@ -84,7 +85,12 @@ const actions = {
     async upsertCommittedProjects({commit, dispatch}: any, sectionCommittedProjects:SectionCommittedProject[]){
         await CommittedProjectsService.upsertCommittedProjects(sectionCommittedProjects)
             .then((response: AxiosResponse) => {
-
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    commit('sectionCommittedProjectsCloneMutator',sectionCommittedProjects)
+                }
+                dispatch('addSuccessNotification', {
+                    message: 'Committed Projects Updated Successfully',
+                });  
             });
     }
 }

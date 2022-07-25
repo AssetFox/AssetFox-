@@ -87,15 +87,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
-            var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
+            var simulationId = Guid.NewGuid();
+            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert
             Assert.NotNull(result);
             Assert.Null(result.WarningMessage);
-            Assert.Equal(result.PerformanceCurves.Count, 1);
-            Assert.NotNull(result.PerformanceCurves[0].CriterionLibrary);
-            Assert.NotNull(result.PerformanceCurves[0].Equation);
+            var performanceCurve = result.PerformanceCurves.Single();
+            Assert.NotNull(performanceCurve.CriterionLibrary);
+            Assert.NotNull(performanceCurve.Equation);
         }
 
         [Fact]
@@ -110,13 +112,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
-            var dbContext = _testHelper.DbContext;
-            var simulationDbSet = dbContext.Simulation;
-            var simulationEntity = simulationDbSet.First();
-            var simulationId = simulationEntity.Id;
-            var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
+            var simulationId = Guid.NewGuid();
+            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
             // Assert
+
             Assert.NotNull(result);
             Assert.True(result.WarningMessage.Contains("The following performace curves are imported without criteria due to invalid values"));
             Assert.True(result.PerformanceCurves.Count > 0);

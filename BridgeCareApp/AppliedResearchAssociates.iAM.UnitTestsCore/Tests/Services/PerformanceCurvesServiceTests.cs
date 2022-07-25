@@ -25,11 +25,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             _testHelper.CreateNetwork();
             _testHelper.SetupDefaultHttpContext();
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
-            if (!dbContext.PerformanceCurveLibrary.Any())
-            {
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
                 dbContext.SaveChanges();
-            }
             return mockExpressionValidationService;
         }
 

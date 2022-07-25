@@ -594,12 +594,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             _testHelper.UnitOfWork.Context.SaveChanges();
+            var simulation = _testHelper.CreateSimulation();
 
             var getResult = await _controller.GetSimulations();
             var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<SimulationDTO>));
 
-            var simulationDTO = dtos[0];
+            var simulationDTO = dtos.Single(s => s.Id == simulation.Id);
             simulationDTO.Name = "Updated Name";
             var testUser = await AddTestUser();
             simulationDTO.Users = new List<SimulationUserDTO>

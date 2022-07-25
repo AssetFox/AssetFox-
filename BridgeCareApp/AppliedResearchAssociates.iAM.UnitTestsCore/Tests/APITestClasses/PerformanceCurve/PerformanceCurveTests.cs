@@ -279,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
 
-            var performanceCurveLibraryDTO = dtos[0];
+            var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
             performanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary =
                 criterionLibrary.ToDto();
 

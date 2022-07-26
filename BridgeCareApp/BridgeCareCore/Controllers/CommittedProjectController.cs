@@ -31,7 +31,6 @@ namespace BridgeCareCore.Controllers
     public class CommittedProjectController : BridgeCareCoreBaseController
     {
         private static ICommittedProjectService _committedProjectService;
-        private static IExpressionValidationService _expressionValidationService;
 
         private readonly IReadOnlyDictionary<string, CommittedProjectRetrieveMethod> _committedProjectRetrieveMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;
@@ -41,14 +40,11 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMultipleMethod> _committedProjectDeleteSpecificMethods;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
-            IExpressionValidationService expressionValidationService,
             IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(
             esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _committedProjectService = committedProjectService ??
                                        throw new ArgumentNullException(nameof(committedProjectService));
-            _expressionValidationService = expressionValidationService ??
-                                       throw new ArgumentNullException(nameof(expressionValidationService));
             _committedProjectRetrieveMethods = CreateRetrieveMethods();
             _committedProjectExportMethods = CreateExportMethods();
             _committedProjectImportMethods = CreateImportMethods();
@@ -318,23 +314,13 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("GetValidConsequences/{brkey}")]
         [Authorize]
-        public async Task<IActionResult> GetValidConsequences(GetValidTreatmentConsequenceParameters consequenceParameters, string brkey)
+        public async Task<IActionResult> GetValidConsequences(SectionCommittedProjectDTO dto, string brkey)
         {
             try
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    var consequencesToReturn = new List<TreatmentConsequenceDTO>();
-                    var asset = UnitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(consequenceParameters.ValidationParameters.NetworkId, brkey);
-                    if (asset == null)
-                        return consequencesToReturn;
-                    consequenceParameters.Consequences.ForEach(_ =>
-                    {
-                        consequenceParameters.ValidationParameters.Expression = _.CriterionLibrary.MergedCriteriaExpression;
-                        if (_.CriterionLibrary.MergedCriteriaExpression == null ||_expressionValidationService.ValidateExpressionByAssetId(consequenceParameters.ValidationParameters, asset.Id).IsValid )
-                            consequencesToReturn.Add(_);
-                    });
-                    return consequencesToReturn;
+                    return _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
                 });
                 return Ok(result);
             }

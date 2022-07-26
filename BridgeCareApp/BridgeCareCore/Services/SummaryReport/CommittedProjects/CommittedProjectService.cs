@@ -4,6 +4,8 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -461,31 +463,134 @@ namespace BridgeCareCore.Services
 
         public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
         {
-            var simOutput = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
-
-            var network = _unitOfWork.Context.Simulation.Include(_ => _.Network).ThenInclude(_ => _.Simulations).FirstOrDefault(_ => _.Id == simulationId)?.Network;
-            if (network == null)
+            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            if (simulation == null)
                 return 0;
-            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
-            if (attrEntity == null)
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            if (asset == null)
                 return 0;
+            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment
+                .Include(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentCosts
+                .Select(_ => _.ScenarioTreatmentCostEquationJoin.Equation).ToList();
 
-            var aggResult = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == brkey) :
-                    _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
-                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == brkey);
+            double totalCost = 0;
+            if (treatmentCostEquations == null)
+                return totalCost;
+            foreach(var cost in treatmentCostEquations)
+            {
+                var compiler = new CalculateEvaluateCompiler();
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
 
-            if (aggResult == null)
-                return 0;
+                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                var calculator = compiler.GetCalculator(cost.Expression);
+                var scope = new CalculateEvaluateScope();
+                var aggResultAttrDict = new Dictionary<string, AggregatedResultEntity>();
+                if (aggResults.Count != attributes.Count)
+                    return 0;
+                InstantiateScope(aggResults, scope);
+                var currentCost = calculator.Delegate(scope);
+                totalCost += currentCost;
+            }
+            return totalCost;
+        }
 
-            var treatmentOption = simOutput.Years.FirstOrDefault(_ => _.Year == year)?.Assets.FirstOrDefault(_ => _.AssetName == aggResult.MaintainableAsset.AssetName)?.TreatmentOptions.FirstOrDefault(_ => _.TreatmentName == treatment);
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year)
+        {
+            var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
+            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            if (simulation == null)
+                return consequencesToReturn;
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            if (asset == null)
+                return consequencesToReturn;
+            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment
+                .Include(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentConsequences.ToList();
+            if (treatmentConsequences == null)
+                return consequencesToReturn;
+            foreach (var consequence in treatmentConsequences)
+            {
+                var compiler = new CalculateEvaluateCompiler();
+                if(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin == null)
+                {
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
+                    continue;
+                }
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
 
-            if (treatmentOption == null)
-                return 0;
-            else
-                return treatmentOption.Cost;
+                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                if (aggResults.Count != attributes.Count)
+                    continue;
+                var evaluator = compiler.GetEvaluator(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression);
+                var scope = new CalculateEvaluateScope();
+                InstantiateScope(aggResults, scope);
+                if (evaluator.Delegate(scope))
+                    consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
+            }
+            return consequencesToReturn;
+        }
+
+        private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
+        {
+            var modifiedExpression = mergedCriteriaExpression
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("@", "")
+                    .Replace("|", "'")
+                    .ToUpper();
+
+            var pattern = "\\[[^\\]]*\\]";
+            var rg = new Regex(pattern);
+            var match = rg.Matches(mergedCriteriaExpression);
+            var hashMatch = new HashSet<string>();
+            foreach (Match m in match)
+            {
+                hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
+            }
+
+            var attributes = _unitOfWork.Context.Attribute
+                .Where(_ => hashMatch.Contains(_.Name))
+                .Select(attribute => new AttributeEntity
+                {
+                    Id = attribute.Id,
+                    Name = attribute.Name,
+                    DataType = attribute.DataType
+                }).AsNoTracking().ToList();
+
+            attributes.ForEach(attribute =>
+            {
+                compiler.ParameterTypes[attribute.Name] = attribute.DataType == "NUMBER"
+                    ? CalculateEvaluateParameterType.Number
+                    : CalculateEvaluateParameterType.Text;
+            });
+
+            return attributes;
+        }
+
+        private void InstantiateScope(List<AggregatedResultEntity> results, CalculateEvaluateScope scope)
+        {
+            results.ForEach(_ =>
+            {
+                if (_.Attribute.DataType == "NUMBER")
+                {
+                    //scope.NumberKeys.Add(_.Attribute.Name);
+                    scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
+                }
+                else
+                {
+                    //scope.TextKeys.Add(_.Attribute.Name);
+                    scope.SetText(_.Attribute.Name, _.TextValue);
+                }
+            });
         }
     }
 }

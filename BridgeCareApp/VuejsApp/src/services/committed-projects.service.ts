@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
-import { GetValidTreatmentConsequenceParameters, SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
+import {SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 import { Network } from '@/shared/models/iAM/network';
 
 export default class CommittedProjectsService { 
@@ -65,7 +65,7 @@ export default class CommittedProjectsService {
         );
     }
 
-    static GetValidConsequences(data: GetValidTreatmentConsequenceParameters, brkeyValue: string){
+    static GetValidConsequences(data: SectionCommittedProject, brkeyValue: string){
         return coreAxiosInstance.post(
             `${API.CommittedProject}/GetValidConsequences/${brkeyValue}`, data
         );

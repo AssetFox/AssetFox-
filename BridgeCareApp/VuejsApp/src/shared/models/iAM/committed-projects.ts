@@ -36,10 +36,6 @@ export interface CommittedProjectConsequence {
     changeValue: string;
 }
 
-export interface GetValidTreatmentConsequenceParameters {
-    consequences: TreatmentConsequence[];
-    ValidationParameters: ValidationParameter;
-}
 
 export const emptySectionCommittedProject = {
     id: getBlankGuid(),

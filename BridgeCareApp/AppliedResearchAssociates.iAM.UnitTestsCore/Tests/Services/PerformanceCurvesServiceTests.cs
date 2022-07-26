@@ -136,12 +136,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
-            var simulationId = (Guid)_testHelper.DbContext.Simulation.FirstOrDefault()?.Id;
+            var simulationId = Guid.NewGuid();
+            _testHelper.CreateSimulation(simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.WarningMessage.Contains("The following performace curves are imported without equation due to invalid values"));
+            Assert.Contains("The following performace curves are imported without equation due to invalid values", result.WarningMessage);
             Assert.True(result.PerformanceCurves.Count > 0);
         }
     }

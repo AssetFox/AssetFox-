@@ -192,6 +192,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(performanceCurveEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
+            // wjwjwj probably should not be deleting and re-adding? Instead, keep equations around if poossible, and
+            // the same for criteria? But when making the change, see if we run into trouble.
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 _.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 
@@ -225,8 +227,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             if (performanceCurves.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                _.CriterionLibrary?.Id != null
+                && _.CriterionLibrary?.Id != Guid.Empty
+                && !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
                 var criterionJoins = new List<CriterionLibraryPerformanceCurveEntity>();
 
@@ -237,6 +240,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         var criterion = new CriterionLibraryEntity
                         {
+                            // wjwjwj This is garbage, should be keeping the id we already have. Make the test pass.
                             Id = Guid.NewGuid(),
                             MergedCriteriaExpression = curve.CriterionLibrary.MergedCriteriaExpression,
                             Name = $"{curve.Name} {curve.Attribute} Criterion",
@@ -252,6 +256,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         return criterion;
                     }).ToList();
 
+                // wjwjwj UpsertAll.
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }

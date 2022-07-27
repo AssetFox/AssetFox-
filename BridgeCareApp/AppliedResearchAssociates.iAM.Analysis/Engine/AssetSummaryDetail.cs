@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         [JsonConstructor]
         public AssetSummaryDetail(string assetName)
         {
-            AssetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
+            AssetName = assetName ?? throw new ArgumentNullException(nameof(assetName)); 
         }
 
         public string AssetName { get; }

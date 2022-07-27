@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Reporting.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Models;
 using Writer = System.Threading.Channels.ChannelWriter<BridgeCareCore.Services.Aggregation.AggregationStatusMemo>;
 
@@ -69,6 +69,7 @@ namespace BridgeCareCore.Services.Aggregation
                         .ToList();
 
                     // Create list of attribute ids we are allowed to update with assigned data.
+                    // Could hack it in, but what is the natural way to set it up?
                     var networkAttributeIds = maintainableAssets
                         .Where(_ => _.AssignedData != null && _.AssignedData.Any())
                         .SelectMany(_ => _.AssignedData.Select(__ => __.Attribute.Id).Distinct()).ToList();

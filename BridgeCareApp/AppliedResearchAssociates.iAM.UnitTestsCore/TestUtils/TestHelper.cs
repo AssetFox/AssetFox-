@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -11,7 +11,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -80,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             MockHubService = new Mock<HubService>(MockHubContext.Object);
-            var connectionString = Config.GetConnectionString("BridgeCareConnex");
+            var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);

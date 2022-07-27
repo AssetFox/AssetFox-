@@ -5,13 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using AppliedResearchAssociates.iAM.Reporting;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Interfaces;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -24,10 +25,13 @@ namespace BridgeCareCore.Controllers
     public class ReportController : BridgeCareCoreBaseController
     {
         private readonly IReportGenerator _generator;
+        private readonly ILog _log;
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _generator = generator ?? throw new ArgumentNullException(nameof(generator));            
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+            _generator = generator ?? throw new ArgumentNullException(nameof(generator));
+        }
 
         #region "API functions"
 
@@ -39,8 +43,9 @@ namespace BridgeCareCore.Controllers
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
 
             //SendRealTimeMessage($"Starting to process {reportName}.");
+            var parameters = await GetParameters();
 
-            var report = await GenerateReport(reportName, ReportType.HTML);
+            var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 
             if (report == null)
             {
@@ -73,39 +78,53 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetFile(string reportName)
         {
-            var report = await GenerateReport(reportName, ReportType.File);
+            var parameters = await GetParameters();
 
-            if (report == null)
+            HubService.SendRealTimeMessage(UnitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, "", parameters);
+
+            try
             {
-                SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
-                return Ok(null);
+                return Ok();
             }
-
-            // Handle a completed run with errors
-            if (report.Errors.Any())
+            finally
             {
-                SendRealTimeMessage($"Failed to generate '{reportName}'");                
-                return Ok(null);
+                Response.OnCompleted(async () =>
+                {
+                    var report = await GenerateReport(reportName, ReportType.File, parameters);
+
+                    if (report == null)
+                    {
+                        SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
+                    }
+
+                    // Handle a completed run with errors
+                    if (report.Errors.Any())
+                    {
+                        SendRealTimeMessage($"Failed to generate '{reportName}'");
+
+                        _log.Information($"Failed to generate '{reportName}'");
+
+                        foreach (string message in report.Errors)
+                        {
+                            _log.Information($"Message: {message}");
+                        }
+                    }
+
+                    // Handle an incomplete run without errors
+                    if (!report.IsComplete)
+                    {
+                        SendRealTimeMessage($"{reportName} ran but never completed");
+                    }
+
+                    //create report index repository
+                    var reportIndexID = createReportIndexRepository(report);
+
+                    if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+                    {
+                        SendRealTimeMessage($"Failed to create report repository index");
+                    }
+                });
             }
-
-            // Handle an incomplete run without errors
-            if (!report.IsComplete)
-            {                
-                SendRealTimeMessage($"{reportName} ran but never completed");
-                return Ok(null);
-            }
-
-            //create report index repository
-            var reportIndexID = createReportIndexRepository(report);
-
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
-            {
-                SendRealTimeMessage($"Failed to create report repository index");
-                return Ok(null);
-            }
-
-            // Report is good, return the report repository index id
-            return Ok(reportIndexID);
         }
 
         [HttpGet]
@@ -211,8 +230,7 @@ namespace BridgeCareCore.Controllers
         #endregion
 
         #region "Internal functions"
-
-        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType)
+        private async Task<string> GetParameters()
         {
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
             var parameters = string.Empty;
@@ -222,6 +240,11 @@ namespace BridgeCareCore.Controllers
                 parameters = await reader.ReadToEndAsync();
             }
 
+            return parameters;
+        }
+
+        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
+        {
             //generate report
             var reportObject = await _generator.Generate(reportName);
 

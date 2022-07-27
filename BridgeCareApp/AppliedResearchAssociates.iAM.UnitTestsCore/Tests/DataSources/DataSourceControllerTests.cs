@@ -16,6 +16,8 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {

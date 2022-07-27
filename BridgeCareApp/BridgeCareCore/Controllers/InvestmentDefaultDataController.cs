@@ -2,8 +2,8 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;

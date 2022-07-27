@@ -666,7 +666,7 @@ export default class Scenarios extends Vue {
         }
     }
 
-    @Watch('stateScenarios')
+    @Watch('stateScenarios', {deep: true})
     onStateScenariosChanged() {
         this.scenarios = clone(this.stateScenarios);
     }

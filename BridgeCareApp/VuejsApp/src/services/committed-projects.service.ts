@@ -70,4 +70,10 @@ export default class CommittedProjectsService {
             `${API.CommittedProject}/GetValidConsequences/${brkeyValue}`, data
         );
     }
+
+    static FillTreatmentValues(data: SectionCommittedProject, brkeyValue: string){
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/FillTreatmentValues/${brkeyValue}`, data
+        );
+    }
 }

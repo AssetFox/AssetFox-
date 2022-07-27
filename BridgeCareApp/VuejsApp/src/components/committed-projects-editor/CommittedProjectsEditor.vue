@@ -115,6 +115,12 @@
                                                     v-model="props.item[header.value]">
                                                 </v-select>
 
+                                                <v-select v-if="header.value === 'category'"
+                                                    :items="categorySelectItems"
+                                                    label="Select a Budget"
+                                                    v-model="props.item[header.value]">
+                                                </v-select>
+
                                                 <v-text-field v-if="header.value === 'year'"
                                                     label="Edit"
                                                     single-line
@@ -271,7 +277,7 @@ import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySec
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { Treatment, TreatmentConsequence, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { Treatment, TreatmentCategory, TreatmentConsequence, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -316,6 +322,8 @@ export default class CommittedProjectsEditor extends Vue  {
     attributeSelectItems: SelectItem[] = [];
     treatmentSelectItems: string[] = [];
     budgetSelectItems: SelectItem[] = [];
+    categorySelectItems: SelectItem[] = [];
+    categories: string[] = [];
     scenarioId: string = getBlankGuid();
     networkId: string = getBlankGuid();
     rules: InputValidationRules = rules;
@@ -389,6 +397,14 @@ export default class CommittedProjectsEditor extends Vue  {
             width: '10%',
         },
         {
+            text: 'Category',
+            value: 'category',
+            align: 'left',
+            sortable: true,
+            class: '',
+            width: '10%',
+        },
+        {
             text: 'Budget',
             value: 'budget',
             align: 'left',
@@ -441,6 +457,13 @@ export default class CommittedProjectsEditor extends Vue  {
     ];
     
     mounted() {
+        this.categories = Object.keys(TreatmentCategory).filter((item) => {return isNaN(Number(item));});
+        this.categorySelectItems = this.categories.map(
+            (cat: string) => ({
+                text: cat,
+                value: cat
+            }),
+        );
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -658,7 +681,7 @@ export default class CommittedProjectsEditor extends Vue  {
             if(property === 'treatment'){
                 this.handleTreatmentChange(scp, value, row)                  
             }
-            else if(property == 'brkey'){
+            else if(property === 'brkey'){
                 this.handleBrkeyChange(row, scp, value);
             }            
             else if(property === 'budget'){
@@ -666,6 +689,8 @@ export default class CommittedProjectsEditor extends Vue  {
             }
             else{
                 this.checkYear(scp);
+                if(property === 'category')
+                    value = this.categories.findIndex((element) => element === scp.category)
                 this.sectionCommittedProjects = update(
                 findIndex(
                     propEq('id', scp.id),
@@ -845,7 +870,8 @@ export default class CommittedProjectsEditor extends Vue  {
             treatmentId: '',
             id: scp.id,
             errors: [],
-            yearErrors: []             
+            yearErrors: [],
+            category: TreatmentCategory[scp.category]        
         }
         return row
     }
@@ -854,23 +880,16 @@ export default class CommittedProjectsEditor extends Vue  {
         row.treatment = treatmentName
         this.updateCommittedProjects(row, treatmentName, 'treatment')  
         
-        CommittedProjectsService.GetValidConsequences(row, row.locationKeys[this.brkey_])
+        CommittedProjectsService.FillTreatmentValues(row, row.locationKeys[this.brkey_])
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
-                row.consequences = [];
-                const consequences = response.data as CommittedProjectConsequence[]
-                row.consequences = consequences;
-                this.updateCommittedProjects(row, consequences, 'consequences');
+                row = response.data
+                scp.cost = row.cost;
+                scp.category = TreatmentCategory[row.category]
                 this.onSelectedCommittedProject();
-            }
-            CommittedProjectsService.GetTreatmetCost(row, row.locationKeys[this.brkey_])
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    row.cost = response.data;
-                    scp.cost = response.data;
-                    this.updateCommittedProjects(row, response.data, 'cost')  
-                }
-            });                   
+                this.updateCommittedProjects(row, row.cost, 'cost')  
+                this.updateCommittedProjects(row, row.consequences, 'consequences')  
+            }                            
         });                                                
     }
     handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
@@ -920,8 +939,9 @@ export default class CommittedProjectsEditor extends Vue  {
     checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if(scp.year < this.stateInvestmentPlan.firstYearOfAnalysisPeriod 
-            || scp.year >= this.stateInvestmentPlan.firstYearOfAnalysisPeriod + this.stateInvestmentPlan.numberOfYearsInAnalysisPeriod)
+        else if(!isNil(this.stateInvestmentPlan) &&(
+            scp.year < this.stateInvestmentPlan.firstYearOfAnalysisPeriod 
+            || scp.year >= this.stateInvestmentPlan.firstYearOfAnalysisPeriod + this.stateInvestmentPlan.numberOfYearsInAnalysisPeriod))
             scp.yearErrors = ['Year is outside of Analysis period'];
         else
             scp.yearErrors = [];

@@ -1,5 +1,5 @@
 import { getBlankGuid } from "@/shared/utils/uuid-utils";
-import { TreatmentConsequence } from "./treatment";
+import { TreatmentConsequence, TreatmentCategory } from "./treatment";
 import {ValidationParameter} from "./expression-validation"
 
 export interface BaseCommittedProject {
@@ -12,7 +12,8 @@ export interface BaseCommittedProject {
     shadowForAnyTreatment: number;
     shadowForSameTreatment: number;
     consequences: CommittedProjectConsequence[];
-    locationKeys: { [key: string]: string; }  
+    locationKeys: { [key: string]: string; }; 
+    category: TreatmentCategory
 }
 export interface SectionCommittedProjectTableData {
     id: string;
@@ -25,6 +26,7 @@ export interface SectionCommittedProjectTableData {
     cost: number;
     errors: string[];
     yearErrors: string[];
+    category: string;
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;
@@ -50,7 +52,7 @@ export const emptySectionCommittedProject = {
     consequences: [],
     locationKeys: {},
     name: '',
-
+    category: TreatmentCategory.other
 }
 
 export const emptyCommittedProjectConsequence ={

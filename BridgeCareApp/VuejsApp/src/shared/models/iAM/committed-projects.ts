@@ -24,6 +24,7 @@ export interface SectionCommittedProjectTableData {
     budget: string;
     cost: number;
     errors: string[];
+    yearErrors: string[];
 }
 export interface SectionCommittedProject extends BaseCommittedProject{
     name: string;

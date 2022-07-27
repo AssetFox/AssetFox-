@@ -79,7 +79,7 @@
                                             large
                                             lazy
                                             persistent>
-                                            <v-text-field v-if="header.value !== 'budget' && header.value !== 'treatment' && header.value !== 'brkey'"
+                                            <v-text-field v-if="header.value !== 'budget' && header.value !== 'year' && header.value !== 'brkey' && header.value !== 'treatment'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -88,11 +88,7 @@
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"/>
-                                            <!-- <v-text-field v-if="header.value === 'treatment'"
-                                                readonly
-                                                class="sm-txt"
-                                                :value="props.item[header.value]"
-                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/> -->
+
                                             <v-text-field v-if="header.value === 'brkey'"
                                                 readonly
                                                 class="sm-txt"
@@ -100,19 +96,18 @@
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.errors"/>
 
+                                            <v-text-field v-if="header.value === 'year'"
+                                                :value="props.item[header.value]"
+                                                :mask="'##########'"
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                                :error-messages="props.item.yearErrors"/>
+
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
                                                     label="Edit"
                                                     single-line
                                                     v-model="props.item[header.value]"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
-
-                                                <!-- <v-combobox v-if="header.value === 'treatment'"
-                                                    :items="treatmentSelectItems"
-                                                    label="Select a Treatment"
-                                                    v-model="props.item.treatment"
-                                                    :rules="[rules['generalRules'].valueIsNotEmpty]">
-                                                </v-combobox> -->
 
                                                 <v-select v-if="header.value === 'budget'"
                                                     :items="budgetSelectItems"
@@ -285,13 +280,13 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosResponse } from 'axios';
-import { clone, find, findIndex, isNil, propEq, update } from 'ramda';
+import { clone, find, findIndex, isEmpty, isNil, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import ImportExportCommittedProjectsDialog from './committed-project-editor-dialogs/CommittedProjectsImportDialog.vue';
 import CreateConsequenceDialog from './committed-project-editor-dialogs/CreateCommittedProjectConsequenceDialog.vue';
-import { Budget } from '@/shared/models/iAM/investment';
+import { Budget, InvestmentPlan } from '@/shared/models/iAM/investment';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import { NIL } from 'uuid';
@@ -330,6 +325,7 @@ export default class CommittedProjectsEditor extends Vue  {
     @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
     selectedLibraryTreatments: Treatment[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.networkModule.networks) networks: Network[];
@@ -445,7 +441,6 @@ export default class CommittedProjectsEditor extends Vue  {
     ];
     
     mounted() {
-
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -462,12 +457,15 @@ export default class CommittedProjectsEditor extends Vue  {
                 });
                 vm.$router.push('/Scenarios/');
             }
-      
-            vm.getTreatmentLibrariesAction();
-            vm.getCommittedProjects(vm.scenarioId);      
-            vm.getInvestmentAction(vm.scenarioId);     
-            vm.getAttributesAction();
-            vm.getNetworksAction();
+     
+            vm.getNetworksAction().then(() => {
+                vm.getCommittedProjects(vm.scenarioId).then(() => {
+                    vm.getInvestmentAction(vm.scenarioId);  
+                    vm.getTreatmentLibrariesAction();                            
+                    vm.getAttributesAction();
+                })
+            });
+                      
         });
     }
 
@@ -477,7 +475,6 @@ export default class CommittedProjectsEditor extends Vue  {
         const network = this.networks.find(o => o.id == this.networkId)
         if(!isNil(network)){
             this.network = network;
-            this.checkBrkeys(0)
         }           
     }
 
@@ -506,6 +503,13 @@ export default class CommittedProjectsEditor extends Vue  {
                 value: attribute.name
             }),
         );
+    }
+
+    @Watch('stateInvestmentPlan')
+    onStateInvestmentPlan(){
+        this.cpItems.forEach(scp => {
+            this.checkYear(scp);
+        })
     }
 
     @Watch('stateScenarioBudgets')
@@ -661,6 +665,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 this.handleBudgetChange(row, scp, value)
             }
             else{
+                this.checkYear(scp);
                 this.sectionCommittedProjects = update(
                 findIndex(
                     propEq('id', scp.id),
@@ -821,8 +826,6 @@ export default class CommittedProjectsEditor extends Vue  {
         this.cpItems = this.sectionCommittedProjects.map(o => 
         {          
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
-            // if(this.network.id !== getBlankGuid())
-            //     this.checkBrkey(row, o.locationKeys[this.brkey_])
             return row
         })
         this.checkBrkeys(0);
@@ -841,7 +844,8 @@ export default class CommittedProjectsEditor extends Vue  {
             treatment: scp.treatment,
             treatmentId: '',
             id: scp.id,
-            errors: []              
+            errors: [],
+            yearErrors: []             
         }
         return row
     }
@@ -911,6 +915,16 @@ export default class CommittedProjectsEditor extends Vue  {
                 index++;
                 this.checkBrkeys(index)
             });
+    }
+
+    checkYear(scp:SectionCommittedProjectTableData){
+        if(!hasValue(scp.year))
+            scp.yearErrors = ['Value cannot be empty'];
+        else if(scp.year < this.stateInvestmentPlan.firstYearOfAnalysisPeriod 
+            || scp.year >= this.stateInvestmentPlan.firstYearOfAnalysisPeriod + this.stateInvestmentPlan.numberOfYearsInAnalysisPeriod)
+            scp.yearErrors = ['Year is outside of Analysis period'];
+        else
+            scp.yearErrors = [];
     }
 
     updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){

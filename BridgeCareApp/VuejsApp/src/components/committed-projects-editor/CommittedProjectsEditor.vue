@@ -882,9 +882,10 @@ export default class CommittedProjectsEditor extends Vue  {
                 row = response.data
                 scp.cost = row.cost;
                 scp.category = TreatmentCategory[row.category]
-                this.onSelectedCommittedProject();
+                
                 this.updateCommittedProjects(row, row.cost, 'cost')  
                 this.updateCommittedProjects(row, row.consequences, 'consequences')  
+                this.onSelectedCommittedProject();
             }                            
         });                                                
     }

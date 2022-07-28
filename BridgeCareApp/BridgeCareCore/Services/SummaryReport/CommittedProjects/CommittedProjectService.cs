@@ -370,10 +370,13 @@ namespace BridgeCareCore.Services
 
                 // This to convert the incoming string to a TreatmentCategory
                 TreatmentCategory convertedCategory = default(TreatmentCategory);
-                if (Enum.TryParse(typeof(TreatmentCategory), worksheet.GetCellValue<string>(row, _keyFields.Count + 8), true, out var convertedCategoryOut))// Assumes that InitialHeaders stays constant
+                var category = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
+                if (Enum.TryParse(typeof(TreatmentCategory), category, true, out var convertedCategoryOut))// Assumes that InitialHeaders stays constant
                 {
                     convertedCategory = (TreatmentCategory)convertedCategoryOut;
                 }
+                else
+                    throw new RowNotInTableException($"The value {category} is not a valid category");
 
                 // Build the committed project object
                 var project = new SectionCommittedProjectDTO

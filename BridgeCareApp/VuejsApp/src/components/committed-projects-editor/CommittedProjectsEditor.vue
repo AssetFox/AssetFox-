@@ -361,7 +361,6 @@ export default class CommittedProjectsEditor extends Vue  {
     sectionCommittedProjects: SectionCommittedProject[] = [];
     selectedConsequences: CommittedProjectConsequence[] = [];
     idsForDeletion: string[] = [];
-    deleteAllClicked: boolean = false;
     committedProjectsCount: number = 0;
     showImportExportCommittedProjectsDialog: boolean = false;
     selectedCommittedProject: string  = '';
@@ -645,16 +644,13 @@ export default class CommittedProjectsEditor extends Vue  {
 
      OnSaveClick(){
         if(this.idsForDeletion.length > 0){
-            this.deleteSpecificCommittedProjectsAction(this.idsForDeletion)
-            this.idsForDeletion = [];
+            this.deleteSpecificCommittedProjectsAction(this.idsForDeletion).then(() => {
+                this.upsertCommittedProjectsAction(this.sectionCommittedProjects)
+                this.idsForDeletion = [];
+            })         
         }
-        if(this.deleteAllClicked){
-            this.deleteSimulationCommittedProjectsAction(this.scenarioId);
-            this.deleteAllClicked = false;
-        }
-        
-        this.upsertCommittedProjectsAction(this.sectionCommittedProjects)
-        
+        else
+            this.upsertCommittedProjectsAction(this.sectionCommittedProjects)     
      }
 
      OnDeleteAllClick(){

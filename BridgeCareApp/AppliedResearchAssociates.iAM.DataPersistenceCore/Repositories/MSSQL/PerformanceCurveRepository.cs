@@ -15,6 +15,12 @@ using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
+    internal class PerformanceCurveFamilyIds
+    {
+        public Guid PerformanceCurveId { get; set; }
+        public Guid? EquationId { get; set; }
+        public Guid? CriterionLibraryId { get; set; }
+    }
     public class PerformanceCurveRepository : IPerformanceCurveRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
@@ -174,6 +180,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
             }
 
+
             var performanceCurveEntities = performanceCurves
                 .Select(_ => _.ToLibraryEntity(libraryId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))
                 .ToList();
@@ -183,6 +190,47 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingEntityIds = _unitOfWork.Context.PerformanceCurve.AsNoTracking()
                 .Where(_ => _.PerformanceCurveLibrary.Id == libraryId && entityIds.Contains(_.Id))
                 .Select(_ => _.Id).ToList();
+
+
+            var performanceCurveFamilies =
+                _unitOfWork.Context.PerformanceCurve.AsNoTracking()
+                .Where(_ => _.PerformanceCurveLibrary.Id == libraryId && entityIds.Contains(_.Id))
+                .Include(_ => _.PerformanceCurveEquationJoin)
+                .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
+                .Select(_ => new PerformanceCurveFamilyIds
+                {
+                    PerformanceCurveId = _.Id,
+                    EquationId = _.PerformanceCurveEquationJoin == null ? null : _.PerformanceCurveEquationJoin.EquationId,
+                    CriterionLibraryId = _.CriterionLibraryPerformanceCurveJoin == null ? null:_.CriterionLibraryPerformanceCurveJoin.CriterionLibraryId,
+                })
+                .ToList();
+
+            var performanceCurvesThatShouldHaveEquations = performanceCurves.Where(_ =>
+                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression))
+                .ToList();
+            var familiesThatDidHaveEquations = performanceCurveFamilies.Where(f => f.EquationId != null)
+                .ToList();
+            var familiesToDeleteEquations = familiesThatDidHaveEquations.Where(f => !performanceCurvesThatShouldHaveEquations.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
+            var familiesToUpdateEquations = familiesThatDidHaveEquations.Where(f => performanceCurvesThatShouldHaveEquations.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
+            var performanceCurvesToAddEquations = performanceCurvesThatShouldHaveEquations
+                .Where(pc => !familiesThatDidHaveEquations.Any(f => f.PerformanceCurveId == pc.Id))
+                .ToList();
+            var equationIdsToDelete = familiesToDeleteEquations.Select(f => f.EquationId).ToList();
+            var equationIdsToMaybeUpdate = familiesToUpdateEquations.Select(f => f.EquationId).ToList();
+            var equationEntitiesToMaybeUpdate = _unitOfWork.Context.Equation
+                .Where(e => equationIdsToMaybeUpdate.Contains(e.Id)).ToList();
+            var equationEntitiesToUpdate = new List<EquationEntity>();
+            foreach (var equation in equationEntitiesToMaybeUpdate)
+            {
+                var family = familiesToUpdateEquations.Single(f => f.EquationId == equation.Id);
+                var performanceCurve = performanceCurves.Single(pc => pc.Id == family.PerformanceCurveId);
+                if (equation.Expression != performanceCurve.Equation.Expression)
+                {
+                    equation.Expression = performanceCurve.Equation.Expression;
+                    equationEntitiesToUpdate.Add(equation);
+                }
+            }
+            _unitOfWork.Context.Update(equationEntitiesToUpdate);
 
             _unitOfWork.Context.DeleteAll<PerformanceCurveEntity>(_ =>
                 _.PerformanceCurveLibrary.Id == libraryId && !entityIds.Contains(_.Id));
@@ -195,19 +243,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // wjwjwj probably should not be deleting and re-adding? Instead, keep equations around if poossible, and
             // the same for criteria? But when making the change, see if we run into trouble.
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.PerformanceCurveEquationJoin.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
+                equationIdsToDelete.Contains(_.Id));
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryPerformanceCurveEntity>(_ =>
                 _.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
 
-            if (performanceCurves.Any(_ =>
-                _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
+            if (performanceCurvesToAddEquations.Any())
             {
                 var equationJoins = new List<PerformanceCurveEquationEntity>();
 
-                var equations = performanceCurves
-                    .Where(_ => _.Equation?.Id != null && _.Equation?.Id != Guid.Empty &&
-                                !string.IsNullOrEmpty(_.Equation.Expression))
+                var equations = performanceCurvesToAddEquations
                     .Select(curve =>
                     {
                         var equation = new EquationEntity

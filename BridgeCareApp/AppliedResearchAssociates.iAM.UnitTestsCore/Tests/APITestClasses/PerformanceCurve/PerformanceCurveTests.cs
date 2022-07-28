@@ -223,8 +223,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(curveId, dto.PerformanceCurves[0].Id);
         }
 
-        //[Fact]
-        [Fact(Skip = "Still broken 7/25/2022. Need to fix the underlying api.")]
+        [Fact]
+        //[Fact(Skip = "Still broken 7/25/2022. Need to fix the underlying api.")]
         public async Task ShouldModifyPerformanceCurveData()
         {
             Setup();

@@ -208,17 +208,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var performanceCurvesThatShouldHaveEquations = performanceCurves.Where(_ =>
                 _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression))
                 .ToList();
+            var performanceCurvesThatShouldHaveCriterionLibraries =
+                performanceCurves.Where(_ =>
+                _.CriterionLibrary?.Id != null
+                && _.CriterionLibrary?.Id != Guid.Empty
+                && !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
+                .ToList();
             var familiesThatDidHaveEquations = performanceCurveFamilies.Where(f => f.EquationId != null)
                 .ToList();
             var familiesToDeleteEquations = familiesThatDidHaveEquations.Where(f => !performanceCurvesThatShouldHaveEquations.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
             var familiesToUpdateEquations = familiesThatDidHaveEquations.Where(f => performanceCurvesThatShouldHaveEquations.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
+            var familiesThatDidHaveCriterionLibraries = performanceCurveFamilies.Where(f => f.CriterionLibraryId != null).ToList();
+            var familiesToDeleteCriterionLibraries = familiesThatDidHaveCriterionLibraries.Where(f => !performanceCurvesThatShouldHaveCriterionLibraries.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
+            var familiesToUpdateCriterieonLibraries = familiesThatDidHaveCriterionLibraries.Where(f => performanceCurvesThatShouldHaveCriterionLibraries.Any(pc => pc.Id == f.PerformanceCurveId)).ToList();
+
             var performanceCurvesToAddEquations = performanceCurvesThatShouldHaveEquations
                 .Where(pc => !familiesThatDidHaveEquations.Any(f => f.PerformanceCurveId == pc.Id))
                 .ToList();
+            var performanceCurvesToAddLibraries = performanceCurvesThatShouldHaveCriterionLibraries
+                .Where(pc => !familiesThatDidHaveCriterionLibraries.Any(f => f.PerformanceCurveId == pc.Id))
+                .ToList();
             var equationIdsToDelete = familiesToDeleteEquations.Select(f => f.EquationId).ToList();
             var equationIdsToMaybeUpdate = familiesToUpdateEquations.Select(f => f.EquationId).ToList();
+            var criterionLibraryIdsToDelete = familiesToDeleteCriterionLibraries
+                .Select(f => f.CriterionLibraryId)
+                .ToList();
+            var criterionLibraryIdsToUpdate = familiesToUpdateCriterieonLibraries
+                .Select(f => f.CriterionLibraryId)
+                .ToList();
+
             var equationEntitiesToMaybeUpdate = _unitOfWork.Context.Equation
                 .Where(e => equationIdsToMaybeUpdate.Contains(e.Id)).ToList();
+            var criterionLibraryJoinsToMaybeUpdate =
+                _unitOfWork.Context.CriterionLibraryPerformanceCurve
+                .Include(clpc => clpc.CriterionLibrary)
+                .Where(cl => criterionLibraryIdsToUpdate.Contains(cl.CriterionLibraryId))
+                .ToList();
             var equationEntitiesToUpdate = new List<EquationEntity>();
             foreach (var equation in equationEntitiesToMaybeUpdate)
             {
@@ -230,7 +255,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     equationEntitiesToUpdate.Add(equation);
                 }
             }
-            _unitOfWork.Context.Update(equationEntitiesToUpdate);
+            var criterionLibrariesToUpdate = new List<CriterionLibraryEntity>();
+            foreach (var criterionLibrary in criterionLibraryJoinsToMaybeUpdate)
+            {
+                var family = familiesToUpdateCriterieonLibraries
+                    .Single(f => f.CriterionLibraryId == criterionLibrary.CriterionLibraryId);
+                var performanceCurve = performanceCurves.Single(pc => pc.Id == family.PerformanceCurveId);
+                var name = $"{performanceCurve.Name} {performanceCurve.Attribute} Criterion";
+                var mergedCrieteriaExpression = performanceCurve.CriterionLibrary.MergedCriteriaExpression;
+                if (name!=criterionLibrary.CriterionLibrary.Name || mergedCrieteriaExpression!=criterionLibrary.CriterionLibrary.MergedCriteriaExpression)
+                {
+                    criterionLibrary.CriterionLibrary.Name = name;
+                    criterionLibrary.CriterionLibrary.MergedCriteriaExpression = mergedCrieteriaExpression;
+                    criterionLibrariesToUpdate.Add(criterionLibrary.CriterionLibrary);
+                }
+            }
+            _unitOfWork.Context.UpdateRange(equationEntitiesToUpdate);
+            _unitOfWork.Context.UpdateRange(criterionLibrariesToUpdate);
 
             _unitOfWork.Context.DeleteAll<PerformanceCurveEntity>(_ =>
                 _.PerformanceCurveLibrary.Id == libraryId && !entityIds.Contains(_.Id));
@@ -246,7 +287,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 equationIdsToDelete.Contains(_.Id));
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryPerformanceCurveEntity>(_ =>
-                _.PerformanceCurve.PerformanceCurveLibraryId == libraryId);
+                criterionLibraryIdsToDelete.Contains(_.CriterionLibraryId));
 
             if (performanceCurvesToAddEquations.Any())
             {
@@ -271,16 +312,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(equationJoins, _unitOfWork.UserEntity?.Id);
             }
 
-            if (performanceCurves.Any(_ =>
-                _.CriterionLibrary?.Id != null
-                && _.CriterionLibrary?.Id != Guid.Empty
-                && !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+            if (performanceCurvesToAddLibraries.Any())
             {
                 var criterionJoins = new List<CriterionLibraryPerformanceCurveEntity>();
 
-                var criteria = performanceCurves
-                    .Where(curve =>curve.CriterionLibrary?.Id != null && curve.CriterionLibrary?.Id != Guid.Empty &&
-                                   !string.IsNullOrEmpty(curve.CriterionLibrary.MergedCriteriaExpression))
+                var criteria = performanceCurvesToAddLibraries
                     .Select(curve =>
                     {
                         var criterion = new CriterionLibraryEntity

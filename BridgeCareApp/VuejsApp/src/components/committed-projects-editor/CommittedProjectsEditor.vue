@@ -277,7 +277,7 @@ import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySec
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
-import { Treatment, TreatmentCategory, TreatmentConsequence, TreatmentLibrary } from '@/shared/models/iAM/treatment';
+import { Treatment, TreatmentCategory, treatmentCategoryMap, treatmentCategoryReverseMap, TreatmentConsequence, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import CommittedProjectsService from '@/services/committed-projects.service';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -367,6 +367,8 @@ export default class CommittedProjectsEditor extends Vue  {
     showCreateCommittedProjectConsequenceDialog: boolean = false;
     disableCrudButtonsResult: boolean = true;
     alertDataForDeletingCommittedProjects: AlertData = { ...emptyAlertData };
+    reverseCatMap = clone(treatmentCategoryReverseMap);
+    catMap = clone(treatmentCategoryMap);
     
     brkey_: string = 'BRKEY_'
 
@@ -456,13 +458,9 @@ export default class CommittedProjectsEditor extends Vue  {
     ];
     
     mounted() {
-        this.categories = Object.keys(TreatmentCategory).filter((item) => {return isNaN(Number(item));});
-        this.categorySelectItems = this.categories.map(
-            (cat: string) => ({
-                text: cat,
-                value: cat
-            }),
-        );
+        this.reverseCatMap.forEach(cat => {
+            this.categorySelectItems.push({text: cat, value: cat})
+        })
     }
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
@@ -686,7 +684,7 @@ export default class CommittedProjectsEditor extends Vue  {
             else{
                 this.checkYear(scp);
                 if(property === 'category')
-                    value = this.categories.findIndex((element) => element === scp.category)
+                    value = this.catMap.get(value);
                 this.sectionCommittedProjects = update(
                 findIndex(
                     propEq('id', scp.id),
@@ -856,6 +854,10 @@ export default class CommittedProjectsEditor extends Vue  {
         const budget: Budget = find(
             propEq('id', scp.scenarioBudgetId), this.stateScenarioBudgets,
         ) as Budget;
+        let cat = this.reverseCatMap.get(scp.category);
+        let value = '';
+        if(!isNil(cat))
+            value = cat;
         const row: SectionCommittedProjectTableData = {
             brkey: scp.locationKeys[this.brkey_],
             year: scp.year,
@@ -867,7 +869,7 @@ export default class CommittedProjectsEditor extends Vue  {
             id: scp.id,
             errors: [],
             yearErrors: [],
-            category: TreatmentCategory[scp.category]        
+            category: value
         }
         return row
     }
@@ -881,8 +883,9 @@ export default class CommittedProjectsEditor extends Vue  {
             if (hasValue(response, 'data')) {
                 row = response.data
                 scp.cost = row.cost;
-                scp.category = TreatmentCategory[row.category]
-                
+                let cat = this.reverseCatMap.get(row.category);
+                if(!isNil(cat))
+                    scp.category = cat;           
                 this.updateCommittedProjects(row, row.cost, 'cost')  
                 this.updateCommittedProjects(row, row.consequences, 'consequences')  
                 this.onSelectedCommittedProject();

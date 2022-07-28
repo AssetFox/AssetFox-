@@ -35,27 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.SetupDefaultHttpContext();
         }
 
-        public PerformanceCurveLibraryEntity TestPerformanceCurveLibrary(Guid id)
-        {
-            var entity = new PerformanceCurveLibraryEntity
-            {
-                Id = id,
-                Name = "Test Name"
-            };
-            return entity;
-        }
 
-        public PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
-        {
-            var returnValue = new PerformanceCurveEntity
-            {
-                Id = curveId,
-                PerformanceCurveLibraryId = libraryId,
-                Name = "Test Name",
-                Shift = false
-            };
-            return returnValue;
-        }
 
         public EquationEntity TestEquation { get; } = new EquationEntity
         {
@@ -76,13 +56,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void SetupForGet(Guid performanceCurveLibraryId, Guid performanceCurveId)
         {
-            var testLibrary = TestPerformanceCurveLibrary(performanceCurveLibraryId);
-            _testHelper.UnitOfWork.Context.PerformanceCurveLibrary.Add(testLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
-            var curve = TestPerformanceCurve(performanceCurveLibraryId, performanceCurveId);
-            curve.AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id;
-            _testHelper.UnitOfWork.Context.PerformanceCurve.Add(curve);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, performanceCurveLibraryId);
+            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId);
         }
 
         private CriterionLibraryEntity AddTestCriterionLibrary()
@@ -140,7 +115,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Act
             var result = await controller
-                .UpsertPerformanceCurveLibrary(TestPerformanceCurveLibrary(libraryId).ToDto());
+                .UpsertPerformanceCurveLibrary(PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId).ToDto());
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -231,19 +206,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = SetupForUpsertOrDelete(libraryId, curveId);
+            var criterionLibrary = AddTestCriterionLibrary();
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
 
-            var performanceCurveLibraryDto = dtos[0];
+            var performanceCurveLibraryDto = dtos.Single(dto => dto.Id == libraryId);
             performanceCurveLibraryDto.Description = "Updated Description";
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.Shift = true;
             performanceCurveDto.CriterionLibrary =
                 criterionLibrary.ToDto();
-            performanceCurveDto.Equation = TestEquation.ToDto();
+            performanceCurveDto.Equation = equation.ToDto();
 
             // Act
             await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);

@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
             worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
-            worksheet.Cells[row, columnNo++].Value = section.AssetName.Split('-')[0];
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
             var deckArea = section.ValuePerNumericAttribute["DECK_AREA"];

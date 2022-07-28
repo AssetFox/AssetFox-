@@ -121,10 +121,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 // Add work done cells
                 TreatmentCause previousYearCause = TreatmentCause.Undefined;
                 var previousYearTreatment = BAMSConstants.NoTreatment;
-                var i = 0;
+                var i = 0; double section_BRKEY = 0;
                 foreach (var section in yearlySectionData.Assets)
                 {
                     TrackDataForParametersTAB(section.ValuePerNumericAttribute, section.ValuePerTextAttribute);
+
+                    //get unique key (brkey) to compare
+                    section_BRKEY = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
                     if (!_bpnPoorOnPerYear.ContainsKey(yearlySectionData.Year))
                     {
@@ -174,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     if (section.TreatmentCause == TreatmentCause.CommittedProject && !isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
+                            .Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY); 
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
@@ -195,7 +198,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             if (prevYearSection == null)
                             {
                                 prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == yearlySectionData.Year - 1)
-                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
+                                    .Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
                             }
                             if (prevYearSection.AppliedTreatment == section.AppliedTreatment)
                             {
@@ -316,11 +319,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     column = AddSimulationYearData(worksheet, row, column, null, section);
                     var initialColumnForShade = column;
 
+                    //get unique key (brkey) to compare
+                    var section_BRKEY = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+
                     AssetDetail prevYearSection = null;
                     if (!isInitialYear)
                     {
                         prevYearSection = outputResults.Years.FirstOrDefault(f => f.Year == sectionData.Year - 1)
-                            .Assets.FirstOrDefault(_ => _.AssetName == section.AssetName);
+                            .Assets.FirstOrDefault(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_") == section_BRKEY);
                     }
 
                     if(section.TreatmentCause == TreatmentCause.CashFlowProject && !isInitialYear)
@@ -466,17 +472,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var columnNo = currentCell.Column;
             foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
             {
-                rowNo++;
-                columnNo = 1;
-                var splitIds = sectionSummary.AssetName.Split('-');
-                var sectionId = "";
-                var facilityId = splitIds[0];
-                if (splitIds.Length == 2)
-                {
-                    sectionId = splitIds[1];
-                }
+                rowNo++; columnNo = 1;
+
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRKEY_");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_TYPE");

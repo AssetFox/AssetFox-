@@ -60,18 +60,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId);
         }
 
-        private CriterionLibraryEntity AddTestCriterionLibrary()
-        {
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
-            return criterionLibrary;
-        }
 
         private CriterionLibraryEntity SetupForUpsertOrDelete(Guid performanceCurveLibaryId, Guid performanceCurveId)
         {
             SetupForGet(performanceCurveLibaryId, performanceCurveId);
-            return AddTestCriterionLibrary();
+            return CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
         }
 
         private ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(Guid simulationId, Guid performanceCurveId)
@@ -86,7 +79,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete(Guid simulationId, Guid performanceCurveId)
         {
             SetupForScenarioCurveGet(simulationId, performanceCurveId);
-            var criterionLibrary = AddTestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -199,7 +192,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        //[Fact(Skip = "Still broken 7/25/2022. Need to fix the underlying api.")]
         public async Task ShouldModifyPerformanceCurveData()
         {
             Setup();
@@ -210,7 +202,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
             var controller = SetupController(_testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = AddTestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
+            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
+            {
+                PerformanceCurveId = performanceCurve.Id,
+                CriterionLibraryId = criterionLibrary.Id
+            };
+            _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
+            _testHelper.UnitOfWork.Context.SaveChanges();
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
@@ -237,7 +236,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Equal(performanceCurveDto.Shift, performanceCurveDtoAfter.Shift);
             Assert.Equal(criterionLibrary.Id,
-                performanceCurveDtoAfter.CriterionLibrary.Id); // Wjwjwj fails here.
+                performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Equation.Id,
                 performanceCurveDtoAfter.Equation.Id);
             Assert.Equal(performanceCurveDto.Attribute,

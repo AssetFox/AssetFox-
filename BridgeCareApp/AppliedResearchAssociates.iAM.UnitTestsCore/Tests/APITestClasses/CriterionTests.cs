@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private CriterionLibraryEntity Setup()
         {
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var controller = SetupController();
             // Act
             var result = await controller
-                .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary().ToDto());
+                .UpsertCriterionLibrary(CriterionLibraryTestSetup.TestCriterionLibrary().ToDto());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

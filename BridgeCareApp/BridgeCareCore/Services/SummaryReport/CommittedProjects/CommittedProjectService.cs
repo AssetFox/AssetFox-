@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
@@ -41,7 +42,8 @@ namespace BridgeCareCore.Services
             "YEARSAME",
             "BUDGET",
             "COST",
-            "AREA"
+            "AREA",
+            "CATEGORY"
         };
 
         private static readonly string NoTreatment = "No Treatment";
@@ -133,6 +135,7 @@ namespace BridgeCareCore.Services
                         worksheet.Cells[row, column++].Value = budgetName;
                         worksheet.Cells[row, column++].Value = project.Cost;
                         worksheet.Cells[row, column++].Value = string.Empty; // AREA
+                        worksheet.Cells[row, column++].Value = project.Category.ToString();
                         // Cycling through the existing attributes will ensure the change values are matched to the correct attribute
                         orderedAttributeNames.ForEach(attribute =>
                         {
@@ -363,7 +366,14 @@ namespace BridgeCareCore.Services
                             $"Budget {budgetName} does not exist in the applied budget library.");
                     }
                     budgetId = simulationEntity.Budgets.Single(_ => _.Name == budgetName).Id;
-                } 
+                }
+
+                // This to convert the incoming string to a TreatmentCategory
+                TreatmentCategory convertedCategory = default(TreatmentCategory);
+                if (Enum.TryParse(typeof(TreatmentCategory), worksheet.GetCellValue<string>(row, _keyFields.Count + 8), true, out var convertedCategoryOut))// Assumes that InitialHeaders stays constant
+                {
+                    convertedCategory = (TreatmentCategory)convertedCategoryOut;
+                }
 
                 // Build the committed project object
                 var project = new SectionCommittedProjectDTO
@@ -377,6 +387,7 @@ namespace BridgeCareCore.Services
                     ShadowForAnyTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 3), // Assumes that InitialHeaders stays constant
                     ShadowForSameTreatment = worksheet.GetCellValue<int>(row, _keyFields.Count + 4), // Assumes that InitialHeaders stays constant
                     Cost = worksheet.GetCellValue<double>(row, _keyFields.Count + 6), // Assumes that InitialHeaders stays constant
+                    Category = convertedCategory,
                     Consequences = new List<CommittedProjectConsequenceDTO>()
                 };
 

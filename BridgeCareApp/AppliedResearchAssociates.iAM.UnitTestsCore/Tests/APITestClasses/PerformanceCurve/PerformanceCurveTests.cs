@@ -305,7 +305,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(performanceCurveId, dtos[0].Id);
         }
 
-        // [Fact(Skip = "Broken. Had a timer.")]
         [Fact]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
@@ -370,11 +369,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Single(_ => _.Id == idToUpdate);
             Assert.Equal(localUpdatedCurve.Name, serverUpdatedCurve.Name);
             Assert.Equal(localUpdatedCurve.Attribute, serverUpdatedCurve.Attribute);
-            //    Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
+            Assert.Equal(localUpdatedCurve.CriterionLibrary.Id, serverUpdatedCurve.CriterionLibrary.Id);
             // Wjwjwj revisit the above and the below after understanding the situation with the similar error in the previous test
             Assert.Equal(localUpdatedCurve.CriterionLibrary.MergedCriteriaExpression,
                 serverUpdatedCurve.CriterionLibrary.MergedCriteriaExpression);
-            //    Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
+            Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
 
             Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
         }

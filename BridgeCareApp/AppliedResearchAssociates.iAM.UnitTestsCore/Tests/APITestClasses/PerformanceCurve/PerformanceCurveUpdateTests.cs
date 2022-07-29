@@ -85,6 +85,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithRemovedEquation_EquationRemoved()
+        {
+            Setup();
+            // Arrange
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
+            performanceCurveDto.Equation = null;
+
+            // Act
+            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+
+            // Assert
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
+            Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
+        }
+
+        [Fact]
         public async Task UpsertPerformanceCurveLibrary_CurveInDbWithCriterionLibrary_CriterionLibraryUnchanged()
         {
             Setup();
@@ -112,6 +137,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Equal(criterionLibrary.Id, performanceCurveDtoAfter.CriterionLibrary.Id);
+            Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
+        }
+
+
+        [Fact]
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithRemovedCriterionLibrary_CriterionLibraryRemoved()
+        {
+            Setup();
+            // Arrange
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
+            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
+            {
+                PerformanceCurveId = performanceCurve.Id,
+                CriterionLibraryId = criterionLibrary.Id
+            };
+            _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
+            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
+            performanceCurveDto.CriterionLibrary = null;
+
+            // Act
+            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+
+            // Assert
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            Assert.Equal(Guid.Empty, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
         }
     }

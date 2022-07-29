@@ -240,18 +240,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             int startRow, startColumn, row, column;
 
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = "Posted";
-            worksheet.Cells[row, column++].Value = "Closed";
+            worksheet.Cells[row++, column].Value = "Closed";
+            worksheet.Cells[row, column++].Value = "Posted";
 
             row = startRow;
-            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(reportOutputData.InitialAssetSummaries);
-            worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(reportOutputData.InitialAssetSummaries);
+            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(reportOutputData.InitialAssetSummaries); 
+            worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(reportOutputData.InitialAssetSummaries);
             foreach (var yearlyData in reportOutputData.Years)
             {
-                row = startRow;
-                column = ++column;
-                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(yearlyData.Assets);
+                row = startRow; column = ++column;
+
                 worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(yearlyData.Assets);
+                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(yearlyData.Assets);                
             }
 
             worksheet.Cells[startRow, startColumn, row + 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;

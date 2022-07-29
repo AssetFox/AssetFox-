@@ -153,7 +153,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
-        public void UpsertOrDeletePerformanceCurves(List<PerformanceCurveDTO> performanceCurves, Guid libraryId)
+        public void UpsertOrDeletePerformanceCurves(
+            List<PerformanceCurveDTO> performanceCurves,
+            Guid libraryId)
         {
             if (!_unitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == libraryId))
             {
@@ -374,7 +376,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertOrDeleteScenarioPerformanceCurves(List<PerformanceCurveDTO> scenarioPerformanceCurves,
+        public void UpsertOrDeleteScenarioPerformanceCurves(
+            List<PerformanceCurveDTO> scenarioPerformanceCurves,
             Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
@@ -402,6 +405,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     $"No attributes found having names: {string.Join(", ", missingAttributes)}.");
             }
 
+            //var performanceCurveFamilies =
+            //    _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
+            //    .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id))
+            //    .Include(_ => _.PerformanceCurveEquationJoin)
+            //    .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
+            //    .Select(_ => new PerformanceCurveFamilyIds
+            //    {
+            //        PerformanceCurveId = _.Id,
+            //        EquationId = _.PerformanceCurveEquationJoin == null ? null : _.PerformanceCurveEquationJoin.EquationId,
+            //        CriterionLibraryId = _.CriterionLibraryPerformanceCurveJoin == null ? null : _.CriterionLibraryPerformanceCurveJoin.CriterionLibraryId,
+            //    })
+            //    .ToList();
             var scenarioPerformanceCurveEntities = scenarioPerformanceCurves
                 .Select(_ =>
                     _.ToScenarioEntity(simulationId, attributeEntities.Single(__ => __.Name == _.Attribute).Id))

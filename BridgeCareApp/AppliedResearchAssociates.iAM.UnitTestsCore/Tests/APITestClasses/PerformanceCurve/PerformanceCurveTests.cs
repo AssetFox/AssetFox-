@@ -301,8 +301,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                     _.PerformanceCurveId == performanceCurveId));
             Assert.False(_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
-            Assert.False(
-                _testHelper.UnitOfWork.Context.Attribute.Any(_ => _.PerformanceCurves.Any()));
         }
 
         [Fact]

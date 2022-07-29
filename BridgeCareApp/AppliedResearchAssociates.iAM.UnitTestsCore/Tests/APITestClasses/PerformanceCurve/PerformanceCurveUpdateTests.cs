@@ -3,6 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Security;
 using MoreLinq;
@@ -218,6 +221,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             Assert.Empty(performanceCurveLibraryDtoAfter.PerformanceCurves);
-          }
+        }
+
+        [Fact]
+        public async Task UpsertPerformanceCurve_EmptyLibraryInDb_Adds()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = attribute.Name,
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+            };
+            Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
+            performanceCurveLibraryDto.PerformanceCurves.Add(performanceCurveDto); ;
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+
+            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            Assert.Single(performanceCurveLibraryDtoAfter.PerformanceCurves);
+        }
     }
 }

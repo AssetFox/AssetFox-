@@ -174,7 +174,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.False(
                 _testHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                     _.PerformanceCurveId == performanceCurveId));
-            Assert.False(_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
         }
 
         [Fact]

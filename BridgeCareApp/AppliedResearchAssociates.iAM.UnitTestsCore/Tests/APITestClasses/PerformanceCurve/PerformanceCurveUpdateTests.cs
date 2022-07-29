@@ -107,6 +107,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
+            var equationAfter = _testHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
+            Assert.Null(equationAfter);
         }
 
         [Fact]
@@ -140,7 +142,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
         }
 
-
         [Fact]
         public async Task UpsertPerformanceCurveLibrary_CurveInDbWithRemovedCriterionLibrary_CriterionLibraryRemoved()
         {
@@ -170,6 +171,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Equal(Guid.Empty, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
+            var criterionLibraryAfter = _testHelper.UnitOfWork.Context.CriterionLibrary.SingleOrDefault(cl => cl.Id == criterionLibrary.Id);
+            Assert.Null(criterionLibraryAfter);
         }
     }
 }

@@ -4,8 +4,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Security;
 using MoreLinq;
@@ -16,6 +14,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class PerformanceCurveUpdateTests
     {
+
+        // WjJake -- these are currently written as tests on the Controller.
+        // An alternative would be to rewrite them as tests on the repo. 
+        // As a general matter, it's an interesting question what to do.
+        // One possible approach would be to test the repo in cases
+        // like these where we are really drilling down on the details of
+        // one complicated call  . . . and test the controller in simpler cases
+        // like PerformanceCurveTests. Another would be to test the controller
+        // with JSON calls (which involves more setup that would take me some
+        // work to figure out).
         private TestHelper _testHelper => TestHelper.Instance;
 
         private void Setup()

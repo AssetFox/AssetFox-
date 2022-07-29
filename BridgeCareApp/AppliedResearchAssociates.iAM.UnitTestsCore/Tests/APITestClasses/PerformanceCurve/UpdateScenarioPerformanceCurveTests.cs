@@ -123,7 +123,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Shift = false,
                 Name = "Deleted"
             });
-            var performanceCurveId = Guid.NewGuid();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
                 .GetScenarioPerformanceCurves(simulation.Id);

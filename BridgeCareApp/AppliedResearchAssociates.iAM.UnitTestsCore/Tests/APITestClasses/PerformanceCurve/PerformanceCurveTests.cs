@@ -99,13 +99,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = _testHelper.CreateSimulation();
             var performanceCurveId = Guid.NewGuid();
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, performanceCurveId);
-            performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);
+            performanceCurve.Attribute = attribute;
+            var performanceCurveDto = performanceCurve.ToDto();
 
             // Act
             var result = await controller
                 .UpsertScenarioPerformanceCurves(simulation.Id,
-                    new List<PerformanceCurveDTO> { performanceCurve.ToDto() });
+                    new List<PerformanceCurveDTO> { performanceCurveDto });
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -216,13 +218,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 });
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, mockedUnauthorized);
             var performanceCurveId = Guid.NewGuid();
-            var performanceCurve = PerformanceCurveTestSetup.ScenarioEntity(simulation.Id, performanceCurveId);
-            performanceCurve.Attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);
+            performanceCurve.Attribute = attribute;
+            var performanceCurveDto = performanceCurve.ToDto();
 
             // Act
             var upsertScenarioPerformanceCurveLibraryResult = await controller
                 .UpsertScenarioPerformanceCurves(simulation.Id,
-                    new List<PerformanceCurveDTO> { performanceCurve.ToDto() });
+                    new List<PerformanceCurveDTO> { performanceCurveDto });
 
             // Assert
             Assert.IsType<UnauthorizedResult>(upsertScenarioPerformanceCurveLibraryResult);

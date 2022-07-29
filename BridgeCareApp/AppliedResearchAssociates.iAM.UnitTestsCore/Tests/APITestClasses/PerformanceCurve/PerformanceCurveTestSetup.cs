@@ -12,19 +12,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveTestSetup
     {
-        public static ScenarioPerformanceCurveEntity ScenarioEntity(Guid simulationId, Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var resolveName = RandomStrings.WithPrefix("Curve name");
-            return new ScenarioPerformanceCurveEntity
-            {
-                Id = resolveId,
-                SimulationId = simulationId,
-                Name = resolveName,
-                Shift = false,
-            };
-        }
-
         public static PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
         {
             var returnValue = new PerformanceCurveEntity

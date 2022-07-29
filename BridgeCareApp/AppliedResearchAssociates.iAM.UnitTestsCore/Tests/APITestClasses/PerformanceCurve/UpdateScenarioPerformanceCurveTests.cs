@@ -32,13 +32,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.SetupDefaultHttpContext();
         }
 
-        private CriterionLibraryEntity SetupForScenarioCurveUpsertOrDelete(Guid simulationId, Guid performanceCurveId)
-        {
-            var curve = ScenarioPerformanceCurveTestSetup.SetupForScenarioCurveGet(_testHelper.UnitOfWork, simulationId, performanceCurveId);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            return criterionLibrary;
-        }
-
         [Fact]
         public async Task ShouldModifyScenarioPerformanceCurveData()
         {
@@ -59,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             });
             var performanceCurveId = Guid.NewGuid();
 
-            var whyIsThisNeverUsed = ScenarioPerformanceCurveTestSetup.SetupForScenarioCurveGet(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
+            var scenarioPerformanceCurveEntity = ScenarioPerformanceCurveTestSetup.SetupForScenarioCurveGet(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
 
             var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
@@ -111,6 +104,40 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
        //     Assert.Equal(localUpdatedCurve.Equation.Id, serverUpdatedCurve.Equation.Id);
        // uncomment this too
             Assert.Equal(localUpdatedCurve.Equation.Expression, serverUpdatedCurve.Equation.Expression);
+        }
+
+        [Fact]
+        public async Task UpsertScenarioPerformanceCurves_ScenarioPerformanceCurveInDb_CurvesInUpsertAreEmpty_Deletes()
+        {
+            Setup();
+            // Arrange
+            var simulation = _testHelper.CreateSimulation();
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var deletedCurveId = Guid.NewGuid();
+            _testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Add(new ScenarioPerformanceCurveEntity
+            {
+                Id = deletedCurveId,
+                SimulationId = simulation.Id,
+                AttributeId = attribute.Id,
+                Shift = false,
+                Name = "Deleted"
+            });
+            var performanceCurveId = Guid.NewGuid();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
+            var localScenarioPerformanceCurves = _testHelper.UnitOfWork.PerformanceCurveRepo
+                .GetScenarioPerformanceCurves(simulation.Id);
+            Assert.Single(localScenarioPerformanceCurves);
+            localScenarioPerformanceCurves.RemoveAt(0);
+
+            // Act
+            await controller.UpsertScenarioPerformanceCurves(simulation.Id, localScenarioPerformanceCurves);
+
+            // Assert
+            var scenarioPerformanceCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo
+                .GetScenarioPerformanceCurves(simulation.Id);
+            Assert.Empty(scenarioPerformanceCurvesAfter);
+            Assert.False(_testHelper.UnitOfWork.Context.ScenarioPerformanceCurve.Any(_ => _.Id == deletedCurveId));
         }
 
     }

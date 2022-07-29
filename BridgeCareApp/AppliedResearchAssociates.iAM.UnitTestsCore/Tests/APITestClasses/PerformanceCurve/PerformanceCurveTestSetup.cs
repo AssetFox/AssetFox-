@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -14,11 +15,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static ScenarioPerformanceCurveEntity ScenarioEntity(Guid simulationId, Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
+            var resolveName = RandomStrings.WithPrefix("Curve name");
             return new ScenarioPerformanceCurveEntity
             {
                 Id = resolveId,
                 SimulationId = simulationId,
-                Name = "Test Name",
+                Name = resolveName,
                 Shift = false,
             };
         }

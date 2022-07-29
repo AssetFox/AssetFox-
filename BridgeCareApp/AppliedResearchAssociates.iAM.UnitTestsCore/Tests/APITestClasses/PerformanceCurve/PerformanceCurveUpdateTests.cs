@@ -1,21 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using BridgeCareCore.Controllers;
-using BridgeCareCore.Models;
 using BridgeCareCore.Security;
-using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
 using MoreLinq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -171,8 +160,64 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Equal(Guid.Empty, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var criterionLibraryAfter = _testHelper.UnitOfWork.Context.CriterionLibrary.SingleOrDefault(cl => cl.Id == criterionLibrary.Id);
-            Assert.Null(criterionLibraryAfter);
+            var criterionLibraryJoinAfter = _testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
+            clpc.PerformanceCurveId == curveId
+            && clpc.CriterionLibraryId == libraryId);
+            Assert.Null(criterionLibraryJoinAfter);
         }
+
+        [Fact]
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithCriterionLibrary_CurveRemovedFromUpsertedLibrary_RemovesCurveAndCriterionJoin()
+        {
+            Setup();
+            // Arrange
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
+            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
+            {
+                PerformanceCurveId = performanceCurve.Id,
+                CriterionLibraryId = criterionLibrary.Id
+            };
+            _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
+            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            performanceCurveLibraryDto.PerformanceCurves.RemoveAt(0);
+
+            // Act
+            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+
+            // Assert
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            Assert.Empty(performanceCurveLibraryDtoAfter.PerformanceCurves);
+            var criterionLibraryJoinAfter = _testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
+            clpc.PerformanceCurveId == curveId
+            && clpc.CriterionLibraryId == libraryId);
+            Assert.Null(criterionLibraryJoinAfter);
+        }
+
+        [Fact]
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithEquation_UpdateRemovesCurve_EquationDeleted()
+        {
+            Setup();
+            // Arrange
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            performanceCurveLibraryDto.PerformanceCurves.RemoveAt(0);
+
+            // Act
+            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+
+            // Assert
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            Assert.Empty(performanceCurveLibraryDtoAfter.PerformanceCurves);
+          }
     }
 }

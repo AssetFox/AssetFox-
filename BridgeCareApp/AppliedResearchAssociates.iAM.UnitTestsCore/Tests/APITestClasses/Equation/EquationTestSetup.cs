@@ -12,6 +12,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class EquationTestSetup
     {
+        private static readonly Guid EquationId = Guid.Parse("a6c65132-e45c-4a48-a0b2-72cd274c9cc2");
+
+        public static EquationEntity TestEquation { get; } = new EquationEntity
+        {
+            Id = EquationId,
+            Expression = "Test Expression"
+        };
+
         public static EquationEntity Two(Guid? id)
         {
             var resolveId = id ?? Guid.NewGuid();

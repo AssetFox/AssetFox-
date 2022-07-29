@@ -23,15 +23,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(IUnitOfWork unitOfWork, Guid simulationId, Guid performanceCurveId)
-        {
-            var performanceCurve = ScenarioEntity(simulationId, performanceCurveId);
-            performanceCurve.AttributeId = unitOfWork.Context.Attribute.First().Id;
-            unitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
-            unitOfWork.Context.SaveChanges();
-            return performanceCurve;
-        }
-
         public static PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
         {
             var returnValue = new PerformanceCurveEntity

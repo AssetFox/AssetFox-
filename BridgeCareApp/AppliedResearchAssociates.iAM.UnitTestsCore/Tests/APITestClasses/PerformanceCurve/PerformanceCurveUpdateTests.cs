@@ -77,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithRemovedEquation_EquationRemoved()
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithEquation_UpdateRemovesEquationFromCurve_EquationRemoved()
         {
             Setup();
             // Arrange
@@ -135,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithRemovedCriterionLibrary_CriterionLibraryRemoved()
+        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithCriterionLibrary_UpdateRemovesCriterionLibraryFromCurve_CriterionLibraryRemoved()
         {
             Setup();
             // Arrange

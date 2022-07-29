@@ -174,9 +174,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.False(
                 _testHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
                     _.PerformanceCurveId == performanceCurveId));
-// wjwjwj -- make this make sense and test.
-//Assert.False(_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
-         }
+            Assert.False(_testHelper.UnitOfWork.Context.Equation.Any(_ => _.Id == EquationId));
+        }
 
         [Fact]
         public async Task GetScenarioPerformanceCurves_SimulationInDbWithPerformanceCurve_Gets()

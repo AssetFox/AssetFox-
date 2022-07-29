@@ -479,8 +479,8 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getCommittedProjects(vm.scenarioId).then(() => {
-                    vm.getInvestmentAction(vm.scenarioId);  
+                vm.getInvestmentAction(vm.scenarioId).then(() => {
+                    vm.getCommittedProjects(vm.scenarioId);  
                     vm.getTreatmentLibrariesAction();                            
                     vm.getAttributesAction();
                 })
@@ -523,13 +523,6 @@ export default class CommittedProjectsEditor extends Vue  {
                 value: attribute.name
             }),
         );
-    }
-
-    @Watch('stateInvestmentPlan')
-    onStateInvestmentPlan(){
-        this.cpItems.forEach(scp => {
-            this.checkYear(scp);
-        })
     }
 
     @Watch('stateScenarioBudgets')
@@ -848,6 +841,7 @@ export default class CommittedProjectsEditor extends Vue  {
             return row
         })
         this.checkBrkeys(0);
+        this.checkYears();
     }
 
     cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
@@ -945,6 +939,13 @@ export default class CommittedProjectsEditor extends Vue  {
             scp.yearErrors = ['Year is outside of Analysis period'];
         else
             scp.yearErrors = [];
+    }
+
+    checkYears()
+    {
+        this.cpItems.forEach(scp => {
+            this.checkYear(scp);
+        })
     }
 
     updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){

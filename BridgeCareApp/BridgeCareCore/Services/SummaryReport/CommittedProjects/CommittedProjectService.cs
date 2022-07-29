@@ -339,15 +339,14 @@ namespace BridgeCareCore.Services
                 var projectYear = worksheet.GetCellValue<int>(row, _keyFields.Count + 2);  // Assumes that InitialHeaders stays constant
 
                 // Get the location information of the project.  This must include the maintainable asset ID using the "ID" key
+                var locationInformation = new Dictionary<string, string>();
                 var locationIdentifier = worksheet.GetCellValue<string>(row, keyColumn);
-                if (!maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
+                if (maintainableAssetIdsPerLocationIdentifier.Keys.ToList().Contains(locationIdentifier))
                 {
-                    // The location does not match any asset in the network
-                    var fileString = string.IsNullOrEmpty(filename) ? "" : @$" from file ""{filename}""";
-                    var exceptionMessage = $"Error importing committed projects{fileString}. Row {row}: Unable to find matching asset in network.";
-                    throw new Exception(exceptionMessage);
+                    // The location matches an asset in the network
+                    locationInformation["ID"] = maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString();
                 }
-                var locationInformation = new Dictionary<string, string>() { { "ID", maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString() } };
+                
                 for (var column = 1; column <= _keyFields.Count; column++)
                 {
                     locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
@@ -370,8 +369,8 @@ namespace BridgeCareCore.Services
 
                 // This to convert the incoming string to a TreatmentCategory
                 TreatmentCategory convertedCategory = default(TreatmentCategory);
-                var category = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);
-                if (Enum.TryParse(typeof(TreatmentCategory), category, true, out var convertedCategoryOut))// Assumes that InitialHeaders stays constant
+                var category = worksheet.GetCellValue<string>(row, _keyFields.Count + 8);// Assumes that InitialHeaders stays constant
+                if (Enum.TryParse(typeof(TreatmentCategory), category, true, out var convertedCategoryOut))
                 {
                     convertedCategory = (TreatmentCategory)convertedCategoryOut;
                 }
@@ -596,12 +595,10 @@ namespace BridgeCareCore.Services
             {
                 if (_.Attribute.DataType == "NUMBER")
                 {
-                    //scope.NumberKeys.Add(_.Attribute.Name);
                     scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
                 }
                 else
                 {
-                    //scope.TextKeys.Add(_.Attribute.Name);
                     scope.SetText(_.Attribute.Name, _.TextValue);
                 }
             });

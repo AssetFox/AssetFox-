@@ -827,8 +827,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private void TrackDataForParametersTAB(Dictionary<string, double> valuePerNumericAttribute, Dictionary<string, string> valuePerTextAttribute)
         {
             // Track status for parameters TAB
-            var portStatus = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "POST_STATUS").ToLower();
-            if (!_parametersModel.Status.Contains(portStatus)) { _parametersModel.Status.Add(portStatus); }
+            var postStatus = _summaryReportHelper.checkAndGetValue<string>(valuePerTextAttribute, "POST_STATUS").ToLower();
+            if (!_parametersModel.Status.Contains(postStatus)) { _parametersModel.Status.Add(postStatus); }
 
             // Track P3 for parameters TAB
             var p3 = _summaryReportHelper.checkAndGetValue<double>(valuePerNumericAttribute, "P3");

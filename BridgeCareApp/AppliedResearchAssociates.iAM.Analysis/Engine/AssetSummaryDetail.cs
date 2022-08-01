@@ -20,8 +20,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         [JsonConstructor]
         public AssetSummaryDetail(string assetName)
         {
-            //TODO: Ask Jake if we need to throw exception since asset name can be null
-            AssetName = assetName ?? ""; // throw new ArgumentNullException(nameof(assetName)); 
+            AssetName = assetName ?? "";
         }
 
         public string AssetName { get; }

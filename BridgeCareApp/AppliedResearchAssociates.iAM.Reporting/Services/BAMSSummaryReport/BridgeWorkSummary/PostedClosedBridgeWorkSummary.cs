@@ -290,7 +290,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             //calculate BPN Annualized Amount for all the years
-            double bpnAnnualizedAmount = 0; if (reportOutputData?.Years?.Any() == true) { bpnAnnualizedAmount = totalMoney / reportOutputData.Years.Count; }
+            double bpnAnnualizedAmount = 0;
+            if (reportOutputData?.Years?.Any() == true)
+            {
+                bpnAnnualizedAmount = totalMoney / reportOutputData.Years.Count;
+            }
 
             //fill BPN annualized amount
             for (var i = 0; i < reportOutputData.Years.Count; i++)

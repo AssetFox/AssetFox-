@@ -233,20 +233,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
-            // sorting the sections based on facility name. This is helpful throughout the report
-
-            // generation process
-            //reportOutputData.InitialAssetSummaries.Sort(
-            //        (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
-            //        );
-
-            //foreach (var yearlySectionData in reportOutputData.Years)
-            //{
-            //    yearlySectionData.Assets.Sort(
-            //        (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
-            //        );
-            //}
-
             reportOutputData.InitialAssetSummaries.Sort(
                     (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );

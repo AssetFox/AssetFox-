@@ -122,12 +122,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
-            {
-                PerformanceCurveId = performanceCurve.Id,
-                CriterionLibraryId = criterionLibrary.Id
-            };
-            _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(_testHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.CriterionLibrary = criterionLibrary.ToDto();
@@ -153,12 +148,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
-            {
-                PerformanceCurveId = performanceCurve.Id,
-                CriterionLibraryId = criterionLibrary.Id
-            };
-            _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(
+                _testHelper.UnitOfWork, curveId, criterionLibrary.Id);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.CriterionLibrary = null;

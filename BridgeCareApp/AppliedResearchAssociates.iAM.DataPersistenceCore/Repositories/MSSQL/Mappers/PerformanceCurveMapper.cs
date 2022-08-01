@@ -96,7 +96,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO(),
                 Equation = entity.ScenarioPerformanceCurveEquationJoin != null
                     ? entity.ScenarioPerformanceCurveEquationJoin.Equation.ToDto()
-                    : new EquationDTO()
+                    : new EquationDTO(),
+                Shift = entity.Shift,
             };
     }
 }

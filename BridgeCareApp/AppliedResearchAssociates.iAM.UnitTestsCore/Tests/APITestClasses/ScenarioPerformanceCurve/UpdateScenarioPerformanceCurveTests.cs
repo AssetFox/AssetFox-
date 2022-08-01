@@ -1,21 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
-using BridgeCareCore.Controllers;
-using BridgeCareCore.Models;
 using BridgeCareCore.Security;
-using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Moq;
 using MoreLinq;
 using Xunit;
 using Assert = Xunit.Assert;
@@ -34,27 +24,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibrary_CurveInDb_UpdatesShiftAndDescription()
+        public async Task UpsertScenarioPerformanceCurves_CurveInDb_UpdatesShiftAndDescription()
         {
             Setup();
             // Arrange
-            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            performanceCurveLibraryDto.Description = "Updated Description";
-            var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
+            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Shift = true;
 
             // Act
-            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+            await controller.UpsertScenarioPerformanceCurves(simulation.Id, scenarioCurves);
 
             // Assert
-            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            Assert.Equal(performanceCurveLibraryDto.Description, performanceCurveLibraryDtoAfter.Description);
-            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
             Assert.Equal(performanceCurveDto.Shift, performanceCurveDtoAfter.Shift);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
         }

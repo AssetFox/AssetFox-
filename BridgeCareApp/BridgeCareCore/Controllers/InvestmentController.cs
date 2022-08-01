@@ -13,7 +13,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Security;
@@ -476,6 +477,35 @@ namespace BridgeCareCore.Controllers
             {
                 var result =
                     await Task.Factory.StartNew(() => _investmentBudgetsService.ExportLibraryInvestmentBudgetsFile(budgetLibraryId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("DownloadInvestmentBudgetsTemplate")]
+        [Authorize]
+        public async Task<IActionResult> DownloadInvestmentBudgetsTemplate()
+        {
+            try
+            {
+                var filePath = AppDomain.CurrentDomain.BaseDirectory + "DownloadTemplates\\Investment_budgets_template.xlsx";
+                var fileData = System.IO.File.ReadAllBytes(filePath);
+                var result = await Task.Factory.StartNew(() => new FileInfoDTO
+                {
+                    FileName = "Investment_budgets_template",
+                    FileData = Convert.ToBase64String(fileData),
+                    MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                });
 
                 return Ok(result);
             }

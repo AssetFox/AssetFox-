@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     {
         private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
+        private static readonly Guid MaintainableAssetLocationId = Guid.Parse("14580d3b-d99a-45f6-b854-adaa3f78910d");
 
         private ExpressionValidationController SetupController()
         {
@@ -42,7 +43,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private AttributeEntity TextAttribute { get; set; }
 
         private MaintainableAssetEntity TestMaintainableAsset { get; } =
-            new MaintainableAssetEntity { Id = MaintainableAssetId };
+            new MaintainableAssetEntity {
+                Id = MaintainableAssetId,
+                MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                {
+                    Id = MaintainableAssetLocationId,
+                    LocationIdentifier = "TestLocationIdentifier2",
+                    Discriminator = DataPersistenceConstants.SectionLocation,
+                    MaintainableAssetId = MaintainableAssetId,
+                }
+            };
 
         private AggregatedResultEntity TestNumericAggregatedResult { get; } = new AggregatedResultEntity
         {
@@ -79,13 +89,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void AddTestData()
         {
-            // WjTodo -- can/should this work via a repo?
             if (!TestDataHaveBeenAdded)
             {
                 TestDataHaveBeenAdded = true;
                 TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
                 _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
-
                 TestNumericAggregatedResult.AttributeId = NumericAttribute.Id;
                 TestTextAggregatedResult.AttributeId = TextAttribute.Id;
                 _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
@@ -223,13 +231,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        // WjTodo Saw a HeisenFailure here 6/16/2022 and again 6/21/2022. The ValidationResult was not valid. No idea why.
         public async Task ShouldValidateNonPiecewiseEquation()
         {
             // Arrange
             var controller = SetupController();
             NumericAttribute = _testHelper.UnitOfWork.Context.Attribute
-                .First(_ => _.DataType == DataPersistenceConstants.AttributeNumericDataType);
+                .First(_ => _.Name == "CULV_DURATION_N");
             var model = new EquationValidationParameters
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
@@ -246,7 +253,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             if (!validationResult.IsValid)
             {
                 // Occasional test failure here. A breakpoint may hopefully catch it in the act someday.
-                Assert.Equal("dummy assert to print the message", validationResult.ValidationMessage);
+                Assert.Equal("dummy assert to print the message", NumericAttribute.Name + " " + validationResult.ValidationMessage);
                 Assert.True(validationResult.IsValid); 
             }
             Assert.Equal("Success", validationResult.ValidationMessage);
@@ -276,7 +283,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal("Success", validationResult.ValidationMessage);
         }
 
-        [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself. WjTodo if time arises for it?")]
+        [Fact(Skip = "Broken as of 10:38am 2 June 2022, even when run by itself.")]
         public void ShouldInvalidatePiecewiseEquations()
         {
             // Act + Assert

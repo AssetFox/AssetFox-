@@ -19,6 +19,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<AttributeDTO> GetAttributes();
 
+        Task<List<string>> GetAggregationRuleTypes();
+        Task<List<string>> GetAttributeDataTypes();
+        Task<List<string>> GetAttributeDataSourceTypes();
         Task<List<AttributeDTO>> GetAttributesAsync();
 
         Task<List<AttributeDTO>> CalculatedAttributes();
@@ -27,5 +30,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// returns null without throwing. Also, this method is necessarily somewhat
         /// inefficient. To perform the case-insensitive comparison, it pulls everything into memory.</summary>
         AttributeDTO GetSingleByName(string attributeName);
+
+        void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete);
     }
 }

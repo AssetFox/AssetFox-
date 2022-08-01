@@ -8,9 +8,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
     public abstract class BaseDataSourceDTO : BaseDTO
     {
+        private string _type;
+
         public BaseDataSourceDTO(string typeName)
         {
-            Type = typeName;
+            _type = typeName;
         }
 
         /// <summary>
@@ -21,7 +23,10 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// <summary>
         /// The type of data source, provided by the specific instance of the data source
         /// </summary>
-        public string Type { get; private set; }
+        public virtual string Type {
+            get { return _type; }
+            set { /* Do Nothing */ }
+        }
 
         /// <summary>
         /// Indicates if the details should be obscured in the database
@@ -30,19 +35,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// A connection string that contains passwords should be secured
         /// </example>
         public bool Secure { get; protected set; }
-
-        /// <summary>
-        /// Maps tyhe data source's details to a string for data persistence
-        /// </summary>
-        public abstract string MapDetails();
-
-        /// <summary>
-        /// Builds the concrete data source object with the details provided as a string
-        /// </summary>
-        /// <param name="details">
-        /// Data source details provided as a string such as a connection string or JSON object
-        /// </param>
-        public abstract void PopulateDetails(string details);
 
         /// <summary>
         /// Validates the details on the datasource

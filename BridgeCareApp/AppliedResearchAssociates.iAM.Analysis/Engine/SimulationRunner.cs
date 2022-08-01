@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
@@ -15,7 +17,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
-        public Simulation Simulation { get; }
+#if !DEBUG
+        private static int maxThreadsForSimulation = GetMaxThreadsForSimulation();
+#endif
+
+        public Simulation Simulation { get;  }
 
         public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
         {
@@ -117,7 +123,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             AssetContexts = Simulation.Network.Assets
 #if !DEBUG
-                .AsParallel()
+                .AsParallel().
+                WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                 .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
@@ -281,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 action(item);
             }
 #else
-            _ = System.Threading.Tasks.Parallel.ForEach(items, action);
+            _ = System.Threading.Tasks.Parallel.ForEach(items, new ParallelOptions { MaxDegreeOfParallelism = maxThreadsForSimulation }, action);
 #endif
         }
 
@@ -595,7 +602,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel()
+                    .AsParallel().
+                    WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -624,7 +632,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel()
+                    .AsParallel().
+                    WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -946,6 +955,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TargetConditionActuals = GetTargetConditionActuals(year);
             DeficientConditionActuals = GetDeficientConditionActuals();
+        }
+
+        private static int GetMaxThreadsForSimulation()
+        {
+            int processorCount = Environment.ProcessorCount;
+
+            if(processorCount >= 16)
+            {
+                return processorCount - 2;
+            }
+
+            return processorCount - 1;
         }
     }
 }

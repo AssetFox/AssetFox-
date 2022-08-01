@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -8,8 +9,11 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -78,15 +82,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             MockHubService = new Mock<HubService>(MockHubContext.Object);
-            var connectionString = Config.GetConnectionString("BridgeCareConnex");
+            var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
 
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Context.Database.EnsureCreated();
+            DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
@@ -105,7 +108,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!HttpContextHasBeenSetup)
             {
-                lock (HttpContextSetupLock) // WjTodo -- can we get rid of the lock?
+                lock (HttpContextSetupLock) // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!HttpContextHasBeenSetup)
                     {
@@ -160,11 +163,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!AttributesHaveBeenCreated)
             {
-                lock (AttributeLock) // WjTodo -- can we get rid of the lock?
+                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!AttributesHaveBeenCreated)
                     {
+                        SQLDataSourceDTO dataSourceToApply = null;
+                        if (!UnitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
+                        {
+                            dataSourceToApply = new SQLDataSourceDTO
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Test SQL DataSource",
+                                ConnectionString = Config.GetConnectionString("BridgeCareConnex")
+                            };
+                            UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
+                        }
+                        else
+                        {
+                            dataSourceToApply = (SQLDataSourceDTO)UnitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
+                        }
                         var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        foreach (var attribute in attributesToInsert)
+                        {
+                            attribute.DataSource = dataSourceToApply;
+                        }
                         UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
                         AttributesHaveBeenCreated = true;
                     }
@@ -185,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                lock (NetworkCreationLock) // WjTodo -- can we get rid of the lock?
+                lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
                 {
                     if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
                     {

@@ -10,8 +10,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using OfficeOpenXml;
-using System;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage.Serializers;
 using AppliedResearchAssociates.iAM.Data.ExcelDatabaseStorage;
 
@@ -37,7 +35,7 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
         }
 
-        [Obsolete("WjTodo leaving this in the code for now 6/21/2022, but should ask myself whether or not to get rid of it once the real attribute import is working.")]
+        [Obsolete("Probably get rid of this once the real attribute import is working.")]
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,
@@ -139,7 +137,7 @@ namespace BridgeCareCore.Services
                     foundAssetNames[lowercaseAssetName] = assetRowIndex;
                     var location = new SectionLocation(Guid.NewGuid(), assetName);
                     var maintainableAssetId = Guid.NewGuid();
-                    var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); // wjwjwj this "[Deck_Area]" is wrong and will need to change
+                    var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue); 
                     var inspectionDateObject = GetCellValueOrNull(worksheet, assetRowIndex, inspectionDateColumnIndex);
                     DateTime inspectionDate = DateTime.MinValue;
                     if (inspectionDateObject is DateTime inspectionDateObjectDate)
@@ -210,7 +208,7 @@ namespace BridgeCareCore.Services
 
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
-            // Wjwjwj -- currently returns null if we fail. Not sure if that's the right end state.
+            // Currently returns null if we fail. Not sure if that's the right end state.
             var domainAttribute = AttributeMapper.ToDomain(attribute);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;

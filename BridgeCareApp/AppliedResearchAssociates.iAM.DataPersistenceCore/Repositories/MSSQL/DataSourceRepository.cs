@@ -38,11 +38,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return result;
         }
 
-        public List<string> GetDataSourceTypes()
-        {
-            var typesWithRepeats = _unitOfWork.Context.DataSource.Select(ds => ds.Type).ToList();
-            return typesWithRepeats.Distinct().ToList();
-        }
         public BaseDataSourceDTO GetDataSource(Guid id) =>
             _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO();
 
@@ -61,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 
         public void UpsertDatasource(BaseDataSourceDTO dataSource)
         {
-            if (_unitOfWork.Context.DataSource.Any(_ => _.Id != dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
+            if (!_unitOfWork.Context.DataSource.Any(_ => _.Id == dataSource.Id) && _unitOfWork.Context.DataSource.Any(_ => _.Name == dataSource.Name))
                 throw new ArgumentException("An existing data source with the same name already exists");
 
             if (!dataSource.Validate())

@@ -5,6 +5,8 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -18,6 +20,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 throw new NullReferenceException("Cannot map null Attribute entity to Attribute domain");
             }
 
+            var connectionString = GetConnectionString(entity.DataSource);
+
             if (entity.DataType == "NUMBER")
             {
                 return new NumericAttribute(Convert.ToDouble(entity.DefaultValue),
@@ -28,9 +32,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.AggregationRuleType,
                     entity.Command,
                     entity.ConnectionType,
-                    "",
+                    connectionString,
                     entity.IsCalculated,
-                    entity.IsAscending);
+                    entity.IsAscending,
+                    entity.DataSourceId);
             }
 
             if (entity.DataType == "STRING")
@@ -41,9 +46,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     entity.AggregationRuleType,
                     entity.Command,
                     entity.ConnectionType,
-                    "",
+                    connectionString,
                     entity.IsCalculated,
-                    entity.IsAscending);
+                    entity.IsAscending,
+                    entity.DataSourceId);
             }
 
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
@@ -57,14 +63,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 dto.Name,
                 dto.AggregationRuleType,
                 dto.Command,
-                ConnectionType.MSSQL,
-                "",
+                MapDTODataSourceTypes(dto.DataSource?.Type),
+                GetConnectionString(dto.DataSource?.ToEntity()),
                 dto.IsCalculated,
-                dto.IsAscending);
+                dto.IsAscending,
+                dto.DataSource?.Id);
         }
 
         private static NumericAttribute ToNumeric(AttributeDTO dto)
         {
+
+
             return double.TryParse(dto.DefaultValue, out double value)
                 ? new NumericAttribute(
                     value,
@@ -74,10 +83,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     dto.Name,
                     dto.AggregationRuleType,
                     dto.Command,
-                    ConnectionType.MSSQL,
-                    "",
+                    MapDTODataSourceTypes(dto.DataSource?.Type),
+                    GetConnectionString(dto.DataSource?.ToEntity()),
                     dto.IsCalculated,
-                    dto.IsAscending)
+                    dto.IsAscending,
+                    dto.DataSource?.Id)
                 : null;
         }
 
@@ -93,7 +103,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return null;
         }
 
-        public static List<Attribute> ToDomainListButDiscardBad(List<AttributeDTO> attributeDTOs)
+       
+        public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs)
         {
             var returnValue = attributeDTOs
                 .Select(dto => ToDomain(dto))
@@ -102,11 +113,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return returnValue;
         }
 
-        public static AttributeEntity ToEntity(this Attribute domain)
+        public static AttributeEntity ToEntity(this Attribute domain, IDataSourceRepository dataSources = null)
         {
             if (domain == null)
             {
                 throw new NullReferenceException("Cannot map null Attribute domain to Attribute entity");
+            }
+
+            var dataSource = new DataSourceEntity()
+            {
+                Id = Guid.Empty,
+                Type = "None"
+            };
+
+            if (domain.DataSourceId != null && domain.DataSourceId != Guid.Empty)
+            {
+                var dataSourceFromDb = dataSources?.GetDataSource(domain.DataSourceId.Value);
+                var possibleDataSource = dataSourceFromDb.ToEntity();
+                if (possibleDataSource != null) dataSource = possibleDataSource;
             }
 
             var entity = new AttributeEntity
@@ -118,8 +142,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Command = domain.Command,
                 ConnectionType = domain.ConnectionType,
                 IsCalculated = domain.IsCalculated,
-                IsAscending = domain.IsAscending
+                IsAscending = domain.IsAscending,
             };
+
+            if (dataSource.Type != "None")
+            {
+                entity.DataSource = dataSource;
+                entity.DataSourceId = dataSource.Id;
+            }
 
             if (domain is NumericAttribute numericAttribute)
             {
@@ -147,6 +177,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return filteredAttribute;
         }
 
+        public static AttributeDTO ToDto(this Attribute domain, BaseDataSourceDTO dataSourceDTO)
+        {
+            double? maximum = null;
+            double? minimum = null;
+            string defaultValue = "";
+            if (domain is NumericAttribute numericAttribute)
+            {
+                maximum = numericAttribute.Maximum;
+                minimum = numericAttribute.Minimum;
+                defaultValue = numericAttribute.DefaultValue.ToString();
+            }
+            if (domain is TextAttribute textAttribute)
+            {
+                defaultValue = textAttribute.DefaultValue;
+            }
+
+            AttributeDTO dto = new()
+            {
+                Name = domain.Name,
+                Type = domain.DataType,
+                Id = domain.Id,
+                IsAscending = domain.IsAscending,
+                IsCalculated = domain.IsCalculated,
+                AggregationRuleType = domain.AggregationRuleType,
+                Command = domain.Command,
+                DefaultValue = defaultValue,
+                Maximum = maximum,
+                Minimum = minimum,
+                DataSource = dataSourceDTO,
+            };
+            return dto;
+        }
+
         public static AttributeDTO ToDto(this AttributeEntity entity) =>
             new()
             {
@@ -160,8 +223,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DefaultValue = entity.DefaultValue,
                 Maximum = entity.Maximum,
                 Minimum = entity.Minimum,
+                DataSource = entity.DataSource?.ToDTO()
             };
-
         /// <summary>Safe to call if the entity might be null. If it is
         /// in fact null, the returned DTO will also be null.</summary>
         public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)
@@ -171,6 +234,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 return null;
             }
             return ToDto(entity);
+        }
+
+        private static ConnectionType MapDTODataSourceTypes(string dtoType)
+        {
+            if (dtoType == DataSourceTypeStrings.Excel.ToString())
+            {
+                return ConnectionType.EXCEL;
+            }
+            else if (dtoType == DataSourceTypeStrings.SQL.ToString())
+            {
+                return ConnectionType.MSSQL;
+            }
+            else
+            {
+                return ConnectionType.NONE;
+            }
+        }
+
+        private static string GetConnectionString(DataSourceEntity entity)
+        {
+            string connectionString = "";
+            if (entity == null) return connectionString;
+            if (entity.Type == "SQL")
+            {
+                var dsDto = (SQLDataSourceDTO)entity.ToDTO();
+                connectionString = dsDto.ConnectionString;
+            }
+            return connectionString;
         }
     }
 }

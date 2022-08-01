@@ -674,14 +674,7 @@ export default class BudgetPriorityEditor extends Vue {
     width: 100%;
 }
 
-.sharing label {
-    padding-top: 0.5em;
-}
 
-.sharing {
-    padding-top: 0;
-    margin: 0;
-}
 
 .row-padding{
     padding-top: 0px;

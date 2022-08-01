@@ -508,7 +508,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 equationIdsToDelete.Contains(_.Id));
 
-            _unitOfWork.Context.DeleteAll<CriterionLibraryPerformanceCurveEntity>(_ =>
+            _unitOfWork.Context.DeleteAll<CriterionLibraryScenarioPerformanceCurveEntity>(_ =>
                 criterionLibraryIdsToDelete.Contains(_.CriterionLibraryId));
 
             if (performanceCurvesToAddEquations.Any())

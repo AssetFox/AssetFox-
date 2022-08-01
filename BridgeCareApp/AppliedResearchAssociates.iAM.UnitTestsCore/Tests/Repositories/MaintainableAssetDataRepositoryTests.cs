@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private Mock<DbSet<MaintainableAssetLocationEntity>> _mockedMaintainableAssetLocationEntitySet;
         private Mock<DbSet<AttributeEntity>> _mockedAttributeSet;
 
-        public void Setup()
+        private void Setup()
         {
             _testData = new TestDataForMaintainableAssetRepo();
             _mockedContext = new Mock<IAMContext>();
@@ -53,25 +53,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             // Assert
             Assert.Equal(2, repo.KeyProperties.Count());
             Assert.Equal(5, repo.KeyProperties["BRKEY_"].Count());
-            Assert.NotNull(repo.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").AssetId == checkGuid);
-            Assert.NotNull(repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256").AssetId == checkGuid);
+            var brKeyDatum = repo.KeyProperties["BRKEY_"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
+            var bmsIdDatum = repo.KeyProperties["BMSID"].FirstOrDefault(_ => _.KeyValue.Value == "13401256");
+            Assert.Equal(brKeyDatum.AssetId, checkGuid);
+            Assert.Equal(bmsIdDatum.AssetId, checkGuid);
         }
 
-        [Fact(Skip ="Changes in facility & section")]
-        public void ReturnsSegmeentDataWithBRKey()
+        [Fact]
+        public void ReturnsSegmentDataWithBRKey()
         {
             // Arrange
             Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act
-            var testSegment = repo.GetAssetAttributes("BRKEY_", "2");
+            var testSegment = repo.GetAssetAttributes("BRKEY_", "101256");
 
             // Assert
-            Assert.Equal(1, testSegment.Where(_ => _.Name == "BRKEY_").Count());            
-            Assert.Equal("2", testSegment.First(_ => _.Name == "BRKEY_").Value);
-            Assert.Equal("15.4", testSegment.First(_ => _.Name == "Length").TextValue);
-            Assert.Equal("First B", testSegment.First(_ => _.Name == "Name").TextValue);
+            var brKeyAsset = testSegment.Single(_ => _.Name == "BRKEY_");
+            Assert.Equal("101256", brKeyAsset.TextValue);
+            var lengthAsset = testSegment.First(_ => _.Name == "Length");
+            var nameAsset = testSegment.First(_ => _.Name == "Name");
+            Assert.Equal("15.4", lengthAsset.TextValue);
+            Assert.Equal("First B", nameAsset.TextValue);
         }
 
         [Fact]

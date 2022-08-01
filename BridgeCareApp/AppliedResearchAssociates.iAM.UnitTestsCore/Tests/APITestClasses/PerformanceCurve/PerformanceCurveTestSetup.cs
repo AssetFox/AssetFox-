@@ -27,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static PerformanceCurveEntity TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId)
         {
             var curve = TestPerformanceCurve(libraryId, curveId);
-            curve.AttributeId = unitOfWork.Context.Attribute.First().Id;
+            var attributeId = unitOfWork.Context.Attribute.First().Id;
+            curve.AttributeId = attributeId;
             unitOfWork.Context.PerformanceCurve.Add(curve);
             unitOfWork.Context.SaveChanges();
             return curve;

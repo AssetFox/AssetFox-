@@ -31,10 +31,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
 
-        public static ScenarioPerformanceCurveEntity SetupForScenarioCurveGet(IUnitOfWork unitOfWork, Guid simulationId, Guid performanceCurveId)
+        public static ScenarioPerformanceCurveEntity EntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId)
         {
+            var performanceCurve = ScenarioEntity(simulationId, curveId);
             var attributeId = unitOfWork.Context.Attribute.First().Id;
-            var performanceCurve = ScenarioEntity(simulationId, attributeId, performanceCurveId);
+            performanceCurve.AttributeId = attributeId;
             unitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
             unitOfWork.Context.SaveChanges();
             return performanceCurve;

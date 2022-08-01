@@ -186,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulation = _testHelper.CreateSimulation();
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var performanceCurveId = Guid.NewGuid();
-            ScenarioPerformanceCurveTestSetup.SetupForScenarioCurveGet(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
+            ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
 
             // Act
             var result = await controller.GetScenarioPerformanceCurves(simulation.Id);

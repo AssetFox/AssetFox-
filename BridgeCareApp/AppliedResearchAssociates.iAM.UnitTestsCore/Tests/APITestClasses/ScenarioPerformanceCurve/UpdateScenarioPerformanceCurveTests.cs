@@ -103,14 +103,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibrary_CurveInDbWithCriterionLibrary_CriterionLibraryUnchanged()
+        public async Task UpsertScenarioPerformanceCurves_CurveInDbWithCriterionLibrary_CriterionLibraryUnchanged()
         {
             Setup();
             // Arrange
-            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
+            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
@@ -119,16 +120,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CriterionLibraryId = criterionLibrary.Id
             };
             _testHelper.UnitOfWork.Context.Add(criterionCurveJoin);
-            var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
+            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.CriterionLibrary = criterionLibrary.ToDto();
 
             // Act
-            await controller.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
 
             // Assert
-            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             Assert.Equal(criterionLibrary.Id, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
         }

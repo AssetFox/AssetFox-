@@ -1,5 +1,0 @@
-{
-  "ConnectionStrings": {
-    "BridgeCareConnexRealDb": "data source=xxxxxxx;initial catalog=IAMv2;persist security info=True;user id=xxxxx;password=xxxxxxxx;MultipleActiveResultSets=True;App=EntityFramework"
-  }
-}

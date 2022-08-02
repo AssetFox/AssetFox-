@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Networking;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -264,7 +264,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var networkId = Guid.NewGuid();
             var assetId = Guid.NewGuid();
             var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var attributeName = RandomStrings.WithPrefix("attribute");
             var location = Locations.Section(locationIdentifier);
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };

@@ -188,6 +188,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
+        public async Task ImportFailsWithNoMimeType()
+        {
+            // Arrange
+            _testHelper.SetupDefaultHttpContext();
+            var controller = new CommittedProjectController(
+                _mockService.Object,
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+
+            // Act + Asset
+            var result = await controller.ImportCommittedProjects();
+            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Equal("Committed Project error::Request MIME type is invalid.", ((BadRequestObjectResult)result).Value);
+        }
+
+        [Fact]
         public async Task ImportFailsOnNoSimulation()
         {
             // Arrange

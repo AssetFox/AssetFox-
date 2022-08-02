@@ -7,13 +7,10 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    // WjJake -- all of these tests were accessing the real db on the dev machine.
-    // I'm not sure what to think of that. I'm uncomfortable,
-    // but can imagine there could be value in testing their
-    // actual simulation. But it will likely have a tendency
-    // to go out of date, as it apparently did. So maybe delete
-    // and write new tests that check basic operations? That
-    // is likely to take some time.
+    // These tests were accessing a specific simulation on the real
+    // db. They are likely to remain broken. We may want to consider
+    // writing new simulation analysis tests.
+    // For now, they are going to remain skipped.
     public class SimulationAnalysisDataPersistenceTests
     {
         private const int SimulationId = 1171;

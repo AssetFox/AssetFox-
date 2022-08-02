@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             Assert.Equal(bmsIdDatum.AssetId, checkGuid);
         }
 
-        [Fact (Skip = "See comment")]
+        [Fact]
         public void ReturnsSegmentDataWithBRKey()
         {
             // WjJake -- got this running again but the asserts fail.
@@ -70,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = new MaintainableAssetDataRepository(_testRepo);
 
             // Act
-            var testSegment = repo.GetAssetAttributes("BRKEY_", "101256");
+            var testSegment = repo.GetAssetAttributes("BRKEY_", "2");
 
             // Assert
             var brKeyAsset = testSegment.Single(_ => _.Name == "BRKEY_");

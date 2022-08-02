@@ -46,9 +46,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly SummaryReportGlossary _summaryReportGlossary;
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IAddGraphsInTabs _addGraphsInTabs;
+        private readonly ISummaryReportHelper _summaryReportHelper;
 
         private Guid _networkId;
-        private Guid _simulationId;
 
         public Guid ID { get; set; }
 
@@ -98,6 +98,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
                         
             _addGraphsInTabs = new AddGraphsInTabs();
             if (_addGraphsInTabs == null) { throw new ArgumentNullException(nameof(_addGraphsInTabs)); }
+
+            _summaryReportHelper = new SummaryReportHelper();
+            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }
@@ -230,17 +233,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
-            // sorting the sections based on facility name. This is helpful throughout the report
-
-            // generation process
             reportOutputData.InitialAssetSummaries.Sort(
-                    (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
+                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
 
             foreach (var yearlySectionData in reportOutputData.Years)
             {
                 yearlySectionData.Assets.Sort(
-                    (a, b) => Int64.Parse(a.AssetName.Split('-')[0]).CompareTo(Int64.Parse(b.AssetName.Split('-')[0]))
+                    (a, b) => _summaryReportHelper.checkAndGetValue<double>(a.ValuePerNumericAttribute, "BRKEY_").CompareTo(_summaryReportHelper.checkAndGetValue<double>(b.ValuePerNumericAttribute, "BRKEY_"))
                     );
             }
 

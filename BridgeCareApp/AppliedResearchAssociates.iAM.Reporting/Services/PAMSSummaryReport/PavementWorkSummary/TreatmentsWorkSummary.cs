@@ -29,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
 
@@ -37,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillFullDepthAsphaltTreatments(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillCompositeTreatments(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
             FillConcreteTreatments(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
-            FillTreatmentGroups(worksheet, currentCell, simulationYears);
+            FillTreatmentGroups(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             FillWorkTypes(worksheet, currentCell, simulationYears);
         }
 
@@ -88,8 +89,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 worksheet.Cells[row, column].Value = asphaltTotalCount;
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
-            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231));
-            ExcelHelper.ApplyColor(worksheet.Cells[row, fromColumn, row, column], Color.FromArgb(132, 151, 176));
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231)); // treatment rows
+            ExcelHelper.ApplyColor(worksheet.Cells[row, fromColumn, row, column], Color.FromArgb(132, 151, 176)); // total row
 
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
@@ -200,19 +201,61 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
 
-        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillTreatmentGroups(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears //,
-                                      //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-                                      //List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+        private void FillTreatmentGroups(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )
         {
+            //var workTypeConcrete = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
+            if (simulationYears.Count <= 0)
+            {
+                return;// workTypeConcrete;
+            }
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "PAMS Treatment Groups Totals");
-            //var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
 
-            //return workTypeTotalCulvert;
-            return null;
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Bituminous);
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Concrete);
         }
+
+
+        private void AddTreatmentGroupTotalDetails(ExcelWorksheet worksheet, CurrentCell currentCell,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            PavementTreatmentHelper.TreatmentGroupCategory treatmentGroupCategory)
+        {
+            int startRow, startColumn, row, column;
+            _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
+
+            var treatmentGroups = PavementTreatmentHelper.GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
+
+            var prefix = PavementTreatmentHelper.GetTreatmentGroupString(treatmentGroupCategory) + " - ";
+            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).ToList();
+
+            _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, treatmentGroupTitles, ref row, ref column);
+
+            column++;
+            var fromColumn = column + 1;
+
+            foreach (var yearlyValues in costAndLengthPerTreatmentGroupPerYear)
+            {
+                row = startRow;
+                column = ++column;
+                foreach (var treatmentGroup in treatmentGroups)
+                {
+                    yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
+                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
+                    row++;
+                }
+            }
+            row--;
+
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231));
+
+            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
+        }
+
+
 
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillWorkTypes(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears //,

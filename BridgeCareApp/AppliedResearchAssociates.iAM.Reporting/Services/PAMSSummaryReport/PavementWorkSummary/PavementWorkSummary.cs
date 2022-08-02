@@ -14,6 +14,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     {
         private CostBudgetsWorkSummary _costBudgetsWorkSummary;
         private TreatmentsWorkSummary _treatmentsWorkSummary;
+        private IriConditionSummary _iriConditionSummary;
+        private OpiConditionSummary _opiConditionSummary;
+
 
         public PavementWorkSummary()
         {
@@ -22,6 +25,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             if (_costBudgetsWorkSummary == null) { throw new ArgumentNullException(nameof(_costBudgetsWorkSummary)); }
 
             _treatmentsWorkSummary = new TreatmentsWorkSummary(workSummaryModel);
+            if (_treatmentsWorkSummary == null) { throw new ArgumentNullException(nameof(_treatmentsWorkSummary)); }
+
+            _iriConditionSummary = new IriConditionSummary(workSummaryModel);
+            if (_treatmentsWorkSummary == null) { throw new ArgumentNullException(nameof(_treatmentsWorkSummary)); }
+
+            _opiConditionSummary = new OpiConditionSummary(workSummaryModel);
             if (_treatmentsWorkSummary == null) { throw new ArgumentNullException(nameof(_treatmentsWorkSummary)); }
         }
 
@@ -47,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
             var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
-            var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
+            var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
 
             //var yearlyCostCommittedProj = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
             //var countForCompletedProject = new Dictionary<int, Dictionary<string, int>>();
@@ -57,12 +66,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
 
             //var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
-            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
 
             //var segmentMilesPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
 
-            _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
 
+            _iriConditionSummary.FillIriConditionSummarySection(worksheet, currentCell, simulationYears);
+
+            _opiConditionSummary.FillOpiConditionSummarySection(worksheet, currentCell, simulationYears);
             var chartRowsModel = new ChartRowsModel(); // TODO: Get this fromto-be-implemented functions
 
             worksheet.Calculate();
@@ -78,7 +90,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             SimulationOutput reportOutputData,
             //Dictionary<int, Dictionary<string, decimal>> costPerBPNPerYear,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             //Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> yearlyCostCommittedProj,
             //Dictionary<int, Dictionary<string, int>> countForCompletedProject,
             //Dictionary<int, Dictionary<string, int>> countForCompletedCommittedProject
@@ -90,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             foreach (var yearData in reportOutputData.Years)
             {
                 costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
-                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
 
                 foreach (var section in yearData.Assets)
                 {
@@ -161,61 +173,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int year,
             AssetDetail section,
             decimal cost,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int PavementCount)>> costAndLengthPerTreatmentPerYear
             )
         {
             var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
-            var treatmentGroups = GetTreatmentGroups(section.AppliedTreatment);
 
-            foreach (var treatmentGroup in treatmentGroups)
-            { 
-                if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
-                {
-                    costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
-                }
-                else
-                {
-                    var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
-                    values.treatmentCost += cost;
-                    values.PavementCount += (int)segmentLength;
-                    costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
-                }
-            }
-        }
+            var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(section.AppliedTreatment);
 
-
-        List<string> GetTreatmentGroups(string appliedTreatment)
-        {
-            var treatments = appliedTreatment.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            return treatments.ToList();
-        }
-
-        private void PopulateCompletedProjectCount(int year, AssetDetail section, Dictionary<int, Dictionary<string, int>> countForCompletedProject)
-        {
-            if (section.TreatmentCause == TreatmentCause.NoSelection)
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
             {
-                //var culvert = BAMSConstants.CulvertPavementType;
-                //// If Pavement type is culvert
-                //if (section.ValuePerTextAttribute["Pavement_TYPE"] == culvert)
-                //{
-                //    AddKeyValue(countForCompletedProject[year], culvert, section.AppliedTreatment);
-                //}
-                //// If Pavement type is non culvert
-                //else
-                //{
-                //    AddKeyValue(countForCompletedProject[year], BAMSConstants.NonCulvertPavementType, section.AppliedTreatment);
-                //}
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
             }
             else
             {
-                if (!countForCompletedProject[year].ContainsKey(section.AppliedTreatment))
-                {
-                    countForCompletedProject[year].Add(section.AppliedTreatment, 1);
-                }
-                else
-                {
-                    countForCompletedProject[year][section.AppliedTreatment] += 1;
-                }
+                var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
+                values.treatmentCost += cost;
+                values.PavementCount += (int)segmentLength;
+                costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
             }
         }
 

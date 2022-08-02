@@ -31,25 +31,68 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _workSummaryModel = workSummaryModel;
         }
 
-        public void FillCostBudgetWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
+        Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+            )
+        {
+            var workTypeTotals = new Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>>();
+
+            foreach (var yearlyValues in costAndLengthPerTreatmentPerYear)
+            {
+                foreach (var treatment in simulationTreatments)
+                {
+                    decimal cost = 0;
+                    int length = 0;
+
+                    yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
+                    cost = costAndLength.treatmentCost;
+                    length = costAndLength.length;
+
+                    if (!workTypeTotals.ContainsKey(treatment.Category))
+                    {
+                        workTypeTotals.Add(treatment.Category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
+                        {
+                            { yearlyValues.Key, (cost, length) }
+                        });
+                    }
+                    else
+                    {
+                        if (!workTypeTotals[treatment.Category].ContainsKey(yearlyValues.Key))
+                        {
+                            workTypeTotals[treatment.Category].Add(yearlyValues.Key, (0, 0));
+                        }
+                        var value = workTypeTotals[treatment.Category][yearlyValues.Key];
+                        value.treatmentCost += cost;
+                        value.length += length;
+                        workTypeTotals[treatment.Category][yearlyValues.Key] = value;
+                    }
+                }
+            }
+            return workTypeTotals;
+        }
+
+
+        public void FillCostBudgetWorkSummarySections(
+            ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
-            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> yearlyCostCommittedProj,
             //Dictionary<int, Dictionary<string, decimal>> bpnCostPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
-            var localSimulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>(simulationTreatments);
-            //localSimulationTreatments.Remove((PAMSConstants.CulvertNoTreatment, AssetCategory.Culvert, TreatmentCategory.Other));
-            //localSimulationTreatments.Remove((PAMSConstants.NonCulvertNoTreatment, AssetCategory.Bridge, TreatmentCategory.Other));
-            //var costPerAsphaltTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
-            var totalFullDepthAsphaltWork = FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
-            var totalCompositeWork = FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
-            var totalConcreteWork = FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, localSimulationTreatments);
+            FillCostOfFullDepthAsphaltWorkSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            FillCostOfCompositeWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
+            FillCostOfConcreteWork(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, simulationTreatments);
 
 
-            var totalTreatmentGroups = FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears);
-            var workTypeTotals = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears);
+            //var totalTreatmentGroups = FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
+            FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
+
+            var workTypeTotals = CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
+            FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals);
 
 
             //var workTypeTotalAggregated = new WorkTypeTotalAggregated
@@ -67,6 +110,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillRemainingBudgetSection(worksheet, currentCell, simulationYears);
         }
 
+
+
+        private List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> allTreatments)
+        {
+            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Bituminous)).ToList();
+        }
+
+        private List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> allTreatments)
+        {
+            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete)).ToList();
+        }
+
+
+
+
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfFullDepthAsphaltWorkSection(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
@@ -78,9 +136,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Full Depth Asphalt Work", "PAMS Full Depth Asphalt Work");
 
-            var categoryHTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("h")).ToList();
+            var asphaltTreatments = GetAsphaltTreatments(simulationTreatments);
 
-            var workTypeTotalFullDepthAsphalt = AddCostsOfFullDepthAsphaltWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryHTreatments);
+            var workTypeTotalFullDepthAsphalt = AddCostsOfFullDepthAsphaltWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, asphaltTreatments);
 
             return workTypeTotalFullDepthAsphalt;
         }
@@ -198,9 +256,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Composite Work", "PAMS Composite Work");
 
-            var categoryHTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("h")).ToList();
+            var asphaltTreatments = GetAsphaltTreatments(simulationTreatments);
 
-            var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryHTreatments);
+            var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, asphaltTreatments);
 
             return workTypeComposite;
         }
@@ -307,8 +365,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             }
         }
 
-
-
         private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillCostOfConcreteWork(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
@@ -320,9 +376,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Cost of PAMS Concrete Work", "PAMS Concrete Work");
 
-            var categoryJTreatments = simulationTreatments.Where(treatment => treatment.Name.ToLower().StartsWith("j")).ToList();
+            var concreteTreatments = GetConcreteTreatments(simulationTreatments);
 
-            var workTypeConcrete = AddCostsOfConcreteWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, categoryJTreatments);
+            var workTypeConcrete = AddCostsOfConcreteWork(worksheet, simulationYears, currentCell, costAndCountPerTreatmentPerYear, concreteTreatments);
 
             return workTypeConcrete;
         }
@@ -430,35 +486,136 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-
-
-        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillTreatmentGroupTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears //,
-                                      //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-                                      //List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
-            )
+        private void AddTreatmentGroupTotalDetails(ExcelWorksheet worksheet, CurrentCell currentCell,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
+            PavementTreatmentHelper.TreatmentGroupCategory treatmentGroupCategory)
         {
-            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "PAMS Treatment Groups Totals");
-            //var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
+            int startRow, startColumn, row, column;
+            _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            //return workTypeTotalCulvert;
-            return null;
+            var treatmentGroups = PavementTreatmentHelper.GetListOfTreatmentGroupForCategory(treatmentGroupCategory);
+
+            var prefix = PavementTreatmentHelper.GetTreatmentGroupString(treatmentGroupCategory) + " - ";
+            var treatmentGroupTitles = treatmentGroups.Select(tg => prefix + tg.GroupDescription).ToList();
+
+            _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, treatmentGroupTitles, ref row, ref column);
+
+            column++;
+            var fromColumn = column + 1;
+
+            foreach (var yearlyValues in costAndLengthPerTreatmentGroupPerYear)
+            {
+                row = startRow;
+                column = ++column;
+                foreach (var treatmentGroup in treatmentGroups)
+                {
+                    yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
+                    worksheet.Cells[row, column].Value = costAndLength.treatmentCost;
+                    row++;
+                }
+            }
+            row--;
+
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column], Color.White);
+
+            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
         }
 
-        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillWorkTypeTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears //,
-                                      //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-                                      //List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+        private void FillTreatmentGroupTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
             )
         {
+            //var workTypeConcrete = new Dictionary<TreatmentCategory, SortedDictionary<int, decimal>>();
+            if (simulationYears.Count <= 0)
+            {
+                return;// workTypeConcrete;
+            }
+
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
-            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals");
-            worksheet.Cells[currentCell.Row, simulationYears.Count + 3].Value = "Total (all years)";
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "PAMS Treatment Groups Totals");
+
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Bituminous);
+            AddTreatmentGroupTotalDetails(worksheet, currentCell, costAndLengthPerTreatmentGroupPerYear, PavementTreatmentHelper.TreatmentGroupCategory.Concrete);
+        }
+
+
+        private Dictionary<TreatmentCategory, SortedDictionary<int, decimal>> FillWorkTypeTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals
+            )
+        {
+            var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement };
+            var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
+            _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Total Budget", "Work Type Totals", "Total (all years)");
+
+            int startRow, startColumn, row, column;
+            _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
+
+            var workTypeTitles = workTypesForReport.Select(tc => tc.ToSpreadsheetString()).ToList();
+
+            _pavementWorkSummaryCommon.SetPavementTreatmentGroupsExcelString(worksheet, workTypeTitles, ref row, ref column);
+
+            column++;
+            var fromColumn = column + 1;
+
+            row = startRow;
+            foreach (var workType in workTypesForReport)
+            {
+                decimal rowTotal = 0;
+                column = fromColumn;
+
+                if (workTypeTotals.TryGetValue(workType, out var workTypeTotal))
+                {
+                    foreach(var year in simulationYears)
+                    {
+                        if (workTypeTotal.TryGetValue(year, out var costAndLength))
+                        {
+                            worksheet.Cells[row, column].Value = costAndLength.treatmentCost;
+                            rowTotal += costAndLength.treatmentCost;
+                        }
+                        else
+                        {
+                            worksheet.Cells[row, column].Value = 0.0;
+                        }
+                        column = ++column;
+                    }
+                    worksheet.Cells[row, column].Value = rowTotal;
+                }
+                row++;
+            }
+            column = fromColumn + simulationYears.Count;
+            row--;
+
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
+
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column - 1], Color.FromArgb(84, 130, 53));
+            ExcelHelper.SetTextColor(worksheet.Cells[startRow, fromColumn, row, column - 1], Color.White);
+
+            ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column - 1], Color.FromArgb(217, 217, 217));
+
             //var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
-            //worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
-            //worksheet.Cells[startRow, column + 3].Value = "Percentage spent on PRESERVATION/REHABILITATION/REPLACEMENT";
+            worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 3].Value = "Percentage spent on PRESERVATION";
             //return workTypeTotalCulvert;
+
+            //var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
+            worksheet.Cells[startRow + 1, column + 2].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 3].Value = "Percentage spent on REHABILITATION";
+            //return workTypeTotalCulvert;
+
+            //var workTypeComposite = AddCostsOfCompositeWork(worksheet, simulationYears, currentCell, costPerTreatmentPerYear, simulationTreatments);
+            worksheet.Cells[startRow, column + 2].Style.Numberformat.Format = "#0.00%";
+            worksheet.Cells[startRow, column + 3].Value = "Percentage spent on REPLACEMENT";
+            //return workTypeTotalCulvert;
+
+            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
+
+
             return null;
         }
 
@@ -547,7 +704,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, row + 4, column);
 
         }
-    };
-
+    }
 
 }

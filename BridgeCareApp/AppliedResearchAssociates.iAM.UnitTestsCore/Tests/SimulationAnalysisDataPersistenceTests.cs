@@ -7,24 +7,32 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
+    // WjJake -- all of these tests were accessing the real db on the dev machine.
+    // I'm not sure what to think of that. I'm uncomfortable,
+    // but can imagine there could be value in testing their
+    // actual simulation. But it will likely have a tendency
+    // to go out of date, as it apparently did. So maybe delete
+    // and write new tests that check basic operations? That
+    // is likely to take some time.
     public class SimulationAnalysisDataPersistenceTests
     {
         private const int SimulationId = 1171;
         private const int SimulationIdWithCommitted = 1260;
+        public const string BrokenDependsOnPennDotNetwork = "Broken. Depends on a particular PennDot network.";
 
         public SimulationAnalysisDataPersistenceTestHelper CreateTestHelper()
         {
             return new SimulationAnalysisDataPersistenceTestHelper();
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip =BrokenDependsOnPennDotNetwork)]
         public void TestCreateExplorer()
         {
             var testHelper = CreateTestHelper();
             try
             {
                 // Arrange
-                testHelper.CreateAttributes();                
+                testHelper.CreateAttributes();
                 testHelper.SetStandAloneSimulation(SimulationId);                                        
                 
                 // Act
@@ -96,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip= BrokenDependsOnPennDotNetwork)]
         public void TestCreateNetwork()
         {
             var testHelper = CreateTestHelper();
@@ -179,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip = BrokenDependsOnPennDotNetwork)]
         public void TestCreateSimulationEntity()
         {
             var testHelper = CreateTestHelper();
@@ -218,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(simulation.NumberOfYearsOfTreatmentOutlook, dataSourceSimulations[0].NumberOfYearsOfTreatmentOutlook);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip =BrokenDependsOnPennDotNetwork)]
         public void TestCreateAnalysisMethodEntity()
         {
             var testHelper = CreateTestHelper();
@@ -350,7 +358,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = BrokenDependsOnPennDotNetwork)]
         public void TestCreatePerformanceCurveEntities()
         {
             var testHelper = CreateTestHelper();
@@ -403,7 +411,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }        
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip=BrokenDependsOnPennDotNetwork)]
         public void TestCreateInvestmentPlanEntity()
         {
             var testHelper = CreateTestHelper();
@@ -565,7 +573,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip=BrokenDependsOnPennDotNetwork)]
         public void TestCreateSelectableTreatmentEntities()
         {
             var testHelper = CreateTestHelper();

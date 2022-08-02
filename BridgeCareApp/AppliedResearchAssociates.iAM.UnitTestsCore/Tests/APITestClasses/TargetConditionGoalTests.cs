@@ -212,8 +212,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Single(x => x.Id == library.Id);
             Assert.Equal(dto.Description, modifiedDto.Description);
 
-            // wjwjwj below fails on some db weirdness I don't understand. The name is updated in the db.
-         //   Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
+            // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
+            // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
             // WjJake -- the below assert fails because the repo churns the CriterionLibrary, similar
             // to what we had with PerformanceCurves.
             //Assert.Equal(dto.TargetConditionGoals[0].CriterionLibrary.Id,

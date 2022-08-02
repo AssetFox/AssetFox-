@@ -62,10 +62,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         [Fact (Skip ="Fails. The underlying apis have changed. Need to figure out if their behavior is appropriate or not.")]
         public void ReturnsSegmentDataWithBRKey()
         {
-            // WjJake -- got this running again but the asserts fail.
-            // I could change them so they pass, but do the failures
-            // signify a problem?
-            // Arrange
             Setup();
             var repo = new MaintainableAssetDataRepository(_testRepo);
 

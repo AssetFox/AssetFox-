@@ -5,8 +5,8 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Networking;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests;
-using AppliedResearchAssociates.iAM.DataMinerUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -34,7 +34,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
 
             var networkName = RandomStrings.WithPrefix("Network");
-            var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
             var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
 
             var networkDefinitionAttribute = AllAttributeDtos.BrKey(allDataSourceDto);

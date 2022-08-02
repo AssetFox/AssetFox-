@@ -53,19 +53,7 @@
                     </v-btn>
                 </v-layout>
             </v-flex>
-                    <!-- <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedDeficientConditionGoalLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot="append">
-                            <v-btn @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field> -->
+                   
         </v-layout>
         </v-flex>
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
@@ -171,12 +159,12 @@
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="ghd-blue"
                                         icon>
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
                                     <v-btn @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
-                                        <v-icon>fas fa-trash</v-icon>
+                                        <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                     </v-btn>
                                 </div>                               
                             </div>

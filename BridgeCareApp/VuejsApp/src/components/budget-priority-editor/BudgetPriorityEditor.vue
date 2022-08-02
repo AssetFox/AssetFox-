@@ -76,7 +76,7 @@
                                         <template slot='activator'>
                                             <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
                                                 <v-btn class='ara-blue ghd-button-text' icon>
-                                                    <v-icon>fas fa-eye</v-icon>
+                                                    <img class='img-general' src="../../../public/icons/eye-ghd-blue.svg"/>
                                                 </v-btn>
                                             </div>
                                             <div v-else class='priority-criteria-output'>
@@ -93,7 +93,7 @@
                                     </v-menu>
                                     <v-btn @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
                                            icon>
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
                                     </v-btn>
                                 </v-layout>
                             </div>
@@ -113,7 +113,7 @@
                             </div>
                             <div v-else>
                                 <v-btn @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
-                                    <v-icon>fas fa-trash</v-icon>
+                                    <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                 </v-btn>
                             </div>
                         </td>

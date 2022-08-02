@@ -150,7 +150,7 @@
                             @click="onDeleteCashFlowDistributionRule(props.item.id)"
                             class="ghd-blue"
                             icon>
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' src="../../../../public/icons/trash-ghd-blue.svg"/>
                         </v-btn>
                     </td>
                 </template>

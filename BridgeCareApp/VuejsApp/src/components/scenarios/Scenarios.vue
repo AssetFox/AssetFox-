@@ -148,39 +148,24 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-ellipsis-v"
-                                                        ></i>
+                                                        <img class='img-general' src="../../../public/icons/more-vertical.svg"/>
                                                     </v-btn>
                                                 </template>
 
                                                 <v-list>
                                                     <v-list-tile
-                                                        v-for="(item,
-                                                        i) in actionItems"
+                                                        v-for="(item,i) in actionItems"
                                                         :key="i"
-                                                        @click="
-                                                            OnActionTaken(
+                                                        @click="OnActionTaken(
                                                                 item.action,
-                                                                props.item
-                                                                    .users,
+                                                                props.item.users,
                                                                 props.item,
-                                                                true,
-                                                            )
-                                                        "
-                                                        class="menu-style"
-                                                    >
+                                                                true) "
+                                                        class="menu-style">
                                                         <v-list-tile-title icon>
-                                                            <v-icon
-                                                                class="action-icon-padding"
-                                                                >{{
-                                                                    item.icon
-                                                                }}</v-icon
-                                                            >
-                                                            {{
-                                                                item.title
-                                                            }}</v-list-tile-title
-                                                        >
+                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            {{item.title}}
+                                                        </v-list-tile-title>
                                                     </v-list-tile>
                                                 </v-list>
                                             </v-menu>
@@ -312,39 +297,19 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-ellipsis-v"
-                                                        ></i>
+                                                        <img class='img-general' src="../../../public/icons/more-vertical.svg"/>
                                                     </v-btn>
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile
-                                                        v-for="(item,
-                                                        i) in actionItemsForSharedScenario"
+                                                    <v-list-tile v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
-                                                        @click="
-                                                            OnActionTaken(
-                                                                item.action,
-                                                                props.item
-                                                                    .users,
-                                                                props.item,
-                                                                false,
-                                                            )
-                                                        "
-                                                        class="menu-style"
-                                                    >
-                                                        <v-list-tile-title icon>
-                                                            <v-icon
-                                                                class="action-icon-padding"
-                                                                >{{
-                                                                    item.icon
-                                                                }}</v-icon
-                                                            >
-                                                            {{
-                                                                item.title
-                                                            }}</v-list-tile-title
-                                                        >
+                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
+                                                        class="menu-style">
+                                                        <v-list-tile-title icon>                                                        
+                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            {{item.title}}
+                                                        </v-list-tile-title>
                                                     </v-list-tile>
                                                 </v-list>
                                             </v-menu>
@@ -730,39 +695,39 @@ export default class Scenarios extends Vue {
             {
                 title: 'Run Analysis',
                 action: this.availableActions.runAnalysis,
-                icon: 'fas fa-play',
+                icon: require("../../../public/icons/monitor.svg"),
             },
             {
                 title: 'Reports',
                 action: this.availableActions.reports,
-                icon: 'fas fa-chart-line',
+                icon: require("../../../public/icons/clipboard.svg"),
             },
             {
                 title: 'Settings',
                 action: this.availableActions.settings,
-                icon: 'fas fa-edit',
+                icon: require("../../../public/icons/gear.svg"),
             },
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
-                icon: 'fas fa-tasks',
+                icon: require("../../../public/icons/ico-criteria-deactive.svg"),
             },
             {
                 title: 'Clone',
                 action: this.availableActions.clone,
-                icon: 'fas fa-paste',
+                icon: require("../../../public/icons/copy.svg"),
             },
             {
                 title: 'Delete',
                 action: this.availableActions.delete,
-                icon: 'fas fa-trash',
+                icon: require("../../../public/icons/trash.svg"),
             }           
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
         this.actionItems.splice(4, 0, {
             title: 'Share',
             action: this.availableActions.share,
-            icon: 'fas fa-users',
+            icon: require("../../../public/icons/share-geometric.svg"),
         });
         this.tabItems.push(
             { name: 'My scenarios', icon: 'star', count: 0 },

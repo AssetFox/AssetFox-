@@ -10,20 +10,6 @@
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
                     </v-select>
-                    <!-- <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedCashFlowRuleLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot="append">
-                            <v-btn
-                                @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field> -->
                     
                 </v-flex>
                 <v-flex xs4 class="ghd-constant-header">    
@@ -137,7 +123,7 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(props.item)"
                                 class="ghd-blue"
                                 icon>
-                                <v-icon>fas fa-edit</v-icon>
+                                <img class='img-general' src="../../../public/icons/edit.svg"/>
                             </v-btn>
                             </v-layout>
                                                    
@@ -148,13 +134,13 @@
                                 @click="onDeleteCashFlowRule(props.item.id)"
                                 class="ghd-blue"
                                 icon>
-                                <v-icon>fas fa-trash</v-icon>
+                                <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(props.item.id)"
                                 class="ghd-blue"
                                 icon>
-                                <v-icon>fas fa-edit</v-icon>
+                                <img class='img-general' src="../../../public/icons/edit.svg"/>
                             </v-btn>
                             </v-layout>                          
                         </td>

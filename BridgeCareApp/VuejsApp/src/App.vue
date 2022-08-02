@@ -70,7 +70,9 @@
                                 v-bind="attrs"
                                 @click="onNotificationMenuSelect"
                                 class="notification-icon"
+                                icon
                             >
+                                <img style="position:absolute; top:20px; height:25px;" src="../public/icons/bell.svg"/>
                                 <notification-bell
                                     :size="30"
                                     :count="notificationCounter"
@@ -81,6 +83,7 @@
                                     counterBackgroundColor="#FF0000"
                                     counterTextColor="#FFFFFF"
                                     iconColor="#002E6C"
+                                    class="hide-bell-svg"
                                 />
                             </button>
                         </template>
@@ -146,8 +149,8 @@
                 <v-toolbar-title>
                     <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
-                <v-toolbar-title class="navbar-gray" v-if="authenticated">
-                    <v-icon class="navbar-user-icon">fas fa-user</v-icon>
+                <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
+                    <img style="height:40px; position:relative; top:2px" src="../public/icons/user-no-circle.svg"/>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">
@@ -656,5 +659,9 @@ html {
 .pointer-for-image{
         cursor: pointer;
     }
+
+.hide-bell-svg svg{
+    visibility: collapse;
+}
 
 </style>

@@ -86,7 +86,7 @@
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                         </v-btn>
                                     </template>
                                 </v-textarea>
@@ -324,9 +324,9 @@ export default class CriteriaEditor extends Vue {
             { id: 'OR', label: 'OR' },
         ],
         addRule: 'Add Rule',
-        removeRule: '<div class="fas fa-trash ghd-blue" style="margin-top:4px;margin-left:4px;"/>',
+        removeRule: `<img class='img-general' src="${require("../../../public/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
         addGroup: 'Add Group',
-        removeGroup: '<div class="fas fa-trash ghd-blue"/>',
+        removeGroup: `<img class='img-general' src="${require("../../../public/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
 
@@ -350,6 +350,7 @@ export default class CriteriaEditor extends Vue {
     mounted() {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
+            
         }
     }
 

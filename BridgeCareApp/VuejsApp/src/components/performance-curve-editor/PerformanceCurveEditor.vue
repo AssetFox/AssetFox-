@@ -212,7 +212,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" icon>
-                                                <v-icon>fas fa-eye</v-icon>
+                                                <img class='img-general' src="../../../public/icons/eye-ghd-blue.svg"/>
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -241,7 +241,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -256,7 +256,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" flat icon>
-                                                <v-icon>fas fa-eye</v-icon>
+                                                <img class='img-general' src="../../../public/icons/eye-ghd-blue.svg"/>
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -286,7 +286,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -299,7 +299,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-trash</v-icon>
+                                        <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                     </v-btn>
                                 </td>
                             </template>

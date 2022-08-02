@@ -123,7 +123,7 @@
                                             class="edit-icon"
                                             icon
                                         >
-                                            <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                            <img class='img-general' src="../../../../public/icons/edit.svg"/>
                                         </v-btn>   
                                     </v-flex>                                    
                                 </v-layout>       

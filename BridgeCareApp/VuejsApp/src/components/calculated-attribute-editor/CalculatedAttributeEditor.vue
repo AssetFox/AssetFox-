@@ -30,7 +30,7 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout align-end>
                         <v-text-field
-                                    append-icon="fas fa-search"
+                                    append-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
                                     placeholder="Search Calcultated Attribute"
@@ -105,7 +105,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <v-icon>fas fa-edit</v-icon>
+                                    <img class='img-general img-shift' src="../../../public/icons/edit.svg"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -122,7 +122,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <v-icon>fas fa-edit</v-icon>
+                                    <img class='img-general img-shift' src="../../../public/icons/edit.svg"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -134,7 +134,7 @@
                             class="ghd-blue"
                             icon
                             :disabled="!isAdmin">
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                         </v-btn>
                     </td>
                 </template>

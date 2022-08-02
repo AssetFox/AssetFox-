@@ -700,6 +700,17 @@ display: none !important;
     margin: 0;
 }
 
+.img-shift{
+    position: relative;
+    top: -9px;
+}
+
+.img-general{
+    height: 25px
+}
+
+
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;

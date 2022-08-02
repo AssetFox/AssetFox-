@@ -116,14 +116,14 @@
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fa-solid fa-edit</v-icon>
+                                            <img class='img-general' src="../../../public/icons/edit.svg"/>
                                         </v-btn>
                                         <v-btn
                                             @click="onRemoveTargetConditionGoalsIcon(props.item)"
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                         </v-btn>
                                     </v-card-actions>
 

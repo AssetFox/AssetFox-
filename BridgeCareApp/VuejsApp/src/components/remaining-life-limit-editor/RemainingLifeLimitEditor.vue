@@ -118,10 +118,14 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">fas fa-edit</v-icon>
+                            <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
+                                <img class='img-general' src="../../../public/icons/edit.svg"/>
+                            </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> fas fa-trash </v-icon>
+                            <v-btn @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
+                                <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                            </v-btn>                          
                         </td>
                     </tr>
                 </template>

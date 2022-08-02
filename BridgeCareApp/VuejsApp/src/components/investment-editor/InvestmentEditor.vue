@@ -109,26 +109,7 @@
                 </v-layout>
             </v-flex>
         </v-layout>
-        <!-- <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    
-                    
-                    <v-text-field label='Library Name' v-if='hasSelectedLibrary && !hasScenario'
-                                  v-model='selectedBudgetLibrary.name'
-                                  :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot='append'>
-                            <v-btn @click='librarySelectItemValue = null' class='ara-orange' icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    
-                </v-flex>
-            </v-layout>
-        </v-flex> -->
-        <!-- visible on both pages -->
-        <!-- <v-divider v-show='hasSelectedLibrary && hasScenario'></v-divider> -->
+
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <!-- <v-layout justify-center>
                 <v-flex xs6>
@@ -178,7 +159,7 @@
                                     </div>       
                                     <div v-if="header.value === 'action'">
                                         <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                                         </v-btn>
                                     </div>                           
                                     <div v-if="header.value !== 'year' && header.value !== 'action'">

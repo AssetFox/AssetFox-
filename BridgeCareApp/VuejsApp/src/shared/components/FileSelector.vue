@@ -6,7 +6,7 @@
                     <v-layout fill-height justify-center>
                         <div class="drag-drop-area">
                             <v-layout fill-height align-center justify-center>
-                                <v-icon class="px-2">fas fa-cloud-upload-alt</v-icon>
+                                <img src="../../../public/icons/upload.svg"/>
                                 <v-layout column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                                     <span class="span-center Montserrat-font-family">or</span>
@@ -43,7 +43,7 @@
                     </td>
                     <td>
                         <v-btn @click="file = null" class="ghd-blue" icon>
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
                         </v-btn>
                     </td>
                 </template>

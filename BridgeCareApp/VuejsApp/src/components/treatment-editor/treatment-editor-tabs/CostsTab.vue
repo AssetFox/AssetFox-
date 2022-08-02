@@ -23,7 +23,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../../public/icons/edit.svg"/>
                                     </v-btn>                                
                                 </v-layout>
                                 <v-layout xs6 align-center>  
@@ -51,7 +51,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        <img class='img-general' src="../../../../public/icons/edit.svg"/>
                                     </v-btn>
                                 </v-layout> 
                                 <v-layout xs6 align-center>              
@@ -76,7 +76,7 @@
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-trash</v-icon>
+                                        <img class='img-general' src="../../../../public/icons/trash-ghd-blue.svg"/>
                                     </v-btn>
                                 </v-layout>                   
                             </td>

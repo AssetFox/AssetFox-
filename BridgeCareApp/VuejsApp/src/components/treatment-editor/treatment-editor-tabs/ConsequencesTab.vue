@@ -37,7 +37,7 @@
                             >
                                 <template slot="activator">
                                     <v-btn class="ghd-blue" icon>
-                                        <v-icon>fas fa-eye</v-icon>
+                                        <img class='img-general' src="../../../../public/icons/eye-ghd-blue.svg"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
@@ -58,7 +58,7 @@
                             </v-menu>     
                              <v-btn v-if="header.value === 'equation'" @click='onShowConsequenceEquationEditorDialog(props.item)' class='edit-icon'
                                     icon>
-                                <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                <img class='img-general' src="../../../../public/icons/edit.svg"/>
                             </v-btn>                       
 
                             <v-menu
@@ -69,7 +69,7 @@
                             >
                                 <template slot="activator">
                                     <v-btn class="ghd-blue" icon>
-                                        <v-icon>fas fa-eye</v-icon>
+                                        <img class='img-general' src="../../../../public/icons/eye-ghd-blue.svg"/>
                                     </v-btn>
                                 </template>
                                 <v-card>
@@ -90,12 +90,12 @@
                             </v-menu>
                             <v-btn v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionLibraryEditorDialog(props.item)'
                                     class='edit-icon' icon>
-                                <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                <img class='img-general' src="../../../../public/icons/edit.svg"/>
                             </v-btn>
 
                             <v-layout v-if="header.value === ''" align-start>
                                 <v-btn @click='onRemoveConsequence(props.item.id)' icon>
-                                    <v-icon class="ghd-blue">fas fa-trash</v-icon>
+                                    <img class='img-general' src="../../../../public/icons/trash-ghd-blue.svg"/>
                                 </v-btn>
                             </v-layout>
                         </td>

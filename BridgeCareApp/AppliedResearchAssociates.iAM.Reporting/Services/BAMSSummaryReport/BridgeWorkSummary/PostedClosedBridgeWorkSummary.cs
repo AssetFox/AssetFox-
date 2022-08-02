@@ -240,18 +240,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             int startRow, startColumn, row, column;
 
             _bridgeWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            worksheet.Cells[row++, column].Value = "Posted";
-            worksheet.Cells[row, column++].Value = "Closed";
+            worksheet.Cells[row++, column].Value = "Closed";
+            worksheet.Cells[row, column++].Value = "Posted";
 
             row = startRow;
-            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(reportOutputData.InitialAssetSummaries);
-            worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(reportOutputData.InitialAssetSummaries);
+            worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(reportOutputData.InitialAssetSummaries); 
+            worksheet.Cells[row, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(reportOutputData.InitialAssetSummaries);
             foreach (var yearlyData in reportOutputData.Years)
             {
-                row = startRow;
-                column = ++column;
-                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(yearlyData.Assets);
+                row = startRow; column = ++column;
+
                 worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculateClosedCount(yearlyData.Assets);
+                worksheet.Cells[row++, column].Value = _bridgeWorkSummaryComputationHelper.CalculatePostedCount(yearlyData.Assets);                
             }
 
             worksheet.Cells[startRow, startColumn, row + 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
@@ -288,9 +288,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var totalMoneyPerYear = AddMoneyNeededByBPN(worksheet, row, column, yearlyData.Assets);
                 totalMoney += totalMoneyPerYear;
             }
+
+            //calculate BPN Annualized Amount for all the years
+            double bpnAnnualizedAmount = 0;
+            if (reportOutputData?.Years?.Any() == true)
+            {
+                bpnAnnualizedAmount = totalMoney / reportOutputData.Years.Count;
+            }
+
+            //fill BPN annualized amount
             for (var i = 0; i < reportOutputData.Years.Count; i++)
             {
-                worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
+                //worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = _workSummaryModel.AnnualizedAmount;
+                worksheet.Cells[row + bpnRowCount, startColumn + i + 2].Value = bpnAnnualizedAmount;
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, startColumn, row + bpnRowCount, column], ExcelHelperCellFormat.NegativeCurrency);

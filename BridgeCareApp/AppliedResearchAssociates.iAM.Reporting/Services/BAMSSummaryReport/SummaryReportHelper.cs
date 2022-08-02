@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
@@ -7,6 +8,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
     public class SummaryReportHelper : ISummaryReportHelper
     {
+        public T checkAndGetValue<T>(IDictionary itemsArray, string itemName)
+        {
+            var itemValue = default(T);
+
+            if (itemsArray == null) { return itemValue; }
+            if (string.IsNullOrEmpty(itemName) || string.IsNullOrWhiteSpace(itemName)) { return itemValue; }
+
+            if (itemsArray.Contains(itemName)) { itemValue = (T)itemsArray[itemName]; }
+
+            //return value
+            return itemValue;
+        }
+
         // Identifying 185 Bridges
         public bool BridgeFunding185(AssetDetail section)
         {

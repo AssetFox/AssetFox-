@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             int startRow, startColumn, row, column;
             _pavementWorkSummaryCommon.SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
 
-            var cheatLabels = new List<string> { "Excellent, Good, Fair, Poor" };
+            var cheatLabels = new List<string> { "Excellent", "Good", "Fair", "Poor" };
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, cheatLabels, ref row, ref column);
 
             _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);

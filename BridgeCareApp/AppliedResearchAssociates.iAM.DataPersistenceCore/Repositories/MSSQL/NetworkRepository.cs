@@ -35,8 +35,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateNetwork(Analysis.Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
 
-        public List<Network> GetAllNetworks() =>
-            _unitOfWork.Context.Network.Select(_ => _.ToDomain()).ToList();
+        public List<Network> GetAllNetworks()
+        {
+            var domain = _unitOfWork.Context.Network
+                .Include(n => n.MaintainableAssets)
+                .ThenInclude(ma => ma.MaintainableAssetLocation)
+                .Select(e => e.ToDomain())
+                .ToList();
+            return domain;
+        }
 
         public Task<List<NetworkDTO>> Networks()
         {

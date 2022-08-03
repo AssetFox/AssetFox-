@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using AppliedResearchAssociates.CalculateEvaluate;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.Validation;
 
@@ -33,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
             }
         }
 
-        internal ChangeApplicator GetApplicator(AssetContext scope)
+        public ChangeApplicator GetApplicator(CalculateEvaluateScope scope)
         {
             switch (Attribute)
             {

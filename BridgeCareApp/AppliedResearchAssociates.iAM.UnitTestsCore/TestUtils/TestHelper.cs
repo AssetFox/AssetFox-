@@ -1,24 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
-using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -143,18 +140,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return returnValue;
         }
 
-        public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
-        {
-            var resolvedId = id ?? Guid.NewGuid();
-            var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
-            var returnValue = new CriterionLibraryEntity
-            {
-                Id = resolvedId,
-                Name = resolvedName,
-                MergedCriteriaExpression = "Test Expression"
-            };
-            return returnValue;
-        }
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();

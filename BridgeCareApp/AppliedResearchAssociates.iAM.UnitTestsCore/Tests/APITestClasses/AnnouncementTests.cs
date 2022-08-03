@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
@@ -15,12 +16,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnnouncementTests
     {
-        private readonly TestHelper _testHelper;
+        private readonly TestHelper _testHelper = TestHelper.Instance;
         private readonly AnnouncementController _controller;
 
         public AnnouncementTests()
         {
-            _testHelper = TestHelper.Instance;
             _testHelper.SetupDefaultHttpContext();
             _controller = new AnnouncementController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
             // Act
             var result = await _controller.Announcements();
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Act
             var announcement = TestAnnouncement();
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnDelete()
+        public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
             var result = await _controller.DeleteAnnouncement(Guid.Empty);
@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldGetAllAnnouncements()
+        public async Task ShouldGetAllAnnouncements()
         {
             // Arrange
             var announcementId = Guid.NewGuid();
@@ -91,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldAddAnnouncementData()
+        public async Task ShouldAddAnnouncementData()
         {
             // Arrange
             var announcement = TestAnnouncement();
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldModifyAnnouncementData()
+        public async Task ShouldModifyAnnouncementData()
         {
             // Arrange
             var announcement = TestAnnouncement();
@@ -141,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldDeletePerformanceCurveData()
+        public async Task ShouldDeletePerformanceCurveData()
         {
             // Arrange
             var announcement = TestAnnouncement();

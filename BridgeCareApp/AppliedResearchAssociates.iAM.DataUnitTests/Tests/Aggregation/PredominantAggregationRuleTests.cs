@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
     public class PredominantAggregationRuleTests
     {
         private readonly Guid guId = Guid.Empty;
-        private readonly Mock<Attribute> mockAttribute;
+        private readonly TextAttribute textAttribute;
         List<IAttributeDatum> attributeData;
         private readonly SectionLocation sectionLocation;
 
@@ -22,7 +22,18 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
         {
             attributeData = new List<IAttributeDatum>();
             sectionLocation = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
-            mockAttribute = new Mock<Attribute>(guId, CommonTestParameterValues.Name, AttributeTypeNames.String, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);
+            textAttribute = new TextAttribute(
+                "defaultValue",
+                Guid.Empty,
+                AttributeTypeNames.String,
+                CommonTestParameterValues.RuleType,
+                CommonTestParameterValues.TestCommand,
+                ConnectionType.MSSQL,
+                CommonTestParameterValues.ConnectionString,
+                false,
+                false,
+                Guid.Empty
+                );
         }
 
         [Fact]
@@ -34,13 +45,13 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             var expectedValue = CommonTestParameterValues.StringValue;
 
             //Act            
-            var result = predominantAggregationRule.Apply(attributeData, mockAttribute.Object);
+            var result = predominantAggregationRule.Apply(attributeData, textAttribute);
 
             //Assert            
             var resultItems = ((IEnumerable<(Attribute attribute, (int year, string value))>)result)?.ToList();
             Assert.True(resultItems != null && resultItems.Count == 1);
             var resultItem = resultItems.FirstOrDefault();
-            Assert.Equal(resultItem.attribute, mockAttribute.Object);
+            Assert.Equal(resultItem.attribute, textAttribute);
             Assert.Equal(resultItem.Item2.year, attributeData[0].TimeStamp.Year);
             Assert.Equal(resultItem.Item2.value, expectedValue);
         }
@@ -55,13 +66,13 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             var expectedValue = CommonTestParameterValues.StringValue;
 
             //Act            
-            var result = predominantAggregationRule.Apply(attributeData, mockAttribute.Object);
+            var result = predominantAggregationRule.Apply(attributeData, textAttribute);
 
             //Assert            
             var resultItems = ((IEnumerable<(Attribute attribute, (int year, string value))>)result)?.ToList();
             Assert.True(resultItems != null && resultItems.Count == 1);
             var resultItem = resultItems.FirstOrDefault();
-            Assert.Equal(resultItem.attribute, mockAttribute.Object);
+            Assert.Equal(resultItem.attribute, textAttribute);
             Assert.Equal(resultItem.Item2.year, attributeData[0].TimeStamp.Year);
             Assert.Equal(resultItem.Item2.value, expectedValue);
         }
@@ -77,12 +88,12 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             var expectedValue2 = CommonTestParameterValues.StringValue2;
 
             //Act            
-            var result = predominantAggregationRule.Apply(attributeData, mockAttribute.Object);
+            var result = predominantAggregationRule.Apply(attributeData, textAttribute);
 
             //Assert            
             var resultItems = ((IEnumerable<(Attribute attribute, (int year, string value))>)result)?.ToList();
             Assert.True(resultItems != null && resultItems.Count == 2);
-            Assert.Contains(resultItems, _ => _.attribute == mockAttribute.Object);
+            Assert.Contains(resultItems, _ => _.attribute == textAttribute);
             Assert.Contains(resultItems, _ => _.Item2 == (attributeData[0].TimeStamp.Year, expectedValue1));
             Assert.Contains(resultItems, _ => _.Item2 == (attributeData[0].TimeStamp.Year - 1, expectedValue2));
         }

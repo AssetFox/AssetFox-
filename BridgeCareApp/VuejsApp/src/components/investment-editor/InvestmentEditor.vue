@@ -40,6 +40,7 @@
                     <v-flex xs4 class="ghd-constant-header">
                         <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                         <v-select :items='librarySelectItems'
+                              append-icon=$vuetify.icons.ghd-down
                               outline 
                               v-model='librarySelectItemValue'
                               class="ghd-select ghd-text-field ghd-text-field-border">
@@ -148,6 +149,7 @@
                 <v-flex >
                    <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
                                       class='v-table__overflow ghd-table' item-key='year' select-all 
+                                      sort-icon=$vuetify.icons.ghd-table-sort
                                       v-model='selectedBudgetYearsGridData' :must-sort='true'>
                             <template slot='items' slot-scope='props'>
                                 <td>

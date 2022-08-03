@@ -33,6 +33,7 @@
         </v-layout>        
         <div class="files-table">
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
+                        sort-icon=$vuetify.icons.ghd-table-sort
                           hide-actions>
                 <template slot="items" slot-scope="props">
                     <td>

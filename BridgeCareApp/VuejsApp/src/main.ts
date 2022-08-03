@@ -25,6 +25,9 @@ import VuejsDialog from 'vuejs-dialog';
 import VuejsDialogMixin from 'vuejs-dialog/dist/vuejs-dialog-mixin.min.js';
 import 'vuejs-dialog/dist/vuejs-dialog.min.css';
 import GhdSearchSvg from '@/shared/icons/GhdSearchSvg.vue';
+import GhdDownSvg from '@/shared/icons/GhdDownSvg.vue';
+import GhdTableSortSvg from '@/shared/icons/GhdTableSortSvg.vue';
+
 
 Vue.use(Vuetify, {
     iconfont: 'fa',
@@ -34,7 +37,19 @@ Vue.use(Vuetify, {
           props: { // pass props to your component if needed
             name: 'ghd-search'
           }
-        }
+        },
+        'ghd-down': {
+            component: GhdDownSvg, 
+            props: { 
+              name: 'ghd-down'
+            }
+          },
+          'ghd-table-sort': {
+            component: GhdTableSortSvg, 
+            props: { 
+              name: 'ghd-table-sort'
+            }
+          },
     }
 });
 

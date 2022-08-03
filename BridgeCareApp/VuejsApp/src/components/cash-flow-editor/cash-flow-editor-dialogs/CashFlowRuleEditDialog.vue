@@ -16,6 +16,7 @@
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
+                sort-icon=$vuetify.icons.ghd-table-sort
                 hide-actions
                 class="ghd-table v-table__overflow">
                 <template slot="items" slot-scope="props">

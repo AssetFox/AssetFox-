@@ -21,6 +21,7 @@
             <v-flex>
               <v-subheader class="ghd-md-gray ghd-control-label">Select Attribute</v-subheader>
               <v-select :items="numericAttributeNames"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="newDeficientConditionGoal.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-select ghd-text-field ghd-text-field-border">

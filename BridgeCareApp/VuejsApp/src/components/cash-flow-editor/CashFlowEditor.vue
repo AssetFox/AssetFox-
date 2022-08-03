@@ -6,6 +6,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Cash Flow Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -56,6 +57,7 @@
                 <v-data-table
                     :headers="cashFlowRuleGridHeaders"
                     :items="cashFlowRuleGridData"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     v-model='selectedCashRuleGridRows'
                     class="ghd-table v-table__overflow"
                     item-key="id"
@@ -140,7 +142,7 @@
                                 @click="onSelectCashFlowRule(props.item.id)"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                <img class='img-general' src="../../../public/icons/edit-cash.svg"/>
                             </v-btn>
                             </v-layout>                          
                         </td>

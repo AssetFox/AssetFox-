@@ -20,6 +20,7 @@
                                 <v-layout>
                                 <v-select
                                     :items="conjunctionSelectListItems"
+                                    append-icon=$vuetify.icons.ghd-down
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
                                 >

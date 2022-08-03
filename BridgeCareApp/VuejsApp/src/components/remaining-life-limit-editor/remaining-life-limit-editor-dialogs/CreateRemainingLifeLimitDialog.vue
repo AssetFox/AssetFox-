@@ -13,9 +13,10 @@
         <v-layout column>
           <v-subheader class="ghd-control-label ghd-md-gray">Select an Attribute</v-subheader>
           <v-select :items="dialogData.numericAttributeSelectItems"
+                    append-icon=$vuetify.icons.ghd-down
                     outline v-model="newRemainingLifeLimit.attribute"
                     :rules="[rules['generalRules'].valueIsNotEmpty]"
-                    class="ghd-control-text ghd-control-border"/>
+                    class="ghd-select ghd-control-text ghd-text-field ghd-text-field-border"/>
           <v-subheader class="ghd-control-label ghd-md-gray">Limit</v-subheader>
           <v-text-field outline :mask="'##########'"
                         v-model.number="newRemainingLifeLimit.value"

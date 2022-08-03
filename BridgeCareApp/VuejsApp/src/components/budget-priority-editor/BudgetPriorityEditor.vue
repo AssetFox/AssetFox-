@@ -6,6 +6,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
                             <v-select :items='librarySelectItems' 
+                                append-icon=$vuetify.icons.ghd-down
                                 outline                           
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>                           
@@ -43,6 +44,7 @@
             <div class='priorities-data-table'>
                 <v-data-table :headers='budgetPriorityGridHeaders' :items='budgetPriorityGridRows'
                               class='v-table__overflow ghd-table' item-key='id' select-all
+                              sort-icon=$vuetify.icons.ghd-table-sort
                               v-model='selectedBudgetPriorityGridRows' :must-sort='true'>
                     <template slot='items' slot-scope='props'>
                         <td>

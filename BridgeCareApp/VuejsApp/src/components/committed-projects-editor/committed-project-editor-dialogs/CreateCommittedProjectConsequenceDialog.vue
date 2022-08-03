@@ -14,16 +14,17 @@
           <v-flex>
             <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
             <v-select :items="attributeNames"
-                      outline
-                      v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
-                      class="ghd-select ghd-text-field ghd-text-field-border">
+              append-icon=$vuetify.icons.ghd-down
+              outline
+              v-model="newConsequence.attribute" :rules="[rules['generalRules'].valueIsNotEmpty]"
+              class="ghd-select ghd-text-field ghd-text-field-border">
             </v-select>
           </v-flex>
           <v-flex>
             <v-subheader class="ghd-md-gray ghd-control-label">Change Value</v-subheader>
             <v-text-field outline v-model="newConsequence.changeValue"
-                          :rules="[rules['generalRules'].valueIsNotEmpty]"
-                          class="ghd-text-field-border ghd-text-field"></v-text-field>
+              :rules="[rules['generalRules'].valueIsNotEmpty]"
+              class="ghd-text-field-border ghd-text-field"></v-text-field>
           </v-flex>         
         </v-layout>
       </v-card-text>

@@ -7,6 +7,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -61,6 +62,7 @@
                 <v-data-table
                     :headers="deficientConditionGoalGridHeaders"
                     :items="deficientConditionGoalGridData"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     class=" ghd-table v-table__overflow"
                     item-key="id"
                     select-all
@@ -104,6 +106,7 @@
 
                                         <v-select v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
+                                            append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
                                             v-model="props.item[header.value]"
                                             :rules="[

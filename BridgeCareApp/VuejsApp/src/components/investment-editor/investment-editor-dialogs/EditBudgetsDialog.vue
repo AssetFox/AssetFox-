@@ -14,7 +14,7 @@
                     <div style='max-height: 450px; overflow-y:auto;'>
                     <v-data-table :headers='editBudgetsDialogGridHeaders'
                                   :items='editBudgetsDialogGridData'
-                                  
+                                  sort-icon=$vuetify.icons.ghd-table-sort
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'

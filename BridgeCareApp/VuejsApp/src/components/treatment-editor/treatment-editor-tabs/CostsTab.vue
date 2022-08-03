@@ -5,6 +5,7 @@
                 <v-data-table
                     hide-default-header             
                     :headers="costsGridHeaders"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     :items="costsGridData"
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions

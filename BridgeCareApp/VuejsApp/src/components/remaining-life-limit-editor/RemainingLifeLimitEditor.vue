@@ -7,6 +7,7 @@
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                       :items="selectListItems"
+                      append-icon=$vuetify.icons.ghd-down
                        v-model="selectItemValue"
                       outline
                       outlined
@@ -22,6 +23,7 @@
         <div v-show="selectItemValue != null || hasScenario">
             <v-data-table
             :headers="gridHeaders"
+            sort-icon=$vuetify.icons.ghd-table-sort
             :items="remainingLifeLimits"
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
@@ -64,6 +66,7 @@
                                 <template slot="input">
                                     <v-select
                                         :items="numericAttributeSelectItems"
+                                        append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
                                         outline
                                         v-model="props.item.attribute"

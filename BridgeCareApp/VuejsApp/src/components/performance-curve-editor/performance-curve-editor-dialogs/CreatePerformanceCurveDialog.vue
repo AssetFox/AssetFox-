@@ -20,6 +20,7 @@
             <v-select class="ghd-select ghd-control-text ghd-control-border"
                       v-model="newPerformanceCurve.attribute"
                       :items="attributeSelectItems"
+                      append-icon=$vuetify.icons.ghd-down
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       outline
             >

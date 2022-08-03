@@ -128,6 +128,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
+                                          sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props">
@@ -198,6 +199,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
+                                          sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props">

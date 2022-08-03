@@ -9,7 +9,9 @@
                         :key="item.name"
                         class="tab-theme"
                     >
-                        <v-icon left>{{ item.icon }}</v-icon>
+                        <!-- <img class="icon-selected-tab" style="padding-right:10px" v-bind:src="item.icon"/> -->
+                        <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
+                        <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
                         {{ item.name }}
                         ( {{ item.count }} )</v-tab
                     >
@@ -31,11 +33,12 @@
                                         <v-text-field
                                             type="text"
                                             placeholder="Search in scenarios"
-                                            append-icon="fas fa-search"
+                                            prepend-inner-icon=$vuetify.icons.ghd-search
                                             hide-details
                                             single-line
                                             v-model="searchMine"
                                             outline
+                                            class="ghd-text-field-border ghd-text-field search-icon-general"
                                         >
                                         </v-text-field>
                                     </v-flex>
@@ -54,6 +57,7 @@
                                 <v-data-table
                                     :headers="scenarioGridHeaders"
                                     :items="userScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
                                     :search="searchMine"
                                     calculate-widths
                                 >
@@ -193,10 +197,11 @@
                                             label="Search"
                                             placeholder="Search in scenarios"
                                             outline
-                                            append-icon="fas fa-search"
+                                            prepend-inner-icon=$vuetify.icons.ghd-search
                                             hide-details
                                             single-line
                                             v-model="searchShared"
+                                            class="ghd-text-field-border ghd-text-field search-icon-general"
                                         >
                                         </v-text-field>
                                     </v-flex>
@@ -204,6 +209,7 @@
                                 <v-data-table
                                     :headers="scenarioGridHeaders"
                                     :items="sharedScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
                                     :search="searchShared"
                                 >
                                     <template slot="items" slot-scope="props">
@@ -435,6 +441,8 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileDownload from 'js-file-download';
 import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
+import GhdStarSvg from '@/shared/icons/GhdStarSvg.vue';
+import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
 
 @Component({
     components: {
@@ -450,7 +458,9 @@ import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExpor
         ShareScenarioDialog,
         ShowAggregationDialog,
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        Alert
+        Alert,
+        GhdShareSvg,
+        GhdStarSvg
     },
 })
 export default class Scenarios extends Vue {
@@ -710,7 +720,7 @@ export default class Scenarios extends Vue {
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
-                icon: require("../../../public/icons/ico-criteria-deactive.svg"),
+                icon: require("../../../public/icons/committed-projects.svg"),
             },
             {
                 title: 'Clone',
@@ -730,8 +740,8 @@ export default class Scenarios extends Vue {
             icon: require("../../../public/icons/share-geometric.svg"),
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: 'star', count: 0 },
-            { name: 'Shared with me', icon: 'share', count: 0 },
+            { name: 'My scenarios', icon: require("../../../public/icons/star-empty.svg"), count: 0 },
+            { name: 'Shared with me', icon: require("../../../public/icons/share-empty.svg"), count: 0 },
         );
         this.tab = 'My scenarios';
     }
@@ -1148,5 +1158,12 @@ export default class Scenarios extends Vue {
 }
 .header-border {
   border-bottom: 2px solid black;
+}
+
+.v-tabs__item--active .icon-selected-tab{
+    fill:#777777
+}
+.icon-selected-tab{
+    fill:#2A578D
 }
 </style>

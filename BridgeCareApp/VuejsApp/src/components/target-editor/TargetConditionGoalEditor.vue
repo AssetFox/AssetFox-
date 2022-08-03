@@ -10,6 +10,7 @@
                                 <v-select
                                     class="ghd-select ghd-text-field ghd-text-field-border"
                                     :items="librarySelectItems"
+                                    append-icon=$vuetify.icons.ghd-down
                                     outline
                                     v-model="librarySelectItemValue"
                                     outlined
@@ -57,6 +58,7 @@
             <div class="targets-data-table">
                 <v-data-table
                     :headers="targetConditionGoalGridHeaders"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     :items="targetConditionGoalGridData"                    
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
@@ -131,6 +133,7 @@
                                         <v-select
                                             v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
+                                            append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
                                             v-model="props.item.attribute"
                                             :rules="[

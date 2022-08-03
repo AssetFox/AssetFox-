@@ -4,6 +4,7 @@
             <div class='consequences-data-table'>
                 <v-data-table :headers='consequencesGridHeaders' :items='consequencesGridData'
                               class='elevation-1 fixed-header v-table__overflow'
+                              sort-icon=$vuetify.icons.ghd-table-sort
                               hide-actions>
                     <template slot='items' slot-scope='props'>
                         <td v-for='header in consequencesGridHeaders'>
@@ -20,6 +21,7 @@
                                               :rules="[rules['treatmentRules'].hasChangeValueOrEquation(props.item.changeValue, props.item.equation.expression)]" />
                                 <template slot='input'>
                                     <v-select v-if="header.value === 'attribute'" :items='attributeSelectItems'
+                                             append-icon=$vuetify.icons.ghd-down
                                               label='Edit'
                                               v-model='props.item.attribute'
                                               :rules="[rules['generalRules'].valueIsNotEmpty]" />

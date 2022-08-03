@@ -27,6 +27,7 @@
                                     <BudgetPrioritySvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
                                     <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
                                     <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
+                                    <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -101,6 +102,7 @@ import RemainingLifeLimitSvg from '@/shared/icons/RemainingLifeLimitSvg.vue';
 import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
 import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
 import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
+import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 
 @Component({
     components: {
@@ -115,7 +117,8 @@ import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
         CashFlowSvg,
         BudgetPrioritySvg,
         AnalysisMethodSvg,
-        CalculatedAttributeSvg
+        CalculatedAttributeSvg,
+        CommittedProjectSvg
     },
 })
 export default class EditScenario extends Vue {

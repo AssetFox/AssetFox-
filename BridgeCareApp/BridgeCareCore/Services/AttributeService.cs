@@ -31,7 +31,7 @@ namespace BridgeCareCore.Services
                 {
                     Attribute = new AttributeEntity
                     {
-                        Name = aggregatedResult.Attribute.Name
+                        Name = aggregatedResult.Attribute.Name, DataType = aggregatedResult.Attribute.DataType
                     },
                     NumericValue = aggregatedResult.NumericValue,
                     TextValue = aggregatedResult.TextValue,
@@ -42,49 +42,38 @@ namespace BridgeCareCore.Services
                 .Select(keyValuePair =>
                 {
                     var values = new List<string>();
+                    var dtypes = new List<string>();
                     if (keyValuePair.Value.All(aggregatedResultEntity =>
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.NumericValue.HasValue)
                             .DistinctBy(_ => _.NumericValue).Select(_ => _.NumericValue!.Value.ToString()).ToList();
+                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.DataType == "NUMBER").DistinctBy(_ => _.Attribute.DataType).Select(_ => _.Attribute.DataType!).ToList();
                     }
                     if (keyValuePair.Value.All(aggregatedResultEntity =>
                         aggregatedResultEntity.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
                     {
                         values = keyValuePair.Value.Where(_ => _.TextValue != null)
                             .DistinctBy(_ => _.TextValue).Select(_ => _.TextValue).ToList();
+                        dtypes = keyValuePair.Value.Where(_ => _.Attribute.DataType == "NUMBER").DistinctBy(_ => _.Attribute.DataType).Select(_ => _.Attribute.DataType).ToList();
                     }
                     return new AttributeSelectValuesResult
                     {
                         Attribute = keyValuePair.Key,
-                        Values = !HasAlphaValues(values)
-                        Values = values.Count > 100
+                        //Values = values.Count > 100
+                        Values = dtypes.Count > 0
                             ? new List<string>()
                             : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
-                            : !HasAlphaValues(values)
-                            : values.Count > 100
-                                ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
+ //                           : values.Count > 100
+                            : dtypes.Count > 0
+                                ? $"Values for attribute {keyValuePair.Key} is a number; use text input"
                                 : "Success",
-                        ResultType = !values.Any() || !HasAlphaValues(values) ? "warning" : "success"
+                        ResultType = !values.Any() ? "warning" : "success"
                     };
                 }).ToList();
         }
-        // Check list of values and determine
-        // if alphabetical characters are in the
-        // list.
-        public bool HasAlphaValues(List<string> vals)
-        {
-            bool found = false;
-
-            foreach (string val in vals)
-            {
-                Regex rg = new Regex(@"^[a-zA-Z\s,]*$");
-                found = rg.IsMatch(val);
-            }
-            return found;
-
         public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)
         {
             var result = new AttributeDTO

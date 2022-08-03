@@ -15,6 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int Year { get; set; }
 
+        public string Category { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
 
         public virtual ScenarioBudgetEntity ScenarioBudget { get; set; }

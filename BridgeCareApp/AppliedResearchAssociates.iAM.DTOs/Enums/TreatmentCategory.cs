@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace AppliedResearchAssociates.iAM.Analysis
+﻿namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
     public enum TreatmentCategory
     {

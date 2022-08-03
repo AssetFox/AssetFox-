@@ -11,6 +11,9 @@ using EFCore.BulkExtensions;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -125,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             );
                         }
 
-                        if (attribute is TextAttribute textAttribute)
+                        if (attribute is Analysis.TextAttribute textAttribute)
                         {
                             textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple.Add(
                                 (_.Id, attributeIdPerName[textAttribute.Name]), _.GetHistory(textAttribute)
@@ -183,5 +186,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(maintainableAssetLocationEntities, _unitOfWork.UserEntity?.Id);
         }
+
+        public bool CheckIfKeyAttributeValueExists(Guid networkId, string attributeValue)
+        {
+            var network = _unitOfWork.Context.Network.Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
+            if (network == null)
+                return false;
+            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            if (attrEntity == null)
+                return false;
+            
+
+            if (attrEntity.DataType == "NUMBER")
+                return  _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .Any(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue);
+            else
+                return _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .Any(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue);
+        }
+
+        public MaintainableAsset GetMaintainableAssetByKeyAttribute(Guid networkId, string attributeValue)
+        {
+            var network = _unitOfWork.Context.Network.Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
+            if (network == null)
+                return null;
+            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            if (attrEntity == null)
+                return null;
+
+
+            var asset = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue)?.MaintainableAsset.ToDomain() :
+                    _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
+                    .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue)?.MaintainableAsset.ToDomain();
+            return asset;
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget

@@ -9,15 +9,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class SimulationYearDetailEntity: BaseEntity
     {
-        public Guid Id { get; set; }
+        public SimulationYearDetailEntity()
+        {
+
+        }
         public Guid SimulationOutputId { get; set; }
         public virtual SimulationOutputEntity SimulationOutput { get; set; }
         public double ConditionOfNetwork { get; set; }
         public int Year { get; set; }
-        //        public List<BudgetDetail> Budgets { get; } = new List<BudgetDetail>();
-        //public List<DeficientConditionGoalDetail> DeficientConditionGoals { get; } = new List<DeficientConditionGoalDetail>();
+        public ICollection<BudgetDetailEntity> Budgets { get; set; } = new HashSet<BudgetDetailEntity>();
+        public ICollection<DeficientConditionGoalDetailEntity> DeficientConditionGoals { get; } = new HashSet<DeficientConditionGoalDetailEntity>();
 
-        //public List<AssetDetail> Assets { get; } = new List<AssetDetail>();
+        public ICollection<AssetDetailEntity> Assets { get; } = new HashSet<AssetDetailEntity>();
 
         //public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
 

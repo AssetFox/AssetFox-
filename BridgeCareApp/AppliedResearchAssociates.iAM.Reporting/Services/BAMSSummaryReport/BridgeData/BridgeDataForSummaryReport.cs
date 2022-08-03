@@ -34,10 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         public BridgeDataForSummaryReport()
         {
             _highlightWorkDoneCells = new HighlightWorkDoneCells();
-            if (_highlightWorkDoneCells == null) { throw new ArgumentNullException(nameof(_highlightWorkDoneCells)); }
-
             _summaryReportHelper = new SummaryReportHelper();
-            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
@@ -144,12 +141,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         _nonNhsPoorOnPerYear.Add(yearlySectionData.Year, 0);
                     }
 
-                    bool isNHS = int.TryParse(section.ValuePerTextAttribute["NHS_IND"], out var numericValue) && numericValue > 0;
+                    bool isNHS = int.TryParse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND"), out var numericValue) && numericValue > 0;
 
                     int nhsOrNonPoorOnCount = isNHS ? _nhsPoorOnPerYear[yearlySectionData.Year] : _nonNhsPoorOnPerYear[yearlySectionData.Year];
 
                     Dictionary<string, int> bpnPoorOnDictionary = _bpnPoorOnPerYear[yearlySectionData.Year];
-                    var busPlanNetwork = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
+                    var busPlanNetwork = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
                     int bpnPoorOnCount;
                     // Create/Update BPN info for this Section/Year
                     if (!bpnPoorOnDictionary.ContainsKey(busPlanNetwork))
@@ -162,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         bpnPoorOnCount = bpnPoorOnDictionary[busPlanNetwork];
                     }
 
-                    var thisYrMinc = section.ValuePerNumericAttribute["MINCOND"];
+                    var thisYrMinc = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "MINCOND");
                     // poor on off Rate
                     var prevYrMinc = 0.0;
                     if (index == 1)
@@ -181,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         previousYearCause = prevYearSection.TreatmentCause;
                         previousYearTreatment = prevYearSection.AppliedTreatment;
                     }
-                    setColor((int)section.ValuePerNumericAttribute["PARALLEL"], section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
+                    setColor((int)_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "PARALLEL"), section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
                     // Work done in a year
@@ -388,7 +385,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
             var minCActionCallDecider = MinCValue.minOfCulvDeckSubSuper;
-            int.TryParse(selectedSection.ValuePerTextAttribute["FAMILY_ID"], out var familyId);
+            int.TryParse(_summaryReportHelper.checkAndGetValue<string>(selectedSection.ValuePerTextAttribute, "FAMILY_ID"), out var familyId);
             var familyIdLessThanEleven = familyId < 11;
             if (familyId > 10)
             {
@@ -405,14 +402,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             else
             {
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["DECK_SEEDED"];
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUP_SEEDED"];
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["SUB_SEEDED"];
+                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "DECK_SEEDED");
+                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_SEEDED");
+                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_SEEDED");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 2].Value = (int)selectedSection.ValuePerNumericAttribute["DECK_DURATION_N"];
-                worksheet.Cells[row, column + 3].Value = (int)selectedSection.ValuePerNumericAttribute["SUP_DURATION_N"];
-                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["SUB_DURATION_N"];
+                worksheet.Cells[row, column + 2].Value = (int)_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "DECK_DURATION_N");
+                worksheet.Cells[row, column + 3].Value = (int)_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUP_DURATION_N");
+                worksheet.Cells[row, column + 4].Value = (int)_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_DURATION_N");
             }
             if (familyIdLessThanEleven)
             {
@@ -430,10 +427,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             else
             {
-                worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["CULV_SEEDED"];
+                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "CULV_SEEDED");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
-                worksheet.Cells[row, column + 4].Value = (int)selectedSection.ValuePerNumericAttribute["CULV_DURATION_N"];
+                worksheet.Cells[row, column + 4].Value = (int)_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "CULV_DURATION_N");
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column + 4]);
             }
             column += 4; // this will take us to "Min cond" column
@@ -443,12 +440,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.SetCustomFormat(worksheet.Cells[row, column], ExcelHelperCellFormat.DecimalPrecision3);
             var minCondColumn = column;
 
-            if (selectedSection.ValuePerNumericAttribute["P3"] > 0 && selectedSection.ValuePerNumericAttribute["MINCOND"] < 5)
+            if (_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "P3") > 0 && _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5)
             {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
                 ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
-            worksheet.Cells[row, ++column].Value = selectedSection.ValuePerNumericAttribute["MINCOND"] < 5 ? "Y" : "N"; //poor
+            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? "Y" : "N"; //poor
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             if (row % 2 == 0)
@@ -457,7 +454,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             // Setting color of MinCond over here, to avoid Color.LightGray overriding it
-            if (selectedSection.ValuePerNumericAttribute["MINCOND"] <= 3.5)
+            if (_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") <= 3.5)
             {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, minCondColumn], Color.FromArgb(112, 48, 160));
                 ExcelHelper.SetTextColor(worksheet.Cells[row, minCondColumn], Color.White);
@@ -790,7 +787,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private int EnterMinDeckSuperSub(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
-            var minValue = Math.Min(numericAttribute["DECK_SEEDED"], Math.Min(numericAttribute["SUP_SEEDED"], numericAttribute["SUB_SEEDED"]));
+            var minValue = Math.Min(_summaryReportHelper.checkAndGetValue<double>(numericAttribute, "DECK_SEEDED"),
+                           Math.Min(_summaryReportHelper.checkAndGetValue<double>(numericAttribute, "SUP_SEEDED")
+                                    , _summaryReportHelper.checkAndGetValue<double>(numericAttribute, "SUP_SEEDED")));
             worksheet.Cells[row, ++column].Value = minValue;
             numericAttribute["MINCOND"] = minValue;
             return column;
@@ -798,7 +797,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private int EnterMinDeckSuperSubCulv(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {
-            worksheet.Cells[row, ++column].Value = numericAttribute["MINCOND"];
+            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(numericAttribute, "MINCOND");
             return column;
         }
 

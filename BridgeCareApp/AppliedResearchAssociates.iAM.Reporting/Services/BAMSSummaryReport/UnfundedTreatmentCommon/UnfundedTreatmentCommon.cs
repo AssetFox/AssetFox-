@@ -19,7 +19,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         public UnfundedTreatmentCommon()
         {
             _summaryReportHelper = new SummaryReportHelper();
-            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
         }
 
         public void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment)
@@ -27,27 +26,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["DISTRICT"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["COUNTY"];
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-            var deckArea = section.ValuePerNumericAttribute["DECK_AREA"];
+            var deckArea = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA");
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["LENGTH"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["BUS_PLAN_NETWORK"];
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["MPO_NAME"];
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
 
-            var functionalClassAbbr = section.ValuePerTextAttribute["FUNC_CLASS"];
+            var functionalClassAbbr = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FUNC_CLASS");
             var functionalClassDescription = _summaryReportHelper.FullFunctionalClassDescription(functionalClassAbbr);
             worksheet.Cells[row, columnNo++].Value = functionalClassDescription;
 
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["NHS_IND"] == "0" ? "N" : "Y";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerTextAttribute["INTERSTATE"];
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "INTERSTATE");
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.00";
-            worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["RISK_SCORE"];
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N";
 
@@ -60,25 +59,25 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             worksheet.Cells[row, columnNo++].Value = Year;
 
-            var familyId = int.Parse(section.ValuePerTextAttribute["FAMILY_ID"]);
+            var familyId = int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
             if (familyId < 11)
             {
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_SEEDED"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["DECK_DURATION_N"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_DURATION_N");
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUP_DURATION_N"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
-                worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["SUB_DURATION_N"];
+                worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
 
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // CULV_DURATION_N
@@ -179,13 +178,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         {
             var untreatedSections =
                     simulationYearDetail.Assets.Where(
-                        sect => sect.TreatmentCause == TreatmentCause.NoSelection
+                        section => section.TreatmentCause == TreatmentCause.NoSelection
                         &&
-                        (!string.IsNullOrEmpty(sect.ValuePerTextAttribute["NHS_IND"]) && int.Parse(sect.ValuePerTextAttribute["NHS_IND"]) == 1)
+                        (!string.IsNullOrEmpty(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
                         ||
-                        sect.ValuePerNumericAttribute["DECK_AREA"] > 28500
+                        _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
                         &&
-                        sect.TreatmentOptions.Count > 0
+                        section.TreatmentOptions.Count > 0
                         ).ToList();
             return untreatedSections;
         }

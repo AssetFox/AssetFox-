@@ -63,14 +63,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             //var countForCompletedCommittedProject = new Dictionary<int, Dictionary<string, int>>();
 
             FillDataToUseInExcel(reportOutputData, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear); //, yearlyCostCommittedProj, countForCompletedProject, countForCompletedCommittedProject);
+            var workTypeTotals = CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 
 
             //var costPerTreatmentPerYear = new Dictionary<int, Dictionary<string, decimal>>();
-            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
+            _costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears, yearlyBudgetAmount, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals);
 
             //var segmentMilesPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>>();
 
-            _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments);
+            _treatmentsWorkSummary.FillTreatmentsWorkSummarySections(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear, simulationTreatments, workTypeTotals);
 
             _iriConditionSummary.FillIriConditionSummarySection(worksheet, currentCell, simulationYears);
 
@@ -84,6 +85,49 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         #region Private methods
+
+
+        Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+            )
+        {
+            var workTypeTotals = new Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>>();
+
+            foreach (var yearlyValues in costAndLengthPerTreatmentPerYear)
+            {
+                foreach (var treatment in simulationTreatments)
+                {
+                    decimal cost = 0;
+                    int length = 0;
+
+                    yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
+                    cost = costAndLength.treatmentCost;
+                    length = costAndLength.length;
+
+                    if (!workTypeTotals.ContainsKey(treatment.Category))
+                    {
+                        workTypeTotals.Add(treatment.Category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
+                        {
+                            { yearlyValues.Key, (cost, length) }
+                        });
+                    }
+                    else
+                    {
+                        if (!workTypeTotals[treatment.Category].ContainsKey(yearlyValues.Key))
+                        {
+                            workTypeTotals[treatment.Category].Add(yearlyValues.Key, (0, 0));
+                        }
+                        var value = workTypeTotals[treatment.Category][yearlyValues.Key];
+                        value.treatmentCost += cost;
+                        value.length += length;
+                        workTypeTotals[treatment.Category][yearlyValues.Key] = value;
+                    }
+                }
+            }
+            return workTypeTotals;
+        }
+
 
         // TODO: private methods are direct cut/paste from BridgeWorkSummary; refactor/delete as necessary
         private void FillDataToUseInExcel(

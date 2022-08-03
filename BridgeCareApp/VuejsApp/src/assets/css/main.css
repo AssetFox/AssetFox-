@@ -377,6 +377,31 @@ v-list-item.ghd-control-text {
     color: #FFFFFF !important;
 }
 
+.ghd-navigation-list .v-icon {
+    background-color: #FFFFFF !important;
+    color: #999999 ! important;
+}
+
+.ghd-navigation-rawdata-list .primary--text {
+    background-color: #FFFFFF !important;
+    color: black !important;
+}
+
+/* .ghd-navigation-rawdata-list {
+    background-color: #FFFFFF !important;
+    color: #999999 !important;
+}
+
+.ghd-navigation-rawdata-list .primary--text .sidebar-icon .v-icon {
+    background-color: #FFFFFF !important;
+    color: #999999 ! important;
+}
+
+.ghd-navigation-rawdata-list .sidebar-icon .v-icon {
+    background-color: #FFFFFF !important;
+    color: #999999 ! important;
+} */
+
 .ghd-dialog {
     padding:30px !important;
 }
@@ -401,12 +426,6 @@ h3.ghd-dialog {
     padding-left:0px !important;
     padding:0px !important;
 }
-
-.ghd-navigation-list .v-icon {
-    background-color: #FFFFFF !important;
-    color: #999999 ! important;
-}
-
 
 .edit-icon, .plus-icon {
     color: forestgreen !important;
@@ -582,6 +601,14 @@ table.v-table tbody td input {
     margin-bottom: -4px !important;
 }
 
+.ghd-sidebar-raw-data{
+    position: absolute;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border: 2px solid #EEEEEE !important;
+    max-height: 100%;
+}
+
 .ghd-sidebar-libary{
     position: absolute;
     max-height: 468px;
@@ -662,6 +689,15 @@ display: none !important;
     font-family: 'Montserrat', sans-serif !important;
     font-size: 18px !important;
     font-weight: 500 !important;
+}
+
+.sharing label {
+    padding-top: 0.5em;
+}
+
+.sharing {
+    padding-top: 0;
+    margin: 0;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');

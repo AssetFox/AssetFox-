@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.Reporting;
-using BridgeCareCore.Hubs;
-using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Logging;
-using BridgeCareCore.Services;
+using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.StartupExtension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 
 namespace BridgeCareCore
 {
@@ -73,15 +75,24 @@ namespace BridgeCareCore
                 sqlServerOptions => sqlServerOptions.CommandTimeout(1800))
                 );
 
-            // Setup reporting
+            SetupReporting(services);
             var reportLookup = new Dictionary<string, Type>();
-            reportLookup.Add("HelloWorld", typeof(HelloWorldReport));
-            reportLookup.Add("InventoryLookup", typeof(InventoryReport));
-            reportLookup.Add("ScenarioOutput", typeof(ScenarioOutputReport));
-            reportLookup.Add("BAMSSummaryReport", typeof(BAMSSummaryReport));
 
-            services.AddSingleton(service => new ReportLookupLibrary(reportLookup));
+            reportLookup.Add("PAMSSummaryReport", typeof(PAMSSummaryReport));
+
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
+            services.AddScoped<IAggregationService, AggregationService>();
+        }
+
+        private void SetupReporting(IServiceCollection services)
+        {
+            var reportFactoryList = new List<IReportFactory>();
+            reportFactoryList.Add(new HelloWorldReportFactory());
+            reportFactoryList.Add(new InventoryReportFactory());
+            reportFactoryList.Add(new BAMSSummaryReportFactory());
+            reportFactoryList.Add(new ScenarioOutputReportFactory());
+            reportFactoryList.Add(new PAMSSummaryReportFactory());
+            services.AddSingleton<IReportLookupLibrary>(service => new ReportLookupLibrary(reportFactoryList));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

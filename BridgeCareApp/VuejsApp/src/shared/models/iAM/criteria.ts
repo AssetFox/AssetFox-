@@ -41,6 +41,7 @@ export interface CriterionLibrary {
 export interface CriteriaEditorData {
     mergedCriteriaExpression: string | null;
     isLibraryContext: boolean;
+    networkId: string;
 }
 
 export interface CriteriaEditorResult {
@@ -65,4 +66,5 @@ export const emptyCriterionLibrary: CriterionLibrary = {
 export const emptyCriteriaEditorData: CriteriaEditorData = {
     mergedCriteriaExpression: '',
     isLibraryContext: false,
+    networkId: getBlankGuid()
 };

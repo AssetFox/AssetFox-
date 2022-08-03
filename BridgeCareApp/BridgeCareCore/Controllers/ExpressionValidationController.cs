@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
-using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -50,7 +50,25 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() =>
-                    _expressionValidationService.ValidateCriterion(model.Expression, model.CurrentUserCriteriaFilter));
+                    _expressionValidationService.ValidateCriterion(model.Expression, model.CurrentUserCriteriaFilter, model.NetworkId));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetCriterionValidationResultNoCount")]
+        [Authorize]
+        public async Task<IActionResult> GetCriterionValidationResultNoCount([FromBody] ValidationParameter model)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                    _expressionValidationService.ValidateCriterionWithoutResults(model.Expression, model.CurrentUserCriteriaFilter));
                 return Ok(result);
             }
             catch (Exception e)

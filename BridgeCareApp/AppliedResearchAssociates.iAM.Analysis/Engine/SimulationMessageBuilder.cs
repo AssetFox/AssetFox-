@@ -12,18 +12,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public string MessageDetail { get; }
 
-        public Guid? SectionId { get; set; }
+        public Guid? AssetId { get; set; }
 
-        public string SectionName { get; set; }
+        public string AssetName { get; set; }
 
         public override string ToString()
         {
-            var message = $"{MessageDetail} [Item:{getNameText(ItemName)}{getIdText(ItemId)}{getSectionPart()}]";
+            var message = $"{MessageDetail} [Item:{getNameText(ItemName)}{getIdText(ItemId)}{getAssetPart()}]";
             return message;
 
             string getNameText(string name) => $" \"{name ?? "n/a"}\"";
             string getIdText(Guid? id) => id.HasValue ? $" ({id})" : "";
-            string getSectionPart() => SectionName is object || SectionId.HasValue ? $", Section:{getNameText(SectionName)}{getIdText(SectionId)}" : "";
+            string getAssetPart() => AssetName is object || AssetId.HasValue ? $", Asset:{getNameText(AssetName)}{getIdText(AssetId)}" : "";
         }
     }
 }

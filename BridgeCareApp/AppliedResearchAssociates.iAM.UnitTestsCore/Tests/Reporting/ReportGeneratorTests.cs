@@ -7,6 +7,8 @@ using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Reporting;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -18,26 +20,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         private ReportLookupLibrary _testReportLibrary;
         private UnitOfDataPersistenceWork _testRepo;
         private DictionaryBasedReportGenerator _generator;
+        private TestHelper _testHelper => TestHelper.Instance;
 
         public ReportGeneratorTests()
         {
             var mockedContext = new Mock<IAMContext>();
             var testReportIndexList = TestDataForReportIndex.SimpleRepo().AsQueryable();
-
-            // From https://docs.microsoft.com/en-us/ef/ef6/fundamentals/testing/mocking?redirectedfrom=MSDN
-            var mockedReportIndexSet = new Mock<DbSet<ReportIndexEntity>>();
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Provider).Returns(testReportIndexList.Provider);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.Expression).Returns(testReportIndexList.Expression);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.ElementType).Returns(testReportIndexList.ElementType);
-            mockedReportIndexSet.As<IQueryable<ReportIndexEntity>>().Setup(_ => _.GetEnumerator()).Returns(testReportIndexList.GetEnumerator());
-
-            mockedContext.Setup(_ => _.ReportIndex).Returns(mockedReportIndexSet.Object);
+            var mockedReportIndexSet = MockedContextBuilder.AddDataSet(mockedContext, _ => _.ReportIndex, testReportIndexList);
             var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
             _testRepo = mockedRepo;
 
             _testReportLibrary = new ReportLookupLibrary(TestDataForReportIndex.SimpleReportLibrary());
 
-            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary);
+            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary, _testHelper.MockHubService.Object);
         }
 
         [Fact]
@@ -71,21 +66,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         }
 
         [Fact]
-        public async Task GeneeratorReturnsFailureReportWhenReportIsMissingProperConstructor()
-        {
-            // Arrange
-            string badReport = "Bad Report";
-
-            // Act
-            IReport report = await _generator.Generate(badReport);
-
-            // Assert
-            Assert.Equal(ReportType.HTML, report.Type);
-            Assert.Equal("Failure Report", report.ReportTypeName);
-            Assert.True(report.Errors.Count() > 0);
-        }
-
-        [Fact]
         public void GeneratorReturnsAllScenarioReports()
         {
             // Arrange
@@ -108,7 +88,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             var reportList = _generator.GetAllReportsForScenario(scenarioId);
 
             // Assert
-            Assert.Equal(0, reportList.Count());
+            Assert.Empty(reportList);
         }
 
         [Fact]

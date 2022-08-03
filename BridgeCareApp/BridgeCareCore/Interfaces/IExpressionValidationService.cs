@@ -1,3 +1,4 @@
+using System;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models.Validation;
 
@@ -8,7 +9,7 @@ namespace BridgeCareCore.Interfaces
         ValidationResult ValidateEquation(EquationValidationParameters model);
 
         CriterionValidationResult ValidateCriterion(string mergedCriteriaExpression,
-            UserCriteriaDTO currentUserCriteriaFilter);
+            UserCriteriaDTO currentUserCriteriaFilter, Guid networkId);
 
         CriterionValidationResult ValidateCriterionWithoutResults(string mergedCriteriaExpression,
             UserCriteriaDTO currentUserCriteriaFilter);

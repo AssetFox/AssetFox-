@@ -12,8 +12,9 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
             ConnectionType connectionType,
             string connectionString,
             bool isCalculated,
-            bool isAscending)
-            : base(id, name, "STRING", ruleType, command, connectionType, connectionString, isCalculated, isAscending) =>
+            bool isAscending,
+            Guid? dataSourceId)
+            : base(id, name, "STRING", ruleType, command, connectionType, connectionString, dataSourceId, isCalculated, isAscending) =>
             DefaultValue = defaultValue;
 
         public string DefaultValue { get; }

@@ -88,6 +88,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<CommittedProjectConsequenceEntity> CommittedProjectConsequence { get; set; }
 
+        public virtual DbSet<CommittedProjectLocationEntity> CommittedProjectLocation { get; set; }
+
         public virtual DbSet<CriterionLibraryEntity> CriterionLibrary { get; set; }
 
         public virtual DbSet<CriterionLibraryAnalysisMethodEntity> CriterionLibraryAnalysisMethod { get; set; }
@@ -131,8 +133,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<DeficientConditionGoalLibraryEntity> DeficientConditionGoalLibrary { get; set; }
 
         public virtual DbSet<EquationEntity> Equation { get; set; }
-
-        public virtual DbSet<FacilityEntity> Facility { get; set; }
+        public virtual DbSet<ExcelRawDataEntity> ExcelRawData { get; set; }
 
         public virtual DbSet<InvestmentPlanEntity> InvestmentPlan { get; set; }
 
@@ -141,6 +142,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<MaintainableAssetLocationEntity> MaintainableAssetLocation { get; set; }
 
         public virtual DbSet<NetworkEntity> Network { get; set; }
+
+        public virtual DbSet<NetworkAttributeEntity> NetworkAttribute { get; set; }
 
         public virtual DbSet<PerformanceCurveEntity> PerformanceCurve { get; set; }
 
@@ -154,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<RemainingLifeLimitLibraryEntity> RemainingLifeLimitLibrary { get; set; }
 
-        public virtual DbSet<SectionEntity> Section { get; set; }
+        public virtual DbSet<AnalysisMaintainableAssetEntity> AnalysisMaintainableAsset { get; set; }
 
         public virtual DbSet<SimulationEntity> Simulation { get; set; }
 
@@ -603,10 +606,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.HasIndex(e => e.SimulationId);
 
-                entity.HasIndex(e => e.ScenarioBudgetId);
-
-                entity.HasIndex(e => e.MaintainableAssetId);
-
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.ShadowForAnyTreatment).IsRequired();
@@ -619,11 +618,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.MaintainableAsset)
-                    .WithMany(p => p.CommittedProjects)
-                    .HasForeignKey(d => d.MaintainableAssetId)
-                    .OnDelete(DeleteBehavior.Cascade);
-
                 entity.HasOne(d => d.ScenarioBudget)
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.ScenarioBudgetId)
@@ -633,6 +627,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .WithMany(p => p.CommittedProjects)
                     .HasForeignKey(d => d.SimulationId)
                     .OnDelete(DeleteBehavior.ClientCascade);
+
+                entity.HasOne(d => d.CommittedProjectLocation)
+                    .WithOne(p => p.CommittedProject)
+                    .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(d => d.CommittedProjectConsequences)
+                    .WithOne(p => p.CommittedProject)
+                    .HasForeignKey(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CommittedProjectLocationEntity>(entity =>
+            {
+                entity.HasIndex(e => e.CommittedProjectId).IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Discriminator).IsRequired();
+
+                entity.Property(e => e.LocationIdentifier).IsRequired();
+
+                entity.HasOne(d => d.CommittedProject)
+                    .WithOne(p => p.CommittedProjectLocation)
+                    .HasForeignKey<CommittedProjectLocationEntity>(d => d.CommittedProjectId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<CommittedProjectConsequenceEntity>(entity =>
@@ -1143,6 +1163,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<DataSourceEntity>(entity =>
             {
+                entity.HasIndex(e => e.Id);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
@@ -1151,6 +1172,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Secure).IsRequired();
 
+                entity.HasMany(d => d.ExcelRawData)
+                    .WithOne(p => p.DataSource)
+                    .HasForeignKey(d => d.DataSourceId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<DeficientConditionGoalEntity>(entity =>
@@ -1216,19 +1241,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Expression).IsRequired();
             });
 
-            modelBuilder.Entity<FacilityEntity>(entity =>
+
+            modelBuilder.Entity<ExcelRawDataEntity>(entity =>
             {
-                entity.HasIndex(e => e.NetworkId);
-
-                entity.Property(e => e.Name).IsRequired();
-
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.HasIndex(e => e.DataSourceId);
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.Network)
-                    .WithMany(p => p.Facilities)
-                    .HasForeignKey(d => d.NetworkId)
+                entity.Property(e => e.SerializedContent).IsRequired();
+
+                entity.Property(e => e.DataSourceId).IsRequired();
+
+                entity.HasOne(e => e.DataSource)
+                    .WithMany(ds => ds.ExcelRawData)
+                    .HasForeignKey(w => w.DataSourceId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
 
             modelBuilder.Entity<InvestmentPlanEntity>(entity =>
             {
@@ -1283,6 +1312,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Name).IsRequired();
+
+                entity.Property(e => e.KeyAttributeId).IsRequired();
+            });
+
+            modelBuilder.Entity<NetworkAttributeEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.AttributeId, e.NetworkId });
+
+                entity.Property(e => e.NetworkId).IsRequired();
+
+                entity.Property(e => e.AttributeId).IsRequired();
+
+                entity.HasOne(j => j.Network)
+                    .WithMany(n => n.AttributeJoins)
+                    .HasForeignKey(j => j.NetworkId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<PerformanceCurveEntity>(entity =>
@@ -1585,17 +1630,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
 
-            modelBuilder.Entity<SectionEntity>(entity =>
+            modelBuilder.Entity<AnalysisMaintainableAssetEntity>(entity =>
             {
-                entity.HasIndex(e => e.FacilityId);
+                entity.HasIndex(e => e.NetworkId);
 
                 entity.Property(e => e.Name).IsRequired();
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.HasOne(d => d.Facility)
-                    .WithMany(p => p.Sections)
-                    .HasForeignKey(d => d.FacilityId)
+                entity.HasOne(d => d.Network)
+                    .WithMany(p => p.AnalysisMaintainableAssets)
+                    .HasForeignKey(d => d.NetworkId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -1988,7 +2033,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Value).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.NumericAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);
@@ -2009,7 +2054,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Year).IsRequired();
 
-                entity.HasOne(d => d.Section)
+                entity.HasOne(d => d.AnalysisMaintainableAsset)
                     .WithMany(p => p.TextAttributeValueHistories)
                     .HasForeignKey(d => d.SectionId)
                     .OnDelete(DeleteBehavior.Cascade);

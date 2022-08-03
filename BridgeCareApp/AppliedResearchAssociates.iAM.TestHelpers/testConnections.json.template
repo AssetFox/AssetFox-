@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "BridgeCareConnex": "data source=xxxxxxx;initial catalog=IAMv2Test;persist security info=True;user id=xxxxx;password=xxxxxxxx;MultipleActiveResultSets=True;App=EntityFramework"
+  }
+}

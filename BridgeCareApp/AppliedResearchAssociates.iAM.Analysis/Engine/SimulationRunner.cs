@@ -3,6 +3,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
@@ -15,7 +17,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         public event EventHandler<SimulationLogEventArgs> SimulationLog;
 
-        public Simulation Simulation { get; }
+#if !DEBUG
+        private static int maxThreadsForSimulation = GetMaxThreadsForSimulation();
+#endif
+
+        public Simulation Simulation { get;  }
 
         public void HandleValidationFailures(ValidationResultBag simulationValidationResults)
         {
@@ -104,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 return applicablePriorities.AsEnumerable();
             });
 
-            CommittedProjectsPerSection = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Section);
+            CommittedProjectsPerAsset = Simulation.CommittedProjects.ToLookup(committedProject => committedProject.Asset);
             ConditionsPerBudget = Simulation.InvestmentPlan.BudgetConditions.ToLookup(budgetCondition => budgetCondition.Budget);
             CurvesPerAttribute = Simulation.PerformanceCurves.ToLookup(curve => curve.Attribute);
             NumberAttributeByName = Simulation.Network.Explorer.NumberAttributes.ToDictionary(attribute => attribute.Name, StringComparer.OrdinalIgnoreCase);
@@ -115,17 +121,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 treatment.SetConsequencesPerAttribute();
             }
 
-            SectionContexts = Simulation.Network.Sections
+            AssetContexts = Simulation.Network.Assets
 #if !DEBUG
-                .AsParallel()
+                .AsParallel().
+                WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
-                .Select(section => new SectionContext(section, this))
+                .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))
-                .ToSortedSet(SelectionComparer<SectionContext>.Create(context => context.Section.Id));
+                .ToSortedSet(SelectionComparer<AssetContext>.Create(context => context.Asset.Id));
 
-            if (SectionContexts.Count == 0)
+            if (AssetContexts.Count == 0)
             {
-                MessageBuilder = new SimulationMessageBuilder("Simulation filter passed no sections.")
+                MessageBuilder = new SimulationMessageBuilder("Simulation filter passed no assets.")
                 {
                     ItemName = Simulation.Name,
                     ItemId = Simulation.Id,
@@ -135,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 Send(logMessage);
             }
 
-            InParallel(SectionContexts, context => context.RollForward());
+            InParallel(AssetContexts, context => context.RollForward());
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 
@@ -173,8 +180,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             Simulation.ClearResults();
 
-            Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
-            Simulation.Results.InitialSectionSummaries.AddRange(SectionContexts.Select(context => context.SummaryDetail));
+            Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
+            Simulation.Results.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
@@ -185,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
 
-                InParallel(SectionContexts, context =>
+                InParallel(AssetContexts, context =>
                 {
                     context.ApplyTreatmentMetadataIfPending(year);
                     context.UnfixCalculatedFieldValues();
@@ -212,7 +219,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             return simulationValidationResults;
         }
 
-        internal ILookup<Section, CommittedProject> CommittedProjectsPerSection { get; private set; }
+        internal ILookup<AnalysisMaintainableAsset, CommittedProject> CommittedProjectsPerAsset { get; private set; }
 
         internal ILookup<NumberAttribute, PerformanceCurve> CurvesPerAttribute { get; private set; }
 
@@ -254,7 +261,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private Func<TreatmentOption, double> ObjectiveFunction;
 
-        private ICollection<SectionContext> SectionContexts;
+        private ICollection<AssetContext> AssetContexts;
 
         private IReadOnlyDictionary<CashFlowRule, SortedDictionary<decimal, CashFlowDistributionRule>> SortedDistributionRulesPerCashFlowRule;
 
@@ -281,7 +288,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 action(item);
             }
 #else
-            _ = System.Threading.Tasks.Parallel.ForEach(items, action);
+            _ = System.Threading.Tasks.Parallel.ForEach(items, new ParallelOptions { MaxDegreeOfParallelism = maxThreadsForSimulation }, action);
 #endif
         }
 
@@ -299,11 +306,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-        private ICollection<SectionContext> ApplyRequiredEvents(int year)
+        private ICollection<AssetContext> ApplyRequiredEvents(int year)
         {
-            var unhandledContexts = new List<SectionContext>();
+            var unhandledContexts = new List<AssetContext>();
 
-            foreach (var context in SectionContexts)
+            foreach (var context in AssetContexts)
             {
                 var yearIsScheduled = context.EventSchedule.TryGetValue(year, out var scheduledEvent);
 
@@ -402,9 +409,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             return ConditionGoalsEvaluator();
         }
 
-        private void ConsiderTreatmentOptions(IEnumerable<SectionContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)
+        private void ConsiderTreatmentOptions(IEnumerable<AssetContext> baselineContexts, IEnumerable<TreatmentOption> treatmentOptions, int year)
         {
-            var workingContextPerBaselineContext = baselineContexts.ToDictionary(_ => _, _ => new SectionContext(_));
+            var workingContextPerBaselineContext = baselineContexts.ToDictionary(_ => _, _ => new AssetContext(_));
 
             InParallel(workingContextPerBaselineContext, _ =>
             {
@@ -453,8 +460,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             {
                                 _ = workingContextPerBaselineContext.Remove(option.Context);
 
-                                _ = SectionContexts.Remove(option.Context);
-                                SectionContexts.Add(workingContext);
+                                _ = AssetContexts.Remove(option.Context);
+                                AssetContexts.Add(workingContext);
 
                                 workingContext.Detail.TreatmentCause = TreatmentCause.SelectedTreatment;
 
@@ -479,10 +486,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<SectionContext> contexts, int year)
+        private IReadOnlyCollection<TreatmentOption> GetBeneficialTreatmentOptionsInOptimalOrder(IEnumerable<AssetContext> contexts, int year)
         {
             var treatmentOptionsBag = new ConcurrentBag<TreatmentOption>();
-            void addTreatmentOptions(SectionContext context)
+            void addTreatmentOptions(AssetContext context)
             {
                 if (context.YearIsWithinShadowForAnyTreatment(year))
                 {
@@ -549,7 +556,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     }
 
                     context.Detail.TreatmentRejections.Add(new TreatmentRejectionDetail(treatment.Name, TreatmentRejectionReason.InvalidCost));
-                    var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Section, treatment, cost, context.SimulationRunner.Simulation.Id);
+                    var messageBuilder = SimulationLogMessageBuilders.InvalidTreatmentCost(context.Asset, treatment, cost, context.SimulationRunner.Simulation.Id);
                     Send(messageBuilder);
                     return true;
                 });
@@ -593,9 +600,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             foreach (var goal in Simulation.AnalysisMethod.DeficientConditionGoals)
             {
-                var goalContexts = SectionContexts
+                var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel()
+                    .AsParallel().
+                    WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -622,9 +630,10 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     continue;
                 }
 
-                var goalContexts = SectionContexts
+                var goalContexts = AssetContexts
 #if !DEBUG
-                    .AsParallel()
+                    .AsParallel().
+                    WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                     .Where(context => goal.Criterion.EvaluateOrDefault(context))
                     .ToArray();
@@ -677,13 +686,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             var yearDetail = Simulation.Results.Years.GetAdd(new SimulationYearDetail(year));
 
             yearDetail.Budgets.AddRange(BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
-            yearDetail.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(SectionContexts);
+            yearDetail.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
 
             RecordStatusOfConditionGoals(yearDetail);
 
-            InParallel(SectionContexts, context => context.CopyAttributeValuesToDetail());
-            yearDetail.Sections.AddRange(SectionContexts.Select(context => context.Detail));
-            InParallel(SectionContexts, context => context.ResetDetail());
+            InParallel(AssetContexts, context => context.CopyAttributeValuesToDetail());
+            yearDetail.Assets.AddRange(AssetContexts.Select(context => context.Detail));
+            InParallel(AssetContexts, context => context.ResetDetail());
 
             if (year < Simulation.InvestmentPlan.LastYearOfAnalysisPeriod)
             {
@@ -691,9 +700,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-        private CostCoverage TryToPayForTreatment(SectionContext sectionContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)
+        private CostCoverage TryToPayForTreatment(AssetContext assetContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)
         {
-            var treatmentCost = sectionContext.GetCostOfTreatment(treatment);
+            var treatmentCost = assetContext.GetCostOfTreatment(treatment);
 
             // This variable is updated as payment for the treatment is arranged.
             var remainingCost = (decimal)(treatmentCost * GetInflationFactor(year));
@@ -707,7 +716,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             if (treatment is CommittedProject)
             {
-                sectionContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
+                assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
                 var budgetUsageDetail = treatmentConsideration.BudgetUsages.Single(budgetUsage => budgetUsage.Status != BudgetUsageStatus.NotUsable);
                 budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
                 budgetUsageDetail.CoveredCost = (decimal)treatmentCost; // Cost is assumed to already include all appropriate adjustments, e.g. for inflation.
@@ -726,7 +735,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 }
 
                 var budgetConditions = ConditionsPerBudget[budgetContext.Budget];
-                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(sectionContext));
+                var budgetConditionIsMet = treatment is CommittedProject || budgetConditions.Count() == 0 || budgetConditions.Any(condition => condition.Criterion.EvaluateOrDefault(assetContext));
                 if (!budgetConditionIsMet)
                 {
                     budgetUsageDetail.Status = BudgetUsageStatus.ConditionNotMet;
@@ -744,7 +753,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                 Action scheduleCashFlowEvents = null;
 
-                var applicableCashFlowRules = Simulation.InvestmentPlan.CashFlowRules.Where(rule => rule.Criterion.EvaluateOrDefault(sectionContext));
+                var applicableCashFlowRules = Simulation.InvestmentPlan.CashFlowRules.Where(rule => rule.Criterion.EvaluateOrDefault(assetContext));
                 foreach (var cashFlowRule in applicableCashFlowRules)
                 {
                     var cashFlowConsideration = cashFlowConsiderations.GetAdd(new CashFlowConsiderationDetail(cashFlowRule.Name));
@@ -772,7 +781,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                             return ReasonAgainstCashFlow.LastYearOfCashFlowIsOutsideOfAnalysisPeriod;
                         }
 
-                        var scheduleIsBlocked = Static.RangeFromBounds(year + 1, lastYearOfCashFlow).Any(sectionContext.EventSchedule.ContainsKey);
+                        var scheduleIsBlocked = Static.RangeFromBounds(year + 1, lastYearOfCashFlow).Any(assetContext.EventSchedule.ContainsKey);
                         if (scheduleIsBlocked)
                         {
                             return ReasonAgainstCashFlow.FutureEventScheduleIsBlocked;
@@ -839,7 +848,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         }
 
                         considerationPerYear[0].CashFlowConsiderations.AddRange(cashFlowConsiderations);
-                        sectionContext.Detail.TreatmentConsiderations.Add(considerationPerYear[0]);
+                        assetContext.Detail.TreatmentConsiderations.Add(considerationPerYear[0]);
 
                         var progression = costPerYear.Zip(considerationPerYear, (cost, consideration) => new TreatmentProgress(treatment, consideration)).ToArray();
                         progression.Last().IsComplete = true;
@@ -853,7 +862,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                             foreach (var (yearProgress, yearOffset) in Zip.Short(progression, Static.Count()))
                             {
-                                sectionContext.EventSchedule.Add(year + yearOffset, yearProgress);
+                                assetContext.EventSchedule.Add(year + yearOffset, yearProgress);
                             }
                         };
 
@@ -871,7 +880,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             // At this point, no cash flow could be used. So try to pay the normal way.
 
             treatmentConsideration.CashFlowConsiderations.AddRange(cashFlowConsiderations);
-            sectionContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
+            assetContext.Detail.TreatmentConsiderations.Add(treatmentConsideration);
 
             var costAllocators = new List<Action>();
             void addCostAllocator(decimal cost, BudgetContext budgetContext)
@@ -946,6 +955,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             TargetConditionActuals = GetTargetConditionActuals(year);
             DeficientConditionActuals = GetDeficientConditionActuals();
+        }
+
+        private static int GetMaxThreadsForSimulation()
+        {
+            int processorCount = Environment.ProcessorCount;
+
+            if(processorCount >= 16)
+            {
+                return processorCount - 2;
+            }
+
+            return processorCount - 1;
         }
     }
 }

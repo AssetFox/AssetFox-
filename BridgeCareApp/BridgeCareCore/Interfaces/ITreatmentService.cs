@@ -6,9 +6,16 @@ namespace BridgeCareCore.Interfaces
 {
     public interface ITreatmentService
     {
-        FileInfoDTO GenerateExcelFile(Guid libraryId);
+        FileInfoDTO ExportLibraryTreatmentsExcelFile(Guid libraryId);
+
         TreatmentImportResultDTO ImportLibraryTreatmentsFile(
             Guid treatmentLibraryId,
             ExcelPackage excelPackage);
+
+        ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(
+            Guid simulationId,
+            ExcelPackage excelPackage);
+
+        FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId);
     }
 }

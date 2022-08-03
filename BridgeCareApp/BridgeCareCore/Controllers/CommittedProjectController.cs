@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +21,12 @@ using OfficeOpenXml;
 
 namespace BridgeCareCore.Controllers
 {
+    using CommittedProjectRetrieveMethod = Func<Guid, List<SectionCommittedProjectDTO>>;
     using CommittedProjectGetMethod = Func<Guid, FileInfoDTO>;
-    using CommittedProjectCreateMethod = Action<Guid, ExcelPackage, string, bool>;
-    using CommittedProjectDeleteMethod = Action<Guid>;
+    using CommittedProjectImportMethod = Action<Guid, ExcelPackage, string, bool>;
+    using CommittedProjectUpsertMethod = Action<List<SectionCommittedProjectDTO>>;
+    using CommittedProjectDeleteSingleMethod = Action<Guid>;
+    using CommittedProjectDeleteMultipleMethod = Action<List<Guid>>;
 
     [Route("api/[controller]")]
     [ApiController]
@@ -27,19 +34,44 @@ namespace BridgeCareCore.Controllers
     {
         private static ICommittedProjectService _committedProjectService;
 
+        private readonly IReadOnlyDictionary<string, CommittedProjectRetrieveMethod> _committedProjectRetrieveMethods;
         private readonly IReadOnlyDictionary<string, CommittedProjectGetMethod> _committedProjectExportMethods;
-        private readonly IReadOnlyDictionary<string, CommittedProjectCreateMethod> _committedProjectImportMethods;
-        private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMethod> _committedProjectDeleteMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectImportMethod> _committedProjectImportMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectUpsertMethod> _committedProjectUpsertMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectDeleteSingleMethod> _committedProjectDeleteSimulationProjectMethods;
+        private readonly IReadOnlyDictionary<string, CommittedProjectDeleteMultipleMethod> _committedProjectDeleteSpecificMethods;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
-            IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(
+            IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(
             esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _committedProjectService = committedProjectService ??
                                        throw new ArgumentNullException(nameof(committedProjectService));
+            _committedProjectRetrieveMethods = CreateRetrieveMethods();
             _committedProjectExportMethods = CreateExportMethods();
             _committedProjectImportMethods = CreateImportMethods();
-            _committedProjectDeleteMethods = CreateDeleteMethods();
+            _committedProjectUpsertMethods = CreateUpsertMethods();
+            _committedProjectDeleteSimulationProjectMethods = CreateDeleteSimulationProjectMethods();
+            _committedProjectDeleteSpecificMethods = CreateDeleteSpecificProjectMethods();
+        }
+
+        private Dictionary<string, CommittedProjectRetrieveMethod> CreateRetrieveMethods()
+        {
+            List<SectionCommittedProjectDTO> GetAny(Guid simulationId) => UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+
+            List<SectionCommittedProjectDTO> GetPermitted(Guid simulationId)
+            {
+                CheckUserSimulationReadAuthorization(simulationId);
+                return UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+            }
+
+            return new Dictionary<string, CommittedProjectRetrieveMethod>
+            {
+                [Role.Administrator] = GetAny,
+                [Role.DistrictEngineer] = GetPermitted,
+                [Role.Cwopa] = GetPermitted,
+                [Role.PlanningPartner] = GetPermitted
+            };
         }
 
         private Dictionary<string, CommittedProjectGetMethod> CreateExportMethods()
@@ -64,7 +96,7 @@ namespace BridgeCareCore.Controllers
             };
         }
 
-        private Dictionary<string, CommittedProjectCreateMethod> CreateImportMethods()
+        private Dictionary<string, CommittedProjectImportMethod> CreateImportMethods()
         {
             void CreateAny(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
             {
@@ -77,7 +109,7 @@ namespace BridgeCareCore.Controllers
                 _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
             }
 
-            return new Dictionary<string, CommittedProjectCreateMethod>
+            return new Dictionary<string, CommittedProjectImportMethod>
             {
                 [Role.Administrator] = CreateAny,
                 [Role.DistrictEngineer] = CreatePermitted,
@@ -86,11 +118,41 @@ namespace BridgeCareCore.Controllers
             };
         }
 
-        private Dictionary<string, CommittedProjectDeleteMethod> CreateDeleteMethods()
+        private Dictionary<string, CommittedProjectUpsertMethod> CreateUpsertMethods()
+        {
+            void UpsertAny(List<SectionCommittedProjectDTO> projects)
+            {
+                UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
+            }
+
+            void UpsertPermitted(List<SectionCommittedProjectDTO> projects)
+            {
+                var simulationIds = projects
+                    .Where(_ => _.SimulationId != null)
+                    .Select(_ => _.SimulationId)
+                    .Distinct();
+                foreach (var simulation in simulationIds)
+                {
+                    CheckUserSimulationModifyAuthorization(simulation);
+                }
+
+                UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
+            }
+
+            return new Dictionary<string, CommittedProjectUpsertMethod>
+            {
+                [Role.Administrator] = UpsertAny,
+                [Role.DistrictEngineer] = UpsertPermitted,
+                [Role.Cwopa] = UpsertPermitted,
+                [Role.PlanningPartner] = UpsertPermitted
+            };
+        }
+
+        private Dictionary<string, CommittedProjectDeleteSingleMethod> CreateDeleteSimulationProjectMethods()
         {
             void DeleteAny(Guid simulationId)
             {
-                UnitOfWork.CommittedProjectRepo.DeleteCommittedProjects(simulationId);
+                UnitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
             }
 
             void DeletePermitted(Guid simulationId)
@@ -99,7 +161,40 @@ namespace BridgeCareCore.Controllers
                 DeleteAny(simulationId);
             }
 
-            return new Dictionary<string, CommittedProjectDeleteMethod>
+            return new Dictionary<string, CommittedProjectDeleteSingleMethod>
+            {
+                [Role.Administrator] = DeleteAny,
+                [Role.DistrictEngineer] = DeletePermitted,
+                [Role.Cwopa] = DeletePermitted,
+                [Role.PlanningPartner] = DeletePermitted
+            };
+        }
+
+        private Dictionary<string, CommittedProjectDeleteMultipleMethod> CreateDeleteSpecificProjectMethods()
+        {
+            void DeleteAny(List<Guid> projectIds)
+            {
+                UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(projectIds);
+            }
+
+            void DeletePermitted(List<Guid> projectIds)
+            {
+                foreach (var project in projectIds)
+                {
+                    try
+                    {
+                        var simulationId = UnitOfWork.CommittedProjectRepo.GetSimulationId(project);
+                        CheckUserSimulationModifyAuthorization(simulationId);
+                    }
+                    catch (RowNotInTableException)
+                    {
+                        // Do nothing - project not found
+                    }
+                }
+                DeleteAny(projectIds);
+            }
+
+            return new Dictionary<string, CommittedProjectDeleteMultipleMethod>
             {
                 [Role.Administrator] = DeleteAny,
                 [Role.DistrictEngineer] = DeletePermitted,
@@ -142,17 +237,12 @@ namespace BridgeCareCore.Controllers
                 }
 
                 await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.BeginTransaction();
-                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackage, filename, applyNoTreatment);
-                    UnitOfWork.Commit();
-                });
+                    _committedProjectImportMethods[UserInfo.Role](simulationId, excelPackage, filename, applyNoTreatment));
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 return Unauthorized();
             }
             catch (Exception e)
@@ -184,30 +274,203 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
-        [Route("DeleteCommittedProjects/{simulationId}")]
+        [HttpPost]
+        [Route("ValidateAssetExistence/{brkeyValue}")]
         [Authorize]
-        public async Task<IActionResult> DeleteCommittedProjects(Guid simulationId)
+        public async Task<IActionResult> ValidateAssetExistence(NetworkDTO network, string brkeyValue)
+        {
+            try
+            {
+                var isValid = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    isValid = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValueExists(network.Id, brkeyValue);
+                });
+                return Ok(isValid);
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetTreatmetCost/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetTreatmetCost(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetValidConsequences/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetValidConsequences(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    return _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("FillTreatmentValues/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> FillTreatmentValues(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    dto.Consequences =  _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                    dto.Cost = _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                    var treatment = UnitOfWork.Context.ScenarioSelectableTreatment
+                        .FirstOrDefault(_ => _.Name == dto.Treatment && _.SimulationId == dto.SimulationId);
+                    if (treatment == null)
+                        return dto;
+                    dto.Category = (TreatmentCategory)treatment.Category;
+                    return dto;
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("CommittedProjectTemplate")]
+        [Authorize]
+        public async Task<IActionResult> GetCommittedProjectTemplate()
+        {
+            var result = await Task.Factory.StartNew(() => _committedProjectService.CreateCommittedProjectTemplate());
+            return Ok(result);
+        }
+
+        [HttpDelete]
+        [Route("DeleteSimulationCommittedProjects/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteSimulationCommittedProjects(Guid simulationId)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.BeginTransaction();
-                    _committedProjectDeleteMethods[UserInfo.Role](simulationId);
-                    UnitOfWork.Commit();
-                });
+                    _committedProjectDeleteSimulationProjectMethods[UserInfo.Role](simulationId));
 
                 return Ok();
             }
             catch (UnauthorizedAccessException)
             {
-                UnitOfWork.Rollback();
                 return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulation {simulationId}");
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("DeleteSpecificCommittedProjects")]
+        [Authorize]
+        public async Task<IActionResult> DeleteSpecificCommittedProjects(List<Guid> projectIds)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                    _committedProjectDeleteSpecificMethods[UserInfo.Role](projectIds));
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find the simulations referenced by the provided committed projects");
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetSectionCommittedProjects/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCommittedProjects(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                    _committedProjectRetrieveMethods[UserInfo.Role](simulationId));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulation {simulationId}");
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertSectionCommittedProjects")]
+        [Authorize]
+        public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                    _committedProjectUpsertMethods[UserInfo.Role](projects));
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulations matching the project description");
+            }
+            catch (Exception e)
+            {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
             }

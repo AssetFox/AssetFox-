@@ -34,9 +34,9 @@
                         outlined>
                         Run Scenario
                     </v-btn>
-                    <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
+                    <!-- <v-btn class="ghd-white-bg ghd-lt-gray ghd-button-text ghd-button-border" @click="showImportExportCommittedProjectsDialog = true" depressed block>
                         Committed Projects
-                    </v-btn>
+                    </v-btn> -->
                 </div>
             </v-card>
             <v-flex xs12 class="ghd-content">
@@ -166,7 +166,7 @@ export default class EditScenario extends Vue {
         },
         {
             tabName: 'Remaining Life Limit',
-            tabIcon: 'fas fa-business-time',
+            tabIcon: 'fas fa-battery-half',
             navigation: {
                 path: '/RemainingLifeLimitEditor/Scenario/',
             },
@@ -176,6 +176,13 @@ export default class EditScenario extends Vue {
             tabIcon: 'fas fa-money-bill-wave',
             navigation: {
                 path: '/CashFlowEditor/Scenario/',
+            },
+        },
+        {
+            tabName: 'Committed Projects',
+            tabIcon: 'fas fa-clipboard',
+            navigation: {
+                path: '/CommittedProjectsEditor/Scenario/',
             },
         },
     ];

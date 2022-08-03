@@ -1,14 +1,19 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -25,9 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public class TestHelper
     {
         private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
-        private static readonly Guid SimulationId = Guid.Parse("416ad546-0796-4889-9db4-9c11bbd6c50d");
-        private static readonly Guid CriterionLibraryId = Guid.Parse("47380dd4-8df8-46e2-9195-b7f786a4258a");
-        private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
 
@@ -37,8 +39,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
 
-        public Mock<IEsecSecurity> MockEsecSecurityAuthorized { get; }
-        public Mock<IEsecSecurity> MockEsecSecurityNotAuthorized { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityAdmin { get; }
+        public Mock<IEsecSecurity> MockEsecSecurityDBE { get; }
         public Mock<ITreatmentService> MockTreatmentService { get; }
         public ILog Logger { get; }
 
@@ -56,16 +58,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .AddJsonFile("testConnections.json")
                 .Build();
             MockTreatmentService = new Mock<ITreatmentService>();
-            MockEsecSecurityAuthorized = new Mock<IEsecSecurity>();
-            MockEsecSecurityAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+            MockEsecSecurityAdmin = new Mock<IEsecSecurity>();
+            MockEsecSecurityAdmin.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
                     Role = "PD-BAMS-Administrator",
                     Email = "pdstseseca5@pa.gov"
                 });
-            MockEsecSecurityNotAuthorized = new Mock<IEsecSecurity>();
-            MockEsecSecurityNotAuthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+            MockEsecSecurityDBE = new Mock<IEsecSecurity>();
+            MockEsecSecurityDBE.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
                     Name = "b-bamsadmin",
@@ -80,17 +82,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
 
             MockHubService = new Mock<HubService>(MockHubContext.Object);
-            var connectionString = Config.GetConnectionString("BridgeCareConnex");
+            var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
 
-            UnitOfWork.Context.Database.EnsureDeleted();
-            UnitOfWork.Context.Database.EnsureCreated();
+            DatabaseResetter.ResetDatabase(UnitOfWork);
         }
-                       
+
         private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
         public static TestHelper Instance
         {
@@ -98,13 +99,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 return lazy.Value;
             }
-        }        
+        }
+
+        private static readonly object HttpContextSetupLock = new object();
+        private static bool HttpContextHasBeenSetup = false;
 
         public void SetupDefaultHttpContext()
         {
-            var context = new DefaultHttpContext();
-            AddAuthorizationHeader(context);
-            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+            if (!HttpContextHasBeenSetup)
+            {
+                lock (HttpContextSetupLock) // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
+                {
+                    if (!HttpContextHasBeenSetup)
+                    {
+                        var context = new DefaultHttpContext();
+                        AddAuthorizationHeader(context);
+                        MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+                    }
+                }
+            }
         }
 
         public void AddAuthorizationHeader(DefaultHttpContext context) =>
@@ -116,62 +129,113 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Test Network"
         };
 
-        public SimulationEntity TestSimulation { get; } = new SimulationEntity
+        public SimulationEntity TestSimulation(Guid? id = null, string name = null)
         {
-            Id = SimulationId,
-            NetworkId = NetworkId,
-            Name = "Test Simulation",
-            NumberOfYearsOfTreatmentOutlook = 2
-        };
-
-        public CriterionLibraryEntity TestCriterionLibrary { get; } = new CriterionLibraryEntity
-        {
-            Id = CriterionLibraryId,
-            Name = "Test Criterion",
-            MergedCriteriaExpression = "Test Expression"
-        };
-
-        public UserEntity TestUser { get; } = new UserEntity
-        {
-            Id = UserId,
-            Username = "pdsystbamsusr02",
-            HasInventoryAccess = true
-        };
-
-        public virtual void CreateAttributes()
-        {
-            var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
-            UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+            var resolveName = name ?? RandomStrings.Length11();
+            var resolveId = id ?? Guid.NewGuid();
+            var returnValue = new SimulationEntity
+            {
+                Id = resolveId,
+                NetworkId = NetworkId,
+                Name = resolveName,
+                NumberOfYearsOfTreatmentOutlook = 2
+            };
+            return returnValue;
         }
 
-        public virtual void CreateNetwork()
+        public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
+        {
+            var resolvedId = id ?? Guid.NewGuid();
+            var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
+            var returnValue = new CriterionLibraryEntity
+            {
+                Id = resolvedId,
+                Name = resolvedName,
+                MergedCriteriaExpression = "Test Expression"
+            };
+            return returnValue;
+        }
+
+        private static bool AttributesHaveBeenCreated = false;
+        private static readonly object AttributeLock = new object();
+
+        public void CreateAttributes()
+        {
+            if (!AttributesHaveBeenCreated)
+            {
+                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
+                {
+                    if (!AttributesHaveBeenCreated)
+                    {
+                        SQLDataSourceDTO dataSourceToApply = null;
+                        if (!UnitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
+                        {
+                            dataSourceToApply = new SQLDataSourceDTO
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Test SQL DataSource",
+                                ConnectionString = Config.GetConnectionString("BridgeCareConnex")
+                            };
+                            UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
+                        }
+                        else
+                        {
+                            dataSourceToApply = (SQLDataSourceDTO)UnitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
+                        }
+                        var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        foreach (var attribute in attributesToInsert)
+                        {
+                            attribute.DataSource = dataSourceToApply;
+                        }
+                        UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+                        AttributesHaveBeenCreated = true;
+                    }
+                }
+            }
+        }
+
+        public virtual void CreateSingletons()
+        {
+            CreateAttributes();
+            CreateNetwork();
+            SetupDefaultHttpContext();
+        }
+
+        private static readonly object NetworkCreationLock = new object();
+
+        public void CreateNetwork()
         {
             if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
             {
-                UnitOfWork.Context.AddEntity(TestNetwork);
+                lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
+                {
+                    if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
+                    {
+                        UnitOfWork.Context.AddEntity(TestNetwork);
+                    }
+                }
             }
         }
 
-        public virtual void CreateSimulation()
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null)
         {
-            if (!UnitOfWork.Context.Simulation.Any(_ => _.Id == SimulationId))
-            {
-                UnitOfWork.Context.AddEntity(TestSimulation);
-            }
+            var entity = TestSimulation(id, name);
+            UnitOfWork.Context.AddEntity(entity);
+            return entity;
         }
 
         public virtual void CreateCalculatedAttributeLibrary()
         {
             if (!UnitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
             {
-                _ = UnitOfWork.Context.CalculatedAttributeLibrary.Add(new CalculatedAttributeLibraryEntity
+                var dto = new CalculatedAttributeLibraryDTO
                 {
                     IsDefault = true,
                     Id = Guid.NewGuid(),
                     Name = "Default Test Calculated Attribute Library",
                     CalculatedAttributes = { },
-                    CreatedDate = DateTime.Now
-                });
+                };
+                UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
             }
         }
     }

@@ -25,11 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             // prevent EF from attempting to create the network's child entities (create them
             // separately as part of a bulk insert)
-            var networkEntity = new NetworkEntity
-            {
-                Id = new Guid(DataPersistenceConstants.PennDotNetworkId),
-                Name = network.Name
-            };
+
             //_unitOfWork.Context.Upsert(networkEntity, networkEntity.Id, _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
@@ -39,8 +35,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateNetwork(Analysis.Network network) => _unitOfWork.Context.AddEntity(network.ToEntity(), _unitOfWork.UserEntity?.Id);
 
-        public List<Network> GetAllNetworks() =>
-            _unitOfWork.Context.Network.Select(_ => _.ToDomain()).ToList();
+        public List<Network> GetAllNetworks()
+        {
+            var domain = _unitOfWork.Context.Network
+                .Include(n => n.MaintainableAssets)
+                .ThenInclude(ma => ma.MaintainableAssetLocation)
+                .Select(e => e.ToDomain())
+                .ToList();
+            return domain;
+        }
 
         public Task<List<NetworkDTO>> Networks()
         {
@@ -49,39 +52,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return Task.Factory.StartNew(() => new List<NetworkDTO>());
             }
 
-            return Task.Factory.StartNew(() => _unitOfWork.Context.Network
+            return Task.Factory.StartNew(() => {
+                var attributeDbSet = _unitOfWork.Context.Attribute.ToList();
+                return _unitOfWork.Context.Network
                 .Include(_ => _.BenefitQuantifier)
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
-                .Select(_ => _.ToDto())
-                .ToList());
+                .Include(_ => _.AttributeJoins)
+                .Select(_ => _.ToDto(attributeDbSet))
+                .ToList();
+                });
         }
 
         public NetworkEntity GetMainNetwork()
         {
-            var mainNetworkId = new Guid(_unitOfWork.Config.GetSection("PrimaryNetwork").Value);
+            var mainNetworkId = new Guid(_unitOfWork.Config["InventoryData:PrimaryNetwork"]);
 
             if (!_unitOfWork.Context.Network.Any(_ => _.Id == mainNetworkId))
             {
-                return null;
+                throw new RowNotInTableException("Unable to find primary network ID specified in appsettings.json");
             }
 
             return _unitOfWork.Context.Network
                 .Single(_ => _.Id == mainNetworkId);
-        }
-
-        public bool CheckPennDotNetworkHasData()
-        {
-            var penndotNetworkId = new Guid(DataPersistenceConstants.PennDotNetworkId);
-            var facilityCount = _unitOfWork.Context.Facility.Count(_ => _.NetworkId == penndotNetworkId);
-            var sectionCount = _unitOfWork.Context.Section.Count(_ => _.Facility.NetworkId == penndotNetworkId);
-            var numericAttributeValueHistoryCount = _unitOfWork.Context.NumericAttributeValueHistory
-                .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
-            var textAttributeValueHistoryCount = _unitOfWork.Context.TextAttributeValueHistory
-                .Count(_ => _.Section.Facility.NetworkId == penndotNetworkId);
-
-            return facilityCount > 0 && sectionCount > 0 && numericAttributeValueHistoryCount > 0 &&
-                   textAttributeValueHistoryCount > 0;
         }
 
         public Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true)
@@ -102,6 +95,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         Id = asset.Id,
                         SpatialWeighting = asset.SpatialWeighting,
+                        AssetName = asset.AssetName,
                         MaintainableAssetLocation = new MaintainableAssetLocationEntity
                         {
                             LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier

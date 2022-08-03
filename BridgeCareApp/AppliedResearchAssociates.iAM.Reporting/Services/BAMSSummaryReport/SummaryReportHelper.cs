@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
@@ -7,8 +8,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 {
     public class SummaryReportHelper : ISummaryReportHelper
     {
+        public T checkAndGetValue<T>(IDictionary itemsArray, string itemName)
+        {
+            var itemValue = default(T);
+
+            if (itemsArray == null) { return itemValue; }
+            if (string.IsNullOrEmpty(itemName) || string.IsNullOrWhiteSpace(itemName)) { return itemValue; }
+
+            if (itemsArray.Contains(itemName)) { itemValue = (T)itemsArray[itemName]; }
+
+            //return value
+            return itemValue;
+        }
+
         // Identifying 185 Bridges
-        public bool BridgeFunding185(SectionDetail section)
+        public bool BridgeFunding185(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -23,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         // Identifying 581 Bridges
-        public bool BridgeFunding581(SectionDetail section)
+        public bool BridgeFunding581(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -38,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         // Identifing STP Bridges
-        public bool BridgeFundingSTP(SectionDetail section)
+        public bool BridgeFundingSTP(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -51,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         // Identifying NHPP Bridges
-        public bool BridgeFundingNHPP(SectionDetail section)
+        public bool BridgeFundingNHPP(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -67,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         // Identifying BOF Bridges
-        public bool BridgeFundingBOF(SectionDetail section)
+        public bool BridgeFundingBOF(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -85,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
         // Identifying 183 Bridges
-        public bool BridgeFunding183(SectionDetail section)
+        public bool BridgeFunding183(AssetDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -102,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
-        public bool BridgeFunding183(SectionSummaryDetail section)
+        public bool BridgeFunding183(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -119,7 +133,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
-        public bool BridgeFunding185(SectionSummaryDetail section)
+        public bool BridgeFunding185(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -133,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
         }
 
-        public bool BridgeFunding581(SectionSummaryDetail section)
+        public bool BridgeFunding581(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -147,7 +161,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 fedAid == "0" && bridgeLength >= 8 && bridgeLength < 20 && ownerCode.StartsWith("01");
         }
 
-        public bool BridgeFundingBOF(SectionSummaryDetail section)
+        public bool BridgeFundingBOF(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -164,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (functionalClass == "08" || functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
-        public bool BridgeFundingNHPP(SectionSummaryDetail section)
+        public bool BridgeFundingNHPP(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
@@ -179,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (functionalClass == "01" || functionalClass == "02" || functionalClass == "11" || functionalClass == "12" || functionalClass == "14");
         }
 
-        public bool BridgeFundingSTP(SectionSummaryDetail section)
+        public bool BridgeFundingSTP(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
             var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);

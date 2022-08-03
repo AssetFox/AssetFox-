@@ -50,6 +50,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public DataSourceEntity DataSource { get; set; }
 
+        public Guid? DataSourceId { get; set; }
+
         public string DefaultValue { get; set; }
 
         public double? Minimum { get; set; }
@@ -60,10 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool IsAscending { get; set; }
 
-        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins
-        {
-            get; set;
-        }
+        public virtual ICollection<AttributeEquationCriterionLibraryEntity> AttributeEquationCriterionLibraryJoins { get; set; }
 
         public virtual ICollection<BenefitEntity> Benefits { get; set; }
 

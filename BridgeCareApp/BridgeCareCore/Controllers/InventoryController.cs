@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -28,22 +28,36 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetInventory")]
+        [Route("GetKeyProperties")]
         [Authorize]
-        public async Task<IActionResult> GetInventory()
+        public async Task<IActionResult> GetKeyProperties() =>
+            Ok(_assetData.KeyProperties.Keys.ToList());
+
+        [HttpGet]
+        [Route("GetValuesForKey/{propertyName}")]
+        [Authorize]
+        public async Task<IActionResult> GetValuesForKey(string propertyName)
         {
-            var data = new List<BMSIDAndBRKeyDTO>();
+            if (!_assetData.KeyProperties.ContainsKey(propertyName)) return BadRequest($"Requested key property ({propertyName}) does not exist");
+            return Ok(_assetData.KeyProperties[propertyName].Select(_ => _.KeyValue.Value).ToList());
+        }
 
-            // TODO:  Need to figure out a way to make this more generic.  Another setting in appSettings.json?
+        // TODO: Remove this once front end can handle generic properties
+        [HttpGet]
+        [Route("GetPennDOTInventory")]
+        [Authorize]
+        public async Task<IActionResult> GetPennDOTInventory()
+        {
+            var data = new List<KeyIDs>();
 
-            if (_assetData.KeyProperties.ContainsKey("BRKEY") && _assetData.KeyProperties.ContainsKey("BMSID"))
+            if (_assetData.KeyProperties.ContainsKey("BRKEY_") && _assetData.KeyProperties.ContainsKey("BMSID"))
             {
                 data = _assetData.KeyProperties["BMSID"].Join(
-                    _assetData.KeyProperties["BRKEY"],
+                    _assetData.KeyProperties["BRKEY_"],
                     assetIDBMS => assetIDBMS.AssetId,
                     assetBrKey => assetBrKey.AssetId,
                     (bmsid, brkey)
-                    => new BMSIDAndBRKeyDTO { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
+                    => new KeyIDs { BrKey = brkey.KeyValue.TextValue, BmsId = bmsid.KeyValue.TextValue })
                     .ToList();
             }
 

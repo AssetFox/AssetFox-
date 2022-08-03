@@ -5,18 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using AppliedResearchAssociates.iAM.Reporting;
-using BridgeCareCore.Hubs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 using System.IO;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Interfaces;
+using BridgeCareCore.Logging;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,10 +25,13 @@ namespace BridgeCareCore.Controllers
     public class ReportController : BridgeCareCoreBaseController
     {
         private readonly IReportGenerator _generator;
+        private readonly ILog _log;
 
         public ReportController(IReportGenerator generator, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
-            _generator = generator ?? throw new ArgumentNullException(nameof(generator));            
+            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+            _generator = generator ?? throw new ArgumentNullException(nameof(generator));
+        }
 
         #region "API functions"
 
@@ -40,8 +43,9 @@ namespace BridgeCareCore.Controllers
             // NOTE:  This might be useful:  https://weblog.west-wind.com/posts/2013/dec/13/accepting-raw-request-body-content-with-aspnet-web-api
 
             //SendRealTimeMessage($"Starting to process {reportName}.");
+            var parameters = await GetParameters();
 
-            var report = await GenerateReport(reportName, ReportType.HTML);
+            var report = await GenerateReport(reportName, ReportType.HTML, parameters);
 
             if (report == null)
             {
@@ -74,46 +78,126 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetFile(string reportName)
         {
-            var report = await GenerateReport(reportName, ReportType.File);
+            var parameters = await GetParameters();
 
-            if (report == null)
+            HubService.SendRealTimeMessage(UnitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, "", parameters);
+
+            try
             {
-                var message = new List<string>() { $"Failed to generate report object for '{reportName}'" };
-                return CreateErrorListing(message);
+                return Ok();
             }
-
-            // Handle a completed run with errors
-            if (report.Errors.Any())
+            finally
             {
-                return CreateErrorListing(report.Errors);
+                Response.OnCompleted(async () =>
+                {
+                    var report = await GenerateReport(reportName, ReportType.File, parameters);
+
+                    if (report == null)
+                    {
+                        SendRealTimeMessage($"Failed to generate report object for '{reportName}'");
+                    }
+
+                    // Handle a completed run with errors
+                    if (report.Errors.Any())
+                    {
+                        SendRealTimeMessage($"Failed to generate '{reportName}'");
+
+                        _log.Information($"Failed to generate '{reportName}'");
+
+                        foreach (string message in report.Errors)
+                        {
+                            _log.Information($"Message: {message}");
+                        }
+                    }
+
+                    // Handle an incomplete run without errors
+                    if (!report.IsComplete)
+                    {
+                        SendRealTimeMessage($"{reportName} ran but never completed");
+                    }
+
+                    //create report index repository
+                    var reportIndexID = createReportIndexRepository(report);
+
+                    if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
+                    {
+                        SendRealTimeMessage($"Failed to create report repository index");
+                    }
+                });
             }
-
-            // Handle an incomplete run without errors
-            if (!report.IsComplete)
-            {
-                var message = new List<string>() { $"{reportName} ran but never completed" };
-                return CreateErrorListing(message);
-            }
-
-            //create report index repository
-            var reportIndexID = createReportIndexRepository(report);
-
-            if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID)) {
-                var message = new List<string>() { $"Failed to create report repository index" };
-                return CreateErrorListing(message);
-            }
-
-            // Report is good, return the report repository index id
-            var validResult = Content(reportIndexID);
-            validResult.StatusCode = (int?)HttpStatusCode.OK;
-            return validResult;
         }
 
+        [HttpGet]
+        [Route("ListReports/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetSimulationReports(Guid simulationId)
+        {
+            // Since Guid cannot be null, if it is not provided, simulation ID will be Guid.Empty
+            if (simulationId == Guid.Empty)
+            {
+                var message = new List<string>() { $"No simulation ID provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            return Ok(UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId));
+        }
 
         [HttpGet]
-        [Route("DownloadReport/{reportIndexID}")]
+        [Route("DownloadReport/{simulationId}/{reportName}")]
         [Authorize]
-        public async Task<IActionResult> DownloadReport(string reportIndexID)
+        public async Task<IActionResult> DownloadReport(Guid simulationId, string reportName)
+        {
+            if (simulationId == Guid.Empty || reportName == String.Empty)
+            {
+                var message = new List<string>() { $"No simulation or report name provided." };
+                return CreateErrorListing(message);
+            }
+
+            if (UnitOfWork.SimulationRepo.GetSimulation(simulationId) == null)
+            {
+                var message = new List<string>() { $"A simulation with the ID of {simulationId} is not available in the database." };
+                return CreateErrorListing(message);
+            }
+
+            var report = UnitOfWork.ReportIndexRepository.GetAllForScenario(simulationId)
+                .Where(_ => _.Type == reportName)
+                .OrderByDescending(_ => _.CreationDate)
+                .FirstOrDefault();
+            if (report == null)
+            {
+                var message = new List<string>() { $"No simulations of the specified type ({reportName}) exist for this simulation.  Did you run the report?" };
+                return CreateErrorListing(message);
+            }
+
+            var reportPath = Path.Combine(Environment.CurrentDirectory, report.Result);
+            if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
+            {
+                var message = new List<string>() { $"The report did not include any results" };
+                return CreateErrorListing(message);
+            }
+
+            FileInfoDTO result;
+            try
+            {
+                result = await GetReport(report);
+            }
+            catch (Exception e)
+            {
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("DownloadSpecificReport/{reportIndexID}")]
+        [Authorize]
+        public async Task<IActionResult> DownloadSpecificReport(string reportIndexID)
         {
             if (string.IsNullOrEmpty(reportIndexID) || string.IsNullOrWhiteSpace(reportIndexID))
             {
@@ -122,35 +206,31 @@ namespace BridgeCareCore.Controllers
             }
 
             //get report path
-            var reportIndexEntity = this.UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
-            var reportPath = reportIndexEntity?.Result ?? "";
-
+            var reportIndex = UnitOfWork.ReportIndexRepository.Get(Guid.Parse(reportIndexID));
+            var reportPath = reportIndex?.Result != null ? Path.Combine(Environment.CurrentDirectory, reportIndex.Result) : "";
             if (string.IsNullOrEmpty(reportPath) || string.IsNullOrWhiteSpace(reportPath))
             {
                 var message = new List<string>() { $"Failed to get report path using the specified repository index" };
                 return CreateErrorListing(message);
             }
 
-            //read file from the specified location and return download response
-            var response = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
-
-            //set file download response
-            var downloadFileName = $"SummaryReport-\\{reportIndexEntity.SimulationID}\\.xlsx";
-            const string contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            HttpContext.Response.ContentType = contentType;
-            HttpContext.Response.Headers.Add("Access-Control-Expose-Headers", "Content-Disposition");            
-            var fileContentResult = new FileContentResult(response, contentType) { FileDownloadName = downloadFileName };
-
             // return the download response
-            return fileContentResult;
+            FileInfoDTO result;
+            try
+            {
+                result = await GetReport(reportIndex);
+            }
+            catch (Exception e)
+            {
+                return CreateErrorListing(new List<string>() { e.Message });
+            }
+            return Ok(result);
         }
 
         #endregion
 
-
         #region "Internal functions"
-
-        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType)
+        private async Task<string> GetParameters()
         {
             // Manually bring in the body JSON as doing so in the parameters (i.e., [FromBody] JObject parameters) will fail when the body does not exist
             var parameters = string.Empty;
@@ -160,6 +240,11 @@ namespace BridgeCareCore.Controllers
                 parameters = await reader.ReadToEndAsync();
             }
 
+            return parameters;
+        }
+
+        private async Task<IReport> GenerateReport(string reportName, ReportType expectedReportType, string parameters)
+        {
             //generate report
             var reportObject = await _generator.Generate(reportName);
 
@@ -191,6 +276,24 @@ namespace BridgeCareCore.Controllers
 
             //return object
             return reportObject;
+        }
+
+        private async Task<FileInfoDTO> GetReport(ReportIndexDTO reportIndex)
+        {
+            var reportPath = Path.Combine(Environment.CurrentDirectory, reportIndex.Result);
+            if (!System.IO.File.Exists(reportPath))
+            {
+                throw new InvalidOperationException($"Cannot get report for report {reportIndex.Type}");
+            }
+            var fileData = await Task.Factory.StartNew(() => FetchFromFileLocation(reportPath));
+            var simulationName = reportIndex.SimulationId != null ? UnitOfWork.SimulationRepo.GetSimulationName((Guid)reportIndex.SimulationId) : String.Empty;
+            var downloadFileName = $"{simulationName} {reportIndex.Type}.xlsx";
+            return new FileInfoDTO
+            {
+                FileData = Convert.ToBase64String(fileData),
+                FileName = downloadFileName,
+                MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            };
         }
 
         private string createReportIndexRepository(IReport reportObject)

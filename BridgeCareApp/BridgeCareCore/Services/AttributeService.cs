@@ -6,9 +6,9 @@ using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
-//using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
@@ -58,11 +58,13 @@ namespace BridgeCareCore.Services
                     {
                         Attribute = keyValuePair.Key,
                         Values = !HasAlphaValues(values)
+                        Values = values.Count > 100
                             ? new List<string>()
                             : values.ToSortedSet(new AlphanumericComparator()).ToList(),
                         ResultMessage = !values.Any()
                             ? $"No values found for attribute {keyValuePair.Key}; use text input"
                             : !HasAlphaValues(values)
+                            : values.Count > 100
                                 ? $"Number of values for attribute {keyValuePair.Key} exceeds 100; use text input"
                                 : "Success",
                         ResultType = !values.Any() || !HasAlphaValues(values) ? "warning" : "success"
@@ -82,6 +84,50 @@ namespace BridgeCareCore.Services
                 found = rg.IsMatch(val);
             }
             return found;
+
+        public static AttributeDTO ConvertAllAttribute(AllAttributeDTO allAttribute)
+        {
+            var result = new AttributeDTO
+            {
+                Id = allAttribute.Id,
+                Name = allAttribute.Name,
+                AggregationRuleType = allAttribute.AggregationRuleType,
+                Command = allAttribute.Command,
+                DefaultValue = allAttribute.DefaultValue,
+                IsAscending = allAttribute.IsAscending,
+                IsCalculated = allAttribute.IsCalculated,
+                Maximum = allAttribute.Maximum,
+                Minimum = allAttribute.Minimum,
+                Type = allAttribute.Type
+            };
+            var dataSourceType = allAttribute.DataSource.Type;
+
+            switch (dataSourceType)
+            {
+            case "SQL":
+                var sqlSource = new SQLDataSourceDTO
+                {
+                    Id = allAttribute.DataSource.Id,
+                    Name = allAttribute.DataSource.Name,
+                    ConnectionString = allAttribute.DataSource.ConnectionString
+                };
+                result.DataSource = sqlSource;
+                return result;
+            case "Excel":
+                var excelSource = new ExcelDataSourceDTO
+                {
+                    Id = allAttribute.DataSource.Id,
+                    Name = allAttribute.DataSource.Name,
+                    LocationColumn = allAttribute.DataSource.LocationColumn,
+                    DateColumn = allAttribute.DataSource.DateColumn
+                };
+                result.DataSource = excelSource;
+                return result;
+            case "None":
+                return result;
+            default:
+                throw new ArgumentException($"Unable to convert All Attribute Data with a type of {allAttribute.Type}");
+            }
         }
     }
 }

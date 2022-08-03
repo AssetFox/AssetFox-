@@ -52,34 +52,42 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public void ReduceNumberOfFacilitiesAndSections(Simulation simulation)
         {
-            var facilities = new List<Facility> { simulation.Network.Facilities.First(_ => _.Sections.Any()) };
-            simulation.Network.ClearFacilities();
+            // Originally, this logic reduced to a single facility's sections. Facilities no longer
+            // exist, but this should probably be updated so that it still reduces the number of
+            // sections to be dealt with.
+            var assets = simulation.Network.Assets/*.Take(10)*/.ToList();
+
+            simulation.Network.ClearAssets();
             simulation.CommittedProjects.Clear();
-            ReUpFacilitiesSectionsAndHistories(facilities, simulation.Network);
+            ReUpSectionsAndHistories(assets, simulation.Network);
         }
 
         public void ReduceNumberOfFacilitiesAndSectionsWithCommittedProjects(Simulation simulation)
         {
-            var facilities = new List<Facility>();
+            var assets = new List<AnalysisMaintainableAsset>();
             CommittedProject committedProject = null;
+
+            // Originally, this logic reduced to a single facility's sections. Facilities no longer
+            // exist, but this should probably be updated so that it still reduces the number of
+            // sections to be dealt with.
             if (simulation.CommittedProjects.Any())
             {
                 committedProject = simulation.CommittedProjects.First();
-                facilities.Add(simulation.Network.Facilities.Single(_ => _.Id == committedProject.Section.Facility.Id));
+                assets.Add(simulation.Network.Assets.Single(_ => _.Id == committedProject.Asset.Network.Id)); // Only one asset? Too much reduction.
             }
             else
             {
-                facilities.Add(simulation.Network.Facilities.First(_ => _.Sections.Any()));
+                assets.AddRange(simulation.Network.Assets); // All assets? Not enough reduction.
             }
 
-            simulation.Network.ClearFacilities();
+            simulation.Network.ClearAssets();
             simulation.CommittedProjects.Clear();
-            ReUpFacilitiesSectionsAndHistories(facilities, simulation.Network);
+            ReUpSectionsAndHistories(assets, simulation.Network);
             if (committedProject != null)
             {
-                var section = simulation.Network.Facilities.First().Sections.First();
+                var asset = simulation.Network.Assets.First();
                 simulation.CommittedProjects.Clear();
-                var newCommittedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(section, committedProject.Year));
+                var newCommittedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, committedProject.Year));
                 newCommittedProject.Name = committedProject.Name;
                 newCommittedProject.ShadowForAnyTreatment = committedProject.ShadowForAnyTreatment;
                 newCommittedProject.ShadowForSameTreatment = committedProject.ShadowForSameTreatment;
@@ -94,41 +102,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public void ReUpFacilitiesSectionsAndHistories(List<Facility> facilities, Network network) =>
-            facilities.ForEach(_ =>
+        public void ReUpSectionsAndHistories(List<AnalysisMaintainableAsset> assets, Network network) =>
+            assets.ForEach(_ =>
             {
-                var facility = network.AddFacility();
-                facility.Id = _.Id;
-                facility.Name = _.Name;
-
-                if (_.Sections.Any())
+                assets.ForEach(__ =>
                 {
-                    _.Sections.ForEach(__ =>
-                    {
-                        var section = facility.AddSection();
-                        section.Id = __.Id;
-                        section.Name = __.Name;
+                    var asset = network.AddAsset();
+                    asset.Id = __.Id;
+                    asset.AssetName = __.AssetName;
 
-                        if (__.HistoricalAttributes.Any())
+                    if (__.HistoricalAttributes.Any())
+                    {
+                        __.HistoricalAttributes.ForEach(___ =>
                         {
-                            __.HistoricalAttributes.ForEach(___ =>
+                            if (network.Explorer.NumberAttributes.Any(numAttr => numAttr.Name == ___.Name))
                             {
-                                if (network.Explorer.NumberAttributes.Any(numAttr => numAttr.Name == ___.Name))
-                                {
-                                    var attribute = network.Explorer.NumberAttributes.Single(numAttr =>
-                                        numAttr.Name == ___.Name);
-                                    CopyOldHistoryToNewHistory(__.GetHistory(attribute), section.GetHistory(attribute));
-                                }
-                                else
-                                {
-                                    var attribute = network.Explorer.TextAttributes.Single(txtAttr =>
-                                        txtAttr.Name == ___.Name);
-                                    CopyOldHistoryToNewHistory(__.GetHistory(attribute), section.GetHistory(attribute));
-                                }
-                            });
-                        }
-                    });
-                }
+                                var attribute = network.Explorer.NumberAttributes.Single(numAttr =>
+                                    numAttr.Name == ___.Name);
+                                CopyOldHistoryToNewHistory(__.GetHistory(attribute), asset.GetHistory(attribute));
+                            }
+                            else
+                            {
+                                var attribute = network.Explorer.TextAttributes.Single(txtAttr =>
+                                    txtAttr.Name == ___.Name);
+                                CopyOldHistoryToNewHistory(__.GetHistory(attribute), asset.GetHistory(attribute));
+                            }
+                        });
+                    }
+                });
             });
 
         private void CopyOldHistoryToNewHistory<T>(AttributeValueHistory<T> oldHistory, AttributeValueHistory<T> newHistory)
@@ -137,12 +138,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             newHistory.ForEach(oldHistory.Add);
         }
 
-        public override void CreateNetwork()
+        public void CreateSimulationAnalysisNetwork()
         {
             UnitOfWork.NetworkRepo.CreateNetwork(StandAloneSimulation.Network);
 
-            var sections = StandAloneSimulation.Network.Facilities.Where(_ => _.Sections.Any()).SelectMany(_ => _.Sections).ToList();
-            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(sections, StandAloneSimulation.Network.Id);
+            var assets = StandAloneSimulation.Network.Assets.ToList();
+            UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assets, StandAloneSimulation.Network.Id);
         }
 
         public void CreateAttributeCriteriaAndEquationJoins() =>
@@ -159,7 +160,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 scheduling.Treatment = selectableTreatment;
             });
         }
-
 
         public void AddTreatmentSupersessions()
         {

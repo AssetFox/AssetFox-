@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
     internal sealed class TreatmentOutlook
     {
-        public TreatmentOutlook(SimulationRunner simulationRunner, SectionContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
+        public TreatmentOutlook(SimulationRunner simulationRunner, AssetContext templateContext, SelectableTreatment initialTreatment, int initialYear, IEnumerable<RemainingLifeCalculator.Factory> remainingLifeCalculatorFactories)
         {
             SimulationRunner = simulationRunner ?? throw new ArgumentNullException(nameof(simulationRunner));
             TemplateContext = templateContext ?? throw new ArgumentNullException(nameof(templateContext));
@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 throw new ArgumentNullException(nameof(remainingLifeCalculatorFactories));
             }
 
-            AccumulationContext = new SectionContext(TemplateContext);
+            AccumulationContext = new AssetContext(TemplateContext);
 
             RemainingLifeCalculators = remainingLifeCalculatorFactories.Select(factory => factory.Create(AccumulationContext)).ToArray();
 
@@ -41,8 +41,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         }
 
         private readonly SimulationRunner SimulationRunner;
-        private readonly SectionContext TemplateContext;
-        private readonly SectionContext AccumulationContext;
+        private readonly AssetContext TemplateContext;
+        private readonly AssetContext AccumulationContext;
         private readonly SelectableTreatment InitialTreatment;
         private readonly int InitialYear;
         private readonly IReadOnlyCollection<RemainingLifeCalculator> RemainingLifeCalculators;

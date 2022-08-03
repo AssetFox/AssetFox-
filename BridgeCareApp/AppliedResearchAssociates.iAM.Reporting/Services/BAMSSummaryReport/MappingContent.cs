@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
             }
         }
 
-        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, SectionDetail prevYearSection)
+        public static (string previousPick, string currentPick) GetCashFlowProjectPick(TreatmentCause treatmentCause, AssetDetail prevYearSection)
         {
             if(prevYearSection.TreatmentCause == treatmentCause)
             {
@@ -111,6 +111,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 return ("BAMS Pick CFB", "BAMS Pick CFE"); // first and last years
             }
         }
+
         public static string GetNonCashFlowProjectPick(TreatmentCause treatmentCause)
         {
             switch (treatmentCause)

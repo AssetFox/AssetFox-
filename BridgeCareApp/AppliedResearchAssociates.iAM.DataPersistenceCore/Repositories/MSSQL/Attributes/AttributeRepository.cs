@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                          throw new ArgumentNullException(nameof(unitOfWork));
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity()).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo)).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
@@ -210,16 +210,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
+        public Task<List<string>> GetAggregationRuleTypes()
+        {
+            var aggregationTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.AggregationRuleType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => aggregationTypes);
+        }
 
-        public Task<List<AttributeDTO>> Attributes()
+        public Task<List<string>> GetAttributeDataTypes()
+        {
+            var dataTypes = _unitOfWork.Context.Attribute
+                .Select(_ => _.DataType)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataTypes);
+        }
+        public Task<List<string>> GetAttributeDataSourceTypes()
+        {
+
+            var dataSourceTypes = _unitOfWork.Context.DataSource
+                .Select(_ => _.Type)
+                .Distinct()
+                .ToList();
+            return Task.Factory.StartNew(() => dataSourceTypes);
+
+        }
+        public List<AttributeDTO> GetAttributes()
         {
             if (!_unitOfWork.Context.Attribute.Any())
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
+            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+        }
 
+        public Task<List<AttributeDTO>> GetAttributesAsync()
+        {
             return Task.Factory.StartNew(() =>
-                _unitOfWork.Context.Attribute.OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+                GetAttributes());
         }
 
         public Task<List<AttributeDTO>> CalculatedAttributes()
@@ -236,11 +266,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public AttributeDTO GetSingleById(Guid attributeId)
         {
             var entity = _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId);
-            if (entity == null)
+            return AttributeMapper.ToDtoNullPropagating(entity);
+        }
+
+        public AttributeDTO GetSingleByName(string attributeName)
+        {
+            var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
+                a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
+            return AttributeMapper.ToDtoNullPropagating(entity);
+        }
+
+        public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
+        {
+            foreach (var id in attributeIdsToDelete)
             {
-                return null;
+                _unitOfWork.BeginTransaction();
+                _unitOfWork.Context.DeleteEntity<AttributeEntity>(_ => _.Id == id);
+                _unitOfWork.Commit();
             }
-            return AttributeMapper.ToDto(entity);
         }
     }
 }

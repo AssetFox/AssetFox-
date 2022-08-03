@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces.DefaultData;
@@ -16,98 +17,111 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnalysisMethodTests
     {
-        private readonly TestHelper _testHelper;
-        private readonly AnalysisMethodController _controller;
+        private TestHelper _testHelper => TestHelper.Instance;
 
-        private static readonly Guid AnalysisMethodId = Guid.Parse("e93670b5-af82-4b58-9487-6eceed99b91e");
         private static readonly Guid BenefitId = Guid.Parse("be2497dd-3acd-4cdd-88a8-adeb9893f1df");
         private readonly Mock<IAnalysisDefaultDataService> _mockAnalysisDefaultDataService = new Mock<IAnalysisDefaultDataService>();
 
-        public AnalysisMethodTests()
+        private AnalysisMethodController SetupController()
         {
-            _testHelper = TestHelper.Instance;
-            if (!_testHelper.DbContext.Attribute.Any())
-            {
-                _testHelper.CreateAttributes();
-                _testHelper.CreateNetwork();
-                _testHelper.CreateSimulation();
-                _testHelper.SetupDefaultHttpContext();
-            }
+            _testHelper.CreateSingletons();
+            _testHelper.CreateSimulation();
             _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
-            _controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAuthorized.Object, _testHelper.UnitOfWork,
+            var controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
+            return controller;
         }
 
-        public AnalysisMethodEntity TestAnalysis { get; } = new AnalysisMethodEntity
+        public AnalysisMethodEntity TestAnalysis(Guid simulationId, Guid? id = null)
         {
-            Id = AnalysisMethodId,
-            OptimizationStrategy = OptimizationStrategy.Benefit,
-            SpendingStrategy = SpendingStrategy.NoSpending,
-            ShouldApplyMultipleFeasibleCosts = false,
-            ShouldDeteriorateDuringCashFlow = false,
-            ShouldUseExtraFundsAcrossBudgets = false
-        };
-
-        public BenefitEntity TestBenefit { get; } = new BenefitEntity
-        {
-            Id = BenefitId,
-            AnalysisMethodId = AnalysisMethodId,
-            Limit = 1
-        };
-
-        private void SetupForGet()
-        {
-            TestAnalysis.SimulationId = _testHelper.TestSimulation.Id;
-            if (!_testHelper.UnitOfWork.Context.AnalysisMethod.Any(m => m.SimulationId == TestAnalysis.SimulationId))
+            var resolveId = id ?? Guid.NewGuid();
+            var returnValue = new AnalysisMethodEntity
             {
-                _testHelper.UnitOfWork.Context.AnalysisMethod.Add(TestAnalysis);
-                _testHelper.UnitOfWork.Context.SaveChanges();
-            }
+                Id = resolveId,
+                SimulationId = simulationId,
+                OptimizationStrategy = OptimizationStrategy.Benefit,
+                SpendingStrategy = SpendingStrategy.NoSpending,
+                ShouldApplyMultipleFeasibleCosts = false,
+                ShouldDeteriorateDuringCashFlow = false,
+                ShouldUseExtraFundsAcrossBudgets = false
+            };
+            return returnValue;
         }
 
-        private void SetupForUpsert()
+        public BenefitEntity TestBenefit(Guid analysisMethodId, Guid? benefitId = null)
         {
-            SetupForGet();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(_testHelper.TestCriterionLibrary);
+            var resolveId = benefitId ?? Guid.NewGuid();
+            var returnValue = new BenefitEntity
+            {
+                Id = resolveId,
+                AnalysisMethodId = analysisMethodId,
+                Limit = 1
+            };
+            return returnValue;
+        }
+
+        private AnalysisMethodEntity SetupForGet(Guid simulationId)
+        {
+            var entity = TestAnalysis(simulationId);
+
+            _testHelper.UnitOfWork.Context.AnalysisMethod.Add(entity);
             _testHelper.UnitOfWork.Context.SaveChanges();
+            return entity;
+        }
+
+        private CriterionLibraryEntity SetupForUpsert(Guid simulationId)
+        {
+            SetupForGet(simulationId);
+            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            _testHelper.UnitOfWork.Context.SaveChanges();
+            return criterionLibrary;
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGet()
         {
+            var controller = SetupController();
             // Act
-            var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var simulation = _testHelper.CreateSimulation();
+            var result = await controller.AnalysisMethod(simulation.Id);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]
-        public async void ShouldReturnOkResultOnPost()
+        public async Task ShouldReturnOkResultOnPost()
         {
             // Arrange
+            var controller = SetupController();
+            var simulation = _testHelper.CreateSimulation();
+            var analysisEntity = TestAnalysis(simulation.Id);
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
-            var dto = TestAnalysis.ToDto();
-            TestBenefit.Attribute = attributeEntity;
-            dto.Benefit = TestBenefit.ToDto();
+            var dto = analysisEntity.ToDto();
+            var benefit = TestBenefit(analysisEntity.Id);
+            benefit.Attribute = attributeEntity;
+            dto.Benefit = benefit.ToDto();
             dto.Benefit.Attribute = attributeEntity.Name;
 
             // Act
             var result =
-                await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
+                await controller.UpsertAnalysisMethod(simulation.Id, dto);
 
             // Assert
             Assert.IsType<OkResult>(result);
         }
 
         [Fact]
-        public async void ShouldGetAnalysisMethod()
+        public async Task ShouldGetAnalysisMethod()
         {
             // Arrange
-            SetupForGet();
+            var controller = SetupController();
+            var simulation = _testHelper.CreateSimulation();
+            var analysisMethodEntity = SetupForGet(simulation.Id);
 
             // Act
-            var result = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var result = await controller.AnalysisMethod(simulation.Id);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -115,14 +129,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dto = (AnalysisMethodDTO)Convert.ChangeType(okObjResult.Value, typeof(AnalysisMethodDTO));
 
-            Assert.Equal(AnalysisMethodId, dto.Id);
+            Assert.Equal(analysisMethodEntity.Id, dto.Id);
         }
 
         [Fact]
-        public async void ShouldCreateAnalysisMethod()
+        public async Task ShouldCreateAnalysisMethod()
         {
             // Arrange
-            var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var controller = SetupController();
+            var simulation = _testHelper.CreateSimulation();
+            var getResult = await controller.AnalysisMethod(simulation.Id);
             var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(AnalysisMethodDTO));
 
@@ -134,10 +150,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, analysisMethodDto);
+            await controller.UpsertAnalysisMethod(simulation.Id, analysisMethodDto);
 
             // Assert
-            getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            getResult = await controller.AnalysisMethod(simulation.Id);
             var upsertedAnalysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(AnalysisMethodDTO));
 
@@ -146,27 +162,30 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async void ShouldUpdateAnalysisMethod()
+        public async Task ShouldUpdateAnalysisMethod()
         {
             // Arrange
-            SetupForUpsert();
-            var getResult = await _controller.AnalysisMethod(_testHelper.TestSimulation.Id);
+            var controller = SetupController();
+            var simulation = _testHelper.CreateSimulation();
+            var criterionLibrary = SetupForUpsert(simulation.Id);
+            var getResult = await controller.AnalysisMethod(simulation.Id);
             var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(AnalysisMethodDTO));
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
             dto.Attribute = attributeEntity.Name;
-            dto.CriterionLibrary = _testHelper.TestCriterionLibrary.ToDto();
-            TestBenefit.Attribute = attributeEntity;
-            dto.Benefit = TestBenefit.ToDto();
+            dto.CriterionLibrary = criterionLibrary.ToDto();
+            var analysisMethod = TestAnalysis(simulation.Id);
+            var benefit = TestBenefit(analysisMethod.Id);
+            benefit.Attribute = attributeEntity;
+            dto.Benefit = benefit.ToDto();
             dto.Benefit.Attribute = attributeEntity.Name;
 
             // Act
-            await _controller.UpsertAnalysisMethod(_testHelper.TestSimulation.Id, dto);
+            await controller.UpsertAnalysisMethod(simulation.Id, dto);
 
             // Assert
             var analysisMethodDto =
-                _testHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(_testHelper
-                    .TestSimulation.Id);
+                _testHelper.UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulation.Id);
 
             Assert.Equal(dto.Id, analysisMethodDto.Id);
             Assert.Equal(dto.Attribute, analysisMethodDto.Attribute);

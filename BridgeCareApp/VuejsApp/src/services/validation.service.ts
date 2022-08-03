@@ -11,4 +11,8 @@ export default class ValidationService {
     static getCriterionValidationResult(validationParameter: ValidationParameter): AxiosPromise {
         return coreAxiosInstance.post(`${API.ExpressionValidation}/GetCriterionValidationResult`, validationParameter);
     }
+
+    static getCriterionValidationResultNoCount(validationParameter: ValidationParameter): AxiosPromise {
+        return coreAxiosInstance.post(`${API.ExpressionValidation}/GetCriterionValidationResultNoCount`, validationParameter);
+    }
 }

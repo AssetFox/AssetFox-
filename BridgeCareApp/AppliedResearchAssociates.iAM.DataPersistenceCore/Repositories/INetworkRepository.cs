@@ -20,8 +20,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         NetworkEntity GetMainNetwork();
 
-        bool CheckPennDotNetworkHasData();
-
         Analysis.Network GetSimulationAnalysisNetwork(Guid networkId, Explorer explorer, bool areFacilitiesRequired = true);
 
         void DeleteNetworkData();

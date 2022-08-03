@@ -3,6 +3,7 @@
     public enum ConnectionType
     {
         MSSQL,
-        MONGO_DB
+        EXCEL,
+        NONE
     }
 }

@@ -5,13 +5,15 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSystem;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 {
-    public class UnitOfDataPersistenceWork : IDisposable
+    public class UnitOfDataPersistenceWork : IDisposable, IUnitOfWork
     {
         public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
@@ -32,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         private IAnalysisMethodRepository _analysisMethodRepo;
         private IAttributeDatumRepository _attributeDatumRepo;
+        private IAttributeMetaDataRepository _attributeMetaDataRepo;
         private IAttributeRepository _attributeRepo;
         private IAttributeValueHistoryRepository _attributeValueHistoryRepo;
         private IBenefitRepository _benefitRepo;
@@ -44,14 +47,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         private ICommittedProjectRepository _committedProjectRepo;
         private ICriterionLibraryRepository _criterionLibraryRepo;
         private IDeficientConditionGoalRepository _deficientConditionGoalRepo;
-        private IFacilityRepository _facilityRepo;
+        private IExcelRawDataRepository _excelWorksheetRepo;
         private IInvestmentPlanRepository _investmentPlanRepo;
         private IMaintainableAssetRepository _maintainableAssetRepo;
         private INetworkRepository _networkRepo;
         private IPerformanceCurveRepository _performanceCurveRepo;
         private ICalculatedAttributesRepository _calculatedAttributesRepo;
         private IRemainingLifeLimitRepository _remainingLifeLimitRepo;
-        private ISectionRepository _sectionRepo;
         private ISelectableTreatmentRepository _selectableTreatmentRepo;
         private ISimulationAnalysisDetailRepository _simulationAnalysisDetailRepo;
         private ISimulationLogRepository _simulationLogRepo;
@@ -78,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public IAttributeDatumRepository AttributeDatumRepo => _attributeDatumRepo ??= new AttributeDatumRepository(this);
 
         public IAttributeRepository AttributeRepo => _attributeRepo ??= new AttributeRepository(this);
-
+        public IAttributeMetaDataRepository AttributeMetaDataRepo => _attributeMetaDataRepo ?? new AttributeMetaDataRepository();
         public IAttributeValueHistoryRepository AttributeValueHistoryRepo => _attributeValueHistoryRepo ??= new AttributeValueHistoryRepository(this);
 
         public IBenefitRepository BenefitRepo => _benefitRepo ??= new BenefitRepository(this);
@@ -101,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IDeficientConditionGoalRepository DeficientConditionGoalRepo => _deficientConditionGoalRepo ??= new DeficientConditionGoalRepository(this);
 
-        public IFacilityRepository FacilityRepo => _facilityRepo ??= new FacilityRepository(this);
+        public IExcelRawDataRepository ExcelWorksheetRepository => _excelWorksheetRepo ?? new ExcelRawDataRepository(this);
 
         public IInvestmentPlanRepository InvestmentPlanRepo => _investmentPlanRepo ??= new InvestmentPlanRepository(this);
 
@@ -114,8 +116,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public ICalculatedAttributesRepository CalculatedAttributeRepo => _calculatedAttributesRepo ??= new CalculatedAttributeRepository(this);
 
         public IRemainingLifeLimitRepository RemainingLifeLimitRepo => _remainingLifeLimitRepo ??= new RemainingLifeLimitRepository(this);
-
-        public ISectionRepository SectionRepo => _sectionRepo ??= new SectionRepository(this);
 
         public ISelectableTreatmentRepository SelectableTreatmentRepo => _selectableTreatmentRepo ??= new SelectableTreatmentRepository(this);
 
@@ -147,13 +147,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         public IReportIndexRepository ReportIndexRepository => _reportIndexRepo ??= new ReportIndexRepository(this);
 
-        public IAssetData AssetDataRepository => _assetDataRepository ??= new PennDOTMaintainableAssetDataRepository(this);
+        public IAssetData AssetDataRepository => _assetDataRepository ??= new MaintainableAssetDataRepository(this);
 
         public IAnnouncementRepository AnnouncementRepo => _announcementRepo ??= new AnnouncementRepository(this);
 
         public IDataSourceRepository DataSourceRepo => _dataSourceRepo ??= new DataSourceRepository(this);
 
+        public UserDTO CurrentUser => UserEntity?.ToDto();
 
+        // TODO: Refactor to an persistence independent object
         public UserEntity UserEntity { get; private set; }
 
         public IDbContextTransaction DbContextTransaction { get; private set; }
@@ -161,20 +163,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public void BeginTransaction() => DbContextTransaction = Context.Database.BeginTransaction();
 
         public SqlConnection GetLegacyConnection() => new SqlConnection(Config.GetConnectionString("BridgeCareLegacyConnex"));
+        // End Refactor
 
         public void SetUser(string username)
         {
-            var user = Context.User
-                .Include(_ => _.UserCriteriaFilterJoin)
-                .FirstOrDefault(_ => _.Username == username);
-            UserEntity = user;
+            if (UserEntity?.Username != username)
+            {
+                var user = Context.User
+                    .Include(_ => _.UserCriteriaFilterJoin)
+                    .FirstOrDefault(_ => _.Username == username);
+                UserEntity = user;
+            }
         }
 
+        private static object AddUserLock = new object();
         public void AddUser(string username, string role)
         {
-            BeginTransaction();
-            UserRepo.AddUser(username, role);
-            Commit();
+            lock (AddUserLock)
+            {
+                if (!UserRepo.UserExists(username))
+                {
+                    BeginTransaction();
+                    UserRepo.AddUser(username, role);
+                    Commit();
+                }
+            }
         }
 
         public void Commit()

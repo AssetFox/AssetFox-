@@ -40,11 +40,11 @@ export default {
         );
 
         connection.on(
-            Hub.BroadcastType.BroadcastSummaryReportGenerationStatus,
+            Hub.BroadcastType.BroadcastReportGenerationStatus,
             (simulationReportDetail: SimulationReportDetail) => {
                 statusHub.$emit(
                     Hub.BroadcastEventType
-                        .BroadcastSummaryReportGenerationStatusEvent,
+                        .BroadcastReportGenerationStatusEvent,
                     { simulationReportDetail },
                 );
             },
@@ -128,8 +128,8 @@ export const Hub = {
         BroadcastError: 'BroadcastError',
         BroadcastWarning: 'BroadcastWarning',
         BroadcastAssignDataStatus: 'BroadcastAssignDataStatus',
-        BroadcastSummaryReportGenerationStatus:
-            'BroadcastSummaryReportGenerationStatus',
+        BroadcastReportGenerationStatus:
+            'BroadcastReportGenerationStatus',
         BroadcastScenarioStatusUpdate: 'BroadcastScenarioStatusUpdate',
         BroadcastSimulationAnalysisDetail: 'BroadcastSimulationAnalysisDetail',
         BroadcastDataMigration: 'BroadcastDataMigration',
@@ -139,8 +139,8 @@ export const Hub = {
         BroadcastErrorEvent: 'BroadcastErrorEvent',
         BroadcastWarningEvent: 'BroadcastWarningEvent',
         BroadcastAssignDataStatusEvent: 'BroadcastAssignDataStatusEvent',
-        BroadcastSummaryReportGenerationStatusEvent:
-            'BroadcastSummaryReportGenerationStatusEvent',
+        BroadcastReportGenerationStatusEvent:
+            'BroadcastReportGenerationStatusEvent',
         BroadcastScenarioStatusUpdateEvent:
             'BroadcastScenarioStatusUpdateEvent',
         BroadcastSimulationAnalysisDetailEvent:

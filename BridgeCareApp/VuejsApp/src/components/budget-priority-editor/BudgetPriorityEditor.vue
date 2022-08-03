@@ -21,7 +21,7 @@
                         </v-divider>
                         <v-checkbox class='sharing header-text-content' label='Shared'
                             v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'
-                            v-model='selectedBudgetPriorityLibrary.shared' />
+                            v-model='selectedBudgetPriorityLibrary.isShared' />
                     </v-layout>                               
                 </v-flex>                               
                 <v-flex xs4 class="ghd-constant-header">
@@ -674,14 +674,7 @@ export default class BudgetPriorityEditor extends Vue {
     width: 100%;
 }
 
-.sharing label {
-    padding-top: 0.5em;
-}
 
-.sharing {
-    padding-top: 0;
-    margin: 0;
-}
 
 .row-padding{
     padding-top: 0px;

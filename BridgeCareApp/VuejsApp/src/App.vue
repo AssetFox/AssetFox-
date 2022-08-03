@@ -24,6 +24,14 @@
                         Libraries
                     </v-btn>
                     <v-btn
+                        @click="onNavigate('/EditRawData/')"
+                        class="ara-blue-pantone-281"
+                        flat
+                        v-if="isAdmin"
+                    >
+                        Raw Data
+                    </v-btn>
+                    <v-btn
                         @click="onNavigate('/UserCriteria/')"
                         class="ara-blue-pantone-281"
                         flat
@@ -316,7 +324,7 @@ export default class AppComponent extends Vue {
     ignoredAPIs: string[] = [
         'SynchronizeLegacySimulation',
         'RunSimulation',
-        'GenerateSummaryReport',
+        'GenerateReport',
         'AggregateNetworkData',
         'RefreshToken',
     ];

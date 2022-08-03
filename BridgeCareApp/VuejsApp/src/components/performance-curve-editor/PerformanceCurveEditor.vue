@@ -217,7 +217,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" icon>
-                                                <img class='img-general' src="../../../public/icons/eye-ghd-blue.svg"/>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -246,7 +246,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -261,7 +261,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" flat icon>
-                                                <img class='img-general' src="../../../public/icons/eye-ghd-blue.svg"/>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -291,7 +291,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -304,7 +304,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </td>
                             </template>

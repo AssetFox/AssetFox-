@@ -125,7 +125,7 @@
                                 @click="onEditCashFlowRuleCriterionLibrary(props.item)"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
                             </v-layout>
                                                    
@@ -136,13 +136,13 @@
                                 @click="onDeleteCashFlowRule(props.item.id)"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>
                             <v-btn
                                 @click="onSelectCashFlowRule(props.item.id)"
                                 class="ghd-blue"
                                 icon>
-                                <img class='img-general' src="../../../public/icons/edit-cash.svg"/>
+                                <img class='img-general' :src="require('@/assets/icons/edit-cash.svg')"/>
                             </v-btn>
                             </v-layout>                          
                         </td>

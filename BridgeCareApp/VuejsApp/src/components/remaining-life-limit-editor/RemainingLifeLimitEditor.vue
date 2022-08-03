@@ -122,12 +122,12 @@
                         </td>
                         <td class="px-0">
                             <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
-                                <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>   
                         </td>
                         <td justify-end>
                             <v-btn @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
-                                <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                             </v-btn>                          
                         </td>
                     </tr>

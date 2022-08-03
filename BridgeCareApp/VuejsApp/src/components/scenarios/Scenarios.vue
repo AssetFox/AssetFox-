@@ -152,7 +152,7 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <img class='img-general' src="../../../public/icons/more-vertical.svg"/>
+                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -303,7 +303,7 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <img class='img-general' src="../../../public/icons/more-vertical.svg"/>
+                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
@@ -705,43 +705,43 @@ export default class Scenarios extends Vue {
             {
                 title: 'Run Analysis',
                 action: this.availableActions.runAnalysis,
-                icon: require("../../../public/icons/monitor.svg"),
+                icon: require("@/assets/icons/monitor.svg"),
             },
             {
                 title: 'Reports',
                 action: this.availableActions.reports,
-                icon: require("../../../public/icons/clipboard.svg"),
+                icon: require("@/assets/icons/clipboard.svg"),
             },
             {
                 title: 'Settings',
                 action: this.availableActions.settings,
-                icon: require("../../../public/icons/gear.svg"),
+                icon: require("@/assets/icons/gear.svg"),
             },
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
-                icon: require("../../../public/icons/committed-projects.svg"),
+                icon: require("@/assets/icons/committed-projects.svg"),
             },
             {
                 title: 'Clone',
                 action: this.availableActions.clone,
-                icon: require("../../../public/icons/copy.svg"),
+                icon: require("@/assets/icons/copy.svg"),
             },
             {
                 title: 'Delete',
                 action: this.availableActions.delete,
-                icon: require("../../../public/icons/trash.svg"),
+                icon: require("@/assets/icons/trash.svg"),
             }           
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
         this.actionItems.splice(4, 0, {
             title: 'Share',
             action: this.availableActions.share,
-            icon: require("../../../public/icons/share-geometric.svg"),
+            icon: require("@/assets/icons/share-geometric.svg"),
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: require("../../../public/icons/star-empty.svg"), count: 0 },
-            { name: 'Shared with me', icon: require("../../../public/icons/share-empty.svg"), count: 0 },
+            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: 0 },
+            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: 0 },
         );
         this.tab = 'My scenarios';
     }

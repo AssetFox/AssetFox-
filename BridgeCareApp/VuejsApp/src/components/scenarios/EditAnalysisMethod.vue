@@ -131,7 +131,7 @@
                                         class="edit-icon ghd-control-label"
                                         icon
                                     >
-                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-flex>
                             </v-layout>

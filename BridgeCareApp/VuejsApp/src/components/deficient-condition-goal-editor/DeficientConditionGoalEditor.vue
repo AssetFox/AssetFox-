@@ -162,12 +162,12 @@
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="ghd-blue"
                                         icon>
-                                        <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
                                     <v-btn @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
-                                        <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>

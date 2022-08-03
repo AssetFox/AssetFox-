@@ -72,7 +72,7 @@
                                 class="notification-icon"
                                 icon
                             >
-                                <img style="position:absolute; top:20px; height:25px;" src="../public/icons/bell.svg"/>
+                                <img style="position:absolute; top:20px; height:25px;" :src="require('@/assets/icons/bell.svg')"/>
                                 <notification-bell
                                     :size="30"
                                     :count="notificationCounter"
@@ -150,7 +150,7 @@
                     <v-divider class="mx-1 navbar-divider" vertical color="#798899"/>
                 </v-toolbar-title>
                 <v-toolbar-title style="margin-left:2px !important" class="navbar-gray" v-if="authenticated">
-                    <img style="height:40px; position:relative; top:2px" src="../public/icons/user-no-circle.svg"/>
+                    <img style="height:40px; position:relative; top:2px" :src="require('@/assets/icons/user-no-circle.svg')"/>
                     <span>{{ username }}</span>
                 </v-toolbar-title>
                 <v-toolbar-title class="white--text" v-if="!authenticated">

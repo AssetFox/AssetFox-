@@ -147,13 +147,13 @@
                                         <div v-if="header.value === 'actions'">
                                             <v-layout style='flex-wrap:nowrap'>
                                                 <v-btn @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
-                                                    <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                                 <v-btn
                                                     @click="onSelectCommittedProject(props.item.id)"
                                                     class="ghd-blue"
                                                     icon>
-                                                    <img class='img-general' src="../../../public/icons/edit.svg"/>
+                                                    <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                                 </v-btn>
                                             </v-layout>
                                         </div>                            
@@ -255,7 +255,7 @@
                             </td>
                             <td>
                                 <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
-                                    <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                                 
                             </td>

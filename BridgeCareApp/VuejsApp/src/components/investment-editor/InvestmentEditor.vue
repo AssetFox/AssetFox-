@@ -161,7 +161,7 @@
                                     </div>       
                                     <div v-if="header.value === 'action'">
                                         <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
-                                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </div>                           
                                     <div v-if="header.value !== 'year' && header.value !== 'action'">

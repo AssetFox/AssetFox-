@@ -6,7 +6,7 @@
                     <v-layout fill-height justify-center>
                         <div class="drag-drop-area">
                             <v-layout fill-height align-center justify-center>
-                                <img src="../../../public/icons/upload.svg"/>
+                                <img :src="require('@/assets/icons/upload.svg')"/>
                                 <v-layout column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                                     <span class="span-center Montserrat-font-family">or</span>
@@ -44,7 +44,7 @@
                     </td>
                     <td>
                         <v-btn @click="file = null" class="ghd-blue" icon>
-                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>

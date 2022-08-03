@@ -109,7 +109,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <img class='img-general img-shift' src="../../../public/icons/edit.svg"/>
+                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -126,7 +126,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <img class='img-general img-shift' src="../../../public/icons/edit.svg"/>
+                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -138,7 +138,7 @@
                             class="ghd-blue"
                             icon
                             :disabled="!isAdmin">
-                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>

@@ -87,7 +87,7 @@
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <img class='img-general' src="../../../public/icons/trash-ghd-blue.svg"/>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </template>
                                 </v-textarea>
@@ -325,9 +325,9 @@ export default class CriteriaEditor extends Vue {
             { id: 'OR', label: 'OR' },
         ],
         addRule: 'Add Rule',
-        removeRule: `<img class='img-general' src="${require("../../../public/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
+        removeRule: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
         addGroup: 'Add Group',
-        removeGroup: `<img class='img-general' src="${require("../../../public/icons/trash-ghd-blue.svg")}"/>`,
+        removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
 

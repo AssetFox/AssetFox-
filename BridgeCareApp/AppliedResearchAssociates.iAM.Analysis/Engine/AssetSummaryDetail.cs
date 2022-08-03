@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
@@ -19,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         [JsonConstructor]
         public AssetSummaryDetail(string assetName)
         {
-            AssetName = assetName ?? throw new ArgumentNullException(nameof(assetName));
+            AssetName = assetName ?? "";
         }
 
         public string AssetName { get; }
@@ -32,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             AssetName = original.AssetName;
 
-            ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute);
+            ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute); 
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);
         }
     }

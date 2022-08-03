@@ -85,6 +85,10 @@ const CashFlowEditor = () =>
     import(
         /*webpackChunkName: cashFlowEditor*/ '@/components/cash-flow-editor/CashFlowEditor.vue'
     );
+const CommittedProjectsEditor = () =>
+    import(
+        '@/components/committed-projects-editor/CommittedProjectsEditor.vue'
+    );
 const CalculatedAttributeEditor = () =>
     import(
         /*webpackChunkName: "CalculatedAttributeEditor" */ '@/components/calculated-attribute-editor/CalculatedAttributeEditor.vue'
@@ -256,6 +260,12 @@ const router = new VueRouter({
                     props: true,
                     beforeEnter: beforeEnterFunc,
                 },
+                {
+                    path: '/CommittedProjectsEditor/Scenario',
+                    component: CommittedProjectsEditor,
+                    props: true,
+                    beforeEnter: beforeEnterFunc
+                }
             ],
         },
         {
@@ -298,6 +308,10 @@ const router = new VueRouter({
                 {
                     path: '/CashFlowEditor/Library',
                     component: CashFlowEditor,
+                },
+                {
+                    path: '/CommittedProjectsEditor/Library',
+                    component: CommittedProjectsEditor,
                 },
             ],
         },
@@ -393,6 +407,13 @@ const router = new VueRouter({
             component: CashFlowEditor,
             props: true,
             beforeEnter: beforeEnterFunc,
+        },
+        {
+            path: '/CommittedProjectsEditor/Library/',
+            name: 'CommittedProjectsEditor',
+            component: CommittedProjectsEditor,
+            props: true,
+            beforeEnter: beforeEnterFunc
         },
         {
             path: '/CriterionLibraryEditor/Library/',

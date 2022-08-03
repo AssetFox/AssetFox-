@@ -33,7 +33,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
-        private Guid _simulationId;
 
         public Guid ID { get; set; }
 

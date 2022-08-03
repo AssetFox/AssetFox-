@@ -130,7 +130,7 @@ export const assetTypeReverseMap: Map<AssetType, string> = new Map([
 // the maps are to convert data to be used in the UI to the data needed by Vue and backend
 export const treatmentCategoryMap: Map<string, TreatmentCategory> = new Map([
     ['Preservation', 0],
-    ['Capacity adding', 1],
+    ['Capacity Adding', 1],
     ['Rehabilitation', 2],
     ['Replacement', 3],
     ['Maintenance', 4],
@@ -138,7 +138,7 @@ export const treatmentCategoryMap: Map<string, TreatmentCategory> = new Map([
 ]);
 export const treatmentCategoryReverseMap: Map<TreatmentCategory, string> = new Map([
     [0, 'Preservation'],
-    [1, 'Capacity adding'],
+    [1, 'Capacity Adding'],
     [2, 'Rehabilitation'],
     [3, 'Replacement'],
     [4, 'Maintenance'],

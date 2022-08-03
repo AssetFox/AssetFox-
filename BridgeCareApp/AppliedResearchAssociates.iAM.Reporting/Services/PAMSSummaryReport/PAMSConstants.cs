@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string UnfundedPavementProjects_Tab = "Unfunded Pavement Projects"; //tabular data
         public const string UnfundedPavementProjects_Tab_Title = "";
 
-        public const string PavementWorkSummary_Tab = "Pavement Work Summary"; //categoriesd tabular data and estimates
+        public const string PavementWorkSummary_Tab = "Pavement Work Summary"; //categorized tabular data and estimates
         public const string PavementWorkSummary_Tab_Title = "";
 
         public const string PavementWorkSummaryByBudget_Tab = "Pavement Work Summary By Budget";
@@ -60,13 +60,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport
         public const string Legend_Tab = "Legend";
         public const string Legend_Tab_Title = "";
 
+        public const string AsphaltTotal = "PAMS Full Depth Asphalt Total";
+        public const string CompositeTotal = "PAMS Composite Total";
+        public const string ConcreteTotal = "PAMS Concrete Total";
 
         //Data Variables
         public const string Work = "Work";
         public const string Cost = "Cost";
+        public const string Total = "Total";
 
         public const string NoTreatment = "no treatment";
         public const string NoTreatmentForWorkSummary = "No Treatment";
+
+
+        public const string PercentBudgetSpentMPMS = "% of Budget - MPMS";
+        public const string PercentBudgetSpentPAMS = "% of Budget - PAMS";
+        public const string PercentBudgetSpentSAP = "% of Budget - SAP";
+        public const string RemainingBudget = "Remaining Budget";
 
         public const string Poor = "Poor";
         public const string Fair = "Fair";

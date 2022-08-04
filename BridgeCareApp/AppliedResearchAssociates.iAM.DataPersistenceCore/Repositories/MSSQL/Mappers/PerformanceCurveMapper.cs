@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsShared = entity.IsShared,
                 PerformanceCurves = entity.PerformanceCurves.Any()
                     ? entity.PerformanceCurves.Select(_ => _.ToDto()).ToList()
-                    : new List<PerformanceCurveDTO>()
+                    : new List<PerformanceCurveDTO>(),
             };
 
         public static PerformanceCurveDTO ToDto(this PerformanceCurveEntity entity) =>
@@ -81,7 +81,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO(),
                 Equation = entity.PerformanceCurveEquationJoin != null
                     ? entity.PerformanceCurveEquationJoin.Equation.ToDto()
-                    : new EquationDTO()
+                    : new EquationDTO(),
+                Shift = entity.Shift,
             };
 
         public static PerformanceCurveDTO ToDto(this ScenarioPerformanceCurveEntity entity) =>
@@ -95,7 +96,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     : new CriterionLibraryDTO(),
                 Equation = entity.ScenarioPerformanceCurveEquationJoin != null
                     ? entity.ScenarioPerformanceCurveEquationJoin.Equation.ToDto()
-                    : new EquationDTO()
+                    : new EquationDTO(),
+                Shift = entity.Shift,
             };
     }
 }

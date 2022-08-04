@@ -284,8 +284,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.AddAll(performanceCurveEntities.Where(_ => !existingEntityIds.Contains(_.Id)).ToList());
 
-            // wjwjwj probably should not be deleting and re-adding? Instead, keep equations around if poossible, and
-            // the same for criteria? But when making the change, see if we run into trouble.
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
                 equationIdsToDelete.Contains(_.Id));
 
@@ -332,9 +330,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         criterionJoins.Add(new CriterionLibraryPerformanceCurveEntity
                         {
                             CriterionLibraryId = criterion.Id, PerformanceCurveId = curve.Id
-                            // Wjwjwj ShouldModifyPerformanceCurves test is failing because it
-                            // hits this code. But that may be an error in the way I wrote
-                            // the test? In particular not sure about the MergedCriteriaExpression.
                         });
                         return criterion;
                     }).ToList();
@@ -560,76 +555,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
-
-            //_unitOfWork.Context.DeleteAll<ScenarioPerformanceCurveEntity>(_ =>
-            //    _.SimulationId == simulationId && !entityIds.Contains(_.Id));
-
-            //_unitOfWork.Context.UpdateAll(scenarioPerformanceCurveEntities.Where(_ => existingEntityIds.Contains(_.Id))
-            //    .ToList());
-
-            //_unitOfWork.Context.AddAll(scenarioPerformanceCurveEntities.Where(_ => !existingEntityIds.Contains(_.Id))
-            //    .ToList());
-
-            //_unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-            //    _.ScenarioPerformanceCurveEquationJoin.ScenarioPerformanceCurve.SimulationId == simulationId);
-
-            //_unitOfWork.Context.DeleteAll<CriterionLibraryScenarioPerformanceCurveEntity>(_ =>
-            //    _.ScenarioPerformanceCurve.SimulationId == simulationId);
-
-            //if (scenarioPerformanceCurves.Any(_ =>
-            //    _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression)))
-            //{
-            //    var equationEntities = new List<EquationEntity>();
-            //    var equationJoinEntities = new List<ScenarioPerformanceCurveEquationEntity>();
-
-            //    scenarioPerformanceCurves.Where(_ =>
-            //            _.Equation?.Id != null && _.Equation?.Id != Guid.Empty && !string.IsNullOrEmpty(_.Equation.Expression))
-            //        .ForEach(curve =>
-            //        {
-            //            var equationEntity = new EquationEntity
-            //            {
-            //                Id = Guid.NewGuid(),
-            //                Expression = curve.Equation.Expression,
-            //            };
-            //            equationEntities.Add(equationEntity);
-            //            equationJoinEntities.Add(new ScenarioPerformanceCurveEquationEntity
-            //            {
-            //                EquationId = equationEntity.Id, ScenarioPerformanceCurveId = curve.Id
-            //            });
-            //        });
-
-            //    _unitOfWork.Context.AddAll(equationEntities, _unitOfWork.UserEntity?.Id);
-            //    _unitOfWork.Context.AddAll(equationJoinEntities, _unitOfWork.UserEntity?.Id);
-            //}
-
-            //if (scenarioPerformanceCurves.Any(_ =>
-            //    _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-            //    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
-            //{
-            //    var criterionJoins = new List<CriterionLibraryScenarioPerformanceCurveEntity>();
-
-            //    var criteria = scenarioPerformanceCurves
-            //        .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-            //                    !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression))
-            //        .Select(curve =>
-            //        {
-            //            var criterion = new CriterionLibraryEntity
-            //            {
-            //                Id = Guid.NewGuid(),
-            //                MergedCriteriaExpression = curve.CriterionLibrary.MergedCriteriaExpression,
-            //                Name = $"{curve.Name} {curve.Attribute} Criterion",
-            //                IsSingleUse = true
-            //            };
-            //            criterionJoins.Add(new CriterionLibraryScenarioPerformanceCurveEntity
-            //            {
-            //                CriterionLibraryId = criterion.Id, ScenarioPerformanceCurveId = curve.Id
-            //            });
-            //            return criterion;
-            //        }).ToList();
-
-            //    _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
-            //    _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
-            //}
 
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);

@@ -128,6 +128,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="piecewiseGridHeaders"
                                           :items="piecewiseGridData"
+                                          sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props">
@@ -145,7 +146,7 @@
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon
                                            v-if="props.item.timeValue !== 0">
-                                      <v-icon>fas fa-trash</v-icon>
+                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>
@@ -198,6 +199,7 @@
                           <div class="data-points-grid">
                             <v-data-table :headers="timeInRatingGridHeaders"
                                           :items="timeInRatingGridData"
+                                          sort-icon=$vuetify.icons.ghd-table-sort
                                           class="v-table__overflow ghd-table"
                                           hide-actions>
                               <template slot="items" slot-scope="props">
@@ -211,7 +213,7 @@
                                   <div v-else>
                                     <v-btn @click="onRemoveTimeAttributeDataPoint(props.item.id)" class="ghd-blue"
                                            icon>
-                                      <v-icon>fas fa-trash</v-icon>
+                                      <img :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                   </div>
                                 </td>

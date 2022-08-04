@@ -6,6 +6,7 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Select Budget Priority Library</v-subheader>
                             <v-select :items='librarySelectItems' 
+                                append-icon=$vuetify.icons.ghd-down
                                 outline                           
                                 v-model='librarySelectItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                             </v-select>                           
@@ -43,6 +44,7 @@
             <div class='priorities-data-table'>
                 <v-data-table :headers='budgetPriorityGridHeaders' :items='budgetPriorityGridRows'
                               class='v-table__overflow ghd-table' item-key='id' select-all
+                              sort-icon=$vuetify.icons.ghd-table-sort
                               v-model='selectedBudgetPriorityGridRows' :must-sort='true'>
                     <template slot='items' slot-scope='props'>
                         <td>
@@ -76,7 +78,7 @@
                                         <template slot='activator'>
                                             <div v-if='stateScenarioSimpleBudgetDetails.length > 5'>
                                                 <v-btn class='ara-blue ghd-button-text' icon>
-                                                    <v-icon>fas fa-eye</v-icon>
+                                                    <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')"/>
                                                 </v-btn>
                                             </div>
                                             <div v-else class='priority-criteria-output'>
@@ -93,7 +95,7 @@
                                     </v-menu>
                                     <v-btn @click='onShowCriterionLibraryEditorDialog(props.item)' class='ghd-blue'
                                            icon>
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                             </div>
@@ -113,7 +115,7 @@
                             </div>
                             <div v-else>
                                 <v-btn @click="onRemoveBudgetPriority(props.item.id)"  class="ghd-blue" icon>
-                                    <v-icon>fas fa-trash</v-icon>
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </div>
                         </td>

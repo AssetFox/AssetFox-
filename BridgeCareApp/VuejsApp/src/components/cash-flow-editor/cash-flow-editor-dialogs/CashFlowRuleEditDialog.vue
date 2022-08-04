@@ -16,6 +16,7 @@
             <v-data-table
                 :headers="cashFlowRuleDistributionGridHeaders"
                 :items="cashFlowDistributionRuleGridData"
+                sort-icon=$vuetify.icons.ghd-table-sort
                 hide-actions
                 class="ghd-table v-table__overflow">
                 <template slot="items" slot-scope="props">
@@ -150,7 +151,7 @@
                             @click="onDeleteCashFlowDistributionRule(props.item.id)"
                             class="ghd-blue"
                             icon>
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>

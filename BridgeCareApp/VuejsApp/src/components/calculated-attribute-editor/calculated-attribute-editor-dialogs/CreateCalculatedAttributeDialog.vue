@@ -17,6 +17,7 @@
                           outline/>
             <v-select v-model="newCalculatedAttribute.attribute"
                       :items="attributeSelectItems"
+                      append-icon=$vuetify.icons.ghd-down
                       :rules="[rules['generalRules'].valueIsNotEmpty]"
                       label="Select Attribute"
                       outline/>

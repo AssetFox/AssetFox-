@@ -6,7 +6,7 @@
                     <v-layout fill-height justify-center>
                         <div class="drag-drop-area">
                             <v-layout fill-height align-center justify-center>
-                                <v-icon class="px-2">fas fa-cloud-upload-alt</v-icon>
+                                <img :src="require('@/assets/icons/upload.svg')"/>
                                 <v-layout column align-center>
                                     <span class="span-center Montserrat-font-family">Drag & Drop Files Here </span>
                                     <span class="span-center Montserrat-font-family">or</span>
@@ -33,6 +33,7 @@
         </v-layout>        
         <div class="files-table">
             <v-data-table :headers="tableHeaders" :items="files" class="elevation-1 fixed-header v-table__overflow Montserrat-font-family"
+                        sort-icon=$vuetify.icons.ghd-table-sort
                           hide-actions>
                 <template slot="items" slot-scope="props">
                     <td>
@@ -43,7 +44,7 @@
                     </td>
                     <td>
                         <v-btn @click="file = null" class="ghd-blue" icon>
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>

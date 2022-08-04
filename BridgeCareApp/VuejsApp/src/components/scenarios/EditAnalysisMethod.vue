@@ -9,6 +9,7 @@
                             <v-select
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="weightingAttributes"
+                                append-icon=$vuetify.icons.ghd-down
                                 @change="
                                     onSetAnalysisMethodProperty(
                                         'attribute',
@@ -26,6 +27,7 @@
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select class="ghd-select ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
+                                append-icon=$vuetify.icons.ghd-down
                                 @change="
                                     onSetAnalysisMethodProperty(
                                         'optimizationStrategy',
@@ -43,6 +45,7 @@
                             <v-select
                                 class="ghd-select ghd-control-border ghd-control-text"
                                 :items="spendingStrategy"
+                                append-icon=$vuetify.icons.ghd-down
                                 @change="
                                     onSetAnalysisMethodProperty(
                                         'spendingStrategy',
@@ -62,6 +65,7 @@
                             <v-select
                                 class="ghd-select ghd-control-text ghd-control-border"
                                 :items="benefitAttributes"
+                                append-icon=$vuetify.icons.ghd-down
                                 @change="
                                     onSetBenefitProperty('attribute', $event)
                                 "
@@ -127,7 +131,7 @@
                                         class="edit-icon ghd-control-label"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-flex>
                             </v-layout>

@@ -7,6 +7,7 @@
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family"
                       :items="dsItems"
+                      append-icon=$vuetify.icons.ghd-down
                       v-model="sourceTypeItem"
                       outline
                       outlined
@@ -23,6 +24,7 @@
               v-show="showMssql || showExcel"
               class="ghd-select ghd-text-field ghd-text-field-border ds-style Montserrat-font-family"
               :items="dsTypeItems"
+              append-icon=$vuetify.icons.ghd-down
               v-model="dataSourceTypeItem"
               outline
               outlined
@@ -45,6 +47,7 @@
             <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
             <v-select
               :items="locColumns"
+              append-icon=$vuetify.icons.ghd-down
               v-model="currentExcelLocationColumn"
               v-show="showExcel"
               class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
@@ -55,6 +58,7 @@
             <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
             <v-select
               :items="datColumns"
+              append-icon=$vuetify.icons.ghd-down
               v-show="showExcel"
               v-model="currentExcelDateColumn"
               class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"

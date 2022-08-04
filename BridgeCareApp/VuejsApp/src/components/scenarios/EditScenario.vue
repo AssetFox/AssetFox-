@@ -16,7 +16,18 @@
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
-                                    <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
+                                    <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
+                                    <TreatmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
+                                    <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
+                                    <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
+                                    <PerformanceCurveSvg style="height: 34px; width: 36px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
+                                    <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
+                                    <InvestmentSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Investment'"/>  
+                                    <CashFlowSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
+                                    <BudgetPrioritySvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
+                                    <AnalysisMethodSvg style="height: 38px; width: 34px"  class="scenario-icon" v-if="navigationTab.tabName === 'Analysis Method'"/>  
+                                    <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
+                                    <CommittedProjectSvg style="height: 32px; width: 24px"  class="scenario-icon-stroke" v-if="navigationTab.tabName === 'Committed Projects'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -81,11 +92,33 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
+import AnalysisMethodSvg from '@/shared/icons/AnalysisMethodSvg.vue';
+import BudgetPrioritySvg from '@/shared/icons/BudgetPrioritySvg.vue';
+import CashFlowSvg from '@/shared/icons/CashFlowSvg.vue';
+import InvestmentSvg from '@/shared/icons/InvestmentSvg.vue';
+import DeficientConditionGoalSvg from '@/shared/icons/DeficientConditionGoalSvg.vue';
+import PerformanceCurveSvg from '@/shared/icons/PerformanceCurveSvg.vue';
+import RemainingLifeLimitSvg from '@/shared/icons/RemainingLifeLimitSvg.vue';
+import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
+import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
+import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
+import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
         Alert,
+        TreatmentSvg, 
+        TargetConditionGoalSvg,
+        RemainingLifeLimitSvg,
+        PerformanceCurveSvg,
+        DeficientConditionGoalSvg,
+        InvestmentSvg,
+        CashFlowSvg,
+        BudgetPrioritySvg,
+        AnalysisMethodSvg,
+        CalculatedAttributeSvg,
+        CommittedProjectSvg
     },
 })
 export default class EditScenario extends Vue {
@@ -399,6 +432,23 @@ export default class EditScenario extends Vue {
 }
 .settings-list a:hover {
     text-decoration: none;
+}
+
+
+.primary--text .scenario-icon{
+    fill: #FFFFFF !important;
+}
+
+.scenario-icon {
+    fill: #999999 !important;
+}
+
+.primary--text .scenario-icon-stroke{
+    stroke: #FFFFFF !important;
+}
+
+.scenario-icon-stroke {
+    stroke: #999999 !important;
 }
 
 </style>

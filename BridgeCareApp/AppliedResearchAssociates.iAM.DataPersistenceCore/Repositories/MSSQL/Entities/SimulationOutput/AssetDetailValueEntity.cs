@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.SimulationOutput
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
     public class AssetDetailValueEntity: SimulationOutputValueEntity
     {

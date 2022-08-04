@@ -264,6 +264,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<ScenarioEquationCalculatedAttributePairEntity> ScenarioEquationCalculatedAttributePair { get; set; }
 
+        public virtual DbSet<AssetDetailEntity> AssetDetail { get; set; }
+
+        public virtual DbSet<AssetDetailValueEntity> AssetDetailValue { get; set; }
+
+        public virtual DbSet<AssetSummaryDetailEntity> AssetSummaryDetail { get; set; }
+
+        public virtual DbSet<AssetSummaryDetailValueEntity> AssetSummaryDetailValue { get; set; }
+
+        public virtual DbSet<BudgetDetailEntity> BudgetDetail { get; set; }
+
+        public virtual DbSet<BudgetUsageDetailEntity> BudgetUsageDetail { get; set; }
+
+        public virtual DbSet<CashFlowConsiderationDetailEntity> CashFlowConsiderationDetail { get; set; }
+
+        public virtual DbSet<DeficientConditionGoalDetailEntity> DeficientConditionGoalDetail { get; set; }
+
+        public virtual DbSet<SimulationYearDetailEntity> SimulationYearDetail { get; set; }
+
+        public virtual DbSet<TargetConditionGoalDetailEntity> TargetConditionGoalDetail { get; set; }
+
+        public virtual DbSet<TreatmentConsiderationDetailEntity> TreatmentConsiderationDetail { get; set; }
+
+        public virtual DbSet<TreatmentOptionDetailEntity> TreatmentOptionDetail { get; set; }
+
+        public virtual DbSet<TreatmentRejectionDetailEntity> TreatmentRejectionDetail { get; set; }
+
+        public virtual DbSet<TreatmentSchedulingCollisionDetailEntity> TreatmentSchedulingCollisionDetail { get; set; }
+
         private class MigrationConnection
         {
             public string BridgeCareConnex { get; set; }

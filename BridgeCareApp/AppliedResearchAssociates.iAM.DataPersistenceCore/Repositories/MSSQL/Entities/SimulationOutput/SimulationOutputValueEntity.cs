@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class SimulationOutputValueEntity: BaseEntity
+    public abstract class SimulationOutputValueEntity: BaseEntity
     {
         public Guid Id { get; set; }
 

@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid Id { get; set; }
 
+        public virtual AttributeEntity Attribute { get; set; }
+
         public Guid AttributeId { get; set; }
 
         public bool GoalIsMet { get; set; }

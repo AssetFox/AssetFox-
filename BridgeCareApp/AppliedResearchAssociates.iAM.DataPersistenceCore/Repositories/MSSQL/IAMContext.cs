@@ -2315,6 +2315,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(e => e.SimulationYearDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<DeficientConditionGoalDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id)
+                .IsRequired();
+
+                entity.Property(e => e.ActualDeficientPercentage)
+                .IsRequired();
+
+                entity.Property(e => e.AllowedDeficientPercentage)
+                .IsRequired();
+
+                entity.Property(e => e.DeficientLimit)
+                .IsRequired();
+
+                entity.Property(e => e.GoalIsMet)
+                .IsRequired();
+
+                entity.HasOne(e => e.Attribute)
+                .WithMany(a => a.DeficientConditionGoalDetails)
+                .HasForeignKey(e => e.AttributeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.DeficientConditionGoalDetails)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            modelBuilder.Entity<TargetConditionGoalDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id)
+                .IsRequired();
+
+                entity.Property(e => e.GoalIsMet)
+                .IsRequired();
+
+                entity.Property(e => e.ActualValue)
+                .IsRequired();
+
+                entity.Property(e => e.TargetValue)
+                .IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.TargetConditionGoals)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Attribute)
+                .WithMany(a => a.TargetConditionGoalDetails)
+                .HasForeignKey(e => e.AttributeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

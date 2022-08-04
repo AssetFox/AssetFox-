@@ -17,9 +17,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int? BudgetPriorityLevel { get; set; }
 
-        public ICollection<BudgetUsageDetailEntity> BudgetUsages { get; set; } = new HashSet<BudgetUsageDetailEntity>();
+        public ICollection<BudgetUsageDetailEntity> BudgetUsageDetails { get; set; } = new HashSet<BudgetUsageDetailEntity>();
 
-        public ICollection<CashFlowConsiderationDetailEntity> CashFlowConsiderations { get; set; } = new HashSet<CashFlowConsiderationDetailEntity>();
+        public ICollection<CashFlowConsiderationDetailEntity> CashFlowConsiderationDetails { get; set; } = new HashSet<CashFlowConsiderationDetailEntity>();
 
         public string TreatmentName { get; }
     }

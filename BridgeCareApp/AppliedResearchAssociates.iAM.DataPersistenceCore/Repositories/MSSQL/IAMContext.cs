@@ -2305,11 +2305,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.AvailableFunding)
-                .IsRequired();
+                entity.Property(e => e.AvailableFunding).IsRequired();
 
-                entity.Property(e => e.BudgetName)
-                .IsRequired();
+                entity.Property(e => e.BudgetName).IsRequired();
 
                 entity.HasOne(e => e.SimulationYearDetail)
                 .WithMany(sy => sy.Budgets)
@@ -2328,11 +2326,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.AllowedDeficientPercentage)
                 .IsRequired();
 
-                entity.Property(e => e.DeficientLimit)
-                .IsRequired();
+                entity.Property(e => e.DeficientLimit).IsRequired();
 
-                entity.Property(e => e.GoalIsMet)
-                .IsRequired();
+                entity.Property(e => e.GoalIsMet).IsRequired();
 
                 entity.HasOne(e => e.Attribute)
                 .WithMany(a => a.DeficientConditionGoalDetails)
@@ -2348,17 +2344,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TargetConditionGoalDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id)
-                .IsRequired();
+                entity.Property(e => e.Id).IsRequired();
 
-                entity.Property(e => e.GoalIsMet)
-                .IsRequired();
+                entity.Property(e => e.GoalIsMet).IsRequired();
 
-                entity.Property(e => e.ActualValue)
-                .IsRequired();
+                entity.Property(e => e.ActualValue).IsRequired();
 
-                entity.Property(e => e.TargetValue)
-                .IsRequired();
+                entity.Property(e => e.TargetValue).IsRequired();
 
                 entity.HasOne(e => e.SimulationYearDetail)
                 .WithMany(sy => sy.TargetConditionGoals)
@@ -2385,6 +2377,85 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.SimulationYearDetail)
                 .WithMany(sy => sy.Assets)
                 .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<BudgetUsageDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.CoveredCost).IsRequired();
+
+                entity.Property(e => e.Status).IsRequired();
+
+                entity.HasOne(e => e.TreatmentConsiderationDetail)
+                .WithMany(tc => tc.BudgetUsageDetails)
+                .HasForeignKey(e => e.TreatmentConsiderationDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CashFlowConsiderationDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.ReasonAgainstCashFlow).IsRequired();
+
+                entity.HasOne(e => e.TreatmentConsiderationDetail)
+                .WithMany(tc => tc.CashFlowConsiderationDetails)
+                .HasForeignKey(e => e.TreatmentConsiderationDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentConsiderationDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentConsiderationDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentOptionDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Benefit).IsRequired();
+
+                entity.Property(e => e.Cost).IsRequired();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentOptionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentRejectionDetailEntity>(entity =>
+            {
+
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.TreatmentRejectionReason).IsRequired();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentRejectionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentSchedulingCollisionDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired()
+                .ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentSchedulingCollisionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }

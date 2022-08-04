@@ -2283,6 +2283,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(e => e.AssetSummaryDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<SimulationYearDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.HasOne(e => e.SimulationOutput)
+                .WithMany(so => so.Years)
+                .HasForeignKey(a => a.SimulationOutputId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.ConditionOfNetwork)
+                .IsRequired();
+
+                entity.Property(e => e.Year)
+                .IsRequired();
+            });
+
+            modelBuilder.Entity<BudgetDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.AvailableFunding)
+                .IsRequired();
+
+                entity.Property(e => e.BudgetName)
+                .IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.Budgets)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

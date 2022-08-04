@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class ConditionGoalDetailEntity: BaseEntity
     {
+        public Guid Id { get; set; }
+
         public Guid AttributeId { get; set; }
 
         public bool GoalIsMet { get; set; }

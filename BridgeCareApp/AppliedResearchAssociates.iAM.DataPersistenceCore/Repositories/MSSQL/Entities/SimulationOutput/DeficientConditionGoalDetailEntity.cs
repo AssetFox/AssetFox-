@@ -7,10 +7,10 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class DeficientConditionGoalDetailEntity: BaseEntity
+    public class DeficientConditionGoalDetailEntity: ConditionGoalDetailEntity
     {
-        // WjJake -- do we want a superclass ConditionGoalDetailEntity? // YES
         public Guid SimulationYearDetailId { get; set; }
+
         public virtual SimulationYearDetailEntity SimulationYearDetail { get; set; }
 
         public double ActualDeficientPercentage { get; set; }
@@ -18,12 +18,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public double AllowedDeficientPercentage { get; set; }
 
         public double DeficientLimit { get; set; }
-
-        // Below are from ConditionGoalDetail
-        public Guid AttributeId { get; set; }
-
-        public bool GoalIsMet { get; set; }
-
-        public string GoalName { get; set; }
     }
 }

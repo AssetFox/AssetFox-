@@ -10,8 +10,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class BudgetUsageDetailEntity: BaseEntity
     {
+        public Guid Id { get; set; }
+
         public Guid TreatmentConsiderationDetailId { get; set; }
+
         public virtual TreatmentConsiderationDetailEntity TreatmentConsiderationDetail { get; set; }
+
         public string BudgetName { get; set; }
 
         public decimal CoveredCost { get; set; }

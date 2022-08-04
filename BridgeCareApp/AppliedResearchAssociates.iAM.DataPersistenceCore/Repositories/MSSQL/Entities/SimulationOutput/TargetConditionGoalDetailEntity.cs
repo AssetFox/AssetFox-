@@ -9,7 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class TargetConditionGoalDetailEntity: ConditionGoalDetailEntity
     {
-        // WjJake -- do we want a superclass ConditionGoalDetailEntity?
         public Guid SimulationYearDetailId { get; set; }
 
         public virtual SimulationYearDetailEntity SimulationYearDetail { get; set; }

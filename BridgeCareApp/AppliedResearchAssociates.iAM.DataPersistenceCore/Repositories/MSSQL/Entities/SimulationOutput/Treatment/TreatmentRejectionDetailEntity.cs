@@ -10,8 +10,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class TreatmentRejectionDetailEntity: BaseEntity
     {
+        public Guid Id { get; set; }
+
         public Guid AssetDetailId { get; set; }
+
         public virtual AssetDetailEntity AssetDetail { get; set; }
+
         public string TreatmentName { get; }
 
         public TreatmentRejectionReason TreatmentRejectionReason { get; }

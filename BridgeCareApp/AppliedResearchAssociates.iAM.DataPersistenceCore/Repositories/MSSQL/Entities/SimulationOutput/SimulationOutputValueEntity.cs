@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class SimulationOutputValueEntity: BaseEntity
     {
+        public Guid Id { get; set; }
+
         public string Discriminator { get; set; }
 
         public string TextValue { get; set; }

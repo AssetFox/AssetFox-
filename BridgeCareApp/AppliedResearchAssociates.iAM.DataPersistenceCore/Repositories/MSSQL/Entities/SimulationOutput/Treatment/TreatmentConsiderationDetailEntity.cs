@@ -9,8 +9,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class TreatmentConsiderationDetailEntity: BaseEntity
     {
+        public Guid Id { get; set; }
+
         public Guid AssetDetailId { get; set; }
+
         public virtual AssetDetailEntity AssetDetail { get; set; }
+
         public int? BudgetPriorityLevel { get; set; }
 
         public ICollection<BudgetUsageDetailEntity> BudgetUsages { get; set; } = new HashSet<BudgetUsageDetailEntity>();

@@ -9,8 +9,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class BudgetDetailEntity: BaseEntity
     {
-        // WjJake -- In the Json output, this is connected to the budget by Name. Wondering if that's still what we want?
+        public Guid Id { get; set; }
+
         public Guid SimulationYearDetailId { get; set; }
+
         public virtual SimulationYearDetailEntity SimulationYearDetail { get; set; }    
 
         public decimal AvailableFunding { get; }

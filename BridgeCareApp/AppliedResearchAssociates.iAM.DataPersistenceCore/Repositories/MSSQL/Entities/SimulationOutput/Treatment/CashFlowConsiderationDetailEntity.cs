@@ -9,6 +9,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class CashFlowConsiderationDetailEntity
     {
+        public Guid Id { get; set; }
+
         public Guid TreatmentConsiderationDetailId { get; set; }
 
         public virtual TreatmentConsiderationDetailEntity TreatmentConsiderationDetail { get; set; }

@@ -10,7 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class AssetDetailEntity: AssetSummaryDetailEntity
     {
         public Guid SimulationYearDetailId { get; set; }
+
         public virtual SimulationYearDetailEntity SimulationYearDetail { get; set; }
+
         public string AppliedTreatment { get; set; }
 
         public TreatmentCause TreatmentCause { get; set; }

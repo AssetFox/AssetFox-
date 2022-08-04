@@ -9,6 +9,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     public class AssetSummaryDetailValueEntity: SimulationOutputValueEntity
     {
         public Guid AssetSummaryDetailId { get; set; }
+
         public virtual AssetSummaryDetailEntity AssetSummary { get; set; }
     }
 }

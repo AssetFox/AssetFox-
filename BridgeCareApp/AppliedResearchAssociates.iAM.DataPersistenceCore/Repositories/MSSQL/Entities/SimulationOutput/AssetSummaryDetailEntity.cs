@@ -7,15 +7,21 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AssetSummaryDetailEntity: BaseEntity
+    public class AssetSummaryDetailEntity : BaseEntity
     {
         public AssetSummaryDetailEntity()
         {
             SimulationOutputValues = new HashSet<SimulationOutputValueEntity>();
         }
+
+        public Guid Id { get; set; }
+
         public string AssetName { get; set; }
+
         public virtual SimulationOutputEntity SimulationOutput { get; set; }
+
         public Guid SimulationOutputId { get; set; }
+
         public virtual ICollection<SimulationOutputValueEntity> SimulationOutputValues { get; set; }
     }
 }

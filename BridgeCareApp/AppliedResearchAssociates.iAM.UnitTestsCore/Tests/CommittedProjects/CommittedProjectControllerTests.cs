@@ -274,7 +274,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async void DeleteSpecificWorksWithValidProject()
+        public async Task DeleteSpecificWorksWithValidProject()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -299,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async void DeleteSpecificFailsOnUnauthorized()
+        public async Task DeleteSpecificFailsOnUnauthorized()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();
@@ -327,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
         [Fact]
-        public async void DeleteSpecificHandlesBadProject()
+        public async Task DeleteSpecificHandlesBadProject()
         {
             // Arrange
             _testHelper.SetupDefaultHttpContext();

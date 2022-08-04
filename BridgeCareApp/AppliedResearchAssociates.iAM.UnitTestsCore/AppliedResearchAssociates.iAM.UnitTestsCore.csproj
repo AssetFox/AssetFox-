@@ -41,11 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataPersistenceCore\AppliedResearchAssociates.iAM.DataPersistenceCore.csproj" />
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataUnitTests\AppliedResearchAssociates.iAM.DataUnitTests.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Analysis\AppliedResearchAssociates.iAM.Analysis.csproj" />
-    <ProjectReference Include="..\AppliedResearchAssociates.iAM.TestHelpers\AppliedResearchAssociates.iAM.TestHelpers.csproj" />
     <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
   </ItemGroup>
 

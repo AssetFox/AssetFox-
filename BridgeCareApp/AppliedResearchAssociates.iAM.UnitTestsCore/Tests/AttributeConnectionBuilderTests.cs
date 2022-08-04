@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
-namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class AttributeConnectionBuilderTests
     {

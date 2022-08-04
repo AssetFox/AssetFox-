@@ -1770,6 +1770,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasIndex(e => e.Id).IsUnique();
                 entity.HasIndex(e => e.SimulationId);
 
+                entity.Property(e => e.InitialConditionOfNetwork).IsRequired();
+
                 entity.Property(e => e.OutputType)
                 .HasConversion(
                     v => v.ToString(),

@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using System;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 //using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
@@ -316,6 +317,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             ExcelHelper.ApplyBorder(cells);
         }
 
+
+
+        public List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> GetAsphaltTreatments(List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> allTreatments)
+        {
+            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Bituminous)).ToList();
+        }
+
+        public List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> GetConcreteTreatments(List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> allTreatments)
+        {
+            return allTreatments.Where(treatment => treatment.Name.ToLower().StartsWith((char)PavementTreatmentHelper.TreatmentGroupCategory.Concrete)).ToList();
+        }
+
+        public List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> GetNoTreatments(List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> allTreatments)
+        {
+            return allTreatments.Where(treatment => treatment.Name.ToLower().Equals(PAMSConstants.NoTreatment)).ToList();
+        }
 
         #endregion Private methods
     }

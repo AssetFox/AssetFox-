@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -37,7 +38,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity)
         {
-            
+            TreatmentCategory convertedCategory = default(TreatmentCategory);
+            if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
+            {
+                convertedCategory = (TreatmentCategory)convertedCategoryOut;
+            }
+
             switch (entity.CommittedProjectLocation.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
@@ -51,6 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         Year = entity.Year,
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
+                        Category = convertedCategory,
                         LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
@@ -74,6 +81,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 ScenarioBudgetId = dto.ScenarioBudgetId,
                 ShadowForAnyTreatment = dto.ShadowForAnyTreatment,
                 ShadowForSameTreatment = dto.ShadowForSameTreatment,
+                Category = dto.Category.ToString(),
                 Year = dto.Year,
                 CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
             };

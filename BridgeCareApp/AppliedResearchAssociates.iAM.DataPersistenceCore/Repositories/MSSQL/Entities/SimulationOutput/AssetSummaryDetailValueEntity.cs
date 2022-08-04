@@ -10,6 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public Guid AssetSummaryDetailId { get; set; }
 
-        public virtual AssetSummaryDetailEntity AssetSummary { get; set; }
+        public virtual AssetSummaryDetailEntity AssetSummaryDetail { get; set; }
     }
 }

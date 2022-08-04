@@ -9,7 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public MaintainableAssetEntity()
         {
             AggregatedResults = new HashSet<AggregatedResultEntity>();
+            AssetDetailValues = new HashSet<AssetDetailValueEntity>();
             AssignedData = new HashSet<AttributeDatumEntity>();
+            AssetSummaryDetailValues = new HashSet<AssetSummaryDetailValueEntity>();
         }
 
         public Guid Id { get; set; }
@@ -29,5 +31,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<AttributeDatumEntity> AssignedData { get; set; }
 
         public virtual ICollection<CommittedProjectEntity> CommittedProjects { get; set; }
+
+        public virtual ICollection<AssetDetailValueEntity> AssetDetailValues { get; set; }
+
+        public virtual ICollection<AssetSummaryDetailValueEntity> AssetSummaryDetailValues { get; set; }
     }
 }

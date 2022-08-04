@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int TreatmentCause { get; set; }
 
+        public ICollection<AssetDetailValueEntity> AssetDetailValues { get; set; } = new HashSet<AssetDetailValueEntity>();
+
         public ICollection<TreatmentConsiderationDetailEntity> TreatmentConsiderations { get; } = new HashSet<TreatmentConsiderationDetailEntity>();
 
         public bool TreatmentFundingIgnoresSpendingLimit { get; set; }

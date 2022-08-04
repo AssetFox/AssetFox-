@@ -2247,6 +2247,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(a => a.SimulationOutputId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<AssetDetailValueEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetDetailValues)
+                .HasForeignKey(a => a.MaintainableAssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.Attribute)
+                .WithMany(a => a.AssetDetailValues)
+                ;
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(a => a.AssetDetailValues)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetSummaryDetailValues)
+                .HasForeignKey(a => a.MaintainableAssetId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.Attribute)
+                .WithMany(a => a.AssetSummaryDetailValues)
+                ;
+
+                entity.HasOne(e => e.AssetSummaryDetail)
+                .WithMany(a => a.AssetSummaryDetailValues)
+                .HasForeignKey(e => e.AssetSummaryDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

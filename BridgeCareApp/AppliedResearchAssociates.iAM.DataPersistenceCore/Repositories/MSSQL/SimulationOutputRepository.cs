@@ -23,67 +23,68 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException("No simulation found for given scenario.");
-            }
+            throw new NotImplementedException();
+            //if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            //{
+            //    throw new RowNotInTableException("No simulation found for given scenario.");
+            //}
 
-            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
-                .Single(_ => _.Id == simulationId);
+            //var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+            //    .Single(_ => _.Id == simulationId);
 
-            if (simulationOutput == null)
-            {
-                throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
-            }
+            //if (simulationOutput == null)
+            //{
+            //    throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
+            //}
 
-            var settings = new StringEnumConverter();
+            //var settings = new StringEnumConverter();
 
-            try
-            {
-                _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
-                _.SimulationId == simulationId);
+            //try
+            //{
+            //    _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
+            //    _.SimulationId == simulationId);
 
-                var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
+            //    var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
 
-                _unitOfWork.Context.Add(
-                        new SimulationOutputEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            SimulationId = simulationId,
-                            Output = outputInitialConditionNetwork,
-                            OutputType = SimulationOutputEnum.InitialConditionNetwork
-                        });
+            //    _unitOfWork.Context.Add(
+            //            new SimulationOutputEntity
+            //            {
+            //                Id = Guid.NewGuid(),
+            //                SimulationId = simulationId,
+            //                Output = outputInitialConditionNetwork,
+            //                OutputType = SimulationOutputEnum.InitialConditionNetwork
+            //            });
 
-                var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
+            //    var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
 
-                _unitOfWork.Context.Add(
-                        new SimulationOutputEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            SimulationId = simulationId,
-                            Output = outputInitialSummary,
-                            OutputType = SimulationOutputEnum.InitialSummary
-                        });
+            //    _unitOfWork.Context.Add(
+            //            new SimulationOutputEntity
+            //            {
+            //                Id = Guid.NewGuid(),
+            //                SimulationId = simulationId,
+            //                Output = outputInitialSummary,
+            //                OutputType = SimulationOutputEnum.InitialSummary
+            //            });
 
-                foreach (var item in simulationOutput.Years)
-                {
-                    var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
+            //    foreach (var item in simulationOutput.Years)
+            //    {
+            //        var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
 
-                    _unitOfWork.Context.Add(
-                        new SimulationOutputEntity
-                        {
-                            Id = Guid.NewGuid(),
-                            SimulationId = simulationId,
-                            Output = simulationOutputYearData,
-                            OutputType = SimulationOutputEnum.YearlySection
-                        });
-                }
-                _unitOfWork.Context.SaveChanges();
-            }
-            catch(Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            //        _unitOfWork.Context.Add(
+            //            new SimulationOutputEntity
+            //            {
+            //                Id = Guid.NewGuid(),
+            //                SimulationId = simulationId,
+            //                Output = simulationOutputYearData,
+            //                OutputType = SimulationOutputEnum.YearlySection
+            //            });
+            //    }
+            //    _unitOfWork.Context.SaveChanges();
+            //}
+            //catch(Exception ex)
+            //{
+            //    throw new Exception(ex.Message);
+            //}
         }
 
         public void GetSimulationOutput(Simulation simulation)
@@ -102,50 +103,51 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationOutput GetSimulationOutput(Guid simulationId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            {
-                throw new RowNotInTableException($"Found no simulation having id {simulationId}");
-            }
-
-            if (!_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
-            {
-                throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
-            }
-
-            var simulationOutputObjects = _unitOfWork.Context.SimulationOutput.Where(_ => _.SimulationId == simulationId);
-
-            var simulationOutput = new SimulationOutput();
-            foreach (var item in simulationOutputObjects)
-            {
-                switch (item.OutputType)
-                {
-                case SimulationOutputEnum.YearlySection:
-                    var yearlySections = JsonConvert.DeserializeObject<SimulationYearDetail>(item.Output, new JsonSerializerSettings
-                    {
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-                    });
-                    simulationOutput.Years.Add(yearlySections);
-                    break;
-                case SimulationOutputEnum.InitialConditionNetwork:
-                    simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
-                    break;
-                case SimulationOutputEnum.InitialSummary:
-                    var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
-                    {
-                        ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-                    });
-                    simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
-                    break;
-                }
-            }
-            simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
-
-            //var outputData = JsonConvert.DeserializeObject<SimulationOutput>(simulationOutputString, new JsonSerializerSettings
+            throw new NotImplementedException();
+            //if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             //{
-            //    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            //});
+            //    throw new RowNotInTableException($"Found no simulation having id {simulationId}");
+            //}
 
-            return simulationOutput;
+            //if (!_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
+            //{
+            //    throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
+            //}
+
+            //var simulationOutputObjects = _unitOfWork.Context.SimulationOutput.Where(_ => _.SimulationId == simulationId);
+
+            //var simulationOutput = new SimulationOutput();
+            //foreach (var item in simulationOutputObjects)
+            //{
+            //    switch (item.OutputType)
+            //    {
+            //    case SimulationOutputEnum.YearlySection:
+            //        var yearlySections = JsonConvert.DeserializeObject<SimulationYearDetail>(item.Output, new JsonSerializerSettings
+            //        {
+            //            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            //        });
+            //        simulationOutput.Years.Add(yearlySections);
+            //        break;
+            //    case SimulationOutputEnum.InitialConditionNetwork:
+            //        simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
+            //        break;
+            //    case SimulationOutputEnum.InitialSummary:
+            //        var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
+            //        {
+            //            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            //        });
+            //        simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
+            //        break;
+            //    }
+            //}
+            //simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
+
+            ////var outputData = JsonConvert.DeserializeObject<SimulationOutput>(simulationOutputString, new JsonSerializerSettings
+            ////{
+            ////    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
+            ////});
+
+            //return simulationOutput;
         }
     }
 }

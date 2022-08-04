@@ -5,6 +5,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class DeficientConditionGoalEntity : ConditionGoalEntity
     {
+        public Guid Id { get; set; }
+
         public Guid DeficientConditionGoalLibraryId { get; set; }
 
         public double AllowedDeficientPercentage { get; set; }

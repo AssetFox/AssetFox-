@@ -18,6 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string TreatmentName { get; }
 
-        public TreatmentRejectionReason TreatmentRejectionReason { get; }
+        public int TreatmentRejectionReason { get; }
     }
 }

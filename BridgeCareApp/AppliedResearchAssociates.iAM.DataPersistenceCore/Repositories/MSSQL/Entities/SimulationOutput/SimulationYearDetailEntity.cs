@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public ICollection<AssetDetailEntity> Assets { get; } = new HashSet<AssetDetailEntity>();
 
-        //public List<TargetConditionGoalDetail> TargetConditionGoals { get; } = new List<TargetConditionGoalDetail>();
+        public ICollection<TargetConditionGoalDetailEntity> TargetConditionGoals { get; } = new List<TargetConditionGoalDetailEntity>();
 
 
     }

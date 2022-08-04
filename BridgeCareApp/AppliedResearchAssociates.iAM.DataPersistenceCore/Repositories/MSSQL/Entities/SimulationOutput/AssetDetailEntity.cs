@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string AppliedTreatment { get; set; }
 
-        public TreatmentCause TreatmentCause { get; set; }
+        public int TreatmentCause { get; set; }
 
         public ICollection<TreatmentConsiderationDetailEntity> TreatmentConsiderations { get; } = new HashSet<TreatmentConsiderationDetailEntity>();
 
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public ICollection<TreatmentSchedulingCollisionDetailEntity> TreatmentSchedulingCollisions { get; } = new HashSet<TreatmentSchedulingCollisionDetailEntity>();
 
-        public TreatmentStatus TreatmentStatus { get; set; }
+        public int TreatmentStatus { get; set; }
 
     }
 }

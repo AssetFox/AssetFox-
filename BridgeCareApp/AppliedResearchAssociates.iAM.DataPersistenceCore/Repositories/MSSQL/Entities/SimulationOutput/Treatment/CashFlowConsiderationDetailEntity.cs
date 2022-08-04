@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CashFlowConsiderationDetailEntity
+    public class CashFlowConsiderationDetailEntity: BaseEntity
     {
         public Guid Id { get; set; }
 
@@ -17,6 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string CashFlowRuleName { get; }
 
-        public ReasonAgainstCashFlow ReasonAgainstCashFlow { get; set; }
+        public int ReasonAgainstCashFlow { get; set; }
     }
 }

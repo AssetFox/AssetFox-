@@ -20,6 +20,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public decimal CoveredCost { get; set; }
 
-        public BudgetUsageStatus Status { get; set; }
+        public int Status { get; set; }
     }
 }

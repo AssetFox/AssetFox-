@@ -15,11 +15,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
     public class UnfundedTreatmentFinalList : IUnfundedTreatmentFinalList
     {
         private IUnfundedTreatmentCommon _unfundedTreatmentCommon;
+        private ISummaryReportHelper _summaryReportHelper;
 
         public UnfundedTreatmentFinalList()
         {
             _unfundedTreatmentCommon = new UnfundedTreatmentCommon.UnfundedTreatmentCommon();
-            if (_unfundedTreatmentCommon == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentCommon)); }
+            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public void Fill(ExcelWorksheet unfundedTreatmentTimeWorksheet, SimulationOutput simulationOutput)
@@ -64,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 var untreatedSections = _unfundedTreatmentCommon.GetUntreatedSections(year);
                 if (firstYear)
                 {
-                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"])));
+                    validFacilityIds.AddRange(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))));
                     firstYear = false;
                     if(simulationOutput.Years.Count > 1)
                     {
@@ -73,12 +74,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 }
                 else
                 {
-                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_.ValuePerNumericAttribute["BRKEY_"]))).ToList();
+                    validFacilityIds = validFacilityIds.Intersect(untreatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_")))).ToList();
                 }
 
                 foreach (var section in untreatedSections)
                 {
-                    var facilityId = Convert.ToInt32(section.ValuePerNumericAttribute["BRKEY_"]);
+                    var facilityId = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_"));
                     if (!treatmentsPerSection.ContainsKey(facilityId)) // skip if we already have a treatment for this section
                     {
                         var treatmentOptions = section.TreatmentOptions.

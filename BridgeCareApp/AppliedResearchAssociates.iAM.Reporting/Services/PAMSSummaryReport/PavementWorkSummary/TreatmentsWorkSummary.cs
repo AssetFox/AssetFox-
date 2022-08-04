@@ -79,15 +79,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 row = startRow;
                 column = ++column;
-                double asphaltTotalCount = 0;
+                double totalLength = 0;
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
-                    //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+                    var treatmentLength = costAndLength.length / 5280;
+                    totalLength += treatmentLength;
+                    worksheet.Cells[row, column].Value = treatmentLength;
                     row++;
                 }
-                worksheet.Cells[row, column].Value = asphaltTotalCount;
+                worksheet.Cells[row, column].Value = totalLength;
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231)); // treatment rows
@@ -133,15 +134,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             row = startRow;
             column = ++column;
-            double CompositeTotalCount = 0;
+            double totalLength = 0;
             foreach (var treatment in simulationTreatments)
             {
                 yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                worksheet.Cells[row, column].Value = costAndLength.length / 5280;
-                //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+                var treatmentLength = costAndLength.length / 5280;
+                totalLength += treatmentLength;
+                worksheet.Cells[row, column].Value = treatmentLength;
                 row++;
             }
-            worksheet.Cells[row, column].Value = CompositeTotalCount;
+            worksheet.Cells[row, column].Value = totalLength;
         }
         ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
         ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231));
@@ -184,15 +186,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             {
                 row = startRow;
                 column = ++column;
-                double ConcreteTotalCount = 0;
+                double totalLength = 0;
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
-                    //projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+                    var treatmentLength = costAndLength.length / 5280;
+                    totalLength += treatmentLength;
+                    worksheet.Cells[row, column].Value = treatmentLength;
                     row++;
                 }
-                worksheet.Cells[row, column].Value = ConcreteTotalCount;
+                worksheet.Cells[row, column].Value = totalLength;
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row, column]);
             ExcelHelper.ApplyColor(worksheet.Cells[startRow, fromColumn, row, column], Color.FromArgb(180, 198, 231));

@@ -10,9 +10,6 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
-    // Supporting classes for specific sections of report
-    // TODO: Factor out to separate files before PR
-
     public class CostBudgetsWorkSummary
     {
         private WorkSummaryModel _workSummaryModel;

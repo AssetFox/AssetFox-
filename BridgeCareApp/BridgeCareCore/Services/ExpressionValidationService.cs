@@ -365,6 +365,7 @@ namespace BridgeCareCore.Services
                 flattenedDataTable.Rows.Add(row);
             });
 
+
         private int GetResultsCount(string expression, List<(string name, string dataType)> attributes, Guid networkId)
         {
             var flattenedDataTable = CreateFlattenedDataTable(attributes);
@@ -406,5 +407,6 @@ namespace BridgeCareCore.Services
 
             return flattenedDataTable.Select(expression).Length;
         }
+
     }
 }

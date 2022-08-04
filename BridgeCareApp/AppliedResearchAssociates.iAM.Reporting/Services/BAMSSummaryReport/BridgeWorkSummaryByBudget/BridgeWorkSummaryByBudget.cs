@@ -14,6 +14,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary.StaticContent;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget
 {
@@ -23,6 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private CulvertCost _culvertCost;
         private BridgeWorkCost _bridgeWorkCost;
         private CommittedProjectCost _committedProjectCost;
+        private ISummaryReportHelper _summaryReportHelper;
 
         public BridgeWorkSummaryByBudget()
         {
@@ -30,6 +32,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _culvertCost = new CulvertCost();
             _bridgeWorkCost = new BridgeWorkCost();
             _committedProjectCost = new CommittedProjectCost();
+            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public void Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -84,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 isCommitted = true,
-                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount),
+                                costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = category
                             });
                             committedTreatments.Add(section.AppliedTreatment);
@@ -102,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                 Year = yearData.Year,
                                 Treatment = section.AppliedTreatment,
                                 Amount = budgetAmount,
-                                costPerBPN = (section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], budgetAmount),
+                                costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = treatmentData.Category,
                                 AssetType = treatmentData.AssetCategory
                             });

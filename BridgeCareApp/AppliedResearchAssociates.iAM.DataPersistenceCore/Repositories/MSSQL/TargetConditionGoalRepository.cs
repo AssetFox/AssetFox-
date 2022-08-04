@@ -148,8 +148,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.DeleteAll<TargetConditionGoalEntity>(_ =>
                 _.TargetConditionGoalLibraryId == libraryId && !entityIds.Contains(_.Id));
 
-            _unitOfWork.Context.UpdateAll(targetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id))
-                .ToList(), _unitOfWork.UserEntity?.Id);
+            var entitiesToUpdate = targetConditionGoalEntities.Where(_ => existingEntityIds.Contains(_.Id)).ToList();
+            _unitOfWork.Context.UpdateAll(
+                entitiesToUpdate, _unitOfWork.UserEntity?.Id);
 
             _unitOfWork.Context.AddAll(targetConditionGoalEntities.Where(_ => !existingEntityIds.Contains(_.Id))
                 .ToList(), _unitOfWork.UserEntity?.Id);

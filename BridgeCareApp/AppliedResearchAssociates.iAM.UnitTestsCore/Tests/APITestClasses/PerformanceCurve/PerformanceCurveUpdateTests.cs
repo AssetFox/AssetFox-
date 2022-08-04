@@ -15,15 +15,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class PerformanceCurveUpdateTests
     {
 
-        // WjJake -- these are currently written as tests on the Controller.
-        // An alternative would be to rewrite them as tests on the repo. 
-        // As a general matter, it's an interesting question what to do.
-        // One possible approach would be to test the repo in cases
-        // like these where we are really drilling down on the details of
-        // one complicated call  . . . and test the controller in simpler cases
-        // like PerformanceCurveTests. Another would be to test the controller
-        // with JSON calls (which involves more setup that would take me some
-        // work to figure out).
+        // Wjwjwj -- change these to repo-level tests.
         private TestHelper _testHelper => TestHelper.Instance;
 
         private void Setup()

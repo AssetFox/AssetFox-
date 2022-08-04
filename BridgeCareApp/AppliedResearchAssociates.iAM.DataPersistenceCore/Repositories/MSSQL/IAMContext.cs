@@ -2242,6 +2242,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<AssetSummaryDetailEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
                 entity.HasOne(e => e.SimulationOutput)
                 .WithMany(so => so.InitialAssetSummaries)
                 .HasForeignKey(a => a.SimulationOutputId)
@@ -2367,6 +2368,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.Attribute)
                 .WithMany(a => a.TargetConditionGoalDetails)
                 .HasForeignKey(e => e.AttributeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AssetDetailEntity>(entity =>
+            {
+                // wjwjwj Do we need to repeat the AssetSummaryDetailEntity properties here?
+                // assuming not for now.
+
+                entity.Property(e => e.TreatmentCause).IsRequired();
+
+                entity.Property(e => e.TreatmentFundingIgnoresSpendingLimit).IsRequired();
+
+                entity.Property(e => e.TreatmentStatus).IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.Assets)
+                .HasForeignKey(e => e.SimulationYearDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }

@@ -2238,6 +2238,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(d => d.SimulationId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<AssetSummaryDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.HasOne(e => e.SimulationOutput)
+                .WithMany(so => so.InitialAssetSummaries)
+                .HasForeignKey(a => a.SimulationOutputId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

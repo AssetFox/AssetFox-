@@ -2,9 +2,9 @@
 
 namespace AppliedResearchAssociates.iAM.Analysis
 {
-    internal sealed class ChangeApplicator
+    public sealed class ChangeApplicator
     {
-        public ChangeApplicator(Action action, double? number)
+        internal ChangeApplicator(Action action, double? number)
         {
             Action = action ?? throw new ArgumentNullException(nameof(action));
             Number = number;

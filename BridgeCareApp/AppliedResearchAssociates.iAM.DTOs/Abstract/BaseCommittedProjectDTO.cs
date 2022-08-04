@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
@@ -31,6 +32,14 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// This treatment does NOT need to exist in a library
         /// </remarks>
         public string Treatment { get; set; }
+
+        /// <summary>
+        /// FHWA Category for the treatment
+        /// </summary>
+        /// <remarks>
+        /// This is a fixed list
+        /// </remarks>
+        public TreatmentCategory Category { get; set; }
 
         /// <summary>
         /// Collection of consequences applied to this specific committed project

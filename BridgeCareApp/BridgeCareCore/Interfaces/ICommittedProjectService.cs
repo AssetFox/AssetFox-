@@ -12,5 +12,8 @@ namespace BridgeCareCore.Interfaces
         FileInfoDTO CreateCommittedProjectTemplate();
 
         void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment);
+
+        public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year);
+        List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year);
     }
 }

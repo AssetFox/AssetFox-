@@ -1,9 +1,12 @@
-﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using System.Collections;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
 {
     public interface ISummaryReportHelper
     {
+        T checkAndGetValue<T>(IDictionary itemsArray, string itemName);
+
         bool BridgeFunding183(AssetDetail section);
         bool BridgeFunding185(AssetDetail section);
         bool BridgeFunding581(AssetDetail section);

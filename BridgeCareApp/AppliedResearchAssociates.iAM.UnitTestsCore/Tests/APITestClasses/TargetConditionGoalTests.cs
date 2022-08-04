@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             //var criterionLibraries = _testHelper.UnitOfWork.Context.CriterionLibrary.ToList();
             //_testHelper.UnitOfWork.Context.CriterionLibrary.RemoveRange(criterionLibraries);
             //_testHelper.UnitOfWork.Context.SaveChanges();
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
@@ -122,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete(Guid simulationId)
         {
             SetupForScenarioTargetGet(simulationId);
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;

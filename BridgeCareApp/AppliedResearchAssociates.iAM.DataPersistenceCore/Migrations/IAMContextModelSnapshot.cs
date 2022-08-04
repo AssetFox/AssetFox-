@@ -529,6 +529,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid?>("AnalysisMaintainableAssetEntityId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<double>("Cost")
                         .HasColumnType("float");
 

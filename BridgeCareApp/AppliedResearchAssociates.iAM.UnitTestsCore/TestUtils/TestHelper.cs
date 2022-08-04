@@ -140,18 +140,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return returnValue;
         }
 
-        public CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
-        {
-            var resolvedId = id ?? Guid.NewGuid();
-            var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
-            var returnValue = new CriterionLibraryEntity
-            {
-                Id = resolvedId,
-                Name = resolvedName,
-                MergedCriteriaExpression = "Test Expression"
-            };
-            return returnValue;
-        }
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();

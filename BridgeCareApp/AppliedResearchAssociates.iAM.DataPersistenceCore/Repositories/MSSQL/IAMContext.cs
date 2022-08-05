@@ -1780,13 +1780,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.InitialConditionOfNetwork).IsRequired();
 
-                entity.Property(e => e.OutputType)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
-                        ? SimulationOutputEnum.InitialConditionNetwork
-                        : (SimulationOutputEnum)Enum.Parse(typeof(SimulationOutputEnum), v));
-
                 entity.HasOne(e => e.Simulation)
                     .WithMany(p => p.SimulationOutputs)
                     .HasForeignKey(d => d.SimulationId)

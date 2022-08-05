@@ -3,6 +3,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -21,6 +22,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             //simulation.Results.InitialConditionOfNetwork = simulationOutputObject.InitialConditionOfNetwork;
             //simulation.Results.InitialAssetSummaries.AddRange(simulationOutputObject.InitialAssetSummaries);
             //simulation.Results.Years.AddRange(simulationOutputObject.Years);
+        }
+
+        public static SimulationOutputEntity ToEntity(this SimulationOutput domain, Guid simulationId)
+        {
+            var id = Guid.NewGuid();
+            var attributeLookup = new Dictionary<string, Guid>();
+            var years = new List<SimulationYearDetailEntity>();
+            foreach (var year in domain.Years)
+            {
+                var mapYear = SimulationOutputYearMapper.ToEntity(year, id, attributeLookup);
+                years.Add(mapYear);
+            }
+            var entity = new SimulationOutputEntity
+            {
+                Id = id,
+                InitialConditionOfNetwork = domain.InitialConditionOfNetwork,
+                SimulationId = simulationId,
+                
+            };
+            return entity;
         }
     }
 }

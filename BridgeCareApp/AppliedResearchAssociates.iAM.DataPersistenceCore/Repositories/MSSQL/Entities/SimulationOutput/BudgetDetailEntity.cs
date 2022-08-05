@@ -15,8 +15,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual SimulationYearDetailEntity SimulationYearDetail { get; set; }    
 
-        public decimal AvailableFunding { get; }
+        public decimal AvailableFunding { get; set; }
         
-        public string BudgetName { get; }
+        public string BudgetName { get; set; }
     }
 }

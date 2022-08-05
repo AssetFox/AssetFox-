@@ -52,6 +52,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
+        protected override void ConfigureConventions(
+            ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+            configurationBuilder.Properties<decimal>()
+                .HavePrecision(18, 2);
+        }
+
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
 
         public virtual DbSet<AnalysisMethodEntity> AnalysisMethod { get; set; }
@@ -2264,12 +2272,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.AssetDetail)
                 .WithMany(a => a.AssetDetailValues)
                 .HasForeignKey(e => e.AssetDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
+
                 entity.HasOne(e => e.MaintainableAsset)
                 .WithMany(ma => ma.AssetSummaryDetailValues)
                 .HasForeignKey(a => a.MaintainableAssetId)
@@ -2282,7 +2291,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.AssetSummaryDetail)
                 .WithMany(a => a.AssetSummaryDetailValues)
                 .HasForeignKey(e => e.AssetSummaryDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<SimulationYearDetailEntity>(entity =>
@@ -2377,7 +2386,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.SimulationYearDetail)
                 .WithMany(sy => sy.Assets)
                 .HasForeignKey(e => e.SimulationYearDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientCascade);
             });
 
             modelBuilder.Entity<BudgetUsageDetailEntity>(entity =>

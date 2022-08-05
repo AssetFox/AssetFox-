@@ -297,10 +297,11 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import CriteriaCombo from './CriteriaCombo.vue';
 import { getBlankGuid } from '../utils/uuid-utils';
 
 @Component({
-    components: { VueQueryBuilder },
+    components: { VueQueryBuilder, CriteriaCombo },
 })
 export default class CriteriaEditor extends Vue {
     @Prop() criteriaEditorData: CriteriaEditorData;

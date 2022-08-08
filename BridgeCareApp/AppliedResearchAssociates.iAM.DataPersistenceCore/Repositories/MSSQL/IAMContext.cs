@@ -2355,7 +2355,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.TargetValue).IsRequired();
 
                 entity.HasOne(e => e.SimulationYearDetail)
-                .WithMany(sy => sy.TargetConditionGoals)
+                .WithMany(sy => sy.TargetConditionGoalDetails)
                 .HasForeignKey(e => e.SimulationYearDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
 

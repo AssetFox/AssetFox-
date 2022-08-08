@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
-    public static class SimulationOutputYearMapper
+    public static class SimulationYearDetailMapper
     {
         public static SimulationYearDetailEntity ToEntity(
             SimulationYearDetail domain,
@@ -15,16 +15,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var id = Guid.NewGuid();
             var budgets = BudgetDetailMapper.ToEntityList(domain.Budgets, id);
             var deficientConditionGoalDetails = DeficientConditionGoalDetailMapper.ToEntityList(domain.DeficientConditionGoals, id);
+            var targetConditionGoalDetails = TargetConditionGoalDetailMapper.ToEntityList(domain.TargetConditionGoals, id);
             var assets = AssetDetailMapper.ToEntityList(domain.Assets, id, attributeIdLookup);
             var entity = new SimulationYearDetailEntity
             {
                 Id = id,
-                ConditionOfNetwork = domain.ConditionOfNetwork,
-                SimulationOutputId = simulationOutputId,
-                DeficientConditionGoalDetails = deficientConditionGoalDetails,
-                Year = domain.Year,
-                Budgets = budgets,
                 Assets = assets,
+                Budgets = budgets,
+                ConditionOfNetwork = domain.ConditionOfNetwork,
+                DeficientConditionGoalDetails = deficientConditionGoalDetails,
+                SimulationOutputId = simulationOutputId,
+                TargetConditionGoalDetails = targetConditionGoalDetails,
+                Year = domain.Year,
             };
             return entity;
         }

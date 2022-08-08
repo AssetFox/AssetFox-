@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual TreatmentConsiderationDetailEntity TreatmentConsiderationDetail { get; set; }
 
-        public string CashFlowRuleName { get; }
+        public string CashFlowRuleName { get; set; }
 
         public int ReasonAgainstCashFlow { get; set; }
     }

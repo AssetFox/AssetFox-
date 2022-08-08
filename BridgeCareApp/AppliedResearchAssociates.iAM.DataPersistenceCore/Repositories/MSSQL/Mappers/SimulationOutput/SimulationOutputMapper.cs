@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var years = new List<SimulationYearDetailEntity>();
             foreach (var year in domain.Years)
             {
-                var mapYear = SimulationOutputYearMapper.ToEntity(year, id, attributeLookup);
+                var mapYear = SimulationYearDetailMapper.ToEntity(year, id, attributeLookup);
                 years.Add(mapYear);
             }
             var entity = new SimulationOutputEntity

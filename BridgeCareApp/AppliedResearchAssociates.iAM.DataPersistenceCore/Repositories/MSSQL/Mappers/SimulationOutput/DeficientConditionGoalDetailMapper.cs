@@ -10,7 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class DeficientConditionGoalDetailMapper
     {
-        internal static List<DeficientConditionGoalDetailEntity> ToEntityList(List<DeficientConditionGoalDetail> domainList, Guid simulationYearDetailId)
+        public static List<DeficientConditionGoalDetailEntity> ToEntityList(
+            List<DeficientConditionGoalDetail> domainList,
+            Guid simulationYearDetailId)
         {
             var entities = new List<DeficientConditionGoalDetailEntity>();
             foreach (var domain in domainList)
@@ -21,13 +23,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entities;
         }
 
-        private static DeficientConditionGoalDetailEntity ToEntity(DeficientConditionGoalDetail domain, Guid simulationYearDetailId)
+        private static DeficientConditionGoalDetailEntity ToEntity(
+            DeficientConditionGoalDetail domain,
+            Guid simulationYearDetailId)
         {
             var entity = new DeficientConditionGoalDetailEntity
             {
                 ActualDeficientPercentage = domain.ActualDeficientPercentage,
                 AllowedDeficientPercentage = domain.AllowedDeficientPercentage,
                 DeficientLimit = domain.DeficientLimit,
+                GoalIsMet = domain.GoalIsMet,
+                GoalName = domain.GoalName,
                 SimulationYearDetailId = simulationYearDetailId,
             };
             return entity;

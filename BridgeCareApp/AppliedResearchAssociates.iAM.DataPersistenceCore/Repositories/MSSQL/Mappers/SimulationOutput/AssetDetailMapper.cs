@@ -15,15 +15,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Guid simulationYearDetailId,
             Dictionary<string, Guid> attributeIdLookup)
         {
-            var mapValues = AssetDetailValueMapper.ToNumericEntityList(Guid.Empty, domain.ValuePerNumericAttribute, attributeIdLookup);
+            var id = Guid.NewGuid();
+            var mapNumericValues = AssetDetailValueMapper.ToNumericEntityList(Guid.Empty, domain.ValuePerNumericAttribute, attributeIdLookup);
+            var mapTextValues = AssetDetailValueMapper.ToTextEntityList(Guid.Empty, domain.ValuePerTextAttribute, attributeIdLookup);
+            var treatmentOptionDetails = TreatmentOptionDetailMapper.ToEntityList(domain.TreatmentOptions, id);
+            var treatmentRejectionDetails = TreatmentRejectionDetailMapper.ToEntityList(domain.TreatmentRejections, id);
+            var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToEntityList(domain.TreatmentConsiderations, id);
+            var treatmentSchedulingCollisionDetails = TreatmentSchedulingCollisionDetailMapper.ToEntityList(domain.TreatmentSchedulingCollisions, id);
+            mapNumericValues.AddRange(mapTextValues);
             var entity = new AssetDetailEntity
             {
+                Id = id,
                 SimulationYearDetailId = simulationYearDetailId,
                 AppliedTreatment = domain.AppliedTreatment,
                 TreatmentCause = (int)domain.TreatmentCause,
+                TreatmentConsiderationDetails = treatmentConsiderationDetails,
+                TreatmentOptionDetails = treatmentOptionDetails,
+                TreatmentRejectionDetails = treatmentRejectionDetails,
+                TreatmentSchedulingCollisionDetails = treatmentSchedulingCollisionDetails,
                 TreatmentFundingIgnoresSpendingLimit = domain.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (int)domain.TreatmentStatus,
                 AssetName = domain.AssetName,
+                AssetDetailValues = mapNumericValues,
             };
             return entity;
         }

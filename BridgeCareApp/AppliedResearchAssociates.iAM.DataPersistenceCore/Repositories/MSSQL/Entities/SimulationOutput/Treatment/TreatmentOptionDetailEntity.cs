@@ -15,12 +15,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public virtual AssetDetailEntity AssetDetail { get; set; }
 
-        public double Benefit { get; }
+        public double Benefit { get; set; }
 
-        public double Cost { get; }
+        public double Cost { get; set; }
 
-        public double? RemainingLife { get; }
+        public double? RemainingLife { get; set; }
 
-        public string TreatmentName { get; }
+        public string TreatmentName { get; set; }
     }
 }

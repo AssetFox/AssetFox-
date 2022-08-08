@@ -2261,6 +2261,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(a => a.Attribute)
                 .WithMany(a => a.AssetDetailValues)
+                .HasForeignKey(a => a.AttributeId)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 ;
 
                 entity.HasOne(e => e.AssetDetail)
@@ -2275,6 +2277,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(a => a.Attribute)
                 .WithMany(a => a.AssetSummaryDetailValues)
+                .HasForeignKey(a => a.AttributeId)
+                .OnDelete(DeleteBehavior.ClientCascade)
                 ;
 
                 entity.HasOne(e => e.AssetSummaryDetail)

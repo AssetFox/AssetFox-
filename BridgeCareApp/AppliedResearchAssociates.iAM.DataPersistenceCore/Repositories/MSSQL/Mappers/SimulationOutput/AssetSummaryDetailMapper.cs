@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
@@ -10,13 +7,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AssetSummaryDetailMapper
     {
-        public static void MapAssetSummaryDetailProperties(AssetSummaryDetail domain, AssetSummaryDetailEntity entity, Guid simulationOutputId)
+        public static AssetSummaryDetailEntity ToEntity(
+            AssetSummaryDetail domain,
+            Guid simulationOutputId,
+            Dictionary<string, Guid> attributeIdLookup)
         {
-
-            entity.AssetName = domain.AssetName;
-            entity.SimulationOutputId = simulationOutputId; 
-            // be a subclass of this one.
-            entity.Id = Guid.NewGuid();
+            var id = Guid.NewGuid();
+            var mapValues = AssetSummaryDetailValueMapper.ToNumericEntityList(
+                domain.ValuePerNumericAttribute,
+                attributeIdLookup);
+            var mapTextValues = AssetSummaryDetailValueMapper.ToTextEntityList(
+                domain.ValuePerTextAttribute,
+                attributeIdLookup);
+            mapValues.AddRange(mapTextValues);
+            var entity = new AssetSummaryDetailEntity
+            {
+                Id = id,
+                SimulationOutputId = simulationOutputId,
+                AssetSummaryDetailValues = mapValues,
+            };
+            return entity;
         }
     }
 }

@@ -15,15 +15,19 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
 
             AssetName = asset.AssetName;
+            AssetId = asset.Id;
         }
 
         [JsonConstructor]
-        public AssetSummaryDetail(string assetName)
+        public AssetSummaryDetail(string assetName, Guid assetId)
         {
             AssetName = assetName ?? "";
+            AssetId = assetId;
         }
 
         public string AssetName { get; }
+
+        public Guid AssetId { get; }
 
         public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
 

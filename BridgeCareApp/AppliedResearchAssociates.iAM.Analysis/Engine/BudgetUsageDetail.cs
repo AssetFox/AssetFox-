@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             BudgetName = budgetName;
         }
 
-        public string BudgetName { get; } // WjJake -- I'm guessing a lot of these properties will now need setters, or at least init setters
+        public string BudgetName { get; } 
 
         public decimal CoveredCost { get; set; }
 

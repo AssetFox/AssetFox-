@@ -2248,15 +2248,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .WithMany(so => so.InitialAssetSummaries)
                 .HasForeignKey(a => a.SimulationOutputId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetSummaryDetails)
+                .HasForeignKey(e => e.MaintainableAssetId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AssetDetailValueEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-                entity.HasOne(e => e.MaintainableAsset)
-                .WithMany(ma => ma.AssetDetailValues)
-                .HasForeignKey(a => a.MaintainableAssetId)
-                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(a => a.Attribute)
                 .WithMany(a => a.AssetDetailValues)
@@ -2271,11 +2272,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
-
-                entity.HasOne(e => e.MaintainableAsset)
-                .WithMany(ma => ma.AssetSummaryDetailValues)
-                .HasForeignKey(a => a.MaintainableAssetId)
-                .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(a => a.Attribute)
                 .WithMany(a => a.AssetSummaryDetailValues)
@@ -2376,6 +2372,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.SimulationYearDetail)
                 .WithMany(sy => sy.Assets)
                 .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetDetails)
+                .HasForeignKey(e => e.MaintainableAssetId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
 

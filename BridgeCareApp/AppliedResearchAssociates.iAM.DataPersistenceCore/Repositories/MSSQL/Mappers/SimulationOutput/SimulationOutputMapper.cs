@@ -29,6 +29,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var id = Guid.NewGuid();
             var attributeLookup = new Dictionary<string, Guid>();
             var years = new List<SimulationYearDetailEntity>();
+            var summaryEntities = new List<AssetSummaryDetailEntity>();
+            foreach (var domainSummary in domain.InitialAssetSummaries)
+            {
+                var summaryEntity = AssetSummaryDetailMapper.ToEntity(domainSummary, id, attributeLookup);
+                summaryEntities.Add(summaryEntity);
+            }
             foreach (var year in domain.Years)
             {
                 var mapYear = SimulationYearDetailMapper.ToEntity(year, id, attributeLookup);

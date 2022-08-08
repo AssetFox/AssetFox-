@@ -16,8 +16,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             Dictionary<string, Guid> attributeIdLookup)
         {
             var id = Guid.NewGuid();
-            var mapNumericValues = AssetDetailValueMapper.ToNumericEntityList(Guid.Empty, domain.ValuePerNumericAttribute, attributeIdLookup);
-            var mapTextValues = AssetDetailValueMapper.ToTextEntityList(Guid.Empty, domain.ValuePerTextAttribute, attributeIdLookup);
+            var mapNumericValues = AssetDetailValueMapper.ToNumericEntityList(domain.ValuePerNumericAttribute, attributeIdLookup);
+            var mapTextValues = AssetDetailValueMapper.ToTextEntityList(domain.ValuePerTextAttribute, attributeIdLookup);
             var treatmentOptionDetails = TreatmentOptionDetailMapper.ToEntityList(domain.TreatmentOptions, id);
             var treatmentRejectionDetails = TreatmentRejectionDetailMapper.ToEntityList(domain.TreatmentRejections, id);
             var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToEntityList(domain.TreatmentConsiderations, id);
@@ -26,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetDetailEntity
             {
                 Id = id,
+                MaintainableAssetId = domain.AssetId,
                 SimulationYearDetailId = simulationYearDetailId,
                 AppliedTreatment = domain.AppliedTreatment,
                 TreatmentCause = (int)domain.TreatmentCause,
@@ -35,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentSchedulingCollisionDetails = treatmentSchedulingCollisionDetails,
                 TreatmentFundingIgnoresSpendingLimit = domain.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (int)domain.TreatmentStatus,
-                AssetName = domain.AssetName,
                 AssetDetailValues = mapNumericValues,
             };
             return entity;

@@ -13,7 +13,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         // This is the entity that was formerly a subclass.
         public Guid Id { get; set; }
 
-        public string AssetName { get; set; }
+        public Guid MaintainableAssetId { get; set; }
+
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
 
         public Guid SimulationYearDetailId { get; set; }
 
@@ -28,8 +30,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public ICollection<TreatmentConsiderationDetailEntity> TreatmentConsiderationDetails { get; set; } = new HashSet<TreatmentConsiderationDetailEntity>();
 
         public bool TreatmentFundingIgnoresSpendingLimit { get; set; }
-
-        public virtual ICollection<AssetSummaryDetailValueEntity> AssetSummaryDetailValues { get; set; } = new HashSet<AssetSummaryDetailValueEntity>();
 
         public ICollection<TreatmentOptionDetailEntity> TreatmentOptionDetails { get; set; } = new HashSet<TreatmentOptionDetailEntity>();
 

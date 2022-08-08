@@ -16,7 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid Id { get; set; }
 
-        public string AssetName { get; set; }  // WjJake
+        public Guid MaintainableAssetId { get; set; }
+
+        public virtual MaintainableAssetEntity MaintainableAsset { get; set; }
 
         public virtual SimulationOutputEntity SimulationOutput { get; set; }
 

@@ -10,7 +10,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     public static class AssetDetailValueMapper
     {
         public static AssetDetailValueEntity ToNumericEntity(
-            Guid maintainableAssetId,
             KeyValuePair<string, double> assetSummaryDetailValue,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
@@ -21,14 +20,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = id,
                 Discriminator = "Numeric",
                 AttributeId = attributeId,
-                MaintainableAssetId = maintainableAssetId,
                 NumericValue = assetSummaryDetailValue.Value,
             };
             return entity;
         }
 
         public static AssetDetailValueEntity ToTextEntity(
-            Guid maintainableAssetId,
             KeyValuePair<string, string> assetSummaryDetailValue,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
@@ -39,35 +36,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = id,
                 Discriminator = "Text",
                 AttributeId = attributeId,
-                MaintainableAssetId = maintainableAssetId,
                 TextValue = assetSummaryDetailValue.Value,
             };
             return entity;
         }
 
         public static List<AssetDetailValueEntity> ToNumericEntityList(
-            Guid maintainableAssetId,
             Dictionary<string, double> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
             var entities = new List<AssetDetailValueEntity>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                var entity = ToNumericEntity(maintainableAssetId, keyValuePair, attributeIdLookup);
+                var entity = ToNumericEntity(keyValuePair, attributeIdLookup);
                 entities.Add(entity);
             }
             return entities;
         }
 
         public static List<AssetDetailValueEntity> ToTextEntityList(
-            Guid maintainableAssetId,
             Dictionary<string, string> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
             var entities = new List<AssetDetailValueEntity>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                var entity = ToTextEntity(maintainableAssetId, keyValuePair, attributeIdLookup);
+                var entity = ToTextEntity(keyValuePair, attributeIdLookup);
                 entities.Add(entity);
             }
             return entities;

@@ -1,36 +1,61 @@
 ﻿namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport
 {
+    public class ChartConditionModel
+    {
+        public int TotalCountRow_Poor { get; set; }
+        public int TotalCountRow_Fair { get; set; }
+        public int TotalCountRow_Good { get; set; }
+        public int TotalCountRow_Excellent { get; set; }
+    }
+
+    //IRI Models
+    public class IRI_BPN_1_ChartModel : ChartConditionModel { }
+    public class IRI_BPN_2_ChartModel : ChartConditionModel { }
+    public class IRI_BPN_3_ChartModel : ChartConditionModel { }
+    public class IRI_BPN_4_ChartModel : ChartConditionModel { }
+    public class IRI_StateWide_ChartModel : ChartConditionModel { }
+
+    //OPI Models
+    public class OPI_BPN_1_ChartModel : ChartConditionModel { }
+    public class OPI_BPN_2_ChartModel : ChartConditionModel { }
+    public class OPI_BPN_3_ChartModel : ChartConditionModel { }
+    public class OPI_BPN_4_ChartModel : ChartConditionModel { }
+    public class OPI_StateWide_ChartModel : ChartConditionModel { }
+
     public class ChartRowsModel
     {
-        public int TotalPamsCountSectionYearsRow { get; set; }
+        public int TotalCountSectionYearsRow { get; set; }
+        public int TotalCountBPNYearsRow { get; set; }
+                
+        public IRI_BPN_1_ChartModel IRI_BPN_1_ChartModel { get; set; }
+        public IRI_BPN_2_ChartModel IRI_BPN_2_ChartModel { get; set; }
+        public IRI_BPN_3_ChartModel IRI_BPN_3_ChartModel { get; set; }
+        public IRI_BPN_4_ChartModel IRI_BPN_4_ChartModel { get; set; }
+        public IRI_StateWide_ChartModel IRI_StateWide_ChartModel { get; set; }
 
 
-
-        public int TotalPoorPamssCountSectionYearsRow { get; set; }
-
-
-
-        public int NHSPamsCountSectionYearsRow { get; set; }
-
-        public int NonNHSPamsCountSectionYearsRow { get; set; }
-
-        public int NHSPamsCountPercentSectionYearsRow { get; set; }
-
-        public int NonNHSPamsCountPercentSectionYearsRow { get; set; }
+        public OPI_BPN_1_ChartModel OPI_BPN_1_ChartModel { get; set; }
+        public OPI_BPN_2_ChartModel OPI_BPN_2_ChartModel { get; set; }
+        public OPI_BPN_3_ChartModel OPI_BPN_3_ChartModel { get; set; }
+        public OPI_BPN_4_ChartModel OPI_BPN_4_ChartModel { get; set; }
+        public OPI_StateWide_ChartModel OPI_StateWide_ChartModel { get; set; }
 
 
+        public ChartRowsModel()
+        {
+            //IRI
+            IRI_BPN_1_ChartModel = new IRI_BPN_1_ChartModel();
+            IRI_BPN_2_ChartModel = new IRI_BPN_2_ChartModel();
+            IRI_BPN_3_ChartModel = new IRI_BPN_3_ChartModel();
+            IRI_BPN_4_ChartModel = new IRI_BPN_4_ChartModel();
+            IRI_StateWide_ChartModel = new IRI_StateWide_ChartModel();
 
-        public int TotalPamsCountPercentYearsRow { get; set; }
-
-
-        public int TotalPamsPostedCountByBPNYearsRow { get; set; }
-
-
-        public int TotalClosedPamsCountByBPNYearsRow { get; internal set; }
-
-
-        public int TotalPostedAndClosedByBPNYearsRow { get; internal set; }
-
-        public int TotalCashNeededByBPNYearsRow { get; internal set; }
+            //OPI
+            OPI_BPN_1_ChartModel = new OPI_BPN_1_ChartModel();
+            OPI_BPN_2_ChartModel = new OPI_BPN_2_ChartModel();
+            OPI_BPN_3_ChartModel = new OPI_BPN_3_ChartModel();
+            OPI_BPN_4_ChartModel = new OPI_BPN_4_ChartModel();
+            OPI_StateWide_ChartModel = new OPI_StateWide_ChartModel();
+        }
     }
 }

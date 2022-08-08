@@ -36,8 +36,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
         }
 
 
-        public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet pamsWorkSummaryWorksheet,
-            ChartRowsModel chartRowModel, int simulationYearsCount)
+        public void Add(ExcelPackage excelPackage, ExcelWorksheet worksheet, ExcelWorksheet pamsWorkSummaryWorksheet, ChartRowsModel chartRowModel, int simulationYearsCount)
         {
             var GraphDataDependentTabs = new Dictionary<string, GraphDataTab>();
             void AddGraphDataDependentTab(string tabTitle, string graphTitle) => GraphDataDependentTabs.Add(tabTitle, new GraphDataTab(excelPackage.Workbook.Worksheets.Add(tabTitle), graphTitle));
@@ -59,48 +58,48 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             // Create the "Graph Data" tab
             var graphDataWorksheet = excelPackage.Workbook.Worksheets.Add("Graph Data");
 
-            int startColumn = 1;
+            int startColumn = 1; startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.OPI_BPN_1_ChartModel., startColumn, simulationYearsCount);
             GraphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].DataColumn = startColumn;
 
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].DataColumn = startColumn;
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].DataColumn = startColumn;
 
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.IRI_BPN3_Tab].DataColumn = startColumn;
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.IRI_BPN3_Tab].DataColumn = startColumn;
 
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.IRI_BPN4_Tab].DataColumn = startColumn;
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.IRI_BPN4_Tab].DataColumn = startColumn;
 
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.IRI_Statewide_Tab].DataColumn = startColumn;
-
-
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.OPI_BPN1_Tab].DataColumn = startColumn;
-
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.OPI_BPN2_Tab].DataColumn = startColumn;
-
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.OPI_BPN3_Tab].DataColumn = startColumn;
-
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.OPI_BPN4_Tab].DataColumn = startColumn;
-
-            startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
-            GraphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].DataColumn = startColumn;
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.IRI_Statewide_Tab].DataColumn = startColumn;
 
 
-            _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
-            graphDataWorksheet.Hidden = eWorkSheetHidden.Hidden;
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.OPI_BPN1_Tab].DataColumn = startColumn;
+
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.OPI_BPN2_Tab].DataColumn = startColumn;
+
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.OPI_BPN3_Tab].DataColumn = startColumn;
+
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.OPI_BPN4_Tab].DataColumn = startColumn;
+
+            //startColumn = _graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.TotalPamsCountPercentYearsRow, startColumn, simulationYearsCount);
+            //GraphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].DataColumn = startColumn;
+
+
+            //_graphData.Fill(graphDataWorksheet, pamsWorkSummaryWorksheet, chartRowModel.NHSPamsCountPercentSectionYearsRow, startColumn, simulationYearsCount);
+            //graphDataWorksheet.Hidden = eWorkSheetHidden.Hidden;
 
             //// Fill the already created tabs that are dependent on the "Graph Data" tab; order of fill does not matter, worksheets were added in order
             //foreach (var graphDataTab in GraphDataDependentTabs.Values)
             //{
             //    _conditionPercentageChart.Fill(graphDataTab.Worksheet, graphDataWorksheet, graphDataTab.DataColumn, graphDataTab.Title, simulationYearsCount);
             //}
-                       
-            _addBPNGraphTab.AddBPNTab(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
+
+            //_addBPNGraphTab.AddBPNTab(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
         }
     }
 }

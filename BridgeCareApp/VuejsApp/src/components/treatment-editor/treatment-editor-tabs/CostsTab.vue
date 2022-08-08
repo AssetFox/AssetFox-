@@ -5,6 +5,7 @@
                 <v-data-table
                     hide-default-header             
                     :headers="costsGridHeaders"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     :items="costsGridData"
                     class="elevation-1 v-table__overflow ghd-padding-top"
                     hide-actions
@@ -23,7 +24,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>                                
                                 </v-layout>
                                 <v-layout xs6 align-center>  
@@ -51,7 +52,7 @@
                                         class="edit-icon"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout> 
                                 <v-layout xs6 align-center>              
@@ -76,7 +77,7 @@
                                         @click="onRemoveCost(props.item.id)"
                                         icon
                                     >
-                                        <v-icon class="ghd-blue">fas fa-trash</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </v-layout>                   
                             </td>

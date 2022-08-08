@@ -700,6 +700,30 @@ display: none !important;
     margin: 0;
 }
 
+/* Icons */
+.img-shift{
+    position: relative;
+    top: -9px;
+}
+
+.img-general{
+    height: 25px
+}
+
+.search-icon-general .v-input__icon {
+    position: relative;
+    bottom: 7px;
+}
+
+.asc .table-sort-icon, .desc .table-sort-icon{
+    stroke: #4A4A4A !important;
+}
+
+.table-sort-size{
+    height: 20px !important
+}
+
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{
     padding-left: 295px !important;

@@ -6,7 +6,8 @@
                     <v-layout column>
                         <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                         <v-select :items='selectAttributeItems'
-                            outline                           
+                            outline
+                            append-icon=$vuetify.icons.ghd-down                           
                             v-model='selectAttributeItemValue' class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>                           
                     </v-layout>
@@ -26,7 +27,8 @@
                 <v-flex xs2>
                     <v-subheader class="ghd-md-gray ghd-control-label">Type</v-subheader>
                     <v-select
-                        outline                           
+                        outline
+                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='typeSelectValues'
                         v-model='selectedAttribute.type'>
@@ -37,7 +39,8 @@
                         Aggregation Rule
                     </v-subheader>
                     <v-select
-                        outline                           
+                        outline
+                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='aggregationRuleSelectValues'
                         v-model='selectedAttribute.aggregationRuleType'>
@@ -86,7 +89,8 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Data Source</v-subheader>
                     <v-select
-                        outline  
+                        outline
+                        append-icon=$vuetify.icons.ghd-down  
                         v-model='selectDatasourceItemValue'
                         :items='selectDatasourceItems'                     
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -120,7 +124,8 @@
                 <v-layout column>
                     <v-subheader class="ghd-md-gray ghd-control-label">Column Name</v-subheader>
                     <v-select
-                        outline                           
+                        outline
+                        append-icon=$vuetify.icons.ghd-down                           
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         :items='selectExcelColumns'
                         v-model='selectedAttribute.command'>

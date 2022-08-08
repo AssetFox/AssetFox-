@@ -7,6 +7,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Select a Deficient Condition Goal Library</v-subheader>
                     <v-select
                         :items="librarySelectItems"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="librarySelectItemValue"
                         class="ghd-select ghd-text-field ghd-text-field-border">
@@ -53,19 +54,7 @@
                     </v-btn>
                 </v-layout>
             </v-flex>
-                    <!-- <v-text-field
-                        label="Library Name"
-                        v-if="hasSelectedLibrary && !hasScenario"
-                        v-model="selectedDeficientConditionGoalLibrary.name"
-                        :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot="append">
-                            <v-btn @click="librarySelectItemValue = null"
-                                class="ara-orange"
-                                icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field> -->
+                   
         </v-layout>
         </v-flex>
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
@@ -73,6 +62,7 @@
                 <v-data-table
                     :headers="deficientConditionGoalGridHeaders"
                     :items="deficientConditionGoalGridData"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     class=" ghd-table v-table__overflow"
                     item-key="id"
                     select-all
@@ -116,6 +106,7 @@
 
                                         <v-select v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
+                                            append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
                                             v-model="props.item[header.value]"
                                             :rules="[
@@ -171,12 +162,12 @@
                                         @click="onShowCriterionLibraryEditorDialog(props.item)"
                                         class="ghd-blue"
                                         icon>
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                     </v-btn>
                                 </v-layout>
                                 <div v-if="header.value === 'action'">
                                     <v-btn @click="onRemoveSelectedDeficientConditionGoal(props.item.id)"  class="ghd-blue" icon>
-                                        <v-icon>fas fa-trash</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </div>                               
                             </div>

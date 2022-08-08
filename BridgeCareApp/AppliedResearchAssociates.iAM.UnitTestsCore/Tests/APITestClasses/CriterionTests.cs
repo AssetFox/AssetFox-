@@ -20,7 +20,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryController SetupController()
         {
             _testHelper.CreateSingletons();
-            _testHelper.CreateSimulation();
             var controller = new CriterionLibraryController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
@@ -28,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private CriterionLibraryEntity Setup()
         {
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
@@ -51,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var controller = SetupController();
             // Act
             var result = await controller
-                .UpsertCriterionLibrary(_testHelper.TestCriterionLibrary().ToDto());
+                .UpsertCriterionLibrary(CriterionLibraryTestSetup.TestCriterionLibrary().ToDto());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

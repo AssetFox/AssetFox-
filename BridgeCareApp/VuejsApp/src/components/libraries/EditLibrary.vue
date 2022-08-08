@@ -16,7 +16,16 @@
                         <v-list-tile :to="navigationTab.navigation" style="border-bottom: 1px solid #CCCCCC;">
                             <v-list-tile-action>
                                 <v-list-tile-icon>
-                                    <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon>
+                                    <!-- <v-icon class="mx-2" slot="prependIcon" v-text="navigationTab.tabIcon"></v-icon> -->
+                                    <TreatmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Treatment'"/>  
+                                    <TargetConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Target Condition Goal'"/>  
+                                    <RemainingLifeLimitSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Remaining Life Limit'"/>  
+                                    <PerformanceCurveSvg style="height: 34px; width: 36px"  class="library-icon" v-if="navigationTab.tabName === 'Deterioration Model'"/>  
+                                    <DeficientConditionGoalSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Deficient Condition Goal'"/>  
+                                    <InvestmentSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Investment'"/>  
+                                    <CashFlowSvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Cash Flow'"/>  
+                                    <BudgetPrioritySvg style="height: 38px; width: 34px"  class="library-icon" v-if="navigationTab.tabName === 'Budget Priority'"/>  
+                                    <CalculatedAttributeSvg style="height: 32px; width: 32px"  class="library-icon-stroke" v-if="navigationTab.tabName === 'Calculated Attribute'"/>  
                                 </v-list-tile-icon>
                             </v-list-tile-action>
                             <v-list-tile-content>
@@ -43,8 +52,28 @@ import { any, clone, isNil, propEq } from 'ramda';
 import { Network } from '@/shared/models/iAM/network';
 import { NavigationTab } from '@/shared/models/iAM/navigation-tab';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import BudgetPrioritySvg from '@/shared/icons/BudgetPrioritySvg.vue';
+import CashFlowSvg from '@/shared/icons/CashFlowSvg.vue';
+import InvestmentSvg from '@/shared/icons/InvestmentSvg.vue';
+import DeficientConditionGoalSvg from '@/shared/icons/DeficientConditionGoalSvg.vue';
+import PerformanceCurveSvg from '@/shared/icons/PerformanceCurveSvg.vue';
+import RemainingLifeLimitSvg from '@/shared/icons/RemainingLifeLimitSvg.vue';
+import TargetConditionGoalSvg from '@/shared/icons/TargetConditionGoalSvg.vue';
+import TreatmentSvg from '@/shared/icons/TreatmentSvg.vue';
+import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
 
 @Component({
+    components: {
+        TreatmentSvg, 
+        TargetConditionGoalSvg,
+        RemainingLifeLimitSvg,
+        PerformanceCurveSvg,
+        DeficientConditionGoalSvg,
+        InvestmentSvg,
+        CashFlowSvg,
+        BudgetPrioritySvg,
+        CalculatedAttributeSvg
+    },
 })
 export default class EditLibrary extends Vue {
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
@@ -179,6 +208,22 @@ export default class EditLibrary extends Vue {
 }
 .settings-list a:hover {
     text-decoration: none;
+}
+
+.primary--text .library-icon{
+    fill: #FFFFFF !important;
+}
+
+.library-icon {
+    fill: #999999 !important;
+}
+
+.primary--text .library-icon-stroke{
+    stroke: #FFFFFF !important;
+}
+
+.library-icon-stroke {
+    stroke: #999999 !important;
 }
 
 </style>

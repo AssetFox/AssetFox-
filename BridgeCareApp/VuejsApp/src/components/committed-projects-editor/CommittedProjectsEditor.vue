@@ -26,6 +26,7 @@
                                 <v-subheader class="ghd-control-label ghd-md-gray">Treatment Library</v-subheader>
                                 <v-select
                                     outline
+                                    append-icon=$vuetify.icons.ghd-down
                                     class="ghd-select ghd-text-field ghd-text-field-border pa-0"
                                     :items='librarySelectItems' 
                                     v-model='librarySelectItemValue'>
@@ -34,14 +35,14 @@
                         </v-flex>
                         <v-flex xs6>
                             <v-text-field
-                                append-icon="fas fa-search"
+                                prepend-inner-icon=$vuetify.icons.ghd-search
                                 hide-details
                                 lablel="Search"
                                 placeholder="Search"
                                 single-line
                                 v-model="searchItems"
                                 outline
-                                class="ghd-text-field-border ghd-text-field"
+                                class="ghd-text-field-border ghd-text-field search-icon-general"
                                 style="margin-top:17px !important">
                             </v-text-field>
                         </v-flex>
@@ -58,6 +59,7 @@
                         <v-data-table
                         :headers="cpGridHeaders"
                         :items="cpItems"
+                        sort-icon=$vuetify.icons.ghd-table-sort
                         item-key='id'
                         :search="searchItems"
                         v-model="selectedCpItems"
@@ -67,6 +69,8 @@
                                     <div>
                                         <v-combobox v-if="header.value === 'treatment'"
                                                     :items="treatmentSelectItems"
+                                                    append-icon=$vuetify.icons.ghd-down
+                                                    class="ghd-down-small"
                                                     label="Select a Treatment"
                                                     v-model="props.item.treatment"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"
@@ -111,12 +115,14 @@
 
                                                 <v-select v-if="header.value === 'budget'"
                                                     :items="budgetSelectItems"
+                                                    append-icon=$vuetify.icons.ghd-down
                                                     label="Select a Budget"
                                                     v-model="props.item[header.value]">
                                                 </v-select>
 
                                                 <v-select v-if="header.value === 'category'"
                                                     :items="categorySelectItems"
+                                                    append-icon=$vuetify.icons.ghd-down
                                                     label="Select a Budget"
                                                     v-model="props.item[header.value]">
                                                 </v-select>
@@ -141,13 +147,13 @@
                                         <div v-if="header.value === 'actions'">
                                             <v-layout style='flex-wrap:nowrap'>
                                                 <v-btn @click="OnDeleteClick(props.item.id)"  class="ghd-blue" icon>
-                                                    <v-icon>fas fa-trash</v-icon>
+                                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                                 </v-btn>
                                                 <v-btn
                                                     @click="onSelectCommittedProject(props.item.id)"
                                                     class="ghd-blue"
                                                     icon>
-                                                    <v-icon>fas fa-edit</v-icon>
+                                                    <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                                 </v-btn>
                                             </v-layout>
                                         </div>                            
@@ -189,6 +195,7 @@
                     :headers="consequenceHeaders"
                     :items="selectedConsequences"
                     item-key='id'
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     class=" fixed-header v-table__overflow">
                         <template slot="items" slot-scope="props">
                             <td>
@@ -210,6 +217,7 @@
                                 <template slot="input">
                                     <v-select
                                         :items="attributeSelectItems"
+                                        append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
                                         outline
                                         v-model="props.item.attribute"
@@ -247,7 +255,7 @@
                             </td>
                             <td>
                                 <v-btn @click="OnDeleteConsequence(props.item.id)"  class="ghd-blue" icon>
-                                    <v-icon>fas fa-trash</v-icon>
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                                 
                             </td>
@@ -994,6 +1002,15 @@ export default class CommittedProjectsEditor extends Vue  {
 }
 .vl1-style {
 justify-content: space-between;
+}
+
+.ghd-down-small svg{
+    width: 12px;
+}
+
+.ghd-down-small .v-input__icon{
+    position: relative;
+    top: 2px;
 }
 
 </style>

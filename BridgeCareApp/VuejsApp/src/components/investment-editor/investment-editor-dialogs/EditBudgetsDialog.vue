@@ -14,7 +14,7 @@
                     <div style='max-height: 450px; overflow-y:auto;'>
                     <v-data-table :headers='editBudgetsDialogGridHeaders'
                                   :items='editBudgetsDialogGridData'
-                                  
+                                  sort-icon=$vuetify.icons.ghd-table-sort
                                   hide-actions
                                   item-key='id'
                                   v-model='selectedGridRows'
@@ -37,14 +37,14 @@
                                     <template slot='append-outer'>
                                         <v-icon @click='onShowCriterionLibraryEditorDialog(props.item)'
                                                 class='ghd-blue'>
-                                            fas fa-edit
+                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-icon>
                                     </template>
                                 </v-text-field>
                             </td>
                             <td>
                                 <v-btn @click="onRemoveBudget(props.item.id)"  class="ghd-blue" icon>
-                                    <v-icon>fas fa-trash</v-icon>
+                                    <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </td>
                         </template>

@@ -7,24 +7,29 @@ using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
+    // These tests were accessing a specific simulation on the real
+    // db. They are likely to remain broken. We may want to consider
+    // writing new simulation analysis tests.
+    // For now, they are going to remain skipped.
     public class SimulationAnalysisDataPersistenceTests
     {
         private const int SimulationId = 1171;
         private const int SimulationIdWithCommitted = 1260;
+        public const string BrokenDependsOnPennDotNetwork = "Broken. Depends on a particular PennDot network.";
 
         public SimulationAnalysisDataPersistenceTestHelper CreateTestHelper()
         {
             return new SimulationAnalysisDataPersistenceTestHelper();
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip =BrokenDependsOnPennDotNetwork)]
         public void TestCreateExplorer()
         {
             var testHelper = CreateTestHelper();
             try
             {
                 // Arrange
-                testHelper.CreateAttributes();                
+                testHelper.CreateAttributes();
                 testHelper.SetStandAloneSimulation(SimulationId);                                        
                 
                 // Act
@@ -96,7 +101,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip= BrokenDependsOnPennDotNetwork)]
         public void TestCreateNetwork()
         {
             var testHelper = CreateTestHelper();
@@ -179,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip = BrokenDependsOnPennDotNetwork)]
         public void TestCreateSimulationEntity()
         {
             var testHelper = CreateTestHelper();
@@ -218,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(simulation.NumberOfYearsOfTreatmentOutlook, dataSourceSimulations[0].NumberOfYearsOfTreatmentOutlook);
         }
 
-        [Fact(Skip="Broken")]
+        [Fact (Skip =BrokenDependsOnPennDotNetwork)]
         public void TestCreateAnalysisMethodEntity()
         {
             var testHelper = CreateTestHelper();
@@ -350,7 +355,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip = BrokenDependsOnPennDotNetwork)]
         public void TestCreatePerformanceCurveEntities()
         {
             var testHelper = CreateTestHelper();
@@ -403,7 +408,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }        
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip=BrokenDependsOnPennDotNetwork)]
         public void TestCreateInvestmentPlanEntity()
         {
             var testHelper = CreateTestHelper();
@@ -565,7 +570,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }
 
-        [Fact(Skip="Broken")]
+        [Fact(Skip=BrokenDependsOnPennDotNetwork)]
         public void TestCreateSelectableTreatmentEntities()
         {
             var testHelper = CreateTestHelper();

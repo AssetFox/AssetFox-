@@ -30,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void Setup()
         {
             _testHelper.CreateSingletons();
-            _testHelper.CreateSimulation();
         }
 
         private BudgetPriorityController CreateAuthorizedController()
@@ -45,9 +44,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private BudgetPriorityController CreateUnauthorizedController()
         {
-            var controller = new BudgetPriorityController(_testHelper.MockEsecSecurityDBE.Object,
+            var controller = new BudgetPriorityController(
+                _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }
 
@@ -214,7 +215,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetPriorityLibraryDTO>));
-            Assert.True(dtos.Any(b => b.Name == BudgetPriorityLibraryEntityName));
+            Assert.Contains(dtos, b => b.Name == BudgetPriorityLibraryEntityName);
             var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
             Assert.True(dtos[0].BudgetPriorities.Count() > 0);
             Assert.Equal(_testBudgetPriority.PriorityLevel, budgetPriorityLibraryDTO.BudgetPriorities[0].PriorityLevel);
@@ -307,7 +308,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
-            await Task.Delay(5000);
             var modifiedDto = _testHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id)[0];
             Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
             Assert.Equal(dtos[0].Year, modifiedDto.Year);

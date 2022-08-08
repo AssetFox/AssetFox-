@@ -10,6 +10,7 @@
                                 <v-select
                                     class="ghd-select ghd-text-field ghd-text-field-border"
                                     :items="librarySelectItems"
+                                    append-icon=$vuetify.icons.ghd-down
                                     outline
                                     v-model="librarySelectItemValue"
                                     outlined
@@ -57,6 +58,7 @@
             <div class="targets-data-table">
                 <v-data-table
                     :headers="targetConditionGoalGridHeaders"
+                    sort-icon=$vuetify.icons.ghd-table-sort
                     :items="targetConditionGoalGridData"                    
                     class="elevation-1 fixed-header v-table__overflow"
                     item-key="id"
@@ -116,14 +118,14 @@
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fa-solid fa-edit</v-icon>
+                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>
                                         <v-btn
                                             @click="onRemoveTargetConditionGoalsIcon(props.item)"
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </v-card-actions>
 
@@ -131,6 +133,7 @@
                                         <v-select
                                             v-if="header.value === 'attribute'"
                                             :items="numericAttributeNames"
+                                            append-icon=$vuetify.icons.ghd-down
                                             label="Select an Attribute"
                                             v-model="props.item.attribute"
                                             :rules="[

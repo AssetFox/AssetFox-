@@ -25,7 +25,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private AnalysisMethodController SetupController()
         {
             _testHelper.CreateSingletons();
-            _testHelper.CreateSimulation();
             _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
             var controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
@@ -72,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryEntity SetupForUpsert(Guid simulationId)
         {
             SetupForGet(simulationId);
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;

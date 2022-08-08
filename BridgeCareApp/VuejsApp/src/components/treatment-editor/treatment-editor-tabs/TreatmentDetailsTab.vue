@@ -22,8 +22,9 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Category</v-subheader>
                         <v-select
-                        class='ghd-control-border ghd-control-text ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
                             :items="Array.from(treatmentCategoryMap.keys())"
+                            append-icon=$vuetify.icons.ghd-down
                             @input="
                                 onEditTreatmentType(
                                     'category',
@@ -39,8 +40,9 @@
                     <v-flex xs3>
                         <v-subheader class="ghd-control-label ghd-md-gray">Asset type</v-subheader>
                         <v-select
-                        class='ghd-control-border ghd-control-text ghd-control-width'
+                        class='ghd-select ghd-control-text ghd-text-field ghd-text-field-border ghd-control-width'
                         :items="Array.from(assetTypeMap.keys())"
+                        append-icon=$vuetify.icons.ghd-down
                             @input="
                                 onEditAssetType(
                                     'assetType',
@@ -123,7 +125,7 @@
                                             class="edit-icon"
                                             icon
                                         >
-                                            <v-icon class="ghd-blue">fas fa-edit</v-icon>
+                                            <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>   
                                     </v-flex>                                    
                                 </v-layout>       

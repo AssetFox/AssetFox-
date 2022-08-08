@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -18,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetDetailValueEntity
             {
                 Id = id,
-                Discriminator = "Numeric",
+                Discriminator = AssetDetailValueDiscriminators.Number,
                 AttributeId = attributeId,
                 NumericValue = assetSummaryDetailValue.Value,
             };
@@ -34,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetDetailValueEntity
             {
                 Id = id,
-                Discriminator = "Text",
+                Discriminator = AssetDetailValueDiscriminators.Text,
                 AttributeId = attributeId,
                 TextValue = assetSummaryDetailValue.Value,
             };

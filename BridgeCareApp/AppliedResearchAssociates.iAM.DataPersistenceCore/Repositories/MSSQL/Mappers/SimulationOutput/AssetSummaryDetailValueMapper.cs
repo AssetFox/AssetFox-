@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetSummaryDetailValueEntity
             {
                 Id = id,
-                Discriminator = "Numeric",
+                Discriminator = AssetDetailValueDiscriminators.Number,
                 AttributeId = attributeId,
                 NumericValue = assetSummaryDetailValue.Value,
             };
@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetSummaryDetailValueEntity
             {
                 Id = id,
-                Discriminator = "Text",
+                Discriminator = AssetDetailValueDiscriminators.Text,
                 AttributeId = attributeId,
                 TextValue = keyValuePair.Value,
             };

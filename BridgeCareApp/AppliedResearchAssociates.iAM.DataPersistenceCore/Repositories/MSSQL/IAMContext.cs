@@ -2268,7 +2268,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.AssetDetail)
                 .WithMany(a => a.AssetDetailValues)
                 .HasForeignKey(e => e.AssetDetailId)
-                .OnDelete(DeleteBehavior.ClientCascade);
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
@@ -2284,7 +2284,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.AssetSummaryDetail)
                 .WithMany(a => a.AssetSummaryDetailValues)
                 .HasForeignKey(e => e.AssetSummaryDetailId)
-                .OnDelete(DeleteBehavior.ClientCascade);
+                .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<SimulationYearDetailEntity>(entity =>

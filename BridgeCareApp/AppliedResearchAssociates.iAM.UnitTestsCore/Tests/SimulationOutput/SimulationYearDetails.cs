@@ -17,6 +17,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 ConditionOfNetwork = 23,
             };
+            var assetDetail = AssetDetails.AssetDetail(context);
+            var budgetDetail = BudgetDetails.Detail();
+            var deficientConditionGoalDetail = DeficientConditionGoalDetails.Detail(context);
+            var targetConditionGoalDetail = TargetConditionGoalDetails.Detail(context);
+            yearDetail.Assets.Add(assetDetail);
+            yearDetail.Budgets.Add(budgetDetail);
+            yearDetail.DeficientConditionGoals.Add(deficientConditionGoalDetail);
+            yearDetail.TargetConditionGoals.Add(targetConditionGoalDetail);
             return yearDetail;
         }
     }

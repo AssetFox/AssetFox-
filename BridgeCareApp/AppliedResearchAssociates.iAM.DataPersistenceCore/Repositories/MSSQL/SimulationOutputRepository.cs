@@ -23,68 +23,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
-            throw new NotImplementedException();
-            //if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            //{
-            //    throw new RowNotInTableException("No simulation found for given scenario.");
-            //}
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation found for given scenario.");
+            }
 
-            //var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
-            //    .Single(_ => _.Id == simulationId);
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Single(_ => _.Id == simulationId);
 
-            //if (simulationOutput == null)
-            //{
-            //    throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
-            //}
+            if (simulationOutput == null)
+            {
+                throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
+            }
 
-            //var settings = new StringEnumConverter();
 
-            //try
-            //{
-            //    _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
-            //    _.SimulationId == simulationId);
-
-            //    var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
-
-            //    _unitOfWork.Context.Add(
-            //            new SimulationOutputEntity
-            //            {
-            //                Id = Guid.NewGuid(),
-            //                SimulationId = simulationId,
-            //                Output = outputInitialConditionNetwork,
-            //                OutputType = SimulationOutputEnum.InitialConditionNetwork
-            //            });
-
-            //    var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
-
-            //    _unitOfWork.Context.Add(
-            //            new SimulationOutputEntity
-            //            {
-            //                Id = Guid.NewGuid(),
-            //                SimulationId = simulationId,
-            //                Output = outputInitialSummary,
-            //                OutputType = SimulationOutputEnum.InitialSummary
-            //            });
-
-            //    foreach (var item in simulationOutput.Years)
-            //    {
-            //        var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
-
-            //        _unitOfWork.Context.Add(
-            //            new SimulationOutputEntity
-            //            {
-            //                Id = Guid.NewGuid(),
-            //                SimulationId = simulationId,
-            //                Output = simulationOutputYearData,
-            //                OutputType = SimulationOutputEnum.YearlySection
-            //            });
-            //    }
-            //    _unitOfWork.Context.SaveChanges();
-            //}
-            //catch(Exception ex)
-            //{
-            //    throw new Exception(ex.Message);
-            //}
+            try
+            {
+                _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
+                _.SimulationId == simulationId);
+                var entity = SimulationOutputMapper.ToEntity(simulationOutput, simulationId);
+                _unitOfWork.Context.Add(entity);
+                _unitOfWork.Context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
         public void GetSimulationOutput(Simulation simulation)

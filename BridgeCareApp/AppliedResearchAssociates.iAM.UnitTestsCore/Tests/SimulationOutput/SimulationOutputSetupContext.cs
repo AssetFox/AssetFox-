@@ -12,5 +12,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public string TextAttributeName { get; set; }
         public Guid ManagedAssetId { get; set; }
         public List<int> Years { get; set; }
+        public string TreatmentName { get; set; }
+        public string BudgetName { get; set; }
     }
 }

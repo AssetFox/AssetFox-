@@ -35,13 +35,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
             }
-
+            var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
+            var attributeIdLookup = new Dictionary<string, Guid>();
+            foreach (var attribute in allAttributes)
+            {
+                attributeIdLookup[attribute.Name] = attribute.Id;
+            }
 
             try
             {
                 _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
                 _.SimulationId == simulationId);
-                var entity = SimulationOutputMapper.ToEntity(simulationOutput, simulationId);
+                var entity = SimulationOutputMapper.ToEntity(simulationOutput, simulationId, attributeIdLookup);
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
             }

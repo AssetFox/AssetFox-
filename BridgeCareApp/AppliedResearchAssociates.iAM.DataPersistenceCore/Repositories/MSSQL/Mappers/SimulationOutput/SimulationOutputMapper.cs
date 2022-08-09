@@ -24,20 +24,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             //simulation.Results.Years.AddRange(simulationOutputObject.Years);
         }
 
-        public static SimulationOutputEntity ToEntity(this SimulationOutput domain, Guid simulationId)
+        public static SimulationOutputEntity ToEntity(
+            this SimulationOutput domain,
+            Guid simulationId,
+            Dictionary<string, Guid> attributeIdLookup)
         {
             var id = Guid.NewGuid();
-            var attributeLookup = new Dictionary<string, Guid>();
             var years = new List<SimulationYearDetailEntity>();
             var summaryEntities = new List<AssetSummaryDetailEntity>();
             foreach (var domainSummary in domain.InitialAssetSummaries)
             {
-                var summaryEntity = AssetSummaryDetailMapper.ToEntity(domainSummary, id, attributeLookup);
+                var summaryEntity = AssetSummaryDetailMapper.ToEntity(domainSummary, id, attributeIdLookup);
                 summaryEntities.Add(summaryEntity);
             }
             foreach (var year in domain.Years)
             {
-                var mapYear = SimulationYearDetailMapper.ToEntity(year, id, attributeLookup);
+                var mapYear = SimulationYearDetailMapper.ToEntity(year, id, attributeIdLookup);
                 years.Add(mapYear);
             }
             var entity = new SimulationOutputEntity

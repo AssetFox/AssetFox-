@@ -14,8 +14,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             var id = Guid.NewGuid();
             var budgets = BudgetDetailMapper.ToEntityList(domain.Budgets, id);
-            var deficientConditionGoalDetails = DeficientConditionGoalDetailMapper.ToEntityList(domain.DeficientConditionGoals, id);
-            var targetConditionGoalDetails = TargetConditionGoalDetailMapper.ToEntityList(domain.TargetConditionGoals, id);
+            var deficientConditionGoalDetails = DeficientConditionGoalDetailMapper.ToEntityList(domain.DeficientConditionGoals, id, attributeIdLookup);
+            var targetConditionGoalDetails = TargetConditionGoalDetailMapper.ToEntityList(domain.TargetConditionGoals, id, attributeIdLookup);
             var assets = AssetDetailMapper.ToEntityList(domain.Assets, id, attributeIdLookup);
             var entity = new SimulationYearDetailEntity
             {

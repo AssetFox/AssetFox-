@@ -12,11 +12,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     {
         public static TargetConditionGoalDetailEntity ToEntity(
             this TargetConditionGoalDetail domain,
-            Guid simulationYearDetailId)
+            Guid simulationYearDetailId,
+            Dictionary<string, Guid> attributeIdLookup)
         {
+            var id = Guid.NewGuid();
+            var attributeId = attributeIdLookup[domain.AttributeName];
             var entity = new TargetConditionGoalDetailEntity
             {
+                Id = id,
                 ActualValue = domain.ActualValue,
+                AttributeId = attributeId,
                 GoalIsMet = domain.GoalIsMet,
                 GoalName = domain.GoalName,
                 SimulationYearDetailId = simulationYearDetailId,
@@ -27,12 +32,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static List<TargetConditionGoalDetailEntity> ToEntityList(
             List<TargetConditionGoalDetail> domainList,
-            Guid simulationYearDetailId)
+            Guid simulationYearDetailId,
+            Dictionary<string, Guid> attributeIdLookup)
         {
             var entities = new List<TargetConditionGoalDetailEntity>();
             foreach (var domain in domainList)
             {
-                var entity = ToEntity(domain, simulationYearDetailId);
+                var entity = ToEntity(domain, simulationYearDetailId, attributeIdLookup);
                 entities.Add(entity);
             }
             return entities;

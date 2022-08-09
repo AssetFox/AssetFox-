@@ -25,6 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = id,
                 SimulationOutputId = simulationOutputId,
                 AssetSummaryDetailValues = mapValues,
+                MaintainableAssetId = domain.AssetId,
             };
             return entity;
         }

@@ -47,7 +47,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Id = id,
                 InitialConditionOfNetwork = domain.InitialConditionOfNetwork,
                 SimulationId = simulationId,
-                
+                Years = years,
+                InitialAssetSummaries = summaryEntities,
             };
             return entity;
         }

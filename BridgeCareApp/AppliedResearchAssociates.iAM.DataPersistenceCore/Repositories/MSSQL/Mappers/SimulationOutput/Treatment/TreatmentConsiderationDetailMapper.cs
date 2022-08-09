@@ -23,6 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AssetDetailId = assetDetailId,
                 BudgetPriorityLevel = domain.BudgetPriorityLevel,
                 BudgetUsageDetails = budgetUsageDetails,
+                CashFlowConsiderationDetails = cashFlowConsiderationDetails,
                 TreatmentName = domain.TreatmentName,
             };
             return entity;

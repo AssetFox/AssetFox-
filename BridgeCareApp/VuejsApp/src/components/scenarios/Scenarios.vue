@@ -875,6 +875,20 @@ export default class Scenarios extends Vue {
         });
     }
 
+    onNavigateToCommittedProjectView(localScenario: Scenario) {
+        this.selectScenarioAction({ scenarioId: localScenario.id });
+
+        this.$router.push({
+            path: '/CommittedProjectsEditor/Scenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            },
+        });
+    }
+
     onShowShareScenarioDialog(scenario: Scenario) {
         this.shareScenarioDialogData = {
             showDialog: true,
@@ -1117,8 +1131,11 @@ export default class Scenarios extends Vue {
                 this.onShowConfirmDeleteAlert(scenario);
                 break;
             case this.availableActions.commitedProjects:
-                this.selectedScenarioId = scenario.id;
-                this.showImportExportCommittedProjectsDialog = true;
+                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
+                    this.onNavigateToCommittedProjectView(scenario);
+                }
+                // this.selectedScenarioId = scenario.id;
+                // this.showImportExportCommittedProjectsDialog = true;
                 break;
         }
     }

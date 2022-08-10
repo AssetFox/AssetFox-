@@ -9,8 +9,8 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AssetDetails
-    { 
-        public static AssetDetail AssetDetail(SimulationOutputSetupContext context, string assetName)
+    {
+        public static AssetDetail AssetDetail(SimulationOutputSetupContext context, string assetName, int year)
         {
             var assetId = context.ManagedAssetId;
             var textAttributeName = context.TextAttributeName;
@@ -30,11 +30,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             detail.TreatmentOptions.Add(treatmentOptionDetail);
             var treatmentRejectionDetail = TreatmentRejectionDetails.Detail();
             detail.TreatmentRejections.Add(treatmentRejectionDetail);
-            foreach (var year in context.Years)
-            {
-                var treatmentSchedulingConsiderationDetail = TreatmentSchedulingCollisionDetails.Detail(year);
-                detail.TreatmentSchedulingCollisions.Add(treatmentSchedulingConsiderationDetail);
-            }
+            var treatmentSchedulingConsiderationDetail = TreatmentSchedulingCollisionDetails.Detail(year);
+            detail.TreatmentSchedulingCollisions.Add(treatmentSchedulingConsiderationDetail);
             return detail;
         }
     }

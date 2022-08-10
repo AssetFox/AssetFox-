@@ -34,5 +34,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
+
+
+        [Fact]
+        public void SaveTwoYearSimulationOutput_ThenLoad_Same()
+        {
+            var two = 2;
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, two);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
+            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+        }
+
+
+        [Theory]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1000)] // 2 seconds or so on 8/10 when part of a full run
+      //  [InlineData(10000)] // typically passes. Was 18.5 sec 8/10 on WJ machine.
+      //  [InlineData(100000)] // typically fails on a TimeOutException
+        public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
+        {
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
+            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+        }
     }
 }

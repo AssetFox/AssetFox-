@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 ConditionOfNetwork = 23,
             };
-            var assetDetail = AssetDetails.AssetDetail(context, context.ManagedAssetName);
+            var assetDetail = AssetDetails.AssetDetail(context, context.ManagedAssetName, year);
             var budgetDetail = BudgetDetails.Detail();
             var deficientConditionGoalDetail = DeficientConditionGoalDetails.Detail(context);
             var targetConditionGoalDetail = TargetConditionGoalDetails.Detail(context);

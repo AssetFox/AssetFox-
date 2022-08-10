@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class SimulationOutputCreationContextTestSetup
     {
-        public static SimulationOutputSetupContext ContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork)
+        public static SimulationOutputSetupContext ContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, int numberOfYears = 1)
         {
             var networkId = Guid.NewGuid();
             var assetId = Guid.NewGuid();
@@ -35,13 +35,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var textAttribute = AttributeTestSetup.Text(textAttributeId);
             var attributes = new List<Attribute> { numericAttribute, textAttribute };
             unitOfWork.AttributeRepo.UpsertAttributes(attributes);
+            var years = Enumerable.Range(2022, numberOfYears).ToList();
             var context = new SimulationOutputSetupContext
             {
                 BudgetName = "Budget",
                 ManagedAssetId = assetId,
                 ManagedAssetName = assetName,
                 TreatmentName = "Treatment",
-                Years = new List<int> { 2022 },
+                Years = years,
                 NumericAttributeName = numericAttribute.Name,
                 TextAttributeName = textAttribute.Name,
                 SimulationId = simulation.Id,

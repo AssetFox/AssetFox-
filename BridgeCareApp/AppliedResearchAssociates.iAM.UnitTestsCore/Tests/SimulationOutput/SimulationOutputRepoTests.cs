@@ -19,31 +19,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_Does()
         {
-            var networkId = Guid.NewGuid();
-            var assetId = Guid.NewGuid();
-            var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
-            var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
-            var simulation = SimulationTestSetup.EntityInDb(_testHelper.UnitOfWork, networkId);
-            var numericAttributeId = Guid.NewGuid();
-            var textAttributeId = Guid.NewGuid();
-            var numericAttribute = AttributeTestSetup.Numeric(numericAttributeId);
-            var textAttribute = AttributeTestSetup.Text(textAttributeId);
-            var attributes = new List<Attribute> { numericAttribute, textAttribute };
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributes);
-            var context = new SimulationOutputSetupContext
-            {
-                BudgetName = "Budget",
-                ManagedAssetId = assetId,
-                TreatmentName = "Treatment",
-                Years = new List<int> { 2022 },
-                NumericAttributeName = numericAttribute.Name,
-                TextAttributeName = textAttribute.Name,
-            };
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulation.Id, simulationOutput);
+            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+        }
+
+        [Fact]
+        public void SaveSimulationOutput_ThenLoad_Same()
+        {
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
     }
 }

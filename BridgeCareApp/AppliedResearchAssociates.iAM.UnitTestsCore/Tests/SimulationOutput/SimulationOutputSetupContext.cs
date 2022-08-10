@@ -14,5 +14,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public List<int> Years { get; set; }
         public string TreatmentName { get; set; }
         public string BudgetName { get; set; }
+        public Guid SimulationId { get; set; }
     }
 }

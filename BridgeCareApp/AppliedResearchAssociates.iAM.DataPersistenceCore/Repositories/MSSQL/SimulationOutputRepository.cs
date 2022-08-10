@@ -72,18 +72,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationOutput GetSimulationOutput(Guid simulationId)
         {
-            throw new NotImplementedException();
-            //if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
-            //{
-            //    throw new RowNotInTableException($"Found no simulation having id {simulationId}");
-            //}
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException($"Found no simulation having id {simulationId}");
+            }
 
-            //if (!_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
-            //{
-            //    throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
-            //}
+            if (!_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulationId))
+            {
+                throw new RowNotInTableException($"No simulation analysis results were found for simulation having id {simulationId}. Please ensure that the simulation analysis has been run.");
+            }
 
-            //var simulationOutputObjects = _unitOfWork.Context.SimulationOutput.Where(_ => _.SimulationId == simulationId);
+            var simulationOutputObjectCount = _unitOfWork.Context.SimulationOutput.Count(so => so.SimulationId == simulationId);
+            if (simulationOutputObjectCount > 1)
+            {
+                throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
+            }
+
+            var entities = _unitOfWork.Context.SimulationOutput
+                .Include(so => so.InitialAssetSummaries)
+                .ThenInclude(a => a.AssetSummaryDetailValues)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Assets)
+                .ThenInclude(a => a.AssetDetailValues)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Assets)
+                .ThenInclude(a => a.TreatmentConsiderationDetails)
+                .ThenInclude(tc => tc.CashFlowConsiderationDetails)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Assets)
+                .ThenInclude(a => a.TreatmentOptionDetails)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Assets)
+                .ThenInclude(a => a.TreatmentRejectionDetails)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Assets)
+                .ThenInclude(a => a.TreatmentSchedulingCollisionDetails)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.Budgets)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.DeficientConditionGoalDetails)
+                .Include(so => so.Years)
+                .ThenInclude(y => y.TargetConditionGoalDetails)
+                .Where(_ => _.SimulationId == simulationId)
+                .ToList();
+
+            var entity = entities[0];
+
+            var domain = SimulationOutputMapper.ToDomain(entity);
+            return domain;
 
             //var simulationOutput = new SimulationOutput();
             //foreach (var item in simulationOutputObjects)
@@ -117,6 +153,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             ////});
 
             //return simulationOutput;
+
+            throw new NotImplementedException();
         }
     }
 }

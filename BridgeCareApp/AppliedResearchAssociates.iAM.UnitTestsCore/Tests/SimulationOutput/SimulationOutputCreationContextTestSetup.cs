@@ -22,6 +22,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
             var network = NetworkTestSetup.ModelForEntityInDb(unitOfWork, maintainableAssets, networkId);
+            // WjJake -- this manual setting of the asset name has to be wrong, but it is the only way I could see to get the Name into our asset.
+            var assetName = RandomStrings.WithPrefix("AssetName");
+            var assetEntity = unitOfWork.Context.MaintainableAsset.Single(ma => ma.Id == assetId);
+            assetEntity.AssetName = assetName;
+            unitOfWork.Context.Update(assetEntity);
+            unitOfWork.Context.SaveChanges();
             var simulation = SimulationTestSetup.EntityInDb(unitOfWork, networkId);
             var numericAttributeId = Guid.NewGuid();
             var textAttributeId = Guid.NewGuid();
@@ -33,6 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 BudgetName = "Budget",
                 ManagedAssetId = assetId,
+                ManagedAssetName = assetName,
                 TreatmentName = "Treatment",
                 Years = new List<int> { 2022 },
                 NumericAttributeName = numericAttribute.Name,

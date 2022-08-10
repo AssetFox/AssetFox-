@@ -59,7 +59,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
             };
-    //        var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainList(entity.InitialAssetSummaries);
+            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainList(entity.InitialAssetSummaries);
+            domain.InitialAssetSummaries.AddRange(initialAssetSummaries);
             return domain;
         }
     }

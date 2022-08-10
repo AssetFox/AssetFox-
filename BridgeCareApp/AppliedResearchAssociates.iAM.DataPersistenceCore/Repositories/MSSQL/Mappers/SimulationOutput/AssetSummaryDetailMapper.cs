@@ -29,5 +29,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
             return entity;
         }
+
+        public static AssetSummaryDetail ToDomain(AssetSummaryDetailEntity entity)
+        {
+            var assetName = entity.MaintainableAsset.AssetName;
+            var domain = new AssetSummaryDetail(assetName, entity.MaintainableAssetId);
+            AssetSummaryDetailValueMapper.AddToDictionaries(
+                entity.AssetSummaryDetailValues,
+                domain.ValuePerNumericAttribute,
+                domain.ValuePerTextAttribute);
+            return domain;
+        }
+
+        public static List<AssetSummaryDetail> ToDomainList(ICollection<AssetSummaryDetailEntity> entityList)
+        {
+            var domainList = new List<AssetSummaryDetail>();
+            foreach (var entity in entityList)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

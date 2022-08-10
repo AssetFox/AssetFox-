@@ -91,6 +91,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entities = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.InitialAssetSummaries)
                 .ThenInclude(a => a.AssetSummaryDetailValues)
+                .Include(so => so.InitialAssetSummaries)
+                .ThenInclude(a => a.MaintainableAsset)
                 .Include(so => so.Years)
                 .ThenInclude(y => y.Assets)
                 .ThenInclude(a => a.AssetDetailValues)

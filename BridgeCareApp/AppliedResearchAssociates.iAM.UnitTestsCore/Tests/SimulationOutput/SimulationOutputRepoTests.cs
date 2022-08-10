@@ -31,6 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
     }

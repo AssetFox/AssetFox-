@@ -10,16 +10,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AssetSummaryDetails
     {
-        public static AssetSummaryDetail Detail(Guid assetId, string numericAttributeName, string textAttributeName)
+        public static AssetSummaryDetail Detail(string assetName, Guid assetId, string numericAttributeName, string textAttributeName)
         {
-            var name = RandomStrings.Length11();
-            var detail = new AssetSummaryDetail(name, assetId);
+            var detail = new AssetSummaryDetail(assetName, assetId);
             detail.ValuePerTextAttribute[textAttributeName] = "Hello";
             detail.ValuePerNumericAttribute[numericAttributeName] = 6;
             return detail;
         }
 
         public static AssetSummaryDetail Detail(SimulationOutputSetupContext setupContext)
-            => Detail(setupContext.ManagedAssetId, setupContext.NumericAttributeName, setupContext.TextAttributeName);
+            => Detail(setupContext.ManagedAssetName, setupContext.ManagedAssetId, setupContext.NumericAttributeName, setupContext.TextAttributeName);
     }
 }

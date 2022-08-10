@@ -13,6 +13,8 @@ using OfficeOpenXml;
 using MoreLinq;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using BridgeCareCore.Models;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 
 namespace BridgeCareCore.Services
 {
@@ -120,6 +122,40 @@ namespace BridgeCareCore.Services
                 WarningMessage = !string.IsNullOrEmpty(warningSb.ToString())
                     ? warningSb.ToString()
                     : null
+            };
+        }
+
+        public PagingModel<PerformanceCurveDTO> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> request)
+        {
+            var take = request.RowsPerPage;
+            var skip = request.RowsPerPage * (request.Page - 1);
+            var updateIds = request.UpdateRows.Select(_ => _.Id);
+            var attributeNames = request.AddedRows.Select(_ => _.Attribute).Distinct().ToList();
+            var attributes = _unitOfWork.Context.Attribute.Where(_ => attributeNames.Contains(_.Name)).ToDictionary(_ => _.Name);
+
+            var curves = _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId && !request.RowsForDeletion.Contains(_.Id))
+                .Include(_ => _.ScenarioPerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute);
+            var updateCurves = curves.Where(_ => updateIds.Contains(_.Id)).ToList();
+            var updateDict = request.UpdateRows.ToDictionary(_ => updateCurves.First(c => c.Id == _.Id));
+            curves.ForEach(_ =>
+            {
+                if (updateIds.Contains(_.Id))
+                    _ = updateDict[_].ToScenarioEntity(simulationId, _.Attribute.Id);
+            });
+            var addedEntites = request.AddedRows.Select(_ => _.ToScenarioEntity(simulationId, attributes[_.Name].Id)).ToList();
+
+            var items = curves.Skip(skip).Take(take).Select(_ => _.ToDto()).ToList();
+            return new PagingModel<PerformanceCurveDTO>()
+            {
+                Items = items,
+                TotalItems = curves.Count(),
+                Page = request.Page,
+                RowsPerPage = request.RowsPerPage
             };
         }
 

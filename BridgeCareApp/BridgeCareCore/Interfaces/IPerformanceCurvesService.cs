@@ -1,5 +1,6 @@
 ﻿using System;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Models;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
@@ -13,5 +14,7 @@ namespace BridgeCareCore.Interfaces
         FileInfoDTO ExportScenarioPerformanceCurvesFile(Guid simulationId);
 
         FileInfoDTO ExportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId);
+
+        PagingModel<PerformanceCurveDTO> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> request);
     }
 }

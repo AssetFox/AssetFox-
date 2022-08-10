@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Controllers
 {
@@ -195,6 +196,24 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpPost]
+        [Route("GetScenarioPerformanceCurvePage/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetScenarioPerformanceCurvePage(simulationId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
 
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]

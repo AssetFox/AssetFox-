@@ -111,8 +111,10 @@
                     <v-card class="elevation-0">
                         <v-data-table
                             :headers="performanceCurveGridHeaders"
-                            :items="performanceCurveGridData"
-                            :search="gridSearchTerm"
+                            :items="currentPage"
+                       
+                            :pagination.sync="performancePagination"
+                            :total-items="totalDesserts"
                             sort-icon=$vuetify.icons.ghd-table-sort
                             select-all
                             v-model='selectedPerformanceEquations'
@@ -501,6 +503,8 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+import { PageingModel, PagingRequestModel } from '@/shared/models/iAM/paging';
 
 @Component({
     components: {
@@ -550,10 +554,16 @@ export default class PerformanceCurveEditor extends Vue {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
+    addedRows: PerformanceCurve[] = [];
+    updatedRows: PerformanceCurve[] = [];
+    deletionIds: string[] = [];
     gridSearchTerm = '';
     selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
         emptyPerformanceCurveLibrary,
     );
+    performancePagination: Pagination = clone(emptyPagination);
+    totalDesserts = 0;
+    currentPage: PerformanceCurve[] = [];
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
@@ -657,6 +667,29 @@ export default class PerformanceCurveEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: false });
     }
 
+    @Watch('performancePagination', {deep: true})
+    onPaginationChanged() {
+        if(this.performanceCurveGridData.length > 0){
+            const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
+            const request: PagingRequestModel<PerformanceCurve>= {
+                page: page,
+                rowsPerPage: rowsPerPage,
+                updateRows: this.updatedRows,
+                rowsForDeletion: this.deletionIds,
+                addedRows: this.addedRows,
+                sortColumn: sortBy,
+                isDescending: descending
+            };
+            PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PageingModel<PerformanceCurve>;
+                    this.currentPage = data.items;
+                    this.totalDesserts = data.totalItems;
+                }
+            });
+        }       
+    }
+
     @Watch('selectedPerformanceEquations')
     onSelectedPerformanceEquationsChanged() {
         this.selectedPerformanceEquationIds = getPropertyValues('id', this.selectedPerformanceEquations) as string[];
@@ -708,6 +741,8 @@ export default class PerformanceCurveEditor extends Vue {
         } else {
             this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
         }
+
+        this.onPaginationChanged();
     }
 
     @Watch('stateNumericAttributes')
@@ -723,6 +758,7 @@ export default class PerformanceCurveEditor extends Vue {
             this.performanceCurveGridData = clone(
                 this.stateScenarioPerformanceCurves,
             );
+            this.onPaginationChanged();
         }
     }
 

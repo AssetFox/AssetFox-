@@ -5,11 +5,18 @@ import {
 } from '@/shared/models/iAM/performance';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { PagingRequestModel } from '@/shared/models/iAM/paging';
 
 export default class PerformanceCurveService {
     static getPerformanceCurveLibraries(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.PerformanceCurve}/GetPerformanceCurveLibraries`,
+        );
+    }
+
+    static getPerformanceCurvePage(scenarioId: string, data:PagingRequestModel<PerformanceCurve>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/GetScenarioPerformanceCurvePage/${scenarioId}`, data
         );
     }
 

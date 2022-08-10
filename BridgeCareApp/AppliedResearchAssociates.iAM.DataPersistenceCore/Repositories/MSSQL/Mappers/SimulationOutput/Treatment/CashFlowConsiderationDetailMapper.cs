@@ -37,5 +37,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entityList;
         }
+
+        public static CashFlowConsiderationDetail ToDomain(CashFlowConsiderationDetailEntity entity)
+        {
+            var domain = new CashFlowConsiderationDetail(entity.CashFlowRuleName)
+            {
+                ReasonAgainstCashFlow = (ReasonAgainstCashFlow)entity.ReasonAgainstCashFlow,
+            };
+            return domain;
+        }
+
+        public static List<CashFlowConsiderationDetail> ToDomainList(ICollection<CashFlowConsiderationDetailEntity> entityCollection)
+        {
+            var domainList = new List<CashFlowConsiderationDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

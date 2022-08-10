@@ -63,5 +63,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entities;
         }
+
+        public static void AddToDictionaries(ICollection<AssetDetailValueEntity> entityCollection, Dictionary<string, string> valuePerTextAttribute, Dictionary<string, double> valuePerNumericAttribute)
+        {
+            {
+                foreach (var entity in entityCollection)
+                {
+                    var attributeName = entity.Attribute.Name;
+                    // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
+                    switch (entity.Discriminator)
+                    {
+                    case AssetDetailValueDiscriminators.Number:
+                        if (entity.NumericValue.HasValue)
+                        {
+                            valuePerNumericAttribute[attributeName] = entity.NumericValue.Value;
+
+                        }
+                        break;
+                    case AssetDetailValueDiscriminators.Text:
+                        valuePerTextAttribute[attributeName] = entity.TextValue;
+                        break;
+                    }
+                }
+            }
+        }
     }
 }

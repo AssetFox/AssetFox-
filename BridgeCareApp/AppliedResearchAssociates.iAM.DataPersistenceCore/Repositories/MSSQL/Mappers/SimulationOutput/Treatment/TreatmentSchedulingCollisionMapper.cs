@@ -36,5 +36,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entityList;
         }
+
+        public static TreatmentSchedulingCollisionDetail ToDomain(TreatmentSchedulingCollisionDetailEntity entity)
+        {
+            var year = entity.AssetDetail.SimulationYearDetail.Year;
+            var domain = new TreatmentSchedulingCollisionDetail(year, entity.NameOfUnscheduledTreatment);
+            return domain;
+        }
+
+        public static List<TreatmentSchedulingCollisionDetail> ToDomainList(ICollection<TreatmentSchedulingCollisionDetailEntity> entityCollection)
+        {
+            var domainList = new List<TreatmentSchedulingCollisionDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

@@ -54,5 +54,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entities;
         }
+
+        public static AssetDetail ToDomain(AssetDetailEntity entity)
+        {
+            var assetName = entity.MaintainableAsset.AssetName;
+            var domain = new AssetDetail(assetName, entity.MaintainableAsset.Id)
+            {
+                AppliedTreatment = entity.AppliedTreatment,
+                TreatmentCause = (TreatmentCause)entity.TreatmentCause,
+                TreatmentFundingIgnoresSpendingLimit = entity.TreatmentFundingIgnoresSpendingLimit,
+                TreatmentStatus = (TreatmentStatus)entity.TreatmentStatus,                
+            };
+            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValues, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute);
+            var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToDomainList(entity.TreatmentConsiderationDetails);
+            domain.TreatmentConsiderations.AddRange(treatmentConsiderationDetails);
+            var treatmentOptionDetails = TreatmentOptionDetailMapper.ToDomainList(entity.TreatmentOptionDetails);
+            domain.TreatmentOptions.AddRange(treatmentOptionDetails);
+            var treatmentRejectionDetails = TreatmentRejectionDetailMapper.ToDomainList(entity.TreatmentRejectionDetails);
+            domain.TreatmentRejections.AddRange(treatmentRejectionDetails);
+            var treatmentSchedulingCollisionDetails = TreatmentSchedulingCollisionDetailMapper.ToDomainList(entity.TreatmentSchedulingCollisionDetails);
+            domain.TreatmentSchedulingCollisions.AddRange(treatmentSchedulingCollisionDetails);
+            return domain;
+        }
+
+        internal static List<AssetDetail> ToDomainList(ICollection<AssetDetailEntity> entityCollection)
+        {
+            var domainList = new List<AssetDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

@@ -43,5 +43,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entities;
         }
+
+        public static TargetConditionGoalDetail ToDomain(TargetConditionGoalDetailEntity entity)
+        {
+            var domain = new TargetConditionGoalDetail
+            {
+                ActualValue = entity.ActualValue,
+                AttributeName = entity.Attribute.Name,
+                GoalIsMet = entity.GoalIsMet,
+                GoalName = entity.GoalName,
+                TargetValue = entity.TargetValue,
+            };
+            return domain;
+        }
+
+        public static List<TargetConditionGoalDetail> ToDomainList(ICollection<TargetConditionGoalDetailEntity> entityCollection)
+        {
+            var domainList = new List<TargetConditionGoalDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

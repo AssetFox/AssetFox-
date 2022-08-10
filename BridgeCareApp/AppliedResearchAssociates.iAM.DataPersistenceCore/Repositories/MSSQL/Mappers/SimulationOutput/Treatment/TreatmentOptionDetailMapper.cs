@@ -40,5 +40,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return list;
         }
+
+        public static TreatmentOptionDetail ToDomain(TreatmentOptionDetailEntity entity)
+        {
+            var domain = new TreatmentOptionDetail(entity.TreatmentName, entity.Cost, entity.Benefit, entity.RemainingLife);
+            return domain;
+        }
+
+        internal static List<TreatmentOptionDetail> ToDomainList(ICollection<TreatmentOptionDetailEntity> entityCollection)
+        {
+            var domainList = new List<TreatmentOptionDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

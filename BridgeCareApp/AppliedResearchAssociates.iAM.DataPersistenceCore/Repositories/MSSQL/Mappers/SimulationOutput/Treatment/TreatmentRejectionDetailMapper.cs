@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        internal static List<TreatmentRejectionDetailEntity> ToEntityList(
+        public static List<TreatmentRejectionDetailEntity> ToEntityList(
             List<TreatmentRejectionDetail> domainList,
             Guid assetDetailId)
         {
@@ -36,6 +36,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entityList.Add(entity);
             }
             return entityList;
+        }
+
+        public static TreatmentRejectionDetail ToDomain(TreatmentRejectionDetailEntity entity)
+        {
+            var treatmentRejectionReason = (TreatmentRejectionReason)entity.TreatmentRejectionReason;
+            var domain = new TreatmentRejectionDetail(entity.TreatmentName, treatmentRejectionReason);
+            return domain;
+        }
+
+        public static List<TreatmentRejectionDetail> ToDomainList(ICollection<TreatmentRejectionDetailEntity> entityCollection)
+        {
+            var domainList = new List<TreatmentRejectionDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
         }
     }
 }

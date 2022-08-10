@@ -10,9 +10,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AssetDetails
     { 
-        public static AssetDetail AssetDetail(SimulationOutputSetupContext context)
+        public static AssetDetail AssetDetail(SimulationOutputSetupContext context, string assetName)
         {
-            var assetName = RandomStrings.Length11();
             var assetId = context.ManagedAssetId;
             var textAttributeName = context.TextAttributeName;
             var numericAttributeName = context.NumericAttributeName;

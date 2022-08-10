@@ -30,5 +30,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
             return entity;
         }
+
+        public static SimulationYearDetail ToDomain(SimulationYearDetailEntity entity)
+        {
+            var domain = new SimulationYearDetail(entity.Year)
+            {
+                ConditionOfNetwork = entity.ConditionOfNetwork,
+            };
+            var budgets = BudgetDetailMapper.ToDomainList(entity.Budgets);
+            domain.Budgets.AddRange(budgets);
+            var deficientConditionGoals = DeficientConditionGoalDetailMapper.ToDomainList(entity.DeficientConditionGoalDetails);
+            domain.DeficientConditionGoals.AddRange(deficientConditionGoals);
+            var targetConditionGoals = TargetConditionGoalDetailMapper.ToDomainList(entity.TargetConditionGoalDetails);
+            domain.TargetConditionGoals.AddRange(targetConditionGoals);
+            var assets = AssetDetailMapper.ToDomainList(entity.Assets);
+            domain.Assets.AddRange(assets);
+            return domain;
+        }
+
+        public static List<SimulationYearDetail> ToDomainList(ICollection<SimulationYearDetailEntity> entityList)
+        {
+            var domainList = new List<SimulationYearDetail>();
+            foreach (var entity in entityList)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

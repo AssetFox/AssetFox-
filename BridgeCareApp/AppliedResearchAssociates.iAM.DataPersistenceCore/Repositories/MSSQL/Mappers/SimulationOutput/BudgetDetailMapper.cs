@@ -32,5 +32,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
             return entities;
         }
+
+        public static BudgetDetail ToDomain(BudgetDetailEntity entity)
+        {
+            var domain = new BudgetDetail(entity.AvailableFunding, entity.BudgetName);
+            return domain;
+        }
+
+        public static List<BudgetDetail> ToDomainList(ICollection<BudgetDetailEntity> entityList)
+        {
+            var domainList = new List<BudgetDetail>();
+            foreach (var entity in entityList)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
+        }
     }
 }

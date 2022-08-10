@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new BudgetUsageDetailEntity
             {
                 Id = id,
+                BudgetName = domain.BudgetName,
                 CoveredCost = domain.CoveredCost,
                 Status = (int)domain.Status,
                 TreatmentConsiderationDetailId = treatmentConsiderationDetailId,
@@ -36,6 +37,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 entityList.Add(entity);
             }
             return entityList;
+        }
+
+        public static BudgetUsageDetail ToDomain(BudgetUsageDetailEntity entity)
+        {
+            var domain = new BudgetUsageDetail(entity.BudgetName)
+            {
+                CoveredCost = entity.CoveredCost,
+                Status = (BudgetUsageStatus)entity.Status,
+            };
+            return domain;
+        }
+
+        public static List<BudgetUsageDetail> ToDomainList(ICollection<BudgetUsageDetailEntity> entityCollection)
+        {
+            var domainList = new List<BudgetUsageDetail>();
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity);
+                domainList.Add(domain);
+            }
+            return domainList;
         }
     }
 }

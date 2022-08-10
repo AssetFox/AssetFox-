@@ -56,20 +56,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
         }
 
-        public void GetSimulationOutput(Simulation simulation)
-        {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
-            {
-                throw new RowNotInTableException("No simulation was found for the given scenario.");
-            }
-
-            if (_unitOfWork.Context.SimulationOutput.Any(_ => _.SimulationId == simulation.Id))
-            {
-                _unitOfWork.Context.SimulationOutput.Single(_ => _.SimulationId == simulation.Id)
-                    .FillSimulationResults(simulation);
-            }
-        }
-
         public SimulationOutput GetSimulationOutput(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

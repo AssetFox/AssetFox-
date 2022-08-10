@@ -8,8 +8,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput);
 
-        void GetSimulationOutput(Simulation simulation);
-
         SimulationOutput GetSimulationOutput(Guid simulationId);
     }
 }

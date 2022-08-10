@@ -8,6 +8,7 @@
                         <v-subheader class="ghd-md-gray ghd-control-label">Calculated Attribute</v-subheader>
                         <v-select
                             :items="librarySelectItems"
+                            append-icon=$vuetify.icons.ghd-down
                             outline
                             v-model="librarySelectItemValue"
                             class="ghd-select ghd-text-field ghd-text-field-border">
@@ -30,14 +31,14 @@
                 <v-flex xs4 class="ghd-constant-header">
                     <v-layout align-end>
                         <v-text-field
-                                    append-icon="fas fa-search"
+                                    prepend-inner-icon=$vuetify.icons.ghd-search
                                     hide-details
                                     lablel="Search"
                                     placeholder="Search Calcultated Attribute"
                                     single-line
                                     v-model="gridSearchTerm"
                                     outline
-                                    class="ghd-text-field-border ghd-text-field"
+                                    class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important"
                                 >
                                 </v-text-field>
@@ -61,6 +62,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
                     <v-select
                         :items="attributeSelectItems"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-model="attributeSelectItemValue">
@@ -74,6 +76,7 @@
                     <v-subheader class="ghd-md-gray ghd-control-label">Timing</v-subheader>
                     <v-select
                         :items="attributeTimingSelectItems"
+                        append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="attributeTimingSelectItemValue"
                         :disabled="!isAdmin"
@@ -91,6 +94,7 @@
                 :items="selectedGridItem"
                 :search="gridSearchTerm"
                 class="v-table__overflow ghd-table"
+                sort-icon=$vuetify.icons.ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId">
                 <template slot="items" slot-scope="props">
                     <td class="text-xs-center">
@@ -105,7 +109,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <v-icon>fas fa-edit</v-icon>
+                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -122,7 +126,7 @@
                                     class="ghd-blue"
                                     icon
                                     v-if="isAdmin">
-                                    <v-icon>fas fa-edit</v-icon>
+                                    <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
                         </v-text-field>
@@ -134,7 +138,7 @@
                             class="ghd-blue"
                             icon
                             :disabled="!isAdmin">
-                            <v-icon>fas fa-trash</v-icon>
+                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
                 </template>

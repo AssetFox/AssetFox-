@@ -20,30 +20,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private DeckAreaBridgeWorkSummary _deckAreaBridgeWorkSummary;
         private PostedClosedBridgeWorkSummary _postedClosedBridgeWorkSummary;
         private ProjectsCompletedCount _projectsCompletedCount;
+        private ISummaryReportHelper _summaryReportHelper;
 
         public BridgeWorkSummary()
         {
             _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary();
-            if (_bridgesCulvertsWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgesCulvertsWorkSummary)); }
-
             var workSummaryModel = new WorkSummaryModel();
             _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
-            if (_costBudgetsWorkSummary == null) { throw new ArgumentNullException(nameof(_costBudgetsWorkSummary)); }
-
             _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
-            if (_bridgeRateDeckAreaWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeRateDeckAreaWorkSummary)); }
-
             _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary();
-            if (_nhsBridgeDeckAreaWorkSummary == null) { throw new ArgumentNullException(nameof(_nhsBridgeDeckAreaWorkSummary)); }
-
             _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
-            if (_deckAreaBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_deckAreaBridgeWorkSummary)); }
-
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
-            if (_postedClosedBridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_postedClosedBridgeWorkSummary)); }
-
             _projectsCompletedCount = new ProjectsCompletedCount();
-            if (_projectsCompletedCount == null) { throw new ArgumentNullException(nameof(_projectsCompletedCount)); }
+            _summaryReportHelper = new SummaryReportHelper();
         }
 
         public ChartRowsModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData,
@@ -121,9 +110,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 countForCompletedCommittedProject.Add(yearData.Year, new Dictionary<string, int>());
                 foreach (var section in yearData.Assets)
                 {
-                    if (!costPerBPNPerYear[yearData.Year].ContainsKey(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]))
+                    //get business plan network
+                    var busPlanNetwork = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+
+                    if (!costPerBPNPerYear[yearData.Year].ContainsKey(busPlanNetwork))
                     {
-                        costPerBPNPerYear[yearData.Year].Add(section.ValuePerTextAttribute["BUS_PLAN_NETWORK"], 0);
+                        costPerBPNPerYear[yearData.Year].Add(busPlanNetwork, 0);
                     }
 
                     if (section.TreatmentCause == TreatmentCause.CommittedProject &&
@@ -143,7 +135,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             yearlyCostCommittedProj[yearData.Year][section.AppliedTreatment] = newCostAndCount;
                         }
 
-                        costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += commitedCost;
+                        costPerBPNPerYear[yearData.Year][busPlanNetwork] += commitedCost;
 
                         // Adding count for completed committed project
                         if (!countForCompletedCommittedProject[yearData.Year].ContainsKey(section.AppliedTreatment))
@@ -167,7 +159,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     RemoveBridgesForCashFlowedProj(countForCompletedProject, section, isInitialYear, yearData.Year);
 
                     // Fill cost per BPN per Year
-                    costPerBPNPerYear[yearData.Year][section.ValuePerTextAttribute["BUS_PLAN_NETWORK"]] += cost;
+                    costPerBPNPerYear[yearData.Year][busPlanNetwork] += cost;
                 }
                 isInitialYear = false;
             }
@@ -181,7 +173,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 var culvert = BAMSConstants.CulvertBridgeType;
                 var nonCulvert = BAMSConstants.NonCulvertBridgeType;
                 // If Bridge type is culvert
-                if (section.ValuePerTextAttribute["BRIDGE_TYPE"] == culvert)
+                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValueForWorkedOn(costAndCountPerTreatmentPerYear[year], culvert, section.AppliedTreatment, cost);
                 }
@@ -214,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var culvert = BAMSConstants.CulvertBridgeType;
                 // If Bridge type is culvert
-                if (section.ValuePerTextAttribute["BRIDGE_TYPE"] == culvert)
+                if (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BRIDGE_TYPE") == culvert)
                 {
                     AddKeyValue(countForCompletedProject[year], culvert, section.AppliedTreatment);
                 }

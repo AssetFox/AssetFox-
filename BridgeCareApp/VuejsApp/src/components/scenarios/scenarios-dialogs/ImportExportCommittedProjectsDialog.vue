@@ -14,7 +14,7 @@
                     <CommittedProjectsFileSelector :closed='closed' useTreatment='true' @treatment='onTreatmentChanged' @submit='onSubmitFileSelectorFile' />
                     <span class="div-warning-border">
                         <v-layout align-start>
-                            <v-icon class="px-2 icon-color">fas fa-exclamation-triangle</v-icon>
+                            <img style="padding-right:5px; height:30px; " :src="require('@/assets/icons/urgent-info.svg')"/>
                             <h3 class="h3-color">Warning</h3>
                         </v-layout>
                         <p class="Montserrat-font-family">

@@ -123,6 +123,7 @@
     <Folder Include="MetaData\AttributeMetaData\" />
     <Folder Include="DownloadTemplates\" />
     <Folder Include="Services\SummaryReport\Models\" />
+    <Folder Include="Utils\Interfaces\" />
   </ItemGroup>
 
 

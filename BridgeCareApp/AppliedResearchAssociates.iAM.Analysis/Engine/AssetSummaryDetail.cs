@@ -36,6 +36,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         internal AssetSummaryDetail(AssetSummaryDetail original)
         {
             AssetName = original.AssetName;
+            AssetId = original.AssetId;
 
             ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute); 
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);

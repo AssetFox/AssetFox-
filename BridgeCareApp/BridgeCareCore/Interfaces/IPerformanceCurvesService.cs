@@ -16,5 +16,6 @@ namespace BridgeCareCore.Interfaces
         FileInfoDTO ExportLibraryPerformanceCurvesFile(Guid performanceCurveLibraryId);
 
         PagingModel<PerformanceCurveDTO> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> request);
+        PagingModel<PerformanceCurveDTO> GetLibraryPerformanceCurvePage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> request);
     }
 }

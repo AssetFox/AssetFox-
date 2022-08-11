@@ -124,6 +124,18 @@ const actions = {
             }
         });
     },
+    async getScenarioPerformanceCurvesPage({ commit }: any, scenarioId: string) {
+        await PerformanceCurveService.getScenarioPerformanceCurves(
+            scenarioId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'scenarioPerformanceCurvesMutator',
+                    response.data as PerformanceCurve[],
+                );
+            }
+        });
+    },
     async upsertScenarioPerformanceCurves(
         { dispatch, commit }: any,
         payload: any,

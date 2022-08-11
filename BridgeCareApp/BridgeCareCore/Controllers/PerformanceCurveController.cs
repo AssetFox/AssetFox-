@@ -56,11 +56,11 @@ namespace BridgeCareCore.Controllers
             }
 
             List<PerformanceCurveLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
+                UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
 
             List<PerformanceCurveLibraryDTO> RetrievePermittedForLibraries()
             {
-                var result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
+                var result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
                 return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
             }
 
@@ -214,6 +214,22 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("GetLibraryPerformanceCurvePage/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLibraryPerformanceCurvePage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetLibraryPerformanceCurvePage(libraryId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
 
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]

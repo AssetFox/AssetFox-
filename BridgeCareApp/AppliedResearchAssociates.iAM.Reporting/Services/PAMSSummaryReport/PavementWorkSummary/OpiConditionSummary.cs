@@ -70,10 +70,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             var conditionLabels = new List<string> { PAMSConstants.Excellent, PAMSConstants.Good, PAMSConstants.Fair, PAMSConstants.Poor };
             _pavementWorkSummaryCommon.SetPavementTreatmentExcelString(worksheet, conditionLabels, ref row, ref column);
-            chartConditionModel.TotalCountRow_Excellent = row - 3;
-            chartConditionModel.TotalCountRow_Good = row - 2;
-            chartConditionModel.TotalCountRow_Fair = row - 1;
-            chartConditionModel.TotalCountRow_Poor = row;
+
+            chartConditionModel.sourceStartRow = startRow;
 
             AddSegmentMilesForBPN(worksheet, startRow, column, reportOutputData.InitialAssetSummaries, bpn);
             foreach (var yearlyData in reportOutputData.Years)

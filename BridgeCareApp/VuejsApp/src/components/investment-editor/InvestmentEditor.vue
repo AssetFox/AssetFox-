@@ -40,6 +40,7 @@
                     <v-flex xs4 class="ghd-constant-header">
                         <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                         <v-select :items='librarySelectItems'
+                              append-icon=$vuetify.icons.ghd-down
                               outline 
                               v-model='librarySelectItemValue'
                               class="ghd-select ghd-text-field ghd-text-field-border">
@@ -109,26 +110,7 @@
                 </v-layout>
             </v-flex>
         </v-layout>
-        <!-- <v-flex xs12>
-            <v-layout justify-center>
-                <v-flex xs3>
-                    
-                    
-                    <v-text-field label='Library Name' v-if='hasSelectedLibrary && !hasScenario'
-                                  v-model='selectedBudgetLibrary.name'
-                                  :rules="[rules['generalRules'].valueIsNotEmpty]">
-                        <template slot='append'>
-                            <v-btn @click='librarySelectItemValue = null' class='ara-orange' icon>
-                                <v-icon>fas fa-caret-left</v-icon>
-                            </v-btn>
-                        </template>
-                    </v-text-field>
-                    
-                </v-flex>
-            </v-layout>
-        </v-flex> -->
-        <!-- visible on both pages -->
-        <!-- <v-divider v-show='hasSelectedLibrary && hasScenario'></v-divider> -->
+
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>
             <!-- <v-layout justify-center>
                 <v-flex xs6>
@@ -167,6 +149,7 @@
                 <v-flex >
                    <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
                                       class='v-table__overflow ghd-table' item-key='year' select-all 
+                                      sort-icon=$vuetify.icons.ghd-table-sort
                                       v-model='selectedBudgetYearsGridData' :must-sort='true'>
                             <template slot='items' slot-scope='props'>
                                 <td>
@@ -178,7 +161,7 @@
                                     </div>       
                                     <div v-if="header.value === 'action'">
                                         <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </div>                           
                                     <div v-if="header.value !== 'year' && header.value !== 'action'">

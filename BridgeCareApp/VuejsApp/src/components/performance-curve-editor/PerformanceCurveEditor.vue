@@ -8,6 +8,7 @@
                         <v-select
                             class="ghd-control-border ghd-control-text ghd-select"
                             :items="librarySelectItems"
+                            append-icon=$vuetify.icons.ghd-down
                             outline
                             v-model="librarySelectItemValue"
                         >
@@ -31,12 +32,14 @@
                     <v-flex xs5 v-show="hasSelectedLibrary || hasScenario">
                         <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
                         <v-text-field
-                            class="ghd-control-text ghd-control-border"
+                            class="ghd-text-field-border ghd-text-field search-icon-general"
                             style="margin-top:0px;"
-                            prepend-inner-icon="fas fa-search"
+                            prepend-inner-icon=$vuetify.icons.ghd-search
                             hide-details
                             label="Search Deterioration Equations"
+                            placeholder="Search Deterioration Equations"
                             single-line
+                            outline
                             v-model="gridSearchTerm"
                         >
                         </v-text-field>
@@ -110,6 +113,7 @@
                             :headers="performanceCurveGridHeaders"
                             :items="performanceCurveGridData"
                             :search="gridSearchTerm"
+                            sort-icon=$vuetify.icons.ghd-table-sort
                             select-all
                             v-model='selectedPerformanceEquations'
                             class="fixed-header ghd-table v-table__overflow"
@@ -190,6 +194,7 @@
                                         <template slot="input">
                                             <v-select
                                                 :items="attributeSelectItems"
+                                                append-icon=$vuetify.icons.ghd-down
                                                 label="Edit"
                                                 v-model="props.item.attribute"
                                                 :rules="[
@@ -212,7 +217,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" icon>
-                                                <v-icon>fas fa-eye</v-icon>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -241,7 +246,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -256,7 +261,7 @@
                                     >
                                         <template slot="activator">
                                             <v-btn class="ghd-blue" flat icon>
-                                                <v-icon>fas fa-eye</v-icon>
+                                                <img class='img-general' :src="require('@/assets/icons/eye-ghd-blue.svg')">
                                             </v-btn>
                                         </template>
                                         <v-card>
@@ -286,7 +291,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-edit</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/edit.svg')">
                                     </v-btn>
                                 </td>
                                 <td class="text-xs-left">
@@ -299,7 +304,7 @@
                                         class="ghd-blue"
                                         icon
                                     >
-                                        <v-icon>fas fa-trash</v-icon>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                     </v-btn>
                                 </td>
                             </template>

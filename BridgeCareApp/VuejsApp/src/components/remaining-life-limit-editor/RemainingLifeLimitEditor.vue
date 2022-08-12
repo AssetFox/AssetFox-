@@ -7,6 +7,7 @@
                     <v-select
                       class="ghd-select ghd-text-field ghd-text-field-border vs-style"
                       :items="selectListItems"
+                      append-icon=$vuetify.icons.ghd-down
                        v-model="selectItemValue"
                       outline
                       outlined
@@ -22,6 +23,7 @@
         <div v-show="selectItemValue != null || hasScenario">
             <v-data-table
             :headers="gridHeaders"
+            sort-icon=$vuetify.icons.ghd-table-sort
             :items="remainingLifeLimits"
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
@@ -64,6 +66,7 @@
                                 <template slot="input">
                                     <v-select
                                         :items="numericAttributeSelectItems"
+                                        append-icon=$vuetify.icons.ghd-down
                                         label="Select an Attribute"
                                         outline
                                         v-model="props.item.attribute"
@@ -118,10 +121,14 @@
                         <td v-else>-
                         </td>
                         <td class="px-0">
-                            <v-icon class="ghd-blue" @click="onShowCriterionLibraryEditorDialog(props.item)">fas fa-edit</v-icon>
+                            <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)" icon>
+                                <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
+                            </v-btn>   
                         </td>
                         <td justify-end>
-                            <v-icon class="ghd-blue" @click="onRemoveRemainingLifeLimitIcon(props.item)"> fas fa-trash </v-icon>
+                            <v-btn @click="onRemoveRemainingLifeLimitIcon(props.item)" icon>
+                                <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                            </v-btn>                          
                         </td>
                     </tr>
                 </template>

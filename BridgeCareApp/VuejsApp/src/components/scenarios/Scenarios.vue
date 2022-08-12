@@ -9,7 +9,9 @@
                         :key="item.name"
                         class="tab-theme"
                     >
-                        <v-icon left>{{ item.icon }}</v-icon>
+                        <!-- <img class="icon-selected-tab" style="padding-right:10px" v-bind:src="item.icon"/> -->
+                        <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
+                        <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
                         {{ item.name }}
                         ( {{ item.count }} )</v-tab
                     >
@@ -31,11 +33,12 @@
                                         <v-text-field
                                             type="text"
                                             placeholder="Search in scenarios"
-                                            append-icon="fas fa-search"
+                                            prepend-inner-icon=$vuetify.icons.ghd-search
                                             hide-details
                                             single-line
                                             v-model="searchMine"
                                             outline
+                                            class="ghd-text-field-border ghd-text-field search-icon-general"
                                         >
                                         </v-text-field>
                                     </v-flex>
@@ -54,6 +57,7 @@
                                 <v-data-table
                                     :headers="scenarioGridHeaders"
                                     :items="userScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
                                     :search="searchMine"
                                     calculate-widths
                                 >
@@ -148,39 +152,24 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-ellipsis-v"
-                                                        ></i>
+                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
                                                 <v-list>
                                                     <v-list-tile
-                                                        v-for="(item,
-                                                        i) in actionItems"
+                                                        v-for="(item,i) in actionItems"
                                                         :key="i"
-                                                        @click="
-                                                            OnActionTaken(
+                                                        @click="OnActionTaken(
                                                                 item.action,
-                                                                props.item
-                                                                    .users,
+                                                                props.item.users,
                                                                 props.item,
-                                                                true,
-                                                            )
-                                                        "
-                                                        class="menu-style"
-                                                    >
+                                                                true) "
+                                                        class="menu-style">
                                                         <v-list-tile-title icon>
-                                                            <v-icon
-                                                                class="action-icon-padding"
-                                                                >{{
-                                                                    item.icon
-                                                                }}</v-icon
-                                                            >
-                                                            {{
-                                                                item.title
-                                                            }}</v-list-tile-title
-                                                        >
+                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            {{item.title}}
+                                                        </v-list-tile-title>
                                                     </v-list-tile>
                                                 </v-list>
                                             </v-menu>
@@ -208,10 +197,11 @@
                                             label="Search"
                                             placeholder="Search in scenarios"
                                             outline
-                                            append-icon="fas fa-search"
+                                            prepend-inner-icon=$vuetify.icons.ghd-search
                                             hide-details
                                             single-line
                                             v-model="searchShared"
+                                            class="ghd-text-field-border ghd-text-field search-icon-general"
                                         >
                                         </v-text-field>
                                     </v-flex>
@@ -219,6 +209,7 @@
                                 <v-data-table
                                     :headers="scenarioGridHeaders"
                                     :items="sharedScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
                                     :search="searchShared"
                                 >
                                     <template slot="items" slot-scope="props">
@@ -312,39 +303,19 @@
                                                         v-bind="attrs"
                                                         v-on="on"
                                                     >
-                                                        <i
-                                                            class="fas fa-ellipsis-v"
-                                                        ></i>
+                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
                                                     </v-btn>
                                                 </template>
 
                                                 <v-list>
-                                                    <v-list-tile
-                                                        v-for="(item,
-                                                        i) in actionItemsForSharedScenario"
+                                                    <v-list-tile v-for="(item,i) in actionItemsForSharedScenario"
                                                         :key="i"
-                                                        @click="
-                                                            OnActionTaken(
-                                                                item.action,
-                                                                props.item
-                                                                    .users,
-                                                                props.item,
-                                                                false,
-                                                            )
-                                                        "
-                                                        class="menu-style"
-                                                    >
-                                                        <v-list-tile-title icon>
-                                                            <v-icon
-                                                                class="action-icon-padding"
-                                                                >{{
-                                                                    item.icon
-                                                                }}</v-icon
-                                                            >
-                                                            {{
-                                                                item.title
-                                                            }}</v-list-tile-title
-                                                        >
+                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
+                                                        class="menu-style">
+                                                        <v-list-tile-title icon>                                                        
+                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            {{item.title}}
+                                                        </v-list-tile-title>
                                                     </v-list-tile>
                                                 </v-list>
                                             </v-menu>
@@ -470,6 +441,8 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import FileDownload from 'js-file-download';
 import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
+import GhdStarSvg from '@/shared/icons/GhdStarSvg.vue';
+import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
 
 @Component({
     components: {
@@ -485,7 +458,9 @@ import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExpor
         ShareScenarioDialog,
         ShowAggregationDialog,
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
-        Alert
+        Alert,
+        GhdShareSvg,
+        GhdStarSvg
     },
 })
 export default class Scenarios extends Vue {
@@ -730,43 +705,43 @@ export default class Scenarios extends Vue {
             {
                 title: 'Run Analysis',
                 action: this.availableActions.runAnalysis,
-                icon: 'fas fa-play',
+                icon: require("@/assets/icons/monitor.svg"),
             },
             {
                 title: 'Reports',
                 action: this.availableActions.reports,
-                icon: 'fas fa-chart-line',
+                icon: require("@/assets/icons/clipboard.svg"),
             },
             {
                 title: 'Settings',
                 action: this.availableActions.settings,
-                icon: 'fas fa-edit',
+                icon: require("@/assets/icons/gear.svg"),
             },
             {
                 title: 'Committed Projects',
                 action: this.availableActions.commitedProjects,
-                icon: 'fas fa-tasks',
+                icon: require("@/assets/icons/committed-projects.svg"),
             },
             {
                 title: 'Clone',
                 action: this.availableActions.clone,
-                icon: 'fas fa-paste',
+                icon: require("@/assets/icons/copy.svg"),
             },
             {
                 title: 'Delete',
                 action: this.availableActions.delete,
-                icon: 'fas fa-trash',
+                icon: require("@/assets/icons/trash.svg"),
             }           
         ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
         this.actionItems.splice(4, 0, {
             title: 'Share',
             action: this.availableActions.share,
-            icon: 'fas fa-users',
+            icon: require("@/assets/icons/share-geometric.svg"),
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: 'star', count: 0 },
-            { name: 'Shared with me', icon: 'share', count: 0 },
+            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: 0 },
+            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: 0 },
         );
         this.tab = 'My scenarios';
     }
@@ -891,6 +866,20 @@ export default class Scenarios extends Vue {
 
         this.$router.push({
             path: '/EditScenario/',
+            query: {
+                scenarioId: localScenario.id,
+                networkId: localScenario.networkId,
+                scenarioName: localScenario.name,
+                networkName: localScenario.networkName,
+            },
+        });
+    }
+
+    onNavigateToCommittedProjectView(localScenario: Scenario) {
+        this.selectScenarioAction({ scenarioId: localScenario.id });
+
+        this.$router.push({
+            path: '/CommittedProjectsEditor/Scenario/',
             query: {
                 scenarioId: localScenario.id,
                 networkId: localScenario.networkId,
@@ -1142,8 +1131,11 @@ export default class Scenarios extends Vue {
                 this.onShowConfirmDeleteAlert(scenario);
                 break;
             case this.availableActions.commitedProjects:
-                this.selectedScenarioId = scenario.id;
-                this.showImportExportCommittedProjectsDialog = true;
+                if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
+                    this.onNavigateToCommittedProjectView(scenario);
+                }
+                // this.selectedScenarioId = scenario.id;
+                // this.showImportExportCommittedProjectsDialog = true;
                 break;
         }
     }
@@ -1183,5 +1175,12 @@ export default class Scenarios extends Vue {
 }
 .header-border {
   border-bottom: 2px solid black;
+}
+
+.v-tabs__item--active .icon-selected-tab{
+    fill:#777777
+}
+.icon-selected-tab{
+    fill:#2A578D
 }
 </style>

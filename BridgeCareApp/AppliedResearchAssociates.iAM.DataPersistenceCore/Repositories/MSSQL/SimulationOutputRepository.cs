@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private const int AssetBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -51,9 +52,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.SaveChanges();
                 foreach (var year in simulationOutput.Years)
                 {
-                    var yearDetail = SimulationYearDetailMapper.ToEntity(year, entity.Id, attributeIdLookup);
+                    var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
-                    _unitOfWork.Context.SaveChanges();
+                    var assets = year.Assets;
+                    var batchedAssets = assets.ConcreteBatch(AssetBatchSize);
+                    var yearSaved = false;
+                    foreach (var batch in batchedAssets)
+                    {
+                        var mappedBatch = AssetDetailMapper.ToEntityList(batch, yearDetail.Id, attributeIdLookup);
+                        _unitOfWork.Context.AddRange(mappedBatch);
+                        _unitOfWork.Context.SaveChanges();
+                        yearSaved = true;
+                    }
+                    if (!yearSaved)
+                    {
+                        _unitOfWork.Context.SaveChanges();
+                    }
                 }
             }
             catch (Exception ex)

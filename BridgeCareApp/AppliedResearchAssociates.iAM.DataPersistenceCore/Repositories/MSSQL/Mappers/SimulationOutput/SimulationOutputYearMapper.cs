@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class SimulationYearDetailMapper
     {
-        public static SimulationYearDetailEntity ToEntity(
+        public static SimulationYearDetailEntity ToEntityWithoutAssets(
             SimulationYearDetail domain,
             Guid simulationOutputId,
             Dictionary<string, Guid> attributeIdLookup)
@@ -16,11 +16,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var budgets = BudgetDetailMapper.ToEntityList(domain.Budgets, id);
             var deficientConditionGoalDetails = DeficientConditionGoalDetailMapper.ToEntityList(domain.DeficientConditionGoals, id, attributeIdLookup);
             var targetConditionGoalDetails = TargetConditionGoalDetailMapper.ToEntityList(domain.TargetConditionGoals, id, attributeIdLookup);
-            var assets = AssetDetailMapper.ToEntityList(domain.Assets, id, attributeIdLookup);
             var entity = new SimulationYearDetailEntity
             {
                 Id = id,
-                Assets = assets,
                 Budgets = budgets,
                 ConditionOfNetwork = domain.ConditionOfNetwork,
                 DeficientConditionGoalDetails = deficientConditionGoalDetails,

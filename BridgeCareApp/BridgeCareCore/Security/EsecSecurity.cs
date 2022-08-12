@@ -6,6 +6,7 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +18,7 @@ namespace BridgeCareCore.Security
         private readonly RsaSecurityKey _esecPublicKey;
         private readonly string _securityType;
         private readonly IConfiguration _config;
+        private IRoleClaimsMapper _roleClaimsMapper;
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -24,12 +26,13 @@ namespace BridgeCareCore.Security
         /// </summary>
         private ConcurrentDictionary<string, long> _revokedTokens;
 
-        public EsecSecurity(IConfiguration config)
+        public EsecSecurity(IConfiguration config, IRoleClaimsMapper roleClaimsMapper)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
+            _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
         }
 
         /// <summary>
@@ -83,7 +86,7 @@ namespace BridgeCareCore.Security
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
-                }
+                }                
 
                 return new UserInfo
                 {

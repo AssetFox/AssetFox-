@@ -86,13 +86,7 @@ namespace BridgeCareCore.Security
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
-                }
-
-                // TODO remove before PR?
-                var role = roleStrings[0];
-                var securityType = SecurityConstants.SecurityTypes.Esec;
-                var internalRole = _roleClaimsMapper.GetInternalRole(securityType, role);
-                var claims = _roleClaimsMapper.GetClaims(securityType, internalRole);
+                }                
 
                 return new UserInfo
                 {

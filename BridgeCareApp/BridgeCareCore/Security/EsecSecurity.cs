@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
@@ -84,11 +85,22 @@ namespace BridgeCareCore.Security
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }
+                //string internalRole = CMapper.GetInternalRole(roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)));
+                //List<string> claims = CMapper.GetClaims();
+                string internalRoleFromMapper = "";
+                List<string> claimFromMapper = new List<string>();
+
+                // Build the identity
+                //var identity = new ClaimsIdentity(claimFromMapper);
+                //request.HttpContext.User.AddIdentity(identity);
+                
 
                 return new UserInfo
                 {
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
                     Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
+                    InternalRole = internalRoleFromMapper,
+                    Claims = claimFromMapper,
                     Email = decodedToken.GetClaimValue("email")
                 };
             }
@@ -99,6 +111,7 @@ namespace BridgeCareCore.Security
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
+                    // assign internal Role & claims
                     Role = SecurityConstants.Role.BAMSAdmin
                 };
             }

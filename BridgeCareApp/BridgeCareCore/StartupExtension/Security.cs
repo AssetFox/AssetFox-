@@ -3,6 +3,8 @@
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureADB2C.UI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -54,6 +56,7 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
+            services.AddSingleton<IRoleClaimsMapper, RoleClaimsMapper>();
         }
     }
 }

@@ -1,10 +1,11 @@
 {
-  "SecurityTypes ": [
+  "SecurityTypes": [
     {
       "SecurityType": "ESEC",
-      "Roles": {
-        "Administrator": {
+      "RolesClaims": [
+        {
           "IPRoles": [ "PD-BAMS-Administrator", "PAMS-Administrator" ],
+          "InternalRole": "Administrator",
           "Claims": [
             "AttributesUpdateAccess",
             "AttributesAddAccess",
@@ -80,8 +81,9 @@
             "CommittedProjectViewAnyAccess"
           ]
         },
-        "Editor": {
+        {
           "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
+          "InternalRole": "Editor",
           "Claims": [
             "SimulationUpdatePermittedAccess",
             "SimulationDeletePermittedAccess",
@@ -142,9 +144,9 @@
             "CommittedProjectViewPermittedAccess"
           ]
         },
-        "ReadOnly": //TODO: Any other name to Ready only user role like Restricted/Guest ??
         {
           "IPRoles": [],
+          "InternalRole": "ReadOnly",
           "Claims": [
             "SimulationViewPermittedAccess",
             "AnnouncementViewAccess",
@@ -169,13 +171,14 @@
             "CommittedProjectViewPermittedAccess"
           ]
         }
-      }
+      ]      
     },
     {
       "SecurityType": "B2C",
-      "Roles": {
-        "Administrator": {
+      "RolesClaims": [
+        {
           "IPRoles": [ "Administrator" ],
+          "InternalRole": "Administrator",
           "Claims": [
             "AttributesUpdateAccess",
             "AttributesAddAccess",
@@ -251,8 +254,9 @@
             "CommittedProjectViewAnyAccess"
           ]
         },
-        "Editor": {
+        {
           "IPRoles": [],
+          "InternalRole": "Editor",
           "Claims": [
             "SimulationUpdatePermittedAccess",
             "SimulationDeletePermittedAccess",
@@ -313,9 +317,9 @@
             "CommittedProjectViewPermittedAccess"
           ]
         },
-        "ReadOnly": //TODO: Any other name to Ready only user role like Restricted/Guest ??
         {
           "IPRoles": [],
+          "InternalRole": "ReadOnly",
           "Claims": [
             "SimulationViewPermittedAccess",
             "AnnouncementViewAccess",
@@ -340,7 +344,7 @@
             "CommittedProjectViewPermittedAccess"
           ]
         }
-      }
+      ]
     }
   ]
 }

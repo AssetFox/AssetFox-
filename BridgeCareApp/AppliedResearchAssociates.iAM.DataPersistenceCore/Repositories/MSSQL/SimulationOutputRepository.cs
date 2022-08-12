@@ -46,9 +46,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
                 _.SimulationId == simulationId);
-                var entity = SimulationOutputMapper.ToEntity(simulationOutput, simulationId, attributeIdLookup);
+                var entity = SimulationOutputMapper.ToEntityWithoutYearDetails(simulationOutput, simulationId, attributeIdLookup);
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
+                foreach (var year in simulationOutput.Years)
+                {
+                    var yearDetail = SimulationYearDetailMapper.ToEntity(year, entity.Id, attributeIdLookup);
+                    _unitOfWork.Context.Add(yearDetail);
+                    _unitOfWork.Context.SaveChanges();
+                }
             }
             catch (Exception ex)
             {

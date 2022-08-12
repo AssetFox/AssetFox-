@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             //simulation.Results.Years.AddRange(simulationOutputObject.Years);
         }
 
-        public static SimulationOutputEntity ToEntity(
+        public static SimulationOutputEntity ToEntityWithoutYearDetails(
             this SimulationOutput domain,
             Guid simulationId,
             Dictionary<string, Guid> attributeIdLookup)
@@ -36,11 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var summaryEntity = AssetSummaryDetailMapper.ToEntity(domainSummary, id, attributeIdLookup);
                 summaryEntities.Add(summaryEntity);
-            }
-            foreach (var year in domain.Years)
-            {
-                var mapYear = SimulationYearDetailMapper.ToEntity(year, id, attributeIdLookup);
-                years.Add(mapYear);
             }
             var entity = new SimulationOutputEntity
             {

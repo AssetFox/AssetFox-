@@ -2,10 +2,7 @@
 {
     public class ChartConditionModel
     {
-        public int TotalCountRow_Poor { get; set; }
-        public int TotalCountRow_Fair { get; set; }
-        public int TotalCountRow_Good { get; set; }
-        public int TotalCountRow_Excellent { get; set; }
+        public int sourceStartRow { get; set; }
     }
 
     //IRI Models
@@ -24,6 +21,7 @@
 
     public class ChartRowsModel
     {
+        public int TotalPamsPostedCountByBPNYearsRow { get; set; }
         public int TotalCountSectionYearsRow { get; set; }
         public int TotalCountBPNYearsRow { get; set; }
                 

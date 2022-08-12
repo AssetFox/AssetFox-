@@ -10,9 +10,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class AssetDetails
     {
-        public static AssetDetail AssetDetail(SimulationOutputSetupContext context, string assetName, int year)
+        public static AssetDetail AssetDetail(SimulationOutputSetupContext context, AssetNameIdPair assetNameIdPair, int year)
         {
-            var assetId = context.ManagedAssetId;
+            var assetId = assetNameIdPair.Id;
+            var assetName = assetNameIdPair.Name;
             var textAttributeName = context.TextAttributeName;
             var numericAttributeName = context.NumericAttributeName;
             var detail = new AssetDetail(assetName, assetId)

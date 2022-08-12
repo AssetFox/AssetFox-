@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return detail;
         }
 
-        public static AssetSummaryDetail Detail(SimulationOutputSetupContext setupContext)
-            => Detail(setupContext.ManagedAssetName, setupContext.ManagedAssetId, setupContext.NumericAttributeName, setupContext.TextAttributeName);
+        public static AssetSummaryDetail Detail(SimulationOutputSetupContext setupContext, AssetNameIdPair assetNameIdPair)
+            => Detail(assetNameIdPair.Name, assetNameIdPair.Id, setupContext.NumericAttributeName, setupContext.TextAttributeName);
     }
 }

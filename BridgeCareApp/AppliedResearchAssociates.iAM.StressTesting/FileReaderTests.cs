@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         [Fact]
         public void ReadSimulationOutput_Does()
         {
-            var text = FileReader.ReadAllTextInGitIgnoredFile("SimulationOutput.json");
+            var text = FileReader.ReadAllTextInGitIgnoredFile(CannedSimulationOutput.Filename);
         }
     }
 }

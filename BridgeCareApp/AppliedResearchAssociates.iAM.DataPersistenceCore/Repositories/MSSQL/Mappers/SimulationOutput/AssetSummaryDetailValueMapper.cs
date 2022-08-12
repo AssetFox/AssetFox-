@@ -69,8 +69,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entities = new List<AssetSummaryDetailValueEntity>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                var entity = ToNumericEntity(keyValuePair, attributeIdLookupDictionary);
-                entities.Add(entity);
+                if (attributeIdLookupDictionary.ContainsKey(keyValuePair.Key))
+                { // Wjwjwj The "if" is a temporary hack which should be deleted prior to PR completion.
+                    var entity = ToNumericEntity(keyValuePair, attributeIdLookupDictionary);
+                    entities.Add(entity);
+                }
             }
             return entities;
         }

@@ -21,7 +21,11 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             var text = FileReader.ReadAllTextInGitIgnoredFile(CannedSimulationOutput.Filename);
             var simulationOutput = JsonConvert.DeserializeObject<SimulationOutput>(text);
             var assetNameIdPairs = simulationOutput.InitialAssetSummaries.Select(a => AssetNameIdPairs.ForAssetSummaryDetail(a)).ToList();
-            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, 5);
+            var assetSummary = simulationOutput.InitialAssetSummaries[0];
+            var attributeNamesToIgnore = new List<string> { "AREA" };
+            var numericAttributeNames = assetSummary.ValuePerNumericAttribute.Keys.Except(attributeNamesToIgnore).ToList();
+            var textAttributeNames = assetSummary.ValuePerTextAttribute.Keys.ToList();
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, 5);
             _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
         }
     }

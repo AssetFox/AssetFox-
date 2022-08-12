@@ -11,15 +11,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class SimulationOutputCreationContextTestSetup
     {
-        public static SimulationOutputSetupContext SingleAssetContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, int numberOfYears = 1)
+        public static SimulationOutputSetupContext SimpleContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, int numberOfYears = 1)
         {
             var assetPair = AssetNameIdPairs.Random();
             var assetPairs = new List<AssetNameIdPair> { assetPair };
-            var context = ContextWithObjectsInDatabase(unitOfWork, assetPairs);
+            var numericAttributeName = RandomStrings.WithPrefix("NumericAttribute");
+            var textAttributeName = RandomStrings.WithPrefix("TextAttrbute");
+            var numericAttributeNames = new List<string> { numericAttributeName };
+            var textAttributeNames = new List<string> { textAttributeName };
+            var context = ContextWithObjectsInDatabase(unitOfWork, assetPairs, numericAttributeNames, textAttributeNames);
             return context;
         }
 
-        public static SimulationOutputSetupContext ContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, List<AssetNameIdPair> assetNameIdPairs, int numberOfYears = 1)
+        public static SimulationOutputSetupContext ContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, List<AssetNameIdPair> assetNameIdPairs, List<string> numericAttributeNames, List<string> textAttributeNames, int numberOfYears = 1)
         {
             var networkId = Guid.NewGuid();
             var maintainableAssets = new List<MaintainableAsset>();
@@ -46,11 +50,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             unitOfWork.Context.UpdateRange(assetEntities);
             unitOfWork.Context.SaveChanges();
             var simulation = SimulationTestSetup.EntityInDb(unitOfWork, networkId);
-            var numericAttributeId = Guid.NewGuid();
-            var textAttributeId = Guid.NewGuid();
-            var numericAttribute = AttributeTestSetup.Numeric(numericAttributeId);
-            var textAttribute = AttributeTestSetup.Text(textAttributeId);
-            var attributes = new List<Attribute> { numericAttribute, textAttribute };
+            var attributes = new List<Attribute>();
+            foreach (var numericAttributeName in numericAttributeNames)
+            {
+
+                var numericAttributeId = Guid.NewGuid();
+                var numericAttribute = AttributeTestSetup.Numeric(numericAttributeId, numericAttributeName);
+                attributes.Add(numericAttribute);
+            }
+            foreach (var textAttributeName in textAttributeNames)
+            {
+                var textAttributeId = Guid.NewGuid();
+                var textAttribute = AttributeTestSetup.Text(textAttributeId, textAttributeName);
+                attributes.Add(textAttribute);
+            }
             unitOfWork.AttributeRepo.UpsertAttributes(attributes);
             var years = Enumerable.Range(2022, numberOfYears).ToList();
             var context = new SimulationOutputSetupContext
@@ -59,8 +72,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 AssetNameIdPairs = assetNameIdPairs,
                 TreatmentName = "Treatment",
                 Years = years,
-                NumericAttributeName = numericAttribute.Name,
-                TextAttributeName = textAttribute.Name,
+                NumericAttributeNames = numericAttributeNames,
+                TextAttributeNames = textAttributeNames,
                 SimulationId = simulation.Id,
             };
             return context;

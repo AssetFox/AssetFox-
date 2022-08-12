@@ -22,8 +22,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             return detail;
         }
-
-        public static DeficientConditionGoalDetail Detail(SimulationOutputSetupContext context)
-            => Detail(context.NumericAttributeName);
     }
 }

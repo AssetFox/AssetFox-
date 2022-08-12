@@ -23,8 +23,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 yearDetail.Assets.Add(assetDetail);
             }
             var budgetDetail = BudgetDetails.Detail();
-            var deficientConditionGoalDetail = DeficientConditionGoalDetails.Detail(context);
-            var targetConditionGoalDetail = TargetConditionGoalDetails.Detail(context);
+            var deficientConditionGoalDetail = DeficientConditionGoalDetails.Detail(context.NumericAttributeNames[0]);
+            var targetConditionGoalDetail = TargetConditionGoalDetails.Detail(context.NumericAttributeNames[0]);
 
             yearDetail.Budgets.Add(budgetDetail);
             yearDetail.DeficientConditionGoals.Add(deficientConditionGoalDetail);

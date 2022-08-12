@@ -14,8 +14,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var assetId = assetNameIdPair.Id;
             var assetName = assetNameIdPair.Name;
-            var textAttributeName = context.TextAttributeName;
-            var numericAttributeName = context.NumericAttributeName;
+            var textAttributeNames = context.TextAttributeNames;
+            var numericAttributeNames = context.NumericAttributeNames;
             var detail = new AssetDetail(assetName, assetId)
             {
                 AppliedTreatment = "Treatment",
@@ -23,8 +23,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 TreatmentFundingIgnoresSpendingLimit = true,
                 TreatmentStatus = TreatmentStatus.Applied,
             };
-            detail.ValuePerTextAttribute[textAttributeName] = "String";
-            detail.ValuePerNumericAttribute[numericAttributeName] = 7;
+            foreach (var textAttributeName in textAttributeNames)
+            {
+                detail.ValuePerTextAttribute[textAttributeName] = "String";
+            }
+            foreach (var numericAttributeName in numericAttributeNames)
+            {
+                detail.ValuePerNumericAttribute[numericAttributeName] = 7;
+            }
             var treatmentConsiderationDetail = TreatmentConsiderationDetails.Detail(context);
             detail.TreatmentConsiderations.Add(treatmentConsiderationDetail);
             var treatmentOptionDetail = TreatmentOptionDetails.Detail();

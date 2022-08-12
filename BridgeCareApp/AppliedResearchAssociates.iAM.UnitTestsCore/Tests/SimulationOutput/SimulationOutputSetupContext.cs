@@ -8,8 +8,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationOutputSetupContext
     {
-        public string NumericAttributeName { get; set; }
-        public string TextAttributeName { get; set; }
+        public List<string> NumericAttributeNames { get; set; }
+        public List<string> TextAttributeNames { get; set; }
         public List<AssetNameIdPair> AssetNameIdPairs { get; set; }
         public List<int> Years { get; set; }
         public string TreatmentName { get; set; }

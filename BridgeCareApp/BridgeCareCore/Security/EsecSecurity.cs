@@ -88,33 +88,55 @@ namespace BridgeCareCore.Security
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }
-                //string internalRole = CMapper.GetInternalRole(roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)));
-                //List<string> claims = CMapper.GetClaims();
-                string internalRoleFromMapper = "";
-                List<string> claimFromMapper = new List<string>();
+                // Get the internal roles and subsequent claims from mapper
+                string internalESECRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)));
+                List<string> claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalESECRoleFromMapper);
+                List<Claim> claims = new List<Claim>();
 
-                // Build the identity
-                //var identity = new ClaimsIdentity(claimFromMapper);
-                //request.HttpContext.User.AddIdentity(identity);
-                
+                // Convert the claim to a system claim for identity purposes
+                claimsFromMapper.ForEach(claim =>
+                {
+                    System.Security.Claims.Claim c = new Claim(claim, "true");
+                    claims.Add(c);
+                });
+                // Build the identity, add to user (claimsPrincipal)
+                var identity = new ClaimsIdentity(claims);
+                request.HttpContext.User.AddIdentity(identity);
 
+                // TODO: Drop role from UserInfo with addition of internal roles/claims
+                //       once tested and verified.
                 return new UserInfo
                 {
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
                     Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
-                    InternalRole = internalRoleFromMapper,
-                    Claims = claimFromMapper,
+                    InternalRole = internalESECRoleFromMapper,
+                    Claims = claimsFromMapper,
                     Email = decodedToken.GetClaimValue("email")
                 };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
+                List<Claim> claims = new List<Claim>();
+                string internalB2CRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C,"Administrator");
+                List<string> claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalB2CRoleFromMapper);
+                // Convert the claim to a system claim for identity purposes
+                claimsFromMapper.ForEach(claim =>
+                {
+                    System.Security.Claims.Claim c = new Claim(claim, "true");
+                    claims.Add(c);
+                });
+                // Build the identity, add to user (claimsPrincipal)
+                var identity = new ClaimsIdentity(claims);
+                request.HttpContext.User.AddIdentity(identity);
+
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
                     // assign internal Role & claims
+                    InternalRole = internalB2CRoleFromMapper,
+                    Claims= claimsFromMapper,
                     Role = SecurityConstants.Role.BAMSAdmin
                 };
             }

@@ -21,5 +21,10 @@
             // TODO remove later:
             public const string BAMSAdmin = "PD-BAMS-Administrator";            
         }
+        public static class Claim
+        {
+            public static string AttributesUpdateAccess = "AttributesUpdateAccess";
+
+        }
     }
 }

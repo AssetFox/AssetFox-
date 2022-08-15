@@ -16,7 +16,11 @@
 
         public static class Role
         {
-            public const string BAMSAdmin = "PD-BAMS-Administrator";
+            // TODO uncomment post authorization imple.n
+            // public const string Administrator = "Administrator";
+
+            // TODO remove later:
+            public const string BAMSAdmin = "PD-BAMS-Administrator";            
         }
     }
 }

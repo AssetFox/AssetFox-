@@ -11,7 +11,7 @@
         // TODO uncomment post authorization imple.n
         // public const string Administrator = "Administrator";
 
-        // TODO remove later:    
+        // TODO remove later:
         public const string Administrator = "PD-BAMS-Administrator";
         public const string DistrictEngineer = "PD-BAMS-DBEngineer";
         public const string PlanningPartner = "PD-BAMS-PlanningPartner";

@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -215,6 +215,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
+
+
+            // County Summary TAB
+            reportDetailDto.Status = $"County Summary TAB";
+            var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
+            //_countySummary.Fill(_countySummaryWorksheet, reportOutputData);
 
 
             // Legend TAB

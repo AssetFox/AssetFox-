@@ -18,7 +18,7 @@ namespace BridgeCareCore.Utils
             var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("IPRoles").Children().Contains(IPRole) == true);
             if(roleClaimsToken == null)
             {
-                throw new UnauthorizedAccessException("Unauthorized: Invalid role present on request.");
+                throw new UnauthorizedAccessException("Unauthorized: Invalid role present in request.");
             }
             internalRole = roleClaimsToken.SelectToken("InternalRole").ToString();
 
@@ -52,7 +52,7 @@ namespace BridgeCareCore.Utils
             var securityTypeToken = jObject.SelectToken("SecurityTypes").FirstOrDefault(s => s.SelectToken("SecurityType")?.ToString() == securityType);
             if(securityTypeToken == null)
             {
-                throw new UnauthorizedAccessException("Unauthorized: Invalid security type present on request.");
+                throw new UnauthorizedAccessException("Unauthorized: Invalid security type present in request.");
             }
             var rolesToken = securityTypeToken.SelectToken("RolesClaims");
             return rolesToken;

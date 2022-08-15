@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
@@ -51,7 +52,18 @@ namespace BridgeCareCore.Controllers.BaseController
             return false;
         }
 
-        public void SetUserInfo(HttpRequest request) => UserInfo = EsecSecurity.GetUserInformation(request);
+        public void SetUserInfo(HttpRequest request)
+        {
+            try
+            {
+                UserInfo = EsecSecurity.GetUserInformation(request);
+            }
+            catch(Exception exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, exception.Message);
+                throw;
+            }
+        }
 
         private UserInfo _userInfo;
         protected UserInfo UserInfo

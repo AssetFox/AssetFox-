@@ -81,6 +81,8 @@ namespace BridgeCareCore.Security
 
             var decodedToken = DecodeToken(idToken);
 
+
+            var claims = new List<Claim>();
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
@@ -89,19 +91,25 @@ namespace BridgeCareCore.Security
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }
                 // Get the internal roles and subsequent claims from mapper
-                string internalESECRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)));
-                List<string> claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalESECRoleFromMapper);
-                List<Claim> claims = new List<Claim>();
-
+                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)));
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
+                var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper.ToString());
+                var roleClaims = new List<Claim>
+                {
+                    roleClaim
+                };
                 // Convert the claim to a system claim for identity purposes
                 claimsFromMapper.ForEach(claim =>
                 {
-                    System.Security.Claims.Claim c = new Claim(claim, "true");
+                    System.Security.Claims.Claim c = new Claim(ClaimTypes.Name, claim);
                     claims.Add(c);
                 });
                 // Build the identity, add to user (claimsPrincipal)
                 var identity = new ClaimsIdentity(claims);
                 request.HttpContext.User.AddIdentity(identity);
+
+                var roleClaimIdentity = new ClaimsIdentity(roleClaims);
+                request.HttpContext.User.AddIdentity(roleClaimIdentity);
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims
                 //       once tested and verified.
@@ -109,7 +117,7 @@ namespace BridgeCareCore.Security
                 {
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
                     Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
-                    InternalRole = internalESECRoleFromMapper,
+                    InternalRole = internalRoleFromMapper,
                     Claims = claimsFromMapper,
                     Email = decodedToken.GetClaimValue("email")
                 };
@@ -117,24 +125,30 @@ namespace BridgeCareCore.Security
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
-                List<Claim> claims = new List<Claim>();
-                string internalB2CRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C,"Administrator");
-                List<string> claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalB2CRoleFromMapper);
+                var internalB2CRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C,"Administrator");
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalB2CRoleFromMapper);
                 // Convert the claim to a system claim for identity purposes
+                var roleClaim = new Claim(ClaimTypes.Role, internalB2CRoleFromMapper.ToString());
+                var roleClaims = new List<Claim>
+                {
+                    roleClaim
+                };
                 claimsFromMapper.ForEach(claim =>
                 {
-                    System.Security.Claims.Claim c = new Claim(claim, "true");
+                    var c = new Claim(ClaimTypes.Name, claim);
                     claims.Add(c);
                 });
                 // Build the identity, add to user (claimsPrincipal)
                 var identity = new ClaimsIdentity(claims);
+                var roleClaimIdentity = new ClaimsIdentity(roleClaims);
+
                 request.HttpContext.User.AddIdentity(identity);
+                request.HttpContext.User.AddIdentity(roleClaimIdentity);
 
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    // assign internal Role & claims
                     InternalRole = internalB2CRoleFromMapper,
                     Claims= claimsFromMapper,
                     Role = SecurityConstants.Role.BAMSAdmin

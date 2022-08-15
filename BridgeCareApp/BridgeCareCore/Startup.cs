@@ -82,13 +82,6 @@ namespace BridgeCareCore
 
             services.AddScoped<IReportGenerator, DictionaryBasedReportGenerator>();
             services.AddScoped<IAggregationService, AggregationService>();
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AttributeAdminAccess", policy => policy.RequireClaim("AttributesViewAccess"));
-                options.AddPolicy("AttributeAdminAccess", policy => policy.RequireClaim("AttributesAddAccess"));
-                options.AddPolicy("AttributeAdminAccess", policy => policy.RequireClaim("AttributesUpdateAccess"));
-            });
         }
 
         private void SetupReporting(IServiceCollection services)

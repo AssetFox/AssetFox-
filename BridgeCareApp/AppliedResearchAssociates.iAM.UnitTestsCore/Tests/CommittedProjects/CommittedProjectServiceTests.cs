@@ -17,6 +17,7 @@ using OfficeOpenXml;
 using System.IO;
 using AppliedResearchAssociates.iAM.DTOs;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -175,6 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.True(((SectionCommittedProjectDTO)testInput[1]).VerifyLocation(), "Could not verify location");
             Assert.Equal(8, testInput[1].Consequences.Count);
             Assert.Equal(2023, testInput[1].Year);
+            Assert.Equal(TreatmentCategory.CapacityAdding, testInput[1].Category);
             Assert.True(testInput.Any(_ => _.Treatment == "No Treatment"), "No Treatment was not created");
             var noTreatment = testInput.First(_ => _.Treatment == "No Treatment");
             Assert.Equal(0, noTreatment.Cost);

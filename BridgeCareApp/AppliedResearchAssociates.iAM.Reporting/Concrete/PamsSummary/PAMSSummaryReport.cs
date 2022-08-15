@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
@@ -22,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSSummaryReport : IReport
     {
-        //private readonly IHubService _hubService;
+        private readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         private readonly SummaryReportParameters _summaryReportParameters;
@@ -50,10 +52,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
+        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
 
             //create summary report objects
@@ -270,6 +273,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 reportDetailDto.Status = $"Gathering summary report data";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
                 Errors.Add(reportDetailDto.Status);
 
                 byte[] summaryReportData = File.ReadAllBytes(filePath);
@@ -278,6 +282,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
             UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
             Errors.Add(reportDetailDto.Status);
 
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");

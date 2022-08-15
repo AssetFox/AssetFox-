@@ -25,14 +25,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             _workSummaryModel = workSummaryModel;
         }
 
-        public void FillTreatmentsWorkSummarySections(
+        public ChartRowsModel FillTreatmentsWorkSummarySections(
             ExcelWorksheet worksheet,
             CurrentCell currentCell,
             List<int> simulationYears,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
             Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear,
             List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments,
-            Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals
+            Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
+            ChartRowsModel chartRowsModel
             )
 
         {
@@ -43,6 +44,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             FillTreatmentGroups(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
 
             FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals);
+
+            return chartRowsModel;
         }
 
         private void FillFullDepthAsphaltTreatments(
@@ -83,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    var treatmentLength = costAndLength.length / 5280;
+                    var treatmentLength = costAndLength.length.FeetToMiles();
                     totalLength += treatmentLength;
                     worksheet.Cells[row, column].Value = treatmentLength;
                     row++;
@@ -138,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             foreach (var treatment in simulationTreatments)
             {
                 yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                var treatmentLength = costAndLength.length / 5280;
+                var treatmentLength = costAndLength.length.FeetToMiles();
                 totalLength += treatmentLength;
                 worksheet.Cells[row, column].Value = treatmentLength;
                 row++;
@@ -190,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatment in simulationTreatments)
                 {
                     yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
-                    var treatmentLength = costAndLength.length / 5280;
+                    var treatmentLength = costAndLength.length.FeetToMiles();
                     totalLength += treatmentLength;
                     worksheet.Cells[row, column].Value = treatmentLength;
                     row++;
@@ -246,7 +249,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 foreach (var treatmentGroup in treatmentGroups)
                 {
                     yearlyValues.Value.TryGetValue(treatmentGroup, out var costAndLength);
-                    worksheet.Cells[row, column].Value = costAndLength.length / 5280;
+                    worksheet.Cells[row, column].Value = costAndLength.length.FeetToMiles();
                     row++;
                 }
             }

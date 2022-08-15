@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        public void FillCostBudgetWorkSummarySections(
+        public ChartRowsModel FillCostBudgetWorkSummarySections(
             ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
@@ -65,6 +65,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             //FillRemainingBudgetSection(worksheet, simulationYears, currentCell, workTypeTotalRow);
             FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
+
+            var chartRowsModel = new ChartRowsModel();
+            return chartRowsModel;
         }
 
 

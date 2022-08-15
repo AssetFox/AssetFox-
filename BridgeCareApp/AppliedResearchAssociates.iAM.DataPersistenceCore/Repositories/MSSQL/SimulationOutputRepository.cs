@@ -94,39 +94,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
             }
 
-            var entities = _unitOfWork.Context.SimulationOutput
+            var entitiesWithoutYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.InitialAssetSummaries)
                 .ThenInclude(a => a.AssetSummaryDetailValues)
                 .Include(so => so.InitialAssetSummaries)
                 .ThenInclude(a => a.MaintainableAsset)
                 .Include(so => so.Years)
-                .ThenInclude(y => y.Assets)
-                .ThenInclude(a => a.AssetDetailValues)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.Assets)
-                .ThenInclude(a => a.TreatmentConsiderationDetails)
-                .ThenInclude(tc => tc.CashFlowConsiderationDetails)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.Assets)
-                .ThenInclude(a => a.TreatmentOptionDetails)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.Assets)
-                .ThenInclude(a => a.TreatmentRejectionDetails)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.Assets)
-                .ThenInclude(a => a.TreatmentSchedulingCollisionDetails)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.Budgets)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.DeficientConditionGoalDetails)
-                .Include(so => so.Years)
-                .ThenInclude(y => y.TargetConditionGoalDetails)
                 .Where(_ => _.SimulationId == simulationId)
                 .ToList();
+            var firstEntity = entitiesWithoutYearContents[0];
+            var domain = SimulationOutputMapper.ToDomain(firstEntity);
+            foreach (var year in firstEntity.Years)
+            {
+                var yearId = year.Id;
+                var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
+                .Include(y => y.Assets)
+                .ThenInclude(a => a.AssetDetailValues)
+                .Include(y => y.Assets)
+                .ThenInclude(a => a.TreatmentConsiderationDetails)
+                .ThenInclude(tc => tc.CashFlowConsiderationDetails)
+                .Include(y => y.Assets)
+                .ThenInclude(a => a.TreatmentOptionDetails)
+                .Include(y => y.Assets)
+                .ThenInclude(a => a.TreatmentRejectionDetails)
+                .Include(y => y.Assets)
+                .ThenInclude(a => a.TreatmentSchedulingCollisionDetails)
+                .Include(y => y.Budgets)
+                .Include(y => y.DeficientConditionGoalDetails)
+                .Include(y => y.TargetConditionGoalDetails)
+                .Where(y => y.Id == yearId)
+                .ToList();
+                var loadedYearEntity = loadedYearWithoutAssets[0];
+                var domainYear = SimulationYearDetailMapper.ToDomain(loadedYearEntity);
+                domain.Years.Add(domainYear);
+            }
+            domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
 
-            var entity = entities[0];
 
-            var domain = SimulationOutputMapper.ToDomain(entity);
             return domain;
 
             //var simulationOutput = new SimulationOutput();

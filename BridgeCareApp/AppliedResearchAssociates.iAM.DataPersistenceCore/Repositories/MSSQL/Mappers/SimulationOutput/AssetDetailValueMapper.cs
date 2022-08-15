@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var deckAreaKey = AttributeNameConstants.DeckArea;
             if (valuePerNumericAttribute.ContainsKey(deckAreaKey))
             {
-                valuePerTextAttribute[areaKey] = valuePerTextAttribute[deckAreaKey];
+                valuePerNumericAttribute[areaKey] = valuePerNumericAttribute[deckAreaKey];
             }
         }
     }

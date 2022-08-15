@@ -16,7 +16,11 @@ namespace BridgeCareCore.Utils
 
             var rolesClaimsToken = GetRolesClaimsToken(securityType);
             var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("IPRoles").Children().Contains(IPRole) == true);
-            internalRole = roleClaimsToken?.SelectToken("InternalRole").ToString();
+            if(roleClaimsToken == null)
+            {
+                throw new UnauthorizedAccessException("Unauthorized: Invalid role present in request.");
+            }
+            internalRole = roleClaimsToken.SelectToken("InternalRole").ToString();
 
             return internalRole;
         }        
@@ -32,8 +36,7 @@ namespace BridgeCareCore.Utils
 
             return claims;
         }
-
-        // TODO exception handling
+        
         private static JToken GetRolesClaimsToken(string securityType)
         {            
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
@@ -47,6 +50,10 @@ namespace BridgeCareCore.Utils
             var content = File.ReadAllText(filePath);
             var jObject = JObject.Parse(content);
             var securityTypeToken = jObject.SelectToken("SecurityTypes").FirstOrDefault(s => s.SelectToken("SecurityType")?.ToString() == securityType);
+            if(securityTypeToken == null)
+            {
+                throw new UnauthorizedAccessException("Unauthorized: Invalid security type present in request.");
+            }
             var rolesToken = securityTypeToken.SelectToken("RolesClaims");
             return rolesToken;
         }

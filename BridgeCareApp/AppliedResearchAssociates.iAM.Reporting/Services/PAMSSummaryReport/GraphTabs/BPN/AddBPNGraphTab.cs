@@ -35,36 +35,36 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             AddGraphDataDependentTab(PAMSConstants.OPI_Statewide_Tab, PAMSConstants.OPI_Statewide_Tab_Title);
 
 
-            graphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.IRI_BPN1_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.IRI_BPN2_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.IRI_BPN3_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.IRI_BPN3_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.IRI_BPN3_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.IRI_BPN4_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.IRI_BPN4_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.IRI_BPN4_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.IRI_Statewide_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.IRI_Statewide_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.IRI_Statewide_Tab].type = ChartType.CountChart;
 
 
 
-            graphDataDependentTabs[PAMSConstants.OPI_BPN1_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.OPI_BPN1_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.OPI_BPN1_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.OPI_BPN2_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.OPI_BPN2_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.OPI_BPN2_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.OPI_BPN3_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.OPI_BPN3_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.OPI_BPN3_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.OPI_BPN4_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.OPI_BPN4_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.OPI_BPN4_Tab].type = ChartType.CountChart;
 
-            graphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].DataColumn = chartRowModel.TotalPamsPostedCountByBPNYearsRow;
+            graphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].DataColumn = chartRowModel.TotalCountBPNYearsRow;
             graphDataDependentTabs[PAMSConstants.OPI_Statewide_Tab].type = ChartType.CountChart;
 
 
@@ -72,20 +72,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Gra
             {
                 switch (graphDataTab.type)
                 {
-                    case ChartType.AreaChart:
-                        //_bpnAreaChart.Fill(graphDataTab.Worksheet, pamsWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
-                        break;
-
                     case ChartType.CountChart:
                         //_bpnCountChart.Fill(graphDataTab.Worksheet, pamsWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
                         break;
 
-                    case ChartType.CombinedChart:
-                        //_combinedPostedAndClosed.Fill(graphDataTab.Worksheet, pamsWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
-                        break;
-
-                    case ChartType.CashChart:
-                        //_cashNeededByBPN.Fill(graphDataTab.Worksheet, pamsWorkSummaryWorksheet, graphDataTab.DataColumn, simulationYearsCount, graphDataTab.Title);
+                    default:
                         break;
                 }
             }

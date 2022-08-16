@@ -9,7 +9,6 @@ using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using System;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-//using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -144,17 +143,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             foreach (var item in simulationTreatments)
             {
-                //if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
-                //{
-                //    if (item.Name == BAMSConstants.CulvertNoTreatment)
-                //    {
-                //        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
-                //    }
-                //    else
-                //    {
-                //        worksheet.Cells[row++, column].Value = item.Name;
-                //    }
-                //}
                 worksheet.Cells[row++, column].Value = item;
             }
         }
@@ -165,17 +153,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             foreach (var item in treatmentGroupNames)
             {
-                //if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
-                //{
-                //    if (item.Name == BAMSConstants.CulvertNoTreatment)
-                //    {
-                //        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
-                //    }
-                //    else
-                //    {
-                //        worksheet.Cells[row++, column].Value = item.Name;
-                //    }
-                //}
                 worksheet.Cells[row++, column].Value = item;
             }
         }
@@ -185,46 +162,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         {
             foreach (var item in simulationTreatments)
             {
-                //if (item.AssetType == AssetCategory.Culvert || item.Name == BAMSConstants.CulvertNoTreatment)
-                //{
-                //    if (item.Name == BAMSConstants.CulvertNoTreatment)
-                //    {
-                //        worksheet.Cells[row++, column].Value = BAMSConstants.NoTreatmentForWorkSummary;
-                //    }
-                //    else
-                //    {
-                //        worksheet.Cells[row++, column].Value = item.Name;
-                //    }
-                //}
                 worksheet.Cells[row++, column].Value = item.Name;
             }
         }
         
-
-        public void InitializeLabelCells(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
-        {
-            SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-            //worksheet.Cells[row++, column].Value = PAMSConstants.Good;
-            //worksheet.Cells[row++, column].Value = PAMSConstants.Fair;
-            //worksheet.Cells[row++, column].Value = PAMSConstants.Poor;
-            //worksheet.Cells[row++, column++].Value = PAMSConstants.Closed;
-            //worksheet.Cells[row - 4, column - 1, row - 1, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-        }
-
-        //public void InitializeBPNLabels(ExcelWorksheet worksheet, CurrentCell currentCell, out int startRow, out int startColumn, out int row, out int column)
-        //{
-        //    SetRowColumns(currentCell, out startRow, out startColumn, out row, out column);
-
-        //    var bpnNames = EnumExtensions.GetValues<BPNName>();
-        //    for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
-        //    {
-        //        worksheet.Cells[row++, column].Value = bpnName.ToReportLabel();
-        //    }
-
-        //    worksheet.Cells[row - bpnNames.Count, column, row - 1, column].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-        //    column++;
-        //}
-
         #region Private methods
 
         private void AddMergeSectionHeader(ExcelWorksheet worksheet, string headerText, int yearsCount, CurrentCell currentCell)

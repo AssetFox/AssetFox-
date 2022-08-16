@@ -14,10 +14,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     {
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
         private WorkSummaryModel _workSummaryModel;
-        //private HashSet<string> MPMSTreatments = new HashSet<string>();
-
-        //private Dictionary<int, decimal> TotalAsphaltSpent = new Dictionary<int, decimal>();
-        //private int AsphaltTotalRow = 0;
 
         public TreatmentsWorkSummary(WorkSummaryModel workSummaryModel)
         {

@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         BPN2 = 1,
         BPN3 = 2,
         BPN4 = 3,
-        //BPNL = 4,
+        //BPNL = 4, // Constants from Bridge version; TODO: Consider whether to remove or keep for future use
         //BPND = 5,
         //BPNH = 6,
         //BPNN = 7,

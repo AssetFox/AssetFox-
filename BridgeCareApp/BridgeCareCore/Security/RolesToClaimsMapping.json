@@ -37,6 +37,7 @@
             "CashFlowViewAnyFromLibraryAccess",
             "CashFlowModifyAnyFromScenarioAccess",
             "CashFlowViewAnyFromScenarioAccess",
+            "DeficientConditionGoalViewAnyFromScenarioAccess",
             "DeficientConditionGoalModifyAnyFromLibraryAccess",
             "DeficientConditionGoalViewAnyFromLibraryAccess",
             "DeficientConditionGoalModifyAnyFromScenarioAccess",

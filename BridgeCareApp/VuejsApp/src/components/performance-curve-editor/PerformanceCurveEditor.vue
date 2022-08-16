@@ -29,8 +29,10 @@
                         </v-select>
                     </v-flex>
                     <v-flex xs2 v-show="hasScenario"></v-flex>
-                    <v-flex xs5 v-show="hasSelectedLibrary || hasScenario">
+                    <v-flex xs5 v-show="hasSelectedLibrary || hasScenario">                     
                         <v-subheader class="ghd-control-label ghd-md-gray"> </v-subheader>
+                        <v-layout>
+                        
                         <v-text-field
                             class="ghd-text-field-border ghd-text-field search-icon-general"
                             style="margin-top:0px;"
@@ -43,6 +45,8 @@
                             v-model="gridSearchTerm"
                         >
                         </v-text-field>
+                        <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                        </v-layout>
                     </v-flex>
                     <v-flex xs5 v-show="!(hasSelectedLibrary || hasScenario)">
                     </v-flex>                    
@@ -315,7 +319,7 @@
                             </template>                               
                         </v-data-table>
                         <v-btn style="margin-top:-84px"
-                            :disabled='selectedPerformanceEquationIds.length === 0 || !hasLibraryEditPermission'
+                            :disabled='selectedPerformanceEquationIds.length === 0 || (!hasLibraryEditPermission && !hasScenario)'
                             @click='onRemovePerformanceEquations'
                             class='ghd-blue' flat
                         >
@@ -504,7 +508,8 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { PageingModel, PagingRequestModel } from '@/shared/models/iAM/paging';
+import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+import { http2XX } from '@/shared/utils/http-utils';
 
 @Component({
     components: {
@@ -555,9 +560,11 @@ export default class PerformanceCurveEditor extends Vue {
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     addedRows: PerformanceCurve[] = [];
-    updatedRowsMap:Map<string, PerformanceCurve> = new Map<string, PerformanceCurve>();
+    updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
     deletionIds: string[] = [];
+    rowCache: PerformanceCurve[] = [];
     gridSearchTerm = '';
+    currentSearch = '';
     selectedPerformanceCurveLibrary: PerformanceCurveLibrary = clone(
         emptyPerformanceCurveLibrary,
     );
@@ -644,20 +651,20 @@ export default class PerformanceCurveEditor extends Vue {
             vm.librarySelectItemValue = null;
             vm.getPerformanceCurveLibrariesAction().then(() => {
                 if (to.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
-                vm.selectedScenarioId = to.query.scenarioId;
+                    vm.selectedScenarioId = to.query.scenarioId;
 
-                if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.addErrorNotificationAction({
-                        message: 'Unable to identify selected scenario.',
-                    });
-                    vm.$router.push('/Scenarios/');
+                    if (vm.selectedScenarioId === vm.uuidNIL) {
+                        vm.addErrorNotificationAction({
+                            message: 'Unable to identify selected scenario.',
+                        });
+                        vm.$router.push('/Scenarios/');
+                    }
+
+                    vm.hasScenario = true;
+                    // vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
+                    vm.onPaginationChanged();
+
                 }
-
-                vm.hasScenario = true;
-                // vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
-                vm.onPaginationChanged();
-
-            }
             });
 
             
@@ -678,24 +685,40 @@ export default class PerformanceCurveEditor extends Vue {
             this.isPageInit = true;
             return;
         }
-
+        this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
-        const request: PagingRequestModel<PerformanceCurve>= {
+
+        const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            updateRows: Array.from(this.updatedRowsMap.values()),
-            rowsForDeletion: this.deletionIds,
-            addedRows: this.addedRows,
+            pagingSync: {
+                libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
+                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: this.deletionIds,
+                addedRows: this.addedRows,
+            },           
             sortColumn: sortBy,
-            isDescending: descending
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch
         };
-        PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
-            if(response.data){
-                let data = response.data as PageingModel<PerformanceCurve>;
-                this.currentPage = data.items;
-                this.totalItems = data.totalItems;
-            }
-        });        
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
+            PerformanceCurveService.getPerformanceCurvePage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<PerformanceCurve>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });
+        else if(this.hasSelectedLibrary)
+             PerformanceCurveService.GetLibraryPerformanceCurvePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<PerformanceCurve>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });     
     }
 
     @Watch('selectedPerformanceEquations')
@@ -741,15 +764,20 @@ export default class PerformanceCurveEditor extends Vue {
             this.hasCreatedLibrary = false;
         }
 
-        if (this.hasScenario) {
-            this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
-                .map((performanceCurve: PerformanceCurve) => ({
-                    ...performanceCurve,
-                    id: getNewGuid(),
-                }));
-        } else {
-            this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
-        }
+        this.updatedRowsMap.clear();
+        this.deletionIds = [];
+        this.addedRows = [];
+
+        // if (this.hasScenario) {
+        //     this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
+        //         .map((performanceCurve: PerformanceCurve) => ({
+        //             ...performanceCurve,
+        //             id: getNewGuid(),
+        //         }));
+        // } else {
+        //     this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
+        // }
+        this.onPaginationChanged();
     }
 
     @Watch('stateNumericAttributes')
@@ -776,14 +804,22 @@ export default class PerformanceCurveEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
+    @Watch('deletionIds')
+    onDeletionIdsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('addedRows')
+    onAddedRowsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
     checkHasUnsavedChanges(){
-        let hasUnsavedChanges: boolean = 
+        const hasUnsavedChanges: boolean = 
             this.deletionIds.length > 0 || 
             this.addedRows.length > 0 ||
-             this.updatedRowsMap.values.length > 0 || (this.hasScenario && hasUnsavedChangesCore('',
-                {...clone(this.selectedPerformanceCurveLibrary), performanceCurves: []},
-                this.stateSelectedPerformanceCurveLibrary))
-
+            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     setAttributeSelectItems() {
@@ -816,7 +852,7 @@ export default class PerformanceCurveEditor extends Vue {
         this.createPerformanceCurveLibraryDialogData = {
             showDialog: true,
             performanceCurves: createAsNewLibrary
-                ? this.performanceCurveGridData
+                ? this.currentPage
                 : [],
         };
     }
@@ -829,9 +865,22 @@ export default class PerformanceCurveEditor extends Vue {
         );
 
         if (!isNil(performanceCurveLibrary)) {
-            this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
-            this.hasCreatedLibrary = true;
-            this.librarySelectItemValue = performanceCurveLibrary.name;
+            const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
+                library: performanceCurveLibrary,               
+                 pagingSync: {
+                    libraryId: performanceCurveLibrary.performanceCurves === [] ? null : this.selectedPerformanceCurveLibrary.id,
+                    rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
+                    updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
+                 }
+            }
+            PerformanceCurveService.UpsertPerformanceCurveLibraryPage(upsertRequest).then(() => {
+                this.hasCreatedLibrary = true;
+                this.librarySelectItemValue = performanceCurveLibrary.name;
+                if(performanceCurveLibrary.performanceCurves === []){
+                    this.clearChanges();
+                }
+            })
         }
     }
 
@@ -855,14 +904,14 @@ export default class PerformanceCurveEditor extends Vue {
                 propEq('id', id),
                 this.currentPage,
             ) as PerformanceCurve;
-            this.updatedRowsMap.set(id, performanceCurve);
+            this.onUpdateRow(id, performanceCurve);
         }
     }
 
     onShowEquationEditorDialog(performanceCurveId: string) {
         this.selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            this.performanceCurveGridData,
+            this.currentPage,
         ) as PerformanceCurve;
 
         if (!isNil(this.selectedPerformanceCurve)) {
@@ -879,13 +928,14 @@ export default class PerformanceCurveEditor extends Vue {
         this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && this.hasSelectedPerformanceCurve) {
-            this.performanceCurveGridData = update(
+            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, equation: equation })
+            this.currentPage = update(
                 findIndex(
                     propEq('id', this.selectedPerformanceCurve.id),
-                    this.performanceCurveGridData,
+                    this.currentPage,
                 ),
                 { ...this.selectedPerformanceCurve, equation: equation },
-                this.performanceCurveGridData,
+                this.currentPage,
             );
         }
 
@@ -896,7 +946,7 @@ export default class PerformanceCurveEditor extends Vue {
     onEditPerformanceCurveCriterionLibrary(performanceCurveId: string) {
         this.selectedPerformanceCurve = find(
             propEq('id', performanceCurveId),
-            this.performanceCurveGridData,
+            this.currentPage,
         ) as PerformanceCurve;
 
         if (!isNil(this.selectedPerformanceCurve)) {
@@ -919,16 +969,17 @@ export default class PerformanceCurveEditor extends Vue {
         );
 
         if (!isNil(criterionLibrary) && this.hasSelectedPerformanceCurve) {
-            this.performanceCurveGridData = update(
+            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, criterionLibrary: criterionLibrary })
+            this.currentPage = update(
                 findIndex(
                     propEq('id', this.selectedPerformanceCurve.id),
-                    this.performanceCurveGridData,
+                    this.currentPage,
                 ),
                 {
                     ...this.selectedPerformanceCurve,
                     criterionLibrary: criterionLibrary,
                 },
-                this.performanceCurveGridData,
+                this.currentPage,
             );
         }
 
@@ -937,32 +988,62 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     onRemovePerformanceCurve(performanceCurveId: string) {
-        this.performanceCurveGridData = reject(
-            propEq('id', performanceCurveId),
-            this.performanceCurveGridData,
-        );
+        this.deletionIds.push(performanceCurveId);
+        this.onPaginationChanged();
     }
 
-    onUpsertScenarioPerformanceCurves() {
-        this.upsertScenarioPerformanceCurvesAction({
-            scenarioPerformanceCurves: this.performanceCurveGridData,
-            scenarioId: this.selectedScenarioId,
-        }).then(() => (this.librarySelectItemValue = null));
+    onUpsertScenarioPerformanceCurves() {// need to do upsert thing
+        // this.upsertScenarioPerformanceCurvesAction({
+        //     scenarioPerformanceCurves: this.performanceCurveGridData,
+        //     scenarioId: this.selectedScenarioId,
+        // }).then(() => (this.librarySelectItemValue = null));
+
+        PerformanceCurveService.UpsertScenarioPerformanceCurvesPage({
+            libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
+            rowsForDeletion: this.deletionIds,
+            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+            addedRows: this.addedRows           
+        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+            }
+
+            this.librarySelectItemValue = null
+        });
     }
 
-    onUpsertPerformanceCurveLibrary() {
-        const performanceCurveLibrary: PerformanceCurveLibrary = {
-            ...clone(this.selectedPerformanceCurveLibrary),
-            performanceCurves: clone(this.performanceCurveGridData),
-        };
-        this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
+    onUpsertPerformanceCurveLibrary() { // need to do upsert things
+        const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
+                library: this.selectedPerformanceCurveLibrary,
+                 pagingSync: {
+                    libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
+                    rowsForDeletion: this.deletionIds,
+                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: this.addedRows
+                 }
+        }
+        PerformanceCurveService.UpsertPerformanceCurveLibraryPage(upsertRequest).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+            }
+        });
+        // const performanceCurveLibrary: PerformanceCurveLibrary = {
+        //     ...clone(this.selectedPerformanceCurveLibrary),
+        //     performanceCurves: clone(this.performanceCurveGridData),
+        // };
+        // this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
     }
 
     onDiscardChanges() {
         this.librarySelectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.performanceCurveGridData = clone(this.stateScenarioPerformanceCurves);
+                this.deletionIds = [];
+                this.addedRows = [];
+                this.updatedRowsMap.clear();
+                this.resetPage();
             }
         });
     }
@@ -988,7 +1069,8 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     disableCrudButtons() {
-        const dataIsValid: boolean = this.performanceCurveGridData.every(
+        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+        const dataIsValid: boolean = rowChanges.every(
             (performanceCurve: PerformanceCurve) => {
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
@@ -1064,6 +1146,39 @@ export default class PerformanceCurveEditor extends Vue {
 
             }
         }
+    }
+
+    onSearchClick(){
+        this.currentSearch = this.gridSearchTerm;
+        this.resetPage();
+    }
+
+    onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
+        let mapEntry = this.updatedRowsMap.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.rowCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
+                this.updatedRowsMap.set(rowId, [row , updatedRow])
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+        }
+        else
+            this.updatedRowsMap.delete(rowId)
+
+        this.checkHasUnsavedChanges();
+    }
+
+    clearChanges(){
+        this.updatedRowsMap.clear();
+        this.addedRows = [];
+        this.deletionIds = [];
+    }
+
+    resetPage(){
+        this.performancePagination.page = 1;
+        this.onPaginationChanged();
     }
 }
 </script>

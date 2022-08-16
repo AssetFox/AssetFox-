@@ -5,7 +5,7 @@ import {
 } from '@/shared/models/iAM/performance';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
-import { PagingRequestModel } from '@/shared/models/iAM/paging';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class PerformanceCurveService {
     static getPerformanceCurveLibraries(): AxiosPromise {
@@ -14,9 +14,28 @@ export default class PerformanceCurveService {
         );
     }
 
-    static getPerformanceCurvePage(scenarioId: string, data:PagingRequestModel<PerformanceCurve>): AxiosPromise {
+    static getPerformanceCurvePage(scenarioId: string, data:PagingRequest<PerformanceCurve>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.PerformanceCurve}/GetScenarioPerformanceCurvePage/${scenarioId}`, data
+        );
+    }
+
+    static GetLibraryPerformanceCurvePage(library: string, data:PagingRequest<PerformanceCurve>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/GetLibraryPerformanceCurvePage/${library}`, data
+        );
+    }
+
+    static UpsertPerformanceCurveLibraryPage(data:LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/UpsertPerformanceCurveLibraryPage`,
+            data,
+        );
+    }
+
+    static UpsertScenarioPerformanceCurvesPage(data: PaginSync<PerformanceCurve>, scenarioId: string){
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurvesPage/${scenarioId}`, data
         );
     }
 

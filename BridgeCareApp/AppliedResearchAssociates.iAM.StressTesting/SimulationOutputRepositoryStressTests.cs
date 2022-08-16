@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             }
         }
 
-        
+
         private void SaveSimulationOutput_ThenLoad_Same(string filename, Func<SimulationOutput, SimulationOutput> preTransform = null)
         {
             if (preTransform == null)
@@ -65,24 +65,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             var outputFilename = filename.Substring(0, filename.IndexOf(".")) + "Output";
             var outputFilenameWithExtension = Path.ChangeExtension(outputFilename, "json");
             FileReader.WriteTextToGitIgnoredFile(outputFilenameWithExtension, serializeOutput);
-            TrimmingAsserts(serializeOutput, serializeLoaded);
-        }
-
-        private static void TrimmingAsserts(string serializeOutput, string serializeLoaded)
-        {
-            var splitSerializeOutput = StringExtensions.ToLines(serializeOutput);
-            var splitSerializeLoaded = StringExtensions.ToLines(serializeLoaded);
-            var trimmedSerializedOutput = splitSerializeOutput.Select(str => str.Trim().TrimEnd(',')).ToList();
-            var trimmedSerializedLoaded = splitSerializeLoaded.Select(str => str.Trim().TrimEnd(',')).ToList();
-            trimmedSerializedOutput.Sort();
-            trimmedSerializedLoaded.Sort();
-            for (int i = 0; i < trimmedSerializedOutput.Count; i++)
-            {
-                var outputI = trimmedSerializedOutput[i];
-                var loadedI = trimmedSerializedLoaded[i];
-                Assert.Equal(outputI, loadedI);
-            }
-            Assert.Equal(serializeOutput.Length, serializeLoaded.Length);
+            SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutput, serializeLoaded);
         }
 
         [Fact]

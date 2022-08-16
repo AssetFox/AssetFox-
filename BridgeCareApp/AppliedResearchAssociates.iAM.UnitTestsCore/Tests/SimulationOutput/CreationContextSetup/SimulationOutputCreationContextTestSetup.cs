@@ -13,8 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     {
         public static SimulationOutputSetupContext SimpleContextWithObjectsInDatabase(UnitOfDataPersistenceWork unitOfWork, int numberOfYears = 1)
         {
-            var assetPair = AssetNameIdPairs.Random();
-            var assetPairs = new List<AssetNameIdPair> { assetPair };
+            var assetPairs = AssetNameIdPairLists.Random(1);
             var numericAttributeName = RandomStrings.WithPrefix("NumericAttribute");
             var textAttributeName = RandomStrings.WithPrefix("TextAttrbute");
             var numericAttributeNames = new List<string> { numericAttributeName };

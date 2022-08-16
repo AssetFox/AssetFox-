@@ -18,8 +18,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private const int AssetSaveBatchSize = 400;
-        private const int AssetLoadBatchSize = 400;
+        public const int AssetSaveBatchSize = 400;
+        public const int AssetLoadBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 

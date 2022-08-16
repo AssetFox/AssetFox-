@@ -18,7 +18,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        private const int AssetBatchSize = 400;
+        private const int AssetSaveBatchSize = 400;
+        private const int AssetLoadBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
-                    var batchedAssets = assets.ConcreteBatch(AssetBatchSize);
+                    var batchedAssets = assets.ConcreteBatch(AssetSaveBatchSize);
                     var yearSaved = false;
                     foreach (var batch in batchedAssets)
                     {
@@ -103,70 +104,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId)
                 .ToList();
             var firstEntity = entitiesWithoutYearContents[0];
+            var cacheYears = firstEntity.Years.ToList();
+            firstEntity.Years.Clear();
             var domain = SimulationOutputMapper.ToDomain(firstEntity);
-            foreach (var year in firstEntity.Years)
+            foreach (var year in cacheYears)
             {
                 var yearId = year.Id;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
-                .Include(y => y.Assets)
-                .ThenInclude(a => a.AssetDetailValues)
-                .Include(y => y.Assets)
-                .ThenInclude(a => a.TreatmentConsiderationDetails)
-                .ThenInclude(tc => tc.CashFlowConsiderationDetails)
-                .Include(y => y.Assets)
-                .ThenInclude(a => a.TreatmentOptionDetails)
-                .Include(y => y.Assets)
-                .ThenInclude(a => a.TreatmentRejectionDetails)
-                .Include(y => y.Assets)
-                .ThenInclude(a => a.TreatmentSchedulingCollisionDetails)
                 .Include(y => y.Budgets)
                 .Include(y => y.DeficientConditionGoalDetails)
                 .Include(y => y.TargetConditionGoalDetails)
                 .Where(y => y.Id == yearId)
                 .ToList();
                 var loadedYearEntity = loadedYearWithoutAssets[0];
-                var domainYear = SimulationYearDetailMapper.ToDomain(loadedYearEntity);
+                var domainYear = SimulationYearDetailMapper.ToDomainWithoutAssets(loadedYearEntity);
                 domain.Years.Add(domainYear);
+                bool shouldContinueLoadingAssets = true;
+                var batchIndex = 0;
+                while (shouldContinueLoadingAssets)
+                {
+                    var assetEntities = _unitOfWork.Context.AssetDetail
+                           .Where(a => a.SimulationYearDetailId == yearId)
+                           .OrderBy(a => a.Id)
+                   .Include(a => a.AssetDetailValues)
+                   .Include(a => a.TreatmentConsiderationDetails)
+                   .ThenInclude(tc => tc.CashFlowConsiderationDetails)
+                   .Include(a => a.TreatmentOptionDetails)
+                   .Include(a => a.TreatmentRejectionDetails)
+                   .Include(a => a.TreatmentSchedulingCollisionDetails)
+                   .Skip(AssetLoadBatchSize * batchIndex)
+                   .Take(AssetLoadBatchSize)
+                   .ToList();
+                    var assets = AssetDetailMapper.ToDomainList(assetEntities);
+                    domainYear.Assets.AddRange(assets);
+                    shouldContinueLoadingAssets = assets.Any();
+                    batchIndex++;
+                }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
 
-
             return domain;
-
-            //var simulationOutput = new SimulationOutput();
-            //foreach (var item in simulationOutputObjects)
-            //{
-            //    switch (item.OutputType)
-            //    {
-            //    case SimulationOutputEnum.YearlySection:
-            //        var yearlySections = JsonConvert.DeserializeObject<SimulationYearDetail>(item.Output, new JsonSerializerSettings
-            //        {
-            //            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            //        });
-            //        simulationOutput.Years.Add(yearlySections);
-            //        break;
-            //    case SimulationOutputEnum.InitialConditionNetwork:
-            //        simulationOutput.InitialConditionOfNetwork = Convert.ToDouble(item.Output);
-            //        break;
-            //    case SimulationOutputEnum.InitialSummary:
-            //        var initialSummary = JsonConvert.DeserializeObject<List<AssetSummaryDetail>>(item.Output, new JsonSerializerSettings
-            //        {
-            //            ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            //        });
-            //        simulationOutput.InitialAssetSummaries.AddRange(initialSummary);
-            //        break;
-            //    }
-            //}
-            //simulationOutput.Years.Sort((a, b) => a.Year.CompareTo(b.Year));
-
-            ////var outputData = JsonConvert.DeserializeObject<SimulationOutput>(simulationOutputString, new JsonSerializerSettings
-            ////{
-            ////    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            ////});
-
-            //return simulationOutput;
-
-            throw new NotImplementedException();
         }
     }
 }

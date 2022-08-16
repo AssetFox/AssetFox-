@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static SimulationYearDetail ToDomain(SimulationYearDetailEntity entity)
+        public static SimulationYearDetail ToDomainWithoutAssets(SimulationYearDetailEntity entity)
         {
             var domain = new SimulationYearDetail(entity.Year)
             {
@@ -41,6 +41,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             domain.DeficientConditionGoals.AddRange(deficientConditionGoals);
             var targetConditionGoals = TargetConditionGoalDetailMapper.ToDomainList(entity.TargetConditionGoalDetails);
             domain.TargetConditionGoals.AddRange(targetConditionGoals);
+            return domain;
+        }
+
+        public static SimulationYearDetail ToDomain(SimulationYearDetailEntity entity)
+        {
+            var domain = ToDomainWithoutAssets(entity);
             var assets = AssetDetailMapper.ToDomainList(entity.Assets);
             domain.Assets.AddRange(assets);
             return domain;

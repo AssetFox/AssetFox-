@@ -20,5 +20,14 @@ namespace AppliedResearchAssociates.iAM.StressTesting
                 throw new Exception(message);
             }
         }
+
+        public static void WriteTextToGitIgnoredFile(string filename, string text)
+        {
+            var directory = Directory.GetCurrentDirectory();
+            var folder = Path.Combine(directory, "GitIgnored");
+            var file = Path.Combine(folder, filename);
+            File.Delete(file);
+            File.WriteAllText(file, text);
+        }
     }
 }

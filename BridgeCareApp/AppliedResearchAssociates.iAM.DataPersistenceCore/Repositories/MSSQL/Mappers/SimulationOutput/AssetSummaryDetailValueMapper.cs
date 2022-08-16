@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
@@ -52,7 +53,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     if (summary.NumericValue.HasValue)
                     {
                         valuePerNumericAttribute[attributeName] = summary.NumericValue.Value;
-                        
                     }
                     break;                    
                 case AssetDetailValueDiscriminators.Text:
@@ -60,22 +60,53 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     break;
                 }
             }
+            var areaKey = Network.DefaultSpatialWeightingIdentifier;
+            var deckAreaKey = AttributeNameConstants.DeckArea;
+            if (valuePerNumericAttribute.ContainsKey(deckAreaKey))
+            {
+                valuePerNumericAttribute[areaKey] = valuePerNumericAttribute[deckAreaKey];
+            }
         }
 
         public static List<AssetSummaryDetailValueEntity> ToNumericEntityList(
             Dictionary<string, double> assetSummaryDetailValues,
-            Dictionary<string, Guid> attributeIdLookupDictionary)
+            Dictionary<string, Guid> attributeIdLookup)
         {
             var entities = new List<AssetSummaryDetailValueEntity>();
+            var areaKey = Network.DefaultSpatialWeightingIdentifier;
+            var deckAreaKey = AttributeNameConstants.DeckArea;
+            var containsAreaKey = assetSummaryDetailValues.ContainsKey(areaKey);
+            var containsDeckAreaKey = assetSummaryDetailValues.ContainsKey(deckAreaKey);
+            if (containsAreaKey && !containsDeckAreaKey)
+            {
+                var message = $"Unable to save simulation results. We have a value for {areaKey} but no value for {deckAreaKey}.";
+                throw new Exception(message);
+            }
+            else if (containsDeckAreaKey && !containsAreaKey)
+            {
+                var message = $"Unable to save simulation results. We have a value for {deckAreaKey} but no value for {areaKey}.";
+                throw new Exception(message);
+            }
+            else if (containsDeckAreaKey && assetSummaryDetailValues[deckAreaKey] != assetSummaryDetailValues[areaKey])
+            {
+                var message = $"Unable to save simulation results. We expect the value for {deckAreaKey} to match the value for {areaKey}. But the value for {deckAreaKey} is {assetSummaryDetailValues[deckAreaKey]} and the value for {areaKey} is {assetSummaryDetailValues[areaKey]},";
+                throw new Exception(message);
+            }
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                if (attributeIdLookupDictionary.ContainsKey(keyValuePair.Key))
-                { // Wjwjwj The "if" is a temporary hack which should be deleted prior to PR completion.
-                    var entity = ToNumericEntity(keyValuePair, attributeIdLookupDictionary);
+                if (attributeIdLookup.ContainsKey(keyValuePair.Key))
+                {
+                    var entity = ToNumericEntity(keyValuePair, attributeIdLookup);
                     entities.Add(entity);
+                }
+                else if (keyValuePair.Key != areaKey)
+                {
+                    var message = $"Unable to save simulation results. We have a value for {keyValuePair.Key}, but no corresponding attribute.";
+                    throw new Exception(message);
                 }
             }
             return entities;
+
         }
 
         public static List<AssetSummaryDetailValueEntity> ToTextEntityList(

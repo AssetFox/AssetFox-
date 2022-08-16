@@ -55,18 +55,6 @@
 		<None Update="GitIgnored\SimulationOutput.json">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Update="GitIgnored\SimulationOutput100Assets.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="GitIgnored\SimulationOutput10Assets.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="GitIgnored\SimulationOutput1Asset.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="GitIgnored\SimulationOutput2Assets.json">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 		<None Update="xunit.runner.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

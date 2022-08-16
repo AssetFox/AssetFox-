@@ -151,6 +151,8 @@
             public static string CommittedProjectImportPermittedAccess = "CommittedProjectImportPermittedAccess";
             public static string CommittedProjectViewPermittedAccess = "CommittedProjectViewPermittedAccess";
 
+            public static string DeficientConditionGoalViewAnyFromScenarioAccess = "DeficientConditionGoalViewAnyFromScenarioAccess";
+
         }
     }
 }

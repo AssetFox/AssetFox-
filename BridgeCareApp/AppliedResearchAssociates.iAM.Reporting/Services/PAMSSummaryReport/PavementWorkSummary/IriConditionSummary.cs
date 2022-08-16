@@ -89,16 +89,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             chartConditionModel.sourceStartRow = startRow;
 
-            AddSegmentMilesForBPN(worksheet, startRow, column, reportOutputData.InitialAssetSummaries, bpn);
+            var fromColumn = column + 2;
+
+            row = startRow;
+            column = fromColumn;
+
+            //AddSegmentMilesForBPN(worksheet, row, column, reportOutputData.InitialAssetSummaries, bpn);
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;
-                column = ++column;
                 AddSegmentMilesForBPN(worksheet, row, column, yearlyData.Assets, bpn);
+                column = ++column;
             }
 
-            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, row + 4, column]);
-            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, ++row, column);
+            column--;
+            ExcelHelper.ApplyBorder(worksheet.Cells[startRow, startColumn, startRow + 3, column]);
+            ExcelHelper.HorizontalRightAlign(worksheet.Cells[startRow, startColumn, startRow + 3, startColumn]);
+            ExcelHelper.SetCustomFormat(worksheet.Cells[startRow, fromColumn, startRow + 3, column], ExcelHelperCellFormat.Number);
+            _pavementWorkSummaryCommon.UpdateCurrentCell(currentCell, startRow + 4, column);
         }
 
         public ChartRowsModel FillIriConditionSummarySection(

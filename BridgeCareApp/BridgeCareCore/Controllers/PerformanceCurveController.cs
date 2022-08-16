@@ -231,6 +231,76 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
+
+        [HttpPost]
+        [Route("UpsertPerformanceCurveLibraryPage")]
+        [Authorize]
+        public async Task<IActionResult> UpsertPerformanceCurveLibraryPage(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var curves = new List<PerformanceCurveDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                        curves.ForEach(curve => curve.Id = Guid.NewGuid());
+                    var dto = upsertRequest.Library;
+                    dto.PerformanceCurves = curves;
+                    _performanceCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
+                    UnitOfWork.Commit();
+                });
+
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertScenarioPerformanceCurvesPage/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> UpsertScenarioPerformanceCurvesPage(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> pagingSync)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var dtos = _performanceCurvesService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    _performanceCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
+                    UnitOfWork.Commit();
+                });
+
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                UnitOfWork.Rollback();
+                return Unauthorized();
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]
         [Authorize]

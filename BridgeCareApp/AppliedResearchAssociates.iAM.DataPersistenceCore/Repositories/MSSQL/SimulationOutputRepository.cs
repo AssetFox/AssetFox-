@@ -98,6 +98,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entitiesWithoutYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.InitialAssetSummaries)
                 .ThenInclude(a => a.AssetSummaryDetailValues)
+                .ThenInclude(d => d.Attribute)
                 .Include(so => so.InitialAssetSummaries)
                 .ThenInclude(a => a.MaintainableAsset)
                 .Include(so => so.Years)
@@ -127,6 +128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
                    .Include(a => a.AssetDetailValues)
+                   .ThenInclude(d => d.Attribute)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
                    .Include(a => a.TreatmentOptionDetails)

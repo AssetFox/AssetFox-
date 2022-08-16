@@ -21,7 +21,6 @@
 
     public class ChartRowsModel
     {
-        public int TotalPamsPostedCountByBPNYearsRow { get; set; }
         public int TotalCountSectionYearsRow { get; set; }
         public int TotalCountBPNYearsRow { get; set; }
                 

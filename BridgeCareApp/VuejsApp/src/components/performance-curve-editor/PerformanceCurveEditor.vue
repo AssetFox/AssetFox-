@@ -541,23 +541,16 @@ export default class PerformanceCurveEditor extends Vue {
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
     selectPerformanceCurveLibraryAction: any;
-    @Action('upsertPerformanceCurveLibrary')
-    upsertPerformanceCurveLibraryAction: any;
     @Action('deletePerformanceCurveLibrary')
     deletePerformanceCurveLibraryAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('updatePerformanceCurvesCriterionLibraries')
     updatePerformanceCurveCriterionLibrariesAction: any;
-    @Action('getScenarioPerformanceCurves')
-    getScenarioPerformanceCurvesAction: any;
-    @Action('upsertScenarioPerformanceCurves')
-    upsertScenarioPerformanceCurvesAction: any;
     @Action('importScenarioPerformanceCurvesFile')
     importScenarioPerformanceCurvesFileAction: any;
     @Action('importLibraryPerformanceCurvesFile')
     importLibraryPerformanceCurvesFileAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-    @Action('addErrorNotification') addErrorNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 

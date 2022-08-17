@@ -681,10 +681,6 @@ export default class PerformanceCurveEditor extends Vue {
 
     @Watch('performancePagination')
     onPaginationChanged() {
-        if(!this.isPageInit){
-            this.isPageInit = true;
-            return;
-        }
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
 
@@ -1154,6 +1150,9 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     onUpdateRow(rowId: string, updatedRow: PerformanceCurve){
+        if(any(propEq('id', rowId), this.addedRows))
+            return;
+
         let mapEntry = this.updatedRowsMap.get(rowId)
 
         if(isNil(mapEntry)){

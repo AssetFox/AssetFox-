@@ -445,7 +445,7 @@
 import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, State, Getter } from 'vuex-class';
+import { Action, State, Getter, Mutation } from 'vuex-class';
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
@@ -556,8 +556,13 @@ export default class PerformanceCurveEditor extends Vue {
     importScenarioPerformanceCurvesFileAction: any;
     @Action('importLibraryPerformanceCurvesFile')
     importLibraryPerformanceCurvesFileAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('addErrorNotification') addErrorNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
+
+    @Mutation('performanceCurveLibraryMutator') performanceCurveLibraryMutator: any;
+    @Mutation('selectedPerformanceCurveLibraryMutator') selectedPerformanceCurveLibraryMutator: any;
 
     addedRows: PerformanceCurve[] = [];
     updatedRowsMap:Map<string, [PerformanceCurve, PerformanceCurve]> = new Map<string, [PerformanceCurve, PerformanceCurve]>();//0: original value | 1: updated value
@@ -852,9 +857,14 @@ export default class PerformanceCurveEditor extends Vue {
             PerformanceCurveService.UpsertPerformanceCurveLibraryPage(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
                 this.librarySelectItemValue = performanceCurveLibrary.name;
+                
                 if(performanceCurveLibrary.performanceCurves === []){
                     this.clearChanges();
                 }
+
+                this.performanceCurveLibraryMutator(performanceCurveLibrary);
+                this.selectedPerformanceCurveLibraryMutator(performanceCurveLibrary.id);
+                this.addSuccessNotificationAction({message:'Added deterioration model library'})
             })
         }
     }
@@ -977,9 +987,9 @@ export default class PerformanceCurveEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
-            }
-
-            this.librarySelectItemValue = null
+                this.addSuccessNotificationAction({message: "Modified scenario's deterioration models"});
+                this.librarySelectItemValue = null
+            }           
         });
     }
 
@@ -997,6 +1007,8 @@ export default class PerformanceCurveEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
+                this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
+                this.addSuccessNotificationAction({message: "Updated deterioration model library",});
             }
         });
     }

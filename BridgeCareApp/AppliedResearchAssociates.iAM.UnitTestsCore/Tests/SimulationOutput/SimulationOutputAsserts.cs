@@ -22,6 +22,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             trimmedSerializedLoaded.Sort();
             if (trimmedSerializedLoaded != trimmedSerializedOutput)
             {
+                var expectedLength = expectedSerializedOutput.Length;
+                var actualLength = actualSerializedOutput.Length;
                 for (int i = 0; i < trimmedSerializedOutput.Count; i++)
                 {
                     var outputI = trimmedSerializedOutput[i];

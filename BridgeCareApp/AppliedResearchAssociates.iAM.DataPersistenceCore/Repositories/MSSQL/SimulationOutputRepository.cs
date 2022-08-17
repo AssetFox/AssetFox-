@@ -63,6 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var mappedBatch = AssetDetailMapper.ToEntityList(batch, yearDetail.Id, attributeIdLookup);
                         _unitOfWork.Context.AddRange(mappedBatch);
                         _unitOfWork.Context.SaveChanges();
+                        _unitOfWork.Context.ChangeTracker.Clear();
                         yearSaved = true;
                     }
                     if (!yearSaved)

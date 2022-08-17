@@ -661,9 +661,7 @@ export default class PerformanceCurveEditor extends Vue {
                     }
 
                     vm.hasScenario = true;
-                    // vm.getScenarioPerformanceCurvesAction(vm.selectedScenarioId);
                     vm.onPaginationChanged();
-
                 }
             });
 
@@ -751,7 +749,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     @Watch('selectedPerformanceCurveLibrary', {deep: true})
-    onSelectedPerformanceCurveLibraryChanged() { //library paging stuff needed
+    onSelectedPerformanceCurveLibraryChanged() { 
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
 
@@ -764,15 +762,6 @@ export default class PerformanceCurveEditor extends Vue {
         this.deletionIds = [];
         this.addedRows = [];
 
-        // if (this.hasScenario) {
-        //     this.performanceCurveGridData = this.selectedPerformanceCurveLibrary.performanceCurves
-        //         .map((performanceCurve: PerformanceCurve) => ({
-        //             ...performanceCurve,
-        //             id: getNewGuid(),
-        //         }));
-        // } else {
-        //     this.performanceCurveGridData = clone(this.selectedPerformanceCurveLibrary.performanceCurves);
-        // }
         this.onPaginationChanged();
     }
 
@@ -788,16 +777,6 @@ export default class PerformanceCurveEditor extends Vue {
         ) {
             this.onPaginationChanged();
         }
-    }
-
-    @Watch('performanceCurveGridData')
-    onPerformanceCurveGridDataChanged() { // move the has unsaved stuff to on pagination change
-        const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore('', this.performanceCurveGridData, this.stateScenarioPerformanceCurves)
-            : hasUnsavedChangesCore('',
-                {...clone(this.selectedPerformanceCurveLibrary), performanceCurves: clone(this.performanceCurveGridData)},
-                this.stateSelectedPerformanceCurveLibrary); 
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     @Watch('deletionIds')
@@ -880,7 +859,7 @@ export default class PerformanceCurveEditor extends Vue {
         }
     }
 
-    onSubmitCreatePerformanceCurveDialogResult( //todo: handle unsorted insertion
+    onSubmitCreatePerformanceCurveDialogResult( 
         newPerformanceCurve: PerformanceCurve,
     ) {
         this.showCreatePerformanceCurveDialog = false;
@@ -895,7 +874,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     onEditPerformanceCurveProperty(id: string, property: string, value: any) {
-        if (any(propEq('id', id), this.currentPage)) { // handle unsaved check here
+        if (any(propEq('id', id), this.currentPage)) { 
             const performanceCurve: PerformanceCurve = find(
                 propEq('id', id),
                 this.currentPage,
@@ -988,12 +967,7 @@ export default class PerformanceCurveEditor extends Vue {
         this.onPaginationChanged();
     }
 
-    onUpsertScenarioPerformanceCurves() {// need to do upsert thing
-        // this.upsertScenarioPerformanceCurvesAction({
-        //     scenarioPerformanceCurves: this.performanceCurveGridData,
-        //     scenarioId: this.selectedScenarioId,
-        // }).then(() => (this.librarySelectItemValue = null));
-
+    onUpsertScenarioPerformanceCurves() {
         PerformanceCurveService.UpsertScenarioPerformanceCurvesPage({
             libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
             rowsForDeletion: this.deletionIds,
@@ -1025,11 +999,6 @@ export default class PerformanceCurveEditor extends Vue {
                 this.resetPage();
             }
         });
-        // const performanceCurveLibrary: PerformanceCurveLibrary = {
-        //     ...clone(this.selectedPerformanceCurveLibrary),
-        //     performanceCurves: clone(this.performanceCurveGridData),
-        // };
-        // this.upsertPerformanceCurveLibraryAction(performanceCurveLibrary);
     }
 
     onDiscardChanges() {

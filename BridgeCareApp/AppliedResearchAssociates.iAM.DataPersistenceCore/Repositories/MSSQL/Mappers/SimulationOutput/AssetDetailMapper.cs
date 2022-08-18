@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entities;
         }
 
-        public static AssetDetail ToDomain(AssetDetailEntity entity)
+        public static AssetDetail ToDomain(AssetDetailEntity entity, int year)
         {
             var assetName = entity.MaintainableAsset.AssetName;
             var domain = new AssetDetail(assetName, entity.MaintainableAsset.Id)
@@ -72,17 +72,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             domain.TreatmentOptions.AddRange(treatmentOptionDetails);
             var treatmentRejectionDetails = TreatmentRejectionDetailMapper.ToDomainList(entity.TreatmentRejectionDetails);
             domain.TreatmentRejections.AddRange(treatmentRejectionDetails);
-            var treatmentSchedulingCollisionDetails = TreatmentSchedulingCollisionDetailMapper.ToDomainList(entity.TreatmentSchedulingCollisionDetails);
+            var treatmentSchedulingCollisionDetails = TreatmentSchedulingCollisionDetailMapper.ToDomainList(entity.TreatmentSchedulingCollisionDetails, year);
             domain.TreatmentSchedulingCollisions.AddRange(treatmentSchedulingCollisionDetails);
             return domain;
         }
 
-        internal static List<AssetDetail> ToDomainList(ICollection<AssetDetailEntity> entityCollection)
+        internal static List<AssetDetail> ToDomainList(
+            ICollection<AssetDetailEntity> entityCollection,
+            int year)
         {
             var domainList = new List<AssetDetail>();
             foreach (var entity in entityCollection)
             {
-                var domain = ToDomain(entity);
+                var domain = ToDomain(entity, year);
                 domainList.Add(domain);
             }
             return domainList;

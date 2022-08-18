@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SimulationYearDetail ToDomain(SimulationYearDetailEntity entity)
         {
             var domain = ToDomainWithoutAssets(entity);
-            var assets = AssetDetailMapper.ToDomainList(entity.Assets);
+            var assets = AssetDetailMapper.ToDomainList(entity.Assets, entity.Year);
             domain.Assets.AddRange(assets);
             return domain;
         }

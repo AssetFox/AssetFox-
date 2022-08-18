@@ -63,7 +63,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var mappedBatch = AssetDetailMapper.ToEntityList(batch, yearDetail.Id, attributeIdLookup);
                         _unitOfWork.Context.AddRange(mappedBatch);
                         _unitOfWork.Context.SaveChanges();
-                        _unitOfWork.Context.ChangeTracker.Clear();
                         yearSaved = true;
                     }
                     if (!yearSaved)
@@ -109,9 +108,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var cacheYears = firstEntity.Years.ToList();
             firstEntity.Years.Clear();
             var domain = SimulationOutputMapper.ToDomain(firstEntity);
-            foreach (var year in cacheYears)
+            foreach (var cacheYear in cacheYears)
             {
-                var yearId = year.Id;
+                var yearId = cacheYear.Id;
+                var year = cacheYear.Year;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
                 .Include(y => y.Budgets)
                 .Include(y => y.DeficientConditionGoalDetails)
@@ -128,20 +128,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assetEntities = _unitOfWork.Context.AssetDetail
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
+                   .Include(a => a.MaintainableAsset)
                    .Include(a => a.AssetDetailValues)
                    .ThenInclude(d => d.Attribute)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
+                   .Include(a => a.TreatmentConsiderationDetails)
+                   .ThenInclude(tc => tc.BudgetUsageDetails)
                    .Include(a => a.TreatmentOptionDetails)
                    .Include(a => a.TreatmentRejectionDetails)
                    .Include(a => a.TreatmentSchedulingCollisionDetails)
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
-                    var assets = AssetDetailMapper.ToDomainList(assetEntities);
+                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year);
                     domainYear.Assets.AddRange(assets);
                     shouldContinueLoadingAssets = assets.Any();
                     batchIndex++;
+                    _unitOfWork.Context.ChangeTracker.Clear();
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));

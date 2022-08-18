@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var detail = new BudgetUsageDetail(budgetName)
             {
-                CoveredCost = 12m,
+                CoveredCost = 12.34m,
                 Status = BudgetUsageStatus.CostCoveredInFull,
             };
             return detail;

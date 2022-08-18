@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -180,22 +180,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetScenarioPerformanceCurves/{simulationId}")]
-        [Authorize]
-        public async Task<IActionResult> GetScenarioPerformanceCurves(Guid simulationId)
-        {
-            try
-            {
-                var result = await Task.Factory.StartNew(() => _performanceCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
-                throw;
-            }
-        }
 
         [HttpPost]
         [Route("GetScenarioPerformanceCurvePage/{simulationId}")]
@@ -230,8 +214,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
-
 
         [HttpPost]
         [Route("UpsertPerformanceCurveLibraryPage")]
@@ -281,66 +263,6 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var dtos = _performanceCurvesService.GetSyncedScenarioDataset(simulationId, pagingSync);
-                    _performanceCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
-                    UnitOfWork.Commit();
-                });
-
-
-                return Ok();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                UnitOfWork.Rollback();
-                return Unauthorized();
-            }
-            catch (Exception e)
-            {
-                UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        [Route("UpsertPerformanceCurveLibrary")]
-        [Authorize]
-        public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.BeginTransaction();
-                    _performanceCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
-                    UnitOfWork.Commit();
-                });
-
-
-                return Ok();
-            }
-            catch (UnauthorizedAccessException)
-            {
-                UnitOfWork.Rollback();
-                return Unauthorized();
-            }
-            catch (Exception e)
-            {
-                UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
-        [Authorize]
-        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, List<PerformanceCurveDTO> dtos)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.BeginTransaction();
                     _performanceCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
                     UnitOfWork.Commit();
                 });

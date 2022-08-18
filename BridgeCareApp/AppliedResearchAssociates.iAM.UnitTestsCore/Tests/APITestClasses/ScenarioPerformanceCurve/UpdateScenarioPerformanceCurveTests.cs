@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using MoreLinq;
 using Xunit;
@@ -38,8 +39,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Shift = true;
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulation.Id, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulation.Id, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -64,8 +72,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation = equation.ToDto();
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -90,8 +105,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation = null;
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -119,8 +141,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.CriterionLibrary = criterionLibrary.ToDto();
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -146,8 +175,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.CriterionLibrary = null;
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -175,9 +211,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(_testHelper.UnitOfWork, curveId, criterionLibrary.Id);
             var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            scenarioCurves.RemoveAt(0);
+
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                RowsForDeletion = new List<Guid> { curveId},
+                AddedRows = new List<PerformanceCurveDTO>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -204,8 +246,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation.Expression = "123";
 
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                AddedRows = new List<PerformanceCurveDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -227,10 +276,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            scenarioCurves.RemoveAt(0);
+
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                RowsForDeletion = new List<Guid> { curveId},
+                AddedRows = new List<PerformanceCurveDTO>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -254,9 +309,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Curve",
             };
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                RowsForDeletion = new List<Guid>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
+
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Single(scenarioCurvesAfter);
@@ -285,9 +346,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Equation = equation,
             };
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                RowsForDeletion = new List<Guid>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
+
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -320,9 +387,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Equation = equation,
             };
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
 
-            await controller.UpsertScenarioPerformanceCurves(simulationId, scenarioCurves);
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                RowsForDeletion = new List<Guid>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
+
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -356,10 +429,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Curve",
                 CriterionLibrary = criterionLibrary,
             };
-            var performanceCurveDtos = new List<PerformanceCurveDTO> { performanceCurveDto };
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
 
-            await controller.UpsertScenarioPerformanceCurves(simulationId, performanceCurveDtos);
+            var request = new PagingSyncModel<PerformanceCurveDTO>()
+            {
+                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                RowsForDeletion = new List<Guid>(),
+                UpdateRows = new List<PerformanceCurveDTO>()
+            };
+
+            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];

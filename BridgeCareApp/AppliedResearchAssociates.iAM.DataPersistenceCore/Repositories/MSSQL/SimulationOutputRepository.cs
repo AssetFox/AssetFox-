@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.Debugging;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -18,15 +19,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
+        private const bool ShouldHackSaveOutputToFile = false;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetSaveBatchSize = 400;
-        public const int AssetLoadBatchSize = 400;
+        public const int AssetSaveBatchSize = 200;
+        public const int AssetLoadBatchSize = 200;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
-            HackSaveOutputToFile(simulationOutput);
+            if (ShouldHackSaveOutputToFile)
+            {
+#pragma warning disable CS0162 // Unreachable code detected
+                HackSaveOutputToFile(simulationOutput);
+#pragma warning restore CS0162 // Unreachable code detected
+            }
+            var memos = EventMemoModelLists.GetFreshInstance("Save");
+            memos.Mark("Starting save");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -55,17 +64,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.SaveChanges();
                 foreach (var year in simulationOutput.Years)
                 {
+                    memos.Mark($"Y{ year.Year}");
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
                     var batchedAssets = assets.ConcreteBatch(AssetSaveBatchSize);
                     var yearSaved = false;
+                    int batchIndex = 0;
                     foreach (var batch in batchedAssets)
                     {
                         var mappedBatch = AssetDetailMapper.ToEntityList(batch, yearDetail.Id, attributeIdLookup);
                         _unitOfWork.Context.AddRange(mappedBatch);
                         _unitOfWork.Context.SaveChanges();
                         yearSaved = true;
+                        memos.Mark($" b{batchIndex}");
+                        batchIndex++;
                     }
                     if (!yearSaved)
                     {
@@ -76,6 +89,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+            finally
+            {
+                var timings = memos.ToMultilineString(true);
+                System.Diagnostics.Debug.WriteLine(timings);
+                var directory = Directory.GetCurrentDirectory();
+                var outputTimingsPath = Path.Combine(directory, "SaveTimings.txt");
+                File.WriteAllText(outputTimingsPath, timings);
             }
         }
 
@@ -90,6 +111,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationOutput GetSimulationOutput(Guid simulationId)
         {
+            var memos = EventMemoModelLists.GetFreshInstance("Load");
+            memos.Mark("Starting load");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"Found no simulation having id {simulationId}");
@@ -116,11 +139,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(_ => _.SimulationId == simulationId)
                 .ToList();
             var firstEntity = entitiesWithoutYearContents[0];
-            var cacheYears = firstEntity.Years.ToList();
+            var cacheYears = firstEntity.Years.OrderBy(y => y.Year).ToList();
             firstEntity.Years.Clear();
             var domain = SimulationOutputMapper.ToDomain(firstEntity);
             foreach (var cacheYear in cacheYears)
             {
+                memos.Mark($"Y{cacheYear.Year}");
                 var yearId = cacheYear.Id;
                 var year = cacheYear.Year;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
@@ -139,6 +163,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assetEntities = _unitOfWork.Context.AssetDetail
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
+                           .AsNoTracking()
                    .Include(a => a.MaintainableAsset)
                    .Include(a => a.AssetDetailValues)
                    .ThenInclude(d => d.Attribute)
@@ -155,12 +180,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assets = AssetDetailMapper.ToDomainList(assetEntities, year);
                     domainYear.Assets.AddRange(assets);
                     shouldContinueLoadingAssets = assets.Any();
-                    batchIndex++;
                     _unitOfWork.Context.ChangeTracker.Clear();
+                    memos.Mark($"b{batchIndex}");
+                    batchIndex++;
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
-
+            var timings = memos.ToMultilineString(true);
+            System.Diagnostics.Debug.WriteLine(timings);
+            var directory = Directory.GetCurrentDirectory();
+            var path = Path.Combine(directory, "LoadTimings.txt");
+            File.Delete(path);
+            File.WriteAllText(path, timings);
             return domain;
         }
     }

@@ -21,6 +21,16 @@ namespace AppliedResearchAssociates.iAM.Debugging
             return Instances[key];
         }
 
+        /// <summary>Gets a "fresh" instance, deleting whatever was there previously.</summary> 
+        public static List<EventMemoModel> GetFreshInstance(string key)
+        {
+            if (Instances.ContainsKey(key))
+            {
+                Instances.Remove(key);
+            }
+            return GetInstance(key);
+        }
+
         public static List<EventMemoModel> Default => GetInstance("Default");
     }
 }

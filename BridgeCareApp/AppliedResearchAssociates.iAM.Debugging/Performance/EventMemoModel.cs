@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Debugging
             return builder.ToString();
         }
 
-        public static string ToMultilineString(this List<EventMemoModel> eventList)
+        public static string ToMultilineString(this List<EventMemoModel> eventList, bool includeLineForTotal = false)
         {
             var builder = new StringBuilder();
             DateTime previous = DateTime.MinValue;
@@ -54,6 +54,12 @@ namespace AppliedResearchAssociates.iAM.Debugging
                     builder.AppendLine($"{memo.Text.PadRight(maxKeyLength + 1)}{roundedTime}");
                 }
                 previous = memo.UtcTime;
+            }
+            if (includeLineForTotal && eventList.Any())
+            {
+                var total = eventList.Last().UtcTime - eventList.First().UtcTime;
+                var totalMs = (int)total.TotalMilliseconds;
+                builder.AppendLine($"Total: {totalMs}");
             }
             return builder.ToString();
         }

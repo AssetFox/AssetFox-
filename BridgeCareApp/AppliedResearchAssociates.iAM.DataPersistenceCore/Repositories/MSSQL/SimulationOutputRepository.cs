@@ -21,8 +21,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private const bool ShouldHackSaveOutputToFile = false;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetSaveBatchSize = 200;
-        public const int AssetLoadBatchSize = 200;
+        public const int AssetSaveBatchSize = 400;
+        public const int AssetLoadBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 

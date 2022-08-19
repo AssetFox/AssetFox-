@@ -214,8 +214,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
-            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+            var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
+            var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
 
             // Unfunded Pavement Projects TAB

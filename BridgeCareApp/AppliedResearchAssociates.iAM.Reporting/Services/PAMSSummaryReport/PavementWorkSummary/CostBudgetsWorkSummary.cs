@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        public void FillCostBudgetWorkSummarySections(
+        public ChartRowsModel FillCostBudgetWorkSummarySections(
             ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears,
             Dictionary<string, Budget> yearlyBudgetAmount,
             Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             //var totalTreatmentGroups = FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
             FillTreatmentGroupTotalsSection(worksheet, currentCell, simulationYears, costAndLengthPerTreatmentGroupPerYear);
 
-            FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals);
+            FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears, workTypeTotals, yearlyBudgetAmount);
 
 
             //var workTypeTotalAggregated = new WorkTypeTotalAggregated
@@ -61,10 +61,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             //var workTypeTotalRow = FillWorkTypeTotalsSection(worksheet, currentCell, simulationYears,
             //    yearlyBudgetAmount,
             //    workTypeTotalAggregated);
-            FillBudgetTotalSection(worksheet, currentCell, simulationYears);
+            FillBudgetTotalSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
 
             //FillRemainingBudgetSection(worksheet, simulationYears, currentCell, workTypeTotalRow);
-            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears);
+            FillBudgetAnalysisSection(worksheet, currentCell, simulationYears, yearlyBudgetAmount);
+
+            var chartRowsModel = new ChartRowsModel();
+            return chartRowsModel;
         }
 
 
@@ -485,7 +488,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
         private void FillWorkTypeTotalsSection(ExcelWorksheet worksheet, CurrentCell currentCell,
             List<int> simulationYears,
-            Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals
+            Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> workTypeTotals,
+            Dictionary<string, Budget> yearlyBudgetAmount
             )
         {
             var workTypesForReport = new List<TreatmentCategory> { TreatmentCategory.Maintenance, TreatmentCategory.Preservation, TreatmentCategory.Rehabilitation, TreatmentCategory.Replacement };
@@ -570,13 +574,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             row += 2;
             worksheet.Cells[row, 1].Value = "Total PAMS Budget";
             column = fromColumn;
+
+            decimal annualBudget = 0;
             foreach (var year in simulationYears)
             {
-                // TODO: Use correct values for Total PAMS Budget
-                worksheet.Cells[row, column].Value = 0.0;
+                var yearIndex = year - simulationYears[0];
+                var budgetTotal = yearlyBudgetAmount.Sum(x => x.Value.YearlyAmounts[yearIndex].Value);
+                worksheet.Cells[row, column].Value = budgetTotal;
                 column++;
+                annualBudget += budgetTotal;
             }
-            worksheet.Cells[row, column].Value = 0.0; // Total cell; TODO: Fill actual total
+            worksheet.Cells[row, column].Value = annualBudget; // Total cell
 
             ExcelHelper.ApplyBorder(worksheet.Cells[row, startColumn, row, column]);
             ExcelHelper.SetCustomFormat(worksheet.Cells[row, fromColumn, row, column], ExcelHelperCellFormat.NegativeCurrency);
@@ -587,9 +595,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
         private void FillBudgetTotalSection(ExcelWorksheet worksheet, CurrentCell currentCell,
-            List<int> simulationYears //,
-                                      //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
-                                      //List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+            List<int> simulationYears,
+            Dictionary<string, Budget> yearlyBudgetAmount
+            //Dictionary<int, Dictionary<string, (decimal treatmentCost, int bridgeCount)>> costPerTreatmentPerYear,
+            //List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
             )
         {
             var headerRange = new Range(currentCell.Row, currentCell.Row + 1);
@@ -628,16 +637,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
         }
 
 
-        private void FillBudgetAnalysisSection(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
-             //int budgetTotalRow)
+        private void FillBudgetAnalysisSection(ExcelWorksheet worksheet, CurrentCell currentCell,
+            List<int> simulationYears,
+            Dictionary<string, Budget> yearlyBudgetAmount)
+        //int budgetTotalRow)
         {
             _pavementWorkSummaryCommon.AddHeaders(worksheet, currentCell, simulationYears, "Budget Analysis", "", "Total Remaining Budget (all years)");
 
-            AddDetailsForBudgetAnalysis(worksheet, simulationYears, currentCell);//, budgetTotalRow);
+            AddDetailsForBudgetAnalysis(worksheet, simulationYears, currentCell, yearlyBudgetAmount);//, budgetTotalRow);
         }
 
-        private void AddDetailsForBudgetAnalysis(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell //,
-                                                                                                                               //int budgetTotalRow)
+        private void AddDetailsForBudgetAnalysis(ExcelWorksheet worksheet, List<int> simulationYears, CurrentCell currentCell, Dictionary<string, Budget> yearlyBudgetAmount //,
+                                                                                                                                                                             //int budgetTotalRow)
              )
         {
             int startRow, startColumn, row, column;

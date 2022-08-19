@@ -68,6 +68,10 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutput, serializeLoaded);
         }
 
+        /// <summary>This test checks a SimulationOutput. It saves it to the database, loads it back from the database,
+        /// then checks that they are the same. For the test to run, you need a json-encoded SimulationOutput saved at the place
+        /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
+        // C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.StressTesting\GitIgnored\SimulationOutput.json
         [Fact]
         public void SaveLargeSimulationOutput_ThenLoad_Same()
         {

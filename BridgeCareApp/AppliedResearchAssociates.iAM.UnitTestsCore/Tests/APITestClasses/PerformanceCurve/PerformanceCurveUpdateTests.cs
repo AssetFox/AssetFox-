@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 }
             };
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -92,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -130,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -171,7 +171,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -211,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -251,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -291,7 +291,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -328,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
             // Act
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -365,7 +365,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
 
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             Assert.Single(performanceCurveLibraryDtoAfter.PerformanceCurves);
@@ -409,7 +409,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
 
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
@@ -457,7 +457,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
 
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
@@ -506,7 +506,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
 
 
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();

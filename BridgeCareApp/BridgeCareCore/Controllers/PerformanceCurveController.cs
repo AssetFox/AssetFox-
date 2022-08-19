@@ -216,9 +216,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertPerformanceCurveLibraryPage")]
+        [Route("UpsertPerformanceCurveLibrary")]
         [Authorize]
-        public async Task<IActionResult> UpsertPerformanceCurveLibraryPage(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest)
+        public async Task<IActionResult> UpsertPerformanceCurveLibrary(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest)
         {
             try
             {
@@ -255,9 +255,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertScenarioPerformanceCurvesPage/{simulationId}")]
+        [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> UpsertScenarioPerformanceCurvesPage(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> pagingSync)
+        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> pagingSync)
         {
             try
             {

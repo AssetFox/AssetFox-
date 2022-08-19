@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulation.Id, request);
+            await controller.UpsertScenarioPerformanceCurves(simulation.Id, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -113,7 +113,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -149,7 +149,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -219,7 +219,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -254,7 +254,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -285,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             // Act
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -317,7 +317,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
 
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Single(scenarioCurvesAfter);
@@ -354,7 +354,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
 
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -395,7 +395,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
 
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
@@ -438,7 +438,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 UpdateRows = new List<PerformanceCurveDTO>()
             };
 
-            await controller.UpsertScenarioPerformanceCurvesPage(simulationId, request);
+            await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];

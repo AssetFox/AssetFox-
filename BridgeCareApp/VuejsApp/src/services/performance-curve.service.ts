@@ -26,25 +26,16 @@ export default class PerformanceCurveService {
         );
     }
 
-    static UpsertPerformanceCurveLibraryPage(data:LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve>): AxiosPromise {
-        return coreAxiosInstance.post(
-            `${API.PerformanceCurve}/UpsertPerformanceCurveLibraryPage`,
-            data,
-        );
-    }
-
-    static UpsertScenarioPerformanceCurvesPage(data: PaginSync<PerformanceCurve>, scenarioId: string){
-        return coreAxiosInstance.post(
-            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurvesPage/${scenarioId}`, data
-        );
-    }
-
-    static upsertPerformanceCurveLibrary(
-        data: PerformanceCurveLibrary,
-    ): AxiosPromise {
+    static UpsertPerformanceCurveLibrary(data:LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.PerformanceCurve}/UpsertPerformanceCurveLibrary`,
             data,
+        );
+    }
+
+    static UpsertScenarioPerformanceCurves(data: PaginSync<PerformanceCurve>, scenarioId: string){
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurves/${scenarioId}`, data
         );
     }
 
@@ -54,21 +45,6 @@ export default class PerformanceCurveService {
         );
     }
 
-    static getScenarioPerformanceCurves(scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.get(
-            `${API.PerformanceCurve}/GetScenarioPerformanceCurves/${scenarioId}`,
-        );
-    }
-
-    static upsertScenarioPerformanceCurves(
-        data: PerformanceCurve[],
-        scenarioId: string,
-    ): AxiosPromise {
-        return coreAxiosInstance.post(
-            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurves/${scenarioId}`,
-            data,
-        );
-    }
 
     static importPerformanceCurves(
         file: File,

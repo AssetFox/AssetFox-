@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Act
             var result = await controller
-                .UpsertPerformanceCurveLibraryPage(request);
+                .UpsertPerformanceCurveLibrary(request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -91,7 +91,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Act
             var result = await controller
-                .UpsertPerformanceCurveLibraryPage(request);
+                .UpsertPerformanceCurveLibrary(request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             // Act
             var result = await controller
-                .UpsertScenarioPerformanceCurvesPage(simulation.Id,
+                .UpsertScenarioPerformanceCurves(simulation.Id,
                     request);
 
             // Assert
@@ -226,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     RowsForDeletion = new List<Guid>()
                 }
             };
-            await controller.UpsertPerformanceCurveLibraryPage(request);
+            await controller.UpsertPerformanceCurveLibrary(request);
 
             // Act
             var result = controller.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
@@ -309,7 +309,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             // Act
             var upsertScenarioPerformanceCurveLibraryResult = await controller
-                .UpsertScenarioPerformanceCurvesPage(simulation.Id,
+                .UpsertScenarioPerformanceCurves(simulation.Id,
                     request);
 
             // Assert

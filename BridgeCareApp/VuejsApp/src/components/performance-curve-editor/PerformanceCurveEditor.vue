@@ -847,7 +847,7 @@ export default class PerformanceCurveEditor extends Vue {
                     addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
                  }
             }
-            PerformanceCurveService.UpsertPerformanceCurveLibraryPage(upsertRequest).then(() => {
+            PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
                 this.librarySelectItemValue = performanceCurveLibrary.name;
                 
@@ -971,7 +971,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     onUpsertScenarioPerformanceCurves() {
-        PerformanceCurveService.UpsertScenarioPerformanceCurvesPage({
+        PerformanceCurveService.UpsertScenarioPerformanceCurves({
             libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
             rowsForDeletion: this.deletionIds,
             updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -996,7 +996,7 @@ export default class PerformanceCurveEditor extends Vue {
                     addedRows: this.addedRows
                  }
         }
-        PerformanceCurveService.UpsertPerformanceCurveLibraryPage(upsertRequest).then((response: AxiosResponse) => {
+        PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();

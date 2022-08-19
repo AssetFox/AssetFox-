@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
@@ -25,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
         {
+            HackSaveOutputToFile(simulationOutput);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -75,6 +77,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        private static void HackSaveOutputToFile(SimulationOutput simulationOutput)
+        {
+            var directory = Directory.GetCurrentDirectory();
+            var path = Path.Combine(directory, "SimulationOutput.json");
+            var serializedOutput = JsonConvert.SerializeObject(simulationOutput);
+            File.Delete(path);
+            File.WriteAllText(path, serializedOutput);
         }
 
         public SimulationOutput GetSimulationOutput(Guid simulationId)

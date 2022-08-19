@@ -12,6 +12,63 @@
         {
             public const string Admin = "UserIsAdmin";
             public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
+
+            public const string NameModifyAnnouncement = "ModifyAnnouncement";
+            public const string ViewDeficientConditionGoalFromlLibrary = "ViewDeficientConditionGoalFromlLibrary";
+            public const string ViewDeficientConditionGoalFromScenario = "ViewDeficientConditionGoalFromScenario";
+            public const string ModifyDeficientConditionGoalFromLibrary = "ModifyDeficientConditionGoalFromLibrary";
+            public const string ModifyDeficientConditionGoalFromScenario = "ModifyDeficientConditionGoalFromScenario";
+            public const string ViewInvestmentFromScenario = "ViewInvestmentFromScenario";
+            public const string ModifyInvestmentFromScenario = "ModifyInvestmentFromScenario";
+            public const string ViewInvestmentFromLibrary = "ViewInvestmentFromLibrary";
+            public const string ModifyInvestmentFromLibrary = "ModifyInvestmentFromLibrary";
+            public const string ImportInvestmentFromLibrary = "ImportInvestmentFromLibrary";
+            public const string ImportInvestmentFromScenario = "ImportInvestmentFromScenario";
+            public const string ViewPerformanceCurveFromLibrary = "ViewPerformanceCurveFromLibrary";
+            public const string ViewPerformanceCurveFromScenario = "ViewPerformanceCurveFromScenario";
+            public const string ModifyPerformanceCurveFromLibrary = "ModifyPerformanceCurveFromLibrary";
+            public const string ModifyPerformanceCurveFromScenario = "ModifyPerformanceCurveFromScenario";
+            public const string DeletePerformanceCurveFromLibrary = "DeletePerformanceCurveFromLibrary";
+            public const string ImportPerformanceCurveFromLibrary = "ImportPerformanceCurveFromLibrary";
+            public const string ImportPerformanceCurveFromScenario = "ImportPerformanceCurveFromScenario";
+            public const string ViewRemainingLifeLimitFromLibrary = "ViewRemainingLifeLimitFromLibrary";
+            public const string ViewRemainingLifeLimitFromScenario = "ViewRemainingLifeLimitFromScenario";
+            public const string ModifyRemainingLifeLimitFromLibrary = "ModifyRemainingLifeLimitFromLibrary";
+            public const string ModifyRemainingLifeLimitFromScenario = "ModifyRemainingLifeLimitFromScenario";
+            public const string DeleteRemainingLifeLimitFromLibrary = "DeleteRemainingLifeLimitFromLibrary";
+            public const string ViewTargetConditionGoalFromLibrary = "ViewTargetConditionGoalFromLibrary";
+            public const string ViewTargetConditionGoalFromScenario = "ViewTargetConditionGoalFromScenario";
+            public const string ModifyTargetConditionGoalFromLibrary = "ModifyTargetConditionGoalFromLibrary";
+            public const string ModifyTargetConditionGoalFromScenario = "ModifyTargetConditionGoalFromScenario";
+            public const string DeleteTargetConditionGoalFromLibrary = "DeleteTargetConditionGoalFromLibrary";
+            public const string ViewTreatmentFromLibrary = "ViewTreatmentFromLibrary";
+            public const string ViewTreatmentFromScenario = "ViewTreatmentFromScenario";
+            public const string ModifyTreatmentFromLibrary = "ModifyTreatmentFromLibrary";
+            public const string ModifyTreatmentFromScenario = "ModifyTreatmentFromScenario";
+            public const string DeleteTreatmentFromLibrary = "DeleteTreatmentFromLibrary";
+            public const string ImportTreatmentFromLibrary = "ImportTreatmentFromLibrary";
+            public const string ImportTreatmentFromScenario = "ImportTreatmentFromScenario";
+            public const string ViewAnalysisMethod = "ViewAnalysisMethod";
+            public const string ModifyAnalysisMethod = "ModifyAnalysisMethod";
+            public const string ModifyAttributes = "ModifyAttributes";
+            public const string ViewSimulation = "ViewSimulation";
+            public const string DeleteSimulation = "DeleteSimulation";
+            public const string UpdateSimulation = "UpdateSimulation";
+            public const string RunSimulation = "RunSimulation";
+            public const string ViewBudgetPriorityFromLibrary = "ViewBudgetPriorityFromLibrary";
+            public const string ModifyBudgetPriorityFromLibrary = "ModifyBudgetPriorityFromLibrary";
+            public const string DeleteBudgetPriorityFromLibrary = "DeleteBudgetPriorityFromLibrary";
+            public const string ViewBudgetPriorityFromScenario = "ViewBudgetPriorityFromScenario";
+            public const string ModifyBudgetPriorityFromScenario = "ModifyBudgetPriorityFromScenario";
+            public const string ModifyCalculatedAttributesFromLibrary = "ModifyCalculatedAttributesFromLibrary";
+            public const string ModifyCalculatedAttributesFromScenario = "ModifyCalculatedAttributesFromScenario";
+            public const string ViewCashFlowFromLibrary = "ViewCashFlowFromLibrary";
+            public const string ViewCashFlowFromScenario = "ViewCashFlowFromScenario";
+            public const string ModifyCashFlowFromLibrary = "ModifyCashFlowFromLibrary";
+            public const string ModifyCashFlowFromScenario = "ModifyCashFlowFromScenario";
+            public const string ImportCommittedProjects = "ImportCommittedProjects";
+            public const string ModifyCommittedProjects = "ModifyCommittedProjects";
+            public const string ViewCommittedProjects = "ViewCommittedProjects";
         }
 
         public static class Role

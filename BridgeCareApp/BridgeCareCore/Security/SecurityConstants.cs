@@ -83,8 +83,7 @@
             public const string AttributesUpdateAccess = "AttributesUpdateAccess";
             public const string AttributesAddAccess = "AttributesAddAccess";
             public const string AttributesViewAccess = "AttributesViewAccess";
-            public const string DataSourceModifyAccess = "DataSourceModifyAccess";
-            public const string DataSourceAddAccess = "DataSourceAddAccess";
+            public const string DataSourceModifyAccess = "DataSourceModifyAccess";            
             public const string DataSourceViewAccess = "DataSourceViewAccess";
             public const string NetworkAggregateAccess = "NetworkAggregateAccess";
             public const string NetworkAddAccess = "NetworkAddAccess";
@@ -113,6 +112,7 @@
             public const string DeficientConditionGoalModifyAnyFromLibraryAccess = "DeficientConditionGoalModifyAnyFromLibraryAccess";
             public const string DeficientConditionGoalViewAnyFromLibraryAccess = "DeficientConditionGoalViewAnyFromLibraryAccess";
             public const string DeficientConditionGoalModifyAnyFromScenarioAccess = "DeficientConditionGoalModifyAnyFromScenarioAccess";
+            public const string DeficientConditionGoalViewAnyFromScenarioAccess = "DeficientConditionGoalViewAnyFromScenarioAccess";
             public const string InvestmentModifyAnyFromLibraryAccess = "InvestmentModifyAnyFromLibraryAccess";
             public const string InvestmentImportAnyFromLibraryAccess = "InvestmentImportAnyFromLibraryAccess";
             public const string InvestmentViewAnyFromLibraryAccess = "InvestmentViewAnyFromLibraryAccess";
@@ -126,6 +126,7 @@
             public const string PerformanceCurveViewAnyFromLibraryAccess = "PerformanceCurveViewAnyFromLibraryAccess";
             public const string PerformanceCurveModifyAnyFromScenarioAccess = "PerformanceCurveModifyAnyFromScenarioAccess";
             public const string PerformanceCurveViewAnyFromScenarioAccess = "PerformanceCurveViewAnyFromScenarioAccess";
+            public const string PerformanceCurveImportAnyFromScenarioAccess = "PerformanceCurveImportAnyFromScenarioAccess";
             public const string RemainingLifeLimitAddAnyFromLibraryAccess = "RemainingLifeLimitAddAnyFromLibraryAccess";
             public const string RemainingLifeLimitUpdateAnyFromLibraryAccess = "RemainingLifeLimitUpdateAnyFromLibraryAccess";
             public const string RemainingLifeLimitDeleteAnyFromLibraryAccess = "RemainingLifeLimitDeleteAnyFromLibraryAccess";
@@ -144,6 +145,7 @@
             public const string TreatmentImportAnyFromLibraryAccess = "TreatmentImportAnyFromLibraryAccess";
             public const string TreatmentViewAnyFromLibraryAccess = "TreatmentViewAnyFromLibraryAccess";
             public const string TreatmentModifyAnyFromScenarioAccess = "TreatmentModifyAnyFromScenarioAccess";
+            public const string TreatmentImportAnyFromScenarioAccess = "TreatmentImportAnyFromScenarioAccess";
             public const string TreatmentViewAnyFromScenarioAccess = "TreatmentViewAnyFromScenarioAccess";
             public const string UserCriteriaModifyAccess = "UserCriteriaModifyAccess";
             public const string UserCriteriaViewAccess = "UserCriteriaViewAccess";
@@ -169,7 +171,7 @@
             public const string DeficientConditionGoalModifyPermittedFromLibraryAccess = "DeficientConditionGoalModifyPermittedFromLibraryAccess";
             public const string DeficientConditionGoalViewPermittedFromLibraryAccess = "DeficientConditionGoalViewPermittedFromLibraryAccess";
             public const string DeficientConditionGoalModifyPermittedFromScenarioAccess = "DeficientConditionGoalModifyPermittedFromScenarioAccess";
-            public const string DeficientConditionGoalViewPermittedFromScenarioAccess = "DeficientConditionGoalViewPermittedFromScenarioAccess";
+            public const string DeficientConditionGoalViewPermittedFromScenarioAccess = "DeficientConditionGoalViewPermittedFromScenarioAccess";            
             public const string InvestmentModifyPermittedFromLibraryAccess = "InvestmentModifyPermittedFromLibraryAccess";
             public const string InvestmentImportPermittedFromLibraryAccess = "InvestmentImportPermittedFromLibraryAccess";
             public const string InvestmentViewPermittedFromLibraryAccess = "InvestmentViewPermittedFromLibraryAccess";
@@ -182,6 +184,7 @@
             public const string PerformanceCurveImportPermittedFromLibraryAccess = "PerformanceCurveImportPermittedFromLibraryAccess";
             public const string PerformanceCurveViewPermittedFromLibraryAccess = "PerformanceCurveViewPermittedFromLibraryAccess";
             public const string PerformanceCurveModifyPermittedFromScenarioAccess = "PerformanceCurveModifyPermittedFromScenarioAccess";
+            public const string PerformanceCurveImportPermittedFromScenarioAccess = "PerformanceCurveImportPermittedFromScenarioAccess";
             public const string PerformanceCurveViewPermittedFromScenarioAccess = "PerformanceCurveViewPermittedFromScenarioAccess";
             public const string RemainingLifeLimitAddPermittedFromLibraryAccess = "RemainingLifeLimitAddPermittedFromLibraryAccess";
             public const string RemainingLifeLimitUpdatePermittedFromLibraryAccess = "RemainingLifeLimitUpdatePermittedFromLibraryAccess";
@@ -201,15 +204,13 @@
             public const string TreatmentImportPermittedFromLibraryAccess = "TreatmentImportPermittedFromLibraryAccess";
             public const string TreatmentViewPermittedFromLibraryAccess = "TreatmentViewPermittedFromLibraryAccess";
             public const string TreatmentModifyPermittedFromScenarioAccess = "TreatmentModifyPermittedFromScenarioAccess";
+            public const string TreatmentImportPermittedFromScenarioAccess = "TreatmentImportPermittedFromScenarioAccess";
             public const string TreatmentViewPermittedFromScenarioAccess = "TreatmentViewPermittedFromScenarioAccess";
             public const string AnalysisMethodModifyPermittedAccess = "AnalysisMethodModifyPermittedAccess";
             public const string AnalysisMethodViewPermittedAccess = "AnalysisMethodViewPermittedAccess";
             public const string CommittedProjectModifyPermittedAccess = "CommittedProjectModifyPermittedAccess";
             public const string CommittedProjectImportPermittedAccess = "CommittedProjectImportPermittedAccess";
             public const string CommittedProjectViewPermittedAccess = "CommittedProjectViewPermittedAccess";
-
-            public const string DeficientConditionGoalViewAnyFromScenarioAccess = "DeficientConditionGoalViewAnyFromScenarioAccess";
-
         }
     }
 }

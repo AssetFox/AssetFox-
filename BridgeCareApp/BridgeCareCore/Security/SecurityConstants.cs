@@ -13,7 +13,7 @@
             public const string Admin = "UserIsAdmin";
             public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
 
-            public const string NameModifyAnnouncement = "ModifyAnnouncement";
+            public const string ModifyAnnouncement = "ModifyAnnouncement";
             public const string ViewDeficientConditionGoalFromlLibrary = "ViewDeficientConditionGoalFromlLibrary";
             public const string ViewDeficientConditionGoalFromScenario = "ViewDeficientConditionGoalFromScenario";
             public const string ModifyDeficientConditionGoalFromLibrary = "ModifyDeficientConditionGoalFromLibrary";

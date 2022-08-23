@@ -13,7 +13,6 @@
             public const string Admin = "UserIsAdmin";
             public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
 
-            public const string ModifyAnnouncement = "ModifyAnnouncement";
             public const string ViewDeficientConditionGoalFromlLibrary = "ViewDeficientConditionGoalFromlLibrary";
             public const string ViewDeficientConditionGoalFromScenario = "ViewDeficientConditionGoalFromScenario";
             public const string ModifyDeficientConditionGoalFromLibrary = "ModifyDeficientConditionGoalFromLibrary";
@@ -78,6 +77,7 @@
             // TODO remove later:
             public const string BAMSAdmin = "PD-BAMS-Administrator";            
         }
+
         public static class Claim
         {
             public const string AttributesUpdateAccess = "AttributesUpdateAccess";

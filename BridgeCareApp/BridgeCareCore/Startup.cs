@@ -17,7 +17,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
-using System.Security.Claims;
 
 namespace BridgeCareCore
 {

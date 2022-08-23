@@ -413,3 +413,5 @@ BridgeCareApp/BridgeCareCore/b2c.json
 
 
 BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json

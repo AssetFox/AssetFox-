@@ -171,9 +171,7 @@ namespace BridgeCareCore
                                                                    "TreatmentUpdatePermittedFromLibraryAccess"));
                 options.AddPolicy("ModifyTreatmentFromScenario",
                     policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentModifyAnyFromScenarioAccess",
-                                                                   "TreatmentModifyPermittedFromScenarioAccess",
-                                                                   "TreatmentDeleteAnyFromLibraryAccess",
-                                                                   "TreatmentDeletePermittedFromLibraryAccess"));
+                                                                   "TreatmentModifyPermittedFromScenarioAccess"));
                 options.AddPolicy("DeleteTreatmentFromLibrary",
                     policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentDeleteAnyFromLibraryAccess", "TreatmentDeletePermittedFromLibraryAccess"));
                 options.AddPolicy("ImportTreatmentFromLibrary",

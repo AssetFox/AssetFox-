@@ -21,8 +21,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private const bool ShouldHackSaveOutputToFile = false;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetSaveBatchSize = 400;
+        public const int AssetSaveBatchSize = 300;
+        public const int AssetSummarySaveBatchSize = 3000;
         public const int AssetLoadBatchSize = 400;
+        public const int AssetSummaryLoadBatchSize = 4000;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -59,9 +61,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
                 _.SimulationId == simulationId);
-                var entity = SimulationOutputMapper.ToEntityWithoutYearDetails(simulationOutput, simulationId, attributeIdLookup);
+                var entity = SimulationOutputMapper.ToEntityWithoutAssetsOrYearDetails(simulationOutput, simulationId, attributeIdLookup);
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
+                var assetSummaries = simulationOutput.InitialAssetSummaries;
+                var batchedAssetSummaries = assetSummaries.ConcreteBatch(AssetSummarySaveBatchSize);
+                foreach (var batch in batchedAssetSummaries)
+                {
+                    var assetSummaryEntityList = AssetSummaryDetailMapper.ToEntityList(batch, entity.Id, attributeIdLookup);
+                    _unitOfWork.Context.AddRange(assetSummaryEntityList);
+                    _unitOfWork.Context.SaveChanges();
+                    _unitOfWork.Context.ChangeTracker.Clear();
+                }
                 foreach (var year in simulationOutput.Years)
                 {
                     memos.Mark($"Y{ year.Year}");
@@ -129,19 +140,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
             }
 
-            var entitiesWithoutYearContents = _unitOfWork.Context.SimulationOutput
-                .Include(so => so.InitialAssetSummaries)
-                .ThenInclude(a => a.AssetSummaryDetailValues)
-                .ThenInclude(d => d.Attribute)
-                .Include(so => so.InitialAssetSummaries)
-                .ThenInclude(a => a.MaintainableAsset)
+            var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
                 .Where(_ => _.SimulationId == simulationId)
                 .ToList();
-            var firstEntity = entitiesWithoutYearContents[0];
+            var firstEntity = entitiesWithoutAssetSummariesOrYearContents[0];
+            var simulationOutputId = firstEntity.Id;
             var cacheYears = firstEntity.Years.OrderBy(y => y.Year).ToList();
             firstEntity.Years.Clear();
             var domain = SimulationOutputMapper.ToDomain(firstEntity);
+            var shouldContinueLoadingAssetSummaries = true;
+            int summaryBatchIndex = 0;
+            while (shouldContinueLoadingAssetSummaries)
+            {
+                var assetSummaries = _unitOfWork.Context.AssetSummaryDetail
+                .Include(a => a.AssetSummaryDetailValues)
+                .ThenInclude(d => d.Attribute)
+                .Include(a => a.MaintainableAsset)
+                .OrderBy(a => a.Id)
+                .Skip(summaryBatchIndex * AssetSummaryLoadBatchSize)
+                .Take(AssetSummaryLoadBatchSize)
+                .Where(a => a.SimulationOutputId == simulationOutputId)
+                .ToList();
+                var assetSummaryDomainList = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaries);
+                domain.InitialAssetSummaries.AddRange(assetSummaryDomainList);
+                shouldContinueLoadingAssetSummaries = assetSummaries.Count() == AssetSummaryLoadBatchSize;
+                summaryBatchIndex++;
+            }
             foreach (var cacheYear in cacheYears)
             {
                 memos.Mark($"Y{cacheYear.Year}");
@@ -179,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .ToList();
                     var assets = AssetDetailMapper.ToDomainList(assetEntities, year);
                     domainYear.Assets.AddRange(assets);
-                    shouldContinueLoadingAssets = assets.Any();
+                    shouldContinueLoadingAssets = assets.Count == AssetLoadBatchSize;
                     _unitOfWork.Context.ChangeTracker.Clear();
                     memos.Mark($"b{batchIndex}");
                     batchIndex++;

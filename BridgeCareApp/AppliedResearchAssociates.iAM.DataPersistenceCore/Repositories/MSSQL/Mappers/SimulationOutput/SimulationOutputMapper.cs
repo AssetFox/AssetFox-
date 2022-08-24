@@ -24,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             //simulation.Results.Years.AddRange(simulationOutputObject.Years);
         }
 
-        public static SimulationOutputEntity ToEntityWithoutYearDetails(
+        public static SimulationOutputEntity ToEntityWithoutAssetsOrYearDetails(
             this SimulationOutput domain,
             Guid simulationId,
             Dictionary<string, Guid> attributeIdLookup)
@@ -32,11 +32,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var id = Guid.NewGuid();
             var years = new List<SimulationYearDetailEntity>();
             var summaryEntities = new List<AssetSummaryDetailEntity>();
-            foreach (var domainSummary in domain.InitialAssetSummaries)
-            {
-                var summaryEntity = AssetSummaryDetailMapper.ToEntity(domainSummary, id, attributeIdLookup);
-                summaryEntities.Add(summaryEntity);
-            }
             var entity = new SimulationOutputEntity
             {
                 Id = id,
@@ -54,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
             };
-            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainList(entity.InitialAssetSummaries);
+            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainListNullSafe(entity.InitialAssetSummaries);
             var years = SimulationYearDetailMapper.ToDomainList(entity.Years);
             domain.InitialAssetSummaries.AddRange(initialAssetSummaries);
             domain.Years.AddRange(years);

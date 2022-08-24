@@ -30,6 +30,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
+        public static List<AssetSummaryDetailEntity> ToEntityList(List<AssetSummaryDetail> domainList, Guid simulationOutputId, Dictionary<string, Guid> attributeIdLookup)
+        {
+            var entityList = new List<AssetSummaryDetailEntity>();
+            foreach (var domain in domainList)
+            {
+                var entity = ToEntity(domain, simulationOutputId, attributeIdLookup);
+                entityList.Add(entity);
+            }
+            return entityList;
+        }
+
         public static AssetSummaryDetail ToDomain(AssetSummaryDetailEntity entity)
         {
             var assetName = entity.MaintainableAsset.AssetName;
@@ -41,13 +52,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domain;
         }
 
-        public static List<AssetSummaryDetail> ToDomainList(ICollection<AssetSummaryDetailEntity> entityList)
+        public static List<AssetSummaryDetail> ToDomainListNullSafe(ICollection<AssetSummaryDetailEntity> entityList)
         {
             var domainList = new List<AssetSummaryDetail>();
-            foreach (var entity in entityList)
+            if (entityList != null)
             {
-                var domain = ToDomain(entity);
-                domainList.Add(domain);
+                foreach (var entity in entityList)
+                {
+                    var domain = ToDomain(entity);
+                    domainList.Add(domain);
+                }
             }
             return domainList;
         }

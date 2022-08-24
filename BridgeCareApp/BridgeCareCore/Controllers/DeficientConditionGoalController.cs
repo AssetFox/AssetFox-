@@ -8,11 +8,11 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {
@@ -23,26 +23,20 @@ namespace BridgeCareCore.Controllers
         private readonly IReadOnlyDictionary<string, CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>>
             _deficientConditionGoalsCRUDOperations;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
+        private readonly IClaimHelper _claimHelper;
 
         public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) =>
+            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        {
+            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _deficientConditionGoalsCRUDOperations = CreateCRUDOperations();
+        }
 
         public Dictionary<string, CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>> CreateCRUDOperations()
         {
-            List<DeficientConditionGoalDTO> RetrieveAnyForScenario(Guid simulationId) => UnitOfWork.DeficientConditionGoalRepo
-                    .GetScenarioDeficientConditionGoals(simulationId);
+            
 
-            void UpsertAnyForScenario(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
-            {
-                UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
-            }
-
-            void UpsertPermittedForScenario(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAnyForScenario(simulationId, dtos);
-            }
+        
 
             void DeleteAnyForScenario(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
             {
@@ -97,8 +91,6 @@ namespace BridgeCareCore.Controllers
 
             var AllCRUDAccess = new CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>()
             {
-                UpsertScenario = UpsertAnyForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
                 DeleteScenario = DeleteAnyForScenario,
                 UpsertLibrary = UpsertAnyForLibrary,
                 RetrieveLibrary = RetrieveAnyForLibraries,
@@ -107,8 +99,6 @@ namespace BridgeCareCore.Controllers
 
             var PermittedCRUDAccess = new CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>()
             {
-                UpsertScenario = UpsertPermittedForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
                 DeleteScenario = DeleteAnyForScenario,
                 UpsertLibrary = UpsertPermittedForLibrary,
                 RetrieveLibrary = RetrievePermittedForLibraries,
@@ -148,7 +138,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _deficientConditionGoalsCRUDOperations[UserInfo.Role].RetrieveScenario(simulationId));
+                var result = new List<DeficientConditionGoalDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    result = UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
+                });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -197,7 +193,8 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _deficientConditionGoalsCRUDOperations[UserInfo.Role].UpsertScenario(simulationId, dtos);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
 

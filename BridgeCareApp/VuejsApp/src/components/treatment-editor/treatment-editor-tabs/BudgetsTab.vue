@@ -16,6 +16,7 @@
                         <v-layout v-else>
                             <v-data-table :headers='budgetHeaders' :items='budgets'
                                           class='elevation-1 v-table__overflow budgets-data-table ghd-control-text'
+                                          sort-icon=$vuetify.icons.ghd-table-sort
                                           hide-actions
                                           item-key='id' select-all
                                           v-model='selectedBudgets'>

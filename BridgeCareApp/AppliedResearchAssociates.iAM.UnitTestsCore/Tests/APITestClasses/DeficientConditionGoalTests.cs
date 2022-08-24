@@ -23,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static DeficientConditionGoalController Setup()
         {
             _testHelper.CreateSingletons();
-            _testHelper.CreateSimulation();
             var controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
@@ -62,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             SetupForGet();
-            var criterionLibrary = _testHelper.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             _testHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;

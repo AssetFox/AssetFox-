@@ -20,6 +20,7 @@
                                 <v-layout>
                                 <v-select
                                     :items="conjunctionSelectListItems"
+                                    append-icon=$vuetify.icons.ghd-down
                                     class="ghd-control-border ghd-control-text ghd-select"
                                     v-model="selectedConjunction"
                                 >
@@ -86,7 +87,7 @@
                                             class="ghd-blue"
                                             icon
                                         >
-                                            <v-icon>fas fa-trash</v-icon>
+                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                         </v-btn>
                                     </template>
                                 </v-textarea>
@@ -296,10 +297,11 @@ import {
     ValidationParameter,
 } from '@/shared/models/iAM/expression-validation';
 import { UserCriteriaFilter } from '../models/iAM/user-criteria-filter';
+import CriteriaCombo from './CriteriaCombo.vue';
 import { getBlankGuid } from '../utils/uuid-utils';
 
 @Component({
-    components: { VueQueryBuilder },
+    components: { VueQueryBuilder, CriteriaCombo },
 })
 export default class CriteriaEditor extends Vue {
     @Prop() criteriaEditorData: CriteriaEditorData;
@@ -324,9 +326,9 @@ export default class CriteriaEditor extends Vue {
             { id: 'OR', label: 'OR' },
         ],
         addRule: 'Add Rule',
-        removeRule: '<div class="fas fa-trash ghd-blue" style="margin-top:4px;margin-left:4px;"/>',
+        removeRule: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}" style="margin-top:4px;margin-left:4px;"/>`,
         addGroup: 'Add Group',
-        removeGroup: '<div class="fas fa-trash ghd-blue"/>',
+        removeGroup: `<img class='img-general' src="${require("@/assets/icons/trash-ghd-blue.svg")}"/>`,
         textInputPlaceholder: 'value',
     };
 
@@ -350,6 +352,7 @@ export default class CriteriaEditor extends Vue {
     mounted() {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
+            
         }
     }
 

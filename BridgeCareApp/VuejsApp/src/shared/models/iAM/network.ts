@@ -20,6 +20,7 @@ export interface Network {
     status?: string;
     benefitQuantifier: BenefitQuantifier;
     networkDataAssignmentPercentage: number;
+    KeyAttribute: string;
 }
 
 export const emptyNetwork: Network = {
@@ -29,7 +30,8 @@ export const emptyNetwork: Network = {
     lastModifiedDate: new Date(),
     status: '',
     benefitQuantifier: clone(emptyBenefitQuantifier),
-    networkDataAssignmentPercentage: 0
+    networkDataAssignmentPercentage: 0,
+    KeyAttribute: getBlankGuid()
 };
 
 export interface NetworkCreationData {

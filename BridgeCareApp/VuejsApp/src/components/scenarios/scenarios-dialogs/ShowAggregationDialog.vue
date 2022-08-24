@@ -25,6 +25,7 @@
                     <div class="network-min-width">
                         <v-data-table
                             :headers="networkGridHeaders"
+                            sort-icon=$vuetify.icons.ghd-table-sort
                             :items="networks"
                             :items-per-page="5"
                             class="elevation-1"

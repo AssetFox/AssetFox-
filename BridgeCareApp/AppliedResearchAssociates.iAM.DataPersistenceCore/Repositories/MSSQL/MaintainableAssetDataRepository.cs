@@ -53,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // Get the target segment info
             var lookupSource = KeyProperties[keyName];
+            var debugMe = lookupSource.Select(_ => _.KeyValue.Value).ToList();
             var targetAsset = lookupSource.FirstOrDefault(_ => _.KeyValue.Value == keyValue);
             if (targetAsset == null) return new List<SegmentAttributeDatum>();
             var asset = _unitOfWork.Context.MaintainableAsset

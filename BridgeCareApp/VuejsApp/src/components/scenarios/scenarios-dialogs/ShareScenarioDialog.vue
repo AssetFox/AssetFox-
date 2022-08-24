@@ -9,6 +9,7 @@
       <v-card-text>
         <v-data-table :headers="scenarioUserGridHeaders"
                       :items="scenarioUserGridRows"
+                      sort-icon=$vuetify.icons.ghd-table-sort
                       :search="searchTerm">
           <template slot="items" slot-scope="props">
             <td>

@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
+using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -271,6 +274,92 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("ValidateAssetExistence/{brkeyValue}")]
+        [Authorize]
+        public async Task<IActionResult> ValidateAssetExistence(NetworkDTO network, string brkeyValue)
+        {
+            try
+            {
+                var isValid = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    isValid = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValueExists(network.Id, brkeyValue);
+                });
+                return Ok(isValid);
+            }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetTreatmetCost/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetTreatmetCost(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetValidConsequences/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> GetValidConsequences(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    return _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("FillTreatmentValues/{brkey}")]
+        [Authorize]
+        public async Task<IActionResult> FillTreatmentValues(SectionCommittedProjectDTO dto, string brkey)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    dto.Consequences =  _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                    dto.Cost = _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year);
+                    var treatment = UnitOfWork.Context.ScenarioSelectableTreatment
+                        .FirstOrDefault(_ => _.Name == dto.Treatment && _.SimulationId == dto.SimulationId);
+                    if (treatment == null)
+                        return dto;
+                    dto.Category = (TreatmentCategory)treatment.Category;
+                    return dto;
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpGet]
         [Route("CommittedProjectTemplate")]
         [Authorize]
@@ -307,7 +396,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Route("DeleteSpecificCommittedProjects")]
         [Authorize]
         public async Task<IActionResult> DeleteSpecificCommittedProjects(List<Guid> projectIds)

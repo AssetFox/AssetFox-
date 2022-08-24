@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport
 {

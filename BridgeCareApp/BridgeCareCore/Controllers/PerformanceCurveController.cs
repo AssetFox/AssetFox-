@@ -167,7 +167,9 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _performanceCRUDMethods[UserInfo.Role].RetrieveLibrary());
+                var result = await Task.Factory.StartNew(() =>
+                _performanceCRUDMethods[UserInfo.Role].RetrieveLibrary()
+                );
                 return Ok(result);
             }
             catch (Exception e)

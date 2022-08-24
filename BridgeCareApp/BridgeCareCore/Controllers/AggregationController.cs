@@ -20,6 +20,8 @@ using BridgeCareCore.Services.Aggregation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -51,7 +53,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [Authorize(Policy = SecurityConstants.Policy.Admin)]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributes)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AllAttributeDTO> attributes)
         {
             if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)
             {
@@ -82,7 +84,8 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, attributes);
+                var specificAttributes = AttributeService.ConvertAllAttributeList(attributes);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, specificAttributes);
                 if (result)
                 {
                     return Ok();

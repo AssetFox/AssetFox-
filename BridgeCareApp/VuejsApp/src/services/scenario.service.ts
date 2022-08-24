@@ -1,10 +1,19 @@
 import {AxiosPromise} from 'axios';
 import {CloneScenarioData, Scenario} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
+import { PagingRequest } from '@/shared/models/iAM/paging';
 
 export default class ScenarioService {
     static getScenarios(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Scenario}/GetScenarios/`);
+    }
+
+    static getUserScenariosPage(data:PagingRequest<Scenario>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetUserScenariosPage/`, data);
+    }
+
+    static getSharedScenariosPage(data:PagingRequest<Scenario>): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/GetSharedScenariosPage/`, data);
     }
 
     static createScenario(data: Scenario, networkId: string): AxiosPromise {

@@ -30,17 +30,25 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-text-field
-                                            type="text"
-                                            placeholder="Search in scenarios"
-                                            prepend-inner-icon=$vuetify.icons.ghd-search
-                                            hide-details
-                                            single-line
-                                            v-model="searchMine"
-                                            outline
-                                            class="ghd-text-field-border ghd-text-field search-icon-general"
-                                        >
-                                        </v-text-field>
+                                        <v-layout>
+                                            <v-text-field
+                                                type="text"
+                                                placeholder="Search in scenarios"
+                                                prepend-inner-icon=$vuetify.icons.ghd-search
+                                                hide-details
+                                                single-line
+                                                v-model="searchMine"
+                                                outline
+                                                class="ghd-text-field-border ghd-text-field search-icon-general"
+                                            >
+                                            </v-text-field>
+                                            <v-btn style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="onMineSearchClick()">
+                                                Search
+                                            </v-btn>
+                                        </v-layout>
                                     </v-flex>
                                     <v-flex xs4></v-flex>
                                     <v-flex class="justify-end xs2">
@@ -55,10 +63,12 @@
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
+                                    :items="currentUserScenariosPage"                      
+                                    :pagination.sync="userScenariosPagination"
+                                    :total-items="totalUserScenarios"
                                     :headers="scenarioGridHeaders"
-                                    :items="userScenarios"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-                                    :search="searchMine"
+
                                     calculate-widths
                                 >
                                     <template slot="items" slot-scope="props">
@@ -176,12 +186,12 @@
                                         </td>
                                     </template>
                                     <v-alert
-                                        :value="true"
+                                        :value="hasMineSearch()"
                                         class="ara-orange-bg"
                                         icon="fas fa-exclamation"
-                                        slot="no-results"
+                                        slot="no-data"
                                     >
-                                        Your search for "{{ searchMine }}" found
+                                        Your search for "{{ currentSearchMine }}" found
                                         no results.
                                     </v-alert>
                                 </v-data-table>
@@ -193,24 +203,33 @@
                             <v-card elevation="5">
                                 <v-card-title>
                                     <v-flex xs6>
-                                        <v-text-field
-                                            label="Search"
-                                            placeholder="Search in scenarios"
-                                            outline
-                                            prepend-inner-icon=$vuetify.icons.ghd-search
-                                            hide-details
-                                            single-line
-                                            v-model="searchShared"
-                                            class="ghd-text-field-border ghd-text-field search-icon-general"
-                                        >
-                                        </v-text-field>
+                                        <v-layout>
+                                            <v-text-field
+                                                label="Search"
+                                                placeholder="Search in scenarios"
+                                                outline
+                                                prepend-inner-icon=$vuetify.icons.ghd-search
+                                                hide-details
+                                                single-line
+                                                v-model="searchShared"
+                                                class="ghd-text-field-border ghd-text-field search-icon-general"
+                                            >
+                                            </v-text-field>
+                                            <v-btn style="margin-top: 2px;" 
+                                                class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' 
+                                                outline 
+                                                @click="onSharedSearchClick()">
+                                                Search
+                                            </v-btn>
+                                        </v-layout>
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
+                                    :items="currentSharedScenariosPage"                      
+                                    :pagination.sync="sharedScenariosPagination"
+                                    :total-items="totalSharedScenarios"
                                     :headers="scenarioGridHeaders"
-                                    :items="sharedScenarios"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-                                    :search="searchShared"
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
@@ -321,15 +340,15 @@
                                             </v-menu>
                                         </td>
                                     </template>
-                                    <v-alert
-                                        :value="true"
-                                        class="ara-orange-bg"
-                                        icon="fas fa-exclamation"
-                                        slot="no-results"
-                                    >
-                                        Your search for "{{ searchShared }}"
-                                        found no results.
-                                    </v-alert>
+                                    <template v-slot:no-data v-if="hasSharedSearch()">
+                                        <v-alert
+                                            :value="true"
+                                            class="ara-orange-bg"
+                                            icon="fas fa-exclamation">
+                                            Your search for "{{ currentSearchShared }}"
+                                            found no results.
+                                        </v-alert>
+                                    </template>                                 
                                 </v-data-table>
                             </v-card>
                         </v-flex>
@@ -443,6 +462,9 @@ import FileDownload from 'js-file-download';
 import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import GhdStarSvg from '@/shared/icons/GhdStarSvg.vue';
 import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+import ScenarioService from '@/services/scenario.service';
 
 @Component({
     components: {
@@ -467,6 +489,11 @@ export default class Scenarios extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
 
+    @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
+    @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
+    @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
+    @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
+
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
 
     @State(state => state.authenticationModule.authenticated)
@@ -480,6 +507,8 @@ export default class Scenarios extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getScenarios') getScenariosAction: any;
+    @Action('getSharedScenariosPage') getSharedScenariosPageAction: any;
+    @Action('getUserScenariosPage') getUserScenariosPageAction: any;
     @Action('createScenario') createScenarioAction: any;
     @Action('cloneScenario') cloneScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
@@ -605,11 +634,24 @@ export default class Scenarios extends Vue {
     tab: string = '';
     availableActions: any;
     nameUpdate: string = '';
+
     scenarios: Scenario[] = [];
+
     userScenarios: Scenario[] = [];
+    currentUserScenariosPage: Scenario[] = []
+    userScenariosPagination: Pagination = clone(emptyPagination);
+    totalUserScenarios: number = 0;
+
     sharedScenarios: Scenario[] = [];
-    searchMine = '';
-    searchShared = '';
+    currentSharedScenariosPage: Scenario[] = [];
+    sharedScenariosPagination:  Pagination = clone(emptyPagination);
+    totalSharedScenarios: number = 0;
+
+    initializing: boolean = true
+    searchMine: string = '';
+    currentSearchMine: string = '';
+    searchShared: string = '';
+    currentSearchShared: string = '';
     //confirmRollupAlertData: AlertData = clone(emptyAlertData);
     //showCreateNetworkDialog: boolean = false;
     reportsDownloaderDialogData: ReportsDownloaderDialogData = clone(
@@ -637,7 +679,7 @@ export default class Scenarios extends Vue {
     onStateNetworksChanged() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks)) {
-            this.getScenariosAction();
+            this.initializeScenarioPages()
         }
     }
 
@@ -646,34 +688,69 @@ export default class Scenarios extends Vue {
         this.scenarios = clone(this.stateScenarios);
     }
 
-    @Watch('scenarios')
-    onScenariosChanged() {
-        const username: string = getUserName();
-        // filter scenarios that are the user's
-        this.userScenarios = this.scenarios.filter(
-            (scenario: Scenario) => scenario.owner === username,
-        );
-        // filter scenarios that are shared with the user
-        const scenarioUserCanModify = (user: ScenarioUser) =>
-            user.username === username;
-        const sharedScenarioFilter = (scenario: Scenario) =>
-            scenario.owner !== username &&
-            (this.isAdmin ||
-                this.isCWOPA ||
-                any(scenarioUserCanModify, scenario.users));
-        this.sharedScenarios = this.scenarios.filter(sharedScenarioFilter);
+    @Watch('stateSharedScenariosPage', {deep: true}) onStateSharedScenariosPageChanged(){
+        this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
+    }
+    @Watch('stateUserScenariosPage', {deep: true}) onStateUserScenariosPageChanged(){
+        this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
+    }
+    @Watch('stateTotalSharedScenarios') onStateTotalSharedScenariosChanged(){
+        this.totalSharedScenarios = this.stateTotalSharedScenarios;
+    }
+    @Watch('stateTotalUserScenarios') onStateTotalUserScenariosChanged(){
+        this.totalUserScenarios = this.stateTotalUserScenarios;
+    }
 
-        this.tabItems[0].count = this.userScenarios.length;
-        this.tabItems[1].count = this.sharedScenarios.length;
+    @Watch('userScenariosPagination')onUserScenariosPagination() {
+        if(this.initializing)
+            return;
+        const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
+
+        const request: PagingRequest<Scenario>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: sortBy != null ? sortBy : '',
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearchMine
+        };
+        if(hasValue(this.networks) )
+            this.getUserScenariosPageAction(request); 
+    }
+
+    @Watch('sharedScenariosPagination') onSharedScenariosPagination() {
+        if(this.initializing)
+            return;
+        const { sortBy, descending, page, rowsPerPage } = this.sharedScenariosPagination;
+
+        const request: PagingRequest<Scenario>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: sortBy != null ? sortBy : '',
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearchShared
+        };
+        if(hasValue(this.networks) )
+            this.getSharedScenariosPageAction(request); 
     }
 
     mounted() {
         this.networks = clone(this.stateNetworks);
-        if (hasValue(this.networks) && !hasValue(this.stateScenarios)) {
-            this.getScenariosAction();
-        } else {
-            this.scenarios = clone(this.stateScenarios);
-        }
+        if (hasValue(this.networks) ) {
+            this.initializeScenarioPages();
+        } 
+        
 
         // this.$statusHub.$on(
         //     Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
@@ -761,6 +838,25 @@ export default class Scenarios extends Vue {
         );
     }
 
+    initializeScenarioPages(){
+        const { sortBy, descending, page, rowsPerPage } = this.sharedScenariosPagination;
+
+        const request: PagingRequest<Scenario>= {
+            page: 1,
+            rowsPerPage: 5,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: '',
+            isDescending: false,
+            search: ''
+        };
+        this.getSharedScenariosPageAction(request).then(() => this.getUserScenariosPageAction(request).then(() => this.initializing = false)); 
+    }
+
     formatDate(dateToFormat: Date) {
         return hasValue(dateToFormat)
             ? moment(dateToFormat).format('M/D/YYYY')
@@ -810,13 +906,18 @@ export default class Scenarios extends Vue {
         // the legacy scenario id is hardcoded to our test scenario "JML Run District 8"
         this.migrateLegacySimulationDataAction({
             simulationId: process.env.VUE_APP_HARDCODED_SCENARIOID_FROM_LEGACY,
-        });
+        }).then(() => this.initializeScenarioPages());
     }
 
     onEditScenarioName(scenario: Scenario, name: string) {
         scenario.name = name;
         if (hasValue(scenario.name)) {
-            this.updateScenarioAction({ scenario: scenario });
+            this.updateScenarioAction({ scenario: scenario }).then(() => {
+                if(this.tab == 0)
+                    this.onUserScenariosPagination();
+                else
+                    this.onSharedScenariosPagination();
+            });
         } else {
             this.scenarios = [];
             setTimeout(() => (this.scenarios = clone(this.stateScenarios)));
@@ -923,7 +1024,13 @@ export default class Scenarios extends Vue {
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.cloneScenarioAction({
                 scenarioId: this.selectedScenario.id,
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }).then(() => {
+                this.selectedScenario = clone(emptyScenario)
+                if(this.tab == 0)
+                    this.onUserScenariosPagination();
+                else
+                    this.onSharedScenariosPagination();
+            });
         }
     }
 
@@ -935,7 +1042,13 @@ export default class Scenarios extends Vue {
                 scenarioId: scenario.id,
                 networkId: scenario.networkId,
                 scenarioName: scenario.name
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }).then(() => {
+                this.selectedScenario = clone(emptyScenario)
+                if(this.tab == 0)
+                    this.onUserScenariosPagination();
+                else
+                    this.onSharedScenariosPagination();
+            });
         }
     }
 
@@ -956,7 +1069,13 @@ export default class Scenarios extends Vue {
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.deleteScenarioAction({
                 scenarioId: this.selectedScenario.id,
-            }).then(() => (this.selectedScenario = clone(emptyScenario)));
+            }).then(() => {
+                this.selectedScenario = clone(emptyScenario);
+                if(this.tab == 0)
+                    this.onUserScenariosPagination();
+                else
+                    this.onSharedScenariosPagination();
+            });
         }
     }
 
@@ -994,6 +1113,11 @@ export default class Scenarios extends Vue {
             this.createScenarioAction({
                 scenario: scenario,
                 networkId: scenario.networkId,
+            }).then(() => {
+                if(this.tab == 0)
+                    this.onUserScenariosPagination();
+                else
+                    this.onSharedScenariosPagination();
             });
         }
     }
@@ -1005,7 +1129,7 @@ export default class Scenarios extends Vue {
             this.migrateLegacySimulationDataAction({
                 simulationId: legacySimulationId,
                 networkId: 'D7B54881-DD44-4F93-8250-3D4A630A4D3B',
-            });
+            }).then(() => this.initializeScenarioPages());
         }
     }
 
@@ -1126,6 +1250,34 @@ export default class Scenarios extends Vue {
         this.aggragateDialogData = {
             showDialog: true,
         };
+    }
+
+    onMineSearchClick(){
+        this.currentSearchMine =  this.searchMine;
+        this.resetPageMine()
+    }
+
+    resetPageMine(){
+        this.userScenariosPagination.page = 1;
+        this.onUserScenariosPagination();
+    }
+
+    onSharedSearchClick(){
+        this.currentSearchShared =  this.searchShared;
+        this.resetPageShared()
+    }
+
+    resetPageShared(){
+        this.sharedScenariosPagination.page = 1;
+        this.onSharedScenariosPagination();
+    }
+
+    hasSharedSearch(): boolean{
+        return this.currentSearchShared.trim() !== '';
+    }
+
+    hasMineSearch(): boolean{
+        return this.currentSearchMine.trim() !== '';
     }
 }
 </script>

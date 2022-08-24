@@ -661,9 +661,7 @@ export default class PerformanceCurveEditor extends Vue {
                     vm.hasScenario = true;
                     vm.onPaginationChanged();
                 }
-            });
-
-            
+            });          
         });
     }
 

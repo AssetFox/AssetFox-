@@ -22,12 +22,16 @@ namespace BridgeCareCore.Utils
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
         }
 
+        /// <summary>
+        /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
+        /// </summary>
+        /// <param name="simulationId"></param>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         public void CheckUserSimulationReadAuthorization(Guid simulationId)
         {
-            if (!ContextAccessor.HttpContext.User.IsInRole(Role.Administrator))
+            if (RequirePermittedCheck())
             {
                 var simulation = GetSimulationWithUsers(simulationId);
-
                 if (!simulation.Users.Any(_ => _.UserId == UserId))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
@@ -35,17 +39,39 @@ namespace BridgeCareCore.Utils
             }
         }
 
+        /// <summary>
+        /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
+        /// </summary>
+        /// <param name="simulationId"></param>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         public void CheckUserSimulationModifyAuthorization(Guid simulationId)
         {
-            if (!ContextAccessor.HttpContext.User.IsInRole(Role.Administrator))
+            if (RequirePermittedCheck())
             {
                 var simulation = GetSimulationWithUsers(simulationId);
-
                 if (!simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public void CheckUserLibraryModifyAuthorization(Guid owner)
+        {
+            if (RequirePermittedCheck() && owner != UserId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
+            }
+        }
+
+        public bool RequirePermittedCheck()
+        {
+            return !IsUserInAdministratorRole();
         }
 
         private SimulationDTO GetSimulationWithUsers(Guid simulationId)
@@ -67,5 +93,10 @@ namespace BridgeCareCore.Utils
 
             return simulation;
         }
+
+        private bool IsUserInAdministratorRole()
+        {
+            return ContextAccessor.HttpContext.User.IsInRole(Role.Administrator);
+        }        
     }
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
@@ -29,89 +28,6 @@ namespace BridgeCareCore.Controllers
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-            _deficientConditionGoalsCRUDOperations = CreateCRUDOperations();
-        }
-
-        public Dictionary<string, CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>> CreateCRUDOperations()
-        {
-            
-
-        
-
-            void DeleteAnyForScenario(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
-            {
-                // Do nothing
-            }
-
-            List<DeficientConditionGoalLibraryDTO> RetrieveAnyForLibraries() => UnitOfWork.DeficientConditionGoalRepo
-                    .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals();
-
-            List<DeficientConditionGoalLibraryDTO> RetrievePermittedForLibraries()
-            {
-                var result = UnitOfWork.DeficientConditionGoalRepo
-                    .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals();
-                return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
-            }
-
-            void UpsertAnyForLibrary(DeficientConditionGoalLibraryDTO dto)
-            {
-                UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto);
-                UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
-            }
-
-            void UpsertPermittedForLibrary(DeficientConditionGoalLibraryDTO dto)
-            {
-                if (dto.Owner == UserId)
-                {
-                    UpsertAnyForLibrary(dto);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
-                }
-            }
-
-            void DeleteAnyForLibrary(Guid libraryId) => UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
-
-            void DeletePermittedForLibrary(Guid libraryId)
-            {
-                var dto = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
-                    .FirstOrDefault(_ => _.Id == libraryId);
-                if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
-
-                if (dto.Owner == UserId)
-                {
-                    DeleteAnyForLibrary(libraryId);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
-                }
-            }
-
-            var AllCRUDAccess = new CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>()
-            {
-                DeleteScenario = DeleteAnyForScenario,
-                UpsertLibrary = UpsertAnyForLibrary,
-                RetrieveLibrary = RetrieveAnyForLibraries,
-                DeleteLibrary = DeleteAnyForLibrary
-            };
-
-            var PermittedCRUDAccess = new CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>()
-            {
-                DeleteScenario = DeleteAnyForScenario,
-                UpsertLibrary = UpsertPermittedForLibrary,
-                RetrieveLibrary = RetrievePermittedForLibraries,
-                DeleteLibrary = DeletePermittedForLibrary
-            };
-
-            return new Dictionary<string, CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>>()
-            {
-                [Role.Administrator] = AllCRUDAccess,
-                [Role.DistrictEngineer] = PermittedCRUDAccess,
-                [Role.Cwopa] = PermittedCRUDAccess,
-                [Role.PlanningPartner] = PermittedCRUDAccess
-            };
         }
 
         [HttpGet]
@@ -121,7 +37,15 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _deficientConditionGoalsCRUDOperations[UserInfo.Role].RetrieveLibrary());
+                var result = new List<DeficientConditionGoalLibraryDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals();
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                    }
+                });
                 return Ok(result);
             }
             catch (Exception e)
@@ -164,7 +88,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _deficientConditionGoalsCRUDOperations[UserInfo.Role].UpsertLibrary(dto);
+                    _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto);
+                    UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -224,7 +150,17 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _deficientConditionGoalsCRUDOperations[UserInfo.Role].DeleteLibrary(libraryId);
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var dto = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+                        .FirstOrDefault(_ => _.Id == libraryId);
+                        if (dto == null)
+                        {
+                            return;
+                        }
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    }
+                    UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 

@@ -7,5 +7,9 @@ namespace BridgeCareCore.Utils.Interfaces
         public void CheckUserSimulationReadAuthorization(Guid simulationId);
 
         public void CheckUserSimulationModifyAuthorization(Guid simulationId);
+
+        public bool RequirePermittedCheck();
+
+        public void CheckUserLibraryModifyAuthorization(Guid owner);
     }
 }

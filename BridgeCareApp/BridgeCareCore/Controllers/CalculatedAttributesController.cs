@@ -57,7 +57,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyCalculatedAttributesFromLibrary)]
         public async Task<IActionResult> UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO dto)
         {
             try
@@ -74,7 +74,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioAttribute/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyCalculatedAttributesFromScenario)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, CalculatedAttributeDTO dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting a simulation attribute");
@@ -93,7 +93,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioAttributes/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyCalculatedAttributesFromScenario)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, List<CalculatedAttributeDTO> dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting simulation attributes");
@@ -111,7 +111,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyCalculatedAttributesFromLibrary)]
         public async Task<IActionResult> DeleteLibrary(Guid libraryId)
         {
             if (!LibraryIdList().ContainsKey(libraryId)) return BadRequest($"Unable to find {libraryId} in the database");

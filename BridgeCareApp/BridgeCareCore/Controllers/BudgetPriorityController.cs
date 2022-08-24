@@ -137,7 +137,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetBudgetPriorityLibraries")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewBudgetPriorityFromLibrary)]
+        //[Authorize]
         public async Task<IActionResult> GetBudgetPriorityLibraries()
         {
             try
@@ -157,7 +158,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertBudgetPriorityLibrary")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyBudgetPriorityFromLibrary)]
+        //[Authorize]
         public async Task<IActionResult> UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto)
         {
             try
@@ -188,7 +190,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteBudgetPriorityLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.DeleteBudgetPriorityFromLibrary)]
+        //[Authorize]
         public async Task<IActionResult> DeleteBudgetPriorityLibrary(Guid libraryId)
         {
             try
@@ -213,7 +216,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioBudgetPriorities/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewBudgetPriorityFromScenario)]
+        //[Authorize]
         public async Task<IActionResult> GetScenarioBudgetPriorities(Guid simulationId)
         {
             try
@@ -233,7 +237,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioBudgetPriorities/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyBudgetPriorityFromScenario)]
+        //[Authorize]
         public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, List<BudgetPriorityDTO> dtos)
         {
             try

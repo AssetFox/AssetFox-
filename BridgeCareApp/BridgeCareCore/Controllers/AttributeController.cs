@@ -136,6 +136,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttribute")]
         [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
+        //[Authorize]
         public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
@@ -160,7 +161,8 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckCommand/{sqlCommand}")]
-        [Authorize]
+        //[Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
         public async Task<IActionResult> CheckCommand(string sqlCommand)
         {
             try

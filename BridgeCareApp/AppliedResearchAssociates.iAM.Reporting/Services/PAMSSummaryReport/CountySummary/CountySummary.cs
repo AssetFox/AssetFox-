@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
 {
     public class DistrictCounty
     {
-        public string District { get; set; }
+        public int District { get; set; }
         public string County { get; set; }
     }
 
@@ -79,22 +79,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             if (reportOutputData?.InitialAssetSummaries?.Any() == true)
             {
                 //create object
-                var districtCountyList = new List<DistrictCounty>();
+                IList<DistrictCounty> districtCountyList = new List<DistrictCounty>();
 
                 foreach (var sectionSummary in reportOutputData.InitialAssetSummaries)
                 {
-                    //create object
-                    var districtCountObject = new DistrictCounty()
-                    {
-                        District = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"),
-                        County = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY")
-                    };
+                    //get and configure field values
+                    var strDistrict = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
+                    var district = 0; if (!string.IsNullOrEmpty(strDistrict) && !string.IsNullOrWhiteSpace(strDistrict)) { district = Convert.ToInt16(strDistrict); }
+                    var county = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
 
                     //check item in the list
-                    if (!districtCountyList.Contains(districtCountObject))
+                    var checkResultObject = districtCountyList
+                                                .Where(w => w.District == district)
+                                                .Where(w => w.County == county).FirstOrDefault();
+                    if (checkResultObject == null)
                     {
-                        //add item to list
-                        districtCountyList.Add(districtCountObject);
+                        //add object to list
+                        districtCountyList.Add(new DistrictCounty() {
+                            District = district,
+                            County = county,
+                        });
                     }
                 }
 

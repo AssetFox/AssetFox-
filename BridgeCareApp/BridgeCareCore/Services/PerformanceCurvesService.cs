@@ -131,30 +131,32 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<PerformanceCurveDTO>();
+            var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
+
+
+            if (request.search.Trim() != "")
+                curves = SearchCurves(curves, request.search);
+            if (request.sortColumn.Trim() != "")
+                curves = OrderByColumn(curves, request.sortColumn, request.isDescending);
+
+            curves = SyncedDataset(curves, request.PagingSync);
+
             if (request.RowsPerPage > 0)
             {
                 take = request.RowsPerPage;
                 skip = request.RowsPerPage * (request.Page - 1);
+                items = curves.Skip(skip).Take(take).ToList();
             }
             else
             {
-                items = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
+                items = curves;
                 return new PagingPageModel<PerformanceCurveDTO>()
                 {
                     Items = items,
-                    TotalItems = items.Count,
+                    TotalItems = items.Count
                 };
             }
 
-            var curves = SyncedDataset(_unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId), request.PagingSync)
-                .Where(_ => _.Name.Contains(request.search) ||
-                    _.Attribute.Contains(request.search) ||
-                    _.Equation.Expression.Contains(request.search) ||
-                    _.CriterionLibrary.MergedCriteriaExpression.Contains(request.search)).ToList();
-
-            curves = orderByColumn(curves, request.sortColumn, request.isDescending);
-
-            items = curves.Skip(skip).Take(take).ToList();
             return new PagingPageModel<PerformanceCurveDTO>()
             {
                 Items = items,
@@ -167,34 +169,33 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<PerformanceCurveDTO>();
-            if(request.RowsPerPage > 0)
+            var curves = request.PagingSync.LibraryId == null ? _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId) :
+                _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.PagingSync.LibraryId.Value);
+
+
+            if (request.search.Trim() != "")
+                curves = SearchCurves(curves, request.search);
+            if (request.sortColumn.Trim() != "")
+                curves = OrderByColumn(curves, request.sortColumn, request.isDescending);
+
+            curves = SyncedDataset(curves, request.PagingSync);
+
+            if (request.RowsPerPage > 0)
             {
-                 take = request.RowsPerPage;
-                 skip = request.RowsPerPage * (request.Page - 1);
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                items = curves.Skip(skip).Take(take).ToList();
             }
             else
             {
-                items = request.PagingSync.LibraryId == null ?
-                    _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId) :
-                    _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.PagingSync.LibraryId.Value);
+                items = curves;
                 return new PagingPageModel<PerformanceCurveDTO>()
                 {
                     Items = items,
                     TotalItems = items.Count
                 };
             }
-            request.search = request.search.ToLower();
-            var curves = SyncedDataset(request.PagingSync.LibraryId == null ?
-                    _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId) :
-                    _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.PagingSync.LibraryId.Value), request.PagingSync)
-                .Where(_ => _.Name.ToLower().Contains(request.search) ||
-                    _.Attribute.ToLower().Contains(request.search) ||
-                    (_.Equation.Expression != null &&_.Equation.Expression.ToLower().Contains(request.search)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(request.search))).ToList();
 
-            curves = orderByColumn(curves, request.sortColumn, request.isDescending);
-
-            items = curves.Skip(skip).Take(take).ToList();
             return new PagingPageModel<PerformanceCurveDTO>()
             {
                 Items = items,
@@ -216,7 +217,7 @@ namespace BridgeCareCore.Services
             return SyncedDataset(curves, request);
         }
 
-        private List<PerformanceCurveDTO> orderByColumn(List<PerformanceCurveDTO> curves, string sortColumn, bool isDescending)
+        private List<PerformanceCurveDTO> OrderByColumn(List<PerformanceCurveDTO> curves, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
@@ -233,6 +234,15 @@ namespace BridgeCareCore.Services
                         return curves.OrderBy(_ => _.Attribute.ToLower()).ToList();
             }
             return curves;
+        }
+
+        private List<PerformanceCurveDTO> SearchCurves(List<PerformanceCurveDTO> curves, string search)
+        {
+            return curves
+                .Where(_ => _.Name.ToLower().Contains(search) ||
+                    _.Attribute.ToLower().Contains(search) ||
+                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(search)) ||
+                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
         }
 
         private List<PerformanceCurveDTO> SyncedDataset(List<PerformanceCurveDTO> curves, PagingSyncModel<PerformanceCurveDTO> request)

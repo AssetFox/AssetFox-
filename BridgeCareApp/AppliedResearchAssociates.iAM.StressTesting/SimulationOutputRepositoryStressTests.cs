@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Newtonsoft.Json;
 using Xunit;
-using AppliedResearchAssociates.iAM.TestHelpers.Extensions;
-using System.IO;
 
 namespace AppliedResearchAssociates.iAM.StressTesting
 {
@@ -68,6 +64,17 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutput, serializeLoaded);
         }
 
+        private void LoadSimulationOutput_Does(string filename, Guid simulationId)
+        {
+            var testHelper = new TestHelper(false);
+            var simulationOutput = testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var text = FileReader.ReadAllTextInGitIgnoredFile(filename);
+            var outputFromFile = JsonConvert.DeserializeObject<SimulationOutput>(text);
+            var serializeOutputFromFile = JsonConvert.SerializeObject(outputFromFile);
+            var serializeLoaded = JsonConvert.SerializeObject(simulationOutput);
+            SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutputFromFile, serializeLoaded);
+        }
+
         /// <summary>This test checks a SimulationOutput. It saves it to the database, loads it back from the database,
         /// then checks that they are the same. For the test to run, you need a json-encoded SimulationOutput saved at the place
         /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
@@ -78,5 +85,12 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename);
         }
 
+        [Fact (Skip ="Actually does reset the db, even though it tries not to. May not ever want this.")]
+        public void LoadOutputFromDatabase_MatchesOutputFromFile()
+        {
+            var simulationOutputIdString = "8135C196-EA4E-4E57-C101-08DA85F126C2";
+            var simulationOutputId = Guid.Parse(simulationOutputIdString);
+            LoadSimulationOutput_Does(CannedSimulationOutput.Filename, simulationOutputId);
+        }
     }
 }

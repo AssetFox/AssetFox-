@@ -22,9 +22,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = false;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetSaveBatchSize = 300;
-        public const int AssetSummarySaveBatchSize = 3000;
+        public const int AssetSummarySaveBatchSize = 2000;
         public const int AssetLoadBatchSize = 400;
-        public const int AssetSummaryLoadBatchSize = 4000;
+        public const int AssetSummaryLoadBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -69,7 +69,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 foreach (var batch in batchedAssetSummaries)
                 {
                     var assetSummaryEntityList = AssetSummaryDetailMapper.ToEntityList(batch, entity.Id, attributeIdLookup);
-                    _unitOfWork.Context.AddRange(assetSummaryEntityList);
+                    _unitOfWork.Context.
+                        AddRange(assetSummaryEntityList);
                     _unitOfWork.Context.SaveChanges();
                     _unitOfWork.Context.ChangeTracker.Clear();
                 }

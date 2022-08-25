@@ -106,7 +106,7 @@ namespace BridgeCareCore.Services
             }
             else
             {
-                items = simulations.ToList();
+                items = simulations;
                 return new PagingPageModel<SimulationDTO>()
                 {
                     Items = items,

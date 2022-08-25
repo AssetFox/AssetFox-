@@ -594,7 +594,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
-      
+
+            // Act
             var request = new PagingRequestModel<SimulationDTO>()
             {
                 isDescending = false,
@@ -612,7 +613,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.NotNull(okObjResult.Value);
 
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
-            var dto = dtos.Single(dto => dto.Id == simulation.Id);
+            Assert.NotEmpty(dtos);
+            Assert.True(dtos.All(_ => _.Users.All(__ => !__.IsOwner)));
+            //var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 
         [Fact]
@@ -664,7 +667,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = _testHelper.CreateSimulation(owner: _testHelper.UnitOfWork.CurrentUser.Id);
 
             var request = new PagingRequestModel<SimulationDTO>()
             {
@@ -675,7 +678,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 sortColumn = ""
             };
 
-            var getResult = await _controller.GetSharedScenariosPage(request);
+            var getResult = await _controller.GetUserScenariosPage(request);
 
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(PagingPageModel<SimulationDTO>))).Items;
@@ -707,8 +710,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(dto.Name, simulationEntity.Name);
 
             var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-            Assert.Single(simulationUsers);
-            Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
+            Assert.True(simulationUsers.Count == 2);
+            Assert.Equal(dto.Users.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId,
+                simulationUsers.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId);
         }
 
         [Fact]

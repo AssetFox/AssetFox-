@@ -19,8 +19,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class DeficientConditionGoalController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, CRUDMethods<DeficientConditionGoalDTO, DeficientConditionGoalLibraryDTO>>
-            _deficientConditionGoalsCRUDOperations;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
 
@@ -46,6 +44,7 @@ namespace BridgeCareCore.Controllers
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
                     }
                 });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -154,10 +153,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
                         .FirstOrDefault(_ => _.Id == libraryId);
-                        if (dto == null)
-                        {
-                            return;
-                        }
+                        if (dto == null) return;
                         _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
                     }
                     UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);

@@ -42,7 +42,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAttributes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> Attributes()
         {
             try
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetAggregationRuleTypes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAggregationRuleTypes()
         {
             try
@@ -74,7 +74,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetAttributeDataSourceTypes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAttributeDataSourceTypes()
         {
             try
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("GetAttributesSelectValues")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAttributeSelectValues([FromBody] List<string> attributeNames)
         {
             try
@@ -136,7 +136,6 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CreateAttribute")]
         [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
-        //[Authorize]
         public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
@@ -161,7 +160,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckCommand/{sqlCommand}")]
-        //[Authorize]
         [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
         public async Task<IActionResult> CheckCommand(string sqlCommand)
         {

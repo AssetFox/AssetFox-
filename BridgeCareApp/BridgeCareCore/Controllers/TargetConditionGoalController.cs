@@ -132,7 +132,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetTargetConditionGoalLibraries")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> TargetConditionGoalLibraries()
         {
             try
@@ -149,7 +149,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewTargetConditionGoalFromScenario)]
         public async Task<IActionResult> GetScenarioTargetConditionGoals(Guid simulationId)
         {
             try
@@ -166,7 +166,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertTargetConditionGoalLibrary")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto)
         {
             try
@@ -195,7 +195,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyTargetConditionGoalFromScenario)]
         public async Task<IActionResult> UpsertScenarioTargetConditionGoals(Guid simulationId, List<TargetConditionGoalDTO> dtos)
         {
             try
@@ -225,7 +225,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteTargetConditionGoalLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.DeleteTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> DeleteTargetConditionGoalLibrary(Guid libraryId)
         {
             try

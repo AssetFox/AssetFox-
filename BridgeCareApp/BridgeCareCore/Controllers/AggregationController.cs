@@ -50,7 +50,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("NetworkAggregateAccess")]
         public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributes)
         {
             if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)

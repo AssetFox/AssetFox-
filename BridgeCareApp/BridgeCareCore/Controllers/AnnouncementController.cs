@@ -41,7 +41,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertAnnouncement")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
         [ClaimAuthorize("AnnouncementModifyAccess")]
         public async Task<IActionResult> UpsertAnnouncement(AnnouncementDTO dto)
         {
@@ -67,7 +66,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteAnnouncement/{announcementId}")]
-        //[Authorize(Policy = SecurityConstants.Policy.Admin)]
         [ClaimAuthorize("AnnouncementModifyAccess")]
         public async Task<IActionResult> DeleteAnnouncement(Guid announcementId)
         {

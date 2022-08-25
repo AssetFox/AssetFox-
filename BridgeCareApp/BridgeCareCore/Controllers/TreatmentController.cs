@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore.Controllers
 {
@@ -162,7 +163,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetTreatmentLibraries")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewTreatmentFromLibrary)]
         public async Task<IActionResult> GetTreatmentLibraries()
         {
             try
@@ -179,7 +180,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioSelectedTreatments/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewTreatmentFromScenario)]
         public async Task<IActionResult> GetScenarioSelectedTreatments(Guid simulationId)
         {
             try
@@ -196,7 +197,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertTreatmentLibrary")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyTreatmentFromLibrary)]
         public async Task<IActionResult> UpsertTreatmentLibrary(TreatmentLibraryDTO dto)
         {
             try
@@ -225,7 +226,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("ExportLibraryTreatmentsExcelFile/{libraryId}")]
-        [Authorize]
         public async Task<IActionResult> ExportLibraryTreatmentsExcelFile(Guid libraryId)
         {
             try
@@ -248,7 +248,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyTreatmentFromScenario)]
         public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid simulationId, List<TreatmentDTO> dtos)
         {
             try
@@ -276,7 +276,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteTreatmentLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.DeleteTreatmentFromLibrary)]
         public async Task<IActionResult> DeleteTreatmentLibrary(Guid libraryId)
         {
             try
@@ -301,7 +301,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportLibraryTreatmentsFile")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ImportTreatmentFromLibrary)]
         public async Task<IActionResult> ImportLibraryTreatmentsFile()
         {
             try
@@ -348,7 +348,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("DeleteTreatment/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.DeleteTreatmentFromLibrary)]
         public async Task<IActionResult> DeleteTreatment(TreatmentDTO treatment, Guid libraryId)
         {
             try
@@ -377,7 +377,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("DeleteScenarioSelectableTreatment/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyTreatmentFromScenario)]
         public async Task<IActionResult> DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment, Guid simulationId)
         {
             try
@@ -405,7 +405,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportScenarioTreatmentsFile")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ImportTreatmentFromScenario)]
         public async Task<IActionResult> ImportScenarioTreatmentsFile()
         {
             try

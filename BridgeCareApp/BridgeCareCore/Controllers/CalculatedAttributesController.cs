@@ -32,7 +32,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("CalculatedAttributes")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetCalculatedAttributes()
         {
             var result = await attributeRepo.CalculatedAttributes();
@@ -42,13 +42,13 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("CalculatedAttrbiuteLibraries")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetCalculatedAttributeLibraries() =>
              Ok(calculatedAttributesRepo.GetCalculatedAttributeLibraries().ToList());
 
         [HttpGet]
         [Route("ScenarioAttributes/{simulationId}")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetAttributesForScenario(Guid simulationId)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when getting simulation attributes");

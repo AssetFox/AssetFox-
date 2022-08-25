@@ -131,7 +131,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetRemainingLifeLimitLibraries")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ViewRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> RemainingLifeLimitLibraries()
         {
             try
@@ -147,7 +147,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetScenarioRemainingLifeLimits/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ViewRemainingLifeLimitFromScenario)]
         public async Task<IActionResult> GetScenarioRemainingLifeLimits(Guid simulationId)
         {
             try
@@ -164,7 +164,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertRemainingLifeLimitLibrary/")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto)
         {
             try
@@ -188,7 +188,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpPost]
         [Route("UpsertScenarioRemainingLifeLimits/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = SecurityConstants.Policy.ModifyRemainingLifeLimitFromScenario)]
         public async Task<IActionResult> UpsertScenarioRemainingLifeLimits(Guid simulationId, List<RemainingLifeLimitDTO> dtos)
         {
             try
@@ -218,7 +218,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteRemainingLifeLimitLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = SecurityConstants.Policy.DeleteRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> DeleteRemainingLifeLimitLibrary(Guid libraryId)
         {
             try

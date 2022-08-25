@@ -39,7 +39,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertSqlDataSource")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> UpsertSqlDataSource(SQLDataSourceDTO dto)
         {
@@ -60,7 +59,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertExcelDataSource")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> UpsertExcelDataSource(ExcelDataSourceDTO dto)
         {
@@ -80,7 +78,6 @@ namespace BridgeCareCore.Controllers
         }
         [HttpDelete]
         [Route("DeleteDataSource/{dataSourceId}")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> DeleteDataSource(Guid dataSourceId)
         {
@@ -102,7 +99,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSources")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSources()
         {
@@ -120,7 +116,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSource/{dataSourceId}")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSource(Guid dataSourceId)
         {
@@ -146,7 +141,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSourceTypes")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSourceTypes()
         {
@@ -165,7 +159,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckSqlConnection/{connectionString}")]
-        //[Authorize]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> CheckSqlConnection(string connectionString)
         {

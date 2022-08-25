@@ -23,12 +23,10 @@ namespace BridgeCareCore.Services
     public class SimulationService
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
-        protected readonly IHubService _hubService;
 
-        public SimulationService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService)
+        public SimulationService(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
         }
 
         public PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request)

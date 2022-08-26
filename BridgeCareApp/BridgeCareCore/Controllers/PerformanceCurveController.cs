@@ -90,7 +90,6 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-
                     UnitOfWork.BeginTransaction();
                     var currentRecord = GetAllPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == dto.Id);
                     // by pass owner check if no record

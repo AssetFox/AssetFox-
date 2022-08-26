@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
@@ -15,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {
@@ -22,143 +22,16 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class PerformanceCurveController : BridgeCareCoreBaseController
     {
-        private readonly IReadOnlyDictionary<string, PerformanceCurvesCRUDMethods> _performanceCRUDMethods;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IPerformanceCurvesService _performanceCurvesService;
+        private readonly IClaimHelper _claimHelper;
 
         public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
-            IHubService hubService, IHttpContextAccessor httpContextAccessor, IPerformanceCurvesService performanceCurvesService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IPerformanceCurvesService performanceCurvesService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _performanceCRUDMethods = CreateCRUDMethods();
-            _performanceCurvesService = performanceCurvesService ??
-                                       throw new ArgumentNullException(nameof(performanceCurvesService));
-        }
-        private Dictionary<string, PerformanceCurvesCRUDMethods> CreateCRUDMethods()
-        {
-            void UpsertAnyForScenario(Guid simulationId, List<PerformanceCurveDTO> dtos)
-            {
-                UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
-            }
-
-            void UpsertPermittedForScenario(Guid simulationId, List<PerformanceCurveDTO> dtos)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAnyForScenario(simulationId, dtos);
-            }
-
-            List<PerformanceCurveDTO> RetrieveAnyForScenario(Guid simulationId) =>
-                UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-
-            void DeleteAnyFromScenario(Guid simulationId, List<PerformanceCurveDTO> dtos)
-            {
-                // Do Nothing
-            }
-
-            List<PerformanceCurveLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
-
-            List<PerformanceCurveLibraryDTO> RetrievePermittedForLibraries()
-            {
-                var result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
-                return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
-            }
-
-            void UpsertAnyForLibrary(PerformanceCurveLibraryDTO dto)
-            {
-                UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
-                UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
-            }
-
-            void UpsertPermittedForLibrary(PerformanceCurveLibraryDTO dto)
-            {
-                var currentRecord = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == dto.Id);
-                if (currentRecord?.Owner == UserId || currentRecord == null)
-                {
-                    UpsertAnyForLibrary(dto);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-            }
-
-            void DeleteAnyForLibrary(Guid libraryId) =>
-                UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId);
-
-            void DeletePermittedForLibrary(Guid libraryId)
-            {
-                var dto = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == libraryId);
-
-                if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
-
-                if (dto.Owner == UserId)
-                {
-                    DeleteAnyForLibrary(libraryId);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-            }
-
-            ScenarioPerformanceCurvesImportResultDTO UpsertAnyForImportScenarioPerformanceCurves(ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
-            {
-                return _performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, currentUserCriteriaFilter);
-            }
-
-            ScenarioPerformanceCurvesImportResultDTO UpsertPermittedForImportScenarioPerformanceCurves(ExcelPackage excelPackage, Guid simulationId, UserCriteriaDTO currentUserCriteriaFilter)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                return UpsertAnyForImportScenarioPerformanceCurves(excelPackage, simulationId, currentUserCriteriaFilter);
-            }
-
-            PerformanceCurvesImportResultDTO UpsertAnyForImportLibraryPerformanceCurves(ExcelPackage excelPackage, Guid performanceCurveLibraryId, UserCriteriaDTO currentUserCriteriaFilter)
-            {
-                return _performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter);
-            }
-
-            PerformanceCurvesImportResultDTO UpsertPermittedForImportLibraryPerformanceCurves(ExcelPackage excelPackage, Guid performanceCurveLibraryId, UserCriteriaDTO currentUserCriteriaFilter)
-            {
-                var existingPerformanceCurveLibrary = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
-                if (existingPerformanceCurveLibrary == null && existingPerformanceCurveLibrary.Owner != UserId)
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-                return UpsertAnyForImportLibraryPerformanceCurves(excelPackage, performanceCurveLibraryId, currentUserCriteriaFilter);
-            }
-
-            var AdminCRUDMethods = new PerformanceCurvesCRUDMethods()
-            {
-                UpsertScenario = UpsertAnyForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
-                DeleteScenario = DeleteAnyFromScenario,
-                UpsertLibrary = UpsertAnyForLibrary,
-                RetrieveLibrary = RetrieveAnyForLibraries,
-                DeleteLibrary = DeleteAnyForLibrary,
-                UpsertImportScenarioPerformanceCurves = UpsertAnyForImportScenarioPerformanceCurves,
-                UpsertImportLibraryPerformanceCurves = UpsertAnyForImportLibraryPerformanceCurves
-            };
-
-            var PermittedCRUDMethods = new PerformanceCurvesCRUDMethods()
-            {
-                UpsertScenario = UpsertPermittedForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
-                DeleteScenario = DeleteAnyFromScenario,
-                UpsertLibrary = UpsertPermittedForLibrary,
-                RetrieveLibrary = RetrievePermittedForLibraries,
-                DeleteLibrary = DeletePermittedForLibrary,
-                UpsertImportScenarioPerformanceCurves = UpsertPermittedForImportScenarioPerformanceCurves,
-                UpsertImportLibraryPerformanceCurves = UpsertAnyForImportLibraryPerformanceCurves
-            };
-
-            return new Dictionary<string, PerformanceCurvesCRUDMethods>
-            {
-                [Role.Administrator] = AdminCRUDMethods,
-                [Role.DistrictEngineer] = PermittedCRUDMethods,
-                [Role.Cwopa] = PermittedCRUDMethods,
-                [Role.PlanningPartner] = PermittedCRUDMethods
-            };
-        }
+            _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));
+            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+        }      
 
         [HttpGet]
         [Route("GetPerformanceCurveLibraries")]
@@ -167,9 +40,16 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() =>
-                _performanceCRUDMethods[UserInfo.Role].RetrieveLibrary()
-                );
+                var result = new List<PerformanceCurveLibraryDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = GetAllPerformanceCurveLibraries();
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                    }
+                });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -186,7 +66,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _performanceCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
+                var result = new List<PerformanceCurveDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    result = UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+                });
                 return Ok(result);
             }
             catch (Exception e)
@@ -205,8 +90,16 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
+
                     UnitOfWork.BeginTransaction();
-                    _performanceCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
+                    var currentRecord = GetAllPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                    // by pass owner check if no record
+                    if (currentRecord != null)
+                    {
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                    }
+                    UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
+                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -236,7 +129,8 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _performanceCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
 
@@ -266,7 +160,13 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _performanceCRUDMethods[UserInfo.Role].DeleteLibrary(libraryId);
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var dto = GetAllPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                        if (dto == null) return;
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    }
+                    UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 
@@ -315,11 +215,20 @@ namespace BridgeCareCore.Controllers
                         Newtonsoft.Json.JsonConvert.DeserializeObject<UserCriteriaDTO>(
                             ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
                 }
-
-                var result = await Task.Factory.StartNew(() =>
+                                
+                var result= new PerformanceCurvesImportResultDTO();
+                await Task.Factory.StartNew(() =>
                 {
-                    return _performanceCRUDMethods[UserInfo.Role].UpsertImportLibraryPerformanceCurves(excelPackage, performanceCurveLibraryId, currentUserCriteriaFilter);
-            });
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var existingPerformanceCurveLibrary = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
+                        if (existingPerformanceCurveLibrary != null)
+                        {
+                            _claimHelper.CheckUserLibraryModifyAuthorization(existingPerformanceCurveLibrary.Owner);
+                        }
+                    }
+                    result = _performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter);
+                });
 
                 if (result.WarningMessage != null)
                 {
@@ -369,8 +278,12 @@ namespace BridgeCareCore.Controllers
                             ContextAccessor.HttpContext.Request.Form["currentUserCriteriaFilter"]);
                 }
 
-                var result = await Task.Factory.StartNew(() =>
-                    _performanceCRUDMethods[UserInfo.Role].UpsertImportScenarioPerformanceCurves(excelPackage, simulationId, currentUserCriteriaFilter));
+                var result = new ScenarioPerformanceCurvesImportResultDTO();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    result = _performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, currentUserCriteriaFilter);
+                });
 
                 if (result.WarningMessage != null)
                 {
@@ -463,12 +376,10 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-    }
 
-    internal class PerformanceCurvesCRUDMethods : CRUDMethods<PerformanceCurveDTO, PerformanceCurveLibraryDTO>
-    {
-        public Func<ExcelPackage, Guid, UserCriteriaDTO, ScenarioPerformanceCurvesImportResultDTO> UpsertImportScenarioPerformanceCurves { get; set; }
-
-        public Func<ExcelPackage, Guid, UserCriteriaDTO, PerformanceCurvesImportResultDTO> UpsertImportLibraryPerformanceCurves { get; set; }
+        private List<PerformanceCurveLibraryDTO> GetAllPerformanceCurveLibraries()
+        {
+            return UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
+        }
     }
 }

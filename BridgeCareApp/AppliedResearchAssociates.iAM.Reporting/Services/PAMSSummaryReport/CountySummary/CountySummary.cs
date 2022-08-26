@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using CurrentCell = AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport.CurrentCell;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary
 {
@@ -26,10 +27,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
         public string County { get; set; }
     }
 
+    public class DistrictCountyCost: DistrictCounty
+    {
+        public int Year { get; set; }
+        public int Cost { get; set; }
+    }
+
+    public class DistrictCountyPercent: DistrictCounty
+    {
+        public int Year { get; set; }
+        public int Cost { get; set; }
+    }
+
     public class CountySummary : ICountySummary
     {
         private ISummaryReportHelper _summaryReportHelper;
         private IList<DistrictCounty> _uniqueDistrictCountyList = null;
+        private CurrentCell currentCell = null;
 
         public CountySummary()
         {
@@ -56,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             FillBudgetByCountyInExcel(worksheet, reportOutputData, simulationYears, simulation);
 
             ////Fill Budget Percent By County
-            //FillBudgetByCountyInExcel(worksheet, reportOutputData, simulationYears, simulation);
+            FillBudgetPercentageByCountyInExcel(worksheet, reportOutputData, simulationYears, simulation);
         }
 
         private List<string> GetHeaders(List<int> simulationYears)
@@ -112,12 +126,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             //Build Budget By County Headers
             var headers = GetHeaders(simulationYears);
 
+            var rowNo = 1; var columnNo = 3;
+            worksheet.Cells[rowNo, columnNo].Value = "Overall Dollars Recommended on Treatments by County";
+            ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + (simulationYears.Count - 1));
+
             //build header cells
-            var headerRow = 1; var startColumn = 0;
+            rowNo++; columnNo = 0;
             for (int column = 0; column < headers.Count; column++)
             {
-                startColumn = column + 1;
-                worksheet.Cells[headerRow, startColumn].Value = headers[column];
+                columnNo = column + 1;
+                worksheet.Cells[rowNo, columnNo].Value = headers[column];
             }
 
             ////build yearly budget list
@@ -126,23 +144,40 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             //    var year = sectionData.Year;
 
             //    //get cost
-            //    foreach (var section in sectionData.Assets){
-            //        var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));                    
+            //    foreach (var section in sectionData.Assets)
+            //    {
+            //        var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
             //    }
             //}
 
             //fill data in cells
-            startColumn = 1; var currentCell = new CurrentCell { Row = headerRow, Column = startColumn };
-            var rowNo = currentCell.Row; var columnNo = currentCell.Column;
+            currentCell = new CurrentCell { Row = rowNo, Column = columnNo }; var currentRowIndex = 0;
             foreach (var districtCountyObject in _uniqueDistrictCountyList)
             {
-                rowNo++; columnNo = 1;
-
+                rowNo++; columnNo = 1; currentRowIndex++;
                 worksheet.Cells[rowNo, columnNo++].Value = districtCountyObject.District;
                 worksheet.Cells[rowNo, columnNo++].Value = districtCountyObject.County;
+
+                var rowsPerDistrict = _uniqueDistrictCountyList.Where(w => w.District == districtCountyObject.District).Count();                
+                if (currentRowIndex > rowsPerDistrict-1)
+                {
+                    //reset index
+                    rowNo++; columnNo = 1; currentRowIndex = 0;
+
+                    //Add Summary Row
+                    ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + 1);
+                    worksheet.Cells[rowNo, columnNo].Value = "District " + districtCountyObject.District.ToString() + " Total";
+
+                    //add total
+                }
             }
 
+            //add state total
+            rowNo++; columnNo = 1; 
 
+            //Add Summary Row
+            ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + 1);
+            worksheet.Cells[rowNo, columnNo].Value = "State Total";
 
             currentCell.Row = rowNo; currentCell.Column = columnNo;
         }
@@ -153,16 +188,52 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             //Build Budget By County Headers
             var headers = GetHeaders(simulationYears);
 
+            var rowNo = currentCell.Row + 1; var columnNo = 3;
+            worksheet.Cells[rowNo, columnNo].Value = "% of Overall Dollars Recommended on Treatments by County";
+            ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + (simulationYears.Count - 1));
+
             //build header cells
-            int headerRow = 1; var startColumn = 0;
+            rowNo++; columnNo = 0;
             for (int column = 0; column < headers.Count; column++)
             {
-                startColumn = column + 1;
-                worksheet.Cells[headerRow, startColumn].Value = headers[column];
+                columnNo = column + 1;
+                worksheet.Cells[rowNo, columnNo].Value = headers[column];
             }
 
+            ////build yearly budget list
+            //foreach (var sectionData in reportOutputData.Years)
+            //{
+            //    var year = sectionData.Year;
+
+            //    //get cost
+            //    foreach (var section in sectionData.Assets)
+            //    {
+            //        var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+            //    }
+            //}
+
             //fill data in cells
-            startColumn = 1; var currentDataCell = new CurrentCell { Row = headerRow, Column = startColumn };
+            currentCell = new CurrentCell { Row = rowNo, Column = columnNo }; var currentRowIndex = 0;
+            foreach (var districtCountyObject in _uniqueDistrictCountyList)
+            {
+                rowNo++; columnNo = 1; currentRowIndex++;
+                worksheet.Cells[rowNo, columnNo++].Value = districtCountyObject.District;
+                worksheet.Cells[rowNo, columnNo++].Value = districtCountyObject.County;
+
+                var rowsPerDistrict = _uniqueDistrictCountyList.Where(w => w.District == districtCountyObject.District).Count();
+                if (currentRowIndex > rowsPerDistrict - 1)
+                {
+                    //reset index
+                    rowNo++; columnNo = 1; currentRowIndex = 0;
+
+                    //Add Summary Row
+                    ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + 1);
+                    worksheet.Cells[rowNo, columnNo].Value = "District " + districtCountyObject.District.ToString() + " Total";
+
+                    //add total
+                }
+            }
+            currentCell.Row = rowNo; currentCell.Column = columnNo;
 
 
         }

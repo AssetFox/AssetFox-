@@ -26,7 +26,7 @@ namespace BridgeCareCore.Controllers
         public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _claimHelper = claimHelper;            
+            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }        
 
         [HttpGet]

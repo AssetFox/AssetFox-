@@ -2,6 +2,7 @@ import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import {SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 import { Network } from '@/shared/models/iAM/network';
+import { PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class CommittedProjectsService { 
     static getCommittedProjectTemplate(): AxiosPromise {
@@ -17,6 +18,11 @@ export default class CommittedProjectsService {
     static getCommittedProjects(scenarioId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.CommittedProject}/GetSectionCommittedProjects/${scenarioId}`,
+        );
+    }
+    static getCommittedProjectsPage(scenarioId: string, data:PagingRequest<SectionCommittedProject>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/GetSectionCommittedProjectsPage/${scenarioId}`, data
         );
     }
     static deleteSimulationCommittedProjects(scenarioId: string): AxiosPromise {
@@ -47,9 +53,9 @@ export default class CommittedProjectsService {
         );
     }   
 
-    static upsertCommittedProjects(data: SectionCommittedProject[]): AxiosPromise {
+    static upsertCommittedProjects(scenarioId: string, data: PaginSync<SectionCommittedProject>): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/UpsertSectionCommittedProjects`, data
+            `${API.CommittedProject}/UpsertSectionCommittedProjects/${scenarioId}`, data
         );
     }
 

@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -544,6 +545,127 @@ namespace BridgeCareCore.Services
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
+        }
+
+        public PagingPageModel<SectionCommittedProjectDTO> GetCommittedProjectPage(List<SectionCommittedProjectDTO> committedProjects, PagingRequestModel<SectionCommittedProjectDTO> request)
+        {
+            var skip = 0;
+            var take = 0;
+            var items = new List<SectionCommittedProjectDTO>();
+            var budgetdict = new Dictionary<Guid, string>();
+
+            if(request.search.Trim() != "" || request.sortColumn.Trim() != "")
+            {
+                var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct();
+                budgetdict = _unitOfWork.Context.Budget.Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _=> _.Name);
+            }
+
+
+            if (request.search.Trim() != "")
+                committedProjects = SearchCurves(committedProjects, request.search, budgetdict);
+            if (request.sortColumn.Trim() != "")
+                committedProjects = OrderByColumn(committedProjects, request.sortColumn, request.isDescending, budgetdict);
+
+            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+
+            if (request.RowsPerPage > 0)
+            {
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                items = committedProjects.Skip(skip).Take(take).ToList();
+            }
+            else
+            {
+                items = committedProjects;
+                return new PagingPageModel<SectionCommittedProjectDTO>()
+                {
+                    Items = items,
+                    TotalItems = items.Count
+                };
+            }
+
+            return new PagingPageModel<SectionCommittedProjectDTO>()
+            {
+                Items = items,
+                TotalItems = committedProjects.Count()
+            };
+        }
+
+        public List<SectionCommittedProjectDTO> GetSyncedDataset(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
+        {
+            var committedProjects = _unitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+            return SyncedDataset(committedProjects, request);
+        }
+
+
+        private List<SectionCommittedProjectDTO> OrderByColumn(List<SectionCommittedProjectDTO> committedProjects,
+            string sortColumn,
+            bool isDescending,
+            Dictionary<Guid, string> budgetDict)
+        {
+            sortColumn = sortColumn?.ToLower();
+            switch (sortColumn)
+            {
+            case "brkey":
+                if (isDescending)
+                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField].ToLower()).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField].ToLower()).ToList();
+            case "year":
+                if (isDescending)
+                    return committedProjects.OrderByDescending(_ => _.Year).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.Year).ToList();
+            case "treatment":
+                if(isDescending)
+                    return  committedProjects.OrderByDescending(_ => _.Treatment.ToLower()).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.Treatment.ToLower()).ToList();
+            case "category":
+                if (isDescending)
+                    return committedProjects.OrderByDescending(_ => _.Category.ToString().ToLower()).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.Category.ToString().ToLower()).ToList();
+            case "budget":
+                if (isDescending)
+                    return committedProjects.OrderByDescending(_ => _.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value].ToLower()).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.Category.ToString().ToLower()).ToList();
+            case "cost":
+                if (isDescending)
+                    return committedProjects.OrderByDescending(_ => _.Cost).ToList();
+                else
+                    return committedProjects.OrderBy(_ => _.Cost).ToList();
+            }
+            return committedProjects;
+        }
+
+        private List<SectionCommittedProjectDTO> SearchCurves(List<SectionCommittedProjectDTO> committedProjects,
+            string search,
+            Dictionary<Guid, string> budgetDict)
+        {
+            search = search.ToLower();
+            return committedProjects
+                .Where(_ => search.Contains(_.LocationKeys[_networkKeyField].ToLower()) ||
+                    search.Contains(_.Year.ToString()) ||
+                    search.Contains(_.Treatment.ToLower()) ||
+                    search.Contains(_.Category.ToString().ToLower()) ||
+                    search.Contains(_.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value]) ||
+                    search.Contains(_.Cost.ToString())).ToList();
+        }
+
+        private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)
+        {
+            committedProjects = committedProjects.Concat(request.AddedRows).ToList();
+
+            for (var i = 0; i < committedProjects.Count; i++)
+            {
+                var item = request.UpdateRows.FirstOrDefault(row => row.Id == committedProjects[i].Id);
+                if (item != null)
+                    committedProjects[i] = item;
+            }
+
+            return committedProjects;
         }
 
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)

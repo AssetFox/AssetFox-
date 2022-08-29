@@ -1,6 +1,7 @@
 ﻿import {getBlankGuid} from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import {clone} from 'ramda';
+import { Attribute } from './attribute';
 
 export interface BenefitQuantifier {
     networkId: string;
@@ -15,6 +16,8 @@ export const emptyBenefitQuantifier: BenefitQuantifier = {
 export interface Network {
     id: string;
     name: string;
+    attributes: Attribute[];
+    keyAttribute: string;
     createdDate?: Date;
     lastModifiedDate?: Date;
     status?: string;
@@ -26,6 +29,8 @@ export interface Network {
 export const emptyNetwork: Network = {
     id: getBlankGuid(),
     name: '',
+    attributes: [],
+    keyAttribute: getBlankGuid(),
     createdDate: new Date(),
     lastModifiedDate: new Date(),
     status: '',

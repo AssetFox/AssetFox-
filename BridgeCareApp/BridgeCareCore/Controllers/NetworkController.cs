@@ -67,7 +67,7 @@ namespace BridgeCareCore.Controllers
                     var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
                     var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, parameters.NetworkDefinitionAttribute.DataSource, UnitOfWork)), parameters.DefaultEquation);
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, mappedDataSource, UnitOfWork)), parameters.DefaultEquation);
                     network.Name = networkName;
 
                     // insert network domain data into the data source

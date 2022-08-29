@@ -33,7 +33,7 @@ export default class AttributeService {
     static CheckCommand(sqlCommand: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
     }
-    static CheckCommand(sqlCommand: string): AxiosPromise {
+    /*static CheckCommand(sqlCommand: string): AxiosPromise {
         return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
-    }
+    }*/
 }

@@ -16,12 +16,12 @@
                         ( {{ item.count }} )</v-tab
                     >
                     <v-spacer></v-spacer>
-                    <v-btn v-if="isAdmin"
+                    <!--<v-btn v-if="isAdmin"
                         class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >
                         Aggregate Data
-                    </v-btn>
+                    </v-btn>-->
                     <v-flex xs1></v-flex>
                 </v-tabs>
                 <v-tabs-items v-model="tab">

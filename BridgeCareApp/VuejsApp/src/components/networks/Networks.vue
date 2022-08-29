@@ -13,7 +13,7 @@
                     </v-layout>
                     <v-btn style="margin-top: 20px !important; margin-left: 20px !important" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                        @click="addNetwork">
+                        @click="onAddNetworkDialog">
                         Add Network
                     </v-btn>
                 </v-layout>
@@ -39,11 +39,11 @@
                 <v-layout >
                     <v-select
                         outline 
-                        :items="dataSourceSelectValues"  
+                        :items="selectDataSourceItems"  
                         style="margin-top: 18px !important;"                  
                         class="ghd-select ghd-text-field ghd-text-field-border shifted-label"
                         label="Data Source"
-                        v-model="selectDataSourceTypevalue">
+                        v-model="selectDataSourceId">
                     </v-select>  
                     <v-btn style="margin-top: 20px !important;" 
                         class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
@@ -104,7 +104,7 @@
                                         <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
                                     </td>
                                     <td>{{ props.item.name }}</td> 
-                                    <td>{{ props.item.dataSourceType }}</td> 
+                                    <td>{{ props.item.dataSource.type }}</td> 
                                 </template>
                             </v-data-table>    
                             <div class="text-xs-center pt-2">
@@ -125,14 +125,10 @@
                     flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
-                <v-btn @click='createNetwork' :disabled='disableCrudButtons() || !hasUnsavedChanges' 
-                    class='ghd-blue-bg white--text ghd-button-text ghd-button'>
-                    Save
-                </v-btn>    
-                <v-btn @click='createNetwork' :disabled='disableCrudButtons() || !hasUnsavedChanges'
+                <v-btn @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
@@ -143,6 +139,8 @@
             :isFromPerformanceCurveEditor=false
             @submit="onSubmitEquationEditorDialogResult"
         />
+        <AddNetworkDialog :dialogData='addNetworkDialogData'
+                                @submit='addNetwork' />
     </v-layout>
 </template>
 
@@ -160,30 +158,37 @@ import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import { Attribute } from '@/shared/models/iAM/attribute';
+import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
+import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
 import { clone, filter, findIndex, isNil, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
+import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
+import { NetworkRequestType } from 'msal/lib-commonjs/utils/Constants';
 
 @Component({
     components: {
         EquationEditorDialog,
+        AddNetworkDialog
     },
 })
 export default class Networks extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.networkModule.selectedNetwork) stateSelectedNetwork: Network;
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
+    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
     
     @Action('getNetworks') getNetworks: any;
+    @Action('getDataSources') getDataSources: any;
     @Action('getAttributes') getAttributes: any;
     @Action('selectNetwork') selectNetworkAction: any;
     @Action('createNetwork') createNetworkAction: any;
-    @Action('aggregateNetworkData') aggreegateNetworkAction: any;
+    @Action('aggregateNetworkData') aggregateNetworkAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -195,23 +200,28 @@ export default class Networks extends Vue {
         { text: 'Data Source', value: 'data source', align: 'left', sortable: true, class: '', width: '' },
     ];
 
+    addNetworkDialogData: AddNetworkDialogData = clone(emptyAddNetworkDialogData);
     pagination: Pagination = emptyPagination;
     selectNetworkItems: SelectItem[] = [];
     selectKeyAttributeItems: SelectItem[] = [];
+    selectDataSourceItems: SelectItem[] = [];
     attributeRows: Attribute[] =[];
+    cleanAttributes: Attribute[] = [];
     attributes: Attribute[] = [];
     selectedAttributeRows: Attribute[] = [];
     dataSourceSelectValues: SelectItem[] = [
-        {text: 'MS SQL', value: 'MS SQL'},
+        {text: 'SQL', value: 'SQL'},
         {text: 'Excel', value: 'Excel'},
         {text: 'None', value: 'None'}
     ]; 
 
-    selectedKeyAttributeItem: string = ''; //placeholder until network dto and api changes
+    selectedKeyAttributeItem: string = '';
+    selectedKeyAttribute: Attribute = clone(emptyAttribute);
     selectedNetwork: Network = clone(emptyNetwork);
     selectNetworkItemValue: string = '';
-    selectDataSourceTypevalue: string = '';
+    selectDataSourceId: string = '';
     hasSelectedNetwork: boolean = false;
+    isNewNetwork: boolean = false;
     spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
     equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
@@ -221,6 +231,7 @@ export default class Networks extends Vue {
         next((vm: any) => {
             vm.getAttributes();
             vm.getNetworks();
+            vm.getDataSources();
         });
     }
     
@@ -231,11 +242,25 @@ export default class Networks extends Vue {
             value: network.id,
         }));
     }
-    @Watch('stateAttributes')
+    /*@Watch('stateAttributes')
     onStateAttributesChanged() {
         this.selectKeyAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
+        }));
+    }*/
+    @Watch('selectedAttributeRows')
+    onSelectedAttributeRowsChanged() {
+        this.selectKeyAttributeItems = this.selectedAttributeRows.map((attribute: Attribute) => ({
+            text: attribute.name,
+            value: attribute.id,
+        }));
+    }
+    @Watch('stateDataSources')
+    onStateDataSourcesChanges() {
+        this.selectDataSourceItems = this.stateDataSources.map((dataSource: Datasource) => ({
+            text: dataSource.name,
+            value: dataSource.id,
         }));
     }
     @Watch('selectNetworkItemValue')
@@ -246,17 +271,39 @@ export default class Networks extends Vue {
     
     @Watch('stateSelectedNetwork')
     onStateSelectedNetworkChanged() {
-        this.selectedNetwork = clone(this.stateSelectedNetwork);
+        if (!this.isNewNetwork) {
+            this.selectedNetwork = clone(this.stateSelectedNetwork);
+        }
     }
     @Watch('selectedNetwork', {deep: true})
     onSelectedNetworkChanged() {
+        this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute
+        this.attributeRows = this.selectedNetwork.attributes;
+
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
-
-    addNetwork()
+    @Watch('selectedKeyAttributeItem')
+    onSelectedKeyAttributeItemChanged()
     {
-        this.selectNetworkItemValue = getBlankGuid()
+        this.selectedKeyAttribute = this.selectedAttributeRows.find((attr: Attribute) => attr.id = this.selectedKeyAttributeItem) || clone(emptyAttribute);
+    }
+    onAddNetworkDialog() {
+        this.addNetworkDialogData = {
+            showDialog: true,
+        }
+    }
+
+    addNetwork(network: Network)
+    {
+        this.selectNetworkItems.push({
+            text: network.name,
+            value: network.id
+        });
+
+        this.selectNetworkItemValue = network.id;
+        this.selectedNetwork = clone(network);
+        this.isNewNetwork = true;
     }
     onDiscardChanges() {
         this.selectedNetwork = clone(this.stateSelectedNetwork);
@@ -275,7 +322,8 @@ export default class Networks extends Vue {
         };      
     }
     selectAllFromSource(){
-        this.attributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSourceType === this.selectDataSourceTypevalue))
+        this.cleanAttributes = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource != null));
+        this.attributeRows = this.cleanAttributes.filter((attr: Attribute) => attr.dataSource.id === this.selectDataSourceId);
     }
     onAddAll(){
         this.selectedAttributeRows = clone(this.attributeRows)
@@ -284,18 +332,39 @@ export default class Networks extends Vue {
         this.selectedAttributeRows = [];
     }
     aggregateNetworkData(){
-        this.aggreegateNetworkAction({
+        this.aggregateNetworkAction({
             attributes: this.selectedAttributeRows,
             networkId: this.selectNetworkItemValue
         });
     }
-    disableCrudButtons() {
+    disableCrudButtonsCreate() {
         let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true
+
+
+        return !allValid;
+    }
+    disableCrudButtonsAggregate() {
+        let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true
 
 
         return !allValid;
     }
     createNetwork(){
+        this.isNewNetwork = false;
+
+        this.createNetworkAction({
+            network: this.selectedNetwork,
+            parameters: {
+                defaultEquation: this.spatialWeightingEquationValue.expression,
+                networkDefinitionAttribute: this.selectedKeyAttribute
+            }
+        })
 
     }
     

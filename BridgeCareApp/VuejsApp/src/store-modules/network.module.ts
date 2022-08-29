@@ -86,7 +86,7 @@ const actions = {
             });
     },
     async createNetwork({dispatch, commit}: any, payload: any) {
-        return await NetworkService.createNetwork(payload.network.name, payload.attribute)
+        return await NetworkService.createNetwork(payload.network.name, payload.parameters)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const message: string = any(

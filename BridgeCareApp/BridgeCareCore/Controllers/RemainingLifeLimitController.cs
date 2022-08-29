@@ -88,7 +88,6 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-
                     var currentRecord = UnitOfWork.RemainingLifeLimitRepo
                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits().FirstOrDefault(_ => _.Id == dto.Id);
                     // by pass owner check if no record

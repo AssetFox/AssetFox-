@@ -7,42 +7,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AssetSummaryDetailMapper
     {
-        public static AssetSummaryDetailEntity ToEntity(
-            AssetSummaryDetail domain,
-            Guid simulationOutputId,
-            Dictionary<string, Guid> attributeIdLookup)
-        {
-            var id = Guid.NewGuid();
-            var mapValues = AssetSummaryDetailValueMapper.ToNumericEntityList(
-                id,
-                domain.ValuePerNumericAttribute,
-                attributeIdLookup);
-            var mapTextValues = AssetSummaryDetailValueMapper.ToTextEntityList(
-                id,
-                domain.ValuePerTextAttribute,
-                attributeIdLookup);
-            mapValues.AddRange(mapTextValues);
-            var entity = new AssetSummaryDetailEntity
-            {
-                Id = id,
-                SimulationOutputId = simulationOutputId,
-                AssetSummaryDetailValues = mapValues,
-                MaintainableAssetId = domain.AssetId,
-            };
-            return entity;
-        }
-
-        public static List<AssetSummaryDetailEntity> ToEntityList(List<AssetSummaryDetail> domainList, Guid simulationOutputId, Dictionary<string, Guid> attributeIdLookup)
-        {
-            var entityList = new List<AssetSummaryDetailEntity>();
-            foreach (var domain in domainList)
-            {
-                var entity = ToEntity(domain, simulationOutputId, attributeIdLookup);
-                entityList.Add(entity);
-            }
-            return entityList;
-        }
-
         public static AssetSummaryDetailEntityFamily ToEntityLists(List<AssetSummaryDetail> domainList, Guid simulationOutputId, Dictionary<string, Guid> attributeIdLookup)
         {
             var family = new AssetSummaryDetailEntityFamily();

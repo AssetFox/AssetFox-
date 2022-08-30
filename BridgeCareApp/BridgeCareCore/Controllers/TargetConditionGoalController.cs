@@ -44,6 +44,7 @@ namespace BridgeCareCore.Controllers
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
                     }
                 });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -66,6 +67,7 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
                     result = UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
                 });
+
                 return Ok(result);
             }
             catch (Exception e)

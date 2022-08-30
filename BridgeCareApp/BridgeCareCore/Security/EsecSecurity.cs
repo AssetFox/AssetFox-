@@ -81,8 +81,6 @@ namespace BridgeCareCore.Security
 
             var decodedToken = DecodeToken(idToken);
 
-
-            var claims = new List<Claim>();
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
@@ -94,7 +92,6 @@ namespace BridgeCareCore.Security
                 // Get the internal roles and subsequent claims from mapper
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.FirstOrDefault());
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
-
                 request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims
@@ -113,7 +110,6 @@ namespace BridgeCareCore.Security
             {
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, "Administrator");
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
-
                 request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims

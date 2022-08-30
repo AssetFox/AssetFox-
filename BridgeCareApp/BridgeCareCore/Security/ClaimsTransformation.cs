@@ -27,11 +27,12 @@ namespace BridgeCareCore.Security
                 // Obtain the role from the claims principal
                 // then parse it and pass to the internal role mapper
                 var roleClaim = principal.Claims
-                        .Single(_ => _.Type == ClaimTypes.Role).Value;
-                var roleParsed = SecurityFunctions.ParseLdap(roleClaim).FirstOrDefault();
-
-                //// TODO: Throw exception if null
-                ////throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+                        .Single(_ => _.Type == ClaimTypes.Role)?.Value;
+                var roleParsed = SecurityFunctions.ParseLdap(roleClaim)?.FirstOrDefault();
+                if (roleParsed == null)
+                {
+                    throw new UnauthorizedAccessException("No role found.");
+                }
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));

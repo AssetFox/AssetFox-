@@ -63,7 +63,10 @@ namespace BridgeCareCore.Utils
 
         public ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper)
         {
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+            var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper);
+            var roleClaims = new List<Claim> { roleClaim };
+
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(roleClaims);
             claimsFromMapper.ForEach(claim =>
             {
                 if (!claimsPrincipal.HasClaim(pclaim => pclaim.Value == claim))

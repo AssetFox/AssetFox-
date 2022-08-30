@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -132,7 +134,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetTargetConditionGoalLibraries")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewTargetConditionGoalFromLibrary)]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> TargetConditionGoalLibraries()
         {
             try
@@ -149,7 +151,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewTargetConditionGoalFromScenario)]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromScenario)]
         public async Task<IActionResult> GetScenarioTargetConditionGoals(Guid simulationId)
         {
             try
@@ -166,7 +168,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertTargetConditionGoalLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyTargetConditionGoalFromLibrary)]
+        [Authorize(Policy = Policy.ModifyTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto)
         {
             try
@@ -195,7 +197,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyTargetConditionGoalFromScenario)]
+        [Authorize(Policy = Policy.ModifyTargetConditionGoalFromScenario)]
         public async Task<IActionResult> UpsertScenarioTargetConditionGoals(Guid simulationId, List<TargetConditionGoalDTO> dtos)
         {
             try
@@ -225,7 +227,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteTargetConditionGoalLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.DeleteTargetConditionGoalFromLibrary)]
+        [Authorize(Policy = Policy.DeleteTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> DeleteTargetConditionGoalLibrary(Guid libraryId)
         {
             try

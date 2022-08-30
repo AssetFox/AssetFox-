@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -126,7 +128,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDeficientConditionGoalLibraries")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewDeficientConditionGoalFromlLibrary)]
+        [Authorize(Policy = Policy.ViewDeficientConditionGoalFromlLibrary)]
         public async Task<IActionResult> DeficientConditionGoalLibraries()
         {
             try
@@ -143,7 +145,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioDeficientConditionGoals/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewDeficientConditionGoalFromScenario)]
+        [Authorize(Policy = Policy.ViewDeficientConditionGoalFromScenario)]
         public async Task<IActionResult> GetScenarioDeficientConditionGoals(Guid simulationId)
         {
             try
@@ -160,7 +162,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertDeficientConditionGoalLibrary/")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyDeficientConditionGoalFromLibrary)]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
         public async Task<IActionResult> UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto)
         {
             try
@@ -189,7 +191,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioDeficientConditionGoals/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyDeficientConditionGoalFromScenario)]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromScenario)]
         public async Task<IActionResult> UpsertScenarioDeficientConditionGoals(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
         {
             try
@@ -219,7 +221,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteDeficientConditionGoalLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyDeficientConditionGoalFromLibrary)]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
         public async Task<IActionResult> DeleteDeficientConditionGoalLibrary(Guid libraryId)
         {
             try

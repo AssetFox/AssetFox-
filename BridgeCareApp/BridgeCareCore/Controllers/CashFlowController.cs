@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -124,7 +126,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetCashFlowRuleLibraries")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewCashFlowFromLibrary)]
+        [Authorize(Policy = Policy.ViewCashFlowFromLibrary)]
         public async Task<IActionResult> GetCashFlowRuleLibraries()
         {
             try
@@ -142,7 +144,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioCashFlowRules/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewCashFlowFromScenario)]
+        [Authorize(Policy = Policy.ViewCashFlowFromScenario)]
         public async Task<IActionResult> GetScenarioCashFlowRules(Guid simulationId)
         {
             try
@@ -160,7 +162,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertCashFlowRuleLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyCashFlowFromLibrary)]
+        [Authorize(Policy = Policy.ModifyCashFlowFromLibrary)]
         public async Task<IActionResult> UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto)
         {
             try
@@ -189,7 +191,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioCashFlowRules/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyCashFlowFromScenario)]
+        [Authorize(Policy = Policy.ModifyCashFlowFromScenario)]
 
         public async Task<IActionResult> UpsertScenarioCashFlowRules(Guid simulationId, List<CashFlowRuleDTO> dtos)
         {
@@ -219,7 +221,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteCashFlowRuleLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyCashFlowFromLibrary)]
+        [Authorize(Policy = Policy.ModifyCashFlowFromLibrary)]
         public async Task<IActionResult> DeleteCashFlowRuleLibrary(Guid libraryId)
         {
             try

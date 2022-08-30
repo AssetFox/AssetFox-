@@ -16,7 +16,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using BridgeCareCore.Security;
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -99,7 +99,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarios/")]
-        [Authorize(Policy = SecurityConstants.Policy.ViewSimulation)]
+        [Authorize(Policy = Policy.ViewSimulation)]
         public async Task<IActionResult> GetSimulations()
         {
             try
@@ -170,7 +170,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPut]
         [Route("UpdateScenario")]
-        [Authorize(Policy = SecurityConstants.Policy.UpdateSimulation)]
+        [Authorize(Policy = Policy.UpdateSimulation)]
         public async Task<IActionResult> UpdateSimulation([FromBody] SimulationDTO dto)
         {
             try
@@ -200,7 +200,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteScenario/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.DeleteSimulation)]
+        [Authorize(Policy = Policy.DeleteSimulation)]
         public async Task<IActionResult> DeleteSimulation(Guid simulationId)
         {
             try
@@ -229,7 +229,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.RunSimulation)]
+        [Authorize(Policy = Policy.RunSimulation)]
         public async Task<IActionResult> RunSimulation(Guid networkId, Guid simulationId)
         {
             try

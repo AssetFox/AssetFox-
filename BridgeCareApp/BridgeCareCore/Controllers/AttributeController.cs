@@ -23,6 +23,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using OfficeOpenXml;
 using BridgeCareCore.Security;
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -110,7 +111,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateAttributes")]
-        [Authorize (Policy = SecurityConstants.Policy.ModifyAttributes)]
+        [Authorize (Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CreateAttributes(List<AllAttributeDTO> attributeDTOs)
         {
             try
@@ -135,7 +136,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateAttribute")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
+        [Authorize(Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
@@ -160,7 +161,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckCommand/{sqlCommand}")]
-        [Authorize(Policy = SecurityConstants.Policy.ModifyAttributes)]
+        [Authorize(Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CheckCommand(string sqlCommand)
         {
             try

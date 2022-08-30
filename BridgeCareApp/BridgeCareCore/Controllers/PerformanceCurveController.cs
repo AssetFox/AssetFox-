@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
+using BridgeCareCore.Security;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -162,7 +165,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetPerformanceCurveLibraries")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewPerformanceCurveFromLibrary)]
         public async Task<IActionResult> GetPerformanceCurveLibraries()
         {
             try
@@ -181,7 +184,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioPerformanceCurves/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewPerformanceCurveFromScenario)]
         public async Task<IActionResult> GetScenarioPerformanceCurves(Guid simulationId)
         {
             try
@@ -198,7 +201,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyPerformanceCurveFromLibrary)]
         public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
         {
             try
@@ -228,7 +231,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyPerformanceCurveFromScenario)]
         public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, List<PerformanceCurveDTO> dtos)
         {
             try
@@ -258,7 +261,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeletePerformanceCurveLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.DeletePerformanceCurveFromLibrary)]
         public async Task<IActionResult> DeletePerformanceCurveLibrary(Guid libraryId)
         {
             try
@@ -282,7 +285,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportLibraryPerformanceCurvesExcelFile")]
-        [Authorize]
+        [Authorize(Policy = Policy.ImportPerformanceCurveFromLibrary)]
         public async Task<IActionResult> ImportLibraryPerformanceCurvesExcelFile()
         {
             try
@@ -336,7 +339,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportScenarioPerformanceCurvesExcelFile")]
-        [Authorize]
+        [Authorize(Policy = Policy.ImportPerformanceCurveFromScenario)]
         public async Task<IActionResult> ImportScenarioPerformanceCurvesExcelFile()
         {
             try

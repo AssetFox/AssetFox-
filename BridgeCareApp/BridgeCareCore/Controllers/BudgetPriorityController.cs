@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     // using BudgetPriorityUpsertMethod = Action<Guid, List<BudgetPriorityDTO>>;
@@ -137,7 +139,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetBudgetPriorityLibraries")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewBudgetPriorityFromLibrary)]
         public async Task<IActionResult> GetBudgetPriorityLibraries()
         {
             try
@@ -157,7 +159,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertBudgetPriorityLibrary")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyBudgetPriorityFromLibrary)]
         public async Task<IActionResult> UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto)
         {
             try
@@ -188,7 +190,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteBudgetPriorityLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.DeleteBudgetPriorityFromLibrary)]
         public async Task<IActionResult> DeleteBudgetPriorityLibrary(Guid libraryId)
         {
             try
@@ -213,7 +215,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioBudgetPriorities/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewBudgetPriorityFromScenario)]
         public async Task<IActionResult> GetScenarioBudgetPriorities(Guid simulationId)
         {
             try
@@ -233,7 +235,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioBudgetPriorities/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyBudgetPriorityFromScenario)]
         public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, List<BudgetPriorityDTO> dtos)
         {
             try

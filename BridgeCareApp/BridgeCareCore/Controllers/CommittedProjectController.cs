@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using BridgeCareCore.Security;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -205,7 +208,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportCommittedProjects")]
-        [Authorize]
+        [Authorize(Policy = Policy.ImportCommittedProjects)]
         public async Task<IActionResult> ImportCommittedProjects()
         {
             try
@@ -371,7 +374,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteSimulationCommittedProjects/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
         public async Task<IActionResult> DeleteSimulationCommittedProjects(Guid simulationId)
         {
             try
@@ -398,7 +401,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("DeleteSpecificCommittedProjects")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
         public async Task<IActionResult> DeleteSpecificCommittedProjects(List<Guid> projectIds)
         {
             try
@@ -424,7 +427,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetSectionCommittedProjects/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewCommittedProjects)]
         public async Task<IActionResult> GetCommittedProjects(Guid simulationId)
         {
             try
@@ -451,7 +454,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertSectionCommittedProjects")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyCommittedProjects)]
         public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
         {
             try

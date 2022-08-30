@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -32,7 +34,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("CalculatedAttributes")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetCalculatedAttributes()
         {
             var result = await attributeRepo.CalculatedAttributes();
@@ -42,13 +44,13 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("CalculatedAttrbiuteLibraries")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetCalculatedAttributeLibraries() =>
              Ok(calculatedAttributesRepo.GetCalculatedAttributeLibraries().ToList());
 
         [HttpGet]
         [Route("ScenarioAttributes/{simulationId}")]
-        [Authorize]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
         public async Task<IActionResult> GetAttributesForScenario(Guid simulationId)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when getting simulation attributes");
@@ -57,7 +59,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertLibrary")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ModifyCalculatedAttributesFromLibrary)]
         public async Task<IActionResult> UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO dto)
         {
             try
@@ -74,7 +76,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioAttribute/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ModifyCalculatedAttributesFromScenario)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, CalculatedAttributeDTO dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting a simulation attribute");
@@ -93,7 +95,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioAttributes/{simulationId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ModifyCalculatedAttributesFromScenario)]
         public async Task<IActionResult> UpsertScenarioAttribute(Guid simulationId, List<CalculatedAttributeDTO> dto)
         {
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting simulation attributes");
@@ -111,7 +113,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ModifyCalculatedAttributesFromLibrary)]
         public async Task<IActionResult> DeleteLibrary(Guid libraryId)
         {
             if (!LibraryIdList().ContainsKey(libraryId)) return BadRequest($"Unable to find {libraryId} in the database");

@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests
     {
         public static void ResetDatabase(IUnitOfWork unitOfWork)
         {
+            return;
             unitOfWork.Context.Database.EnsureDeleted();
             unitOfWork.Context.Database.EnsureCreated();
         }

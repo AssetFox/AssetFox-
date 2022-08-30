@@ -58,9 +58,6 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             Canonicalize(loadedOutput);
             var serializeOutput = JsonConvert.SerializeObject(simulationOutput, Formatting.Indented);
             var serializeLoaded = JsonConvert.SerializeObject(loadedOutput, Formatting.Indented);
-            var outputFilename = filename.Substring(0, filename.IndexOf(".")) + "Output";
-            var outputFilenameWithExtension = Path.ChangeExtension(outputFilename, "json");
-            FileReader.WriteTextToGitIgnoredFile(outputFilenameWithExtension, serializeOutput);
             SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutput, serializeLoaded);
         }
 

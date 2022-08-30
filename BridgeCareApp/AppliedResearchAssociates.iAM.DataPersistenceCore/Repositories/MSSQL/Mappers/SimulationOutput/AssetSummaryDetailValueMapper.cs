@@ -7,13 +7,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AssetSummaryDetailValueMapper
     {
-        public static AssetSummaryDetailValueEntity ToNumericEntity(KeyValuePair<string, double> assetSummaryDetailValue, Dictionary<string, Guid> attributeIdLookupDictionary)
+        public static AssetSummaryDetailValueEntity ToNumericEntity(
+            Guid assetSummaryDetailId,
+            KeyValuePair<string, double> assetSummaryDetailValue,
+            Dictionary<string, Guid> attributeIdLookupDictionary)
         {
             var id = Guid.NewGuid();
             var attributeId = attributeIdLookupDictionary[assetSummaryDetailValue.Key];
             var entity = new AssetSummaryDetailValueEntity
             {
                 Id = id,
+                AssetSummaryDetailId = assetSummaryDetailId,
                 Discriminator = AssetDetailValueDiscriminators.Number,
                 AttributeId = attributeId,
                 NumericValue = assetSummaryDetailValue.Value,
@@ -22,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static AssetSummaryDetailValueEntity ToTextEntity(
+            Guid assetSummaryDetailId,
             KeyValuePair<string, string> keyValuePair,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
@@ -30,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetSummaryDetailValueEntity
             {
                 Id = id,
+                AssetSummaryDetailId = assetSummaryDetailId,
                 Discriminator = AssetDetailValueDiscriminators.Text,
                 AttributeId = attributeId,
                 TextValue = keyValuePair.Value,
@@ -69,6 +75,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static List<AssetSummaryDetailValueEntity> ToNumericEntityList(
+            Guid assetSummaryDetailId,
             Dictionary<string, double> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
@@ -96,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 if (attributeIdLookup.ContainsKey(keyValuePair.Key))
                 {
-                    var entity = ToNumericEntity(keyValuePair, attributeIdLookup);
+                    var entity = ToNumericEntity(assetSummaryDetailId, keyValuePair, attributeIdLookup);
                     entities.Add(entity);
                 }
                 else if (keyValuePair.Key != areaKey)
@@ -110,13 +117,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static List<AssetSummaryDetailValueEntity> ToTextEntityList(
+            Guid assetSummaryDetailId,
             Dictionary<string, string> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
             var entities = new List<AssetSummaryDetailValueEntity>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                var entity = ToTextEntity(keyValuePair, attributeIdLookupDictionary);
+                var entity = ToTextEntity(assetSummaryDetailId, keyValuePair, attributeIdLookupDictionary);
                 entities.Add(entity);
             }
             return entities;

@@ -65,15 +65,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
                 var assetSummaries = simulationOutput.InitialAssetSummaries;
-                var batchedAssetSummaries = assetSummaries.ConcreteBatch(AssetSummarySaveBatchSize);
-                foreach (var batch in batchedAssetSummaries)
-                {
-                    var assetSummaryEntityList = AssetSummaryDetailMapper.ToEntityList(batch, entity.Id, attributeIdLookup);
-                    _unitOfWork.Context.
-                        AddRange(assetSummaryEntityList);
-                    _unitOfWork.Context.SaveChanges();
-                    _unitOfWork.Context.ChangeTracker.Clear();
-                }
+                var family = AssetSummaryDetailMapper.ToEntityLists(assetSummaries, entity.Id, attributeIdLookup);
+                _unitOfWork.Context.AddAll(family.AssetSummaryDetails);
+                _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
                     memos.Mark($"Y{ year.Year}");

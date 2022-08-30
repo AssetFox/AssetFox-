@@ -65,7 +65,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                    var currentRecord = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == dto.Id);
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {

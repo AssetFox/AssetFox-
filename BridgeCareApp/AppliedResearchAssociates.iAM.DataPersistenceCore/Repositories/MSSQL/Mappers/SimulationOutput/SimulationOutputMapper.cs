@@ -50,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
             };
-            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainListNullSafe(entity.InitialAssetSummaries);
+            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainListNullSafe(entity.InitialAssetSummaries, attributeNameLookup);
             var years = SimulationYearDetailMapper.ToDomainList(entity.Years, attributeNameLookup);
             domain.InitialAssetSummaries.AddRange(initialAssetSummaries);
             domain.Years.AddRange(years);

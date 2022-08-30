@@ -47,11 +47,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             ICollection<AssetSummaryDetailValueEntity> assetSummaryDetailValues,
             Dictionary<string, double> valuePerNumericAttribute,
             Dictionary<string, string> valuePerTextAttribute
-            )
+,
+            Dictionary<Guid, string> attributeNameLookup)
         {
             foreach (var summary in assetSummaryDetailValues)
             {
-                var attributeName = summary.Attribute.Name;
+                var attributeName = attributeNameLookup[summary.AttributeId];
                 // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
                 switch (summary.Discriminator)
                 {

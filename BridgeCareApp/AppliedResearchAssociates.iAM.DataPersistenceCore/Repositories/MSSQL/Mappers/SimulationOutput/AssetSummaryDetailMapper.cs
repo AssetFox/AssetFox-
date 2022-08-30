@@ -43,25 +43,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             family.AssetSummaryDetails.Add(entity);
         }
 
-        public static AssetSummaryDetail ToDomain(AssetSummaryDetailEntity entity)
+        public static AssetSummaryDetail ToDomain(AssetSummaryDetailEntity entity, Dictionary<Guid, string> attributeNameLookup)
         {
             var assetName = entity.MaintainableAsset.AssetName;
             var domain = new AssetSummaryDetail(assetName, entity.MaintainableAssetId);
             AssetSummaryDetailValueMapper.AddToDictionaries(
                 entity.AssetSummaryDetailValues,
                 domain.ValuePerNumericAttribute,
-                domain.ValuePerTextAttribute);
+                domain.ValuePerTextAttribute,
+                attributeNameLookup);
             return domain;
         }
 
-        public static List<AssetSummaryDetail> ToDomainListNullSafe(ICollection<AssetSummaryDetailEntity> entityList)
+        public static List<AssetSummaryDetail> ToDomainListNullSafe(ICollection<AssetSummaryDetailEntity> entityList, Dictionary<Guid, string> attributeNameLookup)
         {
             var domainList = new List<AssetSummaryDetail>();
             if (entityList != null)
             {
                 foreach (var entity in entityList)
                 {
-                    var domain = ToDomain(entity);
+                    var domain = ToDomain(entity, attributeNameLookup);
                     domainList.Add(domain);
                 }
             }

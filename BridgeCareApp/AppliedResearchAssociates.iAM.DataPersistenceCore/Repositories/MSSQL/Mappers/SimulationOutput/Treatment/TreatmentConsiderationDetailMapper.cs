@@ -10,20 +10,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class TreatmentConsiderationDetailMapper
     {
-        public static TreatmentConsiderationDetailEntity ToEntity(
+        public static TreatmentConsiderationDetailEntity ToEntityWithoutChildren(
             this TreatmentConsiderationDetail domain,
             Guid assetDetailId)
         {
             var id = Guid.NewGuid();
-            var budgetUsageDetails = BudgetUsageDetailMapper.ToEntityList(domain.BudgetUsages, id);
-            var cashFlowConsiderationDetails = CashFlowConsiderationDetailMapper.ToEntityList(domain.CashFlowConsiderations, id);
             var entity = new TreatmentConsiderationDetailEntity
             {
                 Id = id,
                 AssetDetailId = assetDetailId,
                 BudgetPriorityLevel = domain.BudgetPriorityLevel,
-                BudgetUsageDetails = budgetUsageDetails,
-                CashFlowConsiderationDetails = cashFlowConsiderationDetails,
                 TreatmentName = domain.TreatmentName,
             };
             return entity;
@@ -36,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entityList = new List<TreatmentConsiderationDetailEntity>();
             foreach (var domain in domainList)
             {
-                var entity = ToEntity(domain, assetDetailId);
+                var entity = ToEntityWithoutChildren(domain, assetDetailId);
                 entityList.Add(entity);
             }
             return entityList;
@@ -67,5 +63,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domainList;
         }
 
+        public static void AddToFamily(
+            Guid assetDetailId,
+            AssetDetailEntityFamily family,
+            List<TreatmentConsiderationDetail> treatmentConsiderations
+            )
+        {
+            foreach (var consideration in treatmentConsiderations)
+            {
+                var entity = ToEntityWithoutChildren(consideration, assetDetailId);
+                family.TreatmentConsiderationDetails.Add(entity);
+                var budgetUsageDetails = BudgetUsageDetailMapper.ToEntityList(consideration.BudgetUsages, entity.Id);
+                var cashFlowConsiderationDetails = CashFlowConsiderationDetailMapper.ToEntityList(consideration.CashFlowConsiderations, entity.Id);
+                family.BudgetUsageDetails.AddRange(budgetUsageDetails);
+                family.CashFlowConsiderationDetails.AddRange(cashFlowConsiderationDetails);
+            }
+        }
     }
 }

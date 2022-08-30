@@ -74,22 +74,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
-                    var batchedAssets = assets.ConcreteBatch(AssetSaveBatchSize);
-                    var yearSaved = false;
-                    int batchIndex = 0;
-                    foreach (var batch in batchedAssets)
-                    {
-                        var mappedBatch = AssetDetailMapper.ToEntityList(batch, yearDetail.Id, attributeIdLookup);
-                        _unitOfWork.Context.AddRange(mappedBatch);
-                        _unitOfWork.Context.SaveChanges();
-                        yearSaved = true;
-                        memos.Mark($" b{batchIndex}");
-                        batchIndex++;
-                    }
-                    if (!yearSaved)
-                    {
-                        _unitOfWork.Context.SaveChanges();
-                    }
+                    var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
+                    _unitOfWork.Context.AddAll(assetFamily.AssetDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentSchedulingCollisionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentConsiderationDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
             }
             catch (Exception ex)

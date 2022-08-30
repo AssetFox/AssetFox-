@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
     public static class AssetDetailValueMapper
     {
         public static AssetDetailValueEntity ToNumericEntity(
+            Guid assetDetailId,
             KeyValuePair<string, double> assetSummaryDetailValue,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
@@ -15,6 +16,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var attributeId = attributeIdLookupDictionary[assetSummaryDetailValue.Key];
             var entity = new AssetDetailValueEntity
             {
+                AssetDetailId = assetDetailId,
                 Id = id,
                 Discriminator = AssetDetailValueDiscriminators.Number,
                 AttributeId = attributeId,
@@ -24,6 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static AssetDetailValueEntity ToTextEntity(
+            Guid assetDetailId,
             KeyValuePair<string, string> assetSummaryDetailValue,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
@@ -32,6 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entity = new AssetDetailValueEntity
             {
                 Id = id,
+                AssetDetailId = assetDetailId,
                 Discriminator = AssetDetailValueDiscriminators.Text,
                 AttributeId = attributeId,
                 TextValue = assetSummaryDetailValue.Value,
@@ -40,6 +44,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static List<AssetDetailValueEntity> ToNumericEntityList(
+            Guid assetDetailId,
             Dictionary<string, double> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
@@ -67,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 if (attributeIdLookup.ContainsKey(keyValuePair.Key))
                 {
-                    var entity = ToNumericEntity(keyValuePair, attributeIdLookup);
+                    var entity = ToNumericEntity(assetDetailId, keyValuePair, attributeIdLookup);
                     entities.Add(entity);
                 }
                 else if (keyValuePair.Key != areaKey)
@@ -80,13 +85,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static List<AssetDetailValueEntity> ToTextEntityList(
+            Guid assetDetailId,
             Dictionary<string, string> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
             var entities = new List<AssetDetailValueEntity>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
-                var entity = ToTextEntity(keyValuePair, attributeIdLookup);
+                var entity = ToTextEntity(assetDetailId, keyValuePair, attributeIdLookup);
                 entities.Add(entity);
             }
             return entities;

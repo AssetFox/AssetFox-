@@ -45,13 +45,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static DeficientConditionGoalDetail ToDomain(DeficientConditionGoalDetailEntity entity)
+        public static DeficientConditionGoalDetail ToDomain(
+            DeficientConditionGoalDetailEntity entity,
+            Dictionary<Guid, string> attributeNameLookup
+            )
         {
+            var attributeName = attributeNameLookup[entity.AttributeId];
             var domain = new DeficientConditionGoalDetail
             {
                 ActualDeficientPercentage = entity.ActualDeficientPercentage,
                 AllowedDeficientPercentage = entity.AllowedDeficientPercentage,
-                AttributeName = entity.Attribute.Name,
+                AttributeName = attributeName,
                 DeficientLimit = entity.DeficientLimit,
                 GoalIsMet = entity.GoalIsMet,
                 GoalName = entity.GoalName,
@@ -59,12 +63,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domain;
         }
 
-        internal static List<DeficientConditionGoalDetail> ToDomainList(ICollection<DeficientConditionGoalDetailEntity> entityCollection)
+        internal static List<DeficientConditionGoalDetail> ToDomainList(
+            ICollection<DeficientConditionGoalDetailEntity> entityCollection,
+            Dictionary<Guid, string> attributeNameLookup
+            )
         {
             var domainList = new List<DeficientConditionGoalDetail>();
             foreach (var entity in entityCollection)
             {
-                var domain = ToDomain(entity);
+                var domain = ToDomain(entity, attributeNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

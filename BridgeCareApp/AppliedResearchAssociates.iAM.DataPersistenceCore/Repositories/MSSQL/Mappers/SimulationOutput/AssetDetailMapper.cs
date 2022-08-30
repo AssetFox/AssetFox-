@@ -55,7 +55,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entities;
         }
 
-        public static AssetDetail ToDomain(AssetDetailEntity entity, int year)
+        public static AssetDetail ToDomain(
+            AssetDetailEntity entity,
+            int year,
+            Dictionary<Guid, string> attributeNameLookup)
         {
             var assetName = entity.MaintainableAsset.AssetName;
             var domain = new AssetDetail(assetName, entity.MaintainableAsset.Id)
@@ -65,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentFundingIgnoresSpendingLimit = entity.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (TreatmentStatus)entity.TreatmentStatus,                
             };
-            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValues, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute);
+            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValues, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
             var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToDomainList(entity.TreatmentConsiderationDetails);
             domain.TreatmentConsiderations.AddRange(treatmentConsiderationDetails);
             var treatmentOptionDetails = TreatmentOptionDetailMapper.ToDomainList(entity.TreatmentOptionDetails);
@@ -79,12 +82,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         internal static List<AssetDetail> ToDomainList(
             ICollection<AssetDetailEntity> entityCollection,
-            int year)
+            int year,
+            Dictionary<Guid, string> attributeNameLookup)
         {
             var domainList = new List<AssetDetail>();
             foreach (var entity in entityCollection)
             {
-                var domain = ToDomain(entity, year);
+                var domain = ToDomain(entity, year, attributeNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

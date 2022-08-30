@@ -29,7 +29,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static SimulationYearDetail ToDomainWithoutAssets(SimulationYearDetailEntity entity)
+        public static SimulationYearDetail ToDomainWithoutAssets(
+            SimulationYearDetailEntity entity,
+            Dictionary<Guid, string> attributeNameLookup
+            )
         {
             var domain = new SimulationYearDetail(entity.Year)
             {
@@ -37,27 +40,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
             var budgets = BudgetDetailMapper.ToDomainList(entity.Budgets);
             domain.Budgets.AddRange(budgets);
-            var deficientConditionGoals = DeficientConditionGoalDetailMapper.ToDomainList(entity.DeficientConditionGoalDetails);
+            var deficientConditionGoals = DeficientConditionGoalDetailMapper.ToDomainList(entity.DeficientConditionGoalDetails, attributeNameLookup);
             domain.DeficientConditionGoals.AddRange(deficientConditionGoals);
             var targetConditionGoals = TargetConditionGoalDetailMapper.ToDomainList(entity.TargetConditionGoalDetails);
             domain.TargetConditionGoals.AddRange(targetConditionGoals);
             return domain;
         }
 
-        public static SimulationYearDetail ToDomain(SimulationYearDetailEntity entity)
+        public static SimulationYearDetail ToDomain(
+            SimulationYearDetailEntity entity,
+            Dictionary<Guid, string> attributeNameLookup)
         {
-            var domain = ToDomainWithoutAssets(entity);
-            var assets = AssetDetailMapper.ToDomainList(entity.Assets, entity.Year);
+            var domain = ToDomainWithoutAssets(entity, attributeNameLookup);
+            var assets = AssetDetailMapper.ToDomainList(entity.Assets, entity.Year, attributeNameLookup);
             domain.Assets.AddRange(assets);
             return domain;
         }
 
-        public static List<SimulationYearDetail> ToDomainList(ICollection<SimulationYearDetailEntity> entityList)
+        public static List<SimulationYearDetail> ToDomainList(
+            ICollection<SimulationYearDetailEntity> entityList,
+            Dictionary<Guid, string> attributeNameLookup)
         {
             var domainList = new List<SimulationYearDetail>();
             foreach (var entity in entityList)
             {
-                var domain = ToDomain(entity);
+                var domain = ToDomain(entity, attributeNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

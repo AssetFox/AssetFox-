@@ -140,7 +140,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
             }
-
+            var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
+            var attributeNameLookup = new Dictionary<Guid, string>();
+            foreach (var attribute in allAttributes)
+            {
+                attributeNameLookup[attribute.Id] = attribute.Name;
+            }
             var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
                 .Where(_ => _.SimulationId == simulationId)
@@ -149,14 +154,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationOutputId = firstEntity.Id;
             var cacheYears = firstEntity.Years.OrderBy(y => y.Year).ToList();
             firstEntity.Years.Clear();
-            var domain = SimulationOutputMapper.ToDomain(firstEntity);
+            var domain = SimulationOutputMapper.ToDomain(firstEntity, attributeNameLookup);
             var shouldContinueLoadingAssetSummaries = true;
             int summaryBatchIndex = 0;
             while (shouldContinueLoadingAssetSummaries)
             {
                 var assetSummaries = _unitOfWork.Context.AssetSummaryDetail
                 .Include(a => a.AssetSummaryDetailValues)
-                .ThenInclude(d => d.Attribute)
                 .Include(a => a.MaintainableAsset)
                 .OrderBy(a => a.Id)
                 .Skip(summaryBatchIndex * AssetSummaryLoadBatchSize)
@@ -180,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(y => y.Id == yearId)
                 .ToList();
                 var loadedYearEntity = loadedYearWithoutAssets[0];
-                var domainYear = SimulationYearDetailMapper.ToDomainWithoutAssets(loadedYearEntity);
+                var domainYear = SimulationYearDetailMapper.ToDomainWithoutAssets(loadedYearEntity, attributeNameLookup);
                 domain.Years.Add(domainYear);
                 bool shouldContinueLoadingAssets = true;
                 var batchIndex = 0;
@@ -192,7 +196,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                            .AsNoTracking()
                    .Include(a => a.MaintainableAsset)
                    .Include(a => a.AssetDetailValues)
-                   .ThenInclude(d => d.Attribute)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
                    .Include(a => a.TreatmentConsiderationDetails)
@@ -203,7 +206,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
-                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year);
+                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year, attributeNameLookup);
                     domainYear.Assets.AddRange(assets);
                     shouldContinueLoadingAssets = assets.Count == AssetLoadBatchSize;
                     _unitOfWork.Context.ChangeTracker.Clear();

@@ -72,6 +72,7 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
                     result = UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
                 });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -102,7 +103,6 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.Commit();
                 });
 
-
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -132,7 +132,6 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
-
 
                 return Ok();
             }

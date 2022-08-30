@@ -17,6 +17,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using Microsoft.AspNetCore.Authentication;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore
 {
@@ -55,6 +57,7 @@ namespace BridgeCareCore
             }));
 
             services.AddSecurityConfig(Configuration);
+            services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();

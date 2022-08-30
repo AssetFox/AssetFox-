@@ -10,8 +10,6 @@ namespace BridgeCareCore.Utils.Interfaces
 
         List<string> GetClaims(string securityType, string internalRole);
 
-        void AddClaimsPrincipalIdentities(string securityType, ClaimsPrincipal claimsPrincipal);
-
-        void AddClaimsToUserIdentity(HttpContext httpContext, string internalRoleFromMapper, List<string> claimsFromMapper);
+        ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper);
     }
 }

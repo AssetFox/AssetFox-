@@ -22,8 +22,27 @@ namespace BridgeCareCore.Security
         }
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            _roleClaimsMapper.AddClaimsPrincipalIdentities(_config.GetSection("SecurityType").Value, principal);
+            if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
+            {
+                // Obtain the role from the claims principal
+                // then parse it and pass to the internal role mapper
+                var roleClaim = principal.Claims
+                        .Single(_ => _.Type == ClaimTypes.Role).Value;
+                var roleParsed = SecurityFunctions.ParseLdap(roleClaim).FirstOrDefault();
 
+                //// TODO: Throw exception if null
+                ////throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
+                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
+            }
+            if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
+            {
+                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, "Administrator");
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
+                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
+
+            }
             return Task.FromResult(principal);
         }
     }

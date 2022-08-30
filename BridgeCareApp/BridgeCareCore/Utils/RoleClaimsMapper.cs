@@ -61,19 +61,8 @@ namespace BridgeCareCore.Utils
             return rolesToken;
         }
 
-        public void AddClaimsPrincipalIdentities(string securityType, ClaimsPrincipal claimsPrincipal)
+        public ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper)
         {
-            // Obtain the role from the claims principal
-            // then parse it and pass to the internal role mapper
-            var roleClaim = claimsPrincipal.Claims
-                    .Single(_ => _.Type == ClaimTypes.Role).Value;
-            var roleParsed = SecurityFunctions.ParseLdap(roleClaim).FirstOrDefault();
-
-            //// TODO: Throw exception if null
-            ////throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
-            var internalRoleFromMapper =GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
-            var claimsFromMapper = GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
-
             ClaimsIdentity claimsIdentity = new ClaimsIdentity();
             claimsFromMapper.ForEach(claim =>
             {
@@ -82,29 +71,7 @@ namespace BridgeCareCore.Utils
                     claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, claim));
                 }
             });
-            claimsPrincipal.AddIdentity(claimsIdentity);
-        }
-        public void AddClaimsToUserIdentity(HttpContext httpContext, string internalRoleFromMapper, List<string> claimsFromMapper)
-        {
-            var claims = new List<Claim>();
-            var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper.ToString());
-            var roleClaims = new List<Claim>
-                {
-                    roleClaim
-                };
-
-            // Convert the claim to a system claim for identity purposes
-            claimsFromMapper.ForEach(claim =>
-            {
-                claims.Add(new Claim(ClaimTypes.Name, claim));
-            });
-
-            // Build the identity, add to user (claimsPrincipal)
-            var identity = new ClaimsIdentity(claims);
-            var roleClaimIdentity = new ClaimsIdentity(roleClaims);
-            httpContext.User.AddIdentity(identity);
-            httpContext.User.AddIdentity(roleClaimIdentity);
-
+            return claimsIdentity;
         }
     }
 }

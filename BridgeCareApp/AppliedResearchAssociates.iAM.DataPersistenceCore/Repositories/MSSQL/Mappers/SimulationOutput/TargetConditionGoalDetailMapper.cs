@@ -44,12 +44,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entities;
         }
 
-        public static TargetConditionGoalDetail ToDomain(TargetConditionGoalDetailEntity entity)
+        public static TargetConditionGoalDetail ToDomain(TargetConditionGoalDetailEntity entity, Dictionary<Guid, string> attributeNameLookup)
         {
+            var attributeName = attributeNameLookup[entity.AttributeId];
             var domain = new TargetConditionGoalDetail
             {
                 ActualValue = entity.ActualValue,
-                AttributeName = entity.Attribute.Name,
+                AttributeName = attributeName,
                 GoalIsMet = entity.GoalIsMet,
                 GoalName = entity.GoalName,
                 TargetValue = entity.TargetValue,
@@ -57,12 +58,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domain;
         }
 
-        public static List<TargetConditionGoalDetail> ToDomainList(ICollection<TargetConditionGoalDetailEntity> entityCollection)
+        public static List<TargetConditionGoalDetail> ToDomainList(ICollection<TargetConditionGoalDetailEntity> entityCollection, Dictionary<Guid, string> attributeNameLookup)
         {
             var domainList = new List<TargetConditionGoalDetail>();
             foreach (var entity in entityCollection)
             {
-                var domain = ToDomain(entity);
+                var domain = ToDomain(entity, attributeNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

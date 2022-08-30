@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             domain.Budgets.AddRange(budgets);
             var deficientConditionGoals = DeficientConditionGoalDetailMapper.ToDomainList(entity.DeficientConditionGoalDetails, attributeNameLookup);
             domain.DeficientConditionGoals.AddRange(deficientConditionGoals);
-            var targetConditionGoals = TargetConditionGoalDetailMapper.ToDomainList(entity.TargetConditionGoalDetails);
+            var targetConditionGoals = TargetConditionGoalDetailMapper.ToDomainList(entity.TargetConditionGoalDetails, attributeNameLookup);
             domain.TargetConditionGoals.AddRange(targetConditionGoals);
             return domain;
         }

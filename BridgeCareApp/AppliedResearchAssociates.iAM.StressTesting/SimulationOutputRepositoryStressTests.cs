@@ -36,6 +36,11 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             }
         }
 
+        [Fact]
+        public void SaveSimulationOutput522_ThenLoad_Same()
+        {
+            SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename522);
+        }
 
         private void SaveSimulationOutput_ThenLoad_Same(string filename, Func<SimulationOutput, SimulationOutput> preTransform = null)
         {
@@ -45,13 +50,14 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             }
             var text = FileReader.ReadAllTextInGitIgnoredFile(filename);
             var rawOutput = JsonConvert.DeserializeObject<SimulationOutput>(text);
+            var yearCount = rawOutput.Years.Count;
             var simulationOutput = preTransform(rawOutput);
             var assetNameIdPairs = simulationOutput.InitialAssetSummaries.Select(a => AssetNameIdPairs.ForAssetSummaryDetail(a)).ToList();
             var assetSummary = simulationOutput.InitialAssetSummaries[0];
             var attributeNamesToIgnore = new List<string> { "AREA" };
             var numericAttributeNames = assetSummary.ValuePerNumericAttribute.Keys.Except(attributeNamesToIgnore).ToList();
             var textAttributeNames = assetSummary.ValuePerTextAttribute.Keys.ToList();
-            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, 5);
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, yearCount);
             _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             Canonicalize(simulationOutput);
@@ -77,10 +83,12 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
         // C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.StressTesting\GitIgnored\SimulationOutput.json
         [Fact]
-        public void SaveLargeSimulationOutput_ThenLoad_Same()
+        public void SaveSimulationOutput176_ThenLoad_Same()
         {
-            SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename);
+            SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);
         }
+
+
 
         [Fact(Skip = "Actually does reset the db, even though it tries not to. May not ever want this.")]
         public void LoadOutputFromDatabase_MatchesOutputFromFile()

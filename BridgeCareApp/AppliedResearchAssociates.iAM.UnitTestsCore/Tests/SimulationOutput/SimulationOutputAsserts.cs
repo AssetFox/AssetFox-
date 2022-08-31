@@ -17,10 +17,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var splitSerializeOutput = StringExtensions.ToLines(expectedSerializedOutput);
             var splitSerializeLoaded = StringExtensions.ToLines(actualSerializedOutput);
-            var trimmedSerializedOutput = splitSerializeOutput.Select(str => TrimIrrelevantPortionsAndRoundoff(str)).ToList();
-            var trimmedSerializedLoaded = splitSerializeLoaded.Select(str => TrimIrrelevantPortionsAndRoundoff(str)).ToList();
-            trimmedSerializedOutput.Sort();
-            trimmedSerializedLoaded.Sort();
+            var trimmedSerializedOutput = splitSerializeOutput.Select(str => ExtractTrailingDecimal(str)).ToList();
+            var trimmedSerializedLoaded = splitSerializeLoaded.Select(str => ExtractTrailingDecimal(str)).ToList();
+            trimmedSerializedOutput.Sort((pair1, pair2) => StringDecimalPairComparer.Compare(pair1, pair2));
+            trimmedSerializedLoaded.Sort((pair1, pair2) => StringDecimalPairComparer.Compare(pair1, pair2));
             if (trimmedSerializedLoaded != trimmedSerializedOutput)
             {
                 var expectedLength = expectedSerializedOutput.Length;
@@ -29,7 +29,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 {
                     var outputI = trimmedSerializedOutput[i];
                     var loadedI = trimmedSerializedLoaded[i];
-                    Assert.Equal(outputI, loadedI);
+                    Assert.Equal(outputI.String, loadedI.String);
+                    var decimalDifference = outputI.Decimal - loadedI.Decimal;
+                    var absDecimalDifference = Math.Abs(decimalDifference);
+                    Assert.True(absDecimalDifference < 0.01m);
                 }
             }
         }
@@ -55,10 +58,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return false;
         }
 
-        private static string TrimIrrelevantPortionsAndRoundoff(string str)
+        private static StringDecimalPair ExtractTrailingDecimal(string str)
         {
             var trimmed = str.Trim().TrimEnd(',');
-            var returnValue = StringDecimalRoundoff.RoundoffTrailingDecimal(trimmed, 2);
+            var returnValue = StringDecimalRoundoff.ExtractTrailingDecimal(trimmed);
             return returnValue;
         }
 

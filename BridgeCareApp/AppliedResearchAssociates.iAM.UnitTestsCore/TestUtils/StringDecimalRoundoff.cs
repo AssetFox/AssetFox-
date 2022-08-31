@@ -48,20 +48,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return 0;
         }
 
-        public static string RoundoffTrailingDecimal(string str, int decimalPlaces)
+        public static StringDecimalPair ExtractTrailingDecimal(string str)
         {
             var decimalIndex = IndexOfStartOfTrailingDecimal(str);
             if (decimalIndex == -1 || decimalIndex == str.Length)
             {
-                return str;
+                return StringDecimalPairs.StringOnly(str);
             }
             var trailingDecimal = str.Substring(decimalIndex);
             var parsedDecimal = decimal.Parse(trailingDecimal);
-            var roundedDecimal = decimal.Round(parsedDecimal, decimalPlaces);
-            var formatString = $"F{decimalPlaces}";
-            var decimalString = roundedDecimal.ToString(formatString);
-            str = string.Concat(str.Substring(0, decimalIndex), decimalString);
-            return str;
+            var prefixString = str.Substring(0, decimalIndex);
+            var pair = StringDecimalPairs.StringAndDecimal(prefixString, parsedDecimal);
+            return pair;
         }
     }
 
@@ -73,10 +71,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         [InlineData("hello: 123.000", "hello: 123.00")]
         [InlineData("hello: 234.", "hello: 234.00")]
         [InlineData("Banana", "Banana")]
-        public void RoundoffString_Expected(string input, string expectedOutput)
+        public void RoundoffString_Expected(string input1, string input2)
         {
-            var output = StringDecimalRoundoff.RoundoffTrailingDecimal(input, 2);
-            Assert.Equal(expectedOutput, output);
+            var output1 = StringDecimalRoundoff.ExtractTrailingDecimal(input1);
+            var output2 = StringDecimalRoundoff.ExtractTrailingDecimal(input2);
+            Assert.Equal(output1.String, output2.String);
+            var delta = output1.Decimal - output2.Decimal;
+            Assert.True(Math.Abs(delta) < 0.006m);
         }
     }
 }

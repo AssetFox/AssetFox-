@@ -21,19 +21,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var trimmedSerializedLoaded = splitSerializeLoaded.Select(str => ExtractTrailingDecimal(str)).ToList();
             trimmedSerializedOutput.Sort((pair1, pair2) => StringDecimalPairComparer.Compare(pair1, pair2));
             trimmedSerializedLoaded.Sort((pair1, pair2) => StringDecimalPairComparer.Compare(pair1, pair2));
-            if (trimmedSerializedLoaded != trimmedSerializedOutput)
+            var expectedLength = expectedSerializedOutput.Length;
+            var actualLength = actualSerializedOutput.Length;
+            for (int i = 0; i < trimmedSerializedOutput.Count; i++)
             {
-                var expectedLength = expectedSerializedOutput.Length;
-                var actualLength = actualSerializedOutput.Length;
-                for (int i = 0; i < trimmedSerializedOutput.Count; i++)
-                {
-                    var outputI = trimmedSerializedOutput[i];
-                    var loadedI = trimmedSerializedLoaded[i];
-                    Assert.Equal(outputI.String, loadedI.String);
-                    var decimalDifference = outputI.Decimal - loadedI.Decimal;
-                    var absDecimalDifference = Math.Abs(decimalDifference);
-                    Assert.True(absDecimalDifference < 0.01m);
-                }
+                var outputI = trimmedSerializedOutput[i];
+                var loadedI = trimmedSerializedLoaded[i];
+                Assert.Equal(outputI.String, loadedI.String);
+                var decimalDifference = outputI.Decimal - loadedI.Decimal;
+                var absDecimalDifference = Math.Abs(decimalDifference);
+                Assert.True(absDecimalDifference < 0.01m);
             }
         }
 

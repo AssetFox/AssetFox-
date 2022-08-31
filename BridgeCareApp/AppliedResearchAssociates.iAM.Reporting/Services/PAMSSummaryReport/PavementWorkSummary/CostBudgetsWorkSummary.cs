@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using System.Drawing;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary

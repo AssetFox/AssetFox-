@@ -33,18 +33,22 @@
                                 </v-select>                       
                             </v-layout>
                         </v-flex>
-                        <v-flex xs6>
-                            <v-text-field
-                                prepend-inner-icon=$vuetify.icons.ghd-search
-                                hide-details
-                                lablel="Search"
-                                placeholder="Search"
-                                single-line
-                                v-model="searchItems"
-                                outline
-                                class="ghd-text-field-border ghd-text-field search-icon-general"
-                                style="margin-top:17px !important">
-                            </v-text-field>
+                        <v-flex xs6 style="margin-left: 5px">
+                            <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
+                            <v-layout>                                
+                                <v-text-field
+                                    prepend-inner-icon=$vuetify.icons.ghd-search
+                                    hide-details
+                                    lablel="Search"
+                                    placeholder="Search"
+                                    single-line
+                                    v-model="gridSearchTerm"
+                                    outline
+                                    class="ghd-text-field-border ghd-text-field search-icon-general">
+                                </v-text-field>
+                                <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                            </v-layout>
+                           
                         </v-flex>
                     </v-layout>
                 </v-flex>
@@ -295,7 +299,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosPromise, AxiosResponse } from 'axios';
-import { any, clone, find, findIndex, isEmpty, isNil, propEq, update } from 'ramda';
+import { any, clone, find, findIndex, isEmpty, isNil, map, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
@@ -349,6 +353,8 @@ export default class CommittedProjectsEditor extends Vue  {
     totalItems = 0;
     currentPage: SectionCommittedProjectTableData[] = [];
     initializing: boolean = true;
+
+    isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
 
     projectPagination: Pagination = clone(emptyPagination);
 
@@ -606,10 +612,12 @@ export default class CommittedProjectsEditor extends Vue  {
             this.selectedCommittedProject = this.selectedCpItems[0].id;
     }
 
-    @Watch('performancePagination')
+    @Watch('projectPagination')
     onPaginationChanged() {
+        if(this.initializing)
+            return;
         this.checkHasUnsavedChanges();
-        const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
+        const { sortBy, descending, page, rowsPerPage } = this.projectPagination;
 
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
@@ -624,13 +632,16 @@ export default class CommittedProjectsEditor extends Vue  {
             isDescending: descending != null ? descending : false,
             search: this.currentSearch
         };
-        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
-            CommittedProjectsService.getCommittedProjectsPage(this.selectedScenarioId, request).then(response => {
+        if(this.scenarioId !== this.uuidNIL)
+            CommittedProjectsService.getCommittedProjectsPage(this.scenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<SectionCommittedProject>;
                     this.sectionCommittedProjects = data.items;
                     this.rowCache = clone(this.sectionCommittedProjects)
                     this.totalItems = data.totalItems;
+                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
+                    if(isNil(row))
+                        this.selectedCommittedProject = ''
                 }
             }); 
     }
@@ -945,7 +956,6 @@ export default class CommittedProjectsEditor extends Vue  {
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName
         this.updateCommittedProject(row, treatmentName, 'treatment')  
-        
         CommittedProjectsService.FillTreatmentValues(row, row.locationKeys[this.brkey_])
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
@@ -993,17 +1003,30 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     checkBrkeys(index: number){
-        if(index < this.currentPage.length)
-            CommittedProjectsService.ValidateBRKEY(this.network, this.currentPage[index].brkey).then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    if(!response.data)
-                        this.currentPage[index].errors = ['BRKEY does not exist'];
-                    else
-                        this.currentPage[index].errors = [];
-                }
+        if(index < this.currentPage.length){
+            var map = this.isKeyAttributeValidMap.get(this.currentPage[index].brkey)
+            if(!isNil(map)){
+                if(!map)
+                    this.currentPage[index].errors = ['BRKEY does not exist'];
+                else
+                    this.currentPage[index].errors = [];
+
                 index++;
                 this.checkBrkeys(index)
-            });
+            }
+            else    
+                CommittedProjectsService.ValidateBRKEY(this.network, this.currentPage[index].brkey).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        if(!response.data)
+                            this.currentPage[index].errors = ['BRKEY does not exist'];
+                        else
+                            this.currentPage[index].errors = [];
+                        this.isKeyAttributeValidMap.set(this.currentPage[index].brkey, response.data)
+                    }
+                    index++;
+                    this.checkBrkeys(index)
+                });
+        }         
     }
 
     checkYear(scp:SectionCommittedProjectTableData){

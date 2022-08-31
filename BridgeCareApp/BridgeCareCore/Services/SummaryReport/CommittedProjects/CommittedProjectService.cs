@@ -553,20 +553,26 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<SectionCommittedProjectDTO>();
             var budgetdict = new Dictionary<Guid, string>();
+            var totalItems = 0; 
 
-            if(request.search.Trim() != "" || request.sortColumn.Trim() != "")
+            request.search = request.search == null ? "" : request.search;
+            request.sortColumn = request.sortColumn == null ? "" : request.sortColumn;
+
+            
+
+            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+            totalItems = committedProjects.Count;
+
+            if (request.search.Trim() != "" || request.sortColumn.Trim() != "")
             {
                 var budgetIds = committedProjects.Select(_ => _.ScenarioBudgetId).Distinct();
-                budgetdict = _unitOfWork.Context.Budget.Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _=> _.Name);
+                budgetdict = _unitOfWork.Context.ScenarioBudget.Where(_ => budgetIds.Contains(_.Id)).ToDictionary(_ => _.Id, _ => _.Name);
             }
-
 
             if (request.search.Trim() != "")
                 committedProjects = SearchCurves(committedProjects, request.search, budgetdict);
             if (request.sortColumn.Trim() != "")
-                committedProjects = OrderByColumn(committedProjects, request.sortColumn, request.isDescending, budgetdict);
-
-            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+                committedProjects = OrderByColumn(committedProjects, request.sortColumn, request.isDescending, budgetdict);            
 
             if (request.RowsPerPage > 0)
             {
@@ -587,7 +593,7 @@ namespace BridgeCareCore.Services
             return new PagingPageModel<SectionCommittedProjectDTO>()
             {
                 Items = items,
-                TotalItems = committedProjects.Count()
+                TotalItems = totalItems
             };
         }
 
@@ -646,12 +652,12 @@ namespace BridgeCareCore.Services
         {
             search = search.ToLower();
             return committedProjects
-                .Where(_ => search.Contains(_.LocationKeys[_networkKeyField].ToLower()) ||
-                    search.Contains(_.Year.ToString()) ||
-                    search.Contains(_.Treatment.ToLower()) ||
-                    search.Contains(_.Category.ToString().ToLower()) ||
-                    search.Contains(_.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value]) ||
-                    search.Contains(_.Cost.ToString())).ToList();
+                .Where(_ => _.LocationKeys[_networkKeyField].ToLower().Contains(search) ||
+                    _.Year.ToString().Contains(search) ||
+                    _.Treatment.ToLower().Contains(search) ||
+                    _.Category.ToString().ToLower().Contains(search) ||
+                    (_.ScenarioBudgetId == null ? "" : budgetDict[_.ScenarioBudgetId.Value]).Contains(search) ||
+                    _.Cost.ToString().Contains(search)).ToList();
         }
 
         private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)

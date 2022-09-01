@@ -135,6 +135,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
                 .Where(_ => _.SimulationId == simulationId)
+                .AsNoTracking()
                 .ToList();
             var firstEntity = entitiesWithoutAssetSummariesOrYearContents[0];
             var simulationOutputId = firstEntity.Id;
@@ -184,14 +185,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             memos.Mark("assetSummaries done");
             WriteTimingsToFile(memos, "AssetSummaryLoadTimings.txt");
-            foreach (var detailValue in assetSummaryDetailValueEntities)
-            {
-                var discriminator = detailValue.Discriminator;
-                if (discriminator!="Number" && discriminator!="Text")
-                {
-                    throw new Exception($"Unexpected discriminator {discriminator}");
-                }
-            }
             foreach (var cacheYear in cacheYears)
             {
                 memos.Mark($"Y{cacheYear.Year}");

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -139,9 +139,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationOutputId = firstEntity.Id;
             var cacheYears = firstEntity.Years.OrderBy(y => y.Year).ToList();
             firstEntity.Years.Clear();
-            var domain = SimulationOutputMapper.ToDomain(firstEntity, attributeNameLookup);
+            var domain = SimulationOutputMapper.ToDomainWithoutAssets(firstEntity, attributeNameLookup);
             var shouldContinueLoadingAssetSummaries = true;
             int summaryBatchIndex = 0;
+            var assetNameLookup = new Dictionary<Guid, string>();
             while (shouldContinueLoadingAssetSummaries)
             {
                 var assetSummaries = _unitOfWork.Context.AssetSummaryDetail

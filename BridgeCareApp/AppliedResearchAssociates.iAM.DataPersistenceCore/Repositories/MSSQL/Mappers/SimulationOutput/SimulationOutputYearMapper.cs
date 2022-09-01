@@ -47,24 +47,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domain;
         }
 
-        public static SimulationYearDetail ToDomain(
-            SimulationYearDetailEntity entity,
-            Dictionary<Guid, string> attributeNameLookup)
-        {
-            var domain = ToDomainWithoutAssets(entity, attributeNameLookup);
-            var assets = AssetDetailMapper.ToDomainList(entity.Assets, entity.Year, attributeNameLookup);
-            domain.Assets.AddRange(assets);
-            return domain;
-        }
-
-        public static List<SimulationYearDetail> ToDomainList(
+        public static List<SimulationYearDetail> ToDomainListWithoutAssets(
             ICollection<SimulationYearDetailEntity> entityList,
             Dictionary<Guid, string> attributeNameLookup)
         {
             var domainList = new List<SimulationYearDetail>();
             foreach (var entity in entityList)
             {
-                var domain = ToDomain(entity, attributeNameLookup);
+                var domain = ToDomainWithoutAssets(entity, attributeNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

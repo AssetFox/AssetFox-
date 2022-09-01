@@ -43,16 +43,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static SimulationOutput ToDomain(SimulationOutputEntity entity,
+        public static SimulationOutput ToDomainWithoutAssets(SimulationOutputEntity entity,
             Dictionary<Guid, string> attributeNameLookup)
         {
             var domain = new SimulationOutput
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
             };
-            var initialAssetSummaries = AssetSummaryDetailMapper.ToDomainListNullSafe(entity.InitialAssetSummaries, attributeNameLookup);
-            var years = SimulationYearDetailMapper.ToDomainList(entity.Years, attributeNameLookup);
-            domain.InitialAssetSummaries.AddRange(initialAssetSummaries);
+            var years = SimulationYearDetailMapper.ToDomainListWithoutAssets(entity.Years, attributeNameLookup);
             domain.Years.AddRange(years);
             return domain;
         }

@@ -46,32 +46,46 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         internal static void AddToDictionaries(
             ICollection<AssetSummaryDetailValueEntity> assetSummaryDetailValues,
             Dictionary<string, double> valuePerNumericAttribute,
-            Dictionary<string, string> valuePerTextAttribute
-,
+            Dictionary<string, string> valuePerTextAttribute,
             Dictionary<Guid, string> attributeNameLookup)
         {
             foreach (var summary in assetSummaryDetailValues)
             {
-                var attributeName = attributeNameLookup[summary.AttributeId];
-                // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
-                switch (summary.Discriminator)
-                {
-                case AssetDetailValueDiscriminators.Number:
-                    if (summary.NumericValue.HasValue)
-                    {
-                        valuePerNumericAttribute[attributeName] = summary.NumericValue.Value;
-                    }
-                    break;                    
-                case AssetDetailValueDiscriminators.Text:
-                    valuePerTextAttribute[attributeName] = summary.TextValue;
-                    break;
-                }
+                AddToDictionary(summary, valuePerNumericAttribute, valuePerTextAttribute, attributeNameLookup);
             }
+            FillAreaAttributeValue(valuePerNumericAttribute);
+        }
+
+        public static void FillAreaAttributeValue(Dictionary<string, double> valuePerNumericAttribute)
+        {
             var areaKey = Network.DefaultSpatialWeightingIdentifier;
             var deckAreaKey = AttributeNameConstants.DeckArea;
             if (valuePerNumericAttribute.ContainsKey(deckAreaKey))
             {
                 valuePerNumericAttribute[areaKey] = valuePerNumericAttribute[deckAreaKey];
+            }
+        }
+
+        public static void AddToDictionary(
+            AssetSummaryDetailValueEntity summary,
+            Dictionary<string, double> valuePerNumericAttribute,
+            Dictionary<string, string> valuePerTextAttribute,
+            Dictionary<Guid, string> attributeNameLookup
+            )
+        {
+            var attributeName = attributeNameLookup[summary.AttributeId];
+            // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
+            switch (summary.Discriminator)
+            {
+            case AssetDetailValueDiscriminators.Number:
+                if (summary.NumericValue.HasValue)
+                {
+                    valuePerNumericAttribute[attributeName] = summary.NumericValue.Value;
+                }
+                break;
+            case AssetDetailValueDiscriminators.Text:
+                valuePerTextAttribute[attributeName] = summary.TextValue;
+                break;
             }
         }
 

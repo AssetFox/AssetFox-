@@ -153,8 +153,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 assetNameLookup[assetSummary.MaintainableAssetId] = assetSummary.MaintainableAsset.AssetName;
             }
-            var assetSummaryDomainListWithoutValues = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaryDetails, attributeNameLookup);
-            domain.InitialAssetSummaries.AddRange(assetSummaryDomainListWithoutValues);
+            var assetSummaryDomainDictionary = AssetSummaryDetailMapper.ToDomainDictionaryNullSafe(assetSummaryDetails, attributeNameLookup);
+            domain.InitialAssetSummaries.AddRange(assetSummaryDomainDictionary.Values);
             var assetSummaryDetailValueConfig = new BulkConfig
             {
                 UpdateByProperties = new List<string> { nameof(AssetSummaryDetailValueEntity.AssetSummaryDetailId), nameof(AssetSummaryDetailValueEntity.AttributeId) }
@@ -173,6 +173,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             memos.Mark("assetSummary config");
             _unitOfWork.Context.BulkRead(assetSummaryDetailValueEntities, assetSummaryDetailValueConfig);
+            foreach (var assetSummaryDetailValueEntity in assetSummaryDetailValueEntities)
+            {
+                var summary = assetSummaryDomainDictionary[assetSummaryDetailValueEntity.AssetSummaryDetailId];
+                AssetSummaryDetailValueMapper.AddToDictionary(assetSummaryDetailValueEntity, summary.ValuePerNumericAttribute, summary.ValuePerTextAttribute, attributeNameLookup);
+            }
+            foreach (var summaryValue in assetSummaryDomainDictionary.Values)
+            {
+                AssetSummaryDetailValueMapper.FillAreaAttributeValue(summaryValue.ValuePerNumericAttribute);
+            }
             memos.Mark("assetSummaries done");
             WriteTimingsToFile(memos, "AssetSummaryLoadTimings.txt");
             foreach (var detailValue in assetSummaryDetailValueEntities)

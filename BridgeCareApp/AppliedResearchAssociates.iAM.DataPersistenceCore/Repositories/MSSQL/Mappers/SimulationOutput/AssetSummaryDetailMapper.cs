@@ -55,18 +55,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return domain;
         }
 
-        public static List<AssetSummaryDetail> ToDomainListNullSafe(ICollection<AssetSummaryDetailEntity> entityList, Dictionary<Guid, string> attributeNameLookup)
+        public static Dictionary<Guid, AssetSummaryDetail> ToDomainDictionaryNullSafe(ICollection<AssetSummaryDetailEntity> entityList, Dictionary<Guid, string> attributeNameLookup)
         {
-            var domainList = new List<AssetSummaryDetail>();
+            var domainDictionary = new Dictionary<Guid, AssetSummaryDetail>();
             if (entityList != null)
             {
                 foreach (var entity in entityList)
                 {
                     var domain = ToDomain(entity, attributeNameLookup);
-                    domainList.Add(domain);
+                    domainDictionary[entity.Id] = domain;
                 }
             }
-            return domainList;
+            return domainDictionary;
         }
     }
 }

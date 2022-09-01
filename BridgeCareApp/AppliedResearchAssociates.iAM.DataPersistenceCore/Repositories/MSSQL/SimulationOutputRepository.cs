@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Debugging;
+using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -68,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
-                    memos.Mark($"Y{ year.Year}");
+                    memos.Mark($"Y{year.Year}");
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
@@ -140,31 +141,48 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var cacheYears = firstEntity.Years.OrderBy(y => y.Year).ToList();
             firstEntity.Years.Clear();
             var domain = SimulationOutputMapper.ToDomainWithoutAssets(firstEntity, attributeNameLookup);
-            var shouldContinueLoadingAssetSummaries = true;
-            int summaryBatchIndex = 0;
             var assetNameLookup = new Dictionary<Guid, string>();
-            while (shouldContinueLoadingAssetSummaries)
-            {
-                var assetSummaries = _unitOfWork.Context.AssetSummaryDetail
-                .Include(a => a.AssetSummaryDetailValues)
+            var usedAttributeIds = BuildUsedAttributeIdList(simulationOutputId);
+            var assetSummaryDetails = _unitOfWork.Context.AssetSummaryDetail
                 .Include(a => a.MaintainableAsset)
                 .OrderBy(a => a.Id)
-                .Skip(summaryBatchIndex * AssetSummaryLoadBatchSize)
-                .Take(AssetSummaryLoadBatchSize)
                 .Where(a => a.SimulationOutputId == simulationOutputId)
                 .AsNoTracking()
                 .ToList();
-                foreach (var assetSummary in assetSummaries)
-                {
-                    assetNameLookup[assetSummary.MaintainableAssetId] = assetSummary.MaintainableAsset.AssetName;
-                }
-                var assetSummaryDomainList = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaries, attributeNameLookup);
-                domain.InitialAssetSummaries.AddRange(assetSummaryDomainList);
-                shouldContinueLoadingAssetSummaries = assetSummaries.Count() == AssetSummaryLoadBatchSize;
-                memos.Mark($" summaryBatch {summaryBatchIndex}");
-                summaryBatchIndex++;
+            foreach (var assetSummary in assetSummaryDetails)
+            {
+                assetNameLookup[assetSummary.MaintainableAssetId] = assetSummary.MaintainableAsset.AssetName;
             }
+            var assetSummaryDomainListWithoutValues = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaryDetails, attributeNameLookup);
+            domain.InitialAssetSummaries.AddRange(assetSummaryDomainListWithoutValues);
+            var assetSummaryDetailValueConfig = new BulkConfig
+            {
+                UpdateByProperties = new List<string> { nameof(AssetSummaryDetailValueEntity.AssetSummaryDetailId), nameof(AssetSummaryDetailValueEntity.AttributeId) }
+            };
+            var assetSummaryDetailValueEntities = new List<AssetSummaryDetailValueEntity>();
+            foreach (var assetSummaryDetail in assetSummaryDetails)
+            {
+                foreach (var usedAttributeId in usedAttributeIds)
+                {
+                    assetSummaryDetailValueEntities.Add(new AssetSummaryDetailValueEntity
+                    {
+                        AttributeId = usedAttributeId,
+                        AssetSummaryDetailId = assetSummaryDetail.Id,
+                    });
+                }
+            }
+            memos.Mark("assetSummary config");
+            _unitOfWork.Context.BulkRead(assetSummaryDetailValueEntities, assetSummaryDetailValueConfig);
             memos.Mark("assetSummaries done");
+            WriteTimingsToFile(memos, "AssetSummaryLoadTimings.txt");
+            foreach (var detailValue in assetSummaryDetailValueEntities)
+            {
+                var discriminator = detailValue.Discriminator;
+                if (discriminator!="Number" && discriminator!="Text")
+                {
+                    throw new Exception($"Unexpected discriminator {discriminator}");
+                }
+            }
             foreach (var cacheYear in cacheYears)
             {
                 memos.Mark($"Y{cacheYear.Year}");
@@ -208,13 +226,35 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
+            var outputFilename = "LoadTimings.txt";
+            WriteTimingsToFile(memos, outputFilename);
+            return domain;
+        }
+
+        private static void WriteTimingsToFile(List<EventMemoModel> memos, string filename)
+        {
             var timings = memos.ToMultilineString(true);
             System.Diagnostics.Debug.WriteLine(timings);
             var directory = Directory.GetCurrentDirectory();
-            var path = Path.Combine(directory, "LoadTimings.txt");
+            var path = Path.Combine(directory, filename);
             File.Delete(path);
             File.WriteAllText(path, timings);
-            return domain;
+        }
+
+        private List<Guid> BuildUsedAttributeIdList(Guid simulationOutputId)
+        {
+            var usedAttributeIds = new List<Guid>();
+            var randomAssetSummary = _unitOfWork.Context.AssetSummaryDetail
+                .Include(a => a.AssetSummaryDetailValues)
+                .Include(a => a.MaintainableAsset)
+                .Where(a => a.SimulationOutputId == simulationOutputId)
+                .AsNoTracking()
+                .FirstOrDefault();
+            foreach (var assetSummaryDetailValue in randomAssetSummary.AssetSummaryDetailValues)
+            {
+                usedAttributeIds.Add(assetSummaryDetailValue.AttributeId);
+            }
+            return usedAttributeIds;
         }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -154,6 +154,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(a => a.SimulationOutputId == simulationOutputId)
                 .AsNoTracking()
                 .ToList();
+                foreach (var assetSummary in assetSummaries)
+                {
+                    assetNameLookup[assetSummary.MaintainableAssetId] = assetSummary.MaintainableAsset.AssetName;
+                }
                 var assetSummaryDomainList = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaries, attributeNameLookup);
                 domain.InitialAssetSummaries.AddRange(assetSummaryDomainList);
                 shouldContinueLoadingAssetSummaries = assetSummaries.Count() == AssetSummaryLoadBatchSize;
@@ -184,7 +188,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
                    .AsNoTracking()
-                   .Include(a => a.MaintainableAsset)
                    .Include(a => a.AssetDetailValues)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
@@ -196,7 +199,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
-                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year, attributeNameLookup);
+                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year, attributeNameLookup, assetNameLookup);
                     domainYear.Assets.AddRange(assets);
                     shouldContinueLoadingAssets = assets.Count == AssetLoadBatchSize;
                     _unitOfWork.Context.ChangeTracker.Clear();

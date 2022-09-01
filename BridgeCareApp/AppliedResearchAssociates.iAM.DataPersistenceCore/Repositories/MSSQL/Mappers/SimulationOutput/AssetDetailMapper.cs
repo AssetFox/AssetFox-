@@ -46,10 +46,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static AssetDetail ToDomain(
             AssetDetailEntity entity,
             int year,
-            Dictionary<Guid, string> attributeNameLookup)
+            Dictionary<Guid, string> attributeNameLookup,
+            Dictionary<Guid, string> assetNameLookup)
         {
-            var assetName = entity.MaintainableAsset.AssetName;
-            var domain = new AssetDetail(assetName, entity.MaintainableAsset.Id)
+            var assetName = assetNameLookup[entity.MaintainableAssetId];
+            var domain = new AssetDetail(assetName, entity.MaintainableAssetId)
             {
                 AppliedTreatment = entity.AppliedTreatment,
                 TreatmentCause = (TreatmentCause)entity.TreatmentCause,
@@ -71,12 +72,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         internal static List<AssetDetail> ToDomainList(
             ICollection<AssetDetailEntity> entityCollection,
             int year,
-            Dictionary<Guid, string> attributeNameLookup)
+            Dictionary<Guid, string> attributeNameLookup,
+            Dictionary<Guid, string> assetNameLookup)
         {
             var domainList = new List<AssetDetail>();
             foreach (var entity in entityCollection)
             {
-                var domain = ToDomain(entity, year, attributeNameLookup);
+                var domain = ToDomain(entity, year, attributeNameLookup, assetNameLookup);
                 domainList.Add(domain);
             }
             return domainList;

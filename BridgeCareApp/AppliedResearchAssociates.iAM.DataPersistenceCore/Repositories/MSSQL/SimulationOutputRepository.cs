@@ -156,8 +156,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var assetSummaryDomainList = AssetSummaryDetailMapper.ToDomainListNullSafe(assetSummaries, attributeNameLookup);
                 domain.InitialAssetSummaries.AddRange(assetSummaryDomainList);
                 shouldContinueLoadingAssetSummaries = assetSummaries.Count() == AssetSummaryLoadBatchSize;
+                memos.Mark($" summaryBatch {summaryBatchIndex}");
                 summaryBatchIndex++;
             }
+            memos.Mark("assetSummaries done");
             foreach (var cacheYear in cacheYears)
             {
                 memos.Mark($"Y{cacheYear.Year}");

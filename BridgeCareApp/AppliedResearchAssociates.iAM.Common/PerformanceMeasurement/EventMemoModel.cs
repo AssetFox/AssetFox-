@@ -13,10 +13,27 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
 
     public static class EventMemoModelListExtensions
     {
-        public static void Mark(this List<EventMemoModel> eventList, string text)
+        /// <summary>The returned string shows the elapsed time between the current and previous memos. If there
+        /// is no previous memo, the empty string is returned.</summary> 
+        public static string Mark(this List<EventMemoModel> eventList, string text)
         {
             var memo = EventMemoModels.Now(text);
             eventList.Add(memo);
+            if (eventList.Count > 1)
+            {
+                var previous = eventList[eventList.Count - 2];
+                var elapsed = (memo.UtcTime - previous.UtcTime).TotalMilliseconds;
+                var elapsedString = $"{(int)elapsed}ms {memo.Text} ";
+                return elapsedString;
+            }
+            return "";
+        }
+
+        public static string MarkInformation(this List<EventMemoModel> eventList, string text, ILog logger)
+        {
+            var memo = eventList.Mark(text);
+            logger.Information(memo);
+            return memo;
         }
 
         public static string ToSingleLineString(this List<EventMemoModel> eventList)
@@ -31,7 +48,8 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
                     if (!first)
                     {
                         var elapsed = (memo.UtcTime - previous).TotalMilliseconds;
-                        builder.Append($"{(int)elapsed} {memo.Text} ");
+                        var elapsedString = $"{(int)elapsed} {memo.Text} ";
+                        builder.Append(elapsedString);
                     }
                     previous = memo.UtcTime;
                     first = false;

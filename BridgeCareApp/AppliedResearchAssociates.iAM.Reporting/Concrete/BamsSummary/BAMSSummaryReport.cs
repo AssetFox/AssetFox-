@@ -31,6 +31,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
 using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -203,7 +204,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 $"{BAMSConstants.CulvDurationN}"
             };
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new HubServiceLogger(_hubService, HubConstant.BroadcastReportGenerationStatus, _unitOfWork.CurrentUser?.Username);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 

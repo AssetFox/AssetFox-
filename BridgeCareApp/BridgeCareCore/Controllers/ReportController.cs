@@ -17,6 +17,7 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {

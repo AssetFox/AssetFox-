@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -26,8 +24,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput)
+        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog logger = null)
         {
+            logger ??= new DoNotLog();
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -35,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 #pragma warning restore CS0162 // Unreachable code detected
             }
             var memos = EventMemoModelLists.GetFreshInstance("Save");
-            memos.Mark("Starting save");
+            var startMemo = memos.MarkInformation("Starting save", logger);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -70,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
-                    memos.Mark($"Y{year.Year}");
+                    var yearMemo = memos.MarkInformation($"Y{year.Year}", logger);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
@@ -84,22 +83,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
-                memos.Mark("All added to context");
+                memos.MarkInformation("All added to context", logger);
                 _unitOfWork.Commit();
-                memos.Mark("Transaction committed");
+                memos.MarkInformation("Transaction committed", logger);
             }
             catch (Exception ex)
             {
+                var error = memos.Mark($"Save failed with exception {ex.Message}");
+                logger.Error(error);
                 _unitOfWork.Rollback();
-                throw new Exception(ex.Message);
-            }
-            finally
-            {
-                var timings = memos.ToMultilineString(true);
-                System.Diagnostics.Debug.WriteLine(timings);
-                var directory = Directory.GetCurrentDirectory();
-                var outputTimingsPath = Path.Combine(directory, "SaveTimings.txt");
-                File.WriteAllText(outputTimingsPath, timings);
+                throw;
             }
         }
 
@@ -112,10 +105,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             File.WriteAllText(path, serializedOutput);
         }
 
-        public SimulationOutput GetSimulationOutput(Guid simulationId)
+        public SimulationOutput GetSimulationOutput(Guid simulationId, ILog logger = null)
         {
+            logger ??= new DoNotLog();
             var memos = EventMemoModelLists.GetFreshInstance("Load");
-            memos.Mark("Starting load");
+            var startMemo = memos.MarkInformation("Starting load", logger);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"Found no simulation having id {simulationId}");
@@ -177,7 +171,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     });
                 }
             }
-            memos.Mark("assetSummary config");
+            var configMemo = memos.MarkInformation("assetSummary config", logger);
             _unitOfWork.Context.BulkRead(assetSummaryDetailValueEntities, assetSummaryDetailValueConfig);
             foreach (var assetSummaryDetailValueEntity in assetSummaryDetailValueEntities)
             {
@@ -188,10 +182,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 AssetSummaryDetailValueMapper.FillAreaAttributeValue(summaryValue.ValuePerNumericAttribute);
             }
-            memos.Mark("assetSummaries done");
+            var summariesDoneMemo = memos.MarkInformation("assetSummaries done", logger);
             foreach (var cacheYear in cacheYears)
             {
-                memos.Mark($"Y{cacheYear.Year}");
+                var yearMemo = memos.MarkInformation($"Y{cacheYear.Year}", logger);
                 var yearId = cacheYear.Id;
                 var year = cacheYear.Year;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
@@ -262,9 +256,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
-            memos.Mark("Load done");
-            var outputFilename = "LoadTimings.txt";
-            WriteTimingsToFile(memos, outputFilename);
+            memos.MarkInformation("Load done", logger);
             return domain;
         }
 

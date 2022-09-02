@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
+using BridgeCareCore.Logging;
 
 namespace BridgeCareCore.Services
 {
@@ -105,7 +106,9 @@ namespace BridgeCareCore.Services
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                    var logger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
+                    
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, logger);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;

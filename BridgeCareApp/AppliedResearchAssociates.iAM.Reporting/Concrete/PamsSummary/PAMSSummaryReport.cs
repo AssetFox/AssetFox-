@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
@@ -158,9 +159,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
+            // 
             var functionReturnValue = "";
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new HubServiceLogger(_hubService, HubConstant.BroadcastReportGenerationStatus, _unitOfWork.CurrentUser?.Username);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();

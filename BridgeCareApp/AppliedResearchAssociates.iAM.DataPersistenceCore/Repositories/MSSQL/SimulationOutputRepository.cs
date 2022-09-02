@@ -23,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = false;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 400;
-        public const int AssetSummaryLoadBatchSize = 400;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -41,6 +40,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
             }
+
+            _unitOfWork.BeginTransaction();
 
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                 .Single(_ => _.Id == simulationId);
@@ -83,9 +84,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
+                _unitOfWork.Commit();
             }
             catch (Exception ex)
             {
+                _unitOfWork.Rollback();
                 throw new Exception(ex.Message);
             }
             finally
@@ -184,7 +187,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 AssetSummaryDetailValueMapper.FillAreaAttributeValue(summaryValue.ValuePerNumericAttribute);
             }
             memos.Mark("assetSummaries done");
-            WriteTimingsToFile(memos, "AssetSummaryLoadTimings.txt");
             foreach (var cacheYear in cacheYears)
             {
                 memos.Mark($"Y{cacheYear.Year}");
@@ -200,15 +202,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var loadedYearEntity = loadedYearWithoutAssets[0];
                 var domainYear = SimulationYearDetailMapper.ToDomainWithoutAssets(loadedYearEntity, attributeNameLookup);
                 domain.Years.Add(domainYear);
-                bool shouldContinueLoadingAssets = true;
+                var shouldContinueLoadingAssets = true;
                 var batchIndex = 0;
+                var assets = new Dictionary<Guid, AssetDetail>();
                 while (shouldContinueLoadingAssets)
                 {
                     var assetEntities = _unitOfWork.Context.AssetDetail
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
                    .AsNoTracking()
-                   .Include(a => a.AssetDetailValues)
+                   //    .Include(a => a.AssetDetailValues)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
                    .Include(a => a.TreatmentConsiderationDetails)
@@ -219,15 +222,45 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
-                    var assets = AssetDetailMapper.ToDomainList(assetEntities, year, attributeNameLookup, assetNameLookup);
-                    domainYear.Assets.AddRange(assets);
-                    shouldContinueLoadingAssets = assets.Count == AssetLoadBatchSize;
-                    _unitOfWork.Context.ChangeTracker.Clear();
-                    memos.Mark($"b{batchIndex}");
+                    AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
+                    var assetDetailValues = new List<AssetDetailValueEntity>();
+                    foreach (var assetEntity in assetEntities)
+                    {
+                        foreach (var attributeId in usedAttributeIds)
+                        {
+                            var assetDetail = new AssetDetailValueEntity
+                            {
+                                AssetDetailId = assetEntity.Id,
+                                AttributeId = attributeId,
+                            };
+                            assetDetailValues.Add(assetDetail);
+                        }
+                    }
+                    var assetDetailValueConfig = new BulkConfig
+                    {
+                        UpdateByProperties = new List<string>
+                        {
+                            nameof(AssetDetailValueEntity.AttributeId),
+                            nameof(AssetDetailValueEntity.AssetDetailId)
+                        }
+                    };
+                    _unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
+                    foreach (var assetDetailValue in assetDetailValues)
+                    {
+                        var assetDetail = assets[assetDetailValue.AssetDetailId];
+                        AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
+                    }
                     batchIndex++;
+                    shouldContinueLoadingAssets = assetEntities.Any();
+                }
+                domainYear.Assets.AddRange(assets.Values);
+                foreach (var asset in domainYear.Assets)
+                {
+                    AssetDetailValueMapper.FillArea(asset.ValuePerNumericAttribute);
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
+            memos.Mark("Load done");
             var outputFilename = "LoadTimings.txt";
             WriteTimingsToFile(memos, outputFilename);
             return domain;

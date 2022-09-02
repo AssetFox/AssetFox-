@@ -106,27 +106,41 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         {
             foreach (var entity in entityCollection)
             {
-                var attributeName = attributeNameLookup[entity.AttributeId];
-                // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
-                switch (entity.Discriminator)
-                {
-                case AssetDetailValueDiscriminators.Number:
-                    if (entity.NumericValue.HasValue)
-                    {
-                        valuePerNumericAttribute[attributeName] = entity.NumericValue.Value;
-
-                    }
-                    break;
-                case AssetDetailValueDiscriminators.Text:
-                    valuePerTextAttribute[attributeName] = entity.TextValue;
-                    break;
-                }
+                AddToDictionary(entity, valuePerTextAttribute, valuePerNumericAttribute, attributeNameLookup);
             }
+            FillArea(valuePerNumericAttribute);
+        }
+
+        public static void FillArea(Dictionary<string, double> valuePerNumericAttribute)
+        {
             var areaKey = Network.DefaultSpatialWeightingIdentifier;
             var deckAreaKey = AttributeNameConstants.DeckArea;
             if (valuePerNumericAttribute.ContainsKey(deckAreaKey))
             {
                 valuePerNumericAttribute[areaKey] = valuePerNumericAttribute[deckAreaKey];
+            }
+        }
+
+        public static void AddToDictionary(
+            AssetDetailValueEntity entity,
+            Dictionary<string, string> valuePerTextAttribute,
+            Dictionary<string, double> valuePerNumericAttribute,
+            Dictionary<Guid, string> attributeNameLookup)
+        {
+            var attributeName = attributeNameLookup[entity.AttributeId];
+            // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
+            switch (entity.Discriminator)
+            {
+            case AssetDetailValueDiscriminators.Number:
+                if (entity.NumericValue.HasValue)
+                {
+                    valuePerNumericAttribute[attributeName] = entity.NumericValue.Value;
+
+                }
+                break;
+            case AssetDetailValueDiscriminators.Text:
+                valuePerTextAttribute[attributeName] = entity.TextValue;
+                break;
             }
         }
     }

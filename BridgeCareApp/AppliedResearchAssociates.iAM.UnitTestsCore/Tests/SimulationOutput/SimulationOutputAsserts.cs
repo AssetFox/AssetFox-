@@ -34,27 +34,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
         }
 
-        private static bool EndsWithDecimal(string str)
-        {
-            var length = str.Length;
-            var index = length - 1;
-            while (index > 0)
-            {
-                var c = str[index];
-                if (c == '.')
-                {
-                    return true;
-                }
-                if (c >= '0' && c <= '9')
-                {
-                    index--;
-                    continue;
-                }
-                return false;
-            }
-            return false;
-        }
-
         private static StringDecimalPair ExtractTrailingDecimal(string str)
         {
             var trimmed = str.Trim().TrimEnd(',');

@@ -202,6 +202,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             var rowNo = 1; var columnNo = 3;
             worksheet.Cells[rowNo, columnNo].Value = "Overall Dollars Recommended on Treatments by County";
             ExcelHelper.MergeCells(worksheet, rowNo, columnNo, rowNo, columnNo + (simulationYears.Count - 1));
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo + (simulationYears.Count - 1)]);
 
             //build header cells
             rowNo++; columnNo = 0;
@@ -209,6 +210,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             {
                 columnNo = column + 1;
                 worksheet.Cells[rowNo, columnNo].Value = headers[column];
+                ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, columnNo]);
             }
 
             //fill data in cells
@@ -236,6 +238,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                     }
 
                     ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGreen);
+                    ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo]);
                 }
 
                 //check and add summary row
@@ -272,7 +275,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                         worksheet.Cells[rowNo, columnNo++].Value = districtCostSum;
                     }
 
-                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGreen);
+                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.Green);
+                    ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo]);
                 }
             }
 
@@ -293,7 +297,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                 ExcelHelper.SetCurrencyFormat(worksheet.Cells[rowNo, columnNo]);
                 worksheet.Cells[rowNo, columnNo++].Value = stateCostSum;                
             }
-            ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightGreen);
+            ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.Green);
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo]);
 
             //set curretn cell value
             currentCell.Row = rowNo; currentCell.Column = columnNo;
@@ -314,6 +319,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
             {
                 columnNo = column + 1;
                 worksheet.Cells[rowNo, columnNo].Value = headers[column];
+                ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, columnNo]);
             }
 
             //fill data in cells
@@ -348,6 +354,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                     }
 
                     ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.LightBlue);
+                    ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo]);
                 }
 
                 //check and add summary row
@@ -375,7 +382,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Cou
                         worksheet.Cells[rowNo, columnNo++].Value = districtPercentSum;
                     }
 
-                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.RoyalBlue);
+                    ExcelHelper.ApplyColor(worksheet.Cells[rowNo, 1, rowNo, columnNo], Color.CadetBlue);
+                    ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, 1, rowNo, columnNo]);
                 }
             }
 

@@ -36,7 +36,8 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Takes about 70 minutes to run, provided the 522MB file exists.")]
+
         public void SaveSimulationOutput522_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename522);
@@ -68,22 +69,11 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutput, serializeLoaded);
         }
 
-        private void LoadSimulationOutput_Does(string filename, Guid simulationId)
-        {
-            var testHelper = new TestHelper(false);
-            var simulationOutput = testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
-            var text = FileReader.ReadAllTextInGitIgnoredFile(filename);
-            var outputFromFile = JsonConvert.DeserializeObject<SimulationOutput>(text);
-            var serializeOutputFromFile = JsonConvert.SerializeObject(outputFromFile);
-            var serializeLoaded = JsonConvert.SerializeObject(simulationOutput);
-            SimulationOutputAsserts.AssertCouldRepresentSameSimulationOutput(serializeOutputFromFile, serializeLoaded);
-        }
-
         /// <summary>This test checks a SimulationOutput. It saves it to the database, loads it back from the database,
         /// then checks that they are the same. For the test to run, you need a json-encoded SimulationOutput saved at the place
         /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
         // C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.StressTesting\GitIgnored\SimulationOutput.json
-        [Fact]
+        [Fact (Skip ="Takes about 3 minutes to run. Needs the above file.")]
         public void SaveSimulationOutput176_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);

@@ -38,10 +38,6 @@
                                         <v-btn @click="onShowCriterionLibraryEditorDialog(props.item)"  class="ghd-blue" icon style="margin-top:-6px;">
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>                                        
-                                        <!-- <v-icon @click='onShowCriterionLibraryEditorDialog(props.item)'
-                                                class='ghd-blue'>
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-icon> -->
                                     </template>
                                 </v-text-field>
                             </td>

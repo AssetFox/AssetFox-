@@ -178,12 +178,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         {
             var untreatedSections =
                     simulationYearDetail.Assets.Where(
-                        section => section.TreatmentCause == TreatmentCause.NoSelection && section.TreatmentOptions.Count > 0
+                        section => section.TreatmentCause == TreatmentCause.NoSelection
                         &&
-                        ((!string.IsNullOrEmpty(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
+                        (!string.IsNullOrEmpty(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) && int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND")) == 1)
                         ||
                         _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
-                        )).ToList();
+                        &&
+                        section.TreatmentOptions.Count > 0
+                        ).ToList();
             return untreatedSections;
         }
 

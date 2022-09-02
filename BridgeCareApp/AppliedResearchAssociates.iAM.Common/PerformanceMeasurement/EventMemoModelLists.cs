@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Debugging
+namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
 {
     public static class EventMemoModelLists
     {

@@ -88,15 +88,5 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);
         }
-
-
-
-        [Fact(Skip = "Actually does reset the db, even though it tries not to. May not ever want this.")]
-        public void LoadOutputFromDatabase_MatchesOutputFromFile()
-        {
-            var simulationIdString = "8F3B3D46-F294-404E-CDDC-08DA8AA13E89";
-            var simulationId = Guid.Parse(simulationIdString);
-            LoadSimulationOutput_Does(CannedSimulationOutput.Filename, simulationId);
-        }
     }
 }

@@ -67,7 +67,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.i
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Hubs", "AppliedResearchAssociates.iAM.Hubs\AppliedResearchAssociates.iAM.Hubs.csproj", "{1DB8CFBB-A791-4824-AE7E-07A175C8CAB8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.StressTesting", "AppliedResearchAssociates.iAM.StressTesting\AppliedResearchAssociates.iAM.StressTesting.csproj", "{A3BBDFCD-6D51-4122-A652-B055D78887B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.LongRunningTests", "AppliedResearchAssociates.iAM.StressTesting\AppliedResearchAssociates.iAM.LongRunningTests.csproj", "{A3BBDFCD-6D51-4122-A652-B055D78887B8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.Debugging", "AppliedResearchAssociates.iAM.Debugging\AppliedResearchAssociates.iAM.Debugging.csproj", "{D2F03561-86C4-48D1-92B0-6E5E20F230D5}"
 EndProject

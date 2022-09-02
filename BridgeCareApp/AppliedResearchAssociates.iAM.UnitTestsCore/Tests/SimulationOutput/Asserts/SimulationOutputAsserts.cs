@@ -48,5 +48,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             AssertCouldRepresentSameSimulationOutput(serializeExpected, serializeActual);
         }
 
+        public static void SameSimulationOutput(SimulationOutput expected, SimulationOutput actual)
+        {
+            Assert.Equal(expected.InitialConditionOfNetwork, actual.InitialConditionOfNetwork);
+            Assert.Equal(expected.InitialAssetSummaries.Count, actual.InitialAssetSummaries.Count);
+            Assert.Equal(expected.Years.Count, actual.Years.Count);
+            foreach (var expectedYear in expected.Years)
+            {
+                var actualYear = actual.Years.Single(y => y.Year == expectedYear.Year);
+                SimulationOutputYearAsserts.Same(expectedYear, actualYear);
+            }
+        }
     }
 }

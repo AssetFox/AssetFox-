@@ -60,6 +60,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, yearCount);
             _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            SimulationOutputAsserts.SameSimulationOutput(loadedOutput, simulationOutput);
             Canonicalize(simulationOutput);
             Canonicalize(loadedOutput);
             var serializeOutput = JsonConvert.SerializeObject(simulationOutput, Formatting.Indented);

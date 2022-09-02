@@ -84,7 +84,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
+                memos.Mark("All added to context");
                 _unitOfWork.Commit();
+                memos.Mark("Transaction committed");
             }
             catch (Exception ex)
             {

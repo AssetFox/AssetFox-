@@ -19,5 +19,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public Guid KeyAttribute { get; set; }
 
         public List<AttributeDTO> Attributes { get; set; }
+
+        public string DeafultSpatialWeighting { get; set; }
     }
 }

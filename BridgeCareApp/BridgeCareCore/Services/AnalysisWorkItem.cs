@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
 using BridgeCareCore.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {

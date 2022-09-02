@@ -109,7 +109,7 @@ namespace BridgeCareCore.Services
                             {
                                 foreach (var field in otherData)
                                 {
-                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId);
+                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId).KeyValue.Value;
                                 }
                             }
                             else

@@ -33,16 +33,32 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> AllNetworks()
         {
+            List<NetworkDTO> result;
             try
             {
-                var result = await UnitOfWork.NetworkRepo.Networks();
-                return Ok(result);
+                result = await UnitOfWork.NetworkRepo.Networks();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
                 throw;
             }
+
+
+            foreach (var network in result)
+            {
+                try
+                {
+                    network.DeafultSpatialWeighting = UnitOfWork.MaintainableAssetRepo.GetPredominantAssetSpatialWeighting(network.Id);
+                }
+                catch
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"Unable to get spatial weightings for network {network.Name}");
+                    // No throw here.  It is OK if this DTO remains null
+                }
+            }            
+
+            return Ok(result);
         }
 
         [HttpPost]

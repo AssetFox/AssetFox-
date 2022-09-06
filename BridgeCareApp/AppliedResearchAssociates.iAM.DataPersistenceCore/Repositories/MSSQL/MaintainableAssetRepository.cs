@@ -253,5 +253,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return asset;
         }
 
+        public string GetPredominantAssetSpatialWeighting(Guid networkId)
+        {
+            return _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.NetworkId == networkId)
+                .Select(_ => _.SpatialWeighting)
+                .GroupBy(_ => _)
+                .OrderByDescending(_ => _.Count())
+                .Select(_ => _.Key)
+                .FirstOrDefault();
+        }
     }
 }

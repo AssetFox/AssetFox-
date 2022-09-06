@@ -21,9 +21,6 @@
 
     public class ChartRowsModel
     {
-        public int TotalCountSectionYearsRow { get; set; }
-        public int TotalCountBPNYearsRow { get; set; }
-                
         public IRI_BPN_1_ChartModel IRI_BPN_1_ChartModel { get; set; }
         public IRI_BPN_2_ChartModel IRI_BPN_2_ChartModel { get; set; }
         public IRI_BPN_3_ChartModel IRI_BPN_3_ChartModel { get; set; }

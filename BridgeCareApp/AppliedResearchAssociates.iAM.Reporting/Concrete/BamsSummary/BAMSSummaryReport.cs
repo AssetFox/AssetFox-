@@ -32,6 +32,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTa
 using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using BridgeCareCore.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -204,7 +205,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 $"{BAMSConstants.CulvDurationN}"
             };
 
-            var logger = new HubServiceLogger(_hubService, HubConstant.BroadcastReportGenerationStatus, _unitOfWork.CurrentUser?.Username);
+            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
@@ -382,6 +383,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
+
+        private void UpdateSimulationAnalysisDetailWithStatus(SimulationReportDetailDTO dto, string message)
+        {
+            dto.Status = message;
+            UpdateSimulationAnalysisDetail(dto);
+        }
 
         private void IndicateError()
         {

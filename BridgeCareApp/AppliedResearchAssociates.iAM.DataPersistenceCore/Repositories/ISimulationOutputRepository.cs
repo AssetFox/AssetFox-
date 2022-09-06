@@ -7,8 +7,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface ISimulationOutputRepository
     {
-        void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog logger = null);
+        void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog logerForUserInfo = null, ILog loggerForTechnicalInfo = null);
 
-        SimulationOutput GetSimulationOutput(Guid simulationId, ILog logger = null);
+        SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechincalInfo = null);
     }
 }

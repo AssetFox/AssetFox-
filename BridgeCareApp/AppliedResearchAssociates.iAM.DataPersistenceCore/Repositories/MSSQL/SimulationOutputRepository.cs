@@ -24,9 +24,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog logger = null)
+        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
         {
-            logger ??= new DoNotLog();
+            loggerForTechnicalInfo ??= new DoNotLog();
+            loggerForUserInfo ??= new DoNotLog();
+            loggerForUserInfo.Information("Saving to database");
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -34,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 #pragma warning restore CS0162 // Unreachable code detected
             }
             var memos = EventMemoModelLists.GetFreshInstance("Save");
-            var startMemo = memos.MarkInformation("Starting save", logger);
+            var startMemo = memos.MarkInformation("Starting save", loggerForTechnicalInfo);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -69,7 +71,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
-                    var yearMemo = memos.MarkInformation($"Y{year.Year}", logger);
+                    loggerForUserInfo.Information($"Saving year {year.Year}");
+                    var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
@@ -83,14 +86,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
-                memos.MarkInformation("All added to context", logger);
+                memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
-                memos.MarkInformation("Transaction committed", logger);
+                memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);
+                loggerForUserInfo.Information("Save completed");
             }
             catch (Exception ex)
             {
                 var error = memos.Mark($"Save failed with exception {ex.Message}");
-                logger.Error(error);
+                loggerForTechnicalInfo.Error(error);
                 _unitOfWork.Rollback();
                 throw;
             }
@@ -105,11 +109,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             File.WriteAllText(path, serializedOutput);
         }
 
-        public SimulationOutput GetSimulationOutput(Guid simulationId, ILog logger = null)
+        public SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
         {
-            logger ??= new DoNotLog();
+            loggerForUserInfo ??= new DoNotLog();
+            loggerForTechinalInfo ??= new DoNotLog();
             var memos = EventMemoModelLists.GetFreshInstance("Load");
-            var startMemo = memos.MarkInformation("Starting load", logger);
+            var startMemo = memos.MarkInformation("Starting load", loggerForTechinalInfo);
+            loggerForUserInfo.Information("Loading SimulationOutput");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException($"Found no simulation having id {simulationId}");
@@ -171,7 +177,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     });
                 }
             }
-            var configMemo = memos.MarkInformation("assetSummary config", logger);
+            var configMemo = memos.MarkInformation("assetSummary config", loggerForTechinalInfo);
             _unitOfWork.Context.BulkRead(assetSummaryDetailValueEntities, assetSummaryDetailValueConfig);
             foreach (var assetSummaryDetailValueEntity in assetSummaryDetailValueEntities)
             {
@@ -182,10 +188,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 AssetSummaryDetailValueMapper.FillAreaAttributeValue(summaryValue.ValuePerNumericAttribute);
             }
-            var summariesDoneMemo = memos.MarkInformation("assetSummaries done", logger);
+            var summariesDoneMemo = memos.MarkInformation("assetSummaries done", loggerForTechinalInfo);
             foreach (var cacheYear in cacheYears)
             {
-                var yearMemo = memos.MarkInformation($"Y{cacheYear.Year}", logger);
+                var yearMemo = memos.MarkInformation($"Y{cacheYear.Year}", loggerForTechinalInfo);
+                loggerForUserInfo.Information($"Loading year {cacheYear.Year}");
                 var yearId = cacheYear.Id;
                 var year = cacheYear.Year;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail
@@ -256,7 +263,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 }
             }
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
-            memos.MarkInformation("Load done", logger);
+            memos.MarkInformation("Load done", loggerForTechinalInfo);
+            loggerForUserInfo.Information($"Simulation output load completed");
             return domain;
         }
 

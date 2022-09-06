@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -30,7 +32,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetTargetConditionGoalLibraries")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> TargetConditionGoalLibraries()
         {
             try
@@ -56,7 +58,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromScenario)]
         public async Task<IActionResult> GetScenarioTargetConditionGoals(Guid simulationId)
         {
             try
@@ -79,7 +81,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertTargetConditionGoalLibrary")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto)
         {
             try
@@ -116,7 +118,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioTargetConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyTargetConditionGoalFromScenario)]
         public async Task<IActionResult> UpsertScenarioTargetConditionGoals(Guid simulationId, List<TargetConditionGoalDTO> dtos)
         {
             try
@@ -147,7 +149,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteTargetConditionGoalLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.DeleteTargetConditionGoalFromLibrary)]
         public async Task<IActionResult> DeleteTargetConditionGoalLibrary(Guid libraryId)
         {
             try

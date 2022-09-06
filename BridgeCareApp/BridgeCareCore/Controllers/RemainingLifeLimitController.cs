@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -31,7 +33,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetRemainingLifeLimitLibraries")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ViewRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> RemainingLifeLimitLibraries()
         {
             try
@@ -57,7 +59,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioRemainingLifeLimits/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewRemainingLifeLimitFromScenario)]
         public async Task<IActionResult> GetScenarioRemainingLifeLimits(Guid simulationId)
         {
             try
@@ -80,7 +82,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertRemainingLifeLimitLibrary/")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto)
         {
             try
@@ -112,7 +114,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioRemainingLifeLimits/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromScenario)]
         public async Task<IActionResult> UpsertScenarioRemainingLifeLimits(Guid simulationId, List<RemainingLifeLimitDTO> dtos)
         {
             try
@@ -142,7 +144,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteRemainingLifeLimitLibrary/{libraryId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [Authorize(Policy = Policy.DeleteRemainingLifeLimitFromLibrary)]
         public async Task<IActionResult> DeleteRemainingLifeLimitLibrary(Guid libraryId)
         {
             try

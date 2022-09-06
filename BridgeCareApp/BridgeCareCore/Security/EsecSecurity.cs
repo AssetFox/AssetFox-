@@ -81,8 +81,6 @@ namespace BridgeCareCore.Security
 
             var decodedToken = DecodeToken(idToken);
 
-
-            var claims = new List<Claim>();
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
                 var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
@@ -94,24 +92,7 @@ namespace BridgeCareCore.Security
                 // Get the internal roles and subsequent claims from mapper
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.FirstOrDefault());
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
-
-                var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper.ToString());
-                var roleClaims = new List<Claim>
-                {
-                    roleClaim
-                };
-
-                // Convert the claim to a system claim for identity purposes
-                claimsFromMapper.ForEach(claim =>
-                {
-                    claims.Add(new Claim(ClaimTypes.Name, claim));
-                });
-
-                // Build the identity, add to user (claimsPrincipal)
-                var identity = new ClaimsIdentity(claims);
-                var roleClaimIdentity = new ClaimsIdentity(roleClaims);
-                request.HttpContext.User.AddIdentity(identity);                
-                request.HttpContext.User.AddIdentity(roleClaimIdentity);
+                request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims
                 //       once tested and verified.
@@ -129,24 +110,7 @@ namespace BridgeCareCore.Security
             {
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, "Administrator");
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
-
-                // Convert the claim to a system claim for identity purposes
-                var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper.ToString());
-                var roleClaims = new List<Claim>
-                {
-                    roleClaim
-                };
-                claimsFromMapper.ForEach(claim =>
-                {
-                    var c = new Claim(ClaimTypes.Name, claim);
-                    claims.Add(c);
-                });
-
-                // Build the identity, add to user (claimsPrincipal)
-                var identity = new ClaimsIdentity(claims);
-                var roleClaimIdentity = new ClaimsIdentity(roleClaims);
-                request.HttpContext.User.AddIdentity(identity);
-                request.HttpContext.User.AddIdentity(roleClaimIdentity);
+                request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims
                 //       once tested and verified.

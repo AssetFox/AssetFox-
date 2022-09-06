@@ -19,10 +19,16 @@
       <v-divider></v-divider>
       <v-card-text>
           <v-layout align-start row>
+            <v-select style="padding:0px !important"
+                :items='reports'
+                v-model='selectedReport'>
+            </v-select>
             <v-chip
+                round
                 color="ara-blue-bg"
                 text-color="white"
                 @click="onGenerateReport(true)"
+                :disabled="selectedReport === ''"
             >
                 Generate Summary Report
             </v-chip>
@@ -55,6 +61,7 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import {hasValue} from '@/shared/utils/has-value-util';
+import { SelectItem } from '@/shared/models/vue/select-item';
 
 @Component({})
 export default class ReportsDownloaderDialog extends Vue {
@@ -65,16 +72,27 @@ export default class ReportsDownloaderDialog extends Vue {
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
-    reports: string[] = [/*'Detailed Report', */'Summary Report', 'Simulation Log'];    
+    reports: SelectItem[] = [];   
+    selectedReport: string = ''; 
     isDownloading: boolean = false;
     reportIndexID: string = getBlankGuid();
+
+    mounted() {
+        const reports: string[] =  this.$config.reportType;
+        this.reports = reports.map(rep => {
+            return {text: rep, value: rep}
+        })
+
+        if(reports.length > 0)
+            this.selectedReport = reports[0];
+    }
 
     async onGenerateReport(download: boolean) {
         if (download) {            
             this.isDownloading = true;
             this.dialogData.showModal = false;
             await ReportsService.generateReport(
-                this.dialogData.scenarioId
+                this.dialogData.scenarioId, this.selectedReport
             ).then((response: AxiosResponse<any>) => {
                 this.isDownloading = false;
                 if (response.status == 200) {

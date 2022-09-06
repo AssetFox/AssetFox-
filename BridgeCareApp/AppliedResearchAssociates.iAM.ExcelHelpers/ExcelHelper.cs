@@ -129,5 +129,10 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         {
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
         }
+
+        public static void HorizontalRightAlign(ExcelRange cells)
+        {
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+        }
     }
 }

@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -30,7 +32,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDeficientConditionGoalLibraries")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewDeficientConditionGoalFromlLibrary)]
         public async Task<IActionResult> DeficientConditionGoalLibraries()
         {
             try
@@ -56,7 +58,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioDeficientConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewDeficientConditionGoalFromScenario)]
         public async Task<IActionResult> GetScenarioDeficientConditionGoals(Guid simulationId)
         {
             try
@@ -79,7 +81,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertDeficientConditionGoalLibrary/")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
         public async Task<IActionResult> UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto)
         {
             try
@@ -110,7 +112,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertScenarioDeficientConditionGoals/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromScenario)]
         public async Task<IActionResult> UpsertScenarioDeficientConditionGoals(Guid simulationId, List<DeficientConditionGoalDTO> dtos)
         {
             try
@@ -141,7 +143,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteDeficientConditionGoalLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
         public async Task<IActionResult> DeleteDeficientConditionGoalLibrary(Guid libraryId)
         {
             try

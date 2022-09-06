@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
-using BridgeCareCore.Security;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 

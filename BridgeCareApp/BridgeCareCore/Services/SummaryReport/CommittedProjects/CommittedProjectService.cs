@@ -109,7 +109,7 @@ namespace BridgeCareCore.Services
                             {
                                 foreach (var field in otherData)
                                 {
-                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId);
+                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId).KeyValue.Value;
                                 }
                             }
                             else
@@ -250,7 +250,7 @@ namespace BridgeCareCore.Services
          */
         private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
         {
-            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
             if (!assets.Any())
             {
                 throw new RowNotInTableException("There are no maintainable assets in the database.");
@@ -346,7 +346,9 @@ namespace BridgeCareCore.Services
                     // The location matches an asset in the network
                     locationInformation["ID"] = maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString();
                 }
-                
+                else
+                    throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
+
                 for (var column = 1; column <= _keyFields.Count; column++)
                 {
                     locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));

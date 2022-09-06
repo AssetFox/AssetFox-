@@ -21,11 +21,12 @@
         <v-flex xs12 v-if="hasSelectedAttribute" class="ghd-constant-header" >
             <v-layout>
                 <v-flex xs2> 
-                    <v-text-field outline style="padding-top: 20px !important" class="ghd-text-field-border ghd-text-field"
+                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+                    <v-text-field outline class="ghd-text-field-border ghd-text-field"
                         placeholder="Name" v-model='selectedAttribute.name'/>
                 </v-flex>
                 <v-flex xs2>
-                    <v-subheader class="ghd-md-gray ghd-control-label">Type</v-subheader>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
                         outline
                         append-icon=$vuetify.icons.ghd-down                           
@@ -52,27 +53,26 @@
             <v-flex xs10>
                 <v-layout>
                     <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
                         <v-text-field v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Default Value"
                             v-model='selectedAttribute.defaultValue'/>
                         <v-text-field v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Default Value"
                             v-model.number='selectedAttribute.defaultValue'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Minimum Value"
+                        <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
+                        <v-text-field outline class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
                         <v-text-field outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Maximum Value"
                             v-model.number='selectedAttribute.maximum'
                             :mask="'#############'"/>
                     </v-flex>
-                    <v-flex xs4>
+                    <v-flex xs4 style="padding-top:50px;">
                         <v-layout>
                         <v-switch class='sharing header-text-content' label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>

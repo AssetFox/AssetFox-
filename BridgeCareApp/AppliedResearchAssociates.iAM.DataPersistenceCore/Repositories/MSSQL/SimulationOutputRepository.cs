@@ -71,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
-                    loggerForUserInfo.Information($"Saving year {year.Year}");
+                    loggerForUserInfo.Information($"Preparing to save {year.Year}");
                     var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
@@ -86,6 +86,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
+                loggerForUserInfo.Information("Completing database transaction");
                 memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
                 memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);
@@ -192,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             foreach (var cacheYear in cacheYears)
             {
                 var yearMemo = memos.MarkInformation($"Y{cacheYear.Year}", loggerForTechinalInfo);
-                loggerForUserInfo.Information($"Loading year {cacheYear.Year}");
+                loggerForUserInfo.Information($"Loading {cacheYear.Year}");
                 var yearId = cacheYear.Id;
                 var year = cacheYear.Year;
                 var loadedYearWithoutAssets = _unitOfWork.Context.SimulationYearDetail

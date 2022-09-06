@@ -1,6 +1,7 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { Attribute } from '@/shared/models/iAM/attribute';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 
 export default class AttributeService {
     static getAttributes(): AxiosPromise {
@@ -30,10 +31,7 @@ export default class AttributeService {
     static GetAttributeDataSourceTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
     }
-    static CheckCommand(sqlCommand: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
+    static CheckCommand(sqlCommand: TestStringData): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/`, sqlCommand);
     }
-    /*static CheckCommand(sqlCommand: string): AxiosPromise {
-        return coreAxiosInstance.post(`${API.Attribute}/CheckCommand/${sqlCommand}`);
-    }*/
 }

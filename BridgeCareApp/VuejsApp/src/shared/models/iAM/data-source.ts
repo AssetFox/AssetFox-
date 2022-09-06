@@ -53,5 +53,14 @@ export const emptyDatasource: Datasource = {
     secure: false,
     type: ''
 }
+export const noneDatasource: Datasource = {
+    id: getNewGuid(),
+    name: 'None',
+    connectionString: '',
+    locationColumn: '',
+    dateColumn: '',
+    secure: false,
+    type: ''
+}
 export const DSSQL: string = 'SQL';
 export const DSEXCEL: string = 'Excel';

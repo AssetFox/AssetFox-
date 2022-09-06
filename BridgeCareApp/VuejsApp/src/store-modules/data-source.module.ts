@@ -7,7 +7,8 @@ import {
     RawDataColumns, 
     SqlDataSource, 
     SqlCommandResponse, 
-    emptySqlCommandResponse
+    emptySqlCommandResponse,
+    TestConnection
 } from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
@@ -100,7 +101,7 @@ const actions = {
     },
     async checkSqlCommand(
         {commit}: any,
-        payload: string
+        payload: TestConnection
     ) {
         await DataSourceService.checkSqlConnection(
             payload

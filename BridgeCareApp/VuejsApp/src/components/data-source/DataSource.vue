@@ -32,6 +32,7 @@
             </v-select>
         </v-layout>
         <v-layout column class="cs-style">
+            <div v-show="!isNewDataSource">
             <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
             <v-layout class="txt-style" row>
                 <v-text-field
@@ -66,6 +67,7 @@
               outlined
             >
             </v-select>
+            </div>
         </v-layout>
         <v-layout column>
             <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String</v-subheader>
@@ -82,7 +84,8 @@
                         </v-textarea>
                         <p class="p-success Montserrat-font-family" v-show="sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
                         <p class="p-fail Montserrat-font-family" v-show="!sqlValid && showSqlMessage">Test Connection: {{sqlResponse}}</p>
-                        <p class="p-success Montserrat-font-family" v-show="showSaveMessage">Successfully saved!</p>
+                        <p class="p-success Montserrat-font-family" v-show="showSaveMessage">Successfully saved.</p>
+                        <p class="ara-blue Montserrat-font-family" v-show="isNewDataSource && showExcel">Save new data source before loading file.</p>
                         <p class="p-fail Montserrat-font-family" v-show="false">Error! {{invalidColumn}} Column is invalid</p>
                     </v-flex>
             </v-layout>
@@ -92,7 +95,7 @@
                 <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
                 <v-btn v-show="showMssql || showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
-                <v-btn v-show="showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
+                <v-btn v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
             </v-flex>
         </v-layout>
 
@@ -114,9 +117,10 @@ import {
     DataSourceExcelColumns, 
     RawDataColumns, 
     SqlDataSource, 
-    ExcelDataSource, 
+    ExcelDataSource,
     SqlCommandResponse
 } from '@/shared/models/iAM/data-source';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {
     CreateDataSourceDialogData,
@@ -168,6 +172,7 @@ export default class DataSource extends Vue {
     showExcel: boolean = false;
     showSqlMessage: boolean = false;
     showSaveMessage: boolean = false;
+    isNewDataSource: boolean = false;
     allowSaveData: boolean = false;
 
     fileName: string | null = '';
@@ -281,6 +286,7 @@ export default class DataSource extends Vue {
                     secure: this.currentDatasource.secure
             };
             this.upsertSqlDataSourceAction(sqldat).then(() => {
+                this.showSqlMessage = false;
                 this.showSaveMessage = true;
                 this.getDataSourcesAction();
             });
@@ -294,8 +300,12 @@ export default class DataSource extends Vue {
             secure: this.currentDatasource.secure
             }
             this.upsertExcelDataSourceAction(exldat).then(() => {
-                this.showSaveMessage = true;
-                this.getDataSourcesAction();
+                if (!this.isNewDataSource) {
+                    this.showSaveMessage = true;
+                }
+                this.getDataSourcesAction().then(() => {
+                    this.isNewDataSource = false;
+                });
             });
         }
     }
@@ -314,6 +324,7 @@ export default class DataSource extends Vue {
         this.selectedConnection = datasource.connectionString;
         this.datColumns = [];
         this.locColumns = [];
+        this.isNewDataSource = true;
         }
     }
     allowSave(): boolean {
@@ -361,11 +372,15 @@ export default class DataSource extends Vue {
     }
     checkSQLConnection() {
         if (this.currentDatasource != undefined) {
-            let connStr = this.currentDatasource.connectionString;
-            const regex1 = new RegExp(/\\/,'g');
-            connStr = connStr.replace(regex1, "%5C");
+            this.showSqlMessage = false;
+            this.showSaveMessage = false;
+            let connStr: string = this.currentDatasource.connectionString;
+            //const regex1 = new RegExp(/\\/,'g');
+            //connStr = connStr.replace(regex1, "%5C");
 
-            this.checkSqlCommandAction(connStr).then(() => {
+            let testConnection: TestStringData = {testString: connStr};
+
+            this.checkSqlCommandAction(testConnection).then(() => {
                 this.sqlValid = this.sqlCommandResponse.isValid;
                 this.sqlResponse = this.sqlCommandResponse.validationMessage;
                 this.showSqlMessage = true;

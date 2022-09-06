@@ -155,12 +155,13 @@
 <script lang='ts'>
 import AttributeService from '@/services/attribute.service';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
-import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
+import { Datasource, emptyDatasource, RawDataColumns, noneDatasource } from '@/shared/models/iAM/data-source';
 import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import { any, clone, find, isNil, propEq } from 'ramda';
@@ -168,12 +169,14 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, Getter, State } from 'vuex-class';
+import { Console } from 'console';
 
 @Component({
     
 })
 export default class Attributes extends Vue {
     hasSelectedAttribute: boolean = false;
+    hasEmptyDataSource: boolean = true;
     selectAttributeItemValue: string | null = null;
     selectDatasourceItemValue: string | null = null;
     selectAttributeItems: SelectItem[] = [];
@@ -185,7 +188,7 @@ export default class Attributes extends Vue {
     rules: InputValidationRules = rules;
     validationErrorMessage: string = '';
     ValidationSuccessMessage: string = '';
-    commandIsValid = true
+    commandIsValid: boolean = true;
     checkedCommand = '';
 
     aggregationRuleSelectValues: SelectItem[] = []
@@ -244,6 +247,13 @@ export default class Attributes extends Vue {
             text: datasource.name + ' - ' + datasource.type,
             value: datasource.id,
         }));
+
+        let noneDs = {
+            text: noneDatasource.name,
+            value: noneDatasource.id,
+        }
+
+        this.selectDatasourceItems.push(noneDs);
     }
 
  
@@ -274,6 +284,7 @@ export default class Attributes extends Vue {
             )
             if(!isNil(ds))
             {
+                console.log(ds);
                 this.selectedAttribute.dataSource = ds
                 if(this.selectedAttribute.dataSource.type === "Excel"){
                     this.getExcelSpreadsheetColumnHeadersAction(this.selectedAttribute.dataSource.id)
@@ -297,8 +308,10 @@ export default class Attributes extends Vue {
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {
         this.selectedAttribute = clone(this.stateSelectedAttribute);
-        if(isNil(this.selectedAttribute.dataSource))
+        if(isNil(this.selectedAttribute.dataSource)) {
             this.selectedAttribute.dataSource = clone(emptyDatasource);
+        }
+        this.selectDatasourceItemValue = this.selectedAttribute.dataSource.id;
     }
 
     @Watch('selectedAttribute', {deep: true})
@@ -363,7 +376,8 @@ export default class Attributes extends Vue {
     }
 
     CheckSqlCommand(){
-        AttributeService.CheckCommand(this.selectedAttribute.command)
+        let commandData: TestStringData = {testString: this.selectedAttribute.command};
+        AttributeService.CheckCommand(commandData)
             .then((response: AxiosResponse) => {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;

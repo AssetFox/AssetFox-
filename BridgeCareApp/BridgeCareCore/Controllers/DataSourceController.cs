@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Linq;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore.Controllers
 {
@@ -38,7 +39,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertSqlDataSource")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> UpsertSqlDataSource(SQLDataSourceDTO dto)
         {
             try
@@ -58,7 +59,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertExcelDataSource")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> UpsertExcelDataSource(ExcelDataSourceDTO dto)
         {
             try
@@ -77,7 +78,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpDelete]
         [Route("DeleteDataSource/{dataSourceId}")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> DeleteDataSource(Guid dataSourceId)
         {
             try
@@ -98,7 +99,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSources")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSources()
         {
             try
@@ -115,7 +116,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSource/{dataSourceId}")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSource(Guid dataSourceId)
         {
             try
@@ -140,7 +141,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetDataSourceTypes")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceViewAccess")]
         public async Task<IActionResult> GetDataSourceTypes()
         {
             try
@@ -158,7 +159,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckSqlConnection/{connectionString}")]
-        [Authorize]
+        [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> CheckSqlConnection(string connectionString)
         {
             try

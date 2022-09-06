@@ -23,7 +23,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetUserCriteria")]
-        [Authorize]
+        [ClaimAuthorize("UserCriteriaViewAccess")]
         public async Task<IActionResult> GetUserCriteria()
         {
             try
@@ -49,7 +49,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllUserCriteria")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaViewAccess")]
         public async Task<IActionResult> GetAllUserCriteria()
         {
             try
@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertUserCriteria")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> UpsertUserCriteria([FromBody] UserCriteriaDTO userCriteria)
         {
             try
@@ -90,7 +90,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("RevokeUserAccess/{userCriteriaId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> RevokeUserAccess(Guid userCriteriaId)
         {
             try
@@ -114,7 +114,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteUser/{userId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
             try

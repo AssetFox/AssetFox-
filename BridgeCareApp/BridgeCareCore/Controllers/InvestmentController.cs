@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -192,7 +194,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetInvestment/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewInvestmentFromScenario)]
         public async Task<IActionResult> GetInvestment(Guid simulationId)
         {
             try
@@ -210,7 +212,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertInvestment/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyInvestmentFromScenario)]
         public async Task<IActionResult> UpsertInvestment(Guid simulationId, [FromBody] InvestmentDTO data)
         {
             try
@@ -239,7 +241,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetBudgetLibraries")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewInvestmentFromLibrary)]
         public async Task<IActionResult> GetBudgetLibraries()
         {
             try
@@ -257,7 +259,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertBudgetLibrary")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
         public async Task<IActionResult> UpsertBudgetLibrary([FromBody] BudgetLibraryDTO data)
         {
             try
@@ -281,7 +283,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteBudgetLibrary/{libraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
         public async Task<IActionResult> DeleteBudgetLibrary(Guid libraryId)
         {
             try
@@ -323,7 +325,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportLibraryInvestmentBudgetsExcelFile")]
-        [Authorize]
+        [Authorize(Policy = Policy.ImportInvestmentFromLibrary)]
         public async Task<IActionResult> ImportLibraryInvestmentBudgetsExcelFile()
         {
             try
@@ -384,7 +386,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("ImportScenarioInvestmentBudgetsExcelFile")]
-        [Authorize]
+        [Authorize(Policy = Policy.ImportInvestmentFromScenario)]
         public async Task<IActionResult> ImportScenarioInvestmentBudgetsExcelFile()
         {
             try

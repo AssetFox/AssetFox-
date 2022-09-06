@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
+using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -56,6 +59,22 @@ namespace BridgeCareCore.Utils
             }
             var rolesToken = securityTypeToken.SelectToken("RolesClaims");
             return rolesToken;
+        }
+
+        public ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper)
+        {
+            var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper);
+            var roleClaims = new List<Claim> { roleClaim };
+
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(roleClaims);
+            claimsFromMapper.ForEach(claim =>
+            {
+                if (!claimsPrincipal.HasClaim(pclaim => pclaim.Value == claim))
+                {
+                    claimsIdentity.AddClaim(new Claim(ClaimTypes.Name, claim));
+                }
+            });
+            return claimsIdentity;
         }
     }
 }

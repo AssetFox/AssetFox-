@@ -244,16 +244,9 @@ export default class Attributes extends Vue {
     @Watch('stateDataSources')
     onStateDataSourcesChanged() {
         this.selectDatasourceItems = this.stateDataSources.map((datasource: Datasource) => ({
-            text: datasource.name + ' - ' + datasource.type,
+            text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
-
-        let noneDs = {
-            text: noneDatasource.name,
-            value: noneDatasource.id,
-        }
-
-        this.selectDatasourceItems.push(noneDs);
     }
 
  
@@ -284,7 +277,6 @@ export default class Attributes extends Vue {
             )
             if(!isNil(ds))
             {
-                console.log(ds);
                 this.selectedAttribute.dataSource = ds
                 if(this.selectedAttribute.dataSource.type === "Excel"){
                     this.getExcelSpreadsheetColumnHeadersAction(this.selectedAttribute.dataSource.id)

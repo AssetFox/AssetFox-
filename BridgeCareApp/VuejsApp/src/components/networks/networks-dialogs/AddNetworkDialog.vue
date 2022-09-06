@@ -48,12 +48,13 @@ export default class AddNetworkDialog extends Vue {
   networkName: string = 'New Network';
 
 
-  @Watch('datasourceName')
+  @Watch('networkName')
     onDataSourceNameChanged() {
         this.newNetwork.name = this.networkName;
     }
   @Watch('dialogData')
   onDialogDataChanged() {
+    console.log(this.networkName);
 
     this.newNetwork = {
       ...this.newNetwork,

@@ -8,7 +8,8 @@ import {
     SqlDataSource, 
     SqlCommandResponse, 
     emptySqlCommandResponse,
-    TestConnection
+    TestConnection,
+    noneDatasource
 } from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
@@ -25,6 +26,7 @@ const state = {
 
 const mutations = {
     dataSourceMutator(state: any, dataSources: Datasource[]) {
+        dataSources.push(noneDatasource);
         state.dataSources = clone(dataSources);
     },
     dataSourceTypesMutator(state: any, dataSourceTypes: string[]) {

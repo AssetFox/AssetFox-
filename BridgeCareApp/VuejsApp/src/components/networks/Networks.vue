@@ -20,7 +20,7 @@
             </v-flex>
         </v-flex>
         <v-divider />
-        <v-flex xs12 class="ghd-constant-header" >
+        <v-flex xs12 class="ghd-constant-header" v-show="hasSelectedNetwork">
             <v-layout justify-space-between>
                 <v-flex xs6>
                     <v-layout column>
@@ -30,13 +30,14 @@
                         <v-select
                             outline                           
                             class="ghd-select ghd-text-field ghd-text-field-border"
+                            :disabled="!isNewNetwork"
                             v-model="selectedKeyAttributeItem"
                             :items='selectKeyAttributeItems'>
                         </v-select>  
                     </v-layout>                         
                 </v-flex>
                 <v-flex xs5>
-                <v-layout >
+                <v-layout v-show="!isNewNetwork">
                     <v-select
                         outline 
                         :items="selectDataSourceItems"  
@@ -55,7 +56,7 @@
             </v-layout>
         </v-flex>
         <!-- Data source combobox -->
-        <v-flex xs12 >
+        <v-flex xs12 v-show="hasSelectedNetwork">
             <v-layout justify-space-between>
                 <v-flex xs5 >
                     <v-layout column>
@@ -69,18 +70,39 @@
                                         style="padding-right:20px !important;"
                                         class="edit-icon ghd-control-label"
                                         icon
+                                        :disabled="!isNewNetwork"
                                         @click="onShowEquationEditorDialog">
                                         <v-icon class="ghd-blue">fas fa-edit</v-icon>
                                     </v-btn>
                                 </v-flex>
                             </v-layout>
                         <v-text-field outline class="ghd-text-field-border ghd-text-field" 
-                            v-model="spatialWeightingEquationValue.expression"/>                         
+                           :disabled="!isNewNetwork" v-model="spatialWeightingEquationValue.expression"/>                         
+                    </v-layout>
+                    <v-layout v-show="hasStartedAggregation">
+                        <v-flex>
+                            <v-subheader class="ghd-control-label ara-black" v-text="networkDataAssignmentStatus" ></v-subheader>
+                            <v-progress-linear
+                                            v-model="
+                                                networkDataAssignmentPercentage
+                                            "
+                                            height="25"
+                                            striped
+                                        >
+                                            <strong
+                                                >{{
+                                                    Math.ceil(
+                                                        networkDataAssignmentPercentage,
+                                                    )
+                                                }}%</strong
+                                            >
+                                        </v-progress-linear>
+                        </v-flex>
                     </v-layout>
                 </v-flex>
                 <v-flex xs5>
                     <v-layout column>
-                        <div class='priorities-data-table'>
+                        <div class='priorities-data-table' v-show="!isNewNetwork">
                             <v-layout justify-center>
                                 <v-btn flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'
                                     @click="onAddAll">
@@ -119,16 +141,17 @@
             </v-layout>
         </v-flex>
         <!-- The Buttons  -->
-        <v-flex xs12 >        
+        <v-flex xs12 v-show="hasSelectedNetwork">        
             <v-layout justify-center style="padding-top: 30px !important">
                 <v-btn :disabled='!hasUnsavedChanges' @click='onDiscardChanges'
                     flat class='ghd-blue ghd-button-text ghd-button'>
                     Cancel
                 </v-btn>  
-                <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' class='ghd-blue-bg white--text ghd-button-text ghd-button'>
+                <v-btn @click='aggregateNetworkData' :disabled='disableCrudButtonsAggregate() || isNewNetwork' v-show="!isNewNetwork" class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Aggregate
                 </v-btn>
                 <v-btn @click='createNetwork' :disabled='disableCrudButtonsCreate() || !isNewNetwork'
+                    v-show="isNewNetwork"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'>
                     Create
                 </v-btn>            
@@ -160,7 +183,7 @@ import {
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
 import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
-import { clone, filter, findIndex, isNil, propEq, update } from 'ramda';
+import { clone, filter, findIndex, isNil, propEq, update, any, find } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { getBlankGuid } from '@/shared/utils/uuid-utils';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
@@ -168,6 +191,8 @@ import { InputValidationRules, rules } from '@/shared/utils/input-validation-rul
 import  AddNetworkDialog from '@/components/networks/networks-dialogs/AddNetworkDialog.vue';
 import { AddNetworkDialogData, emptyAddNetworkDialogData } from '@/shared/models/modals/add-network-dialog-data';
 import { NetworkRequestType } from 'msal/lib-commonjs/utils/Constants';
+import { Hub } from '@/connectionHub';
+import { NetworkRollupDetail } from '@/shared/models/iAM/network-rollup-detail';
 
 @Component({
     components: {
@@ -215,6 +240,9 @@ export default class Networks extends Vue {
         {text: 'None', value: 'None'}
     ]; 
 
+    networkDataAssignmentPercentage = 0;
+    networkDataAssignmentStatus: string = 'Waiting on server.';
+
     selectedKeyAttributeItem: string = '';
     selectedKeyAttribute: Attribute = clone(emptyAttribute);
     selectedNetwork: Network = clone(emptyNetwork);
@@ -222,6 +250,8 @@ export default class Networks extends Vue {
     selectDataSourceId: string = '';
     hasSelectedNetwork: boolean = false;
     isNewNetwork: boolean = false;
+    hasStartedAggregation: boolean = false;
+    isKeyPropertySelectedAttribute: boolean = false;
     spatialWeightingEquationValue: Equation = clone(emptyEquation); //placeholder until network dto and api changes
     equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
@@ -234,6 +264,13 @@ export default class Networks extends Vue {
             vm.getDataSources();
         });
     }
+
+    mounted() {
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
+    }
     
     @Watch('stateNetworks')
     onStateNetworksChanged() {
@@ -242,16 +279,10 @@ export default class Networks extends Vue {
             value: network.id,
         }));
     }
-    /*@Watch('stateAttributes')
+    @Watch('stateAttributes')
     onStateAttributesChanged() {
+        this.attributeRows = clone(this.stateAttributes);
         this.selectKeyAttributeItems = this.stateAttributes.map((attribute: Attribute) => ({
-            text: attribute.name,
-            value: attribute.id,
-        }));
-    }*/
-    @Watch('selectedAttributeRows')
-    onSelectedAttributeRowsChanged() {
-        this.selectKeyAttributeItems = this.selectedAttributeRows.map((attribute: Attribute) => ({
             text: attribute.name,
             value: attribute.id,
         }));
@@ -268,6 +299,17 @@ export default class Networks extends Vue {
         this.selectNetworkAction(this.selectNetworkItemValue);
         this.hasSelectedNetwork = true;
     }
+    @Watch('selectedAttributeRows')
+    onSelectedAttributeRowsChanged()
+    {
+        console.log(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows));
+        if(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows)) {
+            this.isKeyPropertySelectedAttribute = true;
+        }
+        else {
+            this.isKeyPropertySelectedAttribute = false;
+        }
+    }
     
     @Watch('stateSelectedNetwork')
     onStateSelectedNetworkChanged() {
@@ -277,8 +319,11 @@ export default class Networks extends Vue {
     }
     @Watch('selectedNetwork', {deep: true})
     onSelectedNetworkChanged() {
-        this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute
-        this.attributeRows = this.selectedNetwork.attributes;
+        this.hasStartedAggregation = false;
+        this.selectNetworkItemValue = this.selectedNetwork.id;
+        this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute;
+        this.spatialWeightingEquationValue.expression = this.selectedNetwork.defaultSpatialWeighting;
+        //this.attributeRows = this.selectedNetwork.attributes;
 
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
@@ -286,7 +331,7 @@ export default class Networks extends Vue {
     @Watch('selectedKeyAttributeItem')
     onSelectedKeyAttributeItemChanged()
     {
-        this.selectedKeyAttribute = this.selectedAttributeRows.find((attr: Attribute) => attr.id = this.selectedKeyAttributeItem) || clone(emptyAttribute);
+        this.selectedKeyAttribute = this.attributeRows.find((attr: Attribute) => attr.id === this.selectedKeyAttributeItem) || clone(emptyAttribute);
     }
     onAddNetworkDialog() {
         this.addNetworkDialogData = {
@@ -322,8 +367,8 @@ export default class Networks extends Vue {
         };      
     }
     selectAllFromSource(){
-        this.cleanAttributes = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource != null));
-        this.attributeRows = this.cleanAttributes.filter((attr: Attribute) => attr.dataSource.id === this.selectDataSourceId);
+        this.selectedAttributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource.id == this.selectDataSourceId));
+       // this.attributeRows = this.cleanAttributes.filter((attr: Attribute) => attr.dataSource.id === this.selectDataSourceId);
     }
     onAddAll(){
         this.selectedAttributeRows = clone(this.attributeRows)
@@ -336,21 +381,25 @@ export default class Networks extends Vue {
             attributes: this.selectedAttributeRows,
             networkId: this.selectNetworkItemValue
         });
+
+        this.hasStartedAggregation = true;
     }
     disableCrudButtonsCreate() {
+
         let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true
+            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true;
 
 
         return !allValid;
     }
     disableCrudButtonsAggregate() {
+        let isKeyPropertySelectedAttribute: Boolean = any(propEq('id', this.selectedNetwork.KeyAttribute), this.selectedAttributeRows);
+
         let allValid = this.rules['generalRules'].valueIsNotEmpty(this.selectedNetwork.name) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.spatialWeightingEquationValue.expression) === true
             && this.rules['generalRules'].valueIsNotEmpty(this.selectedAttributeRows) === true
-            && this.rules['generalRules'].valueIsNotEmpty(this.selectedKeyAttributeItem) === true
+            && this.isKeyPropertySelectedAttribute === true
+            && this.hasStartedAggregation === false;
 
 
         return !allValid;
@@ -367,6 +416,14 @@ export default class Networks extends Vue {
         })
 
     }
+
+    getDataAggregationStatus(data: any) {
+        const networkRollupDetail: NetworkRollupDetail = data.networkRollupDetail as NetworkRollupDetail;
+        if (networkRollupDetail.networkId === this.selectedNetwork.id){
+            this.networkDataAssignmentStatus = networkRollupDetail.status;
+            this.networkDataAssignmentPercentage = data.percentage as number;
+        }
+    }
     
     pages() {
         this.pagination.totalItems = this.attributeRows.length
@@ -374,6 +431,13 @@ export default class Networks extends Vue {
             return 0
 
         return Math.ceil(this.pagination.totalItems / this.pagination.rowsPerPage)
+    }
+
+    beforeDestroy() {
+        this.$statusHub.$off(
+            Hub.BroadcastEventType.BroadcastAssignDataStatusEvent,
+            this.getDataAggregationStatus,
+        );
     }
 }
 </script>

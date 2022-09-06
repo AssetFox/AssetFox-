@@ -60,7 +60,7 @@ export const noneDatasource: Datasource = {
     locationColumn: '',
     dateColumn: '',
     secure: false,
-    type: ''
+    type: 'None'
 }
 export const DSSQL: string = 'SQL';
 export const DSEXCEL: string = 'Excel';

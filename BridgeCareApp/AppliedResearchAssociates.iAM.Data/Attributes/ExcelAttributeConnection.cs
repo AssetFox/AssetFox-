@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                     {
                         _dateColumn = column;
                     }
-                    else if (columnName == attribute.Name)
+                    else if (columnName == attribute.Command)
                     {
                         _dataColumn = column;
                     }

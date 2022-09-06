@@ -21,6 +21,7 @@ export interface Network {
     createdDate?: Date;
     lastModifiedDate?: Date;
     status?: string;
+    defaultSpatialWeighting: string;
     benefitQuantifier: BenefitQuantifier;
     networkDataAssignmentPercentage: number;
     KeyAttribute: string;

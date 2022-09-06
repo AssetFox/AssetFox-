@@ -20,6 +20,6 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public List<AttributeDTO> Attributes { get; set; }
 
-        public string DeafultSpatialWeighting { get; set; }
+        public string DefaultSpatialWeighting { get; set; }
     }
 }

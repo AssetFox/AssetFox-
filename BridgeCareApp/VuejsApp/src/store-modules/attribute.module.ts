@@ -1,9 +1,10 @@
-import {clone, any, propEq, update, findIndex, append, find} from 'ramda';
+import {clone, any, propEq, update, findIndex, append, find, isNil} from 'ramda';
 import AttributeService from '@/services/attribute.service';
 import {AxiosResponse} from 'axios';
 import {Attribute, AttributeSelectValues, AttributeSelectValuesResult, emptyAttribute} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
+import { noneDatasource } from '@/shared/models/iAM/data-source';
 
 const state = {
     attributes: [] as Attribute[],
@@ -45,7 +46,13 @@ const mutations = {
         (state.attributes as Attribute[]).sort((one, two) => (one.name.toUpperCase() < two.name.toUpperCase() ? -1 : 1));
     },
     attributesMutatorClone(state: any,attributes: Attribute[]){
-        state.attributes = clone(attributes);
+        let cleanAttributes = attributes.map( attr => {
+            if(isNil(attr.dataSource)) {
+                attr.dataSource = clone(noneDatasource);
+            }
+            return attr;
+        });
+        state.attributes = clone(cleanAttributes);
     },
     stringAttributesMutator(state: any, stringAttributes: string[]) {
         state.stringAttributes = clone(stringAttributes);

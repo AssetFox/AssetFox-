@@ -49,7 +49,7 @@ namespace BridgeCareCore.Controllers
             {
                 try
                 {
-                    network.DeafultSpatialWeighting = UnitOfWork.MaintainableAssetRepo.GetPredominantAssetSpatialWeighting(network.Id);
+                    network.DefaultSpatialWeighting = UnitOfWork.MaintainableAssetRepo.GetPredominantAssetSpatialWeighting(network.Id);
                 }
                 catch
                 {
@@ -85,6 +85,7 @@ namespace BridgeCareCore.Controllers
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                         AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, mappedDataSource, UnitOfWork)), parameters.DefaultEquation);
                     network.Name = networkName;
+                    network.KeyAttributeId = parameters.NetworkDefinitionAttribute.Id;
 
                     // insert network domain data into the data source
                     UnitOfWork.NetworkRepo.CreateNetwork(network);

@@ -147,7 +147,9 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var dataSourceArray = (DataSourceTypeStrings[])Enum.GetValues(typeof(DataSourceTypeStrings));
-                var result = dataSourceArray.Select(v => v.ToString()).ToList();
+                //All and None are internal data types we do not want to expose to the UI
+                var result = dataSourceArray.Where(q => q.ToString() != "All" && q.ToString() != "None")
+                    .Select(v => v.ToString()).ToList();
                 return Ok(result);
             }
             catch (Exception e)

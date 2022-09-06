@@ -149,7 +149,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "SimulationViewPermittedAccess",
@@ -261,7 +261,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
           "InternalRole": "Editor",
           "Claims": [
             "SimulationUpdatePermittedAccess",
@@ -326,7 +326,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "SimulationViewPermittedAccess",

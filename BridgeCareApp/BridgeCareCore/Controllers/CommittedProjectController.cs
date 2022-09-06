@@ -290,7 +290,27 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ValidateExistenceOfAssets/{networkId}")]
+        [Authorize]
+        public async Task<IActionResult> ValidateExistenceOfAssets(Guid networkId, List<string> brkeys)
+        {
+            try
+            {
+                var result = new Dictionary<string, bool>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValuesExists(networkId, brkeys);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
             }

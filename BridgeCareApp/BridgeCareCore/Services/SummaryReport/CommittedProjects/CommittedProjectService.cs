@@ -471,13 +471,14 @@ namespace BridgeCareCore.Services
 
         public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
         {
-            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
             if (simulation == null)
                 return 0;
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            
             if (asset == null)
                 return 0;
-            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment
+            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -492,7 +493,7 @@ namespace BridgeCareCore.Services
                 var compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 var calculator = compiler.GetCalculator(cost.Expression);
                 var scope = new CalculateEvaluateScope();
@@ -509,13 +510,13 @@ namespace BridgeCareCore.Services
         public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
-            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
             if (simulation == null)
                 return consequencesToReturn;
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment
+            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Include(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -534,7 +535,7 @@ namespace BridgeCareCore.Services
                 }
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 if (aggResults.Count != attributes.Count)
                     continue;
@@ -565,7 +566,7 @@ namespace BridgeCareCore.Services
                 hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
             }
 
-            var attributes = _unitOfWork.Context.Attribute
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
                 .Where(_ => hashMatch.Contains(_.Name))
                 .Select(attribute => new AttributeEntity
                 {

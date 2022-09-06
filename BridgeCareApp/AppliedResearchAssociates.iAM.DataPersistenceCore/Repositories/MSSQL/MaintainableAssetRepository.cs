@@ -76,6 +76,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return assets.Select(_ => _.ToDomain()).ToList();
         }
 
+        public List<Data.Networking.MaintainableAsset> GetAllInNetworkWithLocations(Guid networkId)
+        {
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+
+            if (!_unitOfWork.Context.MaintainableAsset.Any(_ => _.NetworkId == networkId))
+            {
+                throw new RowNotInTableException("The network has no maintainable assets for rollup.");
+            }
+
+            var assets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
+                .Where(_ => _.NetworkId == networkId)
+                .Select(asset => new MaintainableAssetEntity
+                {
+                    Id = asset.Id,
+                    NetworkId = networkId,
+                    SpatialWeighting = asset.SpatialWeighting,
+                    MaintainableAssetLocation = new MaintainableAssetLocationEntity(
+                        asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
+                        asset.MaintainableAssetLocation.LocationIdentifier)                  
+                }).ToList();
+
+            return assets.Select(_ => _.ToDomain()).ToList();
+        }
+
         public MaintainableAsset GetAssetAtLocation(Location location)
         {
             var asset = _unitOfWork.Context.MaintainableAsset.FirstOrDefault(_ => location.MatchOn(_.MaintainableAssetLocation.ToDomain()));

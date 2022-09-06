@@ -487,10 +487,12 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentAction(vm.scenarioId).then(() => {
-                    vm.getCommittedProjects(vm.scenarioId);  
-                    vm.getTreatmentLibrariesAction();                            
-                    vm.getAttributesAction();
+                vm.getInvestmentAction(vm.scenarioId).then(() => {                                            
+                    vm.getAttributesAction().then(() => {                       
+                        vm.getTreatmentLibrariesAction().then(() => {
+                            vm.getCommittedProjects(vm.scenarioId);  
+                        });   
+                    });
                 })
             });
                       

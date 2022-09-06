@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             loggerForTechnicalInfo ??= new DoNotLog();
             loggerForUserInfo ??= new DoNotLog();
-            loggerForUserInfo.Information("Saving to database");
+            loggerForUserInfo.Information("Preparing to save");
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected

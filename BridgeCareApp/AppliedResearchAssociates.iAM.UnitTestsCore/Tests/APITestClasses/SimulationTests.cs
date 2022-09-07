@@ -20,8 +20,10 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -35,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private SimulationEntity _testSimulationToClone;
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private async Task<UserDTO> AddTestUser()
         {
@@ -63,13 +66,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(simulationAnalysisService,
                 _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
         private void CreateTestData()
         {

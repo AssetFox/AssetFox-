@@ -11,6 +11,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Controllers.BaseController
 {
@@ -91,48 +92,6 @@ namespace BridgeCareCore.Controllers.BaseController
 
                     UnitOfWork.SetUser(_userInfo.Name);
                 }
-        }
-
-        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
-
-        public void CheckUserSimulationReadAuthorization(Guid simulationId)
-        {
-            var simulation = GetSimulationWithUsers(simulationId);
-
-            if (!simulation.Users.Any(_ => _.UserId == UserId))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
-            }
-        }
-
-        public void CheckUserSimulationModifyAuthorization(Guid simulationId)
-        {
-            var simulation = GetSimulationWithUsers(simulationId);
-
-            if (!simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
-            }
-        }
-
-        private SimulationDTO GetSimulationWithUsers(Guid simulationId)
-        {
-            SimulationDTO simulation = null;
-            try
-            {
-                simulation = UnitOfWork.SimulationRepo.GetSimulation(simulationId);
-            }
-            catch
-            {
-                throw new RowNotInTableException($"No simulation found having id {simulationId}");
-            }
-
-            if (simulation.Users == null)
-            {
-                throw new RowNotInTableException($"No users assigned to requested simulation");
-            }
-
-            return simulation;
         }
     }
 }

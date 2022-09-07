@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Controllers.BaseController;
@@ -15,7 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
-using BridgeCareCore.Security;
+using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
@@ -26,142 +25,14 @@ namespace BridgeCareCore.Controllers
     public class TreatmentController : BridgeCareCoreBaseController
     {
         private readonly ITreatmentService _treatmentService;
-        private readonly IReadOnlyDictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> _treatmentCRUDMethods;
+        private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
-        
-        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _treatmentCRUDMethods = CreateCRUDMethods();
             _treatmentService = treatmentService;
-        }
-
-        private Dictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>> CreateCRUDMethods()
-        {
-            void UpsertAnyForScenario(Guid simulationId, List<TreatmentDTO> dtos)
-            {
-                UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
-            }
-
-            void UpsertPermittedForScenario(Guid simulationId, List<TreatmentDTO> dtos)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                UpsertAnyForScenario(simulationId, dtos);
-            }
-
-            List<TreatmentDTO> RetrieveAnyForScenario(Guid simulationId) =>
-                UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
-
-            void DeleteAnyFromScenario(Guid simulationId, List<TreatmentDTO> dtos)
-            {
-                // Do Nothing
-            }
-
-            List<TreatmentLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
-
-            List<TreatmentLibraryDTO> RetrievePermittedForLibraries()
-            {
-                var result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
-                return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
-            }
-
-            void UpsertAnyForLibrary(TreatmentLibraryDTO dto)
-            {
-                UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
-                UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
-            }
-
-            void UpsertPermittedForLibrary(TreatmentLibraryDTO dto)
-            {
-                var currentRecord = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
-                if (currentRecord?.Owner == UserId || currentRecord == null)
-                {
-                    UpsertAnyForLibrary(dto);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-            }
-
-            void DeleteAnyForLibrary(Guid libraryId) => UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
-
-            void DeletePermittedForLibrary(Guid libraryId)
-            {
-                var dto = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
-
-                if (dto == null) return; // Mimic existing code that does not inform the user the library ID does not exist
-
-                if (dto.Owner == UserId)
-                {
-                    DeleteAnyForLibrary(libraryId);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-            }
-
-            void DeleteAnyTreatmentForLibrary(TreatmentDTO treatmentDTO, Guid libraryId) => UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatmentDTO, libraryId);
-
-            void DeletePermittedTreatmentForLibrary(TreatmentDTO treatmentDTO, Guid libraryId)
-            {
-                var dto = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
-
-                if (treatmentDTO == null || dto == null) return; // Mimic existing code that does not inform the user the library ID or treatment does not exist
-
-                if (dto.Owner == UserId)
-                {
-                    DeleteAnyTreatmentForLibrary(treatmentDTO, libraryId);
-                }
-                else
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
-                }
-            }
-
-            void DeleteAnyTreatmentForScenario(TreatmentDTO treatmentDTO, Guid simulationId) => UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(treatmentDTO, simulationId);
-
-            void DeletePermittedTreatmentForScenario(TreatmentDTO treatmentDTO, Guid simulationId)
-            {
-                CheckUserSimulationModifyAuthorization(simulationId);
-                DeleteAnyTreatmentForScenario(treatmentDTO, simulationId);
-            }
-
-            var AdminCRUDMethods = new CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>()
-            {
-                UpsertScenario = UpsertAnyForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
-                DeleteScenario = DeleteAnyFromScenario,
-                UpsertLibrary = UpsertAnyForLibrary,
-                RetrieveLibrary = RetrieveAnyForLibraries,
-                DeleteLibrary = DeleteAnyForLibrary,
-                DeleteTreatment = DeleteAnyTreatmentForLibrary,
-                DeleteScenarioTreatment = DeleteAnyTreatmentForScenario
-            };
-
-            var PermittedCRUDMethods = new CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>()
-            {
-                UpsertScenario = UpsertPermittedForScenario,
-                RetrieveScenario = RetrieveAnyForScenario,
-                DeleteScenario = DeleteAnyFromScenario,
-                UpsertLibrary = UpsertPermittedForLibrary,
-                RetrieveLibrary = RetrievePermittedForLibraries,
-                DeleteLibrary = DeletePermittedForLibrary,
-                DeleteTreatment = DeletePermittedTreatmentForLibrary,
-                DeleteScenarioTreatment = DeletePermittedTreatmentForScenario
-            };
-
-            return new Dictionary<string, CRUDMethods<TreatmentDTO, TreatmentLibraryDTO>>
-            {
-                [Role.Administrator] = AdminCRUDMethods,
-                [Role.DistrictEngineer] = PermittedCRUDMethods,
-                [Role.Cwopa] = PermittedCRUDMethods,
-                [Role.PlanningPartner] = PermittedCRUDMethods
-            };
-        }
+            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+        }       
 
         [HttpGet]
         [Route("GetTreatmentLibraries")]
@@ -170,7 +41,16 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _treatmentCRUDMethods[UserInfo.Role].RetrieveLibrary());
+                var result = new List<TreatmentLibraryDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = GetAllTreatmentLibraries();
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                    }
+                });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -187,7 +67,13 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _treatmentCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
+                var result = new List<TreatmentDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    result = UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+                });
+
                 return Ok(result);
             }
             catch (Exception e)
@@ -207,7 +93,14 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
+                    var currentRecord = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
+                    // by pass owner check if no record
+                    if (currentRecord != null)
+                    {
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                    }
+                    UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
                     UnitOfWork.Commit();
                 });
 
@@ -258,9 +151,11 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -286,7 +181,13 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentCRUDMethods[UserInfo.Role].DeleteLibrary(libraryId);
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                        if (dto == null) return;
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    }
+                    UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 
@@ -322,19 +223,29 @@ namespace BridgeCareCore.Controllers
                 {
                     throw new ConstraintException("Request contained no treatment library id.");
                 }
+
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
-
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-
-                var result = await Task.Factory.StartNew(() =>
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());               
+                var result = new TreatmentImportResultDTO();
+                await Task.Factory.StartNew(() =>
                 {
-                    return _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
+                        if (existingTreatmentLibrary != null)
+                        {
+                            _claimHelper.CheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner);
+                        }
+                    }
+                    result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
                 });
+
                 if (!string.IsNullOrEmpty(result.WarningMessage))
                 {
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                     return Ok(null);
                 }
+
                 return Ok(result.TreatmentLibrary);
             }
             catch (UnauthorizedAccessException)
@@ -358,7 +269,13 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentCRUDMethods[UserInfo.Role].DeleteTreatment(treatment, libraryId);
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
+                        if (dto == null || treatment == null) return;
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    }
+                    UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
                     UnitOfWork.Commit();
                 });
 
@@ -387,9 +304,11 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _treatmentCRUDMethods[UserInfo.Role].DeleteScenarioTreatment(scenarioSelectableTreatment, simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(scenarioSelectableTreatment, simulationId);
                     UnitOfWork.Commit();
                 });
+
                 return Ok();
             }
             catch (UnauthorizedAccessException)
@@ -428,10 +347,12 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                var simulationId = Guid.Parse(id.ToString());
-                var result = await Task.Factory.StartNew(() =>
+                var simulationId = Guid.Parse(id.ToString());              
+                var result = new ScenarioTreatmentImportResultDTO();
+                await Task.Factory.StartNew(() =>
                 {
-                    return _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    result = _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
                 });
 
                 if (!string.IsNullOrEmpty(result.WarningMessage))
@@ -439,6 +360,7 @@ namespace BridgeCareCore.Controllers
                     HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, result.WarningMessage);
                     return Ok(null);
                 }
+
                 return Ok(result.Treatments);
             }
             catch (UnauthorizedAccessException)
@@ -534,5 +456,9 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
+        {
+            return UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
+        }
     }
 }

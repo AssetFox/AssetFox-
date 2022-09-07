@@ -87,6 +87,7 @@
           "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
           "InternalRole": "Editor",
           "Claims": [
+            "NetworkViewAccess",
             "SimulationUpdatePermittedAccess",
             "SimulationDeletePermittedAccess",
             "SimulationRunPermittedAccess",
@@ -152,6 +153,7 @@
           "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
+            "NetworkViewAccess",
             "SimulationViewPermittedAccess",
             "AnnouncementViewAccess",
             "BudgetPriorityViewPermittedFromLibraryAccess",
@@ -264,6 +266,7 @@
           "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
           "InternalRole": "Editor",
           "Claims": [
+            "NetworkViewAccess",
             "SimulationUpdatePermittedAccess",
             "SimulationDeletePermittedAccess",
             "SimulationRunPermittedAccess",
@@ -329,6 +332,7 @@
           "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
+            "NetworkViewAccess",
             "SimulationViewPermittedAccess",
             "AnnouncementViewAccess",
             "BudgetPriorityViewPermittedFromLibraryAccess",

@@ -319,6 +319,7 @@ export default class Networks extends Vue {
     }
     @Watch('selectedNetwork', {deep: true})
     onSelectedNetworkChanged() {
+        this.selectedAttributeRows = [];
         this.hasStartedAggregation = false;
         this.selectNetworkItemValue = this.selectedNetwork.id;
         this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute;

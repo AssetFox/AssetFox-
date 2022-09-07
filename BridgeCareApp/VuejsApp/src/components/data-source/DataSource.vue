@@ -209,7 +209,8 @@ export default class DataSource extends Vue {
     @Watch('dataSources')
         onGetDataSources() {
             if (this.dataSources != null || this.dataSources != undefined) {
-                this.dsItems = this.dataSources.length > 0 ? this.dataSources.map(
+                let filteredSources = this.dataSources.filter((ds: Datasource) => ds.type != 'None');  
+                this.dsItems = this.dataSources.length > 0 ? filteredSources.map(
                     (ds: Datasource) => ({
                         text: ds.name,
                         value: ds.name

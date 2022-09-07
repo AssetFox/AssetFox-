@@ -70,10 +70,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                commit(
-                    'dataSourceMutator',
-                    payload
-                );
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });
@@ -91,10 +87,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                commit(
-                    'dataSourceMutator',
-                    payload
-                );
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });

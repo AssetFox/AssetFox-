@@ -87,10 +87,6 @@ namespace BridgeCareCore.Security
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }
-                roleStrings.Clear();
-                roleStrings.Add("ReadOnly");
-                //"PD - BAMS - PlanningPartner"
-                //"ReadOnly"
                 // Get the internal roles and subsequent claims from mapper
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.FirstOrDefault());
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
@@ -98,15 +94,14 @@ namespace BridgeCareCore.Security
 
                 // TODO: Drop role from UserInfo with addition of internal roles/claims
                 //       once tested and verified.
-                //return new UserInfo
-                //{
-                //    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
-                //    Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
-                //    InternalRole = internalRoleFromMapper,
-                //    Claims = claimsFromMapper,
-                //    Email = decodedToken.GetClaimValue("email")
-                //};
-                return new UserInfo { Name = "", Role = roleStrings.FirstOrDefault(), Email = "" };
+                return new UserInfo
+                {
+                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
+                    Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
+                    InternalRole = internalRoleFromMapper,
+                    Claims = claimsFromMapper,
+                    Email = decodedToken.GetClaimValue("email")
+                };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)

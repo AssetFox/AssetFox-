@@ -33,8 +33,6 @@ namespace BridgeCareCore.Security
                 {
                     throw new UnauthorizedAccessException("No role found.");
                 }
-                //ReadOnly
-                roleParsed = "ReadOnly";
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));

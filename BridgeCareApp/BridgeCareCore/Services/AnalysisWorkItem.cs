@@ -107,7 +107,7 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
-                    var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(simulationAnalysisDetail, message));
+                    var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
 
@@ -170,11 +170,11 @@ namespace BridgeCareCore.Services
                 runner.HandleValidationFailures(validationResults);
             }
 
-            void UpdateSimulationAnalysisDetailFromString(SimulationAnalysisDetailDTO simulationAnalysisDetail, string message)
+            void UpdateSimulationAnalysisDetailFromString(string message)
             {
-                simulationAnalysisDetail.Status = message;
-                UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                var detail = CreateSimulationAnalysisDetailDto(message, StartTime);
+                UpdateSimulationAnalysisDetail(detail, DateTime.Now);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, detail);
             }
 
             void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)

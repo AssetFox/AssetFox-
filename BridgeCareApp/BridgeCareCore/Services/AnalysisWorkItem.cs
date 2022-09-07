@@ -174,6 +174,7 @@ namespace BridgeCareCore.Services
             {
                 simulationAnalysisDetail.Status = message;
                 UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
             }
 
             void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)

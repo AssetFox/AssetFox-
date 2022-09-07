@@ -8,19 +8,15 @@ using Xunit;
 using Moq;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using BridgeCareCore.Services;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Logging;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -31,6 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         private Mock<ICommittedProjectService> _mockService;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
         private Guid _badScenario = Guid.Parse("0c66674c-8fcb-462b-8765-69d6815e0958");
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         public CommittedProjectControllerTests()
         {
@@ -68,7 +65,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
@@ -92,7 +90,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
@@ -113,7 +112,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -136,7 +136,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -158,7 +159,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -178,7 +180,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -198,7 +201,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act + Asset
             var result = await controller.ImportCommittedProjects();
@@ -220,7 +224,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -240,7 +245,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
@@ -261,7 +267,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
@@ -281,7 +288,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(_badScenario);
@@ -301,7 +309,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
@@ -329,7 +338,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
@@ -354,7 +364,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 _badScenario
@@ -379,7 +390,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
@@ -402,7 +414,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
@@ -423,7 +436,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(_badScenario);
@@ -442,7 +456,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             // Act
             var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
@@ -463,7 +478,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
@@ -483,7 +498,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
                 .Throws<RowNotInTableException>();
 

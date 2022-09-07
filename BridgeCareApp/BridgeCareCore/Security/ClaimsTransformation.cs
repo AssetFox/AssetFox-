@@ -24,8 +24,7 @@ namespace BridgeCareCore.Security
         {
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
-                // Obtain the role from the claims principal
-                // then parse it and pass to the internal role mapper
+                // Obtain the role from the claims principal                
                 var roleClaim = principal.Claims
                         .Single(_ => _.Type == ClaimTypes.Role)?.Value;
                 var roleParsed = SecurityFunctions.ParseLdap(roleClaim)?.FirstOrDefault();
@@ -33,8 +32,9 @@ namespace BridgeCareCore.Security
                 {
                     throw new UnauthorizedAccessException("No role found.");
                 }
+
                 var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);                
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
             }
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)

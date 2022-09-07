@@ -487,7 +487,9 @@ export default class BudgetPriorityEditor extends Vue {
         return getUserName();
     }
 
-    checkLibraryEditPermission() {
+    checkLibraryEditPermission() { 
+        // TODO do we need this here? If only claims check made and shown the button, will that work??
+        // We have claims in userinfo obj we can utilize that...or controller new methods just check send eligibility bool flag(will help in no repeat of code at UI)
         this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
     }
 

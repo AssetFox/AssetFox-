@@ -90,9 +90,21 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                 switch (Attribute.DataType)
                 {
                 case "NUMBER":
-                    if (_dataColumn.Entries[rowIndex] is DoubleExcelCellDatum)
+                    if (!(_dataColumn.Entries[rowIndex] is EmptyExcelCellDatum))
                     {
-                        dataValue = (T)Convert.ChangeType(((DoubleExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, typeof(T));
+                        if(_dataColumn.Entries[rowIndex] is StringExcelCellDatum)
+                        {
+                            var conversionResult = double.TryParse(((StringExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, out double result);
+                            if (conversionResult)
+                            {
+                                dataValue = (T)Convert.ChangeType(result, typeof(T));
+                            }
+                        }
+                        else
+                        {
+                            dataValue = (T)Convert.ChangeType(((DoubleExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, typeof(T));
+                        }
+
                         assignedFlag = true;
                     }
                     break;

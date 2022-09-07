@@ -40,7 +40,8 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             var status = "Creating input...";
-            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status);
+            var startTime = DateTime.Now;
+            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, startTime);
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
@@ -184,12 +185,11 @@ namespace BridgeCareCore.Services
             }
         }
 
-        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status) =>
-                    new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = simulationId,
-                        LastRun = DateTime.Now,
-                        Status = status,
-                    };
+        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new SimulationAnalysisDetailDTO
+            {
+                SimulationId = simulationId,
+                LastRun = lastRun,
+                Status = status,
+            };
     }
 }

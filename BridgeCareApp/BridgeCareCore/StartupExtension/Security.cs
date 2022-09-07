@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using Claim = BridgeCareCore.Security.SecurityConstants.Claim;
 
 namespace BridgeCareCore.StartupExtension
 {
@@ -49,6 +50,7 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddAuthorization(options =>
             {
+                // TODO: Delete this after security verified
                 options.AddPolicy(Policy.AdminOrDistrictEngineer,
                     policy => policy.Requirements.Add(
                         new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
@@ -58,13 +60,13 @@ namespace BridgeCareCore.StartupExtension
 
                 // Deficient Condition Goal
                 options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "DeficientConditionGoalViewPermittedFromLibraryAccess", "DeficientConditionGoalViewAnyFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalViewPermittedFromLibraryAccess, Claim.DeficientConditionGoalViewAnyFromLibraryAccess));
                 options.AddPolicy(Policy.ViewDeficientConditionGoalFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "DeficientConditionGoalViewAnyFromScenarioAccess", "DeficientConditionGoalViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalViewAnyFromScenarioAccess, Claim.DeficientConditionGoalViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyDeficientConditionGoalFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "DeficientConditionGoalModifyAnyFromLibraryAccess", "DeficientConditionGoalModifyPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalModifyAnyFromLibraryAccess, Claim.DeficientConditionGoalModifyPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyDeficientConditionGoalFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "DeficientConditionGoalModifyAnyFromScenarioAccess", "DeficientConditionGoalModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalModifyAnyFromScenarioAccess, Claim.DeficientConditionGoalModifyPermittedFromScenarioAccess));
 
                 //Investment
                 options.AddPolicy(Policy.ViewInvestmentFromScenario,

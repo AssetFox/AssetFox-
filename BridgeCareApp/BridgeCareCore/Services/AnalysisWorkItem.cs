@@ -39,16 +39,12 @@ namespace BridgeCareCore.Services
             }
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
-            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
-            {
-                SimulationId = simulationId,
-                LastRun = DateTime.Now,
-                Status = "Creating input..."
-            };
+            var status = "Creating input...";
+            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status);
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();                
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
 
             simulationAnalysisDetail.Status = "Getting simulation analysis network";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
@@ -109,7 +105,7 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(simulationAnalysisDetail, message));
-                    
+
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
@@ -187,5 +183,13 @@ namespace BridgeCareCore.Services
                 _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             }
         }
+
+        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status) =>
+                    new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        LastRun = DateTime.Now,
+                        Status = status,
+                    };
     }
 }

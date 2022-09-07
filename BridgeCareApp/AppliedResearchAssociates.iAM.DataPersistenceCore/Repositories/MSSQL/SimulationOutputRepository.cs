@@ -28,7 +28,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             loggerForTechnicalInfo ??= new DoNotLog();
             loggerForUserInfo ??= new DoNotLog();
-            loggerForUserInfo.Information("Preparing to save");
+            loggerForUserInfo.Information("Preparing to save1");
+            loggerForUserInfo.Information("Preparing to save2");
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -44,6 +45,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.BeginTransaction();
 
+            loggerForUserInfo.Information("Inside transaction");
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                 .Single(_ => _.Id == simulationId);
 
@@ -90,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
                 memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);
-                loggerForUserInfo.Information("Save completed");
+                loggerForUserInfo.Information("Simulation output saved to database");
             }
             catch (Exception ex)
             {

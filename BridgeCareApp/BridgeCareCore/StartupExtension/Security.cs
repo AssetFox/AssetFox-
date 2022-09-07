@@ -211,6 +211,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddSingleton<IEsecSecurity, EsecSecurity>();
             services.AddSingleton<IAuthorizationHandler, RestrictAccessHandler>();
             services.AddSingleton<IRoleClaimsMapper, RoleClaimsMapper>();
+            services.AddScoped<IClaimHelper, ClaimHelper>();
         }
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;

@@ -21,6 +21,8 @@ namespace BridgeCareCore.Services
     {
         public string WorkId => simulationId.ToString();
 
+        public DateTime StartTime { get; set; }
+
         public void DoWork(IServiceProvider serviceProvider)
         {
             HashSet<string> LoggedMessages = new();
@@ -40,8 +42,8 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             var status = "Creating input...";
-            var startTime = DateTime.Now;
-            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, startTime);
+            StartTime = DateTime.Now;
+            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 

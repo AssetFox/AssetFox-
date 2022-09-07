@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
-        private const bool ShouldHackSaveOutputToFile = false;
+        private const bool ShouldHackSaveOutputToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 400;
 
@@ -28,8 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             loggerForTechnicalInfo ??= new DoNotLog();
             loggerForUserInfo ??= new DoNotLog();
-            loggerForUserInfo.Information("Preparing to save1");
-            loggerForUserInfo.Information("Preparing to save2");
+            loggerForUserInfo.Information("Preparing to save to database");
             if (ShouldHackSaveOutputToFile)
             {
 #pragma warning disable CS0162 // Unreachable code detected
@@ -45,7 +44,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.BeginTransaction();
 
-            loggerForUserInfo.Information("Inside transaction");
+            // Once we are inside the transaction, there is not much value in adding logs to the
+            // user logger. The problem is that these are often communicated to the user via the database.
+            // But the database won't update until the transaction is completed. Therefore,
+            // adding user logs about the transaction's progress will likely just cause confusion
+            // about why these logs are sometimes not appearing in the UI.
             var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
                 .Single(_ => _.Id == simulationId);
 
@@ -73,7 +76,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 foreach (var year in simulationOutput.Years)
                 {
-                    loggerForUserInfo.Information($"Preparing to save {year.Year}");
                     var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
@@ -88,7 +90,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                 }
-                loggerForUserInfo.Information("Completing database transaction");
                 memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
                 memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);

@@ -107,7 +107,7 @@ namespace BridgeCareCore.Security
                 //    Claims = claimsFromMapper,
                 //    Email = decodedToken.GetClaimValue("email")
                 //};
-                return new UserInfo { Name = "", Role = "", Email = "" };
+                return new UserInfo { Name = "", Role = roleStrings.FirstOrDefault(), Email = "" };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)

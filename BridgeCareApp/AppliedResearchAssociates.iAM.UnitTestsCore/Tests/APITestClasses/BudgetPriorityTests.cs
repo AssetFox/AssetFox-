@@ -11,7 +11,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -26,6 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
         private BudgetPriorityEntity _testBudgetPriority;
         private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
         {
@@ -38,7 +41,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             return controller;
         }
 
@@ -48,7 +52,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
             return controller;
         }
 

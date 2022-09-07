@@ -26,6 +26,7 @@ using MoreLinq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -38,8 +39,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
         private const string BudgetEntityName = "Budget";
-
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         public InvestmentBudgetsService Setup()
         {
@@ -54,8 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             var controller = new InvestmentController(service, _testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
             return controller;
         }
 
@@ -63,8 +63,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             var controller = new InvestmentController(service, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
             return controller;
         }
 

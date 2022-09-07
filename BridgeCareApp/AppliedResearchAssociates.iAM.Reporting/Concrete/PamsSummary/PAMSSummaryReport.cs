@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
@@ -33,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
 
+        private readonly IAddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
@@ -62,21 +64,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //create summary report objects
             _pamsDataForSummaryReport = new PamsDataForSummaryReport();
-            if (_pamsDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_pamsDataForSummaryReport)); }
-
             _summaryReportParameters = new SummaryReportParameters();
-            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
-
             _pavementWorkSummary = new PavementWorkSummary();
-            if (_pavementWorkSummary == null) { throw new ArgumentNullException(nameof(_pavementWorkSummary)); }
-
             _pavementWorkSummaryByBudget = new PavementWorkSummaryByBudget();
-
             _unfundedPavementProjects = new UnfundedPavementProjects();
-            if (_unfundedPavementProjects == null) { throw new ArgumentNullException(nameof(_unfundedPavementProjects)); }
-
+            _addGraphsInTabs = new AddGraphsInTabs();
             _summaryReportGlossary = new SummaryReportGlossary();
-            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -223,8 +216,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Pavement Work Summary TAB
             reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            var pavementWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
-            var chartRowModel = _pavementWorkSummary.Fill(pavementWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+            var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
+            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
 
             //// Pavement Work Summary By Budget TAB
@@ -239,12 +232,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
+            //Graph TABs
+            reportDetailDto.Status = $"Creating Graph TABs";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
-
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";

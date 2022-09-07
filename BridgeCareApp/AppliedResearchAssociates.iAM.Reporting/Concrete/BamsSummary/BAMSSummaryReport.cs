@@ -76,31 +76,14 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
-            if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
-
             _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
-            if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
-
             _unfundedTreatmentTime = new UnfundedTreatmentTime();
-            if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
-
             _bridgeWorkSummary = new BridgeWorkSummary();
-            if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
-
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
-            if (_bridgeWorkSummaryByBudget == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummaryByBudget)); }
-
             _summaryReportGlossary = new SummaryReportGlossary();
-            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
-
-            _summaryReportParameters = new SummaryReportParameters();
-            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
-                        
+            _summaryReportParameters = new SummaryReportParameters();                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            if (_addGraphsInTabs == null) { throw new ArgumentNullException(nameof(_addGraphsInTabs)); }
-
             _summaryReportHelper = new SummaryReportHelper();
-            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }

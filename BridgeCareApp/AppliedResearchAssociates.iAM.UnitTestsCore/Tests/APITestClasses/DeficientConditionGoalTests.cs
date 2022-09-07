@@ -8,7 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -19,12 +21,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private static readonly Guid DeficientConditionGoalLibraryId = Guid.Parse("569618ce-ee50-45de-99ce-cd4625134d07");
         private static readonly Guid DeficientConditionGoalId = Guid.Parse("c148ab58-8b27-40c0-a4a4-84454022d032");
+        private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private static DeficientConditionGoalController Setup()
         {
             _testHelper.CreateSingletons();
             var controller = new DeficientConditionGoalController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
             return controller;
         }
 

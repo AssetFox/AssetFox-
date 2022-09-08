@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -371,6 +371,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             dto.Status = message;
             UpdateSimulationAnalysisDetail(dto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
         }
 
         private void IndicateError()

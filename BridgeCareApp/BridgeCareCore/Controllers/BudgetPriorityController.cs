@@ -71,7 +71,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
@@ -107,7 +107,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -133,7 +133,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<BudgetPriorityDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
                 });
 
@@ -156,7 +156,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
                     UnitOfWork.Commit();
                 });

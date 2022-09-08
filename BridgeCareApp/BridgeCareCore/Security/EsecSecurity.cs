@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
@@ -18,7 +17,7 @@ namespace BridgeCareCore.Security
         private readonly RsaSecurityKey _esecPublicKey;
         private readonly string _securityType;
         private readonly IConfiguration _config;
-        private IClaimHelper _claimHelper;
+        private IRoleClaimsMapper _roleClaimsMapper;
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -26,13 +25,13 @@ namespace BridgeCareCore.Security
         /// </summary>
         private ConcurrentDictionary<string, long> _revokedTokens;
 
-        public EsecSecurity(IConfiguration config, IClaimHelper claimHelper)
+        public EsecSecurity(IConfiguration config, IRoleClaimsMapper roleClaimsMapper)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
-            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
         }
 
         /// <summary>
@@ -88,7 +87,7 @@ namespace BridgeCareCore.Security
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }                                
 
-                var hasAdminClaim = _claimHelper.HasAdminClaim();
+                var hasAdminClaim = _roleClaimsMapper.HasAdminClaim(request.HttpContext.User);
 
                 return new UserInfo
                 {

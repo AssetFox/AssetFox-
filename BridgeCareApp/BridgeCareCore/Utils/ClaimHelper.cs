@@ -1,27 +1,23 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
-using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
-using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Utils
 {
     public class ClaimHelper: IClaimHelper
     {
         private readonly IUnitOfWork UnitOfWork;
-        private readonly IHttpContextAccessor ContextAccessor;
-        // TODO check if it gets assigned here else move down
-        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
+        private readonly IHttpContextAccessor ContextAccessor; 
 
         public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         {
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));          
         }
 
         /// <summary>
@@ -29,12 +25,12 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="simulationId"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserSimulationReadAuthorization(Guid simulationId)
+        public void CheckUserSimulationReadAuthorization(Guid simulationId, Guid userId)
         {
             if (RequirePermittedCheck())
             {
                 var simulation = GetSimulationWithUsers(simulationId);
-                if (!simulation.Users.Any(_ => _.UserId == UserId))
+                if (!simulation.Users.Any(_ => _.UserId == userId))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
                 }
@@ -46,12 +42,12 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="simulationId"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserSimulationModifyAuthorization(Guid simulationId)
+        public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId)
         {
             if (RequirePermittedCheck())
             {
                 var simulation = GetSimulationWithUsers(simulationId);
-                if (!simulation.Users.Any(_ => _.UserId == UserId && _.CanModify))
+                if (!simulation.Users.Any(_ => _.UserId == userId && _.CanModify))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
                 }
@@ -63,9 +59,9 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserLibraryModifyAuthorization(Guid owner)
+        public void CheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
         {
-            if (RequirePermittedCheck() && owner != UserId)
+            if (RequirePermittedCheck() && owner != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
             }
@@ -96,7 +92,7 @@ namespace BridgeCareCore.Utils
             return simulation;
         }      
 
-        public bool HasAdminClaim()
+        private bool HasAdminClaim()
         {
             return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
         }

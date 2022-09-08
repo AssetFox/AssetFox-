@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +16,6 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class UserCriteriaController : BridgeCareCoreBaseController
     {
-
         public UserCriteriaController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 

@@ -54,8 +54,6 @@ export default class AddNetworkDialog extends Vue {
     }
   @Watch('dialogData')
   onDialogDataChanged() {
-    console.log(this.networkName);
-
     this.newNetwork = {
       ...this.newNetwork,
       name: this.networkName,

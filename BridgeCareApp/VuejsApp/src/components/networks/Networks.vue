@@ -302,7 +302,6 @@ export default class Networks extends Vue {
     @Watch('selectedAttributeRows')
     onSelectedAttributeRowsChanged()
     {
-        console.log(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows));
         if(any(propEq('id', this.selectedNetwork.keyAttribute), this.selectedAttributeRows)) {
             this.isKeyPropertySelectedAttribute = true;
         }
@@ -324,7 +323,6 @@ export default class Networks extends Vue {
         this.selectNetworkItemValue = this.selectedNetwork.id;
         this.selectedKeyAttributeItem = this.selectedNetwork.keyAttribute;
         this.spatialWeightingEquationValue.expression = this.selectedNetwork.defaultSpatialWeighting;
-        //this.attributeRows = this.selectedNetwork.attributes;
 
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.selectedNetwork, this.stateSelectedNetwork);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
@@ -369,7 +367,6 @@ export default class Networks extends Vue {
     }
     selectAllFromSource(){
         this.selectedAttributeRows = clone(this.stateAttributes.filter((attr: Attribute) => attr.dataSource.id == this.selectDataSourceId));
-       // this.attributeRows = this.cleanAttributes.filter((attr: Attribute) => attr.dataSource.id === this.selectDataSourceId);
     }
     onAddAll(){
         this.selectedAttributeRows = clone(this.attributeRows)

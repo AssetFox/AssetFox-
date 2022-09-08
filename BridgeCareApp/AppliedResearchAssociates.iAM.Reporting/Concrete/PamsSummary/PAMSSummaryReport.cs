@@ -19,6 +19,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pavemen
 
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
+using BridgeCareCore.Services;
 using OfficeOpenXml;
 
 
@@ -160,10 +161,17 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         private string GenerateSummaryReport(Guid networkId, Guid simulationId)
         {
-            // 
             var functionReturnValue = "";
 
-            var logger = new HubServiceLogger(_hubService, HubConstant.BroadcastReportGenerationStatus, _unitOfWork.CurrentUser?.Username);
+            var logger = new CallbackLogger((string message) =>
+            {
+                var dto = new SimulationReportDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = message,
+                };
+                UpdateSimulationAnalysisDetail(dto);
+            });
             var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 

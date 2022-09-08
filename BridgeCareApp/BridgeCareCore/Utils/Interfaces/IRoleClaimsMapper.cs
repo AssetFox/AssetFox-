@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 
 namespace BridgeCareCore.Utils.Interfaces
 {

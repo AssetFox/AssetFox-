@@ -18,7 +18,7 @@ namespace BridgeCareCore.Security
         private readonly RsaSecurityKey _esecPublicKey;
         private readonly string _securityType;
         private readonly IConfiguration _config;
-        private IRoleClaimsMapper _roleClaimsMapper;
+        private IClaimHelper _claimHelper;
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -26,13 +26,13 @@ namespace BridgeCareCore.Security
         /// </summary>
         private ConcurrentDictionary<string, long> _revokedTokens;
 
-        public EsecSecurity(IConfiguration config, IRoleClaimsMapper roleClaimsMapper)
+        public EsecSecurity(IConfiguration config, IClaimHelper claimHelper)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
-            _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
+            _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
 
         /// <summary>
@@ -86,15 +86,15 @@ namespace BridgeCareCore.Security
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
-                }                
+                }                                
 
-              // add new claim and check if user has adminbased claim:  var hasAdminClaim = _roleClaimsMapper.HasAdminClaim(request.HttpContext.User);
+                var hasAdminClaim = _claimHelper.HasAdminClaim();
 
                 return new UserInfo
                 {
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
                     Email = decodedToken.GetClaimValue("email"),
-                    //HasAdminClaim = hasAdminClaim,
+                    HasAdminClaim = hasAdminClaim,
                 };
             }
 
@@ -104,11 +104,11 @@ namespace BridgeCareCore.Security
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    HasAdminClaim = true // TODO will change if more roles comes for B2C
+                    HasAdminClaim = true // TODO this will change if more roles comes for B2C
                 };
             }
 
-            return new UserInfo { Name = "", Role = "", Email = "" };
+            return new UserInfo { Name = "", Email = "" };
         }
 
         /// <summary>
@@ -119,11 +119,9 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(Dictionary<string, string> userInformationDictionary)
         {
-            var role = SecurityFunctions.ParseLdap(userInformationDictionary["roles"])
-                .First(roleString => Role.AllValidRoles.Contains(roleString));
             var name = SecurityFunctions.ParseLdap(userInformationDictionary["sub"])[0];
             var email = userInformationDictionary.ContainsKey("email") ? userInformationDictionary["email"] : null;
-            return new UserInfo { Name = name, Role = role, Email = email };
+            return new UserInfo { Name = name, Email = email };
         }
 
         /// <summary>

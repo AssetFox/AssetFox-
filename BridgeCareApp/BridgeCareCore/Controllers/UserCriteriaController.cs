@@ -31,8 +31,7 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var userCriteria = UnitOfWork.UserCriteriaRepo
-                        .GetOwnUserCriteria(UserInfo.ToDto(), SecurityConstants.Role.BAMSAdmin);
+                    var userCriteria = UnitOfWork.UserCriteriaRepo.GetOwnUserCriteria(UserInfo.ToDto());
                     UnitOfWork.Commit();
                     return userCriteria;
                 });

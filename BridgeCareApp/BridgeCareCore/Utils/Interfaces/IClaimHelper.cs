@@ -11,5 +11,7 @@ namespace BridgeCareCore.Utils.Interfaces
         public bool RequirePermittedCheck();
 
         public void CheckUserLibraryModifyAuthorization(Guid owner);
+
+        public bool HasAdminClaim();
     }
 }

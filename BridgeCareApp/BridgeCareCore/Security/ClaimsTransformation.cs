@@ -37,13 +37,15 @@ namespace BridgeCareCore.Security
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);                
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
             }
+
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, "Administrator");
+                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, SecurityConstants.Role.Administrator);
                 var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
                 principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
 
             }
+
             return Task.FromResult(principal);
         }
     }

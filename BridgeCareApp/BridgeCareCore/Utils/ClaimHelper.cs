@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
 using static BridgeCareCore.Security.SecurityConstants;
@@ -71,12 +73,12 @@ namespace BridgeCareCore.Utils
 
         public bool RequirePermittedCheck()
         {
-            return !IsUserInAdministratorRole();
+            return !HasAdminClaim();
         }
 
         private SimulationDTO GetSimulationWithUsers(Guid simulationId)
         {
-            SimulationDTO simulation = null;
+            SimulationDTO simulation;
             try
             {
                 simulation = UnitOfWork.SimulationRepo.GetSimulation(simulationId);
@@ -92,11 +94,11 @@ namespace BridgeCareCore.Utils
             }
 
             return simulation;
-        }
+        }      
 
-        private bool IsUserInAdministratorRole()
+        public bool HasAdminClaim()
         {
-            return ContextAccessor.HttpContext.User.IsInRole(Role.Administrator);
-        }        
+            return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
+        }
     }
 }

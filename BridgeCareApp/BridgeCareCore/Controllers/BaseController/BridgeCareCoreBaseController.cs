@@ -87,7 +87,7 @@ namespace BridgeCareCore.Controllers.BaseController
                 {
                     if (!UnitOfWork.UserRepo.UserExists(UserInfo.Name))
                     {
-                        UnitOfWork.AddUser(UserInfo.Name, UserInfo.Role);
+                        UnitOfWork.AddUser(UserInfo.Name, UserInfo.HasAdminClaim);
                     }
 
                     UnitOfWork.SetUser(_userInfo.Name);

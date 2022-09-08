@@ -177,14 +177,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         }
 
         private static object AddUserLock = new object();
-        public void AddUser(string username, string role)
+        public void AddUser(string username, bool hasAdminClaim)
         {
             lock (AddUserLock)
             {
                 if (!UserRepo.UserExists(username))
                 {
                     BeginTransaction();
-                    UserRepo.AddUser(username, role);
+                    UserRepo.AddUser(username, hasAdminClaim);
                     Commit();
                 }
             }

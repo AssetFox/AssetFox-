@@ -75,6 +75,6 @@ namespace BridgeCareCore.Utils
                 }
             });
             return claimsIdentity;
-        }
+        }        
     }
 }

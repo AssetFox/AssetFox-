@@ -109,6 +109,7 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)
         {
+
             try
             {
                 var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
@@ -118,12 +119,23 @@ namespace BridgeCareCore.Controllers
 
                 foreach (var network in networks)
                 {
+                    //TODO: Investigate case where networks have separate key attributes. Disable until handled in 3.1
+                    /*
                     var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
                     if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
                         compatibleNetworks.Add(network);
                     }
+                    */
+
+                    //Placeholder until above enabled
+                    if (network.Id == networkId)
+                    {
+                        compatibleNetworks.Add(network);
+                    }
                 }
+                
+
 
                 return Ok(compatibleNetworks);
 

@@ -70,144 +70,144 @@ namespace BridgeCareCore.StartupExtension
 
                 //Investment
                 options.AddPolicy(Policy.ViewInvestmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentViewAnyFromScenarioAccess", "InvestmentViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentViewAnyFromScenarioAccess, Claim.InvestmentViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ViewInvestmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentViewAnyFromLibraryAccess", "InvestmentViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentViewAnyFromLibraryAccess, Claim.InvestmentViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyInvestmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentModifyAnyFromScenarioAccess", "InvestmentModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentModifyAnyFromScenarioAccess, Claim.InvestmentModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyInvestmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentModifyAnyFromLibraryAccess", "InvestmentModifyPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentModifyAnyFromLibraryAccess, Claim.InvestmentModifyPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportInvestmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentImportAnyFromLibraryAccess", "InvestmentImportPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentImportAnyFromLibraryAccess, Claim.InvestmentImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportInvestmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "InvestmentImportAnyFromScenarioAccess", "InvestmentImportPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.InvestmentImportAnyFromScenarioAccess, Claim.InvestmentImportPermittedFromScenarioAccess));
 
                 // Performance Curve
                 options.AddPolicy(Policy.ViewPerformanceCurveFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveViewAnyFromLibraryAccess", "PerformanceCurveViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveViewAnyFromLibraryAccess, Claim.PerformanceCurveViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewPerformanceCurveFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveViewAnyFromScenarioAccess", "PerformanceCurveViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveViewAnyFromScenarioAccess, Claim.PerformanceCurveViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyPerformanceCurveFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveAddAnyFromLibraryAccess",
-                                                                   "PerformanceCurveUpdateAnyFromLibraryAccess",
-                                                                   "PerformanceCurveAddPermittedFromLibraryAccess",
-                                                                   "PerformanceCurveUpdatePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveViewAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdateAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveAddPermittedFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdatePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyPerformanceCurveFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveModifyAnyFromScenarioAccess", "PerformanceCurveModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveModifyAnyFromScenarioAccess, Claim.PerformanceCurveModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeletePerformanceCurveFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveDeleteAnyFromLibraryAccess", "PerformanceCurveDeletePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveDeleteAnyFromLibraryAccess, Claim.PerformanceCurveDeletePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportPerformanceCurveFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveImportAnyFromLibraryAccess", "PerformanceCurveImportPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromLibraryAccess, Claim.PerformanceCurveImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportPerformanceCurveFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "PerformanceCurveImportAnyFromScenarioAccess", "PerformanceCurveImportPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromScenarioAccess, Claim.PerformanceCurveImportPermittedFromScenarioAccess));
 
                 //  Reamining Life Limit
                 options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "RemainingLifeLimitViewAnyFromLibraryAccess", "RemainingLifeLimitViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.RemainingLifeLimitViewAnyFromLibraryAccess, Claim.RemainingLifeLimitViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewRemainingLifeLimitFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "RemainingLifeLimitViewAnyFromScenarioAccess", "RemainingLifeLimitViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.RemainingLifeLimitViewAnyFromScenarioAccess, Claim.RemainingLifeLimitViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyRemainingLifeLimitFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "RemainingLifeLimitAddAnyFromLibraryAccess",
-                                                                   "RemainingLifeLimitUpdateAnyFromLibraryAccess",
-                                                                   "RemainingLifeLimitAddPermittedFromLibraryAccess",
-                                                                   "RemainingLifeLimitUpdatePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.RemainingLifeLimitAddAnyFromLibraryAccess,
+                                                                   Claim.RemainingLifeLimitUpdateAnyFromLibraryAccess,
+                                                                   Claim.RemainingLifeLimitAddPermittedFromLibraryAccess,
+                                                                   Claim.RemainingLifeLimitUpdatePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyRemainingLifeLimitFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "RemainingLifeLimitModifyAnyFromScenarioAccess", "RemainingLifeLimitModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.RemainingLifeLimitModifyAnyFromScenarioAccess, Claim.RemainingLifeLimitModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeleteRemainingLifeLimitFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "RemainingLifeLimitDeleteAnyFromLibraryAccess", "RemainingLifeLimitDeletePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.RemainingLifeLimitDeleteAnyFromLibraryAccess, Claim.RemainingLifeLimitDeletePermittedFromLibraryAccess));
 
                 // Target Condition Goal
                 options.AddPolicy(Policy.ViewTargetConditionGoalFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TargetConditionGoalViewAnyFromLibraryAccess", "TargetConditionGoalViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalViewAnyFromLibraryAccess, Claim.TargetConditionGoalViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewTargetConditionGoalFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TargetConditionGoalViewAnyFromScenarioAccess", "TargetConditionGoalViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalViewAnyFromScenarioAccess, Claim.TargetConditionGoalViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyTargetConditionGoalFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TargetConditionGoalAddAnyFromLibraryAccess",
-                                                                   "TargetConditionGoalUpdateAnyFromLibraryAccess",
-                                                                   "TargetConditionGoalAddPermittedFromLibraryAccess",
-                                                                   "TargetConditionGoalUpdatePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalAddAnyFromLibraryAccess,
+                                                                   Claim.TargetConditionGoalUpdateAnyFromLibraryAccess,
+                                                                   Claim.TargetConditionGoalAddPermittedFromLibraryAccess,
+                                                                   Claim.TargetConditionGoalUpdatePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyTargetConditionGoalFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TargetConditionGoalModifyAnyFromScenarioAccess", "TargetConditionGoalModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalModifyAnyFromScenarioAccess, Claim.TargetConditionGoalModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeleteTargetConditionGoalFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TargetConditionGoalDeleteAnyFromLibraryAccess", "TargetConditionGoalDeletePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalDeleteAnyFromLibraryAccess, Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
 
                 // Treatment
                 options.AddPolicy(Policy.ViewTreatmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentViewAnyFromLibraryAccess", "TreatmentViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentViewAnyFromLibraryAccess, Claim.TreatmentViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewTreatmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentViewAnyFromScenarioAccess", "TreatmentViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentViewAnyFromScenarioAccess, Claim.TreatmentViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyTreatmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentAddAnyFromLibraryAccess",
-                                                                   "TreatmentUpdateAnyFromLibraryAccess",
-                                                                   "TreatmentAddPermittedFromLibraryAccess",
-                                                                   "TreatmentUpdatePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentAddAnyFromLibraryAccess,
+                                                                   Claim.TreatmentUpdateAnyFromLibraryAccess,
+                                                                   Claim.TreatmentAddPermittedFromLibraryAccess,
+                                                                   Claim.TreatmentUpdatePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyTreatmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentModifyAnyFromScenarioAccess",
-                                                                   "TreatmentModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentModifyAnyFromScenarioAccess,
+                                                                   Claim.TreatmentModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeleteTreatmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentDeleteAnyFromLibraryAccess", "TreatmentDeletePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentDeleteAnyFromLibraryAccess, Claim.TreatmentDeletePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportTreatmentFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentImportAnyFromLibraryAccess", "TreatmentImportPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromLibraryAccess, Claim.TreatmentImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportTreatmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "TreatmentImportAnyFromScenarioAccess", "TreatmentImportPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromScenarioAccess, Claim.TreatmentImportPermittedFromScenarioAccess));
 
                 // Analysis Method
                 options.AddPolicy(Policy.ViewAnalysisMethod,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "AnalysisMethodViewAnyAccess", "AnalysisMethodViewPermittedAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.AnalysisMethodViewAnyAccess, Claim.AnalysisMethodViewPermittedAccess));
                 options.AddPolicy(Policy.ModifyAnalysisMethod,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "AnalysisMethodModifyAnyAccess", "AnalysisMethodModifyPermittedAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.AnalysisMethodModifyAnyAccess, Claim.AnalysisMethodModifyPermittedAccess));
 
                 // Attributes
-                options.AddPolicy(Policy.ModifyAttributes, policy => policy.RequireClaim(ClaimTypes.Name, "AttributesAddAccess", "AttributesUpdateAccess"));
+                options.AddPolicy(Policy.ModifyAttributes, policy => policy.RequireClaim(ClaimTypes.Name, Claim.AttributesAddAccess, Claim.AttributesUpdateAccess));
 
                 // Simulation
                 options.AddPolicy(Policy.ViewSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "SimulationViewPermittedAccess", "SimulationViewAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationViewPermittedAccess, Claim.SimulationViewAnyAccess));
                 options.AddPolicy(Policy.DeleteSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "SimulationDeletePermittedAccess", "SimulationDeleteAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationDeletePermittedAccess, Claim.SimulationDeleteAnyAccess));
                 options.AddPolicy(Policy.UpdateSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "SimulationUpdatePermittedAccess", "SimulationUpdateAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationUpdatePermittedAccess, Claim.SimulationUpdateAnyAccess));
                 options.AddPolicy(Policy.RunSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "SimulationRunPermittedAccess", "SimulationRunAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationRunPermittedAccess, Claim.SimulationRunAnyAccess));
 
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "BudgetPriorityViewAnyFromLibraryAccess", "BudgetPriorityViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyBudgetPriorityFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "BudgetPriorityUpdateAnyFromLibraryAccess",
-                                                                   "BudgetPriorityUpdatePermittedFromLibraryAccess",
-                                                                   "BudgetPriorityAddPermittedFromLibraryAccess",
-                                                                   "BudgetPriorityAddAnyFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityUpdateAnyFromLibraryAccess,
+                                                                   Claim.BudgetPriorityUpdatePermittedFromLibraryAccess,
+                                                                   Claim.BudgetPriorityAddPermittedFromLibraryAccess,
+                                                                   Claim.BudgetPriorityAddAnyFromLibraryAccess));
                 options.AddPolicy(Policy.DeleteBudgetPriorityFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "BudgetPriorityDeleteAnyFromLibraryAccess", "BudgetPriorityDeletePermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityDeleteAnyFromLibraryAccess, Claim.BudgetPriorityDeletePermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewBudgetPriorityFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "BudgetPriorityViewPermittedFromScenarioAccess", "BudgetPriorityViewAnyFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewPermittedFromScenarioAccess, Claim.BudgetPriorityViewAnyFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyBudgetPriorityFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "BudgetPriorityModifyPermittedFromScenarioAccess", "BudgetPriorityModifyAnyFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityModifyPermittedFromScenarioAccess, Claim.BudgetPriorityModifyAnyFromScenarioAccess));
 
                 // Calculated Attributes
                 options.AddPolicy(Policy.ModifyCalculatedAttributesFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CalculatedAttributesModifyFromLibraryAccess", "CalculatedAttributesChangeInLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CalculatedAttributesModifyFromLibraryAccess, Claim.CalculatedAttributesChangeDefaultLibraryAccess));
                 options.AddPolicy(Policy.ModifyCalculatedAttributesFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CalculatedAttributesModifyFromScenarioAccess", "CalculatedAttributesChangeInScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CalculatedAttributesModifyFromScenarioAccess, Claim.CalculatedAttributesChangeInScenarioAccess));
 
                 // Cash Flow
                 options.AddPolicy(Policy.ViewCashFlowFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CashFlowViewAnyFromLibraryAccess", "CashFlowViewPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CashFlowViewAnyFromLibraryAccess, Claim.CashFlowViewPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ViewCashFlowFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CashFlowViewAnyFromScenarioAccess", "CashFlowViewPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CashFlowViewAnyFromScenarioAccess, Claim.CashFlowViewPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.ModifyCashFlowFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CashFlowModifyAnyFromLibraryAccess", "CashFlowModifyPermittedFromLibraryAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CashFlowModifyAnyFromLibraryAccess, Claim.CashFlowModifyPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ModifyCashFlowFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CashFlowModifyAnyFromScenarioAccess", "CashFlowModifyPermittedFromScenarioAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CashFlowModifyAnyFromScenarioAccess, Claim.CashFlowModifyPermittedFromScenarioAccess));
 
                 // Committed Projects
                 options.AddPolicy(Policy.ImportCommittedProjects,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CommittedProjectImportAnyAccess", "CommittedProjectImportPermittedAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectImportAnyAccess, Claim.CommittedProjectImportPermittedAccess));
                 options.AddPolicy(Policy.ModifyCommittedProjects,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CommittedProjectModifyPermittedAccess", "CommittedProjectModifyAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectModifyPermittedAccess, Claim.CommittedProjectModifyAnyAccess));
                 options.AddPolicy(Policy.ViewCommittedProjects,
-                    policy => policy.RequireClaim(ClaimTypes.Name, "CommittedProjectViewPermittedAccess", "CommittedProjectViewAnyAccess"));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.CommittedProjectViewPermittedAccess, Claim.CommittedProjectViewAnyAccess));
             });
 
             services.AddSingleton<IEsecSecurity, EsecSecurity>();

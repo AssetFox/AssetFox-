@@ -30,11 +30,11 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                     {
                         _idColumn = column;
                     }
-                    else if (columnName == excelDataSource.DateColumn)
+                    if (columnName == excelDataSource.DateColumn)
                     {
                         _dateColumn = column;
                     }
-                    else if (columnName == attribute.Command)
+                    if (columnName == attribute.Command)
                     {
                         _dataColumn = column;
                     }

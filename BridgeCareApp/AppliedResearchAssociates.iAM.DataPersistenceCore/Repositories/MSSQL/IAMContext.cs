@@ -2252,6 +2252,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(a => a.AttributeId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 ;
+                entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetDetail)
                 .WithMany(a => a.AssetDetailValues)
@@ -2269,6 +2270,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .HasForeignKey(a => a.AttributeId)
                 .OnDelete(DeleteBehavior.ClientCascade)
                 ;
+                entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetSummaryDetail)
                 .WithMany(a => a.AssetSummaryDetailValues)

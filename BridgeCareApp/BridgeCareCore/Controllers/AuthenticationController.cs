@@ -48,6 +48,7 @@ namespace BridgeCareCore.Controllers
                 var response = GetUserInfoString(token);
                 ValidateResponse(response);
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
+                userInfo.HasAdminClaim = UserInfo.HasAdminClaim;
                 return Ok(userInfo);
             }
             catch (Exception e)

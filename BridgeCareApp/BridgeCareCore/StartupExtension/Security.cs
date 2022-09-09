@@ -50,13 +50,15 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddAuthorization(options =>
             {
-                // TODO: Delete this after security verified
+                // TODO remove below 2 later
                 options.AddPolicy(Policy.AdminOrDistrictEngineer,
                     policy => policy.Requirements.Add(
                         new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
                 options.AddPolicy(Policy.Admin,
                     policy => policy.Requirements.Add(
                         new UserHasAllowedRoleRequirement(Role.Administrator)));
+                ////
+
 
                 // Deficient Condition Goal
                 options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,

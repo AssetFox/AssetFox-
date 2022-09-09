@@ -24,6 +24,7 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly IClaimHelper _claimHelper;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public SimulationController(ISimulationAnalysis simulationAnalysis, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
@@ -114,7 +115,7 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.Id);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(dto.Id, UserId);
                     UnitOfWork.SimulationRepo.UpdateSimulation(dto);
                     UnitOfWork.Commit();
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
@@ -145,7 +146,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
                     UnitOfWork.Commit();
                 });
@@ -172,7 +173,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                 var analysisHandle = _simulationAnalysis.CreateAndRun(networkId, simulationId, UserInfo);
                 // Before sending a "queued" message that may overwrite early messages from the run,
                 // allow a brief moment for an empty queue to start running the submission.

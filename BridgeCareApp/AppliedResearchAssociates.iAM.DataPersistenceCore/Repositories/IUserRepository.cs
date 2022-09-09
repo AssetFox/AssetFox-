@@ -7,7 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
     public interface IUserRepository
     {
-        void AddUser(string username, string role);
+        void AddUser(string username, bool hasAdminClaim);
 
         void UpdateLastNewsAccessDate(Guid id, DateTime accessDate);
 

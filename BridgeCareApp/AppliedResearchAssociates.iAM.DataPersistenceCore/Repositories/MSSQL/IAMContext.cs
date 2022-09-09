@@ -2228,7 +2228,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<AssetSummaryDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(e => e.SimulationOutput)
@@ -2244,7 +2244,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<AssetDetailValueEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(a => a.Attribute)
@@ -2261,7 +2261,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(a => a.Attribute)
@@ -2278,7 +2278,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<SimulationYearDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(e => e.SimulationOutput)
@@ -2295,7 +2295,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<BudgetDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.AvailableFunding).IsRequired();
@@ -2310,8 +2310,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<DeficientConditionGoalDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id)
-                .IsRequired();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.ActualDeficientPercentage)
@@ -2381,8 +2380,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<BudgetUsageDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.CoveredCost).IsRequired();
@@ -2397,8 +2395,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<CashFlowConsiderationDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.ReasonAgainstCashFlow).IsRequired();
@@ -2411,8 +2408,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentConsiderationDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(e => e.AssetDetail)
@@ -2423,8 +2419,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentOptionDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.Benefit).IsRequired();
@@ -2439,9 +2434,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentRejectionDetailEntity>(entity =>
             {
-
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.Property(e => e.TreatmentRejectionReason).IsRequired();
@@ -2454,8 +2447,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             modelBuilder.Entity<TreatmentSchedulingCollisionDetailEntity>(entity =>
             {
-                entity.Property(e => e.Id).IsRequired()
-                .ValueGeneratedOnAdd();
+                entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
                 entity.HasOne(e => e.AssetDetail)

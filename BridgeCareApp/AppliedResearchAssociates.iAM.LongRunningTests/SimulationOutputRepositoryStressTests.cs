@@ -42,7 +42,8 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename522);
         }
 
-        [Fact(Skip = "Takes about 70 minutes to run, provided the 525MB file exists.")]
+        [Fact]
+        //[Fact(Skip = "Takes about 70 minutes to run, provided the 525MB file exists.")]
         public void SaveSimulationOutput525_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename525);

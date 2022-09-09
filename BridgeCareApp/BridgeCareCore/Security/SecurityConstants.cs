@@ -10,8 +10,11 @@
 
         public static class Policy
         {
+            // TODO remove below 2 later
             public const string Admin = "UserIsAdmin";
             public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
+            ////
+
 
             public const string ViewDeficientConditionGoalFromlLibrary = "ViewDeficientConditionGoalFromlLibrary";
             public const string ViewDeficientConditionGoalFromScenario = "ViewDeficientConditionGoalFromScenario";
@@ -72,14 +75,11 @@
 
         public static class Role
         {            
-            public const string Administrator = "Administrator";
-
-            // TODO remove later:
-            public const string BAMSAdmin = "PD-BAMS-Administrator";            
+            public const string Administrator = "Administrator";                     
         }
 
         public static class Claim
-        {
+        {            
             public const string AttributesUpdateAccess = "AttributesUpdateAccess";
             public const string AttributesAddAccess = "AttributesAddAccess";
             public const string AttributesViewAccess = "AttributesViewAccess";
@@ -171,7 +171,7 @@
             public const string DeficientConditionGoalModifyPermittedFromLibraryAccess = "DeficientConditionGoalModifyPermittedFromLibraryAccess";
             public const string DeficientConditionGoalViewPermittedFromLibraryAccess = "DeficientConditionGoalViewPermittedFromLibraryAccess";
             public const string DeficientConditionGoalModifyPermittedFromScenarioAccess = "DeficientConditionGoalModifyPermittedFromScenarioAccess";
-            public const string DeficientConditionGoalViewPermittedFromScenarioAccess = "DeficientConditionGoalViewPermittedFromScenarioAccess";            
+            public const string DeficientConditionGoalViewPermittedFromScenarioAccess = "DeficientConditionGoalViewPermittedFromScenarioAccess";
             public const string InvestmentModifyPermittedFromLibraryAccess = "InvestmentModifyPermittedFromLibraryAccess";
             public const string InvestmentImportPermittedFromLibraryAccess = "InvestmentImportPermittedFromLibraryAccess";
             public const string InvestmentViewPermittedFromLibraryAccess = "InvestmentViewPermittedFromLibraryAccess";
@@ -211,6 +211,7 @@
             public const string CommittedProjectModifyPermittedAccess = "CommittedProjectModifyPermittedAccess";
             public const string CommittedProjectImportPermittedAccess = "CommittedProjectImportPermittedAccess";
             public const string CommittedProjectViewPermittedAccess = "CommittedProjectViewPermittedAccess";
+            public const string AdminAccess = "AdminAccess";
         }
     }
 }

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Security.Claims;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -75,6 +74,11 @@ namespace BridgeCareCore.Utils
                 }
             });
             return claimsIdentity;
+        }
+
+        public bool HasAdminClaim(ClaimsPrincipal claimsPrincipal)
+        {
+            return claimsPrincipal.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
         }
     }
 }

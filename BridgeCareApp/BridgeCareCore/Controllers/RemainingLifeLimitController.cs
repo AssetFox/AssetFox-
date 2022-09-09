@@ -67,7 +67,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<RemainingLifeLimitDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId);
                 });
 
@@ -95,7 +95,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(dto);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
@@ -122,7 +122,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
@@ -157,7 +157,7 @@ namespace BridgeCareCore.Controllers
                         var dto = GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
                         .FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.RemainingLifeLimitRepo.DeleteRemainingLifeLimitLibrary(libraryId);
                     UnitOfWork.Commit();

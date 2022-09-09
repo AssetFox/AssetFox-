@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<DeficientConditionGoalDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId);
                 });
 
@@ -89,7 +89,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                    _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     UnitOfWork.DeficientConditionGoalRepo.UpsertDeficientConditionGoalLibrary(dto);
                     UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteDeficientConditionGoals(dto.DeficientConditionGoals, dto.Id);
                     UnitOfWork.Commit();
@@ -120,7 +120,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
@@ -156,7 +156,7 @@ namespace BridgeCareCore.Controllers
                         var dto = UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()
                         .FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.DeficientConditionGoalRepo.DeleteDeficientConditionGoalLibrary(libraryId);
                     UnitOfWork.Commit();

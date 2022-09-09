@@ -70,7 +70,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TreatmentDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
                 });
 
@@ -97,7 +97,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
@@ -151,7 +151,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
@@ -185,7 +185,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -234,7 +234,7 @@ namespace BridgeCareCore.Controllers
                         var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
                         if (existingTreatmentLibrary != null)
                         {
-                            _claimHelper.CheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner);
+                            _claimHelper.CheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner, UserId);
                         }
                     }
                     result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);
@@ -273,7 +273,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null || treatment == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatment(treatment, libraryId);
                     UnitOfWork.Commit();
@@ -304,7 +304,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SelectableTreatmentRepo.DeleteScenarioSelectableTreatment(scenarioSelectableTreatment, simulationId);
                     UnitOfWork.Commit();
                 });
@@ -351,7 +351,7 @@ namespace BridgeCareCore.Controllers
                 var result = new ScenarioTreatmentImportResultDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     result = _treatmentService.ImportScenarioTreatmentsFile(simulationId, excelPackage);
                 });
 

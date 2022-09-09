@@ -28,6 +28,7 @@ namespace BridgeCareCore.Controllers
     {
         private static ICommittedProjectService _committedProjectService;
         private readonly IClaimHelper _claimHelper;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public CommittedProjectController(ICommittedProjectService committedProjectService,
             IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -71,7 +72,7 @@ namespace BridgeCareCore.Controllers
 
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     _committedProjectService.ImportCommittedProjectFiles(simulationId, excelPackage, filename, applyNoTreatment);
                 });
 
@@ -96,7 +97,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     return _committedProjectService.ExportCommittedProjectsFile(simulationId);
                 });
 
@@ -217,7 +218,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.CommittedProjectRepo.DeleteSimulationCommittedProjects(simulationId);
                 });
 
@@ -276,7 +277,7 @@ namespace BridgeCareCore.Controllers
                         try
                         {
                             var simulationId = UnitOfWork.CommittedProjectRepo.GetSimulationId(project);
-                            _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                            _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                         }
                         catch (RowNotInTableException)
                         {
@@ -296,7 +297,7 @@ namespace BridgeCareCore.Controllers
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     return UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
                 });
 
@@ -355,7 +356,7 @@ namespace BridgeCareCore.Controllers
                     .Distinct();
                     foreach (var simulation in simulationIds)
                     {
-                        _claimHelper.CheckUserSimulationModifyAuthorization(simulation);
+                        _claimHelper.CheckUserSimulationModifyAuthorization(simulation, UserId);
                     }
                 }
             }

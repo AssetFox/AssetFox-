@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TargetConditionGoalDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId);
                 });
 
@@ -94,7 +94,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
@@ -126,7 +126,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
@@ -161,7 +161,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTargetConditionGoalLibrariesWithTargetConditionGoals().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(libraryId);
                     UnitOfWork.Commit();

@@ -22,6 +22,7 @@ namespace BridgeCareCore.Controllers
     {       
         public readonly IAnalysisDefaultDataService _analysisDefaultDataService;
         private readonly IClaimHelper _claimHelper;
+        private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
         public AnalysisMethodController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IAnalysisDefaultDataService analysisDefaultDataService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
@@ -43,26 +44,6 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        //private Dictionary<string, AnalysisMethodUpsertMethod> CreateUpsertMethods()
-        //{
-        //    void UpsertAny(Guid simulationId, AnalysisMethodDTO dto) =>
-        //        UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);
-
-        //    void UpsertPermitted(Guid simulationId, AnalysisMethodDTO dto)
-        //    {
-        //        CheckUserSimulationModifyAuthorization(simulationId);
-        //        UpsertAny(simulationId, dto);
-        //    }
-
-        //    return new Dictionary<string, AnalysisMethodUpsertMethod>
-        //    {
-        //        [Role.Administrator] = UpsertAny,
-        //        [Role.DistrictEngineer] = UpsertPermitted,
-        //        [Role.Cwopa] = UpsertPermitted,
-        //        [Role.PlanningPartner] = UpsertPermitted
-        //    };
-        //}
-
         [HttpGet]
         [Route("GetAnalysisMethod/{simulationId}")]
         [Authorize(Policy = Policy.ViewAnalysisMethod)]
@@ -73,7 +54,7 @@ namespace BridgeCareCore.Controllers
                 var result = new AnalysisMethodDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
                     SetDefaultDataForNewScenario(result);
                 });                     
@@ -96,7 +77,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);                    
                 });
 

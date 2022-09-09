@@ -263,7 +263,7 @@
           ]
         },
         {
-          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
+          "IPRoles": [ "Editor" ],
           "InternalRole": "Editor",
           "Claims": [
             "NetworkViewAccess",

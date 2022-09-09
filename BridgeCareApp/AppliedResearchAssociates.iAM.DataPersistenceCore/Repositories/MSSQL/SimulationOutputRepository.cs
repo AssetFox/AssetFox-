@@ -72,9 +72,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
                 var assetSummaries = simulationOutput.InitialAssetSummaries;
+                memos.Mark("assetSummaries");
                 var family = AssetSummaryDetailMapper.ToEntityLists(assetSummaries, entity.Id, attributeIdLookup);
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetails);
+                memos.Mark("assetSummaryDetails");
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
+                memos.Mark("assetSummaryDetailValues");
                 foreach (var year in simulationOutput.Years)
                 {
                     var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
@@ -83,13 +86,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assets = year.Assets;
                     var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetails);
+                    memos.Mark(" assetDetails");
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues);
+                    memos.Mark(" assetDetailValues");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails);
+                    memos.Mark(" treatmentOptionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails);
+                    memos.Mark(" treatmentRejectionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentSchedulingCollisionDetails);
+                    memos.Mark(" treatmentSchedulingCollisionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentConsiderationDetails);
+                    memos.Mark(" treatmentSchedulingConsiderationDetails");
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
+                    memos.Mark(" budgetUsageDetails");
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
+                    memos.Mark(" cashFlowConsiderationDetails");
                 }
                 memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
@@ -165,6 +176,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(a => a.SimulationOutputId == simulationOutputId)
                 .AsNoTracking()
                 .ToList();
+            memos.Mark("assetSummaryDetails");
             foreach (var assetSummary in assetSummaryDetails)
             {
                 assetNameLookup[assetSummary.MaintainableAssetId] = assetSummary.MaintainableAsset.AssetName;
@@ -224,7 +236,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                            .Where(a => a.SimulationYearDetailId == yearId)
                            .OrderBy(a => a.Id)
                    .AsNoTracking()
-                   //    .Include(a => a.AssetDetailValues)
                    .Include(a => a.TreatmentConsiderationDetails)
                    .ThenInclude(tc => tc.CashFlowConsiderationDetails)
                    .Include(a => a.TreatmentConsiderationDetails)
@@ -263,6 +274,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         var assetDetail = assets[assetDetailValue.AssetDetailId];
                         AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
                     }
+                    memos.Mark($" batch {batchIndex}");
                     batchIndex++;
                     shouldContinueLoadingAssets = assetEntities.Any();
                 }

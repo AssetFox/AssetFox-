@@ -8,7 +8,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
@@ -16,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
     public class RemainingLifeLimitTests
     {
         private TestHelper _testHelper => TestHelper.Instance;
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         public RemainingLifeLimitController SetupController()
         {
@@ -23,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateNetwork();
             _testHelper.SetupDefaultHttpContext();
             var controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
             return controller;
         }
 

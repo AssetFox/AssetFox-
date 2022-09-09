@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInfo, string adminCheckConst)
+        public UserCriteriaDTO GetOwnUserCriteria(UserInfoDTO userInfo)
         {
             // First time login
             if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Sub))
@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Id = Guid.NewGuid(),
                     Username = userInfo.Sub,
-                    HasInventoryAccess = userInfo.Roles.Contains(adminCheckConst)
+                    HasInventoryAccess = userInfo.HasAdminClaim
                 };
                 _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
 

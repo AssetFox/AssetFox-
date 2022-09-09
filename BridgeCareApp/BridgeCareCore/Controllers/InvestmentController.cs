@@ -49,7 +49,7 @@ namespace BridgeCareCore.Controllers
                 var result = new InvestmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = GetForScenario(simulationId);
                 });
 
@@ -72,7 +72,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(data.ScenarioBudgets, simulationId);
                     UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
                     UnitOfWork.Commit();
@@ -129,7 +129,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserLibraryModifyAuthorization(data.Owner);
+                    _claimHelper.CheckUserLibraryModifyAuthorization(data.Owner, UserId);
                     UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.Budgets, data.Id);
                     UnitOfWork.Commit();
@@ -159,7 +159,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var budgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (budgetLibrary == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(budgetLibrary.Owner);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(budgetLibrary.Owner, UserId);
                     }
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -242,7 +242,7 @@ namespace BridgeCareCore.Controllers
                         var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (existingBudgetLibrary != null)
                         {
-                            _claimHelper.CheckUserLibraryModifyAuthorization(existingBudgetLibrary.Owner);
+                            _claimHelper.CheckUserLibraryModifyAuthorization(existingBudgetLibrary.Owner, UserId);
                         }
                     }
                     result = _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
@@ -307,7 +307,7 @@ namespace BridgeCareCore.Controllers
                 var result = new ScenarioBudgetImportResultDTO();
                 await Task.Factory.StartNew(() =>
                 {
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId);
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     result = _investmentBudgetsService.ImportScenarioInvestmentBudgetsFile(simulationId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);
                 });
 

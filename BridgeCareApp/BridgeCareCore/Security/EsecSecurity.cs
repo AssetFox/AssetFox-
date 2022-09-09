@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
@@ -86,44 +85,29 @@ namespace BridgeCareCore.Security
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
-                }
+                }                                
 
-                // Get the internal roles and subsequent claims from mapper
-                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings.FirstOrDefault());
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);
-                request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
+                var hasAdminClaim = _roleClaimsMapper.HasAdminClaim(request.HttpContext.User);
 
-                // TODO: Drop role from UserInfo with addition of internal roles/claims
-                //       once tested and verified.
                 return new UserInfo
                 {
-                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
-                    Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
-                    InternalRole = internalRoleFromMapper,
-                    Claims = claimsFromMapper,
-                    Email = decodedToken.GetClaimValue("email")
+                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
+                    Email = decodedToken.GetClaimValue("email"),
+                    HasAdminClaim = hasAdminClaim,
                 };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
-            {
-                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, "Administrator");
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
-                request.HttpContext.User.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(request.HttpContext.User, internalRoleFromMapper, claimsFromMapper));
-
-                // TODO: Drop role from UserInfo with addition of internal roles/claims
-                //       once tested and verified.
+            {     
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    InternalRole = internalRoleFromMapper,
-                    Claims= claimsFromMapper,
-                    Role = SecurityConstants.Role.BAMSAdmin
+                    HasAdminClaim = true // TODO this will change if more roles comes for B2C
                 };
             }
 
-            return new UserInfo { Name = "", Role = "", Email = "" };
+            return new UserInfo { Name = "", Email = "" };
         }
 
         /// <summary>
@@ -134,11 +118,9 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(Dictionary<string, string> userInformationDictionary)
         {
-            var role = SecurityFunctions.ParseLdap(userInformationDictionary["roles"])
-                .First(roleString => Role.AllValidRoles.Contains(roleString));
             var name = SecurityFunctions.ParseLdap(userInformationDictionary["sub"])[0];
             var email = userInformationDictionary.ContainsKey("email") ? userInformationDictionary["email"] : null;
-            return new UserInfo { Name = name, Role = role, Email = email };
+            return new UserInfo { Name = name, Email = email };
         }
 
         /// <summary>

@@ -34,6 +34,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXunit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!IsRunningFromXunit)
+            {
+                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
+                var contents = File.ReadAllText(filePath);
+                var migrationConnection = JsonConvert
+                    .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
+                    .ConnectionStrings;
+
+                optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
+            }
+        }
+
+
+
         public IAMContext() { }
 
         public IAMContext(DbContextOptions<IAMContext> options) : base(options) { }

@@ -151,7 +151,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "NetworkViewAccess",
@@ -265,7 +265,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "Editor" ],
           "InternalRole": "Editor",
           "Claims": [
             "NetworkViewAccess",
@@ -331,7 +331,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "NetworkViewAccess",

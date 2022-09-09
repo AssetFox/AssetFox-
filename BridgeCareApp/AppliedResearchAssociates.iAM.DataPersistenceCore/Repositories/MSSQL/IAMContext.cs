@@ -38,20 +38,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public IAMContext(DbContextOptions<IAMContext> options) : base(options) { }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!IsRunningFromXunit)
-            {
-                var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Repositories\\MSSQL", "migrationConnection.json");
-                var contents = File.ReadAllText(filePath);
-                var migrationConnection = JsonConvert
-                    .DeserializeAnonymousType(contents, new { ConnectionStrings = default(MigrationConnection) })
-                    .ConnectionStrings;
-
-                optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
-            }
-        }
-
         protected override void ConfigureConventions(
             ModelConfigurationBuilder configurationBuilder)
         {

@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
 
-        public TestHelper(bool resetDatabase)
+        public TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -87,13 +87,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
 
-            if (resetDatabase)
-            {
-                DatabaseResetter.ResetDatabase(UnitOfWork);
-            }
+            DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
-        private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper(true));
+        private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
         public static TestHelper Instance
         {
             get

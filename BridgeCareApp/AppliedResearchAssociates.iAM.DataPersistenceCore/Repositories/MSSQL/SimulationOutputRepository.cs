@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private const bool ShouldHackSaveOutputToFile = true;
+        private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 400;
 
@@ -93,6 +94,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 memos.MarkInformation("All added to context", loggerForTechnicalInfo);
                 _unitOfWork.Commit();
                 memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);
+                if (ShouldHackSaveTimingsToFile)
+                {
+                    var outputFilename = "SaveTimings.txt";
+                    WriteTimingsToFile(memos, outputFilename);
+                }
                 loggerForUserInfo.Information("Simulation output saved to database");
             }
             catch (Exception ex)
@@ -269,6 +275,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
             memos.MarkInformation("Load done", loggerForTechinalInfo);
             loggerForUserInfo.Information($"Simulation output load completed");
+            if (ShouldHackSaveTimingsToFile)
+            {
+                var outputFilename = "LoadTimings.txt";
+                WriteTimingsToFile(memos, outputFilename);
+            }
             return domain;
         }
 

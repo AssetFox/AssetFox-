@@ -147,46 +147,53 @@
             </v-layout> -->
             <!-- datatable -->
                 <v-flex >
-                   <v-data-table :headers='budgetYearsGridHeaders' :items='budgetYearsGridData'
-                                      class='v-table__overflow ghd-table' item-key='year' select-all 
-                                      sort-icon=$vuetify.icons.ghd-table-sort
-                                      v-model='selectedBudgetYearsGridData' :must-sort='true'>
-                            <template slot='items' slot-scope='props'>
-                                <td>
-                                    <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
-                                </td>
-                                <td v-for='header in budgetYearsGridHeaders'>  
-                                    <div v-if="header.value === 'year'">
-                                        <span class='sm-txt'>{{ props.item.year }}</span>
-                                    </div>       
-                                    <div v-if="header.value === 'action'">
-                                        <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
-                                            <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
-                                        </v-btn>
-                                    </div>                           
-                                    <div v-if="header.value !== 'year' && header.value !== 'action'">
-                                        <v-edit-dialog :return-value.sync='props.item[header.value]'
-                                                       @save='onEditBudgetYearValue(props.item.year, header.value, props.item[header.value])'
-                                                       large lazy persistent>
-                                            <v-text-field readonly single-line class='sm-txt'
-                                                          :value='formatAsCurrency(props.item[header.value])'
-                                                          :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                            <template slot='input'>
-                                                <v-text-field label='Edit' single-line
-                                                              v-model.number='props.item[header.value]'
-                                                              v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
-                                                              :rules="[rules['generalRules'].valueIsNotEmpty]" />
-                                            </template>
-                                        </v-edit-dialog>
-                                    </div>
-                                    
-                                </td>
-                            </template>
-                        </v-data-table>   
-                        <v-btn :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
-                            class='ghd-blue ghd-button' flat>
-                            Delete Selected
-                        </v-btn>  
+                   <v-data-table 
+                        :headers='budgetYearsGridHeaders' 
+                        :items="currentPage"
+                        class='v-table__overflow ghd-table' 
+                        item-key='year' 
+                        select-all 
+                        sort-icon=$vuetify.icons.ghd-table-sort
+                        v-model='selectedBudgetYearsGridData' 
+                        :pagination.sync="pagination"
+                        :total-items="totalItems"
+                        :must-sort='true'>
+                        <template slot='items' slot-scope='props'>
+                            <td>
+                                <v-checkbox hide-details primary v-model='props.selected'></v-checkbox>
+                            </td>
+                            <td v-for='header in budgetYearsGridHeaders'>  
+                                <div v-if="header.value === 'year'">
+                                    <span class='sm-txt'>{{ props.item.year }}</span>
+                                </div>       
+                                <div v-if="header.value === 'action'">
+                                    <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
+                                        <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
+                                    </v-btn>
+                                </div>                           
+                                <div v-if="header.value !== 'year' && header.value !== 'action'">
+                                    <v-edit-dialog :return-value.sync='props.item[header.value]'
+                                                    @save='onEditBudgetYearValue(props.item.year, header.value, props.item[header.value])'
+                                                    large lazy persistent>
+                                        <v-text-field readonly single-line class='sm-txt'
+                                                        :value='formatAsCurrency(props.item[header.value])'
+                                                        :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                        <template slot='input'>
+                                            <v-text-field label='Edit' single-line
+                                                            v-model.number='props.item[header.value]'
+                                                            v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
+                                                            :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                        </template>
+                                    </v-edit-dialog>
+                                </div>
+                                
+                            </td>
+                        </template>
+                    </v-data-table>   
+                    <v-btn :disabled='selectedBudgetYears.length === 0' @click='onRemoveBudgetYears'
+                        class='ghd-blue ghd-button' flat>
+                        Delete Selected
+                    </v-btn>  
                 </v-flex>
         </v-flex>
         <!-- <v-divider v-show='hasSelectedLibrary || hasScenario'></v-divider> -->
@@ -304,6 +311,8 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { PagingRequest, PagingPage, InvestmentPagingRequestModel } from '@/shared/models/iAM/paging';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 
 @Component({
     components: {
@@ -339,6 +348,22 @@ export default class InvestmentEditor extends Vue {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
+    addedBudgets: Budget[] = [];
+    updatedBudgetsMap:Map<string, [Budget, Budget]> = new Map<string, [Budget, Budget]>();//0: original value | 1: updated value
+    deletionBudgetIds: string[] = [];
+    BudgetCache: Budget[] = [];
+    budgetAmountCache: BudgetAmount[] = [];
+    updatedBudgetAmountsMaps:Map<string, [BudgetAmount, BudgetAmount]> = new Map<string, [BudgetAmount, BudgetAmount]>();//0: original value | 1: updated value 
+    addedBudgetAmounts: Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
+    deletionYears: number[] = [] 
+    updatedBudgetAmounts:  Map<string, BudgetAmount[]> = new  Map<string, BudgetAmount[]>();
+    gridSearchTerm = '';
+    currentSearch = '';
+    pagination: Pagination = clone(emptyPagination);
+    isPageInit = false;
+    totalItems = 0;
+    currentPage: Budget[] = [];
+
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
     selectedScenarioId: string = getBlankGuid();
@@ -350,7 +375,7 @@ export default class InvestmentEditor extends Vue {
         { text: 'Year', value: 'year', sortable: true, align: 'left', class: '', width: '' },
         this.actionHeader
     ];
-    budgetYearsGridData: BudgetYearsGridData[] = [];
+    budgetYearsGridData: BudgetYearsGridData[] = []; //old data table items
     selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
     selectedBudgetYears: number[] = [];
     createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
@@ -399,13 +424,80 @@ export default class InvestmentEditor extends Vue {
                 }
 
                 vm.hasScenario = true;
-                vm.getInvestmentAction(vm.selectedScenarioId);
+                vm.onPaginationChanged()
             }
         });
     }
 
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
+    }
+    // Watchers
+    @Watch('pagination')
+    onPaginationChanged() {
+        this.checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+
+        const request: InvestmentPagingRequestModel= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
+                updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
+                budgetsForDeletion: this.deletionBudgetIds,
+                addedBudgets: this.addedBudgets,
+                deletionyears: this.deletionYears ,
+                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                Investment: this.investmentPlan,
+                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+            },           
+            sortColumn: sortBy,
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch
+        };
+        
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
+            InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<Budget>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                    if (page == 1) {
+                        this.syncInvestmentPlanWithBudgets();
+                    }
+                }
+            });
+        }            
+        else if(this.hasSelectedLibrary)
+             InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<Budget>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });     
+    }
+
+    @Watch('deletionBudgetIds')
+    onDeletionBudgetIdsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('addedBudgets')
+    onAddedBudgetsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('deletionyears')
+    onDeletionyearsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('addedBudgetAmounts')
+    onAddedBudgetAmountsChanged(){
+        this.checkHasUnsavedChanges();
     }
 
     @Watch('stateBudgetLibraries')
@@ -913,6 +1005,98 @@ export default class InvestmentEditor extends Vue {
 
         this.disableCrudButtonsResult = !allBudgetDataIsValid;
         return !allBudgetDataIsValid;
+    }
+
+    onSearchClick(){
+        this.currentSearch = this.gridSearchTerm;
+        this.resetPage();
+    }
+
+    onUpdateBudget(rowId: string, updatedRow: Budget){
+        if(any(propEq('id', rowId), this.addedBudgets))
+            return;
+
+        let mapEntry = this.updatedBudgetsMap.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.BudgetCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
+                this.updatedBudgetsMap.set(rowId, [row , updatedRow])
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+        }
+        else
+            this.updatedBudgetsMap.delete(rowId)
+
+        this.checkHasUnsavedChanges();
+    }
+
+    onUpdateBudgetAmount(rowId: string, updatedRow: BudgetAmount){
+        if(any(propEq('id', rowId), this.addedBudgetAmounts.get(updatedRow.budgetName)!))
+            return;
+
+        let mapEntry = this.updatedBudgetAmountsMaps.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.budgetAmountCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row)){
+                this.updatedBudgetAmountsMaps.set(rowId, [row , updatedRow])
+                this.updatedBudgetAmounts.get(updatedRow.budgetName)?.push(updatedRow)
+            }               
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+            let amounts = this.updatedBudgetAmounts.get(updatedRow.budgetName)
+            if(!isNil(amounts))
+                amounts[amounts.findIndex(r => r.id == updatedRow.id)] = updatedRow
+        }
+        else{
+            this.updatedBudgetsMap.delete(rowId)
+            let amounts = this.updatedBudgetAmounts.get(updatedRow.budgetName)
+            if(!isNil(amounts))
+                amounts.splice(amounts.findIndex(r => r.id == updatedRow.id), 1)
+        }
+            
+
+        this.checkHasUnsavedChanges();
+    }
+
+    clearChanges(){
+        this.updatedBudgetsMap.clear();
+        this.addedBudgets = [];
+        this.deletionBudgetIds = [];
+        this.updatedBudgetAmountsMaps.clear();
+        this.updatedBudgetAmounts.clear();
+        this.addedBudgetAmounts.clear();
+        this.deletionyears = [];
+    }
+
+    resetPage(){
+        this.performancePagination.page = 1;
+        this.onPaginationChanged();
+    }
+
+    checkHasUnsavedChanges(){
+        const hasUnsavedChanges: boolean = 
+            this.deletionBudgetIds.length > 0 || 
+            this.addedBudgets.length > 0 ||
+            this.updatedBudgetsMap.size > 0 || 
+            this.deletionyears.length > 0 || 
+            this.addedBudgets.length > 0 ||
+            this.updatedBudgetsMap.size > 0 || 
+            (this.hasScenario && this.hasSelectedLibrary)
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    mapToIndexSignature<T>(map: Map<string, T>): {[key: string]: T}{
+        let toReturn: {[key: string]: T} = {}
+
+        for(const key in map.keys){
+            toReturn[key] = map.get(key)!
+        }
+
+        return toReturn;
     }
 }
 </script>

@@ -627,5 +627,142 @@ namespace BridgeCareCore.Services
                     : null
             };
         }
+
+        public PagingPageModel<BudgetDTO> GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request)
+        {
+            var skip = 0;
+            var take = 0;
+            var items = new List<BudgetDTO>();
+            var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+
+
+            budgets = SyncedDataset(budgets, request.PagingSync);
+
+            if (request.sortColumn.Trim() != "")
+                budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
+
+            if (request.RowsPerPage > 0)
+            {
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                items = budgets.Skip(skip).Take(take).ToList();
+            }
+            else
+            {
+                items = budgets;
+                return new PagingPageModel<BudgetDTO>()
+                {
+                    Items = items,
+                    TotalItems = items.Count
+                };
+            }
+
+            return new PagingPageModel<BudgetDTO>()
+            {
+                Items = items,
+                TotalItems = budgets.Count()
+            };
+        }
+
+        public PagingPageModel<BudgetDTO> GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request)
+        {
+            var skip = 0;
+            var take = 0;
+            var items = new List<BudgetDTO>();
+            var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
+           
+
+            budgets = SyncedDataset(budgets, request.PagingSync);
+
+            if (request.sortColumn.Trim() != "")
+                budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
+
+            if (request.RowsPerPage > 0)
+            {
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                items = budgets.Skip(skip).Take(take).ToList();
+            }
+            else
+            {
+                items = budgets;
+                return new PagingPageModel<BudgetDTO>()
+                {
+                    Items = items,
+                    TotalItems = items.Count
+                };
+            }
+
+            return new PagingPageModel<BudgetDTO>()
+            {
+                Items = items,
+                TotalItems = budgets.Count()
+            };
+        }
+
+        public List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request)
+        {
+            var budgets = request.LibraryId == null ?
+                    _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                    _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        public List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request)
+        {
+            var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        private List<BudgetDTO> OrderByColumn(List<BudgetDTO> budgets, string sortColumn, bool isDescending)
+        {
+            sortColumn = sortColumn?.ToLower().Trim();
+            switch (sortColumn)
+            {
+            case "year":
+                if (isDescending)
+                {
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderByDescending(__ => __.Year).ToList());
+                    return budgets;
+                }
+                else
+                {
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderBy(__ => __.Year).ToList());
+                    return budgets;
+                }
+            default:
+                var budget = budgets.FirstOrDefault(_ => _.Name.ToLower().Trim() == sortColumn);
+                if (isDescending)
+                    budget.BudgetAmounts = budget.BudgetAmounts.OrderByDescending(_ => _.Value).ToList();
+                else
+                    budget.BudgetAmounts = budget.BudgetAmounts.OrderBy(_ => _.Value).ToList();
+                return budgets;
+            }
+        }
+
+        private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
+        {
+            budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
+
+            for (var i = 0; i < budgets.Count; i++)
+            {
+                var item = syncModel.UpdatedBudgets.FirstOrDefault(row => row.Id == budgets[i].Id);
+                if(syncModel.AddedBudgetAmounts.Keys.Count != 0)
+                    item.BudgetAmounts = item.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[item.Name]).ToList();
+                if(syncModel.Deletionyears.Count != 0)
+                    item.BudgetAmounts = item.BudgetAmounts.Where(_ => !syncModel.Deletionyears.Contains(_.Year)).ToList();
+                for (var o = 0; o < item.BudgetAmounts.Count; o++)
+                {
+                    var amount = syncModel.UpdatedBudgetAmounts[item.Name].FirstOrDefault(row => row.Id == item.BudgetAmounts[o].Id);
+                    if (amount != null)
+                        item.BudgetAmounts[o] = amount;
+                }
+                if (item != null)
+                    budgets[i] = item;
+            }
+
+            return budgets;
+        }
     }
 }

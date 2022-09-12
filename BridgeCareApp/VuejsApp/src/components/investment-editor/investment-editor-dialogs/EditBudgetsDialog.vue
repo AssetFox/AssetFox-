@@ -82,7 +82,7 @@ import { any, clone, isNil, update, findIndex, propEq } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import {
-    EditBudgetsDialogData,
+    EditBudgetsDialogData, EmitedBudgetChanges, emptyEmitBudgetChanges,
 } from '@/shared/models/modals/edit-budgets-dialog';
 import {
     CriterionLibraryEditorDialogData,
@@ -116,6 +116,12 @@ export default class EditBudgetsDialog extends Vue {
     rules: InputValidationRules = rules;
     uuidNIL: string = getBlankGuid();
 
+    budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
+    
+    addedBudgets: Budget[] = [];
+    updatedBudgets:Budget[] = []
+    deletionBudgetIds: string[] = [];
+
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
@@ -124,13 +130,14 @@ export default class EditBudgetsDialog extends Vue {
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.name.match(/Unnamed Budget/));
-
-        this.editBudgetsDialogGridData.push({
+        const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
             name: `Unnamed Budget ${unnamedBudgets.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
-        });
+        }
+        this.editBudgetsDialogGridData.push(budget);
+        this.budgetChanges.addedBudgets.push(budget);
     }
 
     onEditBudgetName(budget: Budget) {
@@ -139,6 +146,18 @@ export default class EditBudgetsDialog extends Vue {
             clone(budget),
             this.editBudgetsDialogGridData,
         );
+
+        const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id)
+        if(!isNil(origBudget)){
+            if(origBudget.name !== budget.name){
+                if(any(propEq('id', budget.id), this.budgetChanges.addedBudgets))
+                    this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
+                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else
+                    this.budgetChanges.updatedBudgets.push(budget);
+            }
+        }          
     }
 
     disableDeleteButton() {
@@ -148,13 +167,28 @@ export default class EditBudgetsDialog extends Vue {
     onRemoveBudgets() {
         this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
             .filter((budget: Budget) => !any(propEq('id', budget.id), this.selectedGridRows));
-
+        this.selectedGridRows.forEach(budget => {
+            this.removeBudget(budget.id)
+        })
         this.selectedGridRows = [];
     }
 
     onRemoveBudget(id: string){
         this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.id != id);
+
+        this.removeBudget(id)
+    }
+
+    removeBudget(id: string){
+        if(any(propEq('id', id), this.budgetChanges.addedBudgets)){
+            this.budgetChanges.addedBudgets = this.budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
+            this.budgetChanges.deletionIds.push(id);
+        }              
+        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets))
+            this.budgetChanges.updatedBudgets = this.budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
+        else
+            this.budgetChanges.deletionIds.push(id);
     }
 
     onShowCriterionLibraryEditorDialog(budget: Budget) {
@@ -178,13 +212,26 @@ export default class EditBudgetsDialog extends Vue {
                 this.editBudgetsDialogGridData,
             );
 
+        const budget = this.selectedBudgetForCriteriaEdit;
+        const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id)
+        if(!isNil(origBudget)){
+            if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){
+                if(any(propEq('id', budget.id), this.budgetChanges.addedBudgets))
+                    this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
+                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                else
+                    this.budgetChanges.updatedBudgets.push(budget);
+            }
+        }  
+
             this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
         }
     }
 
     onSubmit(submit: boolean) {
         if (submit) {
-            this.$emit('submit', this.editBudgetsDialogGridData);
+            this.$emit('submit', this.budgetChanges);
         } else {
             this.$emit('submit', null);
         }

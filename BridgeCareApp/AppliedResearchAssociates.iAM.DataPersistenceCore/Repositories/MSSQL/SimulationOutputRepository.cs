@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = true;
         private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetLoadBatchSize = 10000;
+        public const int AssetLoadBatchSize = 5000;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -246,7 +246,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
+                    memos.Mark("  assetEntities");
                     AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
+                    memos.Mark("  toDomainDictionary");
                     var assetDetailValues = new List<AssetDetailValueEntity>();
                     foreach (var assetEntity in assetEntities)
                     {
@@ -260,6 +262,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             assetDetailValues.Add(assetDetail);
                         }
                     }
+                    memos.Mark("  empty assetDetails");
                     var assetDetailValueConfig = new BulkConfig
                     {
                         UpdateByProperties = new List<string>
@@ -269,12 +272,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                     };
                     _unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
+                    memos.Mark("  BulkRead done");
                     foreach (var assetDetailValue in assetDetailValues)
                     {
                         var assetDetail = assets[assetDetailValue.AssetDetailId];
                         AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
                     }
-                    memos.Mark($" batch {batchIndex}");
+                    memos.Mark($" batch {batchIndex} done");
                     batchIndex++;
                     shouldContinueLoadingAssets = assetEntities.Any();
                 }

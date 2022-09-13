@@ -413,7 +413,7 @@ export default class InvestmentEditor extends Vue {
             page: page,
             rowsPerPage: rowsPerPage,
             pagingSync: {
-                libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
+                libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
                 updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
@@ -1024,7 +1024,8 @@ export default class InvestmentEditor extends Vue {
             const row = this.budgetAmountCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row)){
                 this.updatedBudgetAmountsMaps.set(rowId, [row , updatedRow])
-                this.updatedBudgetAmounts.get(updatedRow.budgetName)?.push(updatedRow)
+                if(!isNil(this.updatedBudgetAmounts.get(updatedRow.budgetName)))
+                    this.updatedBudgetAmounts.get(updatedRow.budgetName)!.push(updatedRow)
             }               
         }
         else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
@@ -1055,7 +1056,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     resetPage(){
-        this.performancePagination.page = 1;
+        this.pagination.page = 1;
         this.onPaginationChanged();
     }
 
@@ -1064,7 +1065,7 @@ export default class InvestmentEditor extends Vue {
             this.deletionBudgetIds.length > 0 || 
             this.addedBudgets.length > 0 ||
             this.updatedBudgetsMap.size > 0 || 
-            this.deletionyears.length > 0 || 
+            this.deletionYears.length > 0 || 
             this.addedBudgets.length > 0 ||
             this.updatedBudgetsMap.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary)

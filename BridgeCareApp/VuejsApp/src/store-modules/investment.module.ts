@@ -141,33 +141,33 @@ const actions = {
             },
         );
     },
-    async upsertBudgetLibrary(
-        { dispatch, commit }: any,
-        budgetLibrary: BudgetLibrary,
-    ) {
-        await InvestmentService.upsertBudgetLibrary(budgetLibrary).then(
-            (response: AxiosResponse) => {
-                if (
-                    hasValue(response, 'status') &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    const message: string = any(
-                        propEq('id', budgetLibrary.id),
-                        state.budgetLibraries,
-                    )
-                        ? 'Updated budget library'
-                        : 'Added budget library';
+    // async upsertBudgetLibrary(
+    //     { dispatch, commit }: any,
+    //     budgetLibrary: BudgetLibrary,
+    // ) {
+    //     await InvestmentService.upsertBudgetLibrary(budgetLibrary).then(
+    //         (response: AxiosResponse) => {
+    //             if (
+    //                 hasValue(response, 'status') &&
+    //                 http2XX.test(response.status.toString())
+    //             ) {
+    //                 const message: string = any(
+    //                     propEq('id', budgetLibrary.id),
+    //                     state.budgetLibraries,
+    //                 )
+    //                     ? 'Updated budget library'
+    //                     : 'Added budget library';
 
-                    commit('budgetLibraryMutator', budgetLibrary);
-                    commit('selectedBudgetLibraryMutator', budgetLibrary.id);
+    //                 commit('budgetLibraryMutator', budgetLibrary);
+    //                 commit('selectedBudgetLibraryMutator', budgetLibrary.id);
 
-                    dispatch('addSuccessNotification', {
-                        message: message,
-                    });
-                }
-            },
-        );
-    },
+    //                 dispatch('addSuccessNotification', {
+    //                     message: message,
+    //                 });
+    //             }
+    //         },
+    //     );
+    // },
     async deleteBudgetLibrary(
         { dispatch, commit, state }: any,
         libraryId: string,

@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
+using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
@@ -95,6 +100,173 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
             var postedSegments = !String.IsNullOrEmpty(bpn) ? sectionSummaries.FindAll(b => _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn) : sectionSummaries;
             var selectedSegments = postedSegments.FindAll(section => conditionFunction(section));
             return selectedSegments.Sum(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "SEGMENT_LENGTH")).FeetToMiles();
+        }
+
+
+        internal void FillDataToUseInExcel(
+            SimulationOutput reportOutputData,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
+            )
+        {
+            foreach (var yearData in reportOutputData.Years)
+            {
+                costAndLengthPerTreatmentPerYear.Add(yearData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                costAndLengthPerTreatmentGroupPerYear.Add(yearData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
+
+                foreach (var section in yearData.Assets)
+                {
+                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    PopulateTreatmentCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentPerYear);
+                    PopulateTreatmentGroupCostAndLength(yearData.Year, section, cost, costAndLengthPerTreatmentGroupPerYear);
+
+                }
+            }
+        }
+
+        internal void FillDataToUseInExcel(
+            WorkSummaryByBudgetModel budgetSummaryModel,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int count)>> costAndLengthPerTreatmentPerYear,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentGroupPerYear
+            )
+        {
+            foreach (var yearsData in budgetSummaryModel.YearlyData)
+            {
+                if (!costAndLengthPerTreatmentPerYear.ContainsKey(yearsData.Year))
+                {
+                    costAndLengthPerTreatmentPerYear.Add(yearsData.Year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                }
+                var treatmentData = costAndLengthPerTreatmentPerYear[yearsData.Year];
+
+                if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(yearsData.Year))
+                {
+                    costAndLengthPerTreatmentGroupPerYear.Add(yearsData.Year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
+                }
+                var treatmentGroupData = costAndLengthPerTreatmentGroupPerYear[yearsData.Year];
+
+                PopulateTreatmentCostAndLength(yearsData, costAndLengthPerTreatmentPerYear);
+                PopulateTreatmentGroupCostAndLength(yearsData, costAndLengthPerTreatmentGroupPerYear);
+            }
+        }
+        private void PopulateTreatmentCostAndLength(
+            YearsData yearsData,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            )
+        {
+            int segmentLength = 0;
+            //if (!costAndLengthPerTreatmentPerYear[yearsData.Year].ContainsKey(yearsData.TreatmentName))
+            //{
+                costAndLengthPerTreatmentPerYear[yearsData.Year].Add(yearsData.TreatmentName, ((decimal)yearsData.Amount, (int)segmentLength));
+            //}
+        }
+
+        private void PopulateTreatmentGroupCostAndLength(
+            YearsData yearsData,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            )
+        {
+            var year = yearsData.Year;
+            var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(yearsData.TreatmentName);
+            int segmentLength = 0;
+
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
+            {
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, ((decimal)yearsData.Amount, (int)segmentLength));
+            }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
+                values.treatmentCost += (decimal) yearsData.Amount;
+                values.length += (int)segmentLength;
+                costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
+            }
+        }
+
+
+        private void PopulateTreatmentCostAndLength(
+            int year,
+            AssetDetail section,
+            decimal cost,
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            )
+        {
+            var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(section.AppliedTreatment))
+            {
+                costAndLengthPerTreatmentPerYear[year].Add(section.AppliedTreatment, (cost, (int)segmentLength));
+            }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment];
+                values.treatmentCost += cost;
+                values.length += (int)segmentLength;
+                costAndLengthPerTreatmentPerYear[year][section.AppliedTreatment] = values;
+            }
+        }
+
+        private void PopulateTreatmentGroupCostAndLength(
+            int year,
+            AssetDetail section,
+            decimal cost,
+            Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear
+            )
+        {
+            var segmentLength = section.ValuePerNumericAttribute["SEGMENT_LENGTH"];
+
+            var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(section.AppliedTreatment);
+
+            if (!costAndLengthPerTreatmentPerYear[year].ContainsKey(treatmentGroup))
+            {
+                costAndLengthPerTreatmentPerYear[year].Add(treatmentGroup, (cost, (int)segmentLength));
+            }
+            else
+            {
+                var values = costAndLengthPerTreatmentPerYear[year][treatmentGroup];
+                values.treatmentCost += cost;
+                values.length += (int)segmentLength;
+                costAndLengthPerTreatmentPerYear[year][treatmentGroup] = values;
+            }
+        }
+
+        internal Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>> CalculateWorkTypeTotals(
+            Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>> costAndLengthPerTreatmentPerYear,
+            List<(string Name, AssetCategory AssetType, TreatmentCategory Category)> simulationTreatments
+            )
+        {
+            var workTypeTotals = new Dictionary<TreatmentCategory, SortedDictionary<int, (decimal treatmentCost, int length)>>();
+
+            foreach (var yearlyValues in costAndLengthPerTreatmentPerYear)
+            {
+                foreach (var treatment in simulationTreatments)
+                {
+                    decimal cost = 0;
+                    int length = 0;
+
+                    yearlyValues.Value.TryGetValue(treatment.Name, out var costAndLength);
+                    cost = costAndLength.treatmentCost;
+                    length = costAndLength.length;
+
+                    if (!workTypeTotals.ContainsKey(treatment.Category))
+                    {
+                        workTypeTotals.Add(treatment.Category, new SortedDictionary<int, (decimal treatmentCost, int length)>()
+                        {
+                            { yearlyValues.Key, (cost, length) }
+                        });
+                    }
+                    else
+                    {
+                        if (!workTypeTotals[treatment.Category].ContainsKey(yearlyValues.Key))
+                        {
+                            workTypeTotals[treatment.Category].Add(yearlyValues.Key, (0, 0));
+                        }
+                        var value = workTypeTotals[treatment.Category][yearlyValues.Key];
+                        value.treatmentCost += cost;
+                        value.length += length;
+                        workTypeTotals[treatment.Category][yearlyValues.Key] = value;
+                    }
+                }
+            }
+            return workTypeTotals;
         }
 
     }

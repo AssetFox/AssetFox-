@@ -14,12 +14,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     public class TreatmentsWorkSummary
     {
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
-        private WorkSummaryModel _workSummaryModel;
 
-        public TreatmentsWorkSummary(WorkSummaryModel workSummaryModel)
+        public TreatmentsWorkSummary()
         {
             _pavementWorkSummaryCommon = new PavementWorkSummaryCommon();
-            _workSummaryModel = workSummaryModel;
         }
 
         public ChartRowsModel FillTreatmentsWorkSummarySections(

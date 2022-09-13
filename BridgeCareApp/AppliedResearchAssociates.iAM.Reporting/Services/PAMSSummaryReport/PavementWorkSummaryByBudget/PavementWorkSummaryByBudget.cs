@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
 
@@ -17,6 +18,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 {
     public class PavementWorkSummaryByBudget : IPavementWorkSummaryByBudget
     {
+        private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
+
+        public PavementWorkSummaryByBudget()
+        {
+            _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
+        }
+
         public void Fill(
             ExcelWorksheet worksheet,
             SimulationOutput reportOutputData,
@@ -29,18 +37,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
 
             SetupBudgetModelsAndCommittedTreatments(reportOutputData, selectableTreatments, workSummaryByBudgetModels, committedTreatments);
 
+            var simulationTreatments = new List<(string Name, AssetCategory AssetType, TreatmentCategory Category)>();
+            foreach (var item in selectableTreatments)
+            {
+                simulationTreatments.Add((item.Name, item.AssetCategory, item.Category));
+            }
+            simulationTreatments.Sort((a, b) => a.Name.CompareTo(b.Name));
+
             var currentCell = new CurrentCell { Row = 1, Column = 1 };
 
             foreach (var budgetSummaryModel in workSummaryByBudgetModels)
             {
-                //Filter treatment costs for the given budget
-                var treatmentsDataForYear = budgetSummaryModel.YearlyData
-                                                    .FindAll(_ => _.isCommitted && _.Treatment.ToLower() != PAMSConstants.NoTreatment);
+                // Inside iteration since each section has its own budget analysis section.
+                var costBudgetsWorkSummary = new CostBudgetsWorkSummary();
 
-                var totalBudgetPerYear = CalculateTotalBudgetPerYear(simulationYears, treatmentsDataForYear);
-
-                //var startYear = simulationYears[0];
-                //var numberOfYears = simulationYears.Count;
+                var costAndLengthPerTreatmentPerYear = new Dictionary<int, Dictionary<string, (decimal treatmentCost, int length)>>();
+                var costAndLengthPerTreatmentGroupPerYear = new Dictionary<int, Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>>();
 
                 currentCell.Column = 1;
                 worksheet.Cells[currentCell.Row, currentCell.Column].Value = budgetSummaryModel.BudgetName;
@@ -50,35 +62,55 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[currentCell.Row, currentCell.Column]);
                 ExcelHelper.MergeCells(worksheet, currentCell.Row, currentCell.Column, currentCell.Row, simulationYears.Count);
 
-                currentCell.Column = 1;
+                if (budgetSummaryModel.YearlyData.Count == 0)
+                {
+                    // Nothing to see here, but include the empty budgets anyway for now.
+                    // Add all treatments here, set all values to 0
+                    foreach (var year in simulationYears)
+                    {
+                        if (!costAndLengthPerTreatmentPerYear.ContainsKey(year))
+                        {
+                            costAndLengthPerTreatmentPerYear.Add(year, new Dictionary<string, (decimal treatmentCost, int length)>());
+                        }
+                        var treatmentData = costAndLengthPerTreatmentPerYear[year];
 
-                // Add all subsections here
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Full Depth Asphalt Work";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
+                        if (!costAndLengthPerTreatmentGroupPerYear.ContainsKey(year))
+                        {
+                            costAndLengthPerTreatmentGroupPerYear.Add(year, new Dictionary<PavementTreatmentHelper.TreatmentGroup, (decimal treatmentCost, int length)>());
+                        }
+                        var treatmentGroupData = costAndLengthPerTreatmentGroupPerYear[year];
 
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Composite Work";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
+                        foreach (var treatment in simulationTreatments)
+                        {
+                            if (treatment.Name != PAMSConstants.NoTreatmentForWorkSummary)
+                            {
+                                treatmentData.Add(treatment.Name, (0, 0));
 
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Concrete Work";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
+                                var treatmentGroup = PavementTreatmentHelper.GetTreatmentGroup(treatment.Name);
+                                if (!treatmentGroupData.ContainsKey(treatmentGroup))
+                                {
+                                    treatmentGroupData.Add(treatmentGroup, (0, 0));
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    _pavementWorkSummaryComputationHelper.FillDataToUseInExcel(budgetSummaryModel, costAndLengthPerTreatmentPerYear, costAndLengthPerTreatmentGroupPerYear);
+                }
 
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Treatment Groups Totals";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
+                var workTypeTotals = _pavementWorkSummaryComputationHelper.CalculateWorkTypeTotals(costAndLengthPerTreatmentPerYear, simulationTreatments);
 
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Work Type Totals";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
-
-                currentCell.Row += 1;
-                worksheet.Cells[currentCell.Row, currentCell.Column].Value = "PAMS Budget Total";
-                worksheet.Cells[currentCell.Row, currentCell.Column].Style.Font.Bold = true;
+                costBudgetsWorkSummary.FillCostBudgetWorkSummarySections(worksheet, currentCell, simulationYears,
+                    yearlyBudgetAmount,
+                    costAndLengthPerTreatmentPerYear,
+                    costAndLengthPerTreatmentGroupPerYear, // We only care about cost here
+                    simulationTreatments, // This should be filtered by budget/year; do we already have this by this point?
+                    workTypeTotals);
 
                 // Finally, advance for next budget label
-                currentCell.Row += 2;
+                currentCell.Row++;
             }
         }
 
@@ -121,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
-                                Treatment = section.AppliedTreatment,
+                                TreatmentName = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 isCommitted = true,
                                 //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
@@ -139,7 +171,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
                             summaryModel.YearlyData.Add(new YearsData
                             {
                                 Year = yearData.Year,
-                                Treatment = section.AppliedTreatment,
+                                TreatmentName = section.AppliedTreatment,
                                 Amount = budgetAmount,
                                 //costPerBPN = (_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK"), budgetAmount),
                                 TreatmentCategory = treatmentData.Category,

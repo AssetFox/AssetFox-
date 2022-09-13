@@ -15,14 +15,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     public class IriConditionSummary
     {
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
-        private WorkSummaryModel _workSummaryModel;
         private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
 
-        public IriConditionSummary(WorkSummaryModel workSummaryModel)
+        public IriConditionSummary()
         {
             _pavementWorkSummaryCommon = new PavementWorkSummaryCommon();
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
-            _workSummaryModel = workSummaryModel;
         }
 
         private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetSummaryDetail> initialSectionSummaries, BPNName bpn)

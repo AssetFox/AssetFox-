@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using BridgeCareCore.Security;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BridgeCareCore
 {
@@ -71,6 +72,7 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, SecurityAuthorizationMiddlewareResultHandler>();
             var connectionString = Configuration.GetConnectionString("BridgeCareConnex");
 
             services.AddDbContext<IAMContext>(options => options.UseSqlServer(

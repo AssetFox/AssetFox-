@@ -42,8 +42,8 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename522);
         }
 
-        [Fact]
-        //[Fact(Skip = "Takes about 70 minutes to run, provided the 525MB file exists.")]
+        //[Fact]
+        [Fact(Skip = "Takes about 70 minutes to run, provided the 525MB file exists.")]
         public void SaveSimulationOutput525_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename525);
@@ -79,14 +79,14 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         /// then checks that they are the same. For the test to run, you need a json-encoded SimulationOutput saved at the place
         /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
         // C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.StressTesting\GitIgnored\SimulationOutput.json
-        [Fact]
-        //[Fact (Skip ="Takes about 3 minutes to run. Needs the above file.")]
+        //[Fact]
+        [Fact (Skip ="Takes about 3 minutes to run. Needs the above file.")]
         public void SaveSimulationOutput176_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);
         }
 
-        [Fact]
+        [Fact (Skip ="Not sure how long this takes but it's not quick")]
         public void SaveSimulationOutput965_ThenLoad_Saqme()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename965);

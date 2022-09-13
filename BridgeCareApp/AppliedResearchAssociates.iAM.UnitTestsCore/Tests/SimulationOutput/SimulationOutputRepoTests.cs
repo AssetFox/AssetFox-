@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -53,10 +54,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
 
-        [Fact]
+        [Fact (Skip = "May be slow, depending on the batch size")]
         public void SaveSimulationOutputWithMoreAssetsThanBatchSize_ThenLoad_Same()
         {
-            var numberOfAssets = 25 + Math.Max(SimulationOutputRepository.AssetLoadBatchSize, SimulationOutputRepository.AssetLoadBatchSize);
+            var numberOfAssets = 25 + SimulationOutputRepository.AssetLoadBatchSize;
             var assetNameIdPairs = AssetNameIdPairLists.Random(numberOfAssets);
             var numericAttributeName = RandomStrings.WithPrefix("NumericAttribute");
             var textAttributeName = RandomStrings.WithPrefix("TextAttrbute");
@@ -72,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
-            SimulationOutputAsserts.CouldBeEquivalent(simulationOutput, loadedOutput);
+            SimulationOutputAssertions.CouldBeEquivalent(simulationOutput, loadedOutput);
         }
 
     }

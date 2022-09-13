@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class CashFlowConsiderationDetailEntity: BaseEntity
+    public class CashFlowConsiderationDetailEntity
     {
         public Guid Id { get; set; }
 

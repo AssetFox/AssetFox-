@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AssetSummaryDetailEntity : BaseEntity
+    public class AssetSummaryDetailEntity
     {
         public AssetSummaryDetailEntity()
         {

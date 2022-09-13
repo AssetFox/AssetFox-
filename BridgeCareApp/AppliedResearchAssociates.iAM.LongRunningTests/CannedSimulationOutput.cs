@@ -11,5 +11,6 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         public const string Filename176 = "SimulationOutput176.json";
         public const string Filename522 = "SimulationOutput522.json";
         public const string Filename525 = "SimulationOutput525.json";
+        public const string Filename965 = "SimulationOutput965.json";
     }
 }

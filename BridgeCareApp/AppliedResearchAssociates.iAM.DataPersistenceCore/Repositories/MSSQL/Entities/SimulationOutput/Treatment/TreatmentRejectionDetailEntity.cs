@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class TreatmentRejectionDetailEntity: BaseEntity
+    public class TreatmentRejectionDetailEntity
     {
         public Guid Id { get; set; }
 

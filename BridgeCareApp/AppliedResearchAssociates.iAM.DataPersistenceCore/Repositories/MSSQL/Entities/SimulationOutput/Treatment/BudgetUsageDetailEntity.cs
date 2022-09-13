@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class BudgetUsageDetailEntity: BaseEntity
+    public class BudgetUsageDetailEntity
     {
         public Guid Id { get; set; }
 

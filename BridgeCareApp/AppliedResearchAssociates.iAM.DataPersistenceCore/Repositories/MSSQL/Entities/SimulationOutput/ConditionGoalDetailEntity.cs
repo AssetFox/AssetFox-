@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public abstract class ConditionGoalDetailEntity: BaseEntity
+    public abstract class ConditionGoalDetailEntity
     {
         public Guid Id { get; set; }
 

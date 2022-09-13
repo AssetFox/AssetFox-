@@ -8,9 +8,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AssetDetailEntity: BaseEntity
+    public class AssetDetailEntity
     {
-        // This is the entity that was formerly a subclass.
         public Guid Id { get; set; }
 
         public Guid MaintainableAssetId { get; set; }

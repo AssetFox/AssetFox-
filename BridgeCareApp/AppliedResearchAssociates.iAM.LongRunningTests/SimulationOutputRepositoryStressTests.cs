@@ -85,5 +85,11 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);
         }
+
+        [Fact]
+        public void SaveSimulationOutput965_ThenLoad_Saqme()
+        {
+            SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename965);
+        }
     }
 }

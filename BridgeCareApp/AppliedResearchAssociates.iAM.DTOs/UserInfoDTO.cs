@@ -9,5 +9,7 @@
         public string Email { get; set; }
 
         public bool HasAdminClaim { get; set; }
+
+        public string InternalRole { get; set; }
     }
 }

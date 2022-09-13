@@ -85,8 +85,9 @@ namespace BridgeCareCore.Security
                 if (roleStrings.Count == 0)
                 {
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
-                }                                
+                }
 
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings[0]);
                 var hasAdminClaim = _roleClaimsMapper.HasAdminClaim(request.HttpContext.User);
 
                 return new UserInfo
@@ -94,16 +95,19 @@ namespace BridgeCareCore.Security
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminClaim = hasAdminClaim,
+                    InternalRole = internalRole,
                 };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
-            {     
+            {
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, SecurityConstants.Role.Administrator);
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    HasAdminClaim = true // TODO this will change if more roles comes for B2C
+                    HasAdminClaim = true, // TODO this will change if more roles comes for B2C
+                    InternalRole = internalRole,
                 };
             }
 

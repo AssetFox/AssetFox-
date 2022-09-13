@@ -6,7 +6,9 @@ namespace BridgeCareCore.Models
     {
         public string Name { get; set; }        
 
-        public bool HasAdminClaim { get; set; }        
+        public bool HasAdminClaim { get; set; }
+
+        public string InternalRole { get; set; }
 
         public string Email { get; set; }
     }

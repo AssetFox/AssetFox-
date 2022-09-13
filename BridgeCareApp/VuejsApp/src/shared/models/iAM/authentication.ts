@@ -7,7 +7,8 @@ export interface UserTokens {
 }
 
 export interface UserInfo {
-    sub: string;
-    roles: string;
+    sub: string;    
+    HasAdminClaim: boolean;
+    InternalRole: string;
     email: string;
 }

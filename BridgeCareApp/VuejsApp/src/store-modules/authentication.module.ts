@@ -149,10 +149,7 @@ const actions = {
                     localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                     commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
-                    const hasRole: boolean = regexCheckLDAP(
-                        userInfo.roles,
-                        /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/,
-                    );
+                    const hasRole: boolean = userInfo.InternalRole != null && userInfo.InternalRole != '';
 
                     commit('checkedForRoleMutator', hasRole);
                     commit('hasRoleMutator', hasRole);
@@ -160,12 +157,13 @@ const actions = {
                     if (hasRole) {
                         commit(
                             'isAdminMutator',
-                            checkLDAP(userInfo.roles, 'PD-BAMS-Administrator'),
+                            userInfo.HasAdminClaim,
                         );
-                        commit(
-                            'isCWOPAMutator',
-                            checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'),
-                        );
+                        // TODO do we need HasCWOPAAccess claim?? OR HasEditorAceess NOTE: isCWOPA is used in Scenarios.vue
+                        // commit(
+                        //     'isCWOPAMutator',
+                        //     checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'),
+                        // );
                     }
 
                     if (!state.authenticated) {

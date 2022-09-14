@@ -97,7 +97,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPut]
         [Route("UpdateUser")]
-        [Authorize(Policy = Policy.Admin)]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
         {
             try
@@ -113,7 +113,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteUser/{username}")]
-        [Authorize(Policy = Policy.Admin)]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> DeleteUser(string username)
         {
             try

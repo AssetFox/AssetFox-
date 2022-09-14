@@ -50,16 +50,6 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddAuthorization(options =>
             {
-                // TODO remove below 2 later
-                options.AddPolicy(Policy.AdminOrDistrictEngineer,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
-                options.AddPolicy(Policy.Admin,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator)));
-                ////
-
-
                 // Deficient Condition Goal
                 options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalViewPermittedFromLibraryAccess, Claim.DeficientConditionGoalViewAnyFromLibraryAccess));
@@ -164,13 +154,21 @@ namespace BridgeCareCore.StartupExtension
 
                 // Simulation
                 options.AddPolicy(Policy.ViewSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationViewPermittedAccess, Claim.SimulationViewAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationViewPermittedAccess,
+                                                                   Claim.SimulationViewAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.DeleteSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationDeletePermittedAccess, Claim.SimulationDeleteAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationDeletePermittedAccess,
+                                                                   Claim.SimulationDeleteAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.UpdateSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationUpdatePermittedAccess, Claim.SimulationUpdateAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationUpdatePermittedAccess,
+                                                                   Claim.SimulationUpdateAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.RunSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationRunPermittedAccess, Claim.SimulationRunAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationRunPermittedAccess,
+                                                                   Claim.SimulationRunAnyAccess,
+                                                                   Claim.SimulationAccess));
 
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,

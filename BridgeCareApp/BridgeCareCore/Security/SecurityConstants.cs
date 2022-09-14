@@ -10,12 +10,6 @@
 
         public static class Policy
         {
-            // TODO remove below 2 later
-            public const string Admin = "UserIsAdmin";
-            public const string AdminOrDistrictEngineer = "UserIsAdminOrDistrictEngineer";
-            ////
-
-
             public const string ViewDeficientConditionGoalFromlLibrary = "ViewDeficientConditionGoalFromlLibrary";
             public const string ViewDeficientConditionGoalFromScenario = "ViewDeficientConditionGoalFromScenario";
             public const string ModifyDeficientConditionGoalFromLibrary = "ModifyDeficientConditionGoalFromLibrary";

@@ -525,7 +525,7 @@ export default class PerformanceCurveEditor extends Vue {
     stateNumericAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     @Action('getPerformanceCurveLibraries')
@@ -748,7 +748,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

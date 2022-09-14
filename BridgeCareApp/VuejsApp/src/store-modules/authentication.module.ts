@@ -16,8 +16,8 @@ const state = {
     authenticated: false,
     hasRole: false,
     checkedForRole: false,
-    isAdmin: false,
-    isCWOPA: false,
+    hasAdminAccess: false,
+    hasSimulationAccess: false,
     username: '',
     refreshing: false,
     securityType: SecurityTypes.esec,
@@ -35,11 +35,11 @@ const mutations = {
     checkedForRoleMutator(state: any, status: boolean) {
         state.checkedForRole = status;
     },
-    isAdminMutator(state: any, status: boolean) {
-        state.isAdmin = status;
+    AdminAccessMutator(state: any, status: boolean) {
+        state.hasAdminAccess = status;
     },
-    isCWOPAMutator(state: any, status: boolean) {
-        state.isCWOPA = status;
+    SimulationAccessMutator(state: any, status: boolean) {
+        state.hasSimulationAccess = status;
     },
     usernameMutator(state: any, username: string) {
         state.username = username;
@@ -156,14 +156,13 @@ const actions = {
 
                     if (hasRole) {
                         commit(
-                            'isAdminMutator',
+                            'AdminAccessMutator',
                             userInfo.HasAdminAccess,
+                        );                       
+                        commit(
+                            'SimulationAccessMutator',
+                            userInfo.HasSimulationAccess,
                         );
-                        // TODO do we need HasCWOPAAccess claim?? OR HasEditorAceess NOTE: isCWOPA is used in Scenarios.vue
-                        // commit(
-                        //     'isCWOPAMutator',
-                        //     checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'),
-                        // );
                     }
 
                     if (!state.authenticated) {
@@ -209,13 +208,13 @@ const actions = {
         if (payload.status) {
             commit('hasRoleMutator', true);
             commit('checkedForRoleMutator', true);
-            commit('isAdminMutator', true);
+            commit('AdminAccessMutator', true);
             commit('usernameMutator', payload.username);
             commit('authenticatedMutator', true);
         } else {
             commit('hasRoleMutator', false);
             commit('checkedForRoleMutator', false);
-            commit('isAdminMutator', false);
+            commit('AdminAccessMutator', false);
             commit('usernameMutator', '');
             commit('authenticatedMutator', false);
         }

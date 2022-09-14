@@ -9,6 +9,7 @@ export interface UserTokens {
 export interface UserInfo {
     sub: string;    
     HasAdminAccess: boolean;
+    HasSimulationAccess: boolean;
     InternalRole: string;
     email: string;
 }

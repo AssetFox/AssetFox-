@@ -49,6 +49,7 @@ namespace BridgeCareCore.Controllers
                 ValidateResponse(response);
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
                 userInfo.HasAdminAccess = UserInfo.HasAdminAccess;
+                userInfo.HasSimulationAccess = UserInfo.HasSimulationAccess;
                 userInfo.InternalRole = UserInfo.InternalRole;
 
                 return Ok(userInfo);

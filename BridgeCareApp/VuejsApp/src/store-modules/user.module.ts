@@ -155,7 +155,7 @@ const actions = {
                         if (
                             !userCriteriaFilter.hasAccess &&
                             // @ts-ignore
-                            !store.state.authenticationModule.isAdmin
+                            !store.state.authenticationModule.hasAdminAccess
                         ) {
                             dispatch('addInfoNotification', {
                                 message: 'Access Denied.',

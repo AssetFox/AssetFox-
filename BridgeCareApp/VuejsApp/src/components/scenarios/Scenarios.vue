@@ -16,7 +16,7 @@
                         ( {{ item.count }} )</v-tab
                     >
                     <v-spacer></v-spacer>
-                    <v-btn v-if="isAdmin"
+                    <v-btn v-if="hasAdminAccess"
                         class="green darken-2 white--text"
                         @click="onShowAggregatePopup"
                     >
@@ -472,8 +472,8 @@ export default class Scenarios extends Vue {
     @State(state => state.authenticationModule.authenticated)
     authenticated: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
 
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
@@ -658,8 +658,8 @@ export default class Scenarios extends Vue {
             user.username === username;
         const sharedScenarioFilter = (scenario: Scenario) =>
             scenario.owner !== username &&
-            (this.isAdmin ||
-                this.isCWOPA ||
+            (this.hasAdminAccess ||
+                this.hasSimulationAccess ||
                 any(scenarioUserCanModify, scenario.users));
         this.sharedScenarios = this.scenarios.filter(sharedScenarioFilter);
 
@@ -772,8 +772,8 @@ export default class Scenarios extends Vue {
         const scenarioUserCanModify = (user: ScenarioUser) =>
             user.username === currentUser && user.canModify;
         return (
-            this.isAdmin ||
-            this.isCWOPA ||
+            this.hasAdminAccess ||
+            this.hasSimulationAccess ||
             any(scenarioUserCanModify, scenarioUsers)
         );
     }

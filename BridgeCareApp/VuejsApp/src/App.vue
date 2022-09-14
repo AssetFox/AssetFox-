@@ -27,7 +27,7 @@
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         flat
-                        v-if="isAdmin"
+                        v-if="hasAdminAccess"
                     >
                         Raw Data
                     </v-btn>
@@ -35,7 +35,7 @@
                         @click="onNavigate('/UserCriteria/')"
                         class="ara-blue-pantone-281"
                         flat
-                        v-if="isAdmin"
+                        v-if="hasAdminAccess"
                     >
                         Security
                     </v-btn>
@@ -279,7 +279,7 @@ export default class AppComponent extends Vue {
     authenticated: boolean;
     @State(state => state.authenticationModule.hasRole) hasRole: boolean;
     @State(state => state.authenticationModule.username) username: string;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.notificationModule.notifications)

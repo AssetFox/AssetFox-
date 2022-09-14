@@ -347,7 +347,7 @@ export default class CriterionLibraryEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

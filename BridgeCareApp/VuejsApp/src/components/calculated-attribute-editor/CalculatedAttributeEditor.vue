@@ -79,7 +79,7 @@
                         append-icon=$vuetify.icons.ghd-down
                         outline
                         v-model="attributeTimingSelectItemValue"
-                        :disabled="!isAdmin"
+                        :disabled="!hasAdminAccess"
                         class="ghd-select ghd-text-field ghd-text-field-border"
                         v-on:change="setTiming">
                     </v-select>
@@ -102,13 +102,13 @@
                             readonly
                             class="sm-txt"
                             :value="props.item.equation"
-                            :disabled="!isAdmin">
+                            :disabled="!hasAdminAccess">
                             <template slot="append-outer">
                                 <v-btn
                                     @click="onShowEquationEditorDialog(props.item.id) "
                                     class="ghd-blue"
                                     icon
-                                    v-if="isAdmin">
+                                    v-if="hasAdminAccess">
                                     <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
@@ -119,13 +119,13 @@
                             readonly
                             class="sm-txt"
                             :value="props.item.criteriaExpression"
-                            :disabled="!isAdmin">
+                            :disabled="!hasAdminAccess">
                             <template slot="append-outer">
                                 <v-btn
                                     @click="onEditCalculatedAttributeCriterionLibrary(props.item.id)"
                                     class="ghd-blue"
                                     icon
-                                    v-if="isAdmin">
+                                    v-if="hasAdminAccess">
                                     <img class='img-general img-shift' :src="require('@/assets/icons/edit.svg')"/>
                                 </v-btn>
                             </template>
@@ -137,7 +137,7 @@
                                 onRemoveCalculatedAttribute(props.item.id)"
                             class="ghd-blue"
                             icon
-                            :disabled="!isAdmin">
+                            :disabled="!hasAdminAccess">
                             <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                         </v-btn>
                     </td>
@@ -147,7 +147,7 @@
                 @click="onAddCriterionEquationSet()"
                 class='ghd-blue ghd-button'
                 outline
-                v-if="isAdmin"
+                v-if="hasAdminAccess"
                 :disabled="
                     attributeSelectItemValue == null ||
                     attributeSelectItemValue == ''">
@@ -174,7 +174,7 @@
             <v-layout justify-center v-show='hasSelectedLibrary || hasScenario'>
                 <v-btn
                     :disabled="!hasUnsavedChanges"
-                    v-if="isAdmin && hasScenario"
+                    v-if="hasAdminAccess && hasScenario"
                     @click="onDiscardChanges"
                     class='ghd-blue ghd-button-text ghd-button'
                     flat
@@ -184,7 +184,7 @@
                 <v-btn
                     @click="onUpsertScenarioCalculatedAttribute"
                     class='ghd-blue-bg white--text ghd-button-text ghd-button'
-                    v-show="hasScenario && isAdmin"
+                    v-show="hasScenario && hasAdminAccess"
                     :disabled="disableCrudButton() || !hasUnsavedChanges">
                     Save
                 </v-btn>
@@ -198,7 +198,7 @@
                 </v-btn>
                 <v-btn
                     :disabled="disableCrudButton()"
-                    v-if="isAdmin"
+                    v-if="hasAdminAccess"
                     @click="onShowCreateCalculatedAttributeLibraryDialog(true)"
                     outline
                     class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
@@ -330,7 +330,7 @@ export default class CalculatedAttributeEditor extends Vue {
     stateCalculatedAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
 
     @Action('upsertScenarioCalculatedAttribute')
     upsertScenarioCalculatedAttributeAction: any;
@@ -597,7 +597,7 @@ export default class CalculatedAttributeEditor extends Vue {
     }
     @Watch('calculatedAttributeGridData', {deep: true})
     onCalculatedAttributeGridDataChanged() {
-        if (this.isAdmin) {
+        if (this.hasAdminAccess) {
             const hasUnsavedChanges: boolean = this.hasScenario
                 ? hasUnsavedChangesCore(
                       '',

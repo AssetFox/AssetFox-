@@ -23,7 +23,7 @@
                                       v-model='investmentPlan.minimumProjectCostLimit'
                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"                                      
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
-                                      :disabled="!isAdmin" 
+                                      :disabled="!hasAdminAccess" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
                     <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
@@ -33,7 +33,7 @@
                                       @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                       :mask="'###'"
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
-                                      :disabled="!isAdmin" 
+                                      :disabled="!hasAdminAccess" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
                     <!-- this shows up everywhere -->
@@ -322,7 +322,7 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
 
     @Action('getInvestment') getInvestmentAction: any;
@@ -632,7 +632,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

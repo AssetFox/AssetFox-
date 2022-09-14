@@ -171,7 +171,7 @@ const beforeEnterFunc = (to: any, from: any, next: any) => {
         // @ts-ignore
         (!store.state.userModule.currentUserCriteriaFilter.hasAccess &&
             // @ts-ignore
-            !store.state.authenticationModule.isAdmin)
+            !store.state.authenticationModule.hasAdminAccess)
     ) {
         next('/NoRole/');
     } else {

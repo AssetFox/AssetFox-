@@ -313,7 +313,7 @@ export default class CashFlowEditor extends Vue {
     stateScenarioCashFlowRules: CashFlowRule[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
 
     @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
     @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
@@ -628,7 +628,7 @@ export default class CashFlowEditor extends Vue {
 
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

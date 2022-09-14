@@ -204,7 +204,7 @@ export default class Attributes extends Vue {
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
     @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     
     @Action('getAttributes') getAttributes: any;
     @Action('getDataSources') getDataSourcesAction: any;

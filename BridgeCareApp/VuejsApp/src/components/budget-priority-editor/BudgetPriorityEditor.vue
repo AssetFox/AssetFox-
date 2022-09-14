@@ -234,7 +234,7 @@ export default class BudgetPriorityEditor extends Vue {
     @State(state => state.budgetPriorityModule.selectedBudgetPriorityLibrary) stateSelectedBudgetPriorityLibrary: BudgetPriorityLibrary;
     @State(state => state.budgetPriorityModule.scenarioBudgetPriorities) stateScenarioBudgetPriorities: BudgetPriority[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getBudgetPriorityLibraries') getBudgetPriorityLibrariesAction: any;
     @Action('selectBudgetPriorityLibrary') selectBudgetPriorityLibraryAction: any;
@@ -487,10 +487,8 @@ export default class BudgetPriorityEditor extends Vue {
         return getUserName();
     }
 
-    checkLibraryEditPermission() { 
-        // TODO do we need this here? If only claims check made and shown the button, will that work??
-        // We have claims in userinfo obj we can utilize that...or controller new methods just check send eligibility bool flag(will help in no repeat of code at UI)
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+    checkLibraryEditPermission() {        
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

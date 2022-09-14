@@ -18,7 +18,7 @@
                                 <v-icon>fas fa-times-circle</v-icon>
                             </v-btn>
                         </v-toolbar>    
-                        <div class='announcement' style='padding-bottom: 0; margin-bottom: 0' v-if='isAdmin'>
+                        <div class='announcement' style='padding-bottom: 0; margin-bottom: 0' v-if='hasAdminAccess'>
                             <v-card style='margin-bottom: 0; padding-bottom: 0'>
                                 <v-card-title style='padding-top: 0; padding-bottom: 0'>
                                     <v-icon v-if='isEditingAnnouncement()' class='ara-orange'
@@ -67,12 +67,12 @@
                                     <v-spacer />
                                     <v-btn @click='onSetAnnouncementForEdit(announcement)' class='ara-blue'
                                            icon
-                                           title='Edit Announcement' v-if='isAdmin'>
+                                           title='Edit Announcement' v-if='hasAdminAccess'>
                                         <v-icon>fas fa-edit</v-icon>
                                     </v-btn>
                                     <v-btn @click='onDeleteAnnouncement(announcement.id)' class='ara-orange'
                                            icon
-                                           title='Delete Announcement' v-if='isAdmin'>
+                                           title='Delete Announcement' v-if='hasAdminAccess'>
                                         <v-icon>fas fa-trash</v-icon>
                                     </v-btn>
                                 </v-card-title>
@@ -85,7 +85,7 @@
                         <div style='display: flex; align-items: center; justify-content: center;'>
                             <v-btn @click='seeOlderAnnouncements()' class='ara-blue-bg white--text' round
                                    style='margin-top: 0; margin-bottom: 10px'
-                                   v-if='announcementListOffset < announcements.length - (isAdmin ? 9 : 10)'>
+                                   v-if='announcementListOffset < announcements.length - (hasAdminAccess ? 9 : 10)'>
                                 See Older Announcements
                             </v-btn>
                         </div>
@@ -112,7 +112,7 @@ export default class NewsDialog extends Vue {
     @Prop() showDialog: boolean;
   
     @State(state => state.announcementModule.announcements) announcements: Announcement[];
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     
     @Action('upsertAnnouncement') upsertAnnouncementAction: any;
     @Action('deleteAnnouncement') deleteAnnouncementAction: any;
@@ -125,7 +125,7 @@ export default class NewsDialog extends Vue {
     selectedAnnouncementForEdit?: Announcement = undefined;
 
     getVisibleAnnouncements() {
-        return this.announcements.slice(this.announcementListOffset, this.announcementListOffset + (this.isAdmin ? 9 : 10));
+        return this.announcements.slice(this.announcementListOffset, this.announcementListOffset + (this.hasAdminAccess ? 9 : 10));
     }
 
     formatDate(announcementDate: Date) {
@@ -198,7 +198,7 @@ export default class NewsDialog extends Vue {
 
     seeNewerAnnouncements() {
         // Admins see the announcement creation card, so they're shown one less announcement at a time to save space
-        const decrement = this.isAdmin ? 9 : 10;
+        const decrement = this.hasAdminAccess ? 9 : 10;
         if (this.announcementListOffset > decrement) {
             this.announcementListOffset -= decrement;
         } else {
@@ -207,7 +207,7 @@ export default class NewsDialog extends Vue {
     }
 
     seeOlderAnnouncements() {
-        const increment = this.isAdmin ? 9 : 10;
+        const increment = this.hasAdminAccess ? 9 : 10;
         if (this.announcementListOffset < this.announcements.length - increment) {
             this.announcementListOffset += increment;
         } else {

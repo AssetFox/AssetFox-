@@ -16,7 +16,7 @@ namespace BridgeCareCore.Security
     public static class SecurityFunctions
     {
         public static UserInfoDTO ToDto(this UserInfo userInfo) =>
-            new UserInfoDTO { Sub = userInfo.Name, HasAdminAccess  = userInfo.HasAdminAccess, Email = userInfo.Email };
+            new UserInfoDTO { Sub = userInfo.Name, HasAdminAccess  = userInfo.HasAdminAccess, HasSimulationAccess = userInfo.HasSimulationAccess, Email = userInfo.Email };
 
         /// <summary>
         ///     Retrieves the value of the claim of the given type from the JWT payload claims.

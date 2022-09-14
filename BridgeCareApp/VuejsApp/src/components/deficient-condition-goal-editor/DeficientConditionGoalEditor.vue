@@ -350,7 +350,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     stateScenarioDeficientConditionGoals: DeficientConditionGoal[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
 
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getDeficientConditionGoalLibraries')
@@ -576,7 +576,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
     }
 
     checkUserIsLibraryOwner() {

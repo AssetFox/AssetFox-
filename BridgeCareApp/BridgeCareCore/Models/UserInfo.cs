@@ -8,6 +8,7 @@ namespace BridgeCareCore.Models
 
         public bool HasAdminAccess { get; set; }
 
+        // Below is for SimulationPowerUser
         public bool HasSimulationAccess { get; set; }
 
         public string InternalRole { get; set; }

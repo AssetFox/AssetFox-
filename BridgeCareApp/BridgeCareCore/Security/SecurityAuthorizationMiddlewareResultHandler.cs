@@ -18,24 +18,16 @@ namespace BridgeCareCore.Security
             AuthorizationPolicy policy,
             PolicyAuthorizationResult authorizeResult)
         {
-            // If the authorization was forbidden and the resource had a specific requirement,
-            // provide a custom 404 response.
-            //if (authorizeResult.Forbidden
-            //    && authorizeResult.AuthorizationFailure!.FailedRequirements
-            //        .OfType<Show404Requirement>().Any())
-            //{
-            //    // Return a 404 to make it appear as if the resource doesn't exist.
-            //    context.Response.StatusCode = StatusCodes.Status404NotFound;
-            //    return;
-            //}
             if (authorizeResult.Forbidden)
             {
-                //HubService.SendRealTimeMessage("test",HubConstant.BroadcastError, $"Authorization Forbidden: {authorizeResult.ToString}");
+                // Set status code to forbidden
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                //var missingClaims = authorizeResult.AuthorizationFailure.FailedRequirements.FirstOrDefault().ToString();
-                await context.Response.WriteAsync("User is not authorized for this page!");
-                //await context.Response.WriteAsync(missingClaims.Split('(')[1] + " are not authorized for this user!");
-                var bdy = context.Response.Headers;
+
+                string controllerName = "";
+                if (context.Request.Path.Value.Split('/').Count() > 2) controllerName = context.Request.Path.Value.Split('/')[2];
+
+                // Send response back to UI
+                await context.Response.WriteAsync("User is not authorized for " + controllerName + "controller!");
                 return;
             }
 

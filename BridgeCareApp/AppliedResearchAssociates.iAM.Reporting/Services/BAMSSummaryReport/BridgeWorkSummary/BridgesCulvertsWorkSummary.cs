@@ -7,6 +7,7 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary
 {
@@ -16,9 +17,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private HashSet<string> MPMSTreatments = new HashSet<string>();
         private Dictionary<int, decimal> TotalCompletedCommittedCount = new Dictionary<int, decimal>();
 
-        public BridgesCulvertsWorkSummary()
+        private IList<string> _warnings;
+
+        public BridgesCulvertsWorkSummary(IList<string> Warnings)
         {
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _warnings = Warnings;
         }
 
         public void FillBridgesCulvertsWorkSummarySections(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -96,14 +100,34 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var cellToEnterCount = yearlyItem.Key - startYear;
                         worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCount + 2].Value = data.Value.bridgeCount;
 
-                        projectRowNumberModel.TreatmentsCount.Add(data.Key + "_" + yearlyItem.Key, currentCell.Row);
+                        var keyItem = data.Key + "_" + yearlyItem.Key;
+                        if(projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        {
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, currentCell.Row);
+                        }
+                        else
+                        {
+                            var warningMessage = "Item key '" + keyItem + "' already exists in the list";
+                            if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
+                        }
+                        
                         currentCell.Row += 1;
                     }
                     else
                     {
                         var cellToEnterCost = yearlyItem.Key - startYear;
                         worksheet.Cells[uniqueTreatments[data.Key], column + cellToEnterCost + 2].Value = data.Value.bridgeCount;
-                        projectRowNumberModel.TreatmentsCount.Add(data.Key + "_" + yearlyItem.Key, uniqueTreatments[data.Key]);
+
+                        var keyItem = data.Key + "_" + yearlyItem.Key;
+                        if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        {
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, uniqueTreatments[data.Key]);
+                        }
+                        else
+                        {
+                            var warningMessage = "Item key '" + keyItem + "' already exists in the list";
+                            if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
+                        }
                     }
                     committedTotalCount += data.Value.bridgeCount;
                 }
@@ -149,8 +173,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     if (treatment.AssetType == AssetCategory.Culvert || treatment.Name == BAMSConstants.CulvertNoTreatment)
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var culvertCostAndCount);
-                        worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount; 
-                        projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+                        worksheet.Cells[row, column].Value = culvertCostAndCount.bridgeCount;
+
+                        var keyItem = treatment.Name + "_" + yearlyValues.Key;
+                        if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        {
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, row);
+                        }
+                        else
+                        {
+                            var warningMessage = "Item key '" + keyItem + "' already exists in the list";
+                            if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
+                        }
+
                         row++;
 
                         //exclude No Treatment from total
@@ -188,7 +223,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCostAndCount);
                         worksheet.Cells[row, column].Value = nonCulvertCostAndCount.bridgeCount;
-                        projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+
+                        var keyItem = treatment.Name + "_" + yearlyValues.Key;
+                        if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        {
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, row);
+                        }
+                        else
+                        {
+                            var warningMessage = "Item key '" + keyItem + "' already exists in the list";
+                            if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
+                        }
+
                         row++;
 
                         //exclude No Treatment from total

@@ -78,6 +78,7 @@ namespace BridgeCareCore.Security
             }
 
             var decodedToken = DecodeToken(idToken);
+            var claimsPrincipal = request.HttpContext.User;
 
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
@@ -88,13 +89,15 @@ namespace BridgeCareCore.Security
                 }
 
                 var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings[0]);
-                var hasAdminClaim = _roleClaimsMapper.HasAdminClaim(request.HttpContext.User);
+                var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+                var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
                 return new UserInfo
                 {
                     Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
                     Email = decodedToken.GetClaimValue("email"),
-                    HasAdminClaim = hasAdminClaim,
+                    HasAdminAccess = HasAdminAccess,
+                    HasSimulationAccess = HasSimulationAccess,
                     InternalRole = internalRole,
                 };
             }
@@ -102,11 +105,15 @@ namespace BridgeCareCore.Security
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
                 var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, SecurityConstants.Role.Administrator);
+                var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+                var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
+
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    HasAdminClaim = true, // TODO this will change if more roles comes for B2C
+                    HasAdminAccess = HasAdminAccess, 
+                    HasSimulationAccess = HasSimulationAccess, 
                     InternalRole = internalRole,
                 };
             }

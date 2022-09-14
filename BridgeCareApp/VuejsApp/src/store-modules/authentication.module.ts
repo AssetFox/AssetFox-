@@ -157,7 +157,7 @@ const actions = {
                     if (hasRole) {
                         commit(
                             'isAdminMutator',
-                            userInfo.HasAdminClaim,
+                            userInfo.HasAdminAccess,
                         );
                         // TODO do we need HasCWOPAAccess claim?? OR HasEditorAceess NOTE: isCWOPA is used in Scenarios.vue
                         // commit(

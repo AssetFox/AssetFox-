@@ -8,7 +8,9 @@
 
         public string Email { get; set; }
 
-        public bool HasAdminClaim { get; set; }
+        public bool HasAdminAccess { get; set; }
+
+        public bool HasSimulationAccess { get; set; }
 
         public string InternalRole { get; set; }
     }

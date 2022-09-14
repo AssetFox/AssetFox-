@@ -69,7 +69,7 @@ namespace BridgeCareCore.Utils
 
         public bool RequirePermittedCheck()
         {
-            return !HasAdminClaim();
+            return !HasAdminAccess();
         }
 
         private SimulationDTO GetSimulationWithUsers(Guid simulationId)
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Utils
             return simulation;
         }      
 
-        private bool HasAdminClaim()
+        private bool HasAdminAccess()
         {
             return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
         }

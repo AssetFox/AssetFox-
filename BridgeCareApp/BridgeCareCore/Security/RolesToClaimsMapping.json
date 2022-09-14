@@ -85,7 +85,7 @@
           ]
         },
         {
-          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner", "PD-BAMS-CWOPA" ],
+          "IPRoles": [ "PD-BAMS-DBEngineer", "PD-BAMS-PlanningPartner" ],
           "InternalRole": "Editor",
           "Claims": [
             "NetworkViewAccess",
@@ -151,7 +151,14 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "PD-BAMS-CWOPA" ],
+          "InternalRole": "SimulationPowerUser",
+          "Claims": [
+            "SimulationAccess"
+          ]
+        },
+        {
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "NetworkViewAccess",
@@ -265,7 +272,7 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "Editor" ],
           "InternalRole": "Editor",
           "Claims": [
             "NetworkViewAccess",
@@ -331,7 +338,14 @@
           ]
         },
         {
-          "IPRoles": [],
+          "IPRoles": [ "SimulationPowerUser" ],
+          "InternalRole": "SimulationPowerUser",
+          "Claims": [
+            "SimulationAccess"
+          ]
+        },
+        {
+          "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
           "Claims": [
             "NetworkViewAccess",

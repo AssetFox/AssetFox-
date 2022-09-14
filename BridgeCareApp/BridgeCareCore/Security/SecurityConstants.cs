@@ -212,6 +212,7 @@
             public const string CommittedProjectImportPermittedAccess = "CommittedProjectImportPermittedAccess";
             public const string CommittedProjectViewPermittedAccess = "CommittedProjectViewPermittedAccess";
             public const string AdminAccess = "AdminAccess";
+            public const string SimulationAccess = "SimulationAccess";
         }
     }
 }

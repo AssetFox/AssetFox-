@@ -254,7 +254,8 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var dtos = _investmentBudgetsService.GetSyncedInvestmentDataset(simulationId, pagingSync);
-                    var investment = pagingSync.Investment;
+                    InvestmentDTO investment = new InvestmentDTO();
+                    var investmentPlan = pagingSync.Investment;
                     investment.ScenarioBudgets = dtos;
                     _investmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, investment);
                     UnitOfWork.Commit();

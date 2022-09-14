@@ -5,6 +5,13 @@ export interface PagingPage<T>{
     totalItems: number;
 }
 
+export interface InvestmentPagingPage{
+    items: Budget[];
+    totalItems: number;
+    lastYear: number;
+    investmentplan: InvestmentPlan
+}
+
 export interface PagingRequest<T>{
     page: number;
     rowsPerPage: number;

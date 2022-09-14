@@ -19,9 +19,9 @@ namespace BridgeCareCore.Interfaces
         BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets);
 
-        PagingPageModel<BudgetDTO> GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request);
+        InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request);
 
-        PagingPageModel<BudgetDTO> GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request);
+        InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request);
 
         List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request);
 

@@ -125,6 +125,9 @@ export default class EditBudgetsDialog extends Vue {
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
+        this.addedBudgets = [];
+        this.updatedBudgets = [];
+        this.deletionBudgetIds = [];
     }
 
     onAddBudget() {

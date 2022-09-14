@@ -6,7 +6,7 @@ namespace BridgeCareCore.Models
 {
     public class InvestmentPagingSyncModel
     {
-        public InvestmentDTO Investment { get; set; }
+        public InvestmentPlanDTO Investment { get; set; }
         public Guid? LibraryId { get; set; }
         public List<Guid> BudgetsForDeletion { get; set; }
         public List<BudgetDTO> UpdatedBudgets { get; set; }

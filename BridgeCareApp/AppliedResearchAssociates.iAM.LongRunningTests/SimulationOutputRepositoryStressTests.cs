@@ -83,7 +83,8 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);
         }
 
-        [Fact (Skip ="Not sure how long this takes but it's not quick")]
+        //[Fact (Skip ="Not sure how long this takes but it's not quick")]
+        [Fact]
         public void SaveSimulationOutput965_ThenLoad_Saqme()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename965);

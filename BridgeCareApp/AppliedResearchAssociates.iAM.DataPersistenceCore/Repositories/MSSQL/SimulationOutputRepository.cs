@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = true;
         private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetLoadBatchSize = 5000;
+        public const int AssetLoadBatchSize = 2000;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -78,8 +78,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 memos.Mark("assetSummaryDetails");
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 memos.Mark("assetSummaryDetailValues");
+                _unitOfWork.Commit();
                 foreach (var year in simulationOutput.Years)
                 {
+                    loggerForUserInfo.Information($"Saving year {year.Year}");
+                    _unitOfWork.BeginTransaction();
                     var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
@@ -101,10 +104,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     memos.Mark($" {assetFamily.BudgetUsageDetails.Count} budgetUsageDetails");
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                     memos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
+                    _unitOfWork.Commit();
                 }
-                memos.MarkInformation("All added to context", loggerForTechnicalInfo);
-                _unitOfWork.Commit();
-                memos.MarkInformation("Transaction committed", loggerForTechnicalInfo);
+                memos.MarkInformation("Save complete", loggerForTechnicalInfo);
                 if (ShouldHackSaveTimingsToFile)
                 {
                     var outputFilename = "SaveTimings.txt";

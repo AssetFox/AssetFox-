@@ -105,6 +105,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
                     memos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
                     _unitOfWork.Commit();
+                    memos.Mark(" Committed");
+                    _unitOfWork.Context.ChangeTracker.Clear();
+                    memos.Mark(" Cleared ChangeTracker");
                 }
                 memos.MarkInformation("Save complete", loggerForTechnicalInfo);
                 if (ShouldHackSaveTimingsToFile)

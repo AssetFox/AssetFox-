@@ -1217,7 +1217,7 @@ export default class InvestmentEditor extends Vue {
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
-                Investment: this.investmentPlan,
+                Investment: null,
                 addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: 'year',

@@ -720,7 +720,7 @@ namespace BridgeCareCore.Services
                     Items = items,
                     TotalItems = total,
                     LastYear = lastYear,
-                    InvestmentPlan = request.PagingSync.Investment
+                    InvestmentPlan = investmentPlan
                 };
             }
 
@@ -729,7 +729,7 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = total,
                 LastYear = lastYear,
-                InvestmentPlan = request.PagingSync.Investment
+                InvestmentPlan = investmentPlan
             };
         }
 

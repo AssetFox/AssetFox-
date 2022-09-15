@@ -257,6 +257,7 @@ namespace BridgeCareCore.Controllers
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;
                     investment.ScenarioBudgets = dtos;
+                    investment.InvestmentPlan = investmentPlan;
                     _investmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, investment);
                     UnitOfWork.Commit();
                 });

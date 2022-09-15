@@ -20,6 +20,7 @@ using BridgeCareCore.Models;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml;
+using BridgeCareCore.Interfaces.DefaultData;
 
 namespace BridgeCareCore.Services
 {
@@ -27,15 +28,18 @@ namespace BridgeCareCore.Services
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
         private static IExpressionValidationService _expressionValidationService;
+        public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         protected readonly IHubService HubService;
 
         public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork,
-            IExpressionValidationService expressionValidationService, IHubService hubService)
+            IExpressionValidationService expressionValidationService, IHubService hubService,
+            IInvestmentDefaultDataService investmentDefaultDataService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _expressionValidationService = expressionValidationService ??
                                            throw new ArgumentNullException(nameof(expressionValidationService));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
+            _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
 
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> headers)
@@ -634,7 +638,7 @@ namespace BridgeCareCore.Services
             var take = 0;
             var total = 0;
             var items = new List<BudgetDTO>();
-            decimal lastYear = 0;
+            var lastYear = 0;
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
 
@@ -645,7 +649,7 @@ namespace BridgeCareCore.Services
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
-                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Value);
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
 
             if (request.RowsPerPage > 0)
             {
@@ -680,10 +684,17 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<BudgetDTO>();
             var total = 0;
-            decimal lastYear = 0;
+            var lastYear = 0;
+            var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
+            if (investmentPlan.Id == Guid.Empty)
+            {
+                var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                investmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
+                investmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+            }
+
             var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                 _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
-            
 
             budgets = SyncedDataset(budgets, request.PagingSync);
 
@@ -691,7 +702,7 @@ namespace BridgeCareCore.Services
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
 
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
-                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Value);
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
 
             if (request.RowsPerPage > 0)
             {
@@ -709,7 +720,7 @@ namespace BridgeCareCore.Services
                     Items = items,
                     TotalItems = total,
                     LastYear = lastYear,
-                    Investment = request.PagingSync.Investment
+                    InvestmentPlan = request.PagingSync.Investment
                 };
             }
 
@@ -718,7 +729,7 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = total,
                 LastYear = lastYear,
-                Investment = request.PagingSync.Investment
+                InvestmentPlan = request.PagingSync.Investment
             };
         }
 

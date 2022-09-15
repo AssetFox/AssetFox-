@@ -9,7 +9,7 @@ export interface InvestmentPagingPage{
     items: Budget[];
     totalItems: number;
     lastYear: number;
-    investmentplan: InvestmentPlan
+    investmentPlan: InvestmentPlan
 }
 
 export interface PagingRequest<T>{

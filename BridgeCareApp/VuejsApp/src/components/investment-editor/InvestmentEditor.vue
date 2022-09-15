@@ -216,7 +216,7 @@
                                             @submit='onSubmitAddBudgetYearRange' />
 
         <SetRangeForDeletingBudgetYearsDialog :showDialog='showSetRangeForDeletingBudgetYearsDialog'
-                                              :endYear='getLatestYear()'
+                                              :endYear='lastYear'
                                               :maxRange='yearsInAnalysisPeriod'
                                               @submit='onSubmitRemoveBudgetYearRange' />
 
@@ -373,7 +373,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     get deleteYearLabel() {
-        const latestYear = this.getLatestYear();
+        const latestYear = this.lastYear;
         return latestYear ? 'Delete Year (' + latestYear + ')' : 'Delete Year';
     }
 
@@ -412,7 +412,6 @@ export default class InvestmentEditor extends Vue {
             return;
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.pagination;
-
         const request: InvestmentPagingRequestModel= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -423,7 +422,12 @@ export default class InvestmentEditor extends Vue {
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
-                Investment: this.investmentPlan,
+                Investment: !isNil(this.investmentPlan) ? {
+                ...this.investmentPlan,
+                minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+                } : this.investmentPlan,
                 addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
@@ -439,7 +443,7 @@ export default class InvestmentEditor extends Vue {
                     this.rowCache = clone(this.currentPage)
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
-                    this.investmentPlan = data.investmentplan;
+                    this.investmentPlan = data.investmentPlan;
                     this.lastYear = data.lastYear;
                     if (page == 1) {
                         this.syncInvestmentPlanWithBudgets();
@@ -475,7 +479,7 @@ export default class InvestmentEditor extends Vue {
         this.checkHasUnsavedChanges();
     }
 
-    @Watch('addedBudgetAmounts')
+    @Watch('addedBudgetAmounts', {deep: true})
     onAddedBudgetAmountsChanged(){
         this.checkHasUnsavedChanges();
     }
@@ -537,22 +541,95 @@ export default class InvestmentEditor extends Vue {
         this.setGridHeaders();
         this.setGridData();
         
-        this.setHasUnsavedChangesFlag();
+        this.checkHasUnsavedChanges()
     }
 
     @Watch('investmentPlan')
     onInvestmentPlanChanged() {
-        this.setHasUnsavedChangesFlag();
+        this.checkHasUnsavedChanges()
+        if(this.investmentPlan.id === this.uuidNIL)
+            this.investmentPlan.id = getNewGuid();
+        this.hasInvestmentPlanForScenario = true;
     }
 
-    onRemoveBudgetYears() {//remember to remove updated and adds of deleted years
+    onRemoveBudgetYears() {
         this.deletionYears = this.deletionYears.concat(this.selectedBudgetYears)
-        this.deletionYears = [...new Set(this.deletionYears)]
-        this.onScenarioBudgetsChanged()
+        let deletedAddYears: number[] = [];
+        for(let [key, value] of this.addedBudgetAmounts){
+            let val = this.addedBudgetAmounts.get(key)! 
+            val = val.filter(v => {
+                if(!this.deletionYears.includes(v.year)){                  
+                    return true;
+                }
+ 
+                deletedAddYears.push(v.year);  
+
+                return false;
+            })
+            if(val.length == 0)
+                this.addedBudgetAmounts.delete(key)
+        }
+        if(deletedAddYears.length > 0){
+            this.selectedBudgetYears = this.selectedBudgetYears.filter(year => !deletedAddYears.includes(year))
+            this.deletionYears =  this.deletionYears.concat(this.selectedBudgetYears)
+            this.onPaginationChanged();
+            return;
+        }
+
+        let deletedUpdateIds: string[] = [];
+
+        for(let [key, value] of this.updatedBudgetAmounts){
+            let val = this.updatedBudgetAmounts.get(key)!
+            const ids = val.filter(v => this.deletionYears.includes(v.year)).map(v => v.id)
+            deletedUpdateIds = deletedUpdateIds.concat(ids)
+            val = val.filter(v => !this.deletionYears.includes(v.year))
+            if(val.length == 0)
+                this.updatedBudgetAmounts.delete(key)
+        }
+
+        deletedUpdateIds.forEach(id => {
+            this.updatedBudgetAmountsMaps.delete(id);
+        })
+
+        this.onPaginationChanged();
     }
 
-    onRemoveBudgetYear(year: number){        
+    onRemoveBudgetYear(year: number){                
+        let isyearAdded = false;
+        for(let [key, value] of this.addedBudgetAmounts){
+            let val = this.addedBudgetAmounts.get(key)! 
+            val = val.filter(v => {
+                if(v.year !== year){                  
+                    return true;
+                }
+ 
+                isyearAdded = true; 
+
+                return false;
+            })
+            if(val.length == 0)
+                this.addedBudgetAmounts.delete(key)
+        }
+        if(isyearAdded){
+            this.onPaginationChanged();
+            return;
+        }
         this.deletionYears.push(year)
+
+        let deleteIds: string[] = [] 
+        for(let [key, value] of this.updatedBudgetAmounts){
+            let val = this.updatedBudgetAmounts.get(key)!
+            const ids = val.filter(v => v.year === year).map(v => v.id)
+            deleteIds = deleteIds.concat(ids)
+            val = val.filter(v => v.year !== year)
+            if(val.length == 0)
+                this.updatedBudgetAmounts.delete(key)
+        }
+
+        deleteIds.forEach(id => {
+            this.updatedBudgetAmountsMaps.delete(id);
+        })
+
         this.onPaginationChanged();
     }
 
@@ -726,7 +803,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     onRemoveLatestBudgetYear() {
-        const latestYear: number = this.getLatestYear();
+        const latestYear: number = this.lastYear;
 
         const budgets: Budget[] = clone(this.currentPage);
 
@@ -742,7 +819,7 @@ export default class InvestmentEditor extends Vue {
         this.showSetRangeForAddingBudgetYearsDialog = false;
 
         if (this.range > 0) {
-            const latestYear: number = this.getLatestYear();
+            const latestYear: number = this.lastYear;
             const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
             const endYear = moment().year(startYear).add(this.range, 'years').year();
 
@@ -772,7 +849,7 @@ export default class InvestmentEditor extends Vue {
         this.showSetRangeForDeletingBudgetYearsDialog = false;
 
         if (range > 0) {
-            const endYear: number = this.getLatestYear();
+            const endYear: number = this.lastYear;
             const startYear: number = endYear - range + 1;
 
             const budgets: Budget[] = clone(this.currentPage);
@@ -933,7 +1010,12 @@ export default class InvestmentEditor extends Vue {
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
-                Investment: this.investmentPlan,
+                Investment: {
+                ...this.investmentPlan,
+                minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+                },
                 addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
@@ -1095,7 +1177,7 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgets.length > 0 ||
             this.updatedBudgetsMap.size > 0 || 
             this.deletionYears.length > 0 || 
-            this.addedBudgets.length > 0 ||
+            this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetsMap.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary)
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
@@ -1131,12 +1213,15 @@ export default class InvestmentEditor extends Vue {
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
             InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
-                    let data = response.data as PagingPage<Budget>;
+                    let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
+                    this.investmentPlan = data.investmentPlan;
+                    
                     this.syncInvestmentPlanWithBudgets();
+                    this.lastYear = data.lastYear;
                 }
                 this.initializing = false;
             });
@@ -1144,11 +1229,12 @@ export default class InvestmentEditor extends Vue {
         else if(this.hasSelectedLibrary)
              InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
-                    let data = response.data as PagingPage<Budget>;
+                    let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
+                    this.lastYear = data.lastYear;
                 }
                 this.initializing = false;
             });

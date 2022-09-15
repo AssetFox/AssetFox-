@@ -4,7 +4,7 @@ namespace BridgeCareCore.Models
 {
     public class InvestmentPagingPageModel : PagingPageModel<BudgetDTO>
     {
-        public InvestmentPlanDTO Investment { get; set; }
-        public decimal LastYear { get; set; }
+        public InvestmentPlanDTO InvestmentPlan { get; set; }
+        public int LastYear { get; set; }
     }
 }

@@ -244,7 +244,8 @@ import {
     emptyBudgetLibrary,
     emptyInvestmentPlan, InvestmentBudgetFileImport,
     InvestmentPlan,
-    emptyBudgetAmount
+    emptyBudgetAmount,
+    LibraryInvestmentBudgetFileImport
 } from '@/shared/models/iAM/investment';
 import { any, append, clone, find, findIndex, groupBy, isNil, keys, propEq, update, contains, sort} from 'ramda';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -996,18 +997,6 @@ export default class InvestmentEditor extends Vue {
     onUpsertInvestment() {
         const investmentPlan: InvestmentPlan = clone(this.investmentPlan);
 
-        // this.upsertInvestmentAction({
-        //     investment: {
-        //         scenarioBudgets: clone(this.currentPage),
-        //         investmentPlan: {
-        //             ...investmentPlan,
-        //             minimumProjectCostLimit: hasValue(investmentPlan.minimumProjectCostLimit)
-        //                 ? parseFloat(investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
-        //                 : 1000,
-        //         },
-        //     },
-        //     scenarioId: this.selectedScenarioId,
-        // }).then(() => this.librarySelectItemValue = null);
         const sync: InvestmentPagingSyncModel = {
                 libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
                 updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
@@ -1034,9 +1023,30 @@ export default class InvestmentEditor extends Vue {
     }
 
     onUpsertBudgetLibrary() {
-        const budgetLibrary: BudgetLibrary = clone(this.selectedBudgetLibrary);
 
-        this.upsertBudgetLibraryAction({ ...budgetLibrary, budgets: clone(this.currentPage) });
+        const sync: InvestmentPagingSyncModel = {
+                libraryId: this.selectedBudgetLibrary.id === this.uuidNIL ? null : this.selectedBudgetLibrary.id,
+                updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
+                budgetsForDeletion: this.deletionBudgetIds,
+                addedBudgets: this.addedBudgets,
+                deletionyears: this.deletionYears ,
+                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                Investment: null,
+                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+            }
+
+         const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
+                library: this.selectedBudgetLibrary,
+                pagingSync: sync
+        }
+        InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+                // this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
+                // this.addSuccessNotificationAction({message: "Updated deterioration model library",});
+            }
+        });
     }
 
     onDiscardChanges() {
@@ -1183,7 +1193,7 @@ export default class InvestmentEditor extends Vue {
             this.updatedBudgetsMap.size > 0 || 
             this.deletionYears.length > 0 || 
             this.addedBudgetAmounts.size > 0 ||
-            this.updatedBudgetsMap.size > 0 || 
+            this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary)
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }

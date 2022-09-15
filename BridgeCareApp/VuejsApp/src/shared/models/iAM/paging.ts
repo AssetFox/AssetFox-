@@ -48,7 +48,7 @@ export interface InvestmentPagingRequestModel{
 }
 
 export interface InvestmentPagingSyncModel{
-    Investment: InvestmentPlan;
+    Investment: InvestmentPlan | null;
     libraryId: string | null;
     budgetsForDeletion: string[];
     updatedBudgets: Budget[];

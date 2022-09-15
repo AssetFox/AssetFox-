@@ -889,7 +889,9 @@ export default class InvestmentEditor extends Vue {
                 }
                 this.addedBudgetAmounts.set(budget.name, amounts);
             })
+            let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
+            this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b))
             budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget))
             this.onPaginationChanged();
         }      
@@ -899,6 +901,9 @@ export default class InvestmentEditor extends Vue {
         if(any(propEq('id', id), this.addedBudgets)){
             this.addedBudgets = this.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
             this.deletionBudgetIds.push(id);
+            const budget = this.currentPage.find(b => b.id === id);
+            if(!isNil(budget))
+                this.addedBudgetAmounts.delete(budget.name)
         }              
         else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1])))
             this.updatedBudgetsMap.delete(id)

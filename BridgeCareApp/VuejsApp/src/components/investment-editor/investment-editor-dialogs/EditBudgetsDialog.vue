@@ -117,17 +117,13 @@ export default class EditBudgetsDialog extends Vue {
     uuidNIL: string = getBlankGuid();
 
     budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
-    
-    addedBudgets: Budget[] = [];
-    updatedBudgets:Budget[] = []
-    deletionBudgetIds: string[] = [];
 
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
-        this.addedBudgets = [];
-        this.updatedBudgets = [];
-        this.deletionBudgetIds = [];
+        this.budgetChanges.addedBudgets = [];
+        this.budgetChanges.updatedBudgets = [];
+        this.budgetChanges.deletionIds = [];
     }
 
     onAddBudget() {

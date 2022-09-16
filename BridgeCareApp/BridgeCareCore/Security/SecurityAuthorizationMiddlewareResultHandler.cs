@@ -34,7 +34,5 @@ namespace BridgeCareCore.Security
             // Fall back to the default implementation.
             await defaultHandler.HandleAsync(next, context, policy, authorizeResult);
         }
-
-        public class Show404Requirement : IAuthorizationRequirement { }
     }
 }

@@ -15,7 +15,8 @@ namespace AppliedResearchAssociates.iAM.StressTesting
     {
         private TestHelper _testHelper => TestHelper.Instance;
 
-        [Fact(Skip = "Takes about 70 minutes to run, provided the 522MB file exists.")]
+        [Fact]
+        //[Fact(Skip = "Takes about 30-50 minutes to run, provided the 522MB file exists.")]
 
         public void SaveSimulationOutput522_ThenLoad_Same()
         {
@@ -23,7 +24,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         }
 
         //[Fact]
-        [Fact(Skip = "Takes about 30 minutes to run, provided the 525MB file exists.")]
+        [Fact(Skip = "Takes about 30-50 minutes to run, provided the 525MB file exists.")]
         public void SaveSimulationOutput525_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename525);
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         /// where it tries to load the file. The full path for WJ's case is in the regular comment below this message.</summary> 
         // C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.StressTesting\GitIgnored\SimulationOutput.json
         //[Fact]
-        [Fact (Skip ="Takes about 3 minutes to run. Needs the above file.")]
+        [Fact (Skip ="Takes about 2-3 minutes to run. Needs the above file.")]
         public void SaveSimulationOutput176_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename176);

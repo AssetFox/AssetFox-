@@ -443,8 +443,8 @@ export default class AppComponent extends Vue {
             }
             this.setIsBusyAction({ isBusy: false });
             this.addErrorNotificationAction({
-                message: 'HTTP Error',
-                longMessage: getErrorMessage(error),
+                message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",
+                longMessage: error.response!.status === 403 ? error.response!.data : getErrorMessage(error),
             });
             if (
                 hasValue(error, 'response') &&

@@ -213,7 +213,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 .Returns(new UserInfo
                 {
                     Name = "districtEngineer",
-                    HasAdminClaim = false,
+                    HasAdminAccess = false,
                     Email = "fake@pa.gov"
                 });
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, mockedUnauthorized);

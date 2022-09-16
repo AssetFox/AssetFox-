@@ -176,6 +176,21 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize(Policy = Policy.ModifyBudgetPriorityFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            try
+            {
+                return Ok(true);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Ok(false); //remove try catch later just return true from inside
+            }
+        }
+
         private List<BudgetPriorityLibraryDTO> GetAllBudgetPriorityLibraries()
         {
             return UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();

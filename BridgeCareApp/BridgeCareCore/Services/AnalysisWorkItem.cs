@@ -12,12 +12,16 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
+using BridgeCareCore.Logging;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
     public record AnalysisWorkItem(Guid networkId, Guid simulationId, UserInfo userInfo) : IWorkItem
     {
         public string WorkId => simulationId.ToString();
+
+        public DateTime StartTime { get; set; }
 
         public void DoWork(IServiceProvider serviceProvider)
         {
@@ -37,16 +41,13 @@ namespace BridgeCareCore.Services
             }
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
-            var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
-            {
-                SimulationId = simulationId,
-                LastRun = DateTime.Now,
-                Status = "Creating input..."
-            };
+            var status = "Creating input...";
+            StartTime = DateTime.Now;
+            var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            var explorer = _unitOfWork.AttributeRepo.GetExplorer();                
+            var explorer = _unitOfWork.AttributeRepo.GetExplorer();
 
             simulationAnalysisDetail.Status = "Getting simulation analysis network";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
@@ -105,7 +106,10 @@ namespace BridgeCareCore.Services
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
+                    var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
+                    var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
+
+                    _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
                     break;
@@ -166,6 +170,13 @@ namespace BridgeCareCore.Services
                 runner.HandleValidationFailures(validationResults);
             }
 
+            void UpdateSimulationAnalysisDetailFromString(string message)
+            {
+                var detail = CreateSimulationAnalysisDetailDto(message, StartTime);
+                UpdateSimulationAnalysisDetail(detail, DateTime.Now);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, detail);
+            }
+
             void UpdateSimulationAnalysisDetail(SimulationAnalysisDetailDTO simulationAnalysisDetail, DateTime? stopDateTime)
             {
                 if (stopDateTime != null)
@@ -176,5 +187,12 @@ namespace BridgeCareCore.Services
                 _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             }
         }
+
+        private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new SimulationAnalysisDetailDTO
+            {
+                SimulationId = simulationId,
+                LastRun = lastRun,
+                Status = status,
+            };
     }
 }

@@ -34,10 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public static readonly bool IsRunningFromXunit = AppDomain.CurrentDomain.GetAssemblies()
             .Any(a => a.FullName.ToLowerInvariant().StartsWith("xunit"));
 
-        public IAMContext() { }
-
-        public IAMContext(DbContextOptions<IAMContext> options) : base(options) { }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!IsRunningFromXunit)
@@ -50,6 +46,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 optionsBuilder.UseSqlServer(migrationConnection.BridgeCareConnex);
             }
+        }
+
+
+
+        public IAMContext() { }
+
+        public IAMContext(DbContextOptions<IAMContext> options) : base(options) { }
+
+        protected override void ConfigureConventions(
+            ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+            configurationBuilder.Properties<decimal>()
+                .HavePrecision(18, 2);
         }
 
         public virtual DbSet<AggregatedResultEntity> AggregatedResult { get; set; }
@@ -263,6 +273,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public virtual DbSet<ScenarioCriterionLibraryCalculatedAttributePairEntity> ScenarioCriterionLibraryCalculatedAttributePair { get; set; }
 
         public virtual DbSet<ScenarioEquationCalculatedAttributePairEntity> ScenarioEquationCalculatedAttributePair { get; set; }
+
+        public virtual DbSet<AssetDetailEntity> AssetDetail { get; set; }
+
+        public virtual DbSet<AssetDetailValueEntity> AssetDetailValue { get; set; }
+
+        public virtual DbSet<AssetSummaryDetailEntity> AssetSummaryDetail { get; set; }
+
+        public virtual DbSet<AssetSummaryDetailValueEntity> AssetSummaryDetailValue { get; set; }
+
+        public virtual DbSet<BudgetDetailEntity> BudgetDetail { get; set; }
+
+        public virtual DbSet<BudgetUsageDetailEntity> BudgetUsageDetail { get; set; }
+
+        public virtual DbSet<CashFlowConsiderationDetailEntity> CashFlowConsiderationDetail { get; set; }
+
+        public virtual DbSet<DeficientConditionGoalDetailEntity> DeficientConditionGoalDetail { get; set; }
+
+        public virtual DbSet<SimulationYearDetailEntity> SimulationYearDetail { get; set; }
+
+        public virtual DbSet<TargetConditionGoalDetailEntity> TargetConditionGoalDetail { get; set; }
+
+        public virtual DbSet<TreatmentConsiderationDetailEntity> TreatmentConsiderationDetail { get; set; }
+
+        public virtual DbSet<TreatmentOptionDetailEntity> TreatmentOptionDetail { get; set; }
+
+        public virtual DbSet<TreatmentRejectionDetailEntity> TreatmentRejectionDetail { get; set; }
+
+        public virtual DbSet<TreatmentSchedulingCollisionDetailEntity> TreatmentSchedulingCollisionDetail { get; set; }
 
         private class MigrationConnection
         {
@@ -1742,12 +1780,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasIndex(e => e.Id).IsUnique();
                 entity.HasIndex(e => e.SimulationId);
 
-                entity.Property(e => e.OutputType)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => string.IsNullOrWhiteSpace(v) || string.IsNullOrEmpty(v)
-                        ? SimulationOutputEnum.InitialConditionNetwork
-                        : (SimulationOutputEnum)Enum.Parse(typeof(SimulationOutputEnum), v));
+                entity.Property(e => e.InitialConditionOfNetwork).IsRequired();
 
                 entity.HasOne(e => e.Simulation)
                     .WithMany(p => p.SimulationOutputs)
@@ -2206,6 +2239,238 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(d => d.Simulation)
                 .WithMany(p => p.SimulationLogs)
                 .HasForeignKey(d => d.SimulationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AssetSummaryDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(e => e.SimulationOutput)
+                .WithMany(so => so.InitialAssetSummaries)
+                .HasForeignKey(a => a.SimulationOutputId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetSummaryDetails)
+                .HasForeignKey(e => e.MaintainableAssetId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+            });
+
+            modelBuilder.Entity<AssetDetailValueEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(a => a.Attribute)
+                .WithMany(a => a.AssetDetailValues)
+                .HasForeignKey(a => a.AttributeId)
+                .OnDelete(DeleteBehavior.ClientCascade)
+                ;
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(a => a.AssetDetailValues)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(a => a.Attribute)
+                .WithMany(a => a.AssetSummaryDetailValues)
+                .HasForeignKey(a => a.AttributeId)
+                .OnDelete(DeleteBehavior.ClientCascade)
+                ;
+                entity.HasIndex(e => e.AttributeId);
+
+                entity.HasOne(e => e.AssetSummaryDetail)
+                .WithMany(a => a.AssetSummaryDetailValues)
+                .HasForeignKey(e => e.AssetSummaryDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SimulationYearDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(e => e.SimulationOutput)
+                .WithMany(so => so.Years)
+                .HasForeignKey(a => a.SimulationOutputId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.ConditionOfNetwork)
+                .IsRequired();
+
+                entity.Property(e => e.Year)
+                .IsRequired();
+            });
+
+            modelBuilder.Entity<BudgetDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.AvailableFunding).IsRequired();
+
+                entity.Property(e => e.BudgetName).IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.Budgets)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<DeficientConditionGoalDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.ActualDeficientPercentage)
+                .IsRequired();
+
+                entity.Property(e => e.AllowedDeficientPercentage)
+                .IsRequired();
+
+                entity.Property(e => e.DeficientLimit).IsRequired();
+
+                entity.Property(e => e.GoalIsMet).IsRequired();
+
+                entity.HasOne(e => e.Attribute)
+                .WithMany(a => a.DeficientConditionGoalDetails)
+                .HasForeignKey(e => e.AttributeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.DeficientConditionGoalDetails)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            });
+
+            modelBuilder.Entity<TargetConditionGoalDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.GoalIsMet).IsRequired();
+
+                entity.Property(e => e.ActualValue).IsRequired();
+
+                entity.Property(e => e.TargetValue).IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.TargetConditionGoalDetails)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Attribute)
+                .WithMany(a => a.TargetConditionGoalDetails)
+                .HasForeignKey(e => e.AttributeId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AssetDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+                entity.Property(e => e.TreatmentCause).IsRequired();
+
+                entity.Property(e => e.TreatmentFundingIgnoresSpendingLimit).IsRequired();
+
+                entity.Property(e => e.TreatmentStatus).IsRequired();
+
+                entity.HasOne(e => e.SimulationYearDetail)
+                .WithMany(sy => sy.Assets)
+                .HasForeignKey(e => e.SimulationYearDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.MaintainableAsset)
+                .WithMany(ma => ma.AssetDetails)
+                .HasForeignKey(e => e.MaintainableAssetId)
+                .OnDelete(DeleteBehavior.ClientCascade);
+            });
+
+            modelBuilder.Entity<BudgetUsageDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.CoveredCost).IsRequired();
+
+                entity.Property(e => e.Status).IsRequired();
+
+                entity.HasOne(e => e.TreatmentConsiderationDetail)
+                .WithMany(tc => tc.BudgetUsageDetails)
+                .HasForeignKey(e => e.TreatmentConsiderationDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<CashFlowConsiderationDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.ReasonAgainstCashFlow).IsRequired();
+
+                entity.HasOne(e => e.TreatmentConsiderationDetail)
+                .WithMany(tc => tc.CashFlowConsiderationDetails)
+                .HasForeignKey(e => e.TreatmentConsiderationDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentConsiderationDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentConsiderationDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentOptionDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.Benefit).IsRequired();
+
+                entity.Property(e => e.Cost).IsRequired();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentOptionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentRejectionDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.Property(e => e.TreatmentRejectionReason).IsRequired();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentRejectionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
+                .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentSchedulingCollisionDetailEntity>(entity =>
+            {
+                entity.Property(e => e.Id).IsRequired();
+                entity.HasIndex(e => e.Id).IsUnique();
+
+                entity.HasOne(e => e.AssetDetail)
+                .WithMany(ad => ad.TreatmentSchedulingCollisionDetails)
+                .HasForeignKey(e => e.AssetDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
         }

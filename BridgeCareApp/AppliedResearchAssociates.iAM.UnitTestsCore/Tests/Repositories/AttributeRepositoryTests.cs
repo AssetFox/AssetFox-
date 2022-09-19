@@ -298,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public async Task GetCalculatedAttributes_CalculatedAttributeInDb_Gets()
         {
             var attributeId = Guid.NewGuid();
-            var attribute = AttributeTestSetup.Text(attributeId, true);
+            var attribute = AttributeTestSetup.Text(attributeId, calculated: true);
             _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
 
             var calculatedAttributes = await _testHelper.UnitOfWork.AttributeRepo.CalculatedAttributes();

@@ -30,10 +30,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             return dto;
         }
 
-        public static TextAttribute Text(Guid? id = null, bool calculated = false)
+        public static TextAttribute Text(Guid? id = null, string name = null, bool calculated = false)
         {
             var resolvedId = id ?? Guid.NewGuid();
-            var randomName = RandomStrings.Length11();
+            var randomName = name ?? RandomStrings.Length11();
             var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }

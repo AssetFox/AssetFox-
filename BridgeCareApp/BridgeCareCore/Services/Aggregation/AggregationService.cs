@@ -50,7 +50,7 @@ namespace BridgeCareCore.Services.Aggregation
 
                     if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                     {
-                        var broadcastError = $"Error : Metadata.json file has duplicate Ids"; // Wjwjwj error message here is outdated
+                        var broadcastError = $"Error : Duplicate attribute ids.";
                         WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Services.Aggregation
                     var checkForDuplicateNames = configurationAttributes.Select(_ => _.Name).ToList();
                     if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                     {
-                        var broadcastError = $"Error : Metadata.json file has duplicate names";
+                        var broadcastError = $"Error : Duplicate attribute names";
                         WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }

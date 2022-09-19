@@ -118,16 +118,5 @@ namespace BridgeCareCore.Services
                 throw new ArgumentException($"Unable to convert All Attribute Data with a type of {allAttribute.Type}");
             }
         }
-
-        public static List<AttributeDTO> ConvertAllAttributeList(List<AllAttributeDTO> allAttributeDTOs)
-        {
-            var attributeList = new List<AttributeDTO>();
-            foreach (var all in allAttributeDTOs)
-            {
-                var attribute = ConvertAllAttribute(all);
-                attributeList.Add(attribute);
-            }
-            return attributeList;
-        }
     }
 }

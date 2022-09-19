@@ -34,10 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             NumericAttributeValueHistories = new HashSet<NumericAttributeValueHistoryEntity>();
             TextAttributeValueHistories = new HashSet<TextAttributeValueHistoryEntity>();
             AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
-            AssetDetailValues = new HashSet<AssetDetailValueEntity>();
-            AssetSummaryDetailValues = new HashSet<AssetSummaryDetailValueEntity>();
-            DeficientConditionGoalDetails = new HashSet<DeficientConditionGoalDetailEntity>();
-            TargetConditionGoalDetails = new HashSet<TargetConditionGoalDetailEntity>();
         }
 
         public Guid Id { get; set; }
@@ -99,13 +95,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<NumericAttributeValueHistoryEntity> NumericAttributeValueHistories { get; set; }
 
         public virtual ICollection<TextAttributeValueHistoryEntity> TextAttributeValueHistories { get; set; }
-
-        public virtual ICollection<AssetDetailValueEntity> AssetDetailValues { get; set; }
-
-        public virtual ICollection<AssetSummaryDetailValueEntity> AssetSummaryDetailValues { get; set; }
-
-        public virtual ICollection<DeficientConditionGoalDetailEntity> DeficientConditionGoalDetails { get; set; }
-
-        public virtual ICollection<TargetConditionGoalDetailEntity> TargetConditionGoalDetails { get; set; }
     }
 }

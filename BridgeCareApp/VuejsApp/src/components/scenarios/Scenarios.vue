@@ -697,8 +697,17 @@ export default class Scenarios extends Vue {
     @Watch('stateTotalSharedScenarios') onStateTotalSharedScenariosChanged(){
         this.totalSharedScenarios = this.stateTotalSharedScenarios;
     }
+    
+    @Watch('totalSharedScenarios') onTotalSharedScenariosChanged(){
+        this.setTabTotals();
+    }
+    
     @Watch('stateTotalUserScenarios') onStateTotalUserScenariosChanged(){
         this.totalUserScenarios = this.stateTotalUserScenarios;
+    }
+
+    @Watch('totalUserScenarios') onTotalUserScenariosChanged(){
+        this.setTabTotals();
     }
 
     @Watch('userScenariosPagination')onUserScenariosPagination() {
@@ -817,8 +826,8 @@ export default class Scenarios extends Vue {
             icon: require("@/assets/icons/share-geometric.svg"),
         });
         this.tabItems.push(
-            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: 0 },
-            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: 0 },
+            { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
+            { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: this.totalSharedScenarios },
         );
         this.tab = 'My scenarios';
     }
@@ -854,7 +863,13 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };
-        this.getSharedScenariosPageAction(request).then(() => this.getUserScenariosPageAction(request).then(() => this.initializing = false)); 
+        this.getSharedScenariosPageAction(request).then(() => this.getUserScenariosPageAction(request).then(() => {
+            this.initializing = false
+            this.totalUserScenarios = this.stateTotalUserScenarios;
+            this.totalSharedScenarios = this.stateTotalSharedScenarios;
+            this.currentSharedScenariosPage = clone(this.stateUserScenariosPage);
+            this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
+        })); 
     }
 
     formatDate(dateToFormat: Date) {
@@ -1278,6 +1293,15 @@ export default class Scenarios extends Vue {
 
     hasMineSearch(): boolean{
         return this.currentSearchMine.trim() !== '';
+    }
+
+    setTabTotals(){
+        this.tabItems.forEach(tab => {
+            if(tab.name === 'Shared with me')
+                tab.count = this.totalSharedScenarios;
+            else
+                tab.count = this.totalUserScenarios;
+        })
     }
 }
 </script>

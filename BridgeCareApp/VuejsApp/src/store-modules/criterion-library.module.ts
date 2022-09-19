@@ -10,7 +10,8 @@ const state = {
     criterionLibraries: [] as CriterionLibrary[],
     selectedCriterionLibrary: clone(emptyCriterionLibrary) as CriterionLibrary,
     selectedCriterionIsValid: false as boolean,
-    scenarioRelatedCriteria: clone(emptyCriterionLibrary) as CriterionLibrary
+    scenarioRelatedCriteria: clone(emptyCriterionLibrary) as CriterionLibrary,
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -47,7 +48,10 @@ const mutations = {
     },
     upsertScenarioRelatedCriteriaMutator(state: any, library: CriterionLibrary){
         state.scenarioRelatedCriteria = clone(library);
-    }
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -134,7 +138,20 @@ async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
 },
 upsertSelectedScenarioRelatedCriterion({commit, dispatch}: any, payload: any){
     commit('upsertScenarioRelatedCriteriaMutator', payload.library);
-}
+},
+async getHasPermittedAccess({ commit }: any)
+    {
+        await CriterionLibraryService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
 };
 
 const getters = {};

@@ -92,5 +92,14 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        //[Authorize(Policy = Policy.ModifyFromCriterionLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
     }
 }

@@ -314,7 +314,8 @@ export default class CashFlowEditor extends Vue {
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
-
+    @State(state => state.cashFlowModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getCashFlowRuleLibraries') getCashFlowRuleLibrariesAction: any;
     @Action('selectCashFlowRuleLibrary') selectCashFlowRuleLibraryAction: any;
     @Action('upsertCashFlowRuleLibrary') upsertCashFlowRuleLibraryAction: any;
@@ -325,7 +326,6 @@ export default class CashFlowEditor extends Vue {
     @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
-
     
     hasSelectedLibrary: boolean = false;
     selectedScenarioId: string = getBlankGuid();
@@ -423,6 +423,7 @@ export default class CashFlowEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getCashFlowRuleLibrariesAction();
+            vm.getHasPermittedAccessAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
@@ -628,7 +629,7 @@ export default class CashFlowEditor extends Vue {
 
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

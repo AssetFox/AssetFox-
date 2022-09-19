@@ -176,6 +176,14 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize(Policy = Policy.ModifyCashFlowFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
+
         private List<CashFlowRuleLibraryDTO> GetAllCashFlowRuleLibraries()
         {
             return UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries();

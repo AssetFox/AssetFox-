@@ -174,7 +174,7 @@ const actions = {
             }
         });
     },
-    async getHasPermittedAccess({ dispatch, commit }: any)
+    async getHasPermittedAccess({ commit }: any)
     {
         await BudgetPriorityService.getHasPermittedAccess()
         .then((response: AxiosResponse) => {
@@ -184,6 +184,7 @@ const actions = {
             ) {
                 const hasPermittedAccess: boolean = response.data as boolean;
                 commit('PermittedAccessMutator', hasPermittedAccess);
+            }
         });
     },
 };

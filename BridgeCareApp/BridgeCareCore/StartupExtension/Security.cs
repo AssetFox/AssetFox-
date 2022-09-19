@@ -172,7 +172,7 @@ namespace BridgeCareCore.StartupExtension
 
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));                
                 options.AddPolicy(Policy.ModifyBudgetPriorityFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityUpdateAnyFromLibraryAccess,
                                                                    Claim.BudgetPriorityUpdatePermittedFromLibraryAccess,

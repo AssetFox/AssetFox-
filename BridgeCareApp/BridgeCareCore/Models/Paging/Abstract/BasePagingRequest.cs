@@ -5,6 +5,15 @@ namespace BridgeCareCore.Models
 {
     public abstract class BasePagingRequest
     {
+        public BasePagingRequest()
+        {
+            Page = 1;
+            RowsPerPage = 5;
+            isDescending = false;
+            sortColumn = "";
+            search = "";
+        }
+
         public int Page { get; set; }
         public int RowsPerPage { get; set; }
         public bool isDescending { get; set; }

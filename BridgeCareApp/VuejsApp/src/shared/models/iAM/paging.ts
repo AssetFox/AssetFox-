@@ -35,7 +35,8 @@ export interface LibraryUpsertPagingRequest<T,Y>{
 
 export interface InvestmentLibraryUpsertPagingRequestModel{
     library: BudgetLibrary;
-    pagingSync: InvestmentPagingSyncModel;
+    isNewLIbrary: boolean;
+    pagingSync: InvestmentPagingSyncModel;    
 }
 
 export interface InvestmentPagingRequestModel{

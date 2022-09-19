@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AssetDetailValueDiscriminators
     {
-        public const string Text = "Text";
-        public const string Number = "Number";
+        public const char Text = 't';
+        public const char Number = 'n';
     }
 }

@@ -1,5 +1,4 @@
-﻿using AppliedResearchAssociates.iAM.Common;
-using NLog;
+﻿using NLog;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Logging
 {

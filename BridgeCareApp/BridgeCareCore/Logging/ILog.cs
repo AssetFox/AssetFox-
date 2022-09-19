@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Common
+﻿namespace BridgeCareCore.Logging
 {
     public interface ILog
     {

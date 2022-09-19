@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,8 +31,6 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
 using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
-using BridgeCareCore.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -188,8 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 $"{BAMSConstants.CulvDurationN}"
             };
 
-            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 
@@ -366,13 +363,6 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
-
-        private void UpdateSimulationAnalysisDetailWithStatus(SimulationReportDetailDTO dto, string message)
-        {
-            dto.Status = message;
-            UpdateSimulationAnalysisDetail(dto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
-        }
 
         private void IndicateError()
         {

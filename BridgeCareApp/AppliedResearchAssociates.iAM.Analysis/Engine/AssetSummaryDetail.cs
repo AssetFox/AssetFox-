@@ -15,19 +15,15 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
 
             AssetName = asset.AssetName;
-            AssetId = asset.Id;
         }
 
         [JsonConstructor]
-        public AssetSummaryDetail(string assetName, Guid assetId)
+        public AssetSummaryDetail(string assetName)
         {
             AssetName = assetName ?? "";
-            AssetId = assetId;
         }
 
         public string AssetName { get; }
-
-        public Guid AssetId { get; }
 
         public Dictionary<string, double> ValuePerNumericAttribute { get; } = new Dictionary<string, double>();
 
@@ -36,7 +32,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         internal AssetSummaryDetail(AssetSummaryDetail original)
         {
             AssetName = original.AssetName;
-            AssetId = original.AssetId;
 
             ValuePerNumericAttribute.CopyFrom(original.ValuePerNumericAttribute); 
             ValuePerTextAttribute.CopyFrom(original.ValuePerTextAttribute);

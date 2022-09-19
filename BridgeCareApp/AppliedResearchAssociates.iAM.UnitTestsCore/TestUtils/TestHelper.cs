@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -49,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
 
-        public TestHelper()
+        protected TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

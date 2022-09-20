@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using EFCore.BulkExtensions;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -36,23 +38,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var network = NetworkTestSetup.ModelForEntityInDb(unitOfWork, maintainableAssets, networkId);
             // WjJake -- this manual setting of the asset name has to be wrong, but it is the only way I could see to get the Name into our asset.
             var assetIds = assetNameIdPairs.Select(pair => pair.Id).ToList();
-            var assetEntities = unitOfWork.Context.MaintainableAsset.Where(ma => assetIds.Contains(ma.Id)).ToList();
+            var assetEntities2 = new List<MaintainableAssetEntity>();
+            foreach (var assetId in assetIds)
+            {
+                var assetToLoad = new MaintainableAssetEntity
+                {
+                    Id = assetId,
+                };
+                assetEntities2.Add(assetToLoad);
+            }
+            var assetReadBulkConfig = new BulkConfig
+            {
+                UpdateByProperties = new List<string> { nameof(MaintainableAssetEntity.Id)}
+            };
+            unitOfWork.Context.BulkRead(assetEntities2, assetReadBulkConfig);
             var assetDictionary = new Dictionary<Guid, string>();
             foreach (var assetPair in assetNameIdPairs)
             {
                 assetDictionary[assetPair.Id] = assetPair.Name;
             }
-            foreach (var entity in assetEntities)
+            foreach (var entity in assetEntities2)
             {
                 entity.AssetName = assetDictionary[entity.Id];
             }
-            unitOfWork.Context.UpdateRange(assetEntities);
+            unitOfWork.Context.UpdateRange(assetEntities2);
             unitOfWork.Context.SaveChanges();
             var simulation = SimulationTestSetup.EntityInDb(unitOfWork, networkId);
             var attributes = new List<Attribute>();
             foreach (var numericAttributeName in numericAttributeNames)
             {
-
                 var numericAttributeId = Guid.NewGuid();
                 var numericAttribute = AttributeTestSetup.Numeric(numericAttributeId, numericAttributeName);
                 attributes.Add(numericAttribute);

@@ -85,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             var resultsString = new StringBuilder();
             resultsString.Append("<table class=\"report-cell\">");
-            resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY", "BMSID" }));
+            resultsString.Append(CreateHTMLSection("Key Fields", new List<string>() { "BRKEY_", "BMSID" }));
             resultsString.Append(CreateHTMLSection("Location", new List<string>() { "DISTRICT", "COUNTY", "MUNI_CODE", "FEATURE_INTERSECTED", "FEATURE_CARRIED", "LOCATION" }));
             resultsString.Append(CreateHTMLSection("Age and Service", new List<string>() { "YEAR_BUILT", "YEAR_RECON", "SERVTYPON", "SERVTYPUND" }));
             resultsString.Append(CreateHTMLSection("Management", new List<string>() { "CUSTODIAN", "OWNER_CODE", "MPO_NAME", "SUBM_AGENCY", "NBISLEN", "HISTSIGN", "CRGIS_SHOPKEY_NUM", "BUS_PLAN_NETWORK" }));

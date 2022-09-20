@@ -30,11 +30,11 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                     {
                         _idColumn = column;
                     }
-                    else if (columnName == excelDataSource.DateColumn)
+                    if (columnName == excelDataSource.DateColumn)
                     {
                         _dateColumn = column;
                     }
-                    else if (columnName == attribute.Name)
+                    if (columnName == attribute.Command)
                     {
                         _dataColumn = column;
                     }
@@ -81,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                 else
                 {
                     // Ignore the row
-                    break;
+                    continue;
                 }
 
                 // Ensure the data is valid
@@ -90,9 +90,25 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                 switch (Attribute.DataType)
                 {
                 case "NUMBER":
-                    if (_dataColumn.Entries[rowIndex] is DoubleExcelCellDatum)
+                    if (!(_dataColumn.Entries[rowIndex] is EmptyExcelCellDatum))
                     {
-                        dataValue = (T)Convert.ChangeType(((DoubleExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, typeof(T));
+                        if(_dataColumn.Entries[rowIndex] is StringExcelCellDatum)
+                        {
+                            var conversionResult = double.TryParse(((StringExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, out double result);
+                            if (conversionResult)
+                            {
+                                dataValue = (T)Convert.ChangeType(result, typeof(T));
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            dataValue = (T)Convert.ChangeType(((DoubleExcelCellDatum)_dataColumn.Entries[rowIndex]).Value, typeof(T));
+                        }
+
                         assignedFlag = true;
                     }
                     break;
@@ -109,16 +125,15 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
                 if (!assignedFlag)
                 {
                     // Ignore the row
-                    break;
+                    continue;
                 }
 
                 // Ensure the location is not empty
                 if (_idColumn.Entries[rowIndex] is EmptyExcelCellDatum)
                 {
                     // Ignore the row
-                    break;
+                    continue;
                 }
-
                 // All values are good, build the datum
                 yield return new AttributeDatum<T>(Guid.NewGuid(), Attribute, dataValue,
                     LocationBuilder.CreateLocation(_idColumn.Entries[rowIndex].ObjectValue().ToString(), start, end, direction, wellKnownText),

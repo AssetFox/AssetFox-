@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -146,7 +147,9 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var dataSourceArray = (DataSourceTypeStrings[])Enum.GetValues(typeof(DataSourceTypeStrings));
-                var result = dataSourceArray.Select(v => v.ToString()).ToList();
+                //All and None are internal data types we do not want to expose to the UI
+                var result = dataSourceArray.Where(q => q.ToString() != "All" && q.ToString() != "None")
+                    .Select(v => v.ToString()).ToList();
                 return Ok(result);
             }
             catch (Exception e)
@@ -157,9 +160,9 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("CheckSqlConnection/{connectionString}")]
+        [Route("CheckSqlConnection")]
         [Authorize]
-        public async Task<IActionResult> CheckSqlConnection(string connectionString)
+        public async Task<IActionResult> CheckSqlConnection(TestStringData stringData)
         {
             try
             {
@@ -167,7 +170,7 @@ namespace BridgeCareCore.Controllers
                 {
                     await Task.Factory.StartNew(() =>
                     {
-                        using (SqlConnection conn = new SqlConnection(connectionString))
+                        using (SqlConnection conn = new SqlConnection(stringData.testString))
                         {
                             conn.Open(); // throws if invalid
                         }

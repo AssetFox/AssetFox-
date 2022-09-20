@@ -109,7 +109,7 @@ namespace BridgeCareCore.Controllers
                 timer.Stop();
                 timer.Close();
                 channel.Writer.Complete();
-                readTask.Dispose();
+                //readTask.Dispose();
             }
         }
 
@@ -120,7 +120,10 @@ namespace BridgeCareCore.Controllers
                 while (reader.TryRead(out AggregationStatusMemo status))
                 {
                     var error = status.ErrorMessage;
-                    DoublyBroadcastError(error);
+                    if(error != null)
+                    {
+                        DoublyBroadcastError(error);
+                    }
                 }
             }
         }

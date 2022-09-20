@@ -96,8 +96,11 @@ const actions = {
                         ? 'Updated network'
                         : 'Added network';
 
-                    commit('networksMutator', payload.network);
-                    commit('selectedNetworkMutator', response.data);
+                    //commit('networksMutator', payload.network);
+                    dispatch('getNetworks').then(() => {
+                        commit('selectedNetworkMutator', response.data);
+                    });
+                    //commit('selectedNetworkMutator', response.data);
                     dispatch('addSuccessNotification', { message: message });
                 }
             },

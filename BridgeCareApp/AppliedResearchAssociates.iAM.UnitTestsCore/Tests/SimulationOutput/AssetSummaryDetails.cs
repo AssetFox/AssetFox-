@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationOutput;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -15,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var detail = new AssetSummaryDetail(assetName, assetId);
             foreach (var textAttributeName in textAttributeNames)
             {
-                detail.ValuePerTextAttribute[textAttributeName] = "Hello";
+                detail.ValuePerTextAttribute[textAttributeName] = TestAttributeValues.GenericStringValue;
             }
             foreach (var numericAttributeName in numericAttributeNames)
             {

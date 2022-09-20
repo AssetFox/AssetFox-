@@ -55,6 +55,7 @@ export default class BudgetsTab extends Vue {
     @Prop() selectedTreatmentBudgets: string[];
     @Prop() addTreatment: boolean;    
 
+    initializedBudgets: boolean = false;
     budgetHeaders: DataTableHeader[] = [        
         { text: 'Budget', value: 'name', align: 'left', sortable: true, class: '', width: '300' },
     ];
@@ -68,8 +69,9 @@ export default class BudgetsTab extends Vue {
 
     @Watch('selectedTreatmentBudgets')
     onBudgetsTabDataChanged() {        
-        if (this.addTreatment) {        
+        if (this.addTreatment && !this.initializedBudgets) {        
             this.selectedBudgets = this.budgets;
+            this.initializedBudgets = true;
         } else {
             this.selectedBudgets = this.budgets
                 .filter((simpleBudgetDetail: SimpleBudgetDetail) => contains(simpleBudgetDetail.id, this.selectedTreatmentBudgets));

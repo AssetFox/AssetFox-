@@ -324,7 +324,8 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
+    @State(state => state.investmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getInvestment') getInvestmentAction: any;
     @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
     @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
@@ -387,6 +388,7 @@ export default class InvestmentEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getBudgetLibrariesAction();
+            vm.getHasPermittedAccessAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
@@ -632,7 +634,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.hasAdminAccess || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

@@ -403,6 +403,15 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
+
         private InvestmentDTO GetForScenario(Guid scenarioId)
         {
             var budgets = UnitOfWork.BudgetRepo.GetScenarioBudgets(scenarioId);

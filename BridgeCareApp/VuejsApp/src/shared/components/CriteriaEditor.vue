@@ -353,7 +353,7 @@ export default class CriteriaEditor extends Vue {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
             
-        }
+        }      
     }
 
     @Watch('criteriaEditorData')

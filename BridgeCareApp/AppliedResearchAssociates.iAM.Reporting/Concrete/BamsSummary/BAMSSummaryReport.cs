@@ -91,19 +91,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
             if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
 
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
-            if (_bridgeWorkSummaryByBudget == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummaryByBudget)); }
-
             _summaryReportGlossary = new SummaryReportGlossary();
-            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
-
-            _summaryReportParameters = new SummaryReportParameters();
-            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
-                        
+            _summaryReportParameters = new SummaryReportParameters();                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            if (_addGraphsInTabs == null) { throw new ArgumentNullException(nameof(_addGraphsInTabs)); }
-
             _summaryReportHelper = new SummaryReportHelper();
-            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }

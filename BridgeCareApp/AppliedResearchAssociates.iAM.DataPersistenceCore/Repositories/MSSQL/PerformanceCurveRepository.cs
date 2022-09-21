@@ -148,7 +148,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Select(_ => _.ToDto())
                 .ToList();
-        }        
+        }
+
+        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoPerformanceCurves()
+        {
+            if (!_unitOfWork.Context.PerformanceCurveLibrary.Any())
+            {
+                return new List<PerformanceCurveLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.PerformanceCurveLibrary.AsNoTracking()
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
 
         public void UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
@@ -366,6 +378,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Attribute)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<PerformanceCurveDTO> GetScenarioPerformanceCurvesOrderedById(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+
+            return _unitOfWork.Context.ScenarioPerformanceCurve.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId)
+                .Include(_ => _.ScenarioPerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.CriterionLibraryScenarioPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute)
+                .OrderBy(_ => _.Id)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -597,6 +628,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.PerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
                 .FirstOrDefault()?.ToDto();
+        }
+
+        public List<PerformanceCurveDTO> GetPerformanceCurvesForLibraryOrderedById(Guid performanceCurveLibraryId)
+        {
+            if (!_unitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId))
+            {
+                return new List<PerformanceCurveDTO>();
+            }
+
+            return _unitOfWork.Context.PerformanceCurve.AsNoTracking()
+                .Where(_ => _.PerformanceCurveLibraryId == performanceCurveLibraryId)
+                .Include(_ => _.Attribute)
+                .Include(_ => _.CriterionLibraryPerformanceCurveJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.PerformanceCurveEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .OrderBy(_ => _.Id)
+                .Select(_ => _.ToDto())
+                .ToList();
         }
     }
 }

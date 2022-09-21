@@ -10,11 +10,11 @@
                         class="tab-theme"
                     >
                         <!-- <img class="icon-selected-tab" style="padding-right:10px" v-bind:src="item.icon"/> -->
+                        <GhdQueueSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Simulation queue'"/> 
                         <GhdShareSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'Shared with me'"/>  
                         <GhdStarSvg style="padding-right:10px"  class="icon-selected-tab" v-if="item.name === 'My scenarios'"/>  
-                        {{ item.name }}
-                        ( {{ item.count }} )</v-tab
-                    >
+                        {{ item.name }} ( {{ item.count }} )
+                    </v-tab>
                     <v-spacer></v-spacer>
                     <v-btn v-if="isAdmin"
                         class="green darken-2 white--text"
@@ -334,6 +334,113 @@
                             </v-card>
                         </v-flex>
                     </v-tab-item>
+                    <v-tab-item>
+                        <v-flex xs12>
+                            <v-card elevation="5">
+                                <!-- <v-data-table
+                                    :headers="simulationQueueGridHeaders"
+                                    :items="sharedScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
+                                    :search="searchShared"
+                                >                                 -->
+                                <v-data-table
+                                    :headers="simulationQueueGridHeaders"
+                                    :items="sharedScenarios"
+                                    sort-icon=$vuetify.icons.ghd-table-sort
+                                    :search="searchShared"
+                                >
+                                    <template slot="items" slot-scope="props">
+                                        <td>
+                                            {{ props.item.name }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.creator
+                                                    ? props.item.creator
+                                                    : '[ Unknown ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.owner
+                                                    ? props.item.owner
+                                                    : '[ No Owner ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                props.item.networkName
+                                                    ? props.item.networkName
+                                                    : '[ Unknown ]'
+                                            }}
+                                        </td>
+                                        <td>
+                                            <!-- TODO: Replace with Queue Date -->
+                                            {{
+                                                formatDate(
+                                                    props.item.createdDate,
+                                                )
+                                            }}
+                                        </td>
+                                        <td>
+                                            <!-- TODO: Replace with Queue Time -->
+                                            {{ props.item.runTime }}
+                                        </td>
+                                        <td>
+                                            <!-- TODO: Replace with Start Date -->
+                                            {{ formatDate(props.item.lastRun) }}
+                                        </td>
+                                        <td>
+                                            <!-- TODO: Replace with Start Time -->                                            
+                                            {{ props.item.runTime }}
+                                        </td>
+                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.status }}</td>
+                                        <td>
+                                            <v-menu offset-x left>
+                                                <template
+                                                    v-slot:activator="{
+                                                        on,
+                                                        attrs,
+                                                    }"
+                                                >
+                                                    <v-btn
+                                                        color="green--text darken-1"
+                                                        icon
+                                                        v-bind="attrs"
+                                                        v-on="on"
+                                                    >
+                                                        <img class='img-general' :src="require('@/assets/icons/more-vertical.svg')"/>
+                                                    </v-btn>
+                                                </template>
+
+                                                <v-list>
+                                                    <v-list-tile v-for="(item,i) in actionItemsForSimulationQueue"
+                                                        :key="i"
+                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
+                                                        class="menu-style">
+                                                        <v-list-tile-title icon>                                                        
+                                                            <img style="padding-right:5px" v-bind:src="item.icon"/>
+                                                            {{item.title}}
+                                                        </v-list-tile-title>
+                                                    </v-list-tile>
+                                                </v-list>
+                                            </v-menu>
+                                        </td>
+                                    </template>
+                                    <v-alert
+                                        :value="true"
+                                        class="ara-orange-bg"
+                                        icon="fas fa-exclamation"
+                                        slot="no-results"
+                                    >
+                                        Your search for "{{ searchShared }}"
+                                        found no results.
+                                    </v-alert>
+                                </v-data-table>
+                            </v-card>
+                        </v-flex>
+                    </v-tab-item>
                 </v-tabs-items>
             </v-card>
         </v-flex>
@@ -443,6 +550,7 @@ import FileDownload from 'js-file-download';
 import ImportExportCommittedProjectsDialog from './scenarios-dialogs/ImportExportCommittedProjectsDialog.vue';
 import GhdStarSvg from '@/shared/icons/GhdStarSvg.vue';
 import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
+import GhdQueueSvg from '@/shared/icons/GhdQueueSvg.vue';
 
 @Component({
     components: {
@@ -460,7 +568,8 @@ import GhdShareSvg from '@/shared/icons/GhdShareSvg.vue';
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
         Alert,
         GhdShareSvg,
-        GhdStarSvg
+        GhdStarSvg,
+        GhdQueueSvg
     },
 })
 export default class Scenarios extends Vue {
@@ -598,9 +707,108 @@ export default class Scenarios extends Vue {
             width: '',
         },
     ];
+    simulationQueueGridHeaders: DataTableHeader[] = [
+        {
+            text: 'Scenario',
+            value: 'name',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Creator',
+            value: 'creator',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Owner',
+            value: 'owner',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Network',
+            value: 'network',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Queue Date',
+            value: 'createdDate',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Queue Time',
+            value: 'runTime',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Start Date',
+            value: 'lastRun',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Start Time',
+            value: 'runTime',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Run Time',
+            value: 'runTime',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Status',
+            value: 'status',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Action',
+            value: 'actions',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: '',
+            value: '',
+            align: 'left',
+            sortable: false,
+            class: 'header-border',
+            width: '',
+        },        
+    ];
 
     actionItems: ScenarioActions[] = [];
     actionItemsForSharedScenario: ScenarioActions[] = [];
+    actionItemsForSimulationQueue: ScenarioActions[] = [];
     tabItems: TabItems[] = [];
     tab: string = '';
     availableActions: any;
@@ -699,7 +907,8 @@ export default class Scenarios extends Vue {
             share: 'share',
             clone: 'clone',
             delete: 'delete',
-            commitedProjects: 'commitedProjects'
+            commitedProjects: 'commitedProjects',
+            cancel: 'cancel'
         };
         this.actionItemsForSharedScenario = [
             {
@@ -733,6 +942,13 @@ export default class Scenarios extends Vue {
                 icon: require("@/assets/icons/trash.svg"),
             }           
         ];
+        this.actionItemsForSimulationQueue = [
+             {
+                title: 'Cancel',
+                action: this.availableActions.cancel,
+                icon: require("@/assets/icons/check-active.svg"),
+            }             
+        ]
         this.actionItems = this.actionItemsForSharedScenario.slice();
         this.actionItems.splice(4, 0, {
             title: 'Share',
@@ -742,6 +958,7 @@ export default class Scenarios extends Vue {
         this.tabItems.push(
             { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: 0 },
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: 0 },
+            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: 0 },
         );
         this.tab = 'My scenarios';
     }
@@ -964,6 +1181,18 @@ export default class Scenarios extends Vue {
         };
     }
 
+
+    onShowConfirmCancelAlert(scenario: Scenario) {
+        this.selectedScenario = clone(scenario);
+
+        this.confirmDeleteAlertData = {
+            showDialog: true,
+            heading: 'Warning',
+            choice: true,
+            message: 'Are you sure you want to cancel?',
+        };
+    }
+
     onConfirmDeleteAlertSubmit(submit: boolean) {
         this.confirmDeleteAlertData = clone(emptyAlertData);
 
@@ -1129,6 +1358,9 @@ export default class Scenarios extends Vue {
                 break;
             case this.availableActions.delete:
                 this.onShowConfirmDeleteAlert(scenario);
+                break;
+            case this.availableActions.cancel:
+                this.onShowConfirmCancelAlert(scenario);
                 break;
             case this.availableActions.commitedProjects:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {

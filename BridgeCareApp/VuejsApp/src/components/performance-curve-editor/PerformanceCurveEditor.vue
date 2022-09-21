@@ -115,10 +115,10 @@
                     <v-card class="elevation-0">
                         <v-data-table
                             :headers="performanceCurveGridHeaders"
-                            :items="currentPage"
-                       
+                            :items="currentPage"                       
                             :pagination.sync="performancePagination"
                             :total-items="totalItems"
+                            :rows-per-page-items=[5,10,25]
                             sort-icon=$vuetify.icons.ghd-table-sort
                             select-all
                             v-model='selectedPerformanceEquations'
@@ -839,9 +839,10 @@ export default class PerformanceCurveEditor extends Vue {
 
         if (!isNil(performanceCurveLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
-                library: performanceCurveLibrary,               
+                library: performanceCurveLibrary,    
+                isNewLIbrary: true,           
                  pagingSync: {
-                    libraryId: performanceCurveLibrary.performanceCurves === [] ? null : this.selectedPerformanceCurveLibrary.id,
+                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
                     updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
@@ -849,7 +850,7 @@ export default class PerformanceCurveEditor extends Vue {
             }
             PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
-                this.librarySelectItemValue = performanceCurveLibrary.name;
+                this.librarySelectItemValue = performanceCurveLibrary.id;
                 
                 if(performanceCurveLibrary.performanceCurves === []){
                     this.clearChanges();
@@ -989,6 +990,7 @@ export default class PerformanceCurveEditor extends Vue {
     onUpsertPerformanceCurveLibrary() { // need to do upsert things
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
+                isNewLIbrary: false,
                  pagingSync: {
                     libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: this.deletionIds,

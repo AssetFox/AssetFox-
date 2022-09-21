@@ -22,4 +22,5 @@ export interface PaginSync<T>{
 export interface LibraryUpsertPagingRequest<T,Y>{
     library: T;
     pagingSync: PaginSync<Y>;
+    isNewLIbrary: boolean;
 }

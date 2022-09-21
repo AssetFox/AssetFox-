@@ -20,6 +20,7 @@ using BridgeCareCore.Models;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml;
+using BridgeCareCore.Interfaces.DefaultData;
 
 namespace BridgeCareCore.Services
 {
@@ -27,15 +28,18 @@ namespace BridgeCareCore.Services
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
         private static IExpressionValidationService _expressionValidationService;
+        public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         protected readonly IHubService HubService;
 
         public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork,
-            IExpressionValidationService expressionValidationService, IHubService hubService)
+            IExpressionValidationService expressionValidationService, IHubService hubService,
+            IInvestmentDefaultDataService investmentDefaultDataService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _expressionValidationService = expressionValidationService ??
                                            throw new ArgumentNullException(nameof(expressionValidationService));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
+            _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
 
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> headers)
@@ -626,6 +630,185 @@ namespace BridgeCareCore.Services
                     ? warningSb.ToString()
                     : null
             };
+        }
+
+        public InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request)
+        {
+            var skip = 0;
+            var take = 0;
+            var total = 0;
+            var items = new List<BudgetDTO>();
+            var lastYear = 0;
+            var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+
+
+            budgets = SyncedDataset(budgets, request.PagingSync);
+
+
+
+            if (request.sortColumn.Trim() != "")
+                budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
+            if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+
+            if (request.RowsPerPage > 0)
+            {
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                total = budgets.Count != 0 ? budgets.First().BudgetAmounts.Count : 0;
+                budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.Skip(skip).Take(take).ToList());
+                items = budgets;
+            }
+            else
+            {
+                items = budgets;
+                return new InvestmentPagingPageModel()
+                {
+                    Items = items,
+                    TotalItems = total,
+                    LastYear = lastYear
+                };
+            }
+
+            return new InvestmentPagingPageModel()
+            {
+                Items = items,
+                TotalItems = total,
+                LastYear = lastYear
+            };
+        }
+
+        public InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request)
+        {
+            var skip = 0;
+            var take = 0;
+            var items = new List<BudgetDTO>();
+            var total = 0;
+            var lastYear = 0;
+            var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
+            if (investmentPlan.Id == Guid.Empty)
+            {
+                var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                investmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
+                investmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+            }
+
+            var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
+
+            budgets = SyncedDataset(budgets, request.PagingSync);
+
+            if (request.sortColumn.Trim() != "")
+                budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
+
+            if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+
+            if (request.RowsPerPage > 0)
+            {
+                take = request.RowsPerPage;
+                skip = request.RowsPerPage * (request.Page - 1);
+                total = budgets.Count != 0 ? budgets.First().BudgetAmounts.Count : 0;
+                budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.Skip(skip).Take(take).ToList());
+                items = budgets;
+            }
+            else
+            {
+                items = budgets;
+                return new InvestmentPagingPageModel()
+                {
+                    Items = items,
+                    TotalItems = total,
+                    LastYear = lastYear,
+                    InvestmentPlan = investmentPlan
+                };
+            }
+
+            return new InvestmentPagingPageModel()
+            {
+                Items = items,
+                TotalItems = total,
+                LastYear = lastYear,
+                InvestmentPlan = investmentPlan
+            };
+        }
+
+        public List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request)
+        {
+            var budgets = request.LibraryId == null ?
+                    _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                    _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        public List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request)
+        {
+            var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        private List<BudgetDTO> OrderByColumn(List<BudgetDTO> budgets, string sortColumn, bool isDescending)
+        {
+            sortColumn = sortColumn?.ToLower().Trim();
+            switch (sortColumn)
+            {
+            case "year":
+                if (isDescending)
+                {
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderByDescending(__ => __.Year).ToList());
+                    return budgets;
+                }
+                else
+                {
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderBy(__ => __.Year).ToList());
+                    return budgets;
+                }
+            default:
+                var budget = budgets.FirstOrDefault(_ => _.Name.ToLower().Trim() == sortColumn);
+                if (isDescending)
+                {
+                    budget.BudgetAmounts = budget.BudgetAmounts.OrderByDescending(_ => _.Value).ToList();
+                    var dict = budget.BudgetAmounts.ToDictionary(_ => _.Year, _ => _.Value);
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderByDescending(__ => dict[__.Year]).ToList());
+                }
+                else
+                {
+                    budget.BudgetAmounts = budget.BudgetAmounts.OrderBy(_ => _.Value).ToList();
+                    var dict = budget.BudgetAmounts.ToDictionary(_ => _.Year, _ => _.Value);
+                    budgets.ForEach(_ => _.BudgetAmounts = _.BudgetAmounts.OrderBy(__ => dict[__.Year]).ToList());
+                }                   
+                
+                return budgets;
+            }
+        }
+
+        private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
+        {
+            budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
+
+            for (var i = 0; i < budgets.Count; i++)
+            {
+                var budget = budgets[i];
+                var item = syncModel.UpdatedBudgets.FirstOrDefault(row => row.Id == budget.Id);
+                if(item != null)
+                {
+                    budget.Name = item.Name;
+                    budget.CriterionLibrary = item.CriterionLibrary;
+                }
+                if(syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))
+                    budget.BudgetAmounts = budget.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[budget.Name]).ToList();
+                if(syncModel.Deletionyears.Count != 0)
+                    budget.BudgetAmounts = budget.BudgetAmounts.Where(_ => !syncModel.Deletionyears.Contains(_.Year)).ToList();
+                if(syncModel.UpdatedBudgetAmounts.ContainsKey(budget.Name))
+                    for (var o = 0; o < budget.BudgetAmounts.Count; o++)
+                    {
+                        var amount = syncModel.UpdatedBudgetAmounts[budget.Name].FirstOrDefault(row => row.Id == budget.BudgetAmounts[o].Id);
+                        if (amount != null)
+                            budget.BudgetAmounts[o] = amount;
+                    }
+            }
+
+            return budgets;
         }
     }
 }

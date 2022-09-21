@@ -26,6 +26,8 @@ using MoreLinq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using BridgeCareCore.Services.DefaultData;
+using BridgeCareCore.Models;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -46,7 +48,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.SetupDefaultHttpContext();
-            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
+            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork,
+                new ExpressionValidationService(_testHelper.UnitOfWork,
+                _testHelper.Logger), _testHelper.MockHubService.Object,
+                new InvestmentDefaultDataService());
             return service;
         }
 
@@ -295,8 +300,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var controller = CreateAuthorizedController(service);
             var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
 
+            var request = new InvestmentLibraryUpsertPagingRequestModel();
+            request.IsNewLibrary = true;
+
+            request.Library = dto;
+
             // Act
-            var result = await controller.UpsertBudgetLibrary(dto);
+            var result = await controller.UpsertBudgetLibrary(request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -309,14 +319,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var controller = CreateAuthorizedController(service);
             var simulation = _testHelper.CreateSimulation();
-            var dto = new InvestmentDTO
-            {
-                ScenarioBudgets = new List<BudgetDTO>(),
-                InvestmentPlan = new InvestmentPlanDTO()
-            };
+
+            var request = new InvestmentPagingSyncModel();
+            request.Investment = new InvestmentPlanDTO();
+            
 
             // Act
-            var result = await controller.UpsertInvestment(simulation.Id, dto);
+            var result = await controller.UpsertInvestment(simulation.Id, request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -420,8 +429,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.Budgets[0].BudgetAmounts[0].Value = 1000000;
             dto.Budgets[0].CriterionLibrary = new CriterionLibraryDTO();
 
+            var request = new InvestmentLibraryUpsertPagingRequestModel();
+
+            request.Library = dto;
+            request.PagingSync.UpdatedBudgets.Add(dto.Budgets[0]);
+
             // Act
-            await controller.UpsertBudgetLibrary(dto);
+            await controller.UpsertBudgetLibrary(request);
 
             // Assert
             var modifiedDto = _testHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
@@ -456,8 +470,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             dto.ScenarioBudgets[0].CriterionLibrary = new CriterionLibraryDTO();
             dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
 
+            var request = new InvestmentPagingSyncModel();
+            request.Investment = dto.InvestmentPlan;
+            request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
+            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0]};
+
             // Act
-            await controller.UpsertInvestment(simulation.Id, dto);
+            await controller.UpsertInvestment(simulation.Id, request);
 
             // Assert
             var modifiedBudgetDto =
@@ -515,8 +534,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 InvestmentPlan = _testInvestmentPlan.ToDto()
             };
 
+            var request = new InvestmentPagingSyncModel();
+            request.Investment = dto.InvestmentPlan;
+            request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
+
             // Act
-            var result = await controller.UpsertInvestment(simulation.Id, dto);
+            var result = await controller.UpsertInvestment(simulation.Id, request);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
+using BridgeCareCore.Models;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
@@ -17,5 +18,13 @@ namespace BridgeCareCore.Interfaces
 
         BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets);
+
+        InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request);
+
+        InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request);
+
+        List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request);
+
+        List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request);
     }
 }

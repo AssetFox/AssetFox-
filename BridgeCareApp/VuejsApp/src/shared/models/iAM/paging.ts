@@ -1,6 +1,15 @@
+import { Budget, BudgetAmount, BudgetLibrary, Investment, InvestmentPlan } from "./investment";
+
 export interface PagingPage<T>{
     items: T[];
     totalItems: number;
+}
+
+export interface InvestmentPagingPage{
+    items: Budget[];
+    totalItems: number;
+    lastYear: number;
+    investmentPlan: InvestmentPlan
 }
 
 export interface PagingRequest<T>{
@@ -23,4 +32,30 @@ export interface LibraryUpsertPagingRequest<T,Y>{
     library: T;
     pagingSync: PaginSync<Y>;
     isNewLIbrary: boolean;
+}
+
+export interface InvestmentLibraryUpsertPagingRequestModel{
+    library: BudgetLibrary;
+    isNewLIbrary: boolean;
+    pagingSync: InvestmentPagingSyncModel;    
+}
+
+export interface InvestmentPagingRequestModel{
+    page: number;
+    rowsPerPage: number;
+    sortColumn: string;
+    search: string;
+    isDescending: boolean;
+    pagingSync: InvestmentPagingSyncModel;
+}
+
+export interface InvestmentPagingSyncModel{
+    Investment: InvestmentPlan | null;
+    libraryId: string | null;
+    budgetsForDeletion: string[];
+    updatedBudgets: Budget[];
+    addedBudgets: Budget[];
+    deletionyears: number[];
+    updatedBudgetAmounts: { [key: string]: BudgetAmount[]; }
+    addedBudgetAmounts: { [key: string]: BudgetAmount[]; }
 }

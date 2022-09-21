@@ -35,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static NetworkEntity ToEntity(this Network domain) =>
-            new NetworkEntity { Id = domain.Id, Name = domain.Name };
+            new NetworkEntity { Id = domain.Id, Name = domain.Name, KeyAttributeId = domain.KeyAttributeId };
 
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
             new NetworkEntity { Id = domain.Id, Name = domain.Name };

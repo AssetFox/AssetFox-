@@ -1,6 +1,6 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
-import { Datasource, ExcelDataSource, SqlDataSource } from '@/shared/models/iAM/data-source';
+import { Datasource, ExcelDataSource, SqlDataSource, TestConnection } from '@/shared/models/iAM/data-source';
 
 
 export default class DataSourceService {
@@ -34,11 +34,9 @@ export default class DataSourceService {
         );
     }
     static checkSqlConnection(
-        connectionString: string
+        data: TestConnection
     ): AxiosPromise {
-        return coreAxiosInstance.post(
-            `${API.DataSource}/CheckSqlConnection/${connectionString}`
-        );
+        return coreAxiosInstance.post(`${API.DataSource}/CheckSqlConnection`, data);
     }
     static importExcelSpreadsheet(
         file: File,

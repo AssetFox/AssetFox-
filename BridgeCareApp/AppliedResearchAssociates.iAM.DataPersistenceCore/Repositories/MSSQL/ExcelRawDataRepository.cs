@@ -22,6 +22,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Guid AddExcelRawData(ExcelRawDataDTO dto)
         {
+            if(_unitOfWork.Context.ExcelRawData.Any(_ => _.DataSourceId == dto.DataSourceId))
+            {
+                _unitOfWork.Context.DeleteAll<ExcelRawDataEntity>(_ => _.DataSourceId == dto.DataSourceId);
+            }
             var entity = dto.ToEntity();
             var userId = _unitOfWork.UserEntity?.Id;
             var entities = new List<ExcelRawDataEntity> { entity };

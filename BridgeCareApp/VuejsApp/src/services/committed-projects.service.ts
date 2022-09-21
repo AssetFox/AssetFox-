@@ -59,6 +59,12 @@ export default class CommittedProjectsService {
         );
     }
 
+    static ValidateBRKEYs(data: string[], networkId: string){
+        return coreAxiosInstance.post(
+            `${API.CommittedProject}/ValidateExistenceOfAssets/${networkId}`, data
+        );
+    }
+
     static GetTreatmetCost(data: SectionCommittedProject, brkeyValue: string){
         return coreAxiosInstance.post(
             `${API.CommittedProject}/GetTreatmetCost/${brkeyValue}`, data

@@ -37,6 +37,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
 
             var projects = _unitOfWork.Context.CommittedProject
+                .Include(_ => _.CommittedProjectLocation)
+                .Include(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjectConsequences)
+                .ThenInclude(_ => _.Attribute)
                 .Where(_ => _.SimulationId == simulation.Id).ToList();
             foreach (var project in projects)
             {
@@ -49,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Cost = project.Cost,
                     Year = project.Year,
                     CommittedProjectLocation = project.CommittedProjectLocation,
-                    ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
+                    ScenarioBudget = project.ScenarioBudget != null ? new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name } : null,
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {
@@ -161,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             // Test for existing budget
-            var budgetIds = _unitOfWork.Context.ScenarioBudget
+            var budgetIds = _unitOfWork.Context.ScenarioBudget.AsNoTracking()
                 .Where(_ => simulationIds.Contains(_.SimulationId))
                 .Select(_ => _.Id)
                 .ToList();
@@ -175,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"Unable to find the following budget IDs in its matching simulation: {budgetList}");
             }
 
-            var attributes = _unitOfWork.Context.Attribute.ToList();
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
 
             // Create entities and assign IDs
             var committedProjectEntities = projects.Select(p =>

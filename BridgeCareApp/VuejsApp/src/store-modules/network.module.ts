@@ -1,6 +1,6 @@
-import { BenefitQuantifier, Network } from '@/shared/models/iAM/network';
+import { BenefitQuantifier, emptyNetwork, Network } from '@/shared/models/iAM/network';
 import NetworkService from '../services/network.service';
-import { any, clone, find, findIndex, propEq, update } from 'ramda';
+import { any, append, clone, find, findIndex, propEq, update } from 'ramda';
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import prepend from 'ramda/es/prepend';
@@ -10,11 +10,40 @@ import AggregationService from '@/services/aggregation.service';
 
 const state = {
     networks: [] as Network[],
+    selectedNetwork: clone(emptyNetwork),
     compatibleNetworks: [] as Network[]
 };
 
 const mutations = {
-    networksMutator(state: any, networks: Network[]) {
+    selectedNetworkMutator(state: any, networkId: string) {
+        if (any(propEq('id', networkId), state.networks)) {
+            state.selectedNetwork = find(
+                propEq('id', networkId),
+                state.networks,
+            );
+        } else {
+            state.selectedNetwork = clone(
+                emptyNetwork,
+            );
+        }
+    },
+    networksMutator(state: any, network: Network) {
+        state.networks = any(
+            propEq('id', network.id),
+            state.networks,
+        )
+            ? update(
+                  findIndex(
+                      propEq('id', network.id),
+                      state.networks,
+                  ),
+                  network,
+                  state.networks,
+              )
+            : append(network, state.networks);
+        (state.networks as Network[]).sort((one, two) => (one.name.toUpperCase() < two.name.toUpperCase() ? -1 : 1));
+    },
+    networksMutatorClone(state: any, networks: Network[]) {
         state.networks = clone(networks);
     },
     compatibleNetworksMutator(state: any, compatibleNetworks: Network[]) {
@@ -37,11 +66,14 @@ const mutations = {
 };
 
 const actions = {
+    selectNetwork({ commit }: any, networkId: string) {
+        commit('selectedNetworkMutator', networkId);
+    },
     async getNetworks({commit}: any) {
         await NetworkService.getNetworks()
             .then((response: AxiosResponse<any[]>) => {
                 if (hasValue(response, 'data')) {
-                    commit('networksMutator', response.data as Network[]);
+                    commit('networksMutatorClone', response.data as Network[]);
                 }
             });
     },
@@ -54,14 +86,22 @@ const actions = {
             });
     },
     async createNetwork({dispatch, commit}: any, payload: any) {
-        return await NetworkService.createNetwork(payload.name)
+        return await NetworkService.createNetwork(payload.network.name, payload.parameters)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    const network: Network = response.data;
-                    commit('createdNetworkMutator', network);
-                    dispatch('addSuccessNotification', {
-                        message: 'Network created',
+                    const message: string = any(
+                        propEq('id', response.data),
+                        state.networks,
+                    )
+                        ? 'Updated network'
+                        : 'Added network';
+
+                    //commit('networksMutator', payload.network);
+                    dispatch('getNetworks').then(() => {
+                        commit('selectedNetworkMutator', response.data);
                     });
+                    //commit('selectedNetworkMutator', response.data);
+                    dispatch('addSuccessNotification', { message: message });
                 }
             },
         );

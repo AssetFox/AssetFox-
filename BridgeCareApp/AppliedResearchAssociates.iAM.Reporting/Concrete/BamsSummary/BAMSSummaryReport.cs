@@ -62,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public List<string> Errors { get; private set; }
 
+        public List<string> Warnings { get; set; }
+
         public bool IsComplete { get; private set; }
 
         public string Status { get; private set; }
@@ -73,12 +75,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
+            Warnings = new List<string>();
 
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
+            if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
+
             _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
+            if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
+
             _unfundedTreatmentTime = new UnfundedTreatmentTime();
-            _bridgeWorkSummary = new BridgeWorkSummary();
+            if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
+                      
+            _bridgeWorkSummary = new BridgeWorkSummary(Warnings);
+            if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
+
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
             _summaryReportGlossary = new SummaryReportGlossary();
             _summaryReportParameters = new SummaryReportParameters();                        
@@ -91,6 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //set report return default parameters
             ID = (Guid)reportId;
             Errors = new List<string>();
+            if (Warnings == null) { Warnings = new List<string>(); }
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;

@@ -353,7 +353,7 @@ export default class CriteriaEditor extends Vue {
         if (hasValue(this.stateAttributes)) {
             this.setQueryBuilderRules();
             
-        }
+        }      
     }
 
     @Watch('criteriaEditorData')
@@ -362,7 +362,7 @@ export default class CriteriaEditor extends Vue {
         /*const mainCriteria: Criteria = parseCriteriaString(
       this.criteriaEditorData.mergedCriteriaExpression != null ? this.criteriaEditorData.mergedCriteriaExpression : ''
       ) as Criteria;*/
-
+        this.selectedSubCriteriaClauseIndex = -1;
         const mainCriteria: Criteria = convertCriteriaExpressionToCriteriaObject(
             this.criteriaEditorData.mergedCriteriaExpression != null
                 ? this.criteriaEditorData.mergedCriteriaExpression

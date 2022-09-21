@@ -76,6 +76,33 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return assets.Select(_ => _.ToDomain()).ToList();
         }
 
+        public List<Data.Networking.MaintainableAsset> GetAllInNetworkWithLocations(Guid networkId)
+        {
+            if (!_unitOfWork.Context.Network.Any(_ => _.Id == networkId))
+            {
+                throw new RowNotInTableException("The specified network was not found.");
+            }
+
+            if (!_unitOfWork.Context.MaintainableAsset.Any(_ => _.NetworkId == networkId))
+            {
+                throw new RowNotInTableException("The network has no maintainable assets for rollup.");
+            }
+
+            var assets = _unitOfWork.Context.MaintainableAsset.AsNoTracking()
+                .Where(_ => _.NetworkId == networkId)
+                .Select(asset => new MaintainableAssetEntity
+                {
+                    Id = asset.Id,
+                    NetworkId = networkId,
+                    SpatialWeighting = asset.SpatialWeighting,
+                    MaintainableAssetLocation = new MaintainableAssetLocationEntity(
+                        asset.MaintainableAssetLocation.Id, asset.MaintainableAssetLocation.Discriminator,
+                        asset.MaintainableAssetLocation.LocationIdentifier)                  
+                }).ToList();
+
+            return assets.Select(_ => _.ToDomain()).ToList();
+        }
+
         public MaintainableAsset GetAssetAtLocation(Location location)
         {
             var asset = _unitOfWork.Context.MaintainableAsset.FirstOrDefault(_ => location.MatchOn(_.MaintainableAssetLocation.ToDomain()));
@@ -189,35 +216,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public bool CheckIfKeyAttributeValueExists(Guid networkId, string attributeValue)
         {
-            var network = _unitOfWork.Context.Network.Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
+            var network = _unitOfWork.Context.Network.AsNoTracking().Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
             if (network == null)
                 return false;
-            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            var attrEntity = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(_ => _.Id == network.KeyAttributeId);
             if (attrEntity == null)
                 return false;
             
 
             if (attrEntity.DataType == "NUMBER")
-                return  _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
+                return  _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
                     .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
                     .Any(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue);
             else
-                return _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults)
+                return _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
                     .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
                     .Any(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue);
         }
 
+        public Dictionary<string, bool> CheckIfKeyAttributeValuesExists(Guid networkId, List<string> attributeValues)
+        {
+            var network = _unitOfWork.Context.Network.AsNoTracking().Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
+            if (network == null)
+                return new Dictionary<string, bool>();
+            var attrEntity = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            if (attrEntity == null)
+                return new Dictionary<string, bool>();
+
+            var aggResults = _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults)
+                    .Where(_ => _.NetworkId == network.Id)
+                    .SelectMany(_ => _.AggregatedResults)
+                    .Where(_ => _.AttributeId == attrEntity.Id)
+                    .Select(_ => attrEntity.DataType == "NUMBER" ? _.NumericValue.ToString() : _.TextValue)
+                    .Where(_ => attributeValues.Contains(_)).ToList();
+
+            return attributeValues.ToDictionary(_ => _, _ => aggResults.Contains(_));
+        }
+
         public MaintainableAsset GetMaintainableAssetByKeyAttribute(Guid networkId, string attributeValue)
         {
-            var network = _unitOfWork.Context.Network.Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
+            var network = _unitOfWork.Context.Network.AsNoTracking().Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
             if (network == null)
                 return null;
-            var attrEntity = _unitOfWork.Context.Attribute.FirstOrDefault(_ => _.Id == network.KeyAttributeId);
+            var attrEntity = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(_ => _.Id == network.KeyAttributeId);
             if (attrEntity == null)
                 return null;
 
 
-            var asset = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
+            var asset = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
                     .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
                     .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue)?.MaintainableAsset.ToDomain() :
                     _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
@@ -226,5 +272,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return asset;
         }
 
+        public string GetPredominantAssetSpatialWeighting(Guid networkId)
+        {
+            return _unitOfWork.Context.MaintainableAsset
+                .Where(_ => _.NetworkId == networkId)
+                .Select(_ => _.SpatialWeighting)
+                .GroupBy(_ => _)
+                .OrderByDescending(_ => _.Count())
+                .Select(_ => _.Key)
+                .FirstOrDefault();
+        }
     }
 }

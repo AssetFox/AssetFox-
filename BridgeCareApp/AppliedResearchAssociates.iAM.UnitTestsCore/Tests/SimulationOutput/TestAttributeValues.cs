@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationOutput
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class TestAttributeValues
     {

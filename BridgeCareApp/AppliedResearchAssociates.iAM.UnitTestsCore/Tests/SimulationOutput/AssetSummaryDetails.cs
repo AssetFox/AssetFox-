@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SimulationOutput;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {

@@ -22,16 +22,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private ProjectsCompletedCount _projectsCompletedCount;
         private ISummaryReportHelper _summaryReportHelper;
 
-        public BridgeWorkSummary()
+        public BridgeWorkSummary(IList<string> Warnings)
         {
-            _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary();
+            _bridgesCulvertsWorkSummary = new BridgesCulvertsWorkSummary(Warnings);
             var workSummaryModel = new WorkSummaryModel();
             _costBudgetsWorkSummary = new CostBudgetsWorkSummary(workSummaryModel);
             _bridgeRateDeckAreaWorkSummary = new BridgeRateDeckAreaWorkSummary();
             _nhsBridgeDeckAreaWorkSummary = new NHSBridgeDeckAreaWorkSummary();
             _deckAreaBridgeWorkSummary = new DeckAreaBridgeWorkSummary();
             _postedClosedBridgeWorkSummary = new PostedClosedBridgeWorkSummary(workSummaryModel);
-            _projectsCompletedCount = new ProjectsCompletedCount();
+            _projectsCompletedCount = new ProjectsCompletedCount(Warnings);
             _summaryReportHelper = new SummaryReportHelper();
         }
 

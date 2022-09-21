@@ -122,10 +122,13 @@ namespace BridgeCareCore.Services
         public static List<AttributeDTO> ConvertAllAttributeList(List<AllAttributeDTO> allAttributeDTOs)
         {
             var attributeList = new List<AttributeDTO>();
-            foreach (var all in allAttributeDTOs)
+            if (allAttributeDTOs != null)
             {
-                var attribute = ConvertAllAttribute(all);
-                attributeList.Add(attribute);
+                foreach (var all in allAttributeDTOs)
+                {
+                    var attribute = ConvertAllAttribute(all);
+                    attributeList.Add(attribute);
+                }
             }
             return attributeList;
         }

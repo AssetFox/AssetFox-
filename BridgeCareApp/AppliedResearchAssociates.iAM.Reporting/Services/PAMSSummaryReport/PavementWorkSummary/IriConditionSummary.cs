@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
@@ -15,14 +15,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     public class IriConditionSummary
     {
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
-        private WorkSummaryModel _workSummaryModel;
         private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
 
-        public IriConditionSummary(WorkSummaryModel workSummaryModel)
+        public IriConditionSummary()
         {
             _pavementWorkSummaryCommon = new PavementWorkSummaryCommon();
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
-            _workSummaryModel = workSummaryModel;
         }
 
         private void AddSegmentMilesForBPN(ExcelWorksheet worksheet, int row, int column, List<AssetSummaryDetail> initialSectionSummaries, BPNName bpn)

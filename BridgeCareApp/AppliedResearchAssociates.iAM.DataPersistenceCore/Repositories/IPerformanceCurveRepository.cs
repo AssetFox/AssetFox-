@@ -27,5 +27,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibrary(Guid performanceCurveLibraryId);
 
         public PerformanceCurveLibraryDTO GetPerformanceCurveLibrary(Guid performanceCurveLibraryId);
+
+        public List<PerformanceCurveDTO> GetScenarioPerformanceCurvesOrderedById(Guid simulationId);
+
+        public List<PerformanceCurveDTO> GetPerformanceCurvesForLibraryOrderedById(Guid performanceCurveLibraryId);
     }
 }

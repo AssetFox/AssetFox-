@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -618,9 +619,9 @@ namespace BridgeCareCore.Services
             {
             case "brkey":
                 if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField]).ToList();
+                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField], new AlphanumericComparator()).ToList();
                 else
-                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField]).ToList();
+                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField], new AlphanumericComparator()).ToList();
             case "year":
                 if (isDescending)
                     return committedProjects.OrderByDescending(_ => _.Year).ToList();

@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public IReport Create(UnitOfDataPersistenceWork uow, ReportIndexDTO results, IHubService hubService)
         {
-            var report = new PAMSSummaryReport(uow, Name, results);
+            var report = new PAMSSummaryReport(uow, Name, results, hubService);
             return report;
         }
     }

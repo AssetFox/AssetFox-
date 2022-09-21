@@ -110,7 +110,7 @@ namespace BridgeCareCore.Services
                             {
                                 foreach (var field in otherData)
                                 {
-                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId);
+                                    worksheet.Cells[row, column++].Value = _keyProperties[field].FirstOrDefault(_ => _.AssetId == assetId.AssetId).KeyValue.Value;
                                 }
                             }
                             else
@@ -251,7 +251,7 @@ namespace BridgeCareCore.Services
          */
         private Dictionary<string, Guid> GetMaintainableAssetsPerLocationIdentifier(Guid networkId)
         {
-            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+            var assets = _unitOfWork.MaintainableAssetRepo.GetAllInNetworkWithLocations(networkId);
             if (!assets.Any())
             {
                 throw new RowNotInTableException("There are no maintainable assets in the database.");
@@ -347,7 +347,9 @@ namespace BridgeCareCore.Services
                     // The location matches an asset in the network
                     locationInformation["ID"] = maintainableAssetIdsPerLocationIdentifier[locationIdentifier].ToString();
                 }
-                
+                else
+                    throw new RowNotInTableException($"An asset with the location identifier '{locationIdentifier}' does not exist");
+
                 for (var column = 1; column <= _keyFields.Count; column++)
                 {
                     locationInformation.Add(locationColumnNames[column], worksheet.GetCellValue<string>(row, column));
@@ -471,13 +473,14 @@ namespace BridgeCareCore.Services
 
         public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
         {
-            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
             if (simulation == null)
                 return 0;
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            
             if (asset == null)
                 return 0;
-            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment
+            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
@@ -492,7 +495,7 @@ namespace BridgeCareCore.Services
                 var compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 var calculator = compiler.GetCalculator(cost.Expression);
                 var scope = new CalculateEvaluateScope();
@@ -509,13 +512,13 @@ namespace BridgeCareCore.Services
         public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
-            var simulation = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulationId);
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
             if (simulation == null)
                 return consequencesToReturn;
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment
+            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
                 .Include(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
@@ -534,7 +537,7 @@ namespace BridgeCareCore.Services
                 }
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
 
-                var aggResults = _unitOfWork.Context.AggregatedResult.Include(_ => _.Attribute)
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 if (aggResults.Count != attributes.Count)
                     continue;
@@ -561,6 +564,7 @@ namespace BridgeCareCore.Services
             
 
             committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+            committedProjects = committedProjects.OrderBy(_ => _.Id).ToList();
             totalItems = committedProjects.Count;
 
             if (request.search.Trim() != "" || request.sortColumn.Trim() != "")
@@ -614,9 +618,9 @@ namespace BridgeCareCore.Services
             {
             case "brkey":
                 if (isDescending)
-                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField].ToLower()).ToList();
+                    return committedProjects.OrderByDescending(_ => _.LocationKeys[_networkKeyField]).ToList();
                 else
-                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField].ToLower()).ToList();
+                    return committedProjects.OrderBy(_ => _.LocationKeys[_networkKeyField]).ToList();
             case "year":
                 if (isDescending)
                     return committedProjects.OrderByDescending(_ => _.Year).ToList();
@@ -692,7 +696,7 @@ namespace BridgeCareCore.Services
                 hashMatch.Add(m.Value.Substring(1, m.Value.Length - 2));
             }
 
-            var attributes = _unitOfWork.Context.Attribute
+            var attributes = _unitOfWork.Context.Attribute.AsNoTracking()
                 .Where(_ => hashMatch.Contains(_.Name))
                 .Select(attribute => new AttributeEntity
                 {

@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.Data.Networking
 
         public string Name { get; set; }
 
+        public Guid KeyAttributeId { get; set; }
+
         public Network(ICollection<MaintainableAsset> maintainableAssets, Guid id, string name = "")
         {
             MaintainableAssets = maintainableAssets;

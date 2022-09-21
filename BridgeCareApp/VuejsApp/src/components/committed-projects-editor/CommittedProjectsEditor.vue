@@ -67,6 +67,7 @@
                         item-key='id'
                         :pagination.sync="projectPagination"
                         :total-items="totalItems"
+                        :rows-per-page-items=[5,10,25]
                         v-model="selectedCpItems"
                         class=" fixed-header v-table__overflow">
                             <template slot="items" slot-scope="props">
@@ -508,13 +509,14 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentAction(vm.scenarioId).then(() => {
-                    vm.initializePages();  
-                    vm.getTreatmentLibrariesAction();                            
-                    vm.getAttributesAction();
+                vm.getInvestmentAction(vm.scenarioId).then(() => {                                            
+                    vm.getAttributesAction().then(() => {                       
+                        vm.getTreatmentLibrariesAction().then(() => {
+                            vm.initializePages();                            
+                        });   
+                    });
                 })
-            });
-                      
+            });                     
         });
     }
 
@@ -925,7 +927,7 @@ export default class CommittedProjectsEditor extends Vue  {
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
             return row
         })
-        this.checkBrkeys(0);
+        this.checkBrkeys();
         this.checkYears();
     }
 
@@ -1002,31 +1004,34 @@ export default class CommittedProjectsEditor extends Vue  {
         });
     }
 
-    checkBrkeys(index: number){
-        if(index < this.currentPage.length){
-            var map = this.isKeyAttributeValidMap.get(this.currentPage[index].brkey)
-            if(!isNil(map)){
-                if(!map)
-                    this.currentPage[index].errors = ['BRKEY does not exist'];
-                else
-                    this.currentPage[index].errors = [];
+    checkBrkeys(){//todo: refine this
+        const uncheckKeys = this.currentPage.map(scp => scp.brkey).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
+        if(uncheckKeys.length > 0){
+            CommittedProjectsService.ValidateBRKEYs(uncheckKeys, this.network.id).then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    for(let i = 0; i < this.currentPage.length; i++)
+                    {
+                        const check = response.data[this.currentPage[i].brkey]
+                        if(!isNil(check)){
+                            if(!response.data[this.currentPage[i].brkey])
+                                this.currentPage[i].errors = ['BRKEY does not exist'];
+                            else
+                                this.currentPage[i].errors = [];
 
-                index++;
-                this.checkBrkeys(index)
-            }
-            else    
-                CommittedProjectsService.ValidateBRKEY(this.network, this.currentPage[index].brkey).then((response: AxiosResponse) => {
-                    if (hasValue(response, 'data')) {
-                        if(!response.data)
-                            this.currentPage[index].errors = ['BRKEY does not exist'];
-                        else
-                            this.currentPage[index].errors = [];
-                        this.isKeyAttributeValidMap.set(this.currentPage[index].brkey, response.data)
-                    }
-                    index++;
-                    this.checkBrkeys(index)
-                });
-        }         
+                            this.isKeyAttributeValidMap.set(this.currentPage[i].brkey,response.data[this.currentPage[i].brkey] )
+                        }
+                    }                  
+                }
+            }); 
+        }
+        for(let i = 0; i < this.currentPage.length; i++)
+        {
+            if(!this.isKeyAttributeValidMap.get(this.currentPage[i].brkey))
+                this.currentPage[i].errors = ['BRKEY does not exist'];
+            else
+                this.currentPage[i].errors = [];
+        }
+                          
     }
 
     checkYear(scp:SectionCommittedProjectTableData){

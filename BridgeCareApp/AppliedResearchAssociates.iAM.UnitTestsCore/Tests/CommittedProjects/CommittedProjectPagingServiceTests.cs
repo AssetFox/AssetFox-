@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             mockedTestUOW.Setup(_ => _.AttributeRepo).Returns(mockAttributeRepository.Object);
 
             var mockMaintainableAssetRepository = new Mock<IMaintainableAssetRepository>();
-            mockMaintainableAssetRepository.Setup(_ => _.GetAllInNetworkWithAssignedDataAndLocations(It.IsAny<Guid>()))
+            mockMaintainableAssetRepository.Setup(_ => _.GetAllInNetworkWithLocations(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.MaintainableAssets);
             mockedTestUOW.Setup(_ => _.MaintainableAssetRepo).Returns(mockMaintainableAssetRepository.Object);
 
@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 2);
             Assert.Equal(page.Items.Count ,request.RowsPerPage);
-            Assert.Equal(page.Items[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[0].Id);
+            Assert.Equal(page.Items[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[1].Id);
         }
 
         [Fact]
@@ -225,7 +225,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 2);
             Assert.True(page.Items.Count == request.RowsPerPage);
-            Assert.True(page.Items[0].Treatment == updateRow.Treatment);
+            Assert.True(page.Items[1].Treatment == updateRow.Treatment);
         }
 
         [Fact]

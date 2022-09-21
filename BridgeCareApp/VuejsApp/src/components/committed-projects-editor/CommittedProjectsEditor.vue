@@ -487,10 +487,12 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentAction(vm.scenarioId).then(() => {
-                    vm.getCommittedProjects(vm.scenarioId);  
-                    vm.getTreatmentLibrariesAction();                            
-                    vm.getAttributesAction();
+                vm.getInvestmentAction(vm.scenarioId).then(() => {                                            
+                    vm.getAttributesAction().then(() => {                       
+                        vm.getTreatmentLibrariesAction().then(() => {
+                            vm.getCommittedProjects(vm.scenarioId);  
+                        });   
+                    });
                 })
             });
                       
@@ -848,7 +850,7 @@ export default class CommittedProjectsEditor extends Vue  {
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
             return row
         })
-        this.checkBrkeys(0);
+        this.checkBrkeys();
         this.checkYears();
     }
 
@@ -924,18 +926,18 @@ export default class CommittedProjectsEditor extends Vue  {
         });
     }
 
-    checkBrkeys(index: number){
-        if(index < this.cpItems.length)
-            CommittedProjectsService.ValidateBRKEY(this.network, this.cpItems[index].brkey).then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    if(!response.data)
-                        this.cpItems[index].errors = ['BRKEY does not exist'];
+    checkBrkeys(){
+        CommittedProjectsService.ValidateBRKEYs(this.cpItems.map(scp => scp.brkey), this.network.id).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                for(let i = 0; i < this.cpItems.length; i++)
+                {
+                    if(!response.data[this.cpItems[i].brkey])
+                        this.cpItems[i].errors = ['BRKEY does not exist'];
                     else
-                        this.cpItems[index].errors = [];
-                }
-                index++;
-                this.checkBrkeys(index)
-            });
+                        this.cpItems[i].errors = [];
+                }                  
+            }
+        });            
     }
 
     checkYear(scp:SectionCommittedProjectTableData){

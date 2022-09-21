@@ -62,6 +62,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public List<string> Errors { get; private set; }
 
+        public List<string> Warnings { get; set; }
+
         public bool IsComplete { get; private set; }
 
         public string Status { get; private set; }
@@ -73,6 +75,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
+            Warnings = new List<string>();
 
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
@@ -83,24 +86,15 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             _unfundedTreatmentTime = new UnfundedTreatmentTime();
             if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
-
-            _bridgeWorkSummary = new BridgeWorkSummary();
+                      
+            _bridgeWorkSummary = new BridgeWorkSummary(Warnings);
             if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
 
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
-            if (_bridgeWorkSummaryByBudget == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummaryByBudget)); }
-
             _summaryReportGlossary = new SummaryReportGlossary();
-            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
-
-            _summaryReportParameters = new SummaryReportParameters();
-            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
-                        
+            _summaryReportParameters = new SummaryReportParameters();                        
             _addGraphsInTabs = new AddGraphsInTabs();
-            if (_addGraphsInTabs == null) { throw new ArgumentNullException(nameof(_addGraphsInTabs)); }
-
             _summaryReportHelper = new SummaryReportHelper();
-            if (_summaryReportHelper == null) { throw new ArgumentNullException(nameof(_summaryReportHelper)); }
 
             //check for existing report id
             var reportId = results?.Id; if(reportId == null) { reportId = Guid.NewGuid(); }
@@ -108,6 +102,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //set report return default parameters
             ID = (Guid)reportId;
             Errors = new List<string>();
+            if (Warnings == null) { Warnings = new List<string>(); }
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;

@@ -13,8 +13,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport
 
         public double Amount { get; set; }
         public bool isCommitted { get; set; } = false;
-
-        // TODO: Copy/Paste from BAMSSummaryReport; is this needed for PAMS?
-        //       public (string bpnName , double cost) costPerBPN { get; set; }
     }
 }

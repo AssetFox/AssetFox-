@@ -228,7 +228,7 @@ namespace BridgeCareCore.Controllers
                     var curves = new List<PerformanceCurveDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null)
                         curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
-                    else
+                    else if(!upsertRequest.IsNewLibrary)
                         curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                         curves.ForEach(curve => curve.Id = Guid.NewGuid());

@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
 using OfficeOpenXml;
@@ -19,13 +25,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
 {
     public class PAMSSummaryReport : IReport
     {
-        //private readonly IHubService _hubService;
+        private readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
 
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
+        private readonly IPavementWorkSummary _pavementWorkSummary;
+        private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
 
+        private readonly IAddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
 
         private Guid _networkId;
@@ -46,24 +55,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public string Status { get; private set; }
 
-        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results)
+        public PAMSSummaryReport(UnitOfDataPersistenceWork unitOfWork, string name, ReportIndexDTO results, IHubService hubService)
         {
             //store passed parameter   
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
 
             //create summary report objects
             _pamsDataForSummaryReport = new PamsDataForSummaryReport();
-            if (_pamsDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_pamsDataForSummaryReport)); }
-
             _summaryReportParameters = new SummaryReportParameters();
-            if (_summaryReportParameters == null) { throw new ArgumentNullException(nameof(_summaryReportParameters)); }
-
+            _pavementWorkSummary = new PavementWorkSummary();
+            _pavementWorkSummaryByBudget = new PavementWorkSummaryByBudget();
             _unfundedPavementProjects = new UnfundedPavementProjects();
-            if (_unfundedPavementProjects == null) { throw new ArgumentNullException(nameof(_unfundedPavementProjects)); }
-
+            _addGraphsInTabs = new AddGraphsInTabs();
             _summaryReportGlossary = new SummaryReportGlossary();
-            if (_summaryReportGlossary == null) { throw new ArgumentNullException(nameof(_summaryReportGlossary)); }
 
             //check for existing report id
             var reportId = results?.Id; if (reportId == null) { reportId = Guid.NewGuid(); }
@@ -175,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            //_unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -207,18 +213,34 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
 
 
+            //// Pavement Work Summary TAB
+            reportDetailDto.Status = $"Creating Pavement Work Summary TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var pamsWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummary_Tab);
+            var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+
+
+            //// Pavement Work Summary By Budget TAB
+            reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
+
 
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
+            //Graph TABs
+            reportDetailDto.Status = $"Creating Graph TABs";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _addGraphsInTabs.Add(excelPackage, worksheet, pamsWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
             // Legend TAB
             reportDetailDto.Status = $"Creating Legends TAB";
             var shortNameWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.Legend_Tab);
             _summaryReportGlossary.Fill(shortNameWorksheet);
-
 
             //check and generate folder            
             var folderPathForSimulation = $"Reports\\{simulationId}";
@@ -251,6 +273,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 reportDetailDto.Status = $"Gathering summary report data";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
                 Errors.Add(reportDetailDto.Status);
 
                 byte[] summaryReportData = File.ReadAllBytes(filePath);
@@ -259,6 +282,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
             UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
             Errors.Add(reportDetailDto.Status);
 
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");

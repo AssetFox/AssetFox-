@@ -18,9 +18,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         private Dictionary<int, decimal> TotalCompletedCommittedCount = new Dictionary<int, decimal>();
         private HashSet<string> MPMSTreatments = new HashSet<string>();
 
-        public ProjectsCompletedCount()
+        private IList<string> _warnings;
+
+        public ProjectsCompletedCount(IList<string> Warnings)
         {
             _bridgeWorkSummaryCommon = new BridgeWorkSummaryCommon();
+            _warnings = Warnings;
         }
 
         public void FillProjectCompletedCountSection(ExcelWorksheet worksheet, CurrentCell currentCell,
@@ -205,7 +208,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         yearlyValues.Value.TryGetValue(treatment.Name, out var nonCulvertCount);
                         worksheet.Cells[row, column].Value = nonCulvertCount;
-                        projectRowNumberModel.TreatmentsCount.Add(treatment.Name + "_" + yearlyValues.Key, row);
+
+                        var keyItem = treatment.Name + "_" + yearlyValues.Key;
+                        if (projectRowNumberModel.TreatmentsCount.ContainsKey(keyItem) == false)
+                        {
+                            projectRowNumberModel.TreatmentsCount.Add(keyItem, row);
+                        }
+                        else
+                        {
+                            var warningMessage = "Item key '" + keyItem + "' already exists in the list";
+                            if (_warnings.Contains(warningMessage) == false) { _warnings.Add(warningMessage); }
+                        }
+
                         row++;
 
                         //exclude No Treatment from total

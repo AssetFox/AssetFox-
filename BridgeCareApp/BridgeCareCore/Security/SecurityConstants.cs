@@ -27,6 +27,7 @@
             public const string DeletePerformanceCurveFromLibrary = "DeletePerformanceCurveFromLibrary";
             public const string ImportPerformanceCurveFromLibrary = "ImportPerformanceCurveFromLibrary";
             public const string ImportPerformanceCurveFromScenario = "ImportPerformanceCurveFromScenario";
+            public const string ModifyOrDeletePerformanceCurveFromLibrary = "ModifyOrDeletePerformanceCurveFromLibrary";
             public const string ViewRemainingLifeLimitFromLibrary = "ViewRemainingLifeLimitFromLibrary";
             public const string ViewRemainingLifeLimitFromScenario = "ViewRemainingLifeLimitFromScenario";
             public const string ModifyRemainingLifeLimitFromLibrary = "ModifyRemainingLifeLimitFromLibrary";
@@ -37,13 +38,15 @@
             public const string ModifyTargetConditionGoalFromLibrary = "ModifyTargetConditionGoalFromLibrary";
             public const string ModifyTargetConditionGoalFromScenario = "ModifyTargetConditionGoalFromScenario";
             public const string DeleteTargetConditionGoalFromLibrary = "DeleteTargetConditionGoalFromLibrary";
+            public const string ModifyOrDeleteTargetConditionGoalFromLibrary = "ModifyOrDeleteTargetConditionGoalFromLibrary";
             public const string ViewTreatmentFromLibrary = "ViewTreatmentFromLibrary";
             public const string ViewTreatmentFromScenario = "ViewTreatmentFromScenario";
             public const string ModifyTreatmentFromLibrary = "ModifyTreatmentFromLibrary";
             public const string ModifyTreatmentFromScenario = "ModifyTreatmentFromScenario";
             public const string DeleteTreatmentFromLibrary = "DeleteTreatmentFromLibrary";
             public const string ImportTreatmentFromLibrary = "ImportTreatmentFromLibrary";
-            public const string ImportTreatmentFromScenario = "ImportTreatmentFromScenario";
+            public const string ImportTreatmentFromScenario = "ImportTreatmentFromScenario";            
+            public const string ModifyOrDeleteTreatmentFromLibrary = "ModifyOrDeleteTreatmentFromLibrary";
             public const string ViewAnalysisMethod = "ViewAnalysisMethod";
             public const string ModifyAnalysisMethod = "ModifyAnalysisMethod";
             public const string ModifyAttributes = "ModifyAttributes";

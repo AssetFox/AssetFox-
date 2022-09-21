@@ -91,7 +91,14 @@ namespace BridgeCareCore.StartupExtension
                 options.AddPolicy(Policy.ImportPerformanceCurveFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromLibraryAccess, Claim.PerformanceCurveImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportPerformanceCurveFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromScenarioAccess, Claim.PerformanceCurveImportPermittedFromScenarioAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromScenarioAccess, Claim.PerformanceCurveImportPermittedFromScenarioAccess));                
+                options.AddPolicy(Policy.ModifyOrDeletePerformanceCurveFromLibrary,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveViewAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdateAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveAddPermittedFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdatePermittedFromLibraryAccess,
+                                                                   Claim.PerformanceCurveDeleteAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveDeletePermittedFromLibraryAccess));
 
                 //  Reamining Life Limit
                 options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
@@ -122,6 +129,13 @@ namespace BridgeCareCore.StartupExtension
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalModifyAnyFromScenarioAccess, Claim.TargetConditionGoalModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeleteTargetConditionGoalFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalDeleteAnyFromLibraryAccess, Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
+                options.AddPolicy(Policy.ModifyOrDeleteTargetConditionGoalFromLibrary,
+                   policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalAddAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalUpdateAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalAddPermittedFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalUpdatePermittedFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalDeleteAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
 
                 // Treatment
                 options.AddPolicy(Policy.ViewTreatmentFromLibrary,
@@ -141,7 +155,14 @@ namespace BridgeCareCore.StartupExtension
                 options.AddPolicy(Policy.ImportTreatmentFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromLibraryAccess, Claim.TreatmentImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportTreatmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromScenarioAccess, Claim.TreatmentImportPermittedFromScenarioAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromScenarioAccess, Claim.TreatmentImportPermittedFromScenarioAccess));                
+                options.AddPolicy(Policy.ModifyOrDeleteTreatmentFromLibrary,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentAddAnyFromLibraryAccess,
+                                                                   Claim.TreatmentUpdateAnyFromLibraryAccess,
+                                                                   Claim.TreatmentAddPermittedFromLibraryAccess,
+                                                                   Claim.TreatmentUpdatePermittedFromLibraryAccess,
+                                                                   Claim.TreatmentDeleteAnyFromLibraryAccess,
+                                                                   Claim.TreatmentDeletePermittedFromLibraryAccess));
 
                 // Analysis Method
                 options.AddPolicy(Policy.ViewAnalysisMethod,

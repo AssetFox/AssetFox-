@@ -30,6 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
         private Mock<IAMContext> _mockedContext;
         private Mock<IAMContext> _emptyMockedContext;
         private Mock<DbSet<CalculatedAttributeLibraryEntity>> _mockLibrary;
+        private Mock<DbSet<CalculatedAttributeEntity>> _mockLibrarycalcAttr;
         private Mock<DbSet<ScenarioCalculatedAttributeEntity>> _mockScenarioCalculations;
         private Mock<DbSet<AttributeEntity>> _mockAttributes;
         private Guid _badId;
@@ -42,6 +43,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             var libraryRepo = TestDataForCalculatedAttributesRepository.GetLibraryRepo();
             _mockLibrary = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CalculatedAttributeLibrary, libraryRepo);
             _mockLibrary.Setup(_ => _.Add(It.IsAny<CalculatedAttributeLibraryEntity>())).Returns<CalculatedAttributeDTO>(null);
+
+            var libraryCalcAttrRepo = libraryRepo.SelectMany(_ => _.CalculatedAttributes);
+            _mockLibrarycalcAttr = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.CalculatedAttribute, libraryCalcAttrRepo);
 
             var scenarioRepo = TestDataForCalculatedAttributesRepository.GetSimulationCalculatedAttributesRepo();
             _mockScenarioCalculations = MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioCalculatedAttribute, scenarioRepo);
@@ -429,6 +433,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             // Assert
             Assert.Equal(1, testExplorer.CalculatedFields.Count);
             Assert.Equal(CalculatedFieldTiming.OnDemand, testExplorer.CalculatedFields.First().Timing);
+        }
+
+        [Fact]
+        public void GetLibraryCalulatedAttributesByLibraryAndAttributeIdTest()
+        {
+            // Arrange
+            var repo = new CalculatedAttributeRepository(_testRepo);
+            var libraryId = _testRepo.Context.CalculatedAttributeLibrary.First(_ => _.Name == "First").Id;
+            var attr = _mockAttributes.Object.First(_ => _.Name == "AGE");
+
+            // Act
+            var result = repo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, attr.Id);
+
+            // Assert
+            Assert.True(result.Attribute == "AGE");
+        }
+
+        [Fact]
+        public void GetScenarioCalulatedAttributesByScenarioAndAttributeIdTest()
+        {
+            // Arrange
+            var repo = new CalculatedAttributeRepository(_testRepo);
+            var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
+            var attr = _testRepo.Context.Attribute.First(_ => _.Name == "AGE");
+            
+            // Act
+            var result = repo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(simulationId, attr.Id);
+
+            // Assert
+            Assert.True(result.Attribute == "AGE");
         }
 
         // Helpers

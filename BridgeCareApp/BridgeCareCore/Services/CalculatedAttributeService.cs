@@ -140,15 +140,17 @@ namespace BridgeCareCore.Services
             else
             {
                 items = equations;
-                return new PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO>()
+                return new CalculcatedAttributePagingPageModel()
                 {
+                    CalculationTiming = attribute.CalculationTiming,
                     Items = items,
                     TotalItems = items.Count
                 };
             }
 
-            return new PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO>()
+            return new CalculcatedAttributePagingPageModel
             {
+                CalculationTiming = attribute.CalculationTiming,
                 Items = items,
                 TotalItems = equations.Count()
             };

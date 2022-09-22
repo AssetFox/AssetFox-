@@ -92,7 +92,9 @@
             <v-data-table
                 :headers="calculatedAttributeGridHeaders"
                 :items="selectedGridItem"
-                :search="gridSearchTerm"
+                :pagination.sync="pagination"
+                :total-items="totalItems"
+                :rows-per-page-items=[5,10,25]
                 class="v-table__overflow ghd-table"
                 sort-icon=$vuetify.icons.ghd-table-sort
                 item-key="calculatedAttributeLibraryEquationId">
@@ -252,10 +254,12 @@ import {
     rules,
 } from '@/shared/utils/input-validation-rules';
 import {
+  any,
     clone,
     find,
     findIndex,
     isNil,
+    map,
     prepend,
     propEq,
     reject,
@@ -301,6 +305,10 @@ import { SelectItem } from '@/shared/models/vue/select-item';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { emptySelectItem } from '@/shared/models/vue/select-item';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+import { CalculatedAttributePagingRequestModel, calculcatedAttributePagingPageModel, PagingPage } from '@/shared/models/iAM/paging';
+import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
+import CalculatedAttributeService from '@/services/calculated-attribute.service';
 
 @Component({
     components: {
@@ -350,6 +358,23 @@ export default class CalculatedAttributeEditor extends Vue {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
+    updatedCalcAttrMap:Map<string, [CalculatedAttribute, CalculatedAttribute]> = 
+        new Map<string, [CalculatedAttribute, CalculatedAttribute]>();//0: original value | 1: updated value
+    CalcAttrCache: CalculatedAttribute = emptyCalculatedAttribute;
+    pairsCache: CriterionAndEquationSet[] = [];
+    updatedPairsMaps:Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]> = 
+        new Map<string, [CriterionAndEquationSet, CriterionAndEquationSet]>();//0: original value | 1: updated value 
+    addedPairs: Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
+    deletionPairsIds: Map<string, string[]> = new Map<string, string[]>();
+    updatedPairs:  Map<string, CriterionAndEquationSet[]> = new  Map<string, CriterionAndEquationSet[]>();
+    gridSearchTerm = '';
+    currentSearch = '';
+    pagination: Pagination = clone(emptyPagination);
+    isPageInit = false;
+    totalItems = 0;
+    currentPage: CalculatedAttribute = clone(emptyCalculatedAttribute);
+    initializing: boolean = true;
+
     hasSelectedLibrary: boolean = false;
     isDefaultBool: boolean = true;//this exists because isDefault can't be tracked so this bool is tracked for the switch and is then synced with isDefault
     hasScenario: boolean = false;
@@ -371,7 +396,6 @@ export default class CalculatedAttributeEditor extends Vue {
     attributeTimingSelectItemValue: string | number | null = '';
     currentCriteriaEquationSetSelectedId: string | null = '';
 
-    gridSearchTerm = '';
     selectedCalculatedAttributeLibrary: CalculatedAttributeLibrary = clone(
         emptyCalculatedAttributeLibrary,
     );
@@ -443,6 +467,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 vm.hasScenario = true;
                 vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId);
             }
+            vm.initializePages();
         });
     }
     beforeDestroy() {
@@ -450,9 +475,67 @@ export default class CalculatedAttributeEditor extends Vue {
         this.selectedAttribute = clone(emptyCalculatedAttribute);
     }
 
+    // Watchers
+    @Watch('pagination')
+    onPaginationChanged() {
+        if(this.initializing)
+            return;
+        this.checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+        const request: CalculatedAttributePagingRequestModel= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            syncModel: {
+                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
+                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
+                updatedPairs: mapToIndexSignature( this.updatedPairs),
+                addedPairs: this.mapToIndexSignature(this.addedPairs) 
+            },           
+            sortColumn: sortBy === '' ? 'year' : sortBy,
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch,
+            attributeId: this.selectedAttribute.id
+        };
+        
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
+            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as calculcatedAttributePagingPageModel;
+                    this.currentPage.equations = data.items;
+                    this.currentPage.calculationTiming = data.calculationTiming
+                    this.CalcAttrCache = this.currentPage
+                    this.pairsCache = this.currentPage.equations;
+                    this.totalItems = data.totalItems;
+                }
+            });
+        }            
+        else if(this.hasSelectedLibrary)
+             CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as calculcatedAttributePagingPageModel;
+                    this.currentPage.equations = data.items;
+                    this.currentPage.calculationTiming = data.calculationTiming
+                    this.CalcAttrCache = this.currentPage
+                    this.pairsCache = this.currentPage.equations;
+                    this.totalItems = data.totalItems;
+                }
+            });     
+    }
+
+    @Watch('deletionPairsIds')
+    onDeletionPairsIdsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('addedPairs', {deep: true})
+    onAddedPairsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
     @Watch('selectedAttribute')
     onSelectedAttributeChanged(){
-        this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.selectedAttribute)
+        this.selectedGridItem = this.calculatedAttributeGridModelConverter(this.currentPage)
     }
 
     @Watch('isDefaultBool')
@@ -511,7 +594,7 @@ export default class CalculatedAttributeEditor extends Vue {
         );
     }
     @Watch('attributeSelectItemValue')
-    onAttributeSelectItemValueChanged() {
+    onAttributeSelectItemValueChanged() {//check if is possibe to add calc attr(touched)
         // selection change in calculated attribute multi select
         if (
             isNil(this.attributeSelectItemValue) ||
@@ -538,6 +621,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.activeCalculatedAttributeId = item.id;
                 this.selectedAttribute = item;
                 this.setTimingsMultiSelect(item.calculationTiming);
+                this.resetPage();
             } else {
                 // if the selected Calculated attribute data is not present in the grid
                 // Add a new object for it. Because we cannot loop over a object, which is null
@@ -556,7 +640,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
     @Watch('attributeTimingSelectItemValue')
-    onAttributeTimingSelectItemValue() {
+    onAttributeTimingSelectItemValue() {//(touched)
         // Change in timings select box
         if (
             isNil(this.attributeTimingSelectItemValue) ||
@@ -572,6 +656,8 @@ export default class CalculatedAttributeEditor extends Vue {
             if (item != undefined) {
                 item.calculationTiming = localTiming;
                 this.selectedAttribute = item;
+                this.onUpdateCalcAttr(item.id, clone(item))
+                this.onPaginationChanged();
             }
         }
     }
@@ -621,7 +707,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
     @Watch('selectedCalculatedAttributeLibrary')
-    onSelectedCalculatedAttributeLibraryChanged() {
+    onSelectedCalculatedAttributeLibraryChanged() {//library change, needs to call on pagination
         // change in library multiselect
         if (
             this.selectedCalculatedAttributeLibrary.id !== this.uuidNIL &&
@@ -726,6 +812,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
         this.onCalculatedAttributeGridDataChanged();
     }
+
     setTiming(selectedItem: number) {
         this.setTimingsMultiSelect(selectedItem);
     }
@@ -739,21 +826,21 @@ export default class CalculatedAttributeEditor extends Vue {
         return getUserName();
     }
 
-    onUpsertScenarioCalculatedAttribute() {
+    onUpsertScenarioCalculatedAttribute() {//scenario upsert things
         this.upsertScenarioCalculatedAttributeAction({
             scenarioCalculatedAttribute: this.calculatedAttributeGridData,
             scenarioId: this.selectedScenarioId,
         }).then(() => (this.librarySelectItemValue = null));
     }
 
-    onUpsertCalculatedAttributeLibrary() {
+    onUpsertCalculatedAttributeLibrary() {//library upsert things
         const CalculatedAttributeLibrary: CalculatedAttributeLibrary = {
             ...clone(this.selectedCalculatedAttributeLibrary),
             calculatedAttributes: clone(this.calculatedAttributeGridData),
         };
         this.upsertCalculatedAttributeLibraryAction(CalculatedAttributeLibrary);
     }
-    onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {
+    onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {//needs stuff
         var localCalculatedAttributes = [] as CalculatedAttribute[];
         if (createAsNewLibrary) {
             // if library is getting created from a scenario. Assign new Ids
@@ -778,7 +865,7 @@ export default class CalculatedAttributeEditor extends Vue {
             attributeSelectItems: this.attributeSelectItems,
         };
     }
-    onSubmitCreateCalculatedAttributeLibraryDialogResult(
+    onSubmitCreateCalculatedAttributeLibraryDialogResult(//new library upsert stuff
         calculatedAttributeLibrary: CalculatedAttributeLibrary,
     ) {
         this.createCalculatedAttributeLibraryDialogData = clone(
@@ -793,7 +880,7 @@ export default class CalculatedAttributeEditor extends Vue {
             this.hasCreatedLibrary = true;
         }
     }
-    onSubmitCreateCalculatedAttributeDialogResult(
+    onSubmitCreateCalculatedAttributeDialogResult(//might be deprecated
         newCalculatedAttribute: CalculatedAttribute[],
     ) {
         this.showCreateCalculatedAttributeDialog = false;
@@ -803,7 +890,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
 
-    disableCrudButton() {
+    disableCrudButton() {//gonna have to do something with this
         if (this.calculatedAttributeGridData == undefined) {
             return false;
         }
@@ -856,7 +943,7 @@ export default class CalculatedAttributeEditor extends Vue {
             );
         }
     }
-    onAddCriterionEquationSet() {
+    onAddCriterionEquationSet() { //adds new pair
         var newSet = clone(emptyCriterionAndEquationSet);
         newSet.id = getNewGuid();
         newSet.criteriaLibrary.id = getNewGuid();
@@ -878,7 +965,7 @@ export default class CalculatedAttributeEditor extends Vue {
         );
         this.onSelectedAttributeChanged()
     }
-    onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {
+    onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {//opens criterion editor
         var currItem = this.calculatedAttributeGridData.find(
             _ => _.id == this.activeCalculatedAttributeId,
         )!;
@@ -908,7 +995,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(
+    onSubmitCriterionLibraryEditorDialogResult(//edits criterion of pair
         criterionLibrary: CriterionLibrary,
     ) {
         this.criterionLibraryEditorDialogData = clone(
@@ -940,7 +1027,7 @@ export default class CalculatedAttributeEditor extends Vue {
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
         this.hasSelectedCalculatedAttribute = false;
     }
-    onShowEquationEditorDialog(criterionEquationSetId: string) {
+    onShowEquationEditorDialog(criterionEquationSetId: string) {//edits equation of pair
         var currItem = this.calculatedAttributeGridData.find(
             _ => _.id == this.activeCalculatedAttributeId,
         )!;
@@ -957,7 +1044,7 @@ export default class CalculatedAttributeEditor extends Vue {
             };
         }
     }
-    onSubmitEquationEditorDialogResult(equation: Equation) {
+    onSubmitEquationEditorDialogResult(equation: Equation) {//opens equation editor
         this.equationEditorDialogData = clone(emptyEquationEditorDialogData);
 
         if (!isNil(equation) && this.hasSelectedCalculatedAttribute) {
@@ -975,7 +1062,7 @@ export default class CalculatedAttributeEditor extends Vue {
         this.selectedCalculatedAttribute = clone(emptyCalculatedAttribute);
         this.hasSelectedCalculatedAttribute = false;
     }
-    onRemoveCalculatedAttribute(criterionEquationSetId: string) {
+    onRemoveCalculatedAttribute(criterionEquationSetId: string) {//removes pair
         var currItem = this.calculatedAttributeGridData.find(
             _ => _.id == this.activeCalculatedAttributeId,
         )!;
@@ -989,7 +1076,7 @@ export default class CalculatedAttributeEditor extends Vue {
         );
         this.onSelectedAttributeChanged()
     }
-    onDiscardChanges() {
+    onDiscardChanges() {//needs work
         this.librarySelectItemValue = null;
         this.selectedCalculatedAttributeLibrary = clone(
             emptyCalculatedAttributeLibrary,
@@ -1002,7 +1089,7 @@ export default class CalculatedAttributeEditor extends Vue {
         });
     }
 
-    resetGridData() {
+    resetGridData() {//take a look at this
         this.calculatedAttributeGridData = clone(
             this.stateScenarioCalculatedAttributes,
         );
@@ -1049,7 +1136,7 @@ export default class CalculatedAttributeEditor extends Vue {
         this.attributeTimingSelectItemValue = selectedItem;
         this.isTimingSelectedItemValue = true;
     }
-    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {
+    setDefaultAttributeOnLoad(localCalculatedAttribute: CalculatedAttribute) {//might want to look at
         this.attributeSelectItemValue = clone(
             localCalculatedAttribute.attribute,
         );
@@ -1076,6 +1163,128 @@ export default class CalculatedAttributeEditor extends Vue {
             })
         }
         return toReturn
+    }
+
+    onUpdateCalcAttr(rowId: string, updatedRow: CalculatedAttribute){
+        let mapEntry = this.updatedCalcAttrMap.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.CalcAttrCache;
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
+                this.updatedCalcAttrMap.set(rowId, [row , updatedRow])
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+        }
+        else
+            this.updatedCalcAttrMap.delete(rowId)
+
+        this.checkHasUnsavedChanges();
+    }
+
+    onUpdatePair(rowId: string, updatedRow: CriterionAndEquationSet){
+        if(!isNil(this.addedPairs.get(this.selectedAttribute.id)))
+            if(any(propEq('id', rowId), this.addedPairs.get(this.selectedAttribute.id)!)){
+                let amounts = this.addedPairs.get(this.selectedAttribute.id)!
+                amounts[amounts.findIndex(b => b.id == rowId)] = updatedRow;
+            }               
+
+        let mapEntry = this.updatedPairsMaps.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.pairsCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row)){
+                this.updatedPairsMaps.set(rowId, [row , updatedRow])
+                if(!isNil(this.updatedPairs.get(this.selectedAttribute.id)))
+                    this.updatedPairs.get(this.selectedAttribute.id)!.push(updatedRow)
+                else
+                    this.updatedPairs.set(this.selectedAttribute.id, [updatedRow])
+            }               
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+            let amounts = this.updatedPairs.get(this.selectedAttribute.id)
+            if(!isNil(amounts))
+                amounts[amounts.findIndex(r => r.id == updatedRow.id)] = updatedRow
+        }
+        else{
+            // this.updatedCalcAttrMap.delete(rowId)
+            let amounts = this.updatedPairs.get(this.selectedCalculatedAttribute.id)
+            if(!isNil(amounts))
+                amounts.splice(amounts.findIndex(r => r.id == updatedRow.id), 1)
+        }
+            
+
+        this.checkHasUnsavedChanges();
+    }
+
+    clearChanges(){
+        this.updatedPairs.clear();
+        this.updatedPairsMaps.clear
+        this.addedPairs.clear();
+        this.deletionPairsIds.clear();
+        this.updatedCalcAttrMap.clear();
+    }
+
+    resetPage(){
+        this.pagination.page = 1;
+        this.onPaginationChanged();
+    }
+
+    checkHasUnsavedChanges(){
+        const hasUnsavedChanges: boolean = 
+            this.deletionPairsIds.size > 0 || 
+            this.addedPairs.size > 0 ||
+            this.updatedCalcAttrMap.size > 0 || 
+            this.updatedPairs.size > 0 || 
+            (this.hasScenario && this.hasSelectedLibrary) 
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    initializePages(){
+        const request: CalculatedAttributePagingRequestModel= {
+            page: 1,
+            rowsPerPage: 5,
+            syncModel: {
+                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
+                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
+                updatedPairs: mapToIndexSignature( this.updatedPairs),
+                addedPairs: this.mapToIndexSignature(this.addedPairs) 
+            },           
+            sortColumn: '',
+            isDescending: false,
+            search: '',
+            attributeId: this.selectedAttribute.id
+        };
+        
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
+            CalculatedAttributeService.getScenarioCalculatedAttrbiutetPage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as calculcatedAttributePagingPageModel;
+                    this.currentPage.equations = data.items;
+                    this.currentPage.calculationTiming = data.calculationTiming
+                    this.CalcAttrCache = this.currentPage
+                    this.pairsCache = this.currentPage.equations;
+                    this.totalItems = data.totalItems;
+                }
+                this.initializing = false;
+            });
+        }            
+        else if(this.hasSelectedLibrary)
+            CalculatedAttributeService.getLibraryCalculatedAttributePage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as calculcatedAttributePagingPageModel;
+                    this.currentPage.equations = data.items;
+                    this.currentPage.calculationTiming = data.calculationTiming
+                    this.CalcAttrCache = this.currentPage
+                    this.pairsCache = this.currentPage.equations;
+                    this.totalItems = data.totalItems;
+                }
+                this.initializing = false;
+            });
+        else
+            this.initializing = false;
     }
 }
 </script>

@@ -92,11 +92,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (areFacilitiesRequired)
             {
-                memos.Mark("beforeAssets");
+
+                var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
+                var attributeIdLookup = new Dictionary<Guid, string>();
+                foreach (var attribute in allAttributes)
+                {
+                    attributeIdLookup[attribute.Id] = attribute.Name;
+                }
+
+                memos.Mark("attributes");
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Include(a => a.MaintainableAssetLocation)
                     .Include(a => a.AggregatedResults)
-                    .ThenInclude(ar => ar.Attribute)
                     .Where(_ => _.NetworkId == networkId)
                     .Select(asset => new MaintainableAssetEntity
                     {
@@ -115,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             NumericValue = result.NumericValue,
                             Attribute = new AttributeEntity
                             {
-                                Name = result.Attribute.Name
+                                Name = attributeIdLookup[result.AttributeId],
                             }
                         }).ToList()
                     }).AsNoTracking().ToList();

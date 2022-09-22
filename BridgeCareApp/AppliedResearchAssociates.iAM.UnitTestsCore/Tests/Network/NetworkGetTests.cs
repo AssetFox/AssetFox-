@@ -18,6 +18,7 @@ using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -75,6 +76,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 resultAttributes.Add(resultAttribute);
             }
             _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            foreach (var asset in maintainableAssets)
+            {
+                foreach (var attribute in resultAttributes)
+                {
+                    var resultId = Guid.NewGuid();
+                    var result = new AggregatedResult<double>(
+                        resultId,
+                        asset,
+                        null
+                        );
+                }
+            }
+
 
             var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
             var config = _testHelper.Config;

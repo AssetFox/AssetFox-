@@ -35,10 +35,10 @@ const mutations = {
     checkedForRoleMutator(state: any, status: boolean) {
         state.checkedForRole = status;
     },
-    AdminAccessMutator(state: any, status: boolean) {
+    adminAccessMutator(state: any, status: boolean) {
         state.hasAdminAccess = status;
     },
-    SimulationAccessMutator(state: any, status: boolean) {
+    simulationAccessMutator(state: any, status: boolean) {
         state.hasSimulationAccess = status;
     },
     usernameMutator(state: any, username: string) {
@@ -149,19 +149,19 @@ const actions = {
                     localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                     commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
-                    const hasRole: boolean = userInfo.InternalRole != null && userInfo.InternalRole != '';
+                    const hasRole: boolean = userInfo.internalRole != null && userInfo.internalRole != '';
 
                     commit('checkedForRoleMutator', hasRole);
                     commit('hasRoleMutator', hasRole);
 
                     if (hasRole) {
                         commit(
-                            'AdminAccessMutator',
-                            userInfo.HasAdminAccess,
+                            'adminAccessMutator',
+                            userInfo.hasAdminAccess,
                         );                       
                         commit(
-                            'SimulationAccessMutator',
-                            userInfo.HasSimulationAccess,
+                            'simulationAccessMutator',
+                            userInfo.hasSimulationAccess,
                         );
                     }
 
@@ -208,15 +208,17 @@ const actions = {
         if (payload.status) {
             commit('hasRoleMutator', true);
             commit('checkedForRoleMutator', true);
-            commit('AdminAccessMutator', true);
+            commit('adminAccessMutator', true);
             commit('usernameMutator', payload.username);
             commit('authenticatedMutator', true);
+            commit('simulationAccessMutator', false);
         } else {
             commit('hasRoleMutator', false);
             commit('checkedForRoleMutator', false);
-            commit('AdminAccessMutator', false);
+            commit('adminAccessMutator', false);
             commit('usernameMutator', '');
             commit('authenticatedMutator', false);
+            commit('simulationAccessMutator', false);
         }
     },
 };

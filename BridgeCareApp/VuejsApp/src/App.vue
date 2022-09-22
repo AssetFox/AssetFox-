@@ -336,6 +336,7 @@ export default class AppComponent extends Vue {
     showNewsDialog: boolean = false;
     hasUnreadNewsItem: boolean = false;
     currentURL: any = '';
+    unauthorizedError: string = '';
 
     get container() {
         const container: any = {};
@@ -441,10 +442,12 @@ export default class AppComponent extends Vue {
                     error.response.headers,
                 );
             }
-            this.setIsBusyAction({ isBusy: false });
+            this.setIsBusyAction({ isBusy: false });            
+            this.unauthorizedError = hasValue(this.unauthorizedError) ? error.response!.data : "User is not authorized!";
+            
             this.addErrorNotificationAction({
                 message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",
-                longMessage: error.response!.status === 403 ? error.response!.data : getErrorMessage(error),
+                longMessage: error.response!.status === 403 ? this.unauthorizedError : getErrorMessage(error),
             });
             if (
                 hasValue(error, 'response') &&

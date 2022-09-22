@@ -8,8 +8,8 @@ export interface UserTokens {
 
 export interface UserInfo {
     sub: string;    
-    HasAdminAccess: boolean;
-    HasSimulationAccess: boolean;
-    InternalRole: string;
+    hasAdminAccess: boolean;
+    hasSimulationAccess: boolean;
+    internalRole: string;
     email: string;
 }

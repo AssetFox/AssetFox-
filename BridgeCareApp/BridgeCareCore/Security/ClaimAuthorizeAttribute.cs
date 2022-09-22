@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -36,8 +37,8 @@ namespace BridgeCareCore.Security
 
             var isAuthorized = user.Claims.Any(c => c.Type == ClaimType && c.Value == ClaimValue);
             if (!isAuthorized)
-            {
-                context.Result = new ForbidResult();
+            {                            
+                context.Result = new ForbidResult();                
             }
         }
     }     

@@ -117,7 +117,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.True(page.TotalItems == 2);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
             Assert.True(page.Items[0].Id == sorted[0].Id);
-            Assert.True(page.Items[0].Id == sorted[0].Id);
+            Assert.True(page.Items[1].Id == sorted[1].Id);
         }
 
         [Fact]

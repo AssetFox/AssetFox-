@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             Name = "DISTRICT",
             AggregationRuleType = TextAttributeAggregationRules.Predominant,
             Id = Guid.NewGuid(),
-            Command = "DistrictCommand",
+            Command = "DISTRICT",
             DefaultValue = "Default District",
             Type = "STRING",
             IsAscending = false,

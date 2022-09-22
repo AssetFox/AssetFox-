@@ -450,7 +450,7 @@ namespace BridgeCareCore.Controllers
             try
             {
                 var result = await Task.Factory.StartNew(() =>
-                    _committedProjectRetrieveMethods[UserInfo.Role](simulationId));
+                     _committedProjectRetrieveMethods[UserInfo.Role](simulationId));
 
                 return Ok(result);
             }
@@ -470,14 +470,41 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertSectionCommittedProjects")]
+        [Route("GetSectionCommittedProjectsPage/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        public async Task<IActionResult> GetCommittedProjectsPage(Guid simulationId, PagingRequestModel<SectionCommittedProjectDTO> request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                    _committedProjectService.GetCommittedProjectPage(_committedProjectRetrieveMethods[UserInfo.Role](simulationId), request));
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulation {simulationId}");
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("UpsertSectionCommittedProjects/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> UpsertCommittedProjects(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
-                    _committedProjectUpsertMethods[UserInfo.Role](projects));
+                    _committedProjectUpsertMethods[UserInfo.Role](_committedProjectService.GetSyncedDataset(simulationId, request)));
 
                 return Ok();
             }

@@ -16,6 +16,7 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -58,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void GetSimulationAnalysisNetwork_NetworkInDb_Does()
+        public void GetSimulationAnalysisNetwork_NetworkInDbCreatedViaFactory_Does()
         {
             var config = _testHelper.Config;
             var connectionString = TestConnectionStrings.BridgeCare(config);
@@ -83,6 +84,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
 
             Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
+        }
+
+
+        [Fact]
+        public void GetSimulationAnalysisNetwork_NetworkInDb_Does()
+        {
+            var networkId = Guid.NewGuid();
+            var assetId = Guid.NewGuid();
+            var locationIdentifier = RandomStrings.WithPrefix("Location");
+            var location = Locations.Section(locationIdentifier);
+            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+            var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
+            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            var config = _testHelper.Config;
+            var connectionString = TestConnectionStrings.BridgeCare(config);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
+            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
+            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+
+            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
+
+            Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
+
         }
     }
 }

@@ -7,7 +7,9 @@ import {
     RawDataColumns, 
     SqlDataSource, 
     SqlCommandResponse, 
-    emptySqlCommandResponse
+    emptySqlCommandResponse,
+    TestConnection,
+    noneDatasource
 } from '@/shared/models/iAM/data-source';
 import {hasValue} from '@/shared/utils/has-value-util';
 import DataSourceService from '@/services/data-source.service';
@@ -24,6 +26,7 @@ const state = {
 
 const mutations = {
     dataSourceMutator(state: any, dataSources: Datasource[]) {
+        dataSources.push(noneDatasource);
         state.dataSources = clone(dataSources);
     },
     dataSourceTypesMutator(state: any, dataSourceTypes: string[]) {
@@ -67,10 +70,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                commit(
-                    'dataSourceMutator',
-                    payload
-                );
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });
@@ -88,10 +87,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                commit(
-                    'dataSourceMutator',
-                    payload
-                );
                 dispatch('addSuccessNotification', {
                     message: 'Modified data sources',
                 });
@@ -100,7 +95,7 @@ const actions = {
     },
     async checkSqlCommand(
         {commit}: any,
-        payload: string
+        payload: TestConnection
     ) {
         await DataSourceService.checkSqlConnection(
             payload

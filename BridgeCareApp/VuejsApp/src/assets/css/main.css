@@ -581,6 +581,47 @@ table.v-table tbody td input {
     padding-bottom: 30px;
 }
 
+/* Pagination */
+
+.ghd-pagination button{
+    border: solid 2px #2A578D !important;
+    color: #2A578D !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    height: 2.4rem !important;
+}
+
+.ghd-pagination button.primary{
+    border: none !important;
+    box-shadow: none !important;
+    color: #A8AFB0 !important;
+    background-color: white !important;
+}
+
+.ghd-pagination button.v-pagination__navigation{
+    border: solid 2px #2A578D !important;
+    color: #2A578D !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    width: 2.4rem !important;
+    height: 2.4rem !important;
+}
+
+.ghd-pagination button.v-pagination__navigation i{
+    color: #2A578D !important;
+}
+
+.ghd-pagination button.v-pagination__navigation.v-pagination__navigation--disabled{
+    border: solid 2px #A8AFB0 !important;
+    color: #A8AFB0 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.ghd-pagination button.v-pagination__navigation.v-pagination__navigation--disabled i{
+    color: #A8AFB0 !important;
+}
+
 .owner-shared-divider{
     height: 22px;
     margin-top: 6px !important;

@@ -16,6 +16,7 @@ using BridgeCareCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Controllers
 {
@@ -24,13 +25,15 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : BridgeCareCoreBaseController
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
+        private readonly SimulationService _simulationService;
 
         private readonly IReadOnlyDictionary<string, SimulationCRUDMethods> _simulationCRUDMethods;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis,SimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
+            _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _simulationCRUDMethods = CreateCRUDMethods();
         }
 
@@ -61,20 +64,17 @@ namespace BridgeCareCore.Controllers
                 return RunAnySimulation(networkId, simulationId);
             }
 
-            List<SimulationDTO> RetrieveAllSimulations() => UnitOfWork.SimulationRepo.GetAllScenario();
-
-            List<SimulationDTO> RetrievePermittedSimulations()
-            {
-                // TODO:  Replace with query to find all shared simulations
-                return RetrieveAllSimulations();
-            }
+            PagingPageModel<SimulationDTO> RetrieveUserSimulations(PagingRequestModel<SimulationDTO> request) => _simulationService.GetUserScenarioPage(request);
+            PagingPageModel<SimulationDTO> RetrieveSharedSimulations(PagingRequestModel<SimulationDTO> request) => _simulationService.GetSharedScenarioPage(request, UserInfo.Role);
+ 
 
             // TODO: Add another 2 methods in to controll simulation cloning (the user should only be able to clone scenarios that they have access to)
 
             var AdminCRUDMethods = new SimulationCRUDMethods()
             {
                 UpsertSimulation = UpdateAnySimulation,
-                RetrieveSimulation = RetrieveAllSimulations,
+                RetrieveSimulations = RetrieveUserSimulations,
+                RetrieveSharedSimulations = RetrieveSharedSimulations,
                 DeleteSimulation = DeleteAnySimulation,
                 RunSimulation = RunAnySimulation
             };
@@ -82,7 +82,8 @@ namespace BridgeCareCore.Controllers
             var PermittedCRUDMethods = new SimulationCRUDMethods()
             {
                 UpsertSimulation = UpdatePermittedSimulation,
-                RetrieveSimulation = RetrievePermittedSimulations,
+                RetrieveSimulations = RetrieveUserSimulations,
+                RetrieveSharedSimulations = RetrieveSharedSimulations,
                 DeleteSimulation = DeletePermittedSimulation,
                 RunSimulation = RunPermittedSimulation
             };
@@ -96,14 +97,31 @@ namespace BridgeCareCore.Controllers
             };
         }
 
-        [HttpGet]
-        [Route("GetScenarios/")]
+        [HttpPost]
+        [Route("GetUserScenariosPage")]
         [Authorize]
-        public async Task<IActionResult> GetSimulations()
+        public async Task<IActionResult> GetUserScenariosPage([FromBody]PagingRequestModel<SimulationDTO> request)
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _simulationCRUDMethods[UserInfo.Role].RetrieveSimulation());
+                var result = await Task.Factory.StartNew(() => _simulationCRUDMethods[UserInfo.Role].RetrieveSimulations(request));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetSharedScenariosPage")]
+        [Authorize]
+        public async Task<IActionResult> GetSharedScenariosPage([FromBody] PagingRequestModel<SimulationDTO> request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _simulationCRUDMethods[UserInfo.Role].RetrieveSharedSimulations(request));
                 return Ok(result);
             }
             catch (Exception e)
@@ -127,7 +145,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.Commit();
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
-
+                
                 return Ok(result);
             }
             catch (Exception e)
@@ -265,7 +283,8 @@ namespace BridgeCareCore.Controllers
     internal class SimulationCRUDMethods
     {
         public Action<SimulationDTO> UpsertSimulation { get; set; }
-        public Func<List<SimulationDTO>> RetrieveSimulation { get; set; }
+        public Func<PagingRequestModel<SimulationDTO>,PagingPageModel<SimulationDTO>> RetrieveSimulations { get; set; }
+        public Func<PagingRequestModel<SimulationDTO>, PagingPageModel<SimulationDTO>> RetrieveSharedSimulations { get; set; }
         public Action<Guid> DeleteSimulation { get; set; }
         public Func<Guid, Guid, IQueuedWorkHandle> RunSimulation { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Controllers
 {
@@ -55,11 +56,11 @@ namespace BridgeCareCore.Controllers
             }
 
             List<PerformanceCurveLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
+                UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
 
             List<PerformanceCurveLibraryDTO> RetrievePermittedForLibraries()
             {
-                var result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();
+                var result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
                 return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
             }
 
@@ -179,14 +180,32 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("GetScenarioPerformanceCurves/{simulationId}")]
+
+        [HttpPost]
+        [Route("GetScenarioPerformanceCurvePage/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> GetScenarioPerformanceCurves(Guid simulationId)
+        public async Task<IActionResult> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _performanceCRUDMethods[UserInfo.Role].RetrieveScenario(simulationId));
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetScenarioPerformanceCurvePage(simulationId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryPerformanceCurvePage/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLibraryPerformanceCurvePage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetLibraryPerformanceCurvePage(libraryId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -199,13 +218,22 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]
         [Authorize]
-        public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
+        public async Task<IActionResult> UpsertPerformanceCurveLibrary(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var curves = new List<PerformanceCurveDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if(!upsertRequest.IsNewLibrary)
+                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                        curves.ForEach(curve => curve.Id = Guid.NewGuid());
+                    var dto = upsertRequest.Library;
+                    dto.PerformanceCurves = curves;
                     _performanceCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
                     UnitOfWork.Commit();
                 });
@@ -229,13 +257,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
         [Authorize]
-        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, List<PerformanceCurveDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var dtos = _performanceCurvesService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     _performanceCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, dtos);
                     UnitOfWork.Commit();
                 });

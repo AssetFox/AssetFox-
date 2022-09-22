@@ -1,7 +1,7 @@
 ﻿
 using System.Collections.Generic;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent
+namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent
 {
     public enum BPNCostBudgetName
     {

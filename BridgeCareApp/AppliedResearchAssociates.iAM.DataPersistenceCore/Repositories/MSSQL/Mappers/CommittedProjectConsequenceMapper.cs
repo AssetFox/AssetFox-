@@ -47,7 +47,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             consequence.Id = entity.Id;
             consequence.Change.Expression = entity.ChangeValue;
             consequence.Attribute = committedProject.Asset.Network.Explorer.NumberAttributes
-                .Single(_ => _.Name == entity.Attribute.Name);
+                .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
+            if (consequence.Attribute == null)
+            {
+                consequence.Attribute = committedProject.Asset.Network.Explorer.TextAttributes
+                    .SingleOrDefault(_ => _.Name == entity.Attribute.Name);
+            }
         }
     }
 }

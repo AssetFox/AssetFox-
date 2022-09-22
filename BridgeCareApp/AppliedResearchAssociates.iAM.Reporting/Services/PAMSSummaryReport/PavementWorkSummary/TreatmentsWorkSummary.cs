@@ -7,18 +7,17 @@ using System.Drawing;
 using System;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
 {
     public class TreatmentsWorkSummary
     {
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
-        private WorkSummaryModel _workSummaryModel;
 
-        public TreatmentsWorkSummary(WorkSummaryModel workSummaryModel)
+        public TreatmentsWorkSummary()
         {
             _pavementWorkSummaryCommon = new PavementWorkSummaryCommon();
-            _workSummaryModel = workSummaryModel;
         }
 
         public ChartRowsModel FillTreatmentsWorkSummarySections(

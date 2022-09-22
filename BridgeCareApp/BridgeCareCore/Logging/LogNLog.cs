@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using AppliedResearchAssociates.iAM.Common;
+using NLog;
 
 namespace BridgeCareCore.Logging
 {

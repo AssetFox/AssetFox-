@@ -16,6 +16,8 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -54,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         
-        public void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount)
+        public void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
         {
             var networkId = Guid.NewGuid();
             var maintainableAssets = new List<MaintainableAsset>();
@@ -66,6 +68,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
                 maintainableAssets.Add(maintainableAsset);
             }
+            var resultAttributes = new List<IamAttribute>();
+            for (int i=0; i<aggregatedResultPerAssetCount; i++)
+            {
+                var resultAttribute = AttributeTestSetup.Numeric();
+                resultAttributes.Add(resultAttribute);
+            }
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+
             var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
             var config = _testHelper.Config;
             var connectionString = TestConnectionStrings.BridgeCare(config);
@@ -85,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void GetSimulationAnalysisNetwork_NetworkInDb33000Assets_Does()
         {
-            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(33000);
+            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(33000, 1);
         }
     }
 }

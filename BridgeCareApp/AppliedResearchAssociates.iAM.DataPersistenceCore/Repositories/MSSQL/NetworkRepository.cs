@@ -11,6 +11,8 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
+using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
+using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -83,12 +85,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
+            var memos = EventMemoModelLists.GetFreshInstance("network");
 
             var networkEntity = _unitOfWork.Context.Network.AsNoTracking()
                 .Single(_ => _.Id == networkId);
 
             if (areFacilitiesRequired)
             {
+                memos.Mark("beforeAssets");
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Where(_ => _.NetworkId == networkId)
                     .Select(asset => new MaintainableAssetEntity
@@ -112,8 +116,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             }
                         }).ToList()
                     }).AsNoTracking().ToList();
+                memos.Mark("after assets");
             }
-            return networkEntity.ToDomain(explorer);
+            
+            var domain = networkEntity.ToDomain(explorer);
+            memos.Mark("done");
+            var timings = memos.ToMultilineString(true);
+            return domain;
         }
 
         public void DeleteNetworkData()

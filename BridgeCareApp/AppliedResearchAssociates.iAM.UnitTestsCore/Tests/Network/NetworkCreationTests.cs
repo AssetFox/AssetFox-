@@ -58,57 +58,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var actual = allNetworks.Single(n => n.Id == networkId);
         }
 
-        [Fact]
-        public void GetSimulationAnalysisNetwork_NetworkInDbCreatedViaFactory_Does()
-        {
-            var config = _testHelper.Config;
-            var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
-            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
-            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-
-            var networkName = RandomStrings.WithPrefix("Network");
-            var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
-
-            var networkDefinitionAttribute = AllAttributeDtos.BrKey(allDataSourceDto);
-            var parameters = new NetworkCreationParameters
-            {
-                DefaultEquation = "[Deck_Area]",
-                NetworkDefinitionAttribute = networkDefinitionAttribute
-            };
-            var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
-                _testHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
-
-            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
-
-            Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
-        }
-
-
-        [Fact]
-        public void GetSimulationAnalysisNetwork_NetworkInDb_Does()
-        {
-            var networkId = Guid.NewGuid();
-            var assetId = Guid.NewGuid();
-            var locationIdentifier = RandomStrings.WithPrefix("Location");
-            var location = Locations.Section(locationIdentifier);
-            var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
-            var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
-            var config = _testHelper.Config;
-            var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
-            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
-            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
-
-            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
-
-            Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
-
-        }
     }
 }

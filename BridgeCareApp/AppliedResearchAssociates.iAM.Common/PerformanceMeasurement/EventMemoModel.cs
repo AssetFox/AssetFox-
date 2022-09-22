@@ -36,6 +36,22 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
             return memo;
         }
 
+        private static string FormatMilliseconds(int milliseconds)
+        {
+            if (milliseconds < 1000)
+            {
+                return milliseconds.ToString();
+            }
+            var seconds = milliseconds / 1000;
+            var remainder = milliseconds % 1000;
+            return $"{seconds} {remainder}";
+        }
+
+        private static string FormatMilliseconds(double milliseconds)
+        {
+            return FormatMilliseconds((int)milliseconds);
+        }
+
         public static string ToSingleLineString(this List<EventMemoModel> eventList)
         {
             var builder = new StringBuilder();
@@ -48,7 +64,7 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
                     if (!first)
                     {
                         var elapsed = (memo.UtcTime - previous).TotalMilliseconds;
-                        var elapsedString = $"{(int)elapsed} {memo.Text} ";
+                        var elapsedString = $"{FormatMilliseconds(elapsed)} {memo.Text} ";
                         builder.Append(elapsedString);
                     }
                     previous = memo.UtcTime;
@@ -67,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
                 if (previous != DateTime.MinValue)
                 {
                     var elapsed = (memo.UtcTime - previous).TotalMilliseconds;
-                    var roundedTime = (int)elapsed;
+                    var roundedTime = FormatMilliseconds(elapsed);
                     var maxKeyLength = eventList.Select(x => x.Text.Length).Max();
                     builder.AppendLine($"{memo.Text.PadRight(maxKeyLength + 1)}{roundedTime}");
                 }
@@ -76,7 +92,7 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
             if (includeLineForTotal && eventList.Any())
             {
                 var total = eventList.Last().UtcTime - eventList.First().UtcTime;
-                var totalMs = (int)total.TotalMilliseconds;
+                var totalMs = FormatMilliseconds(total.TotalMilliseconds);
                 builder.AppendLine($"Total: {totalMs}");
             }
             return builder.ToString();

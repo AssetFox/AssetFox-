@@ -7,9 +7,14 @@ import {http2XX} from '@/shared/utils/http-utils';
 import ReportsService from '@/services/reports.service';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-detail';
+import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
     scenarios: [] as Scenario[],
+    currentSharedScenariosPage: [] as Scenario[],
+    currentUserScenarioPage: [] as Scenario[],
+    totalSharedScenarios: 0 as number,
+    totalUserScenarios: 0 as number,
     selectedScenario: clone(emptyScenario) as Scenario
 };
 
@@ -17,53 +22,70 @@ const mutations = {
     scenariosMutator(state: any, scenarios: Scenario[]) {
         state.scenarios = clone(scenarios);
     },
-    createdScenarioMutator(state: any, createdScenario: Scenario) {
-        state.scenarios = prepend(createdScenario, state.scenarios);
+    UserScenarioPageMutator(state: any, scenarios: PagingPage<Scenario>){
+        state.currentUserScenarioPage = clone(scenarios.items);
+        state.totalUserScenarios = scenarios.totalItems;
     },
-    updatedScenarioMutator(state: any, updatedScenario: Scenario) {
-        if (any(propEq('id', updatedScenario.id), state.scenarios)) {
-            state.scenarios = update(
-                findIndex(propEq('id', updatedScenario.id), state.scenarios),
-                updatedScenario,
-                state.scenarios
-            );
-        }
-    },
-    deletedScenarioMutator(state: any, id: string) {
-        if (any(propEq('id', id), state.scenarios)) {
-            state.scenarios = reject(propEq('id', id), state.scenarios);
-        }
+    SharedScenarioPageMutator(state: any, scenarios: PagingPage<Scenario>){
+        state.currentSharedScenariosPage = clone(scenarios.items);
+        state.totalSharedScenarios = scenarios.totalItems;
     },
     selectedScenarioMutator(state: any, id: string) {
-        if (any(propEq('id', id), state.scenarios)) {
-            state.selectedScenario = find(propEq('id', id), state.scenarios) as Scenario;
-        } else {
+        if (any(propEq('id', id), state.currentSharedScenariosPage)) {
+            state.selectedScenario = find(propEq('id', id), state.currentSharedScenariosPage) as Scenario;
+        } 
+        else if(any(propEq('id', id), state.currentUserScenarioPage))
+            state.selectedScenario = find(propEq('id', id), state.currentUserScenarioPage) as Scenario;
+        else {
             state.selectedScenario = clone(emptyScenario);
         }
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
-        if (any(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios)) {
-            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.scenarios) as Scenario;
+        if (any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSharedScenariosPage)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSharedScenariosPage) as Scenario;
             updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
             updatedScenario.status = simulationAnalysisDetail.status;
             updatedScenario.runTime = simulationAnalysisDetail.runTime;
 
-            state.scenarios = update(
-                findIndex(propEq('id', updatedScenario.id), state.scenarios),
+            state.currentSharedScenariosPage = update(
+                findIndex(propEq('id', updatedScenario.id), state.currentSharedScenariosPage),
                 updatedScenario,
-                state.scenarios
+                state.currentSharedScenariosPage
             );
+            
+        }
+        else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentUserScenarioPage)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentUserScenarioPage) as Scenario;
+            updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
+            updatedScenario.status = simulationAnalysisDetail.status;
+            updatedScenario.runTime = simulationAnalysisDetail.runTime;
+
+            state.currentUserScenarioPage = update(
+                findIndex(propEq('id', updatedScenario.id), state.currentShcurrentUserScenarioPagearedScenariosPage),
+                updatedScenario,
+                state.currentUserScenarioPage
+            );         
         }
     },
     simulationReportDetailMutator(state: any, simulationReportDetail: SimulationReportDetail) {
-        if (any(propEq('id', simulationReportDetail.simulationId), state.scenarios)) {
-            const updatedScenario: Scenario = find(propEq('id', simulationReportDetail.simulationId), state.scenarios) as Scenario;
+        if (any(propEq('id', simulationReportDetail.simulationId), state.currentSharedScenariosPage)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationReportDetail.simulationId), state.currentSharedScenariosPage) as Scenario;
             updatedScenario.reportStatus = simulationReportDetail.status;
 
-            state.scenarios = update(
-                findIndex(propEq('id', updatedScenario.id), state.scenarios),
+            state.currentSharedScenariosPage = update(
+                findIndex(propEq('id', updatedScenario.id), state.currentSharedScenariosPage),
                 updatedScenario,
-                state.scenarios
+                state.currentSharedScenariosPage
+            );
+        }
+        else if (any(propEq('id', simulationReportDetail.simulationId), state.currentUserScenarioPage)) {
+            const updatedScenario: Scenario = find(propEq('id', simulationReportDetail.simulationId), state.currentUserScenarioPage) as Scenario;
+            updatedScenario.reportStatus = simulationReportDetail.status;
+
+            state.currentUserScenarioPage = update(
+                findIndex(propEq('id', updatedScenario.id), state.currentUserScenarioPage),
+                updatedScenario,
+                state.currentUserScenarioPage
             );
         }
     }
@@ -84,6 +106,22 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     commit('scenariosMutator', response.data as Scenario[]);
+                }
+            });
+    },
+    async getSharedScenariosPage({commit}: any, payload: PagingRequest<Scenario>) {
+        await ScenarioService.getSharedScenariosPage(payload)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('SharedScenarioPageMutator', response.data as PagingPage<Scenario>);
+                }
+            });
+    },
+    async getUserScenariosPage({commit}: any, payload: PagingRequest<Scenario>) {
+        await ScenarioService.getUserScenariosPage(payload)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('UserScenarioPageMutator', response.data as PagingPage<Scenario>);
                 }
             });
     },
@@ -109,7 +147,6 @@ const actions = {
         return await ScenarioService.createScenario(payload.scenario, payload.networkId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('createdScenarioMutator', response.data as Scenario);
                     dispatch('addSuccessNotification', {
                     message: 'Created scenario',
                     });
@@ -126,7 +163,6 @@ const actions = {
         return await ScenarioService.cloneScenario(cloneScenarioData)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('createdScenarioMutator', response.data as Scenario);
                     dispatch('addSuccessNotification', {
                         message: 'Cloned scenario',
                     });
@@ -138,7 +174,6 @@ const actions = {
         return await ScenarioService.updateScenario(payload.scenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('updatedScenarioMutator', response.data);
                     dispatch('addSuccessNotification', {
                         message: 'Updated scenario',
                     });
@@ -150,7 +185,6 @@ const actions = {
         return await ScenarioService.deleteScenario(payload.scenarioId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                    commit('deletedScenarioMutator', payload.scenarioId);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted scenario',
                     });

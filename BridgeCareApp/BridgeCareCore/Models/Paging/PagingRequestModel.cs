@@ -5,6 +5,11 @@ namespace BridgeCareCore.Models
 {
     public class PagingRequestModel<T>
     {
+        public PagingRequestModel()
+        {
+            PagingSync = new PagingSyncModel<T>();
+        }
+
         public int Page { get; set; }
         public int RowsPerPage { get; set; }
         public bool isDescending { get; set; }

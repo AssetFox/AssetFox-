@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Models.PAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary.StaticContent;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
@@ -15,13 +15,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pav
     {
         private PavementWorkSummaryComputationHelper _pavementWorkSummaryComputationHelper;
         private PavementWorkSummaryCommon _pavementWorkSummaryCommon;
-        private WorkSummaryModel _workSummaryModel;
 
-        public OpiConditionSummary(WorkSummaryModel workSummaryModel)
+        public OpiConditionSummary()
         {
             _pavementWorkSummaryCommon = new PavementWorkSummaryCommon();
             _pavementWorkSummaryComputationHelper = new PavementWorkSummaryComputationHelper();
-            _workSummaryModel = workSummaryModel;
         }
 
 

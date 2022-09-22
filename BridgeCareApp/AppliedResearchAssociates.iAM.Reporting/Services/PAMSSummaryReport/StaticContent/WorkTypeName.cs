@@ -1,6 +1,6 @@
 ﻿using AppliedResearchAssociates.iAM.DTOs.Enums;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary
+namespace AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.StaticContent
 {
     public static class WorkTypeNamesExtensions
     {

@@ -38,13 +38,7 @@ namespace AppliedResearchAssociates.iAM.Common.PerformanceMeasurement
 
         private static string FormatMilliseconds(int milliseconds)
         {
-            if (milliseconds < 1000)
-            {
-                return milliseconds.ToString();
-            }
-            var seconds = milliseconds / 1000;
-            var remainder = milliseconds % 1000;
-            return $"{seconds} {remainder}";
+            return milliseconds.ToString("N0");
         }
 
         private static string FormatMilliseconds(double milliseconds)

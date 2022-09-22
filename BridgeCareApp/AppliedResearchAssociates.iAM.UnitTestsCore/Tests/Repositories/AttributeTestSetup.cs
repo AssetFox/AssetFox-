@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var resolvedId = id ?? Guid.NewGuid();
             var randomName = name ?? ValidAttributeName();
-            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", connectionType, "connectionString", true, false, dataSourceId);            return attribute;
+            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", connectionType, "connectionString", false, false, dataSourceId);            return attribute;
         }
 
         public static AttributeDTO NumericDto(BaseDataSourceDTO dataSourceDTO, Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL)

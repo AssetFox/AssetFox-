@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
 
         
-        public void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
+        private void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
         {
             var networkId = Guid.NewGuid();
             var maintainableAssets = new List<MaintainableAsset>();
@@ -76,27 +76,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 resultAttributes.Add(resultAttribute);
             }
             _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
             {
+                var resultId = Guid.NewGuid();
+                var resultData = new List<(IamAttribute, (int, double))>();
+
                 foreach (var attribute in resultAttributes)
                 {
-                    var resultId = Guid.NewGuid();
-                    var result = new AggregatedResult<double>(
-                        resultId,
-                        asset,
-                        null
-                        );
+                    var resultDatum = (
+                        attribute, (2022, 1.23));
+                    resultData.Add(resultDatum);
                 }
+                var result = new AggregatedResult<double>(
+                    resultId,
+                    asset,
+                    resultData
+                    );
+                
+                results.Add(result);
             }
+            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
 
-
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
             var config = _testHelper.Config;
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
+       //     _testHelper.UnitOfWork.Context.ChangeTracker.Clear();
             var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
 
             var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
@@ -104,12 +113,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
             var assets = simulationAnalysisNetwork.Assets;
             Assert.Equal(assetCount, assets.Count);
+            foreach (var asset in assets)
+            {
+                var historicalAttribute = asset.HistoricalAttributes.FirstOrDefault();
+                var historicalAttributeList = asset.HistoricalAttributes.ToList();
+                Assert.Equal(aggregatedResultPerAssetCount, historicalAttributeList.Count);
+            }
         }
 
         [Fact]
         public void GetSimulationAnalysisNetwork_NetworkInDb33000Assets_Does()
         {
-            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(33000, 1);
+            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(33000, 100);
         }
     }
 }

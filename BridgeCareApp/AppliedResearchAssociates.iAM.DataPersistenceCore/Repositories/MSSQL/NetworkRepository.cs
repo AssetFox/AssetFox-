@@ -19,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class NetworkRepository : INetworkRepository
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
+        public const int AssetLoadBatchSize = 5000;
 
         public NetworkRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
@@ -93,29 +94,43 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (areFacilitiesRequired)
             {
                 memos.Mark("beforeAssets");
-                networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
-                    .Where(_ => _.NetworkId == networkId)
-                    .Select(asset => new MaintainableAssetEntity
-                    {
-                        Id = asset.Id,
-                        SpatialWeighting = asset.SpatialWeighting,
-                        AssetName = asset.AssetName,
-                        MaintainableAssetLocation = new MaintainableAssetLocationEntity
+                int batchIndex = 0;
+                var shouldContinueLoadingAssets = true;
+                var allAssets = new List<MaintainableAssetEntity>();
+                while (shouldContinueLoadingAssets)
+                {
+                    var loadedAssets = _unitOfWork.Context.MaintainableAsset
+                        .Where(_ => _.NetworkId == networkId)
+                        .OrderBy(_ => _.Id)
+                        .Skip(batchIndex * AssetLoadBatchSize)
+                        .Take(AssetLoadBatchSize)
+                        .Select(asset => new MaintainableAssetEntity
                         {
-                            LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
-                        },
-                        AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
-                        {
-                            Discriminator = result.Discriminator,
-                            Year = result.Year,
-                            TextValue = result.TextValue,
-                            NumericValue = result.NumericValue,
-                            Attribute = new AttributeEntity
+                            Id = asset.Id,
+                            SpatialWeighting = asset.SpatialWeighting,
+                            AssetName = asset.AssetName,
+                            MaintainableAssetLocation = new MaintainableAssetLocationEntity
                             {
-                                Name = result.Attribute.Name
-                            }
-                        }).ToList()
-                    }).AsNoTracking().ToList();
+                                LocationIdentifier = asset.MaintainableAssetLocation.LocationIdentifier
+                            },
+                            AggregatedResults = asset.AggregatedResults.Select(result => new AggregatedResultEntity
+                            {
+                                Discriminator = result.Discriminator,
+                                Year = result.Year,
+                                TextValue = result.TextValue,
+                                NumericValue = result.NumericValue,
+                                Attribute = new AttributeEntity
+                                {
+                                    Name = result.Attribute.Name
+                                }
+                            }).ToList()
+                        }).AsNoTracking().ToList();
+                    allAssets.AddRange(loadedAssets);
+                    shouldContinueLoadingAssets = loadedAssets.Count() == AssetLoadBatchSize;
+                    memos.Mark($"batch {batchIndex}");
+                    batchIndex++;
+                }
+                networkEntity.MaintainableAssets = allAssets;
                 memos.Mark("after assets");
             }
             

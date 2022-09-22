@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             mockedTestUOW.Setup(_ => _.AttributeRepo).Returns(mockAttributeRepository.Object);
 
             var mockMaintainableAssetRepository = new Mock<IMaintainableAssetRepository>();
-            mockMaintainableAssetRepository.Setup(_ => _.GetAllInNetworkWithAssignedDataAndLocations(It.IsAny<Guid>()))
+            mockMaintainableAssetRepository.Setup(_ => _.GetAllInNetworkWithLocations(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.MaintainableAssets);
             mockedTestUOW.Setup(_ => _.MaintainableAssetRepo).Returns(mockMaintainableAssetRepository.Object);
 

@@ -27,36 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         private TestHelper _testHelper => TestHelper.Instance;
 
-        [Fact]
-        public void GetSimulationAnalysisNetwork_NetworkInDbCreatedViaFactory_Does()
-        {
-            var config = _testHelper.Config;
-            var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
-            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
-            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-
-            var networkName = RandomStrings.WithPrefix("Network");
-            var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
-
-            var networkDefinitionAttribute = AllAttributeDtos.BrKey(allDataSourceDto);
-            var parameters = new NetworkCreationParameters
-            {
-                DefaultEquation = "[Deck_Area]",
-                NetworkDefinitionAttribute = networkDefinitionAttribute
-            };
-            var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
-                _testHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
-
-            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
-
-            Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
-        }
-
-
-        
         private void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
         {
             var networkId = Guid.NewGuid();
@@ -105,7 +75,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-       //     _testHelper.UnitOfWork.Context.ChangeTracker.Clear();
             var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
 
             var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
@@ -115,16 +84,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(assetCount, assets.Count);
             foreach (var asset in assets)
             {
-                var historicalAttribute = asset.HistoricalAttributes.FirstOrDefault();
                 var historicalAttributeList = asset.HistoricalAttributes.ToList();
                 Assert.Equal(aggregatedResultPerAssetCount, historicalAttributeList.Count);
             }
         }
 
         [Fact]
-        public void GetSimulationAnalysisNetwork_NetworkInDb33000Assets_Does()
+        public void GetSimulationAnalysisNetwork_NetworkInDb300Assets_Does()
         {
-            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(33000, 100);
+            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(300, 10);
         }
     }
 }

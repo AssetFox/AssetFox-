@@ -85,7 +85,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException($"No network found having id {networkId}");
             }
-            var memos = EventMemoModelLists.GetFreshInstance("network");
 
             var networkEntity = _unitOfWork.Context.Network.AsNoTracking()
                 .Single(_ => _.Id == networkId);
@@ -100,7 +99,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     attributeIdLookup[attribute.Id] = attribute.Name;
                 }
 
-                memos.Mark("attributes");
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Include(a => a.MaintainableAssetLocation)
                     .Include(a => a.AggregatedResults)
@@ -126,12 +124,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             }
                         }).ToList()
                     }).AsNoTracking().ToList();
-                memos.Mark("results");
             }
 
             var domain = networkEntity.ToDomain(explorer);
-            memos.Mark("done");
-            var timings = memos.ToMultilineString(true);
             return domain;
         }
 

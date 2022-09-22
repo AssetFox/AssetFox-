@@ -93,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 2);
             Assert.Equal(page.Items.Count ,request.RowsPerPage);
-            Assert.Equal(page.Items[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[1].Id);
+            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.FirstOrDefault(_ => _.Id == page.Items[0].Id) != null);
         }
 
         [Fact]
@@ -113,10 +113,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             };
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
-
+            var sorted = TestDataForCommittedProjects.ValidCommittedProjects.OrderBy(_ => _.Treatment).ToList();
             Assert.True(page.TotalItems == 2);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
-            Assert.True(page.Items[0].Treatment == "Simple");
+            Assert.True(page.Items[0].Id == sorted[0].Id);
+            Assert.True(page.Items[0].Id == sorted[0].Id);
         }
 
         [Fact]
@@ -139,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 2);
             Assert.True(page.Items.Count == 1);
-            Assert.True(page.Items[0].Treatment == "Simple");
+            Assert.True(page.Items.All(_ => _.Treatment == "Simple"));
         }
 
         [Fact]
@@ -196,7 +197,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 3);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
-            Assert.Equal(page.Items[2].Id, addrow.Id);
+            Assert.True(page.Items.SingleOrDefault(_ => _.Id == addrow.Id) != null);
         }
 
         [Fact]
@@ -205,8 +206,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var service = new CommittedProjectService(_testUOW);
 
             var updateRow = TestDataForCommittedProjects.ValidCommittedProjects[0];
-
-            updateRow.Treatment = "updated treatment";
+            var newTreament = "updated treatment";
+            updateRow.Treatment = newTreament;
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
@@ -225,7 +226,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
             Assert.True(page.TotalItems == 2);
             Assert.True(page.Items.Count == request.RowsPerPage);
-            Assert.True(page.Items[1].Treatment == updateRow.Treatment);
+            Assert.True(page.Items.FirstOrDefault(_ => updateRow.Id == _.Id).Treatment == newTreament);
         }
 
         [Fact]
@@ -235,10 +236,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
             var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, new PagingSyncModel<SectionCommittedProjectDTO>());
+            var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.Equal(dataSet[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[0].Id);
-            Assert.Equal(dataSet[1].Id, TestDataForCommittedProjects.ValidCommittedProjects[1].Id);
+            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
+                TestDataForCommittedProjects.ValidCommittedProjects.Count);
         }
 
         [Fact]
@@ -255,11 +257,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
             };
             var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id,sync);
+            var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count);
-            Assert.Equal(dataSet[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[0].Id);
-            Assert.Equal(dataSet[1].Id, TestDataForCommittedProjects.ValidCommittedProjects[1].Id);
-            Assert.True(dataSet[0].Treatment == updateRow.Treatment);
+            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
+                TestDataForCommittedProjects.ValidCommittedProjects.Count);
+            Assert.True(dataSet.FirstOrDefault(_ => _.Id == updateRow.Id).Treatment == updateRow.Treatment);
         }
 
         [Fact]
@@ -304,11 +307,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 AddedRows = new List<SectionCommittedProjectDTO> { addrow }
             };
             var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, sync);
+            var dataIds = dataSet.Select(_ => _.Id).ToList();
 
             Assert.True(dataSet.Count == TestDataForCommittedProjects.ValidCommittedProjects.Count + 1);
-            Assert.Equal(dataSet[0].Id, TestDataForCommittedProjects.ValidCommittedProjects[0].Id);
-            Assert.Equal(dataSet[1].Id, TestDataForCommittedProjects.ValidCommittedProjects[1].Id);
-            Assert.Equal(dataSet[2].Id, addrow.Id);
+            Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.Where(_ => dataIds.Contains(_.Id)).Count() ==
+                TestDataForCommittedProjects.ValidCommittedProjects.Count);
+            Assert.True(dataSet.FirstOrDefault(_ => _.Id == addrow.Id) != null);
         }
     }
 }

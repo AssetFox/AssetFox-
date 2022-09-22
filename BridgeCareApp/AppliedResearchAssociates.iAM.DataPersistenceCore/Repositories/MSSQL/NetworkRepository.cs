@@ -93,16 +93,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (areFacilitiesRequired)
             {
                 memos.Mark("beforeAssets");
-                var assets = _unitOfWork.Context.MaintainableAsset
-                    .Include(a => a.MaintainableAssetLocation)
-                    .Where(a => a.NetworkId == networkEntity.Id)
-                    .ToList();
-                memos.Mark("assets");
-                var assetDictionary = new Dictionary<Guid, MaintainableAssetEntity>();
-                foreach (var asset in assets)
-                {
-                    assetDictionary[asset.Id] = asset;
-                }
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Include(a => a.MaintainableAssetLocation)
                     .Include(a => a.AggregatedResults)

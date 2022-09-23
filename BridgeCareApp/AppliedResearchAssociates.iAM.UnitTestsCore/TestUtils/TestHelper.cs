@@ -191,19 +191,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual void CreateCalculatedAttributeLibrary()
-        {
-            if (!UnitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
-            {
-                var dto = new CalculatedAttributeLibraryDTO
-                {
-                    IsDefault = true,
-                    Id = Guid.NewGuid(),
-                    Name = "Default Test Calculated Attribute Library",
-                    CalculatedAttributes = { },
-                };
-                UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
-            }
-        }
     }
 }

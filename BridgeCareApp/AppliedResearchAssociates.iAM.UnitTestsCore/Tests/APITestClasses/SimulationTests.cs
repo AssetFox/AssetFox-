@@ -23,6 +23,7 @@ using BridgeCareCore.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -50,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
             _testHelper.SetupDefaultHttpContext();
-            _testHelper.CreateCalculatedAttributeLibrary();
+            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
 
             var simulationAnalysisService =
                 new SimulationAnalysisService(_testHelper.UnitOfWork, new());

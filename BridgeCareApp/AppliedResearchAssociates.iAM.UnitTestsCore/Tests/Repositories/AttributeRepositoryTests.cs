@@ -17,6 +17,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -29,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.CreateCalculatedAttributeLibrary();
+            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
         }
 
         [Fact]

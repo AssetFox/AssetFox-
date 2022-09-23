@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var randomName = RandomStrings.Length11();
             var role = "PD-BAMS-Administrator";
-            _testHelper.UnitOfWork.AddUser(randomName, role);
+            _testHelper.UnitOfWork.AddUser(randomName, true);
             var returnValue = await _testHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
             return returnValue;
         }

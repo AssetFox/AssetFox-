@@ -13,6 +13,7 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
@@ -64,7 +65,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.Commit();
                     return UnitOfWork.SimulationRepo.GetSimulation(dto.Id);
                 });
-
+                
                 return Ok(result);
             }
             catch (Exception e)

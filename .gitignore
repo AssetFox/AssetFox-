@@ -411,7 +411,10 @@ BridgeCareApp/BridgeCareCore/b2c.json
 .Rproj.user
 /BridgeCareApp/BridgeCareCore/web.config
 
-
+# Connection strings
 BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
+
+# Intended for large resource files, but really anything the coder wants to ignore
+[gG]it[iI]gnored/

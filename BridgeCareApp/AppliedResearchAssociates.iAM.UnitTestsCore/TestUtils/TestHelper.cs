@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -48,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
 
-        protected TestHelper()
+        public TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -126,17 +128,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Test Network"
         };
 
-        public SimulationEntity TestSimulation(Guid? id = null, string name = null)
+        public SimulationEntity TestSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {
             var resolveName = name ?? RandomStrings.Length11();
             var resolveId = id ?? Guid.NewGuid();
+            var users = new List<SimulationUserEntity>();
             var returnValue = new SimulationEntity
             {
                 Id = resolveId,
                 NetworkId = NetworkId,
                 Name = resolveName,
-                NumberOfYearsOfTreatmentOutlook = 2
+                NumberOfYearsOfTreatmentOutlook = 2,
+                SimulationUserJoins = users
             };
+            if (owner != null)
+                users.Add(new SimulationUserEntity() { IsOwner = true, UserId = owner.Value, SimulationId = resolveId });
             return returnValue;
         }
 
@@ -202,9 +208,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null)
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {
-            var entity = TestSimulation(id, name);
+            var entity = TestSimulation(id, name, owner);
             UnitOfWork.Context.AddEntity(entity);
             return entity;
         }

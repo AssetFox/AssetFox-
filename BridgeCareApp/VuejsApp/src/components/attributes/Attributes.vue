@@ -21,11 +21,12 @@
         <v-flex xs12 v-if="hasSelectedAttribute" class="ghd-constant-header" >
             <v-layout>
                 <v-flex xs2> 
-                    <v-text-field outline style="padding-top: 20px !important" class="ghd-text-field-border ghd-text-field"
+                    <v-subheader class="ghd-md-gray ghd-control-label">Attribute</v-subheader>
+                    <v-text-field outline class="ghd-text-field-border ghd-text-field"
                         placeholder="Name" v-model='selectedAttribute.name'/>
                 </v-flex>
                 <v-flex xs2>
-                    <v-subheader class="ghd-md-gray ghd-control-label">Type</v-subheader>
+                    <v-subheader class="ghd-md-gray ghd-control-label">Data Type</v-subheader>
                     <v-select
                         outline
                         append-icon=$vuetify.icons.ghd-down                           
@@ -52,27 +53,26 @@
             <v-flex xs10>
                 <v-layout>
                     <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Default Value</v-subheader>
                         <v-text-field v-if="selectedAttribute.type == 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Default Value"
                             v-model='selectedAttribute.defaultValue'/>
                         <v-text-field v-if="selectedAttribute.type != 'STRING'" outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Default Value"
                             v-model.number='selectedAttribute.defaultValue'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
-                        <v-text-field outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Minimum Value"
+                        <v-subheader class="ghd-md-gray ghd-control-label">Minimum Value</v-subheader>
+                        <v-text-field outline class="ghd-text-field-border ghd-text-field"                            
                             v-model.number='selectedAttribute.minimum'
                             :mask="'#############'"/>
                     </v-flex>
                     <v-flex xs2>
+                        <v-subheader class="ghd-md-gray ghd-control-label">Maximum Value</v-subheader>
                         <v-text-field outline class="ghd-text-field-border ghd-text-field"
-                            placeholder="Maximum Value"
                             v-model.number='selectedAttribute.maximum'
                             :mask="'#############'"/>
                     </v-flex>
-                    <v-flex xs4>
+                    <v-flex xs4 style="padding-top:50px;">
                         <v-layout>
                         <v-switch class='sharing header-text-content' label='Calculated' 
                             v-model='selectedAttribute.isCalculated'/>
@@ -155,12 +155,13 @@
 <script lang='ts'>
 import AttributeService from '@/services/attribute.service';
 import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
-import { Datasource, emptyDatasource, RawDataColumns } from '@/shared/models/iAM/data-source';
+import { Datasource, emptyDatasource, RawDataColumns, noneDatasource } from '@/shared/models/iAM/data-source';
 import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { InputValidationRules, rules } from '@/shared/utils/input-validation-rules';
+import { TestStringData } from '@/shared/models/iAM/test-string';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { AxiosResponse } from 'axios';
 import { any, clone, find, isNil, propEq } from 'ramda';
@@ -168,12 +169,14 @@ import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
 import { Action, Getter, State } from 'vuex-class';
+import { Console } from 'console';
 
 @Component({
     
 })
 export default class Attributes extends Vue {
     hasSelectedAttribute: boolean = false;
+    hasEmptyDataSource: boolean = true;
     selectAttributeItemValue: string | null = null;
     selectDatasourceItemValue: string | null = null;
     selectAttributeItems: SelectItem[] = [];
@@ -185,7 +188,7 @@ export default class Attributes extends Vue {
     rules: InputValidationRules = rules;
     validationErrorMessage: string = '';
     ValidationSuccessMessage: string = '';
-    commandIsValid = true
+    commandIsValid: boolean = true;
     checkedCommand = '';
 
     aggregationRuleSelectValues: SelectItem[] = []
@@ -241,7 +244,7 @@ export default class Attributes extends Vue {
     @Watch('stateDataSources')
     onStateDataSourcesChanged() {
         this.selectDatasourceItems = this.stateDataSources.map((datasource: Datasource) => ({
-            text: datasource.name + ' - ' + datasource.type,
+            text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
     }
@@ -297,8 +300,10 @@ export default class Attributes extends Vue {
     @Watch('stateSelectedAttribute')
     onStateSelectedAttributeChanged() {
         this.selectedAttribute = clone(this.stateSelectedAttribute);
-        if(isNil(this.selectedAttribute.dataSource))
+        if(isNil(this.selectedAttribute.dataSource)) {
             this.selectedAttribute.dataSource = clone(emptyDatasource);
+        }
+        this.selectDatasourceItemValue = this.selectedAttribute.dataSource.id;
     }
 
     @Watch('selectedAttribute', {deep: true})
@@ -363,7 +368,8 @@ export default class Attributes extends Vue {
     }
 
     CheckSqlCommand(){
-        AttributeService.CheckCommand(this.selectedAttribute.command)
+        let commandData: TestStringData = {testString: this.selectedAttribute.command};
+        AttributeService.CheckCommand(commandData)
             .then((response: AxiosResponse) => {
           if (hasValue(response, 'data')) {
             const result: ValidationResult = response.data as ValidationResult;

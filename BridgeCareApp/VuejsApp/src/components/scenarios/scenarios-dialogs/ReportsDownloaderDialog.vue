@@ -121,7 +121,7 @@ export default class ReportsDownloaderDialog extends Vue {
         this.isDownloading = true;
         this.dialogData.showModal = false;        
         await ReportsService.downloadReport(
-            this.dialogData.scenarioId, "BAMSSummaryReport"
+            this.dialogData.scenarioId, this.selectedReport
         ).then((response: AxiosResponse<any>) => {
             this.isDownloading = false;
             if (hasValue(response, 'data')) {

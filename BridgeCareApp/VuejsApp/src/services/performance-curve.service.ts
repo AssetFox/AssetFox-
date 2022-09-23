@@ -5,6 +5,7 @@ import {
 } from '@/shared/models/iAM/performance';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class PerformanceCurveService {
     static getPerformanceCurveLibraries(): AxiosPromise {
@@ -13,12 +14,28 @@ export default class PerformanceCurveService {
         );
     }
 
-    static upsertPerformanceCurveLibrary(
-        data: PerformanceCurveLibrary,
-    ): AxiosPromise {
+    static getPerformanceCurvePage(scenarioId: string, data:PagingRequest<PerformanceCurve>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/GetScenarioPerformanceCurvePage/${scenarioId}`, data
+        );
+    }
+
+    static GetLibraryPerformanceCurvePage(library: string, data:PagingRequest<PerformanceCurve>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/GetLibraryPerformanceCurvePage/${library}`, data
+        );
+    }
+
+    static UpsertPerformanceCurveLibrary(data:LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.PerformanceCurve}/UpsertPerformanceCurveLibrary`,
             data,
+        );
+    }
+
+    static UpsertScenarioPerformanceCurves(data: PaginSync<PerformanceCurve>, scenarioId: string){
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurves/${scenarioId}`, data
         );
     }
 
@@ -28,21 +45,6 @@ export default class PerformanceCurveService {
         );
     }
 
-    static getScenarioPerformanceCurves(scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.get(
-            `${API.PerformanceCurve}/GetScenarioPerformanceCurves/${scenarioId}`,
-        );
-    }
-
-    static upsertScenarioPerformanceCurves(
-        data: PerformanceCurve[],
-        scenarioId: string,
-    ): AxiosPromise {
-        return coreAxiosInstance.post(
-            `${API.PerformanceCurve}/UpsertScenarioPerformanceCurves/${scenarioId}`,
-            data,
-        );
-    }
 
     static importPerformanceCurves(
         file: File,

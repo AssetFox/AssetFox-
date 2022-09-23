@@ -126,7 +126,8 @@ export default class EditScenario extends Vue {
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
-    @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
+    @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
     @State(state => state.authenticationModule.userId) userId: string;
 
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
@@ -285,8 +286,17 @@ export default class EditScenario extends Vue {
         this.selectedScenario = clone(this.stateSelectedScenario);
     }
 
-    @Watch('stateScenarios')
-    onStateScenariosChanged() {
+    @Watch('stateSharedScenariosPage')
+    onStateSharedScenariosPageChanged() {
+        if (any(propEq('id', this.selectedScenario.id))) {
+            this.selectScenarioAction({
+                scenarioId: this.selectedScenario.id,
+            });
+        }
+    }
+
+     @Watch('stateUserScenariosPage')
+    onStateUserScenariosPagePageChanged() {
         if (any(propEq('id', this.selectedScenario.id))) {
             this.selectScenarioAction({
                 scenarioId: this.selectedScenario.id,

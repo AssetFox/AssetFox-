@@ -82,17 +82,6 @@ const actions = {
             }
         });
     },
-    async upsertCommittedProjects({commit, dispatch}: any, sectionCommittedProjects:SectionCommittedProject[]){
-        await CommittedProjectsService.upsertCommittedProjects(sectionCommittedProjects)
-            .then((response: AxiosResponse) => {
-                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                    commit('sectionCommittedProjectsCloneMutator',sectionCommittedProjects)
-                }
-                dispatch('addSuccessNotification', {
-                    message: 'Committed Projects Updated Successfully',
-                });  
-            });
-    }
 }
 export default {
     state,

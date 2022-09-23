@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -14,9 +14,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
-using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCore.Models;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {

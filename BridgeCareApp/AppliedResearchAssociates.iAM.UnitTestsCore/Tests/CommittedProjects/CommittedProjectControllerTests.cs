@@ -16,7 +16,8 @@ using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
-using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCore.Logging;
+using BridgeCareCore.Models;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -459,8 +460,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHttpContextAccessor.Object,
                 _mockClaimHelper.Object);
 
+            var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
+            {
+                LibraryId = null,
+                AddedRows = TestDataForCommittedProjects.ValidCommittedProjects,
+                UpdateRows = new List<SectionCommittedProjectDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -473,6 +482,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _testHelper.MockEsecSecurityDBE.Object,
@@ -480,8 +490,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
 
+            var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
+            {
+                LibraryId = null,
+                AddedRows = TestDataForCommittedProjects.ValidCommittedProjects,
+                UpdateRows = new List<SectionCommittedProjectDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+            _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
+
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -503,8 +522,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
                 .Throws<RowNotInTableException>();
 
+            var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
+            {
+                LibraryId = null,
+                AddedRows = TestDataForCommittedProjects.ValidCommittedProjects,
+                UpdateRows = new List<SectionCommittedProjectDTO>(),
+                RowsForDeletion = new List<Guid>()
+            };
+
+
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

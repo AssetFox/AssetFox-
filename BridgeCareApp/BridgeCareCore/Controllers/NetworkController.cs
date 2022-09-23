@@ -34,16 +34,32 @@ namespace BridgeCareCore.Controllers
         [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> AllNetworks()
         {
+            List<NetworkDTO> result;
             try
             {
-                var result = await UnitOfWork.NetworkRepo.Networks();
-                return Ok(result);
+                result = await UnitOfWork.NetworkRepo.Networks();
             }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
                 throw;
             }
+
+
+            foreach (var network in result)
+            {
+                try
+                {
+                    network.DefaultSpatialWeighting = UnitOfWork.MaintainableAssetRepo.GetPredominantAssetSpatialWeighting(network.Id);
+                }
+                catch
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastWarning, $"Unable to get spatial weightings for network {network.Name}");
+                    // No throw here.  It is OK if this DTO remains null
+                }
+            }            
+
+            return Ok(result);
         }
 
         [HttpPost]
@@ -68,8 +84,9 @@ namespace BridgeCareCore.Controllers
                     var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
                     var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
                     var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, parameters.NetworkDefinitionAttribute.DataSource, UnitOfWork)), parameters.DefaultEquation);
+                        AttributeDataBuilder.GetData(AttributeConnectionBuilder.Build(attribute, mappedDataSource, UnitOfWork)), parameters.DefaultEquation);
                     network.Name = networkName;
+                    network.KeyAttributeId = parameters.NetworkDefinitionAttribute.Id;
 
                     // insert network domain data into the data source
                     UnitOfWork.NetworkRepo.CreateNetwork(network);
@@ -93,6 +110,7 @@ namespace BridgeCareCore.Controllers
         [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)
         {
+
             try
             {
                 var attributesForOriginalNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
@@ -102,12 +120,23 @@ namespace BridgeCareCore.Controllers
 
                 foreach (var network in networks)
                 {
+                    //TODO: Investigate case where networks have separate key attributes. Disable until handled in 3.1
+                    /*
                     var attributesForNetwork = UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(network.Id);
 
                     if (attributesForOriginalNetwork.TrueForAll(_ => attributesForNetwork.Any(__ => _ == __))) {
                         compatibleNetworks.Add(network);
                     }
+                    */
+
+                    //Placeholder until above enabled
+                    if (network.Id == networkId)
+                    {
+                        compatibleNetworks.Add(network);
+                    }
                 }
+                
+
 
                 return Ok(compatibleNetworks);
 

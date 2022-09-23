@@ -55,6 +55,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var actual = allNetworks.Single(n => n.Id == networkId);
         }
-
     }
 }

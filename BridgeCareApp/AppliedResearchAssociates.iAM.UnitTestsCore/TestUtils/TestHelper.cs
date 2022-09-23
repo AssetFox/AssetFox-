@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
-                    HasAdminClaim = false,
+                    HasAdminClaim = true,
                     //Role = "PD-BAMS-Administrator",
                     Email = "pdstseseca5@pa.gov"
                 });
@@ -92,7 +92,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Options);
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
-
+            //UserDTO testUser = new UserDTO() { Username = "testname", Id = new Guid() };
+            //UnitOfWork.SetUser("testname");
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 

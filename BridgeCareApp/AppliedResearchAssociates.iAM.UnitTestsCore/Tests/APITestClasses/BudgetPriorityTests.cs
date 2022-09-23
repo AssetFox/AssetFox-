@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
@@ -12,11 +13,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -50,6 +54,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object,
                 _mockClaimHelper.Object);
+
+            controller.ControllerContext = new ControllerContext();
+            controller.ControllerContext.HttpContext = new DefaultHttpContext();
+
             return controller;
         }
 
@@ -61,6 +69,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object,
                 _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext();
+            controller.ControllerContext.HttpContext = new DefaultHttpContext();
+
             return controller;
         }
 
@@ -369,6 +380,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task UserIsViewBudgetPriorityFromLibraryAuthorized()
         {
+
+            var server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
+            var client = server.CreateClient();
+            var url = "api/BudgetPriority/GetBudgetPriorityLibraries";
+            var expected = HttpStatusCode.Unauthorized;
+
+            var response = await client.GetAsync(url);
+            Assert.Equal(expected, response.StatusCode);
+
+
             // Set up the claims for testing
             List<string> testClaims = new List<string>()
             {
@@ -376,35 +397,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess
             };
             // Admin not authorized
-            var controller = CreateAuthorizedController();
+            var controller = CreateUnauthorizedController();
             _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", new List<string>());
+            // Assert
             var result = await controller.GetBudgetPriorityLibraries();
             Assert.IsType<UnauthorizedResult>(result);
 
             // Admin authorized
-            _testHelper.SetAuthorizationClaims("ESEC", "Administrator", testClaims);
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", testClaims);
             controller = CreateAuthorizedController();
             result = await controller.GetBudgetPriorityLibraries();
             Assert.IsType<OkObjectResult>(result);
 
             // Non-admin authorized
-            _testHelper.SetAuthorizationClaims("ESEC", "Editor", testClaims);
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Editor", testClaims);
             controller = CreateAuthorizedController();
             result = await controller.GetBudgetPriorityLibraries();
             Assert.IsType<OkObjectResult>(result);
 
             // Non-admin not authorized
-            _testHelper.SetAuthorizationClaims("ESEC", "Editor", new List<string>());
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Editor", new List<string>());
             controller = CreateAuthorizedController();
             result = await controller.GetBudgetPriorityLibraries();
             Assert.IsType<UnauthorizedResult>(result);
 
             // Non-admin B2C not authorized
-            _testHelper.SetAuthorizationClaims("B2C", "Editor", new List<string>());
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, "Editor", new List<string>());
             controller = CreateAuthorizedController();
             result = await controller.GetBudgetPriorityLibraries();
             Assert.IsType<UnauthorizedResult>(result);
-
         }
         [Fact]
         public async Task UserIsModifyBudgetPriorityFromScenarioAuthorized()
@@ -419,10 +440,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityModifyPermittedFromScenarioAccess
             };
             // Admin not authorized
-            _testHelper.SetAuthorizationClaims("ESEC", "Administrator", testClaims);
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", new List<string>());
             var controller = CreateAuthorizedController();
             var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
             Assert.IsType<UnauthorizedResult>(result);
+            // Admin authorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", testClaims);
+            controller = CreateAuthorizedController();
+            result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
+            Assert.IsType<OkObjectResult>(result);
+            // Non-admin unauthorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Editor", new List<string>());
+            controller = CreateAuthorizedController();
+            result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
+            Assert.IsType<UnauthorizedResult>(result);
+            // Non-Admin authorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Editor", testClaims);
+            controller = CreateAuthorizedController();
+            result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
+            Assert.IsType<OkObjectResult>(result);
         }
     }
 }

@@ -193,5 +193,43 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !_testHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
                     _.DeficientConditionGoalId == DeficientConditionGoalId));
         }
+        [Fact]
+        public async Task UserIsDeficientConditionGoalViewFromLibraryAuthorized()
+        {
+            // Set up the claims for testing
+            List<string> testClaims = new List<string>()
+            {
+                BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewAnyFromLibraryAccess,
+                BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalViewPermittedFromLibraryAccess
+            };
+            // Admin not authorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", new List<string>());
+            var controller = Setup();
+            var result = await controller.DeficientConditionGoalLibraries();
+            Assert.IsType<UnauthorizedResult>(result);
+            // Admin authorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", testClaims);
+            controller = Setup();
+            result = await controller.DeficientConditionGoalLibraries();
+            Assert.IsType<OkObjectResult>(result);
+        }
+        [Fact]
+        public async Task UserIsDeficientConditionGoalModifyFromScenarioAuthorized()
+        {
+            // Set up the claims for testing
+            List<string> testClaims = new List<string>()
+            {
+                BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyAnyFromScenarioAccess,
+                BridgeCareCore.Security.SecurityConstants.Claim.DeficientConditionGoalModifyPermittedFromScenarioAccess
+            };
+            // Admin not authorized
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", new List<string>());
+            var controller = Setup();
+            var result = await controller.DeficientConditionGoalLibraries();
+            Assert.IsType<UnauthorizedResult>(result);
+            // Admin authorized
+
+
+        }
     }
 }

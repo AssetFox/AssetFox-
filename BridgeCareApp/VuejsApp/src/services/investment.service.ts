@@ -91,5 +91,11 @@ export default class InvestmentService {
             return coreAxiosInstance.get(               
                   `${API.Investment}/DownloadInvestmentBudgetsTemplate`,
               );
-        }
+    }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetHasPermittedAccess`,
+        );
+    }
 }

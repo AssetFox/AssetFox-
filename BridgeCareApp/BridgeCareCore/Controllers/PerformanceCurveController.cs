@@ -377,6 +377,15 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        [Authorize(Policy = Policy.ModifyOrDeletePerformanceCurveFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
+
         private List<PerformanceCurveLibraryDTO> GetAllPerformanceCurveLibraries()
         {
             return UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibraries();

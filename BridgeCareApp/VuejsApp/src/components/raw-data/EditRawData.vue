@@ -58,7 +58,7 @@ import NetworksSvg from '@/shared/icons/NetworksSvg.vue';
     components: { AttributesSvg, DataSourceSvg, NetworksSvg}
 })
 export default class EditRawData extends Vue {
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
 
     networkId: string = getBlankGuid();
@@ -103,7 +103,7 @@ export default class EditRawData extends Vue {
                         if (navigationTab.tabName === 'DataSource' 
                             || navigationTab.tabName === 'Networks' 
                             || navigationTab.tabName === 'Attributes') {
-                            navigationTab['visible'] = vm.isAdmin;
+                            navigationTab['visible'] = vm.hasAdminAccess;
                         }
 
                         return navigationTab;

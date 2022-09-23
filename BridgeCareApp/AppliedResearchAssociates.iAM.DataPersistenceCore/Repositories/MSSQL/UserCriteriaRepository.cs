@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Id = Guid.NewGuid(),
                     Username = userInfo.Sub,
-                    HasInventoryAccess = userInfo.HasAdminClaim
+                    HasInventoryAccess = userInfo.HasAdminAccess
                 };
                 _unitOfWork.Context.AddEntity(newUserEntity, newUserEntity.Id);
 

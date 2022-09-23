@@ -30,7 +30,7 @@ namespace BridgeCareCore.Services
             {
                 if (!_unitOfWork.Context.User.Any(_ => _.Username == userInfo.Name))
                 {
-                    _unitOfWork.AddUser(userInfo.Name, userInfo.HasAdminClaim);
+                    _unitOfWork.AddUser(userInfo.Name, userInfo.HasAdminAccess);
                 }
 
                 _unitOfWork.SetUser(userInfo.Name);

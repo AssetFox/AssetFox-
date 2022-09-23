@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
-                    Role = "PD-BAMS-Administrator",
+                    HasAdminAccess = true,
                     Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityDBE = new Mock<IEsecSecurity>();
@@ -68,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "b-bamsadmin",
-                    Role = "PD-BAMS-DBEngineer",
+                    HasAdminAccess = false,
                     Email = "jmalmberg@ara.com"
                 });
 

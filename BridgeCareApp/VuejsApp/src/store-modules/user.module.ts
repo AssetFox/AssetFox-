@@ -138,11 +138,11 @@ const actions = {
     },
     //////////////////////////////
     async getUserCriteriaFilter({ commit, dispatch }: any) {
-        // @ts-ignore
-        if (!store.state.userModule.checkedForCriteria) {
+            if (!store.state.userModule.checkedForCriteria) {
             const message =
                 'You do not have access to any bridge data. \
-          Please contact an administrator to gain access to the data you need.';
+                Please contact an administrator to gain access to the data you need.';
+
             await UserService.getUserCriteriaFilterData().then(
                 (response: AxiosResponse) => {
                     if (hasValue(response, 'data')) {
@@ -155,7 +155,7 @@ const actions = {
                         if (
                             !userCriteriaFilter.hasAccess &&
                             // @ts-ignore
-                            !store.state.authenticationModule.isAdmin
+                            !store.state.authenticationModule.hasAdminAccess
                         ) {
                             dispatch('addInfoNotification', {
                                 message: 'Access Denied.',

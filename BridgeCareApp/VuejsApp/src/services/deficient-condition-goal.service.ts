@@ -30,4 +30,10 @@ export default class DeficientConditionGoalService {
             data,
         );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.DeficientConditionGoal}/GetHasPermittedAccess`,
+        );
+    }
 }

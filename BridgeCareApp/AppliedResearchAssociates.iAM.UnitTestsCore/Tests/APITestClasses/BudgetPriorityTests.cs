@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
@@ -12,9 +14,14 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -357,6 +364,64 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
 
             // Assert
+            Assert.IsType<UnauthorizedResult>(result);
+        }
+        [Fact]
+        public async Task UserIsViewBudgetPriorityFromLibraryAuthorized()
+        {
+            // Set up the claims for testing
+            List<string> testClaims = new List<string>()
+            {
+                BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess,
+                BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess
+            };
+            // Admin not authorized
+            var controller = CreateAuthorizedController();
+            _testHelper.SetAuthorizationClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, "Administrator", new List<string>());
+            var result = await controller.GetBudgetPriorityLibraries();
+            Assert.IsType<UnauthorizedResult>(result);
+
+            // Admin authorized
+            _testHelper.SetAuthorizationClaims("ESEC", "Administrator", testClaims);
+            controller = CreateAuthorizedController();
+            result = await controller.GetBudgetPriorityLibraries();
+            Assert.IsType<OkObjectResult>(result);
+
+            // Non-admin authorized
+            _testHelper.SetAuthorizationClaims("ESEC", "Editor", testClaims);
+            controller = CreateAuthorizedController();
+            result = await controller.GetBudgetPriorityLibraries();
+            Assert.IsType<OkObjectResult>(result);
+
+            // Non-admin not authorized
+            _testHelper.SetAuthorizationClaims("ESEC", "Editor", new List<string>());
+            controller = CreateAuthorizedController();
+            result = await controller.GetBudgetPriorityLibraries();
+            Assert.IsType<UnauthorizedResult>(result);
+
+            // Non-admin B2C not authorized
+            _testHelper.SetAuthorizationClaims("B2C", "Editor", new List<string>());
+            controller = CreateAuthorizedController();
+            result = await controller.GetBudgetPriorityLibraries();
+            Assert.IsType<UnauthorizedResult>(result);
+
+        }
+        [Fact]
+        public async Task UserIsModifyBudgetPriorityFromScenarioAuthorized()
+        {
+            var simulation = _testHelper.CreateSimulation();
+            var dtos = new List<BudgetPriorityDTO>();
+
+            // Set up the claims for testing
+            List<string> testClaims = new List<string>()
+            {
+                BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityModifyAnyFromScenarioAccess,
+                BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityModifyPermittedFromScenarioAccess
+            };
+            // Admin not authorized
+            _testHelper.SetAuthorizationClaims("ESEC", "Administrator", testClaims);
+            var controller = CreateAuthorizedController();
+            var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
             Assert.IsType<UnauthorizedResult>(result);
         }
     }

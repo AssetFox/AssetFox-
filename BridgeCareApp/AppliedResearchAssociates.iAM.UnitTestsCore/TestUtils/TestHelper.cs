@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -16,10 +18,13 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
@@ -47,6 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
+        public Mock<IRoleClaimsMapper> MockRoleClaimsMapper { get; }
 
         protected TestHelper()
         {
@@ -60,7 +66,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
-                    Role = "PD-BAMS-Administrator",
+                    HasAdminClaim = false,
+                    //Role = "PD-BAMS-Administrator",
                     Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityDBE = new Mock<IEsecSecurity>();
@@ -68,10 +75,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "b-bamsadmin",
-                    Role = "PD-BAMS-DBEngineer",
+                    HasAdminClaim= false,
+                    //Role = "PD-BAMS-DBEngineer",
                     Email = "jmalmberg@ara.com"
                 });
-
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 
             Logger = new LogNLog();
@@ -125,7 +132,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Id = NetworkId,
             Name = "Test Network"
         };
+        public void SetAuthorizationClaims(string securityType, string internalRole, List<string> testClaims)
+        {
+            var MockRoleClaimsMapper = new Mock<IRoleClaimsMapper>();
+            MockRoleClaimsMapper.Setup(r => r.GetInternalRole(It.IsAny<string>(), It.IsAny<string>())).Returns(internalRole);
+            MockRoleClaimsMapper.Setup(c => c.GetClaims(It.IsAny<string>(), It.IsAny<string>())).Returns(testClaims);
 
+            List<Claim> oclaims = new List<Claim>();
+            var claims = MockRoleClaimsMapper.Object.GetClaims(securityType, internalRole);
+            foreach (var claim in claims)
+            {
+                oclaims.Add(new Claim(ClaimTypes.Name, claim));
+            }
+            var identity = new ClaimsIdentity(oclaims);
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            var mockHttpContext = new Mock<HttpContext>();
+            mockHttpContext.Setup(m => m.User).Returns(claimsPrincipal);
+            MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+        }
         public SimulationEntity TestSimulation(Guid? id = null, string name = null)
         {
             var resolveName = name ?? RandomStrings.Length11();
@@ -222,6 +246,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 };
                 UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
             }
+        }
+        public virtual IAuthorizationService BuildAuthorizationService(Action<IServiceCollection> setupServices = null)
+        {
+            var services = new ServiceCollection();
+            services.AddAuthorizationCore();
+            services.AddLogging();
+            services.AddOptions();
+            setupServices?.Invoke(services);
+            return services.BuildServiceProvider().GetRequiredService<IAuthorizationService>();
         }
     }
 }

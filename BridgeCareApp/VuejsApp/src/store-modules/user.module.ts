@@ -138,10 +138,6 @@ const actions = {
     },
     //////////////////////////////
     async getUserCriteriaFilter({ commit, dispatch }: any) {
-        // @ts-ignore
-        // if (store.state.userModule.checkedForCriteria) {
-        //     const message = 'checkedForCriteria is true';
-        // } else {
             if (!store.state.userModule.checkedForCriteria) {
             const message =
                 'You do not have access to any bridge data. \

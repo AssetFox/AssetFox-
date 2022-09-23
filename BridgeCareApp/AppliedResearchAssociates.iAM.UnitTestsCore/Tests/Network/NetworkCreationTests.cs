@@ -15,8 +15,6 @@ using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
-using LiteDB;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {

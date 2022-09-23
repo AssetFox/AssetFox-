@@ -11,8 +11,6 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Network = AppliedResearchAssociates.iAM.Data.Networking.Network;
-using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
-using System.IO;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {

@@ -68,17 +68,5 @@ namespace AppliedResearchAssociates.iAM.StressTesting
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename965);
         }
-
-        [Fact (Skip ="Related to a very specific situation. Probably delete this soon.")]
-        public void TwoSimulationOutputs_Same()
-        {
-            var text1 = FileReader.ReadAllTextInGitIgnoredFile(CannedSimulationOutput.Filename525);
-            var simulationOutput1 = JsonConvert.DeserializeObject<SimulationOutput>(text1);
-            text1 = null;
-            var text2 = FileReader.ReadAllTextInGitIgnoredFile(CannedSimulationOutput.Filename525b);
-            var simulationOutput2 = JsonConvert.DeserializeObject<SimulationOutput>(text2);
-            text2 = null;
-            SimulationOutputAssertions.SameSimulationOutput(simulationOutput1, simulationOutput2);
-        }
     }
 }

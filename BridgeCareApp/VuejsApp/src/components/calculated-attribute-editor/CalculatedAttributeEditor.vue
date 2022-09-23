@@ -306,9 +306,11 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { emptySelectItem } from '@/shared/models/vue/select-item';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
-import { CalculatedAttributePagingRequestModel, calculcatedAttributePagingPageModel, PagingPage } from '@/shared/models/iAM/paging';
+import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel, calculcatedAttributePagingPageModel, PagingPage } from '@/shared/models/iAM/paging';
 import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
+import { AxiosResponse } from 'axios';
+import { http2XX } from '@/shared/utils/http-utils';
 
 @Component({
     components: {
@@ -355,6 +357,8 @@ export default class CalculatedAttributeEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
+
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -707,7 +711,7 @@ export default class CalculatedAttributeEditor extends Vue {
         }
     }
     @Watch('selectedCalculatedAttributeLibrary')
-    onSelectedCalculatedAttributeLibraryChanged() {//library change, needs to call on pagination
+    onSelectedCalculatedAttributeLibraryChanged() {//library change, needs to call on pagination(touched)
         // change in library multiselect
         if (
             this.selectedCalculatedAttributeLibrary.id !== this.uuidNIL &&
@@ -720,24 +724,24 @@ export default class CalculatedAttributeEditor extends Vue {
 
         // If grid data is null, then add dummy objects on the fly, to show the rows to users.
         // So that, the users can add criteria and equations
-        if (
-            this.calculatedAttributeGridData == undefined ||
-            this.calculatedAttributeGridData.length == 0
-        ) {
-            this.attributeSelectItems.forEach(_ => {
-                var tempItem: CalculatedAttribute = {
-                    id: getNewGuid(),
-                    attribute: _.text,
-                    name: _.text,
-                    calculationTiming: Timing.OnDemand,
-                    equations: [] as CriterionAndEquationSet[],
-                };
-                this.calculatedAttributeGridData.push(tempItem);
-                this.setDefaultAttributeOnLoad(
-                    this.calculatedAttributeGridData[0],
-                );
-            });
-        }
+        // if (
+        //     this.calculatedAttributeGridData == undefined ||
+        //     this.calculatedAttributeGridData.length == 0
+        // ) {
+        //     this.attributeSelectItems.forEach(_ => {
+        //         var tempItem: CalculatedAttribute = {
+        //             id: getNewGuid(),
+        //             attribute: _.text,
+        //             name: _.text,
+        //             calculationTiming: Timing.OnDemand,
+        //             equations: [] as CriterionAndEquationSet[],
+        //         };
+        //         this.calculatedAttributeGridData.push(tempItem);
+        //         this.setDefaultAttributeOnLoad(
+        //             this.calculatedAttributeGridData[0],
+        //         );
+        //     });
+        // }
 
         if (this.hasScenario && this.hasSelectedLibrary) {
             // we need new ids for the object which is assigned to a scenario.
@@ -749,23 +753,23 @@ export default class CalculatedAttributeEditor extends Vue {
             );
             // If a user in scenario page, then selecting a library should generate new Ids.
             // Because this data will be saved against the scenario
-            this.calculatedAttributeGridData.forEach(att => {
-                att.equations.map((value: CriterionAndEquationSet) => ({
-                    ...value,
-                    id: getNewGuid(),
-                }));
-                att.equations.forEach(eq => {
-                    eq.id = getNewGuid();
-                    if (isNil(eq.criteriaLibrary)) {
-                        eq.criteriaLibrary = clone(emptyCriterionLibrary);
-                        eq.criteriaLibrary.id = getNewGuid();
-                        eq.criteriaLibrary.isSingleUse = true;
-                    } else {
-                        eq.criteriaLibrary.id = getNewGuid();
-                    }
-                    eq.equation.id = getNewGuid();
-                });
-            });
+            // this.calculatedAttributeGridData.forEach(att => {
+            //     att.equations.map((value: CriterionAndEquationSet) => ({
+            //         ...value,
+            //         id: getNewGuid(),
+            //     }));
+            //     att.equations.forEach(eq => {
+            //         eq.id = getNewGuid();
+            //         if (isNil(eq.criteriaLibrary)) {
+            //             eq.criteriaLibrary = clone(emptyCriterionLibrary);
+            //             eq.criteriaLibrary.id = getNewGuid();
+            //             eq.criteriaLibrary.isSingleUse = true;
+            //         } else {
+            //             eq.criteriaLibrary.id = getNewGuid();
+            //         }
+            //         eq.equation.id = getNewGuid();
+            //     });
+            // });
 
             // Set the default values in Calculated attribute multi select, if we have data in calculatedAttributeGridData
             if (
@@ -775,6 +779,7 @@ export default class CalculatedAttributeEditor extends Vue {
                 this.setDefaultAttributeOnLoad(
                     this.calculatedAttributeGridData[0],
                 );
+                this.onPaginationChanged();
             } else {
                 this.isAttributeSelectedItemValue = false;
             }
@@ -803,6 +808,7 @@ export default class CalculatedAttributeEditor extends Vue {
                     this.calculatedAttributeGridData[0] != undefined
                         ? this.calculatedAttributeGridData[0]
                         : this.selectedCalculatedAttribute;
+                this.onPaginationChanged();
             } else {
                 this.isAttributeSelectedItemValue = false;
                 this.attributeSelectItemValue = null;
@@ -826,21 +832,47 @@ export default class CalculatedAttributeEditor extends Vue {
         return getUserName();
     }
 
-    onUpsertScenarioCalculatedAttribute() {//scenario upsert things
-        this.upsertScenarioCalculatedAttributeAction({
-            scenarioCalculatedAttribute: this.calculatedAttributeGridData,
-            scenarioId: this.selectedScenarioId,
-        }).then(() => (this.librarySelectItemValue = null));
+    onUpsertScenarioCalculatedAttribute() {//scenario upsert things(touched)
+        const syncModel: CalculatedAttributePagingSyncModel = {
+                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
+                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
+                updatedPairs: mapToIndexSignature( this.updatedPairs),
+                addedPairs: mapToIndexSignature(this.addedPairs) 
+        }
+        CalculatedAttributeService.upsertScenarioCalculatedAttribute(syncModel, this.selectedScenarioId).then(((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+                this.addSuccessNotificationAction({message: "Modified calculated attrbutes"});
+                this.librarySelectItemValue = null
+            }   
+        }))
     }
 
-    onUpsertCalculatedAttributeLibrary() {//library upsert things
-        const CalculatedAttributeLibrary: CalculatedAttributeLibrary = {
-            ...clone(this.selectedCalculatedAttributeLibrary),
-            calculatedAttributes: clone(this.calculatedAttributeGridData),
-        };
-        this.upsertCalculatedAttributeLibraryAction(CalculatedAttributeLibrary);
+    onUpsertCalculatedAttributeLibrary() {//library upsert things(touched)
+        const syncModel: CalculatedAttributePagingSyncModel = {
+                libraryId: this.selectedCalculatedAttributeLibrary.id === this.uuidNIL ? null : this.selectedCalculatedAttributeLibrary.id,
+                updatedCalculatedAttributes: Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: mapToIndexSignature(this.deletionPairsIds),
+                updatedPairs: mapToIndexSignature( this.updatedPairs),
+                addedPairs: mapToIndexSignature(this.addedPairs) 
+        }
+        const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
+            syncModel: syncModel,
+            isNewLibrary: false,
+            library: this.selectedCalculatedAttributeLibrary
+        }
+        CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+                //this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary);
+                this.addSuccessNotificationAction({message: "Updated calculated attribute library",});
+            }   
+        }))
     }
-    onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {//needs stuff
+    onShowCreateCalculatedAttributeLibraryDialog(createAsNewLibrary: boolean) {//might need stuff
         var localCalculatedAttributes = [] as CalculatedAttribute[];
         if (createAsNewLibrary) {
             // if library is getting created from a scenario. Assign new Ids
@@ -865,7 +897,7 @@ export default class CalculatedAttributeEditor extends Vue {
             attributeSelectItems: this.attributeSelectItems,
         };
     }
-    onSubmitCreateCalculatedAttributeLibraryDialogResult(//new library upsert stuff
+    onSubmitCreateCalculatedAttributeLibraryDialogResult(//new library upsert stuff(touched)
         calculatedAttributeLibrary: CalculatedAttributeLibrary,
     ) {
         this.createCalculatedAttributeLibraryDialogData = clone(
@@ -876,8 +908,29 @@ export default class CalculatedAttributeEditor extends Vue {
             this.upsertCalculatedAttributeLibraryAction(
                 calculatedAttributeLibrary,
             );
-            this.librarySelectItemValue = calculatedAttributeLibrary.id;
-            this.hasCreatedLibrary = true;
+            const syncModel: CalculatedAttributePagingSyncModel = {
+                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? null : this.selectedCalculatedAttributeLibrary.id,
+                updatedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
+                deletedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.deletionPairsIds),
+                updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( this.updatedPairs),
+                addedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.addedPairs) 
+            }
+            const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
+                syncModel: syncModel,
+                isNewLibrary: false,
+                library: this.selectedCalculatedAttributeLibrary
+            }
+            CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.clearChanges()
+                    this.resetPage();
+                    //this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary);
+                    this.addSuccessNotificationAction({message: "Updated calculated attribute library",});
+                    this.librarySelectItemValue = calculatedAttributeLibrary.id;
+                    this.hasCreatedLibrary = true;
+                }   
+            }))
+           
         }
     }
     onSubmitCreateCalculatedAttributeDialogResult(//might be deprecated
@@ -913,8 +966,6 @@ export default class CalculatedAttributeEditor extends Vue {
             }),
         );
 
-        
-
         if (this.hasSelectedLibrary) {
             return !(
                 this.rules['generalRules'].valueIsNotEmpty(
@@ -943,27 +994,33 @@ export default class CalculatedAttributeEditor extends Vue {
             );
         }
     }
-    onAddCriterionEquationSet() { //adds new pair
+    onAddCriterionEquationSet() { //adds new pair(touched)
         var newSet = clone(emptyCriterionAndEquationSet);
         newSet.id = getNewGuid();
         newSet.criteriaLibrary.id = getNewGuid();
         newSet.equation.id = getNewGuid();
         newSet.criteriaLibrary.isSingleUse = true;
 
-        if (this.selectedAttribute.equations == undefined) {
-            this.selectedAttribute.equations = [];
-            this.onSelectedAttributeChanged()
+        let pairs = this.addedPairs.get(this.selectedAttribute.id);
+        if(!isNil(pairs)){
+            pairs.push(newSet)
         }
-        this.selectedAttribute.equations.push(newSet);
-        this.calculatedAttributeGridData = update(
-            findIndex(
-                propEq('id', this.selectedAttribute.id),
-                this.calculatedAttributeGridData,
-            ),
-            { ...this.selectedAttribute },
-            this.calculatedAttributeGridData,
-        );
-        this.onSelectedAttributeChanged()
+        else
+            this.addedPairs.set(this.selectedAttribute.id, [newSet])
+        // if (this.selectedAttribute.equations == undefined) {
+        //     this.selectedAttribute.equations = [];
+        //     this.onSelectedAttributeChanged()
+        // }
+        // this.selectedAttribute.equations.push(newSet);
+        // this.calculatedAttributeGridData = update(
+        //     findIndex(
+        //         propEq('id', this.selectedAttribute.id),
+        //         this.calculatedAttributeGridData,
+        //     ),
+        //     { ...this.selectedAttribute },
+        //     this.calculatedAttributeGridData,
+        // );
+        // this.onSelectedAttributeChanged()
     }
     onEditCalculatedAttributeCriterionLibrary(criterionEquationSetId: string) {//opens criterion editor
         var currItem = this.calculatedAttributeGridData.find(

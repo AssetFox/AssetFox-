@@ -51,12 +51,28 @@ namespace BridgeCareCore.Services
             var attributes = request.LibraryId == null ?
                     _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationId).ToList() :
                     _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(request.LibraryId.Value).CalculatedAttributes.ToList();
+            if(request.LibraryId != null)
+            {
+                attributes.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.Equations.ForEach(__ =>
+                    {
+                        __.Id = Guid.NewGuid();
+                        if(__.CriteriaLibrary != null)
+                            __.CriteriaLibrary.Id = Guid.NewGuid();
+                        if (__.Equation != null)
+                            __.Equation.Id = Guid.NewGuid();
+                    });
+                });
+            }
             return SyncedDataset(attributes, request);
         }
 
         public List<CalculatedAttributeDTO> GetSyncedLibraryDataset(Guid libraryId, CalculatedAttributePagingSyncModel request)
         {
             var library = _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(libraryId);
+
             return SyncedDataset(library.CalculatedAttributes.ToList() , request);
         }
 

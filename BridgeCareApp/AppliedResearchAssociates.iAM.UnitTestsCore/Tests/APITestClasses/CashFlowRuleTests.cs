@@ -136,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             CreateAuthorizedController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             // Act
             var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
@@ -171,7 +171,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             CreateAuthorizedController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var dtos = new List<CashFlowRuleDTO>();
 
             // Act
@@ -231,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -284,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -341,7 +341,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);
 

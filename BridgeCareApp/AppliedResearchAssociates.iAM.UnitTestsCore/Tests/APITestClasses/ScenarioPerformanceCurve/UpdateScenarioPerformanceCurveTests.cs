@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
@@ -96,7 +96,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
@@ -204,7 +204,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
@@ -237,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
@@ -270,7 +270,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
             var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
@@ -299,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var performanceCurveDto = new PerformanceCurveDTO
@@ -330,7 +330,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
@@ -371,7 +371,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
@@ -412,7 +412,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var criterionLibrary = new CriterionLibraryDTO

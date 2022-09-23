@@ -189,7 +189,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var controller = SetupController();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
@@ -258,7 +258,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var controller = SetupController();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var goal = SetupForScenarioTargetGet(simulation.Id);
 
             // Act
@@ -279,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var controller = SetupController();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
             var getResult = await controller.GetScenarioTargetConditionGoals(simulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,

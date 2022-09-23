@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
@@ -28,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestHelper
     {
-        private static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
+        public static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
 
         public readonly string BaseUrl = "http://localhost:64469/api";
 
@@ -128,24 +129,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Name = "Test Network"
         };
 
-        public SimulationEntity TestSimulation(Guid? id = null, string name = null, Guid? owner = null)
-        {
-            var resolveName = name ?? RandomStrings.Length11();
-            var resolveId = id ?? Guid.NewGuid();
-            var users = new List<SimulationUserEntity>();
-            var returnValue = new SimulationEntity
-            {
-                Id = resolveId,
-                NetworkId = NetworkId,
-                Name = resolveName,
-                NumberOfYearsOfTreatmentOutlook = 2,
-                SimulationUserJoins = users
-            };
-            if (owner != null)
-                users.Add(new SimulationUserEntity() { IsOwner = true, UserId = owner.Value, SimulationId = resolveId });
-            return returnValue;
-        }
-
 
         private static bool AttributesHaveBeenCreated = false;
         private static readonly object AttributeLock = new object();
@@ -206,13 +189,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     }
                 }
             }
-        }
-
-        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null, Guid? owner = null)
-        {
-            var entity = TestSimulation(id, name, owner);
-            UnitOfWork.Context.AddEntity(entity);
-            return entity;
         }
 
         public virtual void CreateCalculatedAttributeLibrary()

@@ -82,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var controller = SetupController();
             // Act
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var result = await controller.AnalysisMethod(simulation.Id);
 
             // Assert
@@ -94,7 +94,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var analysisEntity = TestAnalysis(simulation.Id);
             var attributeEntity = _testHelper.UnitOfWork.Context.Attribute.First();
             var dto = analysisEntity.ToDto();
@@ -116,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var analysisMethodEntity = SetupForGet(simulation.Id);
 
             // Act
@@ -136,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var getResult = await controller.AnalysisMethod(simulation.Id);
             var analysisMethodDto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(AnalysisMethodDTO));
@@ -165,7 +165,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var criterionLibrary = SetupForUpsert(simulation.Id);
             var getResult = await controller.AnalysisMethod(simulation.Id);
             var dto = (AnalysisMethodDTO)Convert.ChangeType((getResult as OkObjectResult).Value,

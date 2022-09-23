@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             // Act
             var controller = CreateAuthorizedController();
             var result = await controller.GetScenarioSelectedTreatments(simulation.Id);
@@ -181,7 +181,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             var controller = CreateAuthorizedController();
             var dtos = new List<TreatmentDTO>();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             // Act
             var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
@@ -237,7 +237,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             var budget = CreateScenarioTestData(simulation.Id);
 
@@ -265,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyLibraryTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
@@ -328,7 +328,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -395,7 +395,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateUnauthorizedController();
             CreateScenarioTestData(simulation.Id);
 

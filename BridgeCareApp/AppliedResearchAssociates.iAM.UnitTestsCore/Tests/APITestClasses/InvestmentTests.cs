@@ -278,7 +278,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             var controller = CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             // Act
             var result = await controller.GetInvestment(simulation.Id);
@@ -308,7 +308,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             var controller = CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var dto = new InvestmentDTO
             {
                 ScenarioBudgets = new List<BudgetDTO>(),
@@ -375,7 +375,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
 
@@ -443,7 +443,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
 
             var dto = new InvestmentDTO
@@ -507,7 +507,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateUnauthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var dto = new InvestmentDTO
             {
@@ -528,7 +528,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateUnauthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -781,7 +781,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var year = DateTime.Now.Year;
             var service = Setup();
             var controller = CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
 
@@ -829,7 +829,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var year = DateTime.Now.Year;
             var service = Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -884,7 +884,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var year = DateTime.Now.Year;
             var service = Setup();
             var simulationName = RandomStrings.Length11();
-            var simulation = _testHelper.CreateSimulation(null, simulationName);
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, null, simulationName);
             var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);
@@ -932,7 +932,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var simulationName = RandomStrings.Length11();
-            var simulation = _testHelper.CreateSimulation(null, simulationName);
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, null, simulationName);
             var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
             CreateRequestWithScenarioFormData(simulation.Id);

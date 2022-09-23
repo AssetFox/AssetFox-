@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
 
             var simulationId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
             // Assert
 
@@ -137,7 +137,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            _testHelper.CreateSimulation(simulationId);
+            SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert

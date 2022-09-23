@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
 
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var request = new PagingRequestModel<PerformanceCurveDTO>()
             {
@@ -146,7 +146,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var performanceCurveId = Guid.NewGuid();
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
@@ -249,7 +249,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
             var performanceCurveId = Guid.NewGuid();
             ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
@@ -285,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             _testHelper.SetupDefaultHttpContext();
             var mockedUnauthorized = new Mock<IEsecSecurity>();
             mockedUnauthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))

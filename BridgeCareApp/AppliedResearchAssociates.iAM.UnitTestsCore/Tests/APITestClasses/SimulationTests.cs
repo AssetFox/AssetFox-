@@ -458,7 +458,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             // Act
             await _controller.DeleteSimulation(simulation.Id);
@@ -519,7 +519,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             CreateAuthorizedController(service);
-            var simulation = _testHelper.TestSimulation();
+            var simulation = SimulationTestSetup.TestSimulation();
             simulation.NetworkId = _testHelper.TestNetwork.Id;
             simulation.Network = _testHelper.TestNetwork;
 
@@ -538,7 +538,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             // Act
             var result = await _controller.UpdateSimulation(simulation.ToDto(null));
 
@@ -566,7 +566,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation(owner:_testHelper.UnitOfWork.CurrentUser.Id);
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, owner:_testHelper.UnitOfWork.CurrentUser.Id);
             var request = new PagingRequestModel<SimulationDTO>()
             {
                 isDescending = false,
@@ -593,7 +593,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             // Act
             var request = new PagingRequestModel<SimulationDTO>()
@@ -624,7 +624,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
 
             var newSimulationDTO = simulation.ToDto(null);
             newSimulationDTO.Id = Guid.NewGuid();
@@ -667,7 +667,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            var simulation = _testHelper.CreateSimulation(owner: _testHelper.UnitOfWork.CurrentUser.Id);
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, owner: _testHelper.UnitOfWork.CurrentUser.Id);
 
             var request = new PagingRequestModel<SimulationDTO>()
             {

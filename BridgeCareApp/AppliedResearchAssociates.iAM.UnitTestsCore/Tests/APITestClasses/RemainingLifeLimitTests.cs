@@ -134,7 +134,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var lifeLimitLibrary = SetupForGet();
             var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await controller.RemainingLifeLimitLibraries();

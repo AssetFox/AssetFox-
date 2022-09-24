@@ -9,6 +9,7 @@ using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,13 +25,49 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : BridgeCareCoreBaseController
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
+        private readonly SimulationService _simulationService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public SimulationController(ISimulationAnalysis simulationAnalysis, SimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
+            _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+        }
+
+        [HttpPost]
+        [Route("GetUserScenariosPage")]
+        [Authorize]
+        public async Task<IActionResult> GetUserScenariosPage([FromBody] PagingRequestModel<SimulationDTO> request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _simulationService.GetUserScenarioPage(request));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetSharedScenariosPage")]
+        [Authorize]
+        public async Task<IActionResult> GetSharedScenariosPage([FromBody] PagingRequestModel<SimulationDTO> request)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _simulationService.GetSharedScenarioPage(request, UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                throw;
+            }
         }
 
         [HttpGet]

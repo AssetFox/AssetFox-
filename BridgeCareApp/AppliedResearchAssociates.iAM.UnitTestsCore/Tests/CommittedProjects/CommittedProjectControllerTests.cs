@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -469,7 +470,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             };
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -500,7 +501,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -532,7 +533,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

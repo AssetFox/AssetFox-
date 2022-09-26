@@ -38,7 +38,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IConfiguration Config { get; }
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
-        public Mock<IEsecSecurity> MockEsecSecurityDBE { get; }
         public Mock<ITreatmentService> MockTreatmentService { get; }
         public ILog Logger { get; }
 
@@ -56,14 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .AddJsonFile("testConnections.json")
                 .Build();
             MockTreatmentService = new Mock<ITreatmentService>();
-            MockEsecSecurityDBE = new Mock<IEsecSecurity>();
-            MockEsecSecurityDBE.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
-                .Returns(new UserInfo
-                {
-                    Name = "b-bamsadmin",
-                    Role = "PD-BAMS-DBEngineer",
-                    Email = "jmalmberg@ara.com"
-                });
+
 
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 

@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
-            var controller = new InvestmentController(service, _testHelper.MockEsecSecurityDBE.Object,
+            var controller = new InvestmentController(service, EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
             return controller;

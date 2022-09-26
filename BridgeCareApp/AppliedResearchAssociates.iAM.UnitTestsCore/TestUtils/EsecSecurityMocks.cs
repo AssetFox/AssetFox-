@@ -36,5 +36,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 return mock.Object;
             }
         }
+
+        public static Mock<IEsecSecurity> DbeMock
+        {
+            get
+            {
+                var mock = new Mock<IEsecSecurity>();
+                mock.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
+                    .Returns(new UserInfo
+                    {
+                        Name = "b-bamsadmin",
+                        Role = "PD-BAMS-DBEngineer",
+                        Email = "jmalmberg@ara.com"
+                    });
+                return mock;
+            }
+        }
+
+        public static IEsecSecurity Dbe
+        {
+            get
+            {
+                return DbeMock.Object;
+            }
+        }
     }
 }

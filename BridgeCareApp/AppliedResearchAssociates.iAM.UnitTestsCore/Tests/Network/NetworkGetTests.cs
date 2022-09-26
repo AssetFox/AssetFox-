@@ -1,0 +1,98 @@
+﻿using System;
+using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using Xunit;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using BridgeCareCore.Models;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
+using AppliedResearchAssociates.iAM.DataUnitTests;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using IamAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.Data.Aggregation;
+
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+{
+    public class NetworkGetTests
+    {
+
+        private TestHelper _testHelper => TestHelper.Instance;
+
+        private void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
+        {
+            var networkId = Guid.NewGuid();
+            var maintainableAssets = new List<MaintainableAsset>();
+            for (int i = 0; i < assetCount; i++)
+            {
+                var assetId = Guid.NewGuid();
+                var locationIdentifier = RandomStrings.WithPrefix("Location");
+                var location = Locations.Section(locationIdentifier);
+                var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
+                maintainableAssets.Add(maintainableAsset);
+            }
+            var resultAttributes = new List<IamAttribute>();
+            for (int i=0; i<aggregatedResultPerAssetCount; i++)
+            {
+                var resultAttribute = AttributeTestSetup.Numeric();
+                resultAttributes.Add(resultAttribute);
+            }
+            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            var results = new List<IAggregatedResult>();
+            foreach (var asset in maintainableAssets)
+            {
+                var resultId = Guid.NewGuid();
+                var resultData = new List<(IamAttribute, (int, double))>();
+
+                foreach (var attribute in resultAttributes)
+                {
+                    var resultDatum = (
+                        attribute, (2022, 1.23));
+                    resultData.Add(resultDatum);
+                }
+                var result = new AggregatedResult<double>(
+                    resultId,
+                    asset,
+                    resultData
+                    );
+                
+                results.Add(result);
+            }
+            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+
+            var config = _testHelper.Config;
+            var connectionString = TestConnectionStrings.BridgeCare(config);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
+            var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
+            UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
+            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+
+            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
+
+            Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
+            var assets = simulationAnalysisNetwork.Assets;
+            Assert.Equal(assetCount, assets.Count);
+            foreach (var asset in assets)
+            {
+                var historicalAttributeList = asset.HistoricalAttributes.ToList();
+                Assert.Equal(aggregatedResultPerAssetCount, historicalAttributeList.Count);
+            }
+        }
+
+        [Fact]
+        public void GetSimulationAnalysisNetwork_NetworkInDb300Assets_Does()
+        {
+            RunGetSimulationAnalysisNetwork_NetworkInDb_Does(300, 10);
+        }
+    }
+}

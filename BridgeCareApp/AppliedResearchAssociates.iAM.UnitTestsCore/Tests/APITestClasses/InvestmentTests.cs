@@ -154,7 +154,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             ResetHttpContextToDefault();
             var httpContext = new DefaultHttpContext();
-            _testHelper.AddAuthorizationHeader(httpContext);
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
@@ -187,7 +187,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             ResetHttpContextToDefault();
             var httpContext = new DefaultHttpContext();
-            _testHelper.AddAuthorizationHeader(httpContext);
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",

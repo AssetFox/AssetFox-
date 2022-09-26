@@ -543,7 +543,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         private HttpContext CreateLoadedContextForSimulation(Guid simulationId)
         {
             var httpContext = new DefaultHttpContext();
-            _testHelper.AddAuthorizationHeader(httpContext);
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
@@ -566,7 +566,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         private HttpContext CreateContextWithNoFile(Guid simulationId)
         {
             var httpContext = new DefaultHttpContext();
-            _testHelper.AddAuthorizationHeader(httpContext);
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
 
             var formData = new Dictionary<string, StringValues>()

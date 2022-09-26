@@ -85,22 +85,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public void SetupDefaultHttpContext()
         {
-            if (!HttpContextHasBeenSetup)
-            {
-                lock (HttpContextSetupLock) // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
-                {
-                    if (!HttpContextHasBeenSetup)
-                    {
-                        var context = new DefaultHttpContext();
-                        AddAuthorizationHeader(context);
-                        MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
-                    }
-                }
-            }
-        }
 
-        public void AddAuthorizationHeader(DefaultHttpContext context) =>
-            context.Request.Headers.Add("Authorization", "Bearer abc123");
+            var context = new DefaultHttpContext();
+            HttpContextSetup.AddAuthorizationHeader(context);
+            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
+        }
 
         public NetworkEntity TestNetwork { get; } = new NetworkEntity
         {

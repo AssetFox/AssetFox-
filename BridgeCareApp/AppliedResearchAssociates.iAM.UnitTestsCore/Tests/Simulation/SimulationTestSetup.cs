@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var returnValue = new SimulationEntity
             {
                 Id = resolveId,
-                NetworkId = TestHelper.NetworkId,
+                NetworkId = NetworkTestSetup.NetworkId,
                 Name = resolveName,
                 NumberOfYearsOfTreatmentOutlook = 2,
                 SimulationUserJoins = users

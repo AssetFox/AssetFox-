@@ -30,7 +30,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestHelper
     {
-        public static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
 
         public readonly IAMContext DbContext;
 
@@ -58,36 +57,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        private static readonly object HttpContextSetupLock = new object();
-
-        public NetworkEntity TestNetwork { get; } = new NetworkEntity
-        {
-            Id = NetworkId,
-            Name = "Test Network"
-        };
-
-
-
         public void CreateSingletons()
         {
             AttributeTestSetup.CreateAttributes(UnitOfWork);
-            CreateNetwork();
-        }
-
-        private static readonly object NetworkCreationLock = new object();
-
-        public void CreateNetwork()
-        {
-            if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
-            {
-                lock (NetworkCreationLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
-                {
-                    if (!UnitOfWork.Context.Network.Any(_ => _.Id == NetworkId))
-                    {
-                        UnitOfWork.Context.AddEntity(TestNetwork);
-                    }
-                }
-            }
+            NetworkTestSetup.CreateNetwork(UnitOfWork);
         }
     }
 }

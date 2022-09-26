@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
                 hubService, accessor);
             return controller;

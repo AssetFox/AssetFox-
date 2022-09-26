@@ -29,7 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
         }
 

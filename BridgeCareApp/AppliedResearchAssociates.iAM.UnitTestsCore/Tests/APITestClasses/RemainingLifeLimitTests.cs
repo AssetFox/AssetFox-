@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public RemainingLifeLimitController SetupController()
         {
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new RemainingLifeLimitController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,

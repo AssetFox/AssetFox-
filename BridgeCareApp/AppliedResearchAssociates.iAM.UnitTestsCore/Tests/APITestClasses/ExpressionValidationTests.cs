@@ -87,7 +87,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         TestDataHaveBeenAdded = true;
                         var culvAttribute = AttributeDtos.CulvDurationN;
                         var actionTypeAttribute = AttributeDtos.ActionType;
-                        TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
+                        TestMaintainableAsset.NetworkId = NetworkTestSetup.NetworkId;
                         _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
                         TestNumericAggregatedResult.AttributeId = AttributeDtos.CulvDurationN.Id;
                         TestTextAggregatedResult.AttributeId = AttributeDtos.ActionType.Id;
@@ -263,7 +263,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1' AND [{AttributeDtos.ActionType.Name}]='test'",
-                NetworkId = _testHelper.TestNetwork.Id
+                NetworkId = NetworkTestSetup.NetworkId,
             };
 
             // Act
@@ -345,7 +345,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             foreach (var testDataSet in invalid)
             {
                 var validationParams = testDataSet[0] as ValidationParameter;
-                validationParams.NetworkId = _testHelper.TestNetwork.Id;
+                validationParams.NetworkId = NetworkTestSetup.NetworkId;
                 var result =
                     await controller.GetCriterionValidationResult(validationParams);
 
@@ -369,7 +369,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1'",
-                NetworkId = _testHelper.TestNetwork.Id
+                NetworkId = NetworkTestSetup.NetworkId,
             };
 
             // Act

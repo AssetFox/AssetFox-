@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public void Setup()
         {
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
         }
 
         private TreatmentController CreateAuthorizedController()

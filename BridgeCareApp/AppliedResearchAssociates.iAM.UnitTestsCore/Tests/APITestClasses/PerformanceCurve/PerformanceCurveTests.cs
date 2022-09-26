@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         private void Setup()
         {
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
         }
 
         [Fact]

@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         {
             var dbContext = _testHelper.DbContext;
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
                 dbContext.SaveChanges();

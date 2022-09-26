@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public SimulationAnalysisService Setup()
         {
             AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            _testHelper.CreateNetwork();
+            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
 
             var simulationAnalysisService =
@@ -124,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     Id = Guid.NewGuid(),
                     Name = SimulationName,
                     NumberOfYearsOfTreatmentOutlook = 1,
-                    NetworkId = _testHelper.TestNetwork.Id,
+                    NetworkId = NetworkTestSetup.NetworkId,
                     SimulationUserJoins = new List<SimulationUserEntity>
                 {
                     new SimulationUserEntity
@@ -531,13 +531,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             var simulation = SimulationTestSetup.TestSimulation();
-            simulation.NetworkId = _testHelper.TestNetwork.Id;
-            simulation.Network = _testHelper.TestNetwork;
+            simulation.NetworkId = NetworkTestSetup.TestNetwork.Id;
+            simulation.Network = NetworkTestSetup.TestNetwork;
 
             // Act
             var dto = simulation.ToDto(null);
             dto.Id = Guid.NewGuid();
-            var result = await _controller.CreateSimulation(_testHelper.TestNetwork.Id, dto);
+            var result = await _controller.CreateSimulation(NetworkTestSetup.NetworkId, dto);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -654,7 +654,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Act
             var result =
-                await _controller.CreateSimulation(_testHelper.TestNetwork.Id, newSimulationDTO) as OkObjectResult;
+                await _controller.CreateSimulation(NetworkTestSetup.NetworkId, newSimulationDTO) as OkObjectResult;
             var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
             // Assert

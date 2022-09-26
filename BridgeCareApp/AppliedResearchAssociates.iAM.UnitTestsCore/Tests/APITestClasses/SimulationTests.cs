@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -50,7 +51,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
 
             var simulationAnalysisService =
@@ -58,21 +58,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return simulationAnalysisService;
         }
 
-        private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService) =>
+        private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService)
+        {
+            var accessor = HttpContextAccessorMocks.Default();
             _controller = new SimulationController(
                 simulationAnalysisService,
                 new SimulationService(_testHelper.UnitOfWork),
                 EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                accessor);
+        }
 
-        private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService) =>
+        private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService)
+        {
+            var accessor = HttpContextAccessorMocks.Default();
             _controller = new SimulationController(simulationAnalysisService,
                 new SimulationService(_testHelper.UnitOfWork),
                 EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor);
+        }
 
         private void CreateTestData()
         {

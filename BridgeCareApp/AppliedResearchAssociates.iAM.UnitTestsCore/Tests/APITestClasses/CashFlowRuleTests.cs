@@ -31,15 +31,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateSingletons();
         }
 
-        private void CreateAuthorizedController() =>
+        private void CreateAuthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor);
+        }
 
-        private void CreateUnauthorizedController() =>
+        private void CreateUnauthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor
+                );
+        }
 
         private void CreateLibraryTestData()
         {

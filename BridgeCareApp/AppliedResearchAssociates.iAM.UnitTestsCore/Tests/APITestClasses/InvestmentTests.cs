@@ -45,26 +45,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
             var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service)
+        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
+            accessor ??= HttpContextAccessorMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+                _testHelper.MockHubService.Object,
+                accessor,
+                _mockInvestmentDefaultDataService.Object);
             return controller;
         }
 
         private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockInvestmentDefaultDataService.Object);
+                _testHelper.MockHubService.Object, accessor, _mockInvestmentDefaultDataService.Object);
             return controller;
         }
 
@@ -150,20 +153,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateRequestWithLibraryFormData(bool overwriteBudgets = false)
+        private IHttpContextAccessor CreateRequestWithLibraryFormData(bool overwriteBudgets = false)
         {
-            ResetHttpContextToDefault();
             var httpContext = new DefaultHttpContext();
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
-                "TestInvestmentBudgets.xlsx");
-            using var stream = File.OpenRead(filePath);
-            var memStream = new MemoryStream();
-            stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-
             var formData = new Dictionary<string, StringValues>()
             {
                 {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
@@ -178,14 +170,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     HasAccess = true,
                 })}
             };
-
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
+                "TestInvestmentBudgets.xlsx");
+            using var stream = File.OpenRead(filePath);
+            var memStream = new MemoryStream();
+            stream.CopyTo(memStream);
+            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
+            HttpContextSetup.AddAuthorizationHeader(httpContext);
+            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
+
+           var mock = new Mock<IHttpContextAccessor>();
+            mock.Setup(m => m.HttpContext).Returns(httpContext);
+            return mock.Object;
         }
 
         private void CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
         {
-            ResetHttpContextToDefault();
             var httpContext = new DefaultHttpContext();
             HttpContextSetup.AddAuthorizationHeader(httpContext);
             httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
@@ -204,7 +205,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             };
 
             httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
         }
 
         private Dictionary<string, string> GetCriteriaPerBudgetName()
@@ -235,7 +235,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return criteriaPerBudgetName;
         }
 
-        private void CreateRequestForExceptionTesting(FormFile file = null)
+        private IHttpContextAccessor CreateRequestForExceptionTesting(FormFile file = null)
         {
             var httpContext = new DefaultHttpContext();
 
@@ -250,12 +250,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             }
 
             httpContext.Request.Form = new FormCollection(new Dictionary<string, StringValues>(), formFileCollection);
-            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(httpContext);
-        }
-
-        private void ResetHttpContextToDefault()
-        {
-            _testHelper.MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(new DefaultHttpContext());
+            var accessor = new Mock<IHttpContextAccessor>();
+            accessor.Setup(_ => _.HttpContext).Returns(httpContext);
+            return accessor.Object;
         }
 
         [Fact]
@@ -545,9 +542,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
             CreateLibraryTestData();
-            CreateRequestWithLibraryFormData();
+            var accessor = CreateRequestWithLibraryFormData();
+            var controller = CreateAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
 
 
@@ -736,7 +733,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateAuthorizedController(service);
-            ResetHttpContextToDefault();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -749,8 +745,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateRequestForExceptionTesting();
+            var accessor = CreateRequestForExceptionTesting();
+            var controller = CreateAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -763,10 +759,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
-            CreateRequestForExceptionTesting(file);
+            var accessor = CreateRequestForExceptionTesting(file);
+            var controller = CreateAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -972,7 +968,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateAuthorizedController(service);
-            ResetHttpContextToDefault();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -985,8 +980,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
+            var accessor = CreateRequestForExceptionTesting();
             var controller = CreateAuthorizedController(service);
-            CreateRequestForExceptionTesting();
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -999,10 +994,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
-            CreateRequestForExceptionTesting(file);
+            var accessor = CreateRequestForExceptionTesting(file);
+            var controller = CreateAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

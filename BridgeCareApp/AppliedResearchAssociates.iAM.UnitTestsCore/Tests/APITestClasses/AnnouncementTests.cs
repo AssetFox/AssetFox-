@@ -21,9 +21,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public AnnouncementTests()
         {
-            _testHelper.SetupDefaultHttpContext();
+            var accessor = HttpContextAccessorMocks.Default();
             _controller = new AnnouncementController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, accessor);
         }
 
         public AnnouncementEntity TestAnnouncement(Guid? id = null)

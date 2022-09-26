@@ -32,21 +32,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
         }
 
         private TreatmentController CreateAuthorizedController()
         {
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, accessor);
             return controller;
         }
 
         private TreatmentController CreateUnauthorizedController()
         {
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor);
             return controller;
         }
 

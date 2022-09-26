@@ -24,11 +24,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public TargetConditionGoalController SetupController()
         {
+            var accessor = HttpContextAccessorMocks.Default();
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, accessor);
             return controller;
         }
 

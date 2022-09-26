@@ -34,21 +34,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private BudgetPriorityController CreateAuthorizedController()
         {
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new BudgetPriorityController(
                 EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                accessor);
             return controller;
         }
 
         private BudgetPriorityController CreateUnauthorizedController()
         {
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new BudgetPriorityController(
                 EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object);
+                accessor);
             return controller;
         }
 

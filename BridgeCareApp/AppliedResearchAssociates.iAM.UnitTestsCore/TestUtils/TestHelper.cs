@@ -44,7 +44,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; }
 
-        public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
 
         public TestHelper()
@@ -53,8 +52,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
-
-            MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 
             Logger = new LogNLog();
 
@@ -81,15 +78,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         }
 
         private static readonly object HttpContextSetupLock = new object();
-        private static bool HttpContextHasBeenSetup = false;
-
-        public void SetupDefaultHttpContext()
-        {
-
-            var context = new DefaultHttpContext();
-            HttpContextSetup.AddAuthorizationHeader(context);
-            MockHttpContextAccessor.Setup(_ => _.HttpContext).Returns(context);
-        }
 
         public NetworkEntity TestNetwork { get; } = new NetworkEntity
         {
@@ -140,7 +128,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             CreateAttributes();
             CreateNetwork();
-            SetupDefaultHttpContext();
         }
 
         private static readonly object NetworkCreationLock = new object();

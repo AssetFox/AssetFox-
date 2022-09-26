@@ -21,9 +21,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new RemainingLifeLimitController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object, accessor);
             return controller;
         }
 

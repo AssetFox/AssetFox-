@@ -26,7 +26,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
         }
 
         [Fact]
@@ -286,7 +285,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
-            _testHelper.SetupDefaultHttpContext();
             var mockedUnauthorized = new Mock<IEsecSecurity>();
             mockedUnauthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo

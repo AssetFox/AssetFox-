@@ -24,7 +24,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
         }
 
         [Fact]

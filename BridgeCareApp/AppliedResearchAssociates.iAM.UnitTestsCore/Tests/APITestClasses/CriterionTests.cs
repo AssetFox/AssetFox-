@@ -20,8 +20,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryController SetupController()
         {
             _testHelper.CreateSingletons();
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new CriterionLibraryController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor);
             return controller;
         }
 

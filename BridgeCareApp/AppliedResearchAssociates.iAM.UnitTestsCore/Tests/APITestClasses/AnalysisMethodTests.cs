@@ -26,8 +26,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateSingletons();
             _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new AnalysisMethodController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object);
+                _testHelper.MockHubService.Object, accessor, _mockAnalysisDefaultDataService.Object);
             return controller;
         }
 

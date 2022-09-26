@@ -23,8 +23,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private static DeficientConditionGoalController Setup()
         {
             _testHelper.CreateSingletons();
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+                _testHelper.MockHubService.Object,
+                accessor);
             return controller;
         }
 

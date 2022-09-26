@@ -16,11 +16,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static PerformanceCurveController SetupController(TestHelper testHelper, IEsecSecurity esecSecurity)
         {
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new PerformanceCurveController(
                 esecSecurity,
                 testHelper.UnitOfWork,
                 testHelper.MockHubService.Object,
-                testHelper.MockHttpContextAccessor.Object,
+                accessor,
                 TestUtils.TestServices.PerformanceCurves);
             return controller;
         }

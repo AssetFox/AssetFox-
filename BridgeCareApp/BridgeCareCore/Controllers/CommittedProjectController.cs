@@ -371,14 +371,15 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertSectionCommittedProjects")]
+        [Route("UpsertSectionCommittedProjects/{simulationId}")]
         [Authorize(Policy = Policy.ModifyCommittedProjects)]
-        public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        public async Task<IActionResult> UpsertCommittedProjects(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    var projects = _committedProjectService.GetSyncedDataset(simulationId, request);
                     checkUpsertPermit(projects);
                     UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
                 });

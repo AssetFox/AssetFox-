@@ -34,16 +34,28 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetLibraryCalculatedAttributePage(Guid libraryId, CalculatedAttributePagingRequestModel request)
         {
-            var attribute = _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, request.AttributeId);
-            return HandlePaging(attribute, request);
+            var calcAttribute = new CalculatedAttributeDTO();
+            var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
+            var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
+            if (addedCalc != null)
+                calcAttribute = addedCalc;
+            else
+                calcAttribute = _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(libraryId, request.AttributeId);
+            return HandlePaging(calcAttribute, request);
         }
 
         public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetScenarioCalculatedAttributePage(Guid simulationId, CalculatedAttributePagingRequestModel request)
         {
-            var attribute = request.SyncModel.LibraryId == null ? _unitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(simulationId, request.AttributeId):
+            var calcAttribute = new CalculatedAttributeDTO();
+            var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
+            var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
+            if (addedCalc != null)
+                calcAttribute = addedCalc;
+            else
+                calcAttribute = request.SyncModel.LibraryId == null ? _unitOfWork.CalculatedAttributeRepo.GetScenarioCalulatedAttributesByScenarioAndAttributeId(simulationId, request.AttributeId):
                 _unitOfWork.CalculatedAttributeRepo.GetLibraryCalulatedAttributesByLibraryAndAttributeId(request.SyncModel.LibraryId.Value, request.AttributeId);
 
-            return HandlePaging(attribute, request);
+            return HandlePaging(calcAttribute, request);
         }
 
         public List<CalculatedAttributeDTO> GetSyncedScenarioDataset(Guid simulationId, CalculatedAttributePagingSyncModel request)
@@ -66,14 +78,15 @@ namespace BridgeCareCore.Services
                     });
                 });
             }
+            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
             return SyncedDataset(attributes, request);
         }
 
         public List<CalculatedAttributeDTO> GetSyncedLibraryDataset(Guid libraryId, CalculatedAttributePagingSyncModel request)
         {
             var library = _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(libraryId);
-
-            return SyncedDataset(library.CalculatedAttributes.ToList() , request);
+            library.CalculatedAttributes = library.CalculatedAttributes.Concat(request.AddedCalculatedAttributes).ToList(); 
+            return SyncedDataset(library.CalculatedAttributes.ToList(), request);
         }
 
         private List<CalculatedAttributeEquationCriteriaPairDTO> OrderByColumn(List<CalculatedAttributeEquationCriteriaPairDTO> equations, string sortColumn, bool isDescending)
@@ -86,7 +99,7 @@ namespace BridgeCareCore.Services
                     return equations.OrderByDescending(_ => _.Equation.Expression.ToLower()).ToList();
                 else
                     return equations.OrderBy(_ => _.Equation.Expression.ToLower()).ToList();
-            case "criterion":
+            case "criteriaexpression":
                 if (isDescending)
                     return equations.OrderByDescending(_ => _.CriteriaLibrary.MergedCriteriaExpression.ToLower()).ToList();
                 else
@@ -140,27 +153,28 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<CalculatedAttributeEquationCriteriaPairDTO>();
             var equations = attribute.Equations.ToList();
-            if (request.search.Trim() != "")
+            if (request.search != null && request.search.Trim() != "")
                 equations = SearchRows(equations, request.search);
-            if (request.sortColumn.Trim() != "")
+            if (request.sortColumn != null && request.sortColumn.Trim() != "")
                 equations = OrderByColumn(equations, request.sortColumn, request.isDescending);
 
+            attribute.Equations = equations;
             attribute = SyncedDataset(new List<CalculatedAttributeDTO>() { attribute }, request.SyncModel).First();
 
             if (request.RowsPerPage > 0)
             {
                 take = request.RowsPerPage;
                 skip = request.RowsPerPage * (request.Page - 1);
-                items = equations.Skip(skip).Take(take).ToList();
+                items = attribute.Equations.Skip(skip).Take(take).ToList();
             }
             else
             {
-                items = equations;
+                items = attribute.Equations.ToList();
                 return new CalculcatedAttributePagingPageModel()
                 {
                     CalculationTiming = attribute.CalculationTiming,
                     Items = items,
-                    TotalItems = items.Count
+                    TotalItems = attribute.Equations.Count
                 };
             }
 
@@ -168,7 +182,7 @@ namespace BridgeCareCore.Services
             {
                 CalculationTiming = attribute.CalculationTiming,
                 Items = items,
-                TotalItems = equations.Count()
+                TotalItems = attribute.Equations.Count
             };
         }
     }

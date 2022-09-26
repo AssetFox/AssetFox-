@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId)
         {
-            return _unitOfDataPersistanceWork.Context.CalculatedAttribute
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute.AsNoTracking()
             .Include(_ => _.Attribute)
             .Include(_ => _.Equations)
             .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public CalculatedAttributeDTO GetScenarioCalulatedAttributesByScenarioAndAttributeId(Guid scenarioId, Guid attributeId)
         {
-            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
             .Include(_ => _.Attribute)
             .Include(_ => _.Equations)
             .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)

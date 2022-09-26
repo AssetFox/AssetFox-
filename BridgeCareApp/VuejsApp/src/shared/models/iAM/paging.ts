@@ -74,6 +74,7 @@ export interface CalculatedAttributePagingRequestModel extends BasePagingRequest
 export interface CalculatedAttributePagingSyncModel{
     libraryId: string | null;
     updatedCalculatedAttributes: CalculatedAttribute[];
+    addedCalculatedAttributes: CalculatedAttribute[];
     addedPairs: { [key: string]: CriterionAndEquationSet[]; }
     updatedPairs: { [key: string]: CriterionAndEquationSet[]; }
     deletedPairs: { [key: string]: string[]; }

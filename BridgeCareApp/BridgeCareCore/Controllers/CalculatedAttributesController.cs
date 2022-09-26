@@ -110,7 +110,14 @@ namespace BridgeCareCore.Controllers
                     attributes.ForEach(attribute =>
                     {
                         attribute.Id = Guid.NewGuid();
-                        attribute.Equations.ToList().ForEach(_ => _.Id = Guid.NewGuid());
+                        var equations = attribute.Equations.ToList();
+                        equations.ForEach(_ =>
+                        {
+                            _.Id = Guid.NewGuid();
+                            _.Equation.Id = Guid.NewGuid();
+                            _.CriteriaLibrary.Id = Guid.NewGuid();
+                        });
+                        attribute.Equations = equations;
                     });
                 var dto = upsertRequest.Library;
                 dto.CalculatedAttributes = attributes;

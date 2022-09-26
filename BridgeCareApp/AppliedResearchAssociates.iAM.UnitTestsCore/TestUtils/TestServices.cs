@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.StartupExtension;
@@ -30,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var hubService = HubServiceMocks.Default();
             serviceCollection.AddSingleton(hubService);
             serviceCollection.AddSingleton<IHubService>(hubService);
-            var log = testHelper.Logger;
+            var log = new LogNLog();
             serviceCollection.AddSingleton(log);
             serviceCollection.AddBridgecareCoreServices();
             var provider = serviceCollection.BuildServiceProvider();

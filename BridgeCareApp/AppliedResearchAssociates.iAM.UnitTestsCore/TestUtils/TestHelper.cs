@@ -31,14 +31,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     {
         public static readonly Guid NetworkId = Guid.Parse("7f4ea3ba-6082-4e1e-91a4-b80578aeb0ed");
 
-        public readonly string BaseUrl = "http://localhost:64469/api";
-
         public readonly IAMContext DbContext;
 
         public IConfiguration Config { get; }
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
-        public ILog Logger { get; }
 
         public TestHelper()
         {
@@ -46,8 +43,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
-
-            Logger = new LogNLog();
 
             var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
@@ -115,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual void CreateSingletons()
+        public void CreateSingletons()
         {
             CreateAttributes();
             CreateNetwork();
@@ -136,6 +131,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 }
             }
         }
-
     }
 }

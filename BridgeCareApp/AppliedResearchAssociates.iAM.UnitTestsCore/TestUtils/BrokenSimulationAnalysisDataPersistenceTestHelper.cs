@@ -12,15 +12,14 @@ using System.IO;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
-    public class SimulationAnalysisDataPersistenceTestHelper : TestHelper
+    public class BrokenSimulationAnalysisDataPersistenceTestHelper : TestHelper
     {
-        private const int NetworkId = 13;
         public UnitOfDataPersistenceWork UnitOfWorkForAnalysis { get; }
         public readonly IAMContext DbContextForAnalysis;
         public IConfiguration ConfigForAnalysis { get; }
         public Simulation StandAloneSimulation { get; set; }
 
-        public SimulationAnalysisDataPersistenceTestHelper(): base()
+        public BrokenSimulationAnalysisDataPersistenceTestHelper(): base()
         {
             ConfigForAnalysis = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

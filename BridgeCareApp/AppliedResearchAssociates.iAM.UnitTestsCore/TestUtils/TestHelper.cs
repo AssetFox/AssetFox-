@@ -38,7 +38,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IConfiguration Config { get; }
 
         public UnitOfDataPersistenceWork UnitOfWork { get; }
-        public Mock<ITreatmentService> MockTreatmentService { get; }
         public ILog Logger { get; }
 
         public Mock<HubService> MockHubService { get; }
@@ -54,8 +53,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
-            MockTreatmentService = new Mock<ITreatmentService>();
-
 
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 

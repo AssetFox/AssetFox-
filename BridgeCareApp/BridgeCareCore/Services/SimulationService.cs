@@ -20,7 +20,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 
 namespace BridgeCareCore.Services
 {
-    public class SimulationService
+    public class SimulationService : ISimulationService
     {
         private static UnitOfDataPersistenceWork _unitOfWork;
 

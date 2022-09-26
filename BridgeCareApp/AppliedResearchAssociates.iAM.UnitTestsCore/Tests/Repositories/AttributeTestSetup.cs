@@ -16,11 +16,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
     public static class AttributeTestSetup
     {
+        public static string ValidAttributeName() => "A" + RandomStrings.Length11();
+
         public static NumericAttribute Numeric(Guid? id = null, string name = null, Guid? dataSourceId = null, ConnectionType connectionType = ConnectionType.MSSQL)
         {
             var resolvedId = id ?? Guid.NewGuid();
-            var randomName = name ?? RandomStrings.Length11();
-            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", connectionType, "connectionString", true, false, dataSourceId);            return attribute;
+            var randomName = name ?? ValidAttributeName();
+            var attribute = new NumericAttribute(2, 3, 1, resolvedId, randomName, "AVERAGE", "Command", connectionType, "connectionString", false, false, dataSourceId);
+            return attribute;
         }
 
         public static AttributeDTO NumericDto(BaseDataSourceDTO dataSourceDTO, Guid? id = null, string name = null, ConnectionType connectionType = ConnectionType.MSSQL)
@@ -33,10 +36,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         public static TextAttribute Text(Guid? id = null, string name = null, bool calculated = false)
         {
             var resolvedId = id ?? Guid.NewGuid();
-            var randomName = name ?? RandomStrings.Length11();
+            var randomName = name ?? ValidAttributeName();
             var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }
-
     }
 }

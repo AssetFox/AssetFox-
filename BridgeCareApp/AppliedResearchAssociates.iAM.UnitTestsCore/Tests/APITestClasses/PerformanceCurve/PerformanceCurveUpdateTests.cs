@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var curveId = Guid.NewGuid();
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             performanceCurveLibraryDto.Description = "Updated Description";
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
@@ -74,7 +74,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.Equation = equation.ToDto();
@@ -112,7 +112,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.Equation = null;
@@ -151,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(_testHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -190,7 +190,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(
                 _testHelper.UnitOfWork, curveId, criterionLibrary.Id);
@@ -234,7 +234,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(_testHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
@@ -273,7 +273,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.Equation.Expression = "123";
@@ -311,7 +311,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryDto = library.ToDto();
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
             var equation = EquationTestSetup.TwoWithJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = _testHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             performanceCurveLibraryDto.PerformanceCurves.RemoveAt(0);
 
@@ -351,7 +351,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Name = "Curve",
             };
             Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -394,7 +394,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
    
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -442,7 +442,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
  
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -491,7 +491,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
 
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {

@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _controller = new SimulationController(
                 simulationAnalysisService,
                 new SimulationService(_testHelper.UnitOfWork),
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);

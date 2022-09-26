@@ -32,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         private void CreateAuthorizedController() =>
-            _controller = new CashFlowController(_testHelper.MockEsecSecurityAdmin.Object,
+            _controller = new CashFlowController(EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
 

@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _testHelper.CreateSingletons();
             AddTestData();
             var service = CreateValidationService();
-            var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
+            var controller = new ExpressionValidationController(service, EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }

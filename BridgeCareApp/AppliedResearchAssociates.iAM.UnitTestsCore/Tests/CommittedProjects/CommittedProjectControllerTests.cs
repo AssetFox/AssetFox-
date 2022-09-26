@@ -66,7 +66,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -111,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -156,7 +156,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(CreateContextWithNoFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -196,7 +196,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Throws<ArgumentException>();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 mockContextAccessor.Object);
@@ -238,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -299,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -352,7 +352,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -377,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(TestDataForCommittedProjects.ValidCommittedProjects);
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -421,7 +421,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Throws<RowNotInTableException>();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -440,7 +440,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -499,7 +499,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _testHelper.SetupDefaultHttpContext();
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);

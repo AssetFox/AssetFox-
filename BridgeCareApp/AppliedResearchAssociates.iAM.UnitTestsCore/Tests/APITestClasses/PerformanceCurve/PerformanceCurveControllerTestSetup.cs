@@ -14,10 +14,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public static class PerformanceCurveControllerTestSetup
     {
 
-        public static PerformanceCurveController SetupController(TestHelper testHelper, Moq.Mock<IEsecSecurity> mockedEsecSecurity)
+        public static PerformanceCurveController SetupController(TestHelper testHelper, IEsecSecurity esecSecurity)
         {
             var controller = new PerformanceCurveController(
-                mockedEsecSecurity.Object,
+                esecSecurity,
                 testHelper.UnitOfWork,
                 testHelper.MockHubService.Object,
                 testHelper.MockHttpContextAccessor.Object,

@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 Name = "Test"
             };
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 .Throws(new ArgumentException(errorMessage));
             var hubService = _testHelper.MockHubService;
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -105,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 LocationColumn = "BRKEY"
             };
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -124,7 +124,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             // Arrange
             var sourceToDelete = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -141,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -156,7 +156,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             var sourceSQL = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "SQL Server Data Source").Id;
             var sourceExcel = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -231,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);
@@ -249,7 +249,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var controller = new DataSourceController(
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
                 _testHelper.MockHttpContextAccessor.Object);

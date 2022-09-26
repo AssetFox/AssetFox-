@@ -34,7 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             // Act
             var result = await controller.GetPerformanceCurveLibraries();
@@ -49,7 +49,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var libraryId = Guid.NewGuid();
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId).ToDto();
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
@@ -75,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var libraryId = Guid.NewGuid();
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId).ToDto();
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
 
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
 
             // Act
             var result = await controller.DeletePerformanceCurveLibrary(Guid.NewGuid());
@@ -119,7 +119,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var request = new PagingRequestModel<PerformanceCurveDTO>()
             {
                 isDescending = false,
@@ -148,7 +148,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
             var performanceCurveId = Guid.NewGuid();
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);
             performanceCurve.Attribute = attribute;
@@ -176,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, libraryId);
             var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(_testHelper.UnitOfWork, libraryId, curveId);
 
@@ -202,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             Setup();
             // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveLibraryId = Guid.NewGuid();
             var performanceCurveId = Guid.NewGuid();
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(_testHelper.UnitOfWork, performanceCurveLibraryId);
@@ -250,7 +250,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Setup();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, EsecSecurityMocks.Admin);
             var performanceCurveId = Guid.NewGuid();
             ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulation.Id, performanceCurveId);
             var request = new PagingRequestModel<PerformanceCurveDTO>()
@@ -295,7 +295,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     Role = Role.DistrictEngineer,
                     Email = "fake@pa.gov"
                 });
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, mockedUnauthorized);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, mockedUnauthorized.Object);
             var performanceCurveId = Guid.NewGuid();
             var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);

@@ -37,7 +37,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private TreatmentController CreateAuthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             return controller;
         }

@@ -64,11 +64,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -88,11 +89,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -107,13 +109,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
+            var hubService = HubServiceMocks.Default();
             mockContextAccessor.Setup(_ => _.HttpContext)
                 .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 mockContextAccessor.Object);
 
             // Act
@@ -132,11 +135,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             mockContextAccessor.Setup(_ => _.HttpContext)
                 .Returns(CreateLoadedContextForSimulation(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 mockContextAccessor.Object);
 
             // Act
@@ -154,11 +158,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var mockContextAccessor = new Mock<IHttpContextAccessor>();
             mockContextAccessor.Setup(_ => _.HttpContext)
                 .Returns(CreateContextWithNoFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee")));
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 mockContextAccessor.Object);
 
             // Act
@@ -174,11 +179,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -194,11 +200,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act + Asset
@@ -216,11 +223,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 .Returns(CreateLoadedContextForSimulation(_badScenario));
             _mockService.Setup(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .Throws<ArgumentException>();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 mockContextAccessor.Object);
 
             // Act
@@ -236,11 +244,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -257,11 +266,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -277,11 +287,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -297,11 +308,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             var deleteList = new List<Guid>()
             {
@@ -325,11 +337,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
             _mockCommittedProjectRepo.Setup(_ => _.GetSimulationId(It.IsAny<Guid>()))
                 .Returns(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             var deleteList = new List<Guid>()
             {
@@ -350,11 +363,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             var deleteList = new List<Guid>()
             {
@@ -375,11 +389,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var accessor = HttpContextAccessorMocks.Default();
             _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.ValidCommittedProjects);
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -398,11 +413,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -419,11 +435,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var accessor = HttpContextAccessorMocks.Default();
             _mockCommittedProjectRepo.Setup(_ => _.GetSectionCommittedProjectDTOs(It.IsAny<Guid>()))
                 .Throws<RowNotInTableException>();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -438,11 +455,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
@@ -467,12 +485,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
-            
+            var hubService = HubServiceMocks.Default();
+
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
@@ -497,11 +516,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
                 .Throws<RowNotInTableException>();

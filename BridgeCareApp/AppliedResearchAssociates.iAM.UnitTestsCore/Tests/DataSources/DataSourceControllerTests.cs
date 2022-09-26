@@ -55,10 +55,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 Name = "Test"
             };
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -82,12 +83,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             };
             _mockDataSource.Setup(_ => _.UpsertDatasource(It.IsAny<BaseDataSourceDTO>()))
                 .Throws(new ArgumentException(errorMessage));
-            var hubService = _testHelper.MockHubService;
+            var hubService = HubServiceMocks.Default();
             var accessor = HttpContextAccessorMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                hubService.Object,
+                hubService,
                 accessor);
 
             // Act & Assert
@@ -107,10 +108,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 LocationColumn = "BRKEY"
             };
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -127,10 +129,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             // Arrange
             var sourceToDelete = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -145,10 +148,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             _mockDataSource.Setup(_ => _.DeleteDataSource(It.IsAny<Guid>())).Throws<RowNotInTableException>();
 
@@ -161,10 +165,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -184,10 +189,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             _mockDataSource.Setup(_ => _.GetDataSources()).Returns(new List<BaseDataSourceDTO>());
 
@@ -210,10 +216,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             var sourceSQL = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "SQL Server Data Source").Id;
             var sourceExcel = TestDataForDataSources.SimpleRepo().Single(_ => _.Name == "Some Excel File").Id;
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act
@@ -239,10 +246,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             _mockDataSource.Setup(_ => _.GetDataSource(It.IsAny<Guid>())).Returns<BaseDataSourceDTO>(null);
 
@@ -258,10 +266,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
         {
             // Arrange
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new DataSourceController(
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
 
             // Act

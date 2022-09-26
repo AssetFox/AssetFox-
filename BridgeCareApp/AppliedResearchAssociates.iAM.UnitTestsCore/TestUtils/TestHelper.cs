@@ -40,12 +40,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public UnitOfDataPersistenceWork UnitOfWork { get; }
         public ILog Logger { get; }
 
-        public Mock<HubService> MockHubService { get; }
-
-        public Mock<IHubContext<BridgeCareHub>> MockHubContext { get; }
-
-
-
         public TestHelper()
         {
             Config = new ConfigurationBuilder()
@@ -55,9 +49,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
             Logger = new LogNLog();
 
-            MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
-
-            MockHubService = new Mock<HubService>(MockHubContext.Object);
             var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)

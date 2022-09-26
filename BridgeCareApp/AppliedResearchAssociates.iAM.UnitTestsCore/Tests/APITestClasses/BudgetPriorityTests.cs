@@ -35,10 +35,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityController CreateAuthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
                 EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             return controller;
         }
@@ -46,10 +47,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityController CreateUnauthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
                 EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
             return controller;
         }

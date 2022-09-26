@@ -31,8 +31,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
             _testRepo = mockedRepo;
 
             _testReportLibrary = new ReportLookupLibrary(TestDataForReportIndex.SimpleReportLibrary());
+            var hubService = HubServiceMocks.Default();
 
-            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary, _testHelper.MockHubService.Object);
+            _generator = new DictionaryBasedReportGenerator(_testRepo, _testReportLibrary, hubService);
         }
 
         [Fact]

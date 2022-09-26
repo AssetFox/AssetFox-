@@ -45,7 +45,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _testHelper.CreateAttributes();
             _testHelper.CreateNetwork();
-            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), _testHelper.MockHubService.Object);
+            var hubService = HubServiceMocks.Default();
+            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, _testHelper.Logger), hubService);
             return service;
         }
 
@@ -53,9 +54,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor,
                 _mockInvestmentDefaultDataService.Object);
             return controller;
@@ -65,9 +67,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, accessor, _mockInvestmentDefaultDataService.Object);
+                hubService, accessor, _mockInvestmentDefaultDataService.Object);
             return controller;
         }
 

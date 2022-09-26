@@ -61,23 +61,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService)
         {
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(
                 simulationAnalysisService,
                 new SimulationService(_testHelper.UnitOfWork),
                 EsecSecurityMocks.Admin,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
         }
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService)
         {
             var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(simulationAnalysisService,
                 new SimulationService(_testHelper.UnitOfWork),
                 EsecSecurityMocks.Dbe,
                 _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
+                hubService,
                 accessor);
         }
 

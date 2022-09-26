@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var testHelper = TestHelper.Instance;
             serviceCollection.AddSingleton(testHelper.Config);
             serviceCollection.AddSingleton(testHelper.DbContext);
-            var hubService = testHelper.MockHubService.Object;
+            var hubService = HubServiceMocks.Default();
             serviceCollection.AddSingleton(hubService);
             serviceCollection.AddSingleton<IHubService>(hubService);
             var log = testHelper.Logger;

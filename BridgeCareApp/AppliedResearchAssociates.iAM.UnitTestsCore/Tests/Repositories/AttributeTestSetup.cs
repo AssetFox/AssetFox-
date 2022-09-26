@@ -16,7 +16,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
     public static class AttributeTestSetup
     {
-        private static string ValidAttributeName() => "A" + RandomStrings.Length11();
+        public static string ValidAttributeName() => "A" + RandomStrings.Length11();
 
         public static NumericAttribute Numeric(Guid? id = null, string name = null, Guid? dataSourceId = null, ConnectionType connectionType = ConnectionType.MSSQL)
         {

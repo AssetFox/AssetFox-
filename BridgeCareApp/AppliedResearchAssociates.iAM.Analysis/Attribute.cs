@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             if (name == null || !NamePattern.IsMatch(name))
             {
-                throw new MalformedInputException($"Invalid name. The valid pattern is \"{PatternStrings.Identifier}\".");
+                throw new MalformedInputException($"Invalid name {name}. The valid pattern is \"{PatternStrings.Identifier}\".");
             }
 
             Name = name;

@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public void CreateNetworkViaFactoryAndRepository_Does()
         {
             var networkName = RandomStrings.WithPrefix("Network");
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var allNetworksBefore = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
@@ -24,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         private void Setup()
         {
-            _testHelper.CreateAttributes();
+            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
             _testHelper.CreateNetwork();
         }
 

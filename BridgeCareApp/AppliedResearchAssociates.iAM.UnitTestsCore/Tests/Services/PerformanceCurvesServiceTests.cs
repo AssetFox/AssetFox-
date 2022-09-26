@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
@@ -21,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         private Mock<IExpressionValidationService> SetupMock(Guid performanceCurveLibraryId)
         {
             var dbContext = _testHelper.DbContext;
-            _testHelper.CreateAttributes();
+            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
             _testHelper.CreateNetwork();
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });

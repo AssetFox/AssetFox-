@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
         [Fact]
         public async Task Aggregate_SqlDataSourceInDb_AttributesInDb_Aggregates()
         {
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);

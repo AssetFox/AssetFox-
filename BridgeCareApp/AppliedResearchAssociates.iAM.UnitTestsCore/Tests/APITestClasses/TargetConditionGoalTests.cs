@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            _testHelper.CreateAttributes();
+            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
             _testHelper.CreateNetwork();
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
                 hubService, accessor);

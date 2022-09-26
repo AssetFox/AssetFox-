@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using MoreLinq;
 using System.IO;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -21,15 +22,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public BrokenSimulationAnalysisDataPersistenceTestHelper(): base()
         {
+            var config = TestConfiguration.Get();
             ConfigForAnalysis = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("testConnections.json")
                 .Build();
 
-            var connectionString = Config.GetConnectionString("BridgeCareConnexRealDb");
+            var connectionString = config.GetConnectionString("BridgeCareConnexRealDb");
 
             DbContextForAnalysis = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
-                .UseSqlServer(Config.GetConnectionString("BridgeCareConnexRealDb"))
+                .UseSqlServer(config.GetConnectionString("BridgeCareConnexRealDb"))
                 .Options);
 
             UnitOfWorkForAnalysis = new UnitOfDataPersistenceWork(ConfigForAnalysis, DbContextForAnalysis);
@@ -176,8 +178,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public void SetupForSimulation()
         {
-            CreateAttributes();
-            CreateNetwork();
+            //CreateAttributes();
+            //CreateNetwork();
         }
 
         public void SetupForAll()

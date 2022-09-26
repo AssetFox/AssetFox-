@@ -23,7 +23,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 testHelper.UnitOfWork,
                 hubService,
                 accessor,
-                TestUtils.TestServices.PerformanceCurves);
+                TestUtils.TestServices.PerformanceCurves(testHelper.UnitOfWork, hubService)
+                );
             return controller;
         }
     }

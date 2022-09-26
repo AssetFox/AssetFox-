@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             }
             _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
 
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);

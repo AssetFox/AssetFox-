@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
@@ -33,23 +34,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public readonly IAMContext DbContext;
 
-        public IConfiguration Config { get; }
-
         public UnitOfDataPersistenceWork UnitOfWork { get; }
 
         public TestHelper()
         {
-            Config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("testConnections.json")
-                .Build();
-
-            var connectionString = TestConnectionStrings.BridgeCare(Config);
+            var config = TestConfiguration.Get();
+            var connectionString = TestConnectionStrings.BridgeCare(config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);
 
-            UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
+            UnitOfWork = new UnitOfDataPersistenceWork(config, DbContext);
 
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
@@ -72,47 +67,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         };
 
 
-        private static bool AttributesHaveBeenCreated = false;
-        private static readonly object AttributeLock = new object();
-
-        public void CreateAttributes()
-        {
-            if (!AttributesHaveBeenCreated)
-            {
-                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
-                {
-                    if (!AttributesHaveBeenCreated)
-                    {
-                        SQLDataSourceDTO dataSourceToApply = null;
-                        if (!UnitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
-                        {
-                            dataSourceToApply = new SQLDataSourceDTO
-                            {
-                                Id = Guid.NewGuid(),
-                                Name = "Test SQL DataSource",
-                                ConnectionString = Config.GetConnectionString("BridgeCareConnex")
-                            };
-                            UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
-                        }
-                        else
-                        {
-                            dataSourceToApply = (SQLDataSourceDTO)UnitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
-                        }
-                        var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
-                        foreach (var attribute in attributesToInsert)
-                        {
-                            attribute.DataSource = dataSourceToApply;
-                        }
-                        UnitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
-                        AttributesHaveBeenCreated = true;
-                    }
-                }
-            }
-        }
 
         public void CreateSingletons()
         {
-            CreateAttributes();
+            AttributeTestSetup.CreateAttributes(UnitOfWork);
             CreateNetwork();
         }
 

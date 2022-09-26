@@ -27,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -44,7 +45,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public InvestmentBudgetsService Setup()
         {
-            _testHelper.CreateAttributes();
+            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
             _testHelper.CreateNetwork();
             var hubService = HubServiceMocks.Default();
             var logger = new LogNLog();

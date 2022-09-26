@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact (Skip ="Fails as we apparently need a CalculatedAttribute library. Setup is likely nowhere near rich enough.")]
         public void RunSimulation()
         {
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
             var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);

@@ -25,6 +25,7 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -49,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public SimulationAnalysisService Setup()
         {
-            _testHelper.CreateAttributes();
+            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
             _testHelper.CreateNetwork();
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
 

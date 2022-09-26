@@ -7,13 +7,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.Validation;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
-using BridgeCareCore.Logging;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
@@ -22,6 +21,8 @@ namespace BridgeCareCore.Services
         public string WorkId => simulationId.ToString();
 
         public DateTime StartTime { get; set; }
+
+        public UserInfo UserInfo { get; } = userInfo;
 
         public void DoWork(IServiceProvider serviceProvider)
         {
@@ -189,10 +190,10 @@ namespace BridgeCareCore.Services
         }
 
         private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new SimulationAnalysisDetailDTO
-            {
-                SimulationId = simulationId,
-                LastRun = lastRun,
-                Status = status,
-            };
+        {
+            SimulationId = simulationId,
+            LastRun = lastRun,
+            Status = status,
+        };
     }
 }

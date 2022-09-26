@@ -23,7 +23,11 @@ namespace BridgeCareCore
                 })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+#if MsSqlDebug
+                    webBuilder.UseStartup<Startup>().UseKestrel(options => { options.Limits.MaxRequestBodySize = null; });
+#elif Release
                     webBuilder.UseStartup<Startup>();
+#endif
                 });
     }
 }

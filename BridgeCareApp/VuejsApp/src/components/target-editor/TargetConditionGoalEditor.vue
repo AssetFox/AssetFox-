@@ -248,7 +248,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || !hasSelectedLibrary"
+                    :disabled="!hasSelectedLibrary"
                 >
                     Delete Library
                 </v-btn>

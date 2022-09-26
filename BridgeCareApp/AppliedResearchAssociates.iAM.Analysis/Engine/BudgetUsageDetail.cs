@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             BudgetName = budgetName;
         }
 
-        public string BudgetName { get; }
+        public string BudgetName { get; } 
 
         public decimal CoveredCost { get; set; }
 

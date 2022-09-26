@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +31,8 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
 using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using BridgeCareCore.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -62,6 +64,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
         public List<string> Errors { get; private set; }
 
+        public List<string> Warnings { get; set; }
+
         public bool IsComplete { get; private set; }
 
         public string Status { get; private set; }
@@ -73,12 +77,21 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ReportTypeName = name;
+            Warnings = new List<string>();
 
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
+            if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
+
             _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
+            if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
+
             _unfundedTreatmentTime = new UnfundedTreatmentTime();
-            _bridgeWorkSummary = new BridgeWorkSummary();
+            if (_unfundedTreatmentTime == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentTime)); }
+                      
+            _bridgeWorkSummary = new BridgeWorkSummary(Warnings);
+            if (_bridgeWorkSummary == null) { throw new ArgumentNullException(nameof(_bridgeWorkSummary)); }
+
             _bridgeWorkSummaryByBudget = new BridgeWorkSummaryByBudget();
             _summaryReportGlossary = new SummaryReportGlossary();
             _summaryReportParameters = new SummaryReportParameters();                        
@@ -91,6 +104,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //set report return default parameters
             ID = (Guid)reportId;
             Errors = new List<string>();
+            if (Warnings == null) { Warnings = new List<string>(); }
             Status = "Report definition created.";
             Results = String.Empty;
             IsComplete = false;
@@ -186,7 +200,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 $"{BAMSConstants.CulvDurationN}"
             };
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 
@@ -363,6 +378,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
+
+        private void UpdateSimulationAnalysisDetailWithStatus(SimulationReportDetailDTO dto, string message)
+        {
+            dto.Status = message;
+            UpdateSimulationAnalysisDetail(dto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
+        }
 
         private void IndicateError()
         {

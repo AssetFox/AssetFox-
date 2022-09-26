@@ -20,6 +20,9 @@ using BridgeCareCore.Services.Aggregation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {
@@ -51,7 +54,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("AggregateNetworkData/{networkId}")]
         [ClaimAuthorize("NetworkAggregateAccess")]
-        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AttributeDTO> attributes)
+        public async Task<IActionResult> AggregateNetworkData(Guid networkId, List<AllAttributeDTO> attributes)
         {
             if (FalseButCompilerDoesNotKnowThat || UpdateAttributes)
             {
@@ -82,7 +85,8 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, attributes);
+                var specificAttributes = AttributeService.ConvertAllAttributeList(attributes);
+                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, specificAttributes);
                 if (result)
                 {
                     return Ok();
@@ -106,7 +110,7 @@ namespace BridgeCareCore.Controllers
                 timer.Stop();
                 timer.Close();
                 channel.Writer.Complete();
-                readTask.Dispose();
+                //readTask.Dispose();
             }
         }
 
@@ -117,7 +121,10 @@ namespace BridgeCareCore.Controllers
                 while (reader.TryRead(out AggregationStatusMemo status))
                 {
                     var error = status.ErrorMessage;
-                    DoublyBroadcastError(error);
+                    if(error != null)
+                    {
+                        DoublyBroadcastError(error);
+                    }
                 }
             }
         }

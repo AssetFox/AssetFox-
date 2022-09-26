@@ -162,7 +162,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("CheckCommand/{sqlCommand}")]
         [Authorize(Policy = Policy.ModifyAttributes)]
-        public async Task<IActionResult> CheckCommand(string sqlCommand)
+        public async Task<IActionResult> CheckCommand(TestStringData sqlCommand)
         {
             try
             {
@@ -171,7 +171,7 @@ namespace BridgeCareCore.Controllers
                 {
                     TSql100Parser parser = new TSql100Parser(false);
 
-                    parser.Parse(new StringReader(sqlCommand), out errors);
+                    parser.Parse(new StringReader(sqlCommand.testString), out errors);
                 });
 
                 if(errors != null && errors.Count > 0)

@@ -11,6 +11,8 @@ namespace BridgeCareCore.Utils.Interfaces
 
         ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper);
 
-        bool HasAdminClaim(ClaimsPrincipal claimsPrincipal);
+        bool HasAdminAccess(ClaimsPrincipal claimsPrincipal);
+
+        bool HasSimulationAccess(ClaimsPrincipal claimsPrincipal);
     }
 }

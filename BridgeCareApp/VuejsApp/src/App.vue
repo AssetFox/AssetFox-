@@ -27,7 +27,7 @@
                         @click="onNavigate('/EditRawData/')"
                         class="ara-blue-pantone-281"
                         flat
-                        v-if="isAdmin"
+                        v-if="hasAdminAccess"
                     >
                         Raw Data
                     </v-btn>
@@ -35,7 +35,7 @@
                         @click="onNavigate('/UserCriteria/')"
                         class="ara-blue-pantone-281"
                         flat
-                        v-if="isAdmin"
+                        v-if="hasAdminAccess"
                     >
                         Security
                     </v-btn>
@@ -279,7 +279,7 @@ export default class AppComponent extends Vue {
     authenticated: boolean;
     @State(state => state.authenticationModule.hasRole) hasRole: boolean;
     @State(state => state.authenticationModule.username) username: string;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.authenticationModule.refreshing) refreshing: boolean;
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
     @State(state => state.notificationModule.notifications)
@@ -336,6 +336,7 @@ export default class AppComponent extends Vue {
     showNewsDialog: boolean = false;
     hasUnreadNewsItem: boolean = false;
     currentURL: any = '';
+    unauthorizedError: string = '';
 
     get container() {
         const container: any = {};
@@ -441,10 +442,12 @@ export default class AppComponent extends Vue {
                     error.response.headers,
                 );
             }
-            this.setIsBusyAction({ isBusy: false });
+            this.setIsBusyAction({ isBusy: false });            
+            this.unauthorizedError = hasValue(this.unauthorizedError) ? error.response!.data : "User is not authorized!";
+            
             this.addErrorNotificationAction({
                 message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",
-                longMessage: error.response!.status === 403 ? error.response!.data : getErrorMessage(error),
+                longMessage: error.response!.status === 403 ? this.unauthorizedError : getErrorMessage(error),
             });
             if (
                 hasValue(error, 'response') &&

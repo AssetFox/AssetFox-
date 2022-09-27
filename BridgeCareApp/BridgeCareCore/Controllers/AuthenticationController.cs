@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {
@@ -48,7 +49,10 @@ namespace BridgeCareCore.Controllers
                 var response = GetUserInfoString(token);
                 ValidateResponse(response);
                 var userInfo = JsonConvert.DeserializeObject<UserInfoDTO>(response);
-                userInfo.HasAdminClaim = UserInfo.HasAdminClaim;
+                userInfo.HasAdminAccess = UserInfo.HasAdminAccess;
+                userInfo.HasSimulationAccess = UserInfo.HasSimulationAccess;
+                userInfo.InternalRole = UserInfo.InternalRole;
+
                 return Ok(userInfo);
             }
             catch (Exception e)

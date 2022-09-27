@@ -171,5 +171,14 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        [Authorize(Policy = Policy.ModifyDeficientConditionGoalFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
     }
 }

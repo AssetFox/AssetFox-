@@ -33,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
         public static TextAttribute ForExcelTestData(Guid dataSourceId)
         {
             var columnName = CommonTestParameterValues.NameColumn;
-            var testCommand = "SELECT Top 1 Id AS ID_, Name AS FACILITY, Name AS SECTION, Name AS LOCATION_IDENTIFIER, CreatedDate AS DATE_, " + columnName + " AS DATA_ FROM dbo.Attribute";
+            var testCommand = "DISTRICT";
             var returnValue = new TextAttribute(
                 "TextAttribute",
                 Guid.NewGuid(),

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Common;
 using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IRoleClaimsMapper> MockRoleClaimsMapper { get; }
 
-        protected TestHelper()
+        public TestHelper()
         {
             Config = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -67,7 +68,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "pdsystbamsusr01",
-                    HasAdminClaim = true,
+                    HasAdminAccess = true,
                     Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityDBE = new Mock<IEsecSecurity>();
@@ -75,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = "b-bamsadmin",
-                    HasAdminClaim= false,
+                    HasAdminAccess = false,
                     Email = "jmalmberg@ara.com"
                 });
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -135,29 +136,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         //    MockRoleClaimsMapper.Setup(r => r.GetInternalRole(It.IsAny<string>(), It.IsAny<string>())).Returns(internalRole);
         //    MockRoleClaimsMapper.Setup(c => c.GetClaims(It.IsAny<string>(), It.IsAny<string>())).Returns(testClaims);
 
-        //    List<Claim> oclaims = new List<Claim>();
-        //    var claims = MockRoleClaimsMapper.Object.GetClaims(securityType, internalRole);
-        //    foreach (var claim in claims)
-        //    {
-        //        oclaims.Add(new Claim(ClaimTypes.Name, claim));
-        //    }
-        //    var identity = new ClaimsIdentity(oclaims);
-        //    var claimsPrincipal = new ClaimsPrincipal(identity);
-        //    var mockHttpContext = new Mock<HttpContext>();
-        //    mockHttpContext.Setup(m => m.User).Returns(claimsPrincipal);
-        //    MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
-        //}
-        public SimulationEntity TestSimulation(Guid? id = null, string name = null)
+        public SimulationEntity TestSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {
             var resolveName = name ?? RandomStrings.Length11();
             var resolveId = id ?? Guid.NewGuid();
+            var users = new List<SimulationUserEntity>();
             var returnValue = new SimulationEntity
             {
                 Id = resolveId,
                 NetworkId = NetworkId,
                 Name = resolveName,
-                NumberOfYearsOfTreatmentOutlook = 2
+                NumberOfYearsOfTreatmentOutlook = 2,
+                SimulationUserJoins = users
             };
+            if (owner != null)
+                users.Add(new SimulationUserEntity() { IsOwner = true, UserId = owner.Value, SimulationId = resolveId });
             return returnValue;
         }
 
@@ -223,9 +216,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         }
 
-        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null)
+        public virtual SimulationEntity CreateSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {
-            var entity = TestSimulation(id, name);
+            var entity = TestSimulation(id, name, owner);
             UnitOfWork.Context.AddEntity(entity);
             return entity;
         }

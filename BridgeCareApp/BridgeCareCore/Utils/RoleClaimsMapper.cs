@@ -76,9 +76,14 @@ namespace BridgeCareCore.Utils
             return claimsIdentity;
         }
 
-        public bool HasAdminClaim(ClaimsPrincipal claimsPrincipal)
+        public bool HasAdminAccess(ClaimsPrincipal claimsPrincipal)
         {
             return claimsPrincipal.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
+        }
+
+        public bool HasSimulationAccess(ClaimsPrincipal claimsPrincipal)
+        {
+            return claimsPrincipal.HasClaim(claim => claim.Value == SecurityConstants.Claim.SimulationAccess);
         }
     }
 }

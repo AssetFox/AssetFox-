@@ -130,7 +130,27 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("ValidateExistenceOfAssets/{networkId}")]
+        [Authorize]
+        public async Task<IActionResult> ValidateExistenceOfAssets(Guid networkId, List<string> brkeys)
+        {
+            try
+            {
+                var result = new Dictionary<string, bool>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = UnitOfWork.MaintainableAssetRepo.CheckIfKeyAttributeValuesExists(networkId, brkeys);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
             }
@@ -318,15 +338,48 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [Route("GetSectionCommittedProjectsPage/{simulationId}")]
+        [Authorize]
+        // TODO New method add claims and policy here
+        public async Task<IActionResult> GetCommittedProjectsPage(Guid simulationId, PagingRequestModel<SectionCommittedProjectDTO> request)
+        {
+            try
+            {
+                var result = new PagingPageModel<SectionCommittedProjectDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    var sectionCommittedProjectDTOs = UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
+                    result = _committedProjectService.GetCommittedProjectPage(sectionCommittedProjectDTOs, request);
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (RowNotInTableException)
+            {
+                return BadRequest($"Unable to find simulation {simulationId}");
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
-        [Route("UpsertSectionCommittedProjects")]
+        [Route("UpsertSectionCommittedProjects/{simulationId}")]
         [Authorize(Policy = Policy.ModifyCommittedProjects)]
-        public async Task<IActionResult> UpsertCommittedProjects(List<SectionCommittedProjectDTO> projects)
+        public async Task<IActionResult> UpsertCommittedProjects(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
+                    var projects = _committedProjectService.GetSyncedDataset(simulationId, request);
                     checkUpsertPermit(projects);
                     UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
                 });

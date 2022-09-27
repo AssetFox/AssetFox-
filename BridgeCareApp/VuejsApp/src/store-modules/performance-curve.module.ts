@@ -24,6 +24,7 @@ const state = {
         emptyPerformanceCurveLibrary,
     ) as PerformanceCurveLibrary,
     scenarioPerformanceCurves: [] as PerformanceCurve[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -69,6 +70,9 @@ const mutations = {
     ) {
         state.scenarioPerformanceCurves = clone(performanceCurves);
     },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -87,65 +91,7 @@ const actions = {
             },
         );
     },
-    async upsertPerformanceCurveLibrary(
-        { dispatch, commit }: any,
-        library: PerformanceCurveLibrary,
-    ) {
-        await PerformanceCurveService.upsertPerformanceCurveLibrary(
-            library,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                const message: string = any(
-                    propEq('id', library.id),
-                    state.performanceCurveLibraries,
-                )
-                    ? 'Updated deterioration model library'
-                    : 'Added deterioration model library';
 
-                commit('performanceCurveLibraryMutator', library);
-                commit('selectedPerformanceCurveLibraryMutator', library.id);
-
-                dispatch('addSuccessNotification', { message: message });
-            }
-        });
-    },
-    async getScenarioPerformanceCurves({ commit }: any, scenarioId: string) {
-        await PerformanceCurveService.getScenarioPerformanceCurves(
-            scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                commit(
-                    'scenarioPerformanceCurvesMutator',
-                    response.data as PerformanceCurve[],
-                );
-            }
-        });
-    },
-    async upsertScenarioPerformanceCurves(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await PerformanceCurveService.upsertScenarioPerformanceCurves(
-            payload.scenarioPerformanceCurves,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioPerformanceCurvesMutator',
-                    payload.scenarioPerformanceCurves,
-                );
-                dispatch('addSuccessNotification', {
-                    message: "Modified scenario's deterioration models",
-                });
-            }
-        });
-    },
     async deletePerformanceCurveLibrary(
         { dispatch, commit }: any,
         libraryId: string,
@@ -209,6 +155,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deterioration Models file imported',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await PerformanceCurveService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

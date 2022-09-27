@@ -10,14 +10,17 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummary;
-
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
+using BridgeCareCore.Services;
 using OfficeOpenXml;
 
 
@@ -31,7 +34,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly SummaryReportParameters _summaryReportParameters;
         private readonly IPamsDataForSummaryReport _pamsDataForSummaryReport;
         private readonly IPavementWorkSummary _pavementWorkSummary;
+        private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
+
+        private readonly ICountySummary _countySummary;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
@@ -65,7 +71,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _pamsDataForSummaryReport = new PamsDataForSummaryReport();
             _summaryReportParameters = new SummaryReportParameters();
             _pavementWorkSummary = new PavementWorkSummary();
+            _pavementWorkSummaryByBudget = new PavementWorkSummaryByBudget();
             _unfundedPavementProjects = new UnfundedPavementProjects();
+            _countySummary = new CountySummary();
             _addGraphsInTabs = new AddGraphsInTabs();
             _summaryReportGlossary = new SummaryReportGlossary();
 
@@ -161,7 +169,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var functionReturnValue = "";
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new CallbackLogger((string message) =>
+            {
+                var dto = new SimulationReportDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = message,
+                };
+                UpdateSimulationAnalysisDetail(dto);
+            });
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();
@@ -218,10 +235,22 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var chartRowModel = _pavementWorkSummary.Fill(pamsWorkSummaryWorksheet, reportOutputData, simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
 
+            //// Pavement Work Summary By Budget TAB
+            reportDetailDto.Status = $"Creating Pavement Work Summary By Budget TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            var pavementWorkSummaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.PavementWorkSummaryByBudget_Tab);
+            _pavementWorkSummaryByBudget.Fill(pavementWorkSummaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
+
+
             // Unfunded Pavement Projects TAB
             reportDetailDto.Status = $"Unfunded Pavement Projects TAB";
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
+
+            // County Summary TAB
+            reportDetailDto.Status = $"County Summary TAB";
+            var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
+            _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
 
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";

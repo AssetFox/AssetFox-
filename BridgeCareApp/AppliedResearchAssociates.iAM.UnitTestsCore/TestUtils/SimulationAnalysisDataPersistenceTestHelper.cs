@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public IConfiguration ConfigForAnalysis { get; }
         public Simulation StandAloneSimulation { get; set; }
 
-        public SimulationAnalysisDataPersistenceTestHelper()
+        public SimulationAnalysisDataPersistenceTestHelper(): base()
         {
             ConfigForAnalysis = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

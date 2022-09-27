@@ -177,6 +177,15 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        [Authorize(Policy = Policy.ModifyOrDeleteTargetConditionGoalFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
+        }
+
         private List<TargetConditionGoalLibraryDTO> GetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
         {
             return UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesWithTargetConditionGoals();

@@ -24,6 +24,7 @@ const state = {
         emptyCashFlowRuleLibrary,
     ) as CashFlowRuleLibrary,
     scenarioCashFlowRules: [] as CashFlowRule[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -57,6 +58,9 @@ const mutations = {
     },
     scenarioCashFlowRulesMutator(state: any, cashFlowRules: CashFlowRule[]) {
         state.scenarioCashFlowRules = clone(cashFlowRules);
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
     },
 };
 
@@ -156,6 +160,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Modified scenario cash flow rules',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await CashFlowService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

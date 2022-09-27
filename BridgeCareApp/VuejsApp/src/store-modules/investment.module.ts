@@ -37,7 +37,8 @@ const state = {
     investmentPlan: clone(emptyInvestmentPlan) as InvestmentPlan,
     scenarioSimpleBudgetDetails: [] as SimpleBudgetDetail[],
     scenarioBudgets: [] as Budget[],
-    isSuccessfulImport: false
+    isSuccessfulImport: false,
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -80,7 +81,10 @@ const mutations = {
     },
     isSuccessfulImportMutator(State: any, isSuccessful: boolean){
         state.isSuccessfulImport = isSuccessful;
-    }
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -248,6 +252,19 @@ const actions = {
             }
             else
                 commit('isSuccessfulImportMutator', false);
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await InvestmentService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
         });
     },
 };

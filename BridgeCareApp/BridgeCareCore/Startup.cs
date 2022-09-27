@@ -17,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
+using AppliedResearchAssociates.iAM.Common;
 using Microsoft.AspNetCore.Authentication;
 using BridgeCareCore.Security;
 using Microsoft.AspNetCore.Authorization;

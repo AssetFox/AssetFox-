@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;
@@ -14,9 +14,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using OfficeOpenXml;
-using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCore.Models;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Utils.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {
@@ -33,7 +34,41 @@ namespace BridgeCareCore.Controllers
         {
             _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-        }      
+        }
+
+        [HttpPost]
+        [Route("GetScenarioPerformanceCurvePage/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioPerformanceCurvePage(Guid simulationId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetScenarioPerformanceCurvePage(simulationId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryPerformanceCurvePage/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLibraryPerformanceCurvePage(Guid libraryId, PagingRequestModel<PerformanceCurveDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _performanceCurvesService.GetLibraryPerformanceCurvePage(libraryId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("GetPerformanceCurveLibraries")]
@@ -87,18 +122,25 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertPerformanceCurveLibrary")]
         [Authorize(Policy = Policy.ModifyPerformanceCurveFromLibrary)]
-        public async Task<IActionResult> UpsertPerformanceCurveLibrary(PerformanceCurveLibraryDTO dto)
+        public async Task<IActionResult> UpsertPerformanceCurveLibrary(LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = GetAllPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == dto.Id);
-                    // by pass owner check if no record
-                    if (currentRecord != null)
+                    var curves = new List<PerformanceCurveDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if (!upsertRequest.IsNewLibrary)
+                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                        curves.ForEach(curve => curve.Id = Guid.NewGuid());
+                    var dto = upsertRequest.Library;
+                    if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        dto.PerformanceCurves = curves;
                     }
                     UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(dto.PerformanceCurves, dto.Id);
@@ -123,13 +165,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioPerformanceCurves/{simulationId}")]
         [Authorize(Policy = Policy.ModifyPerformanceCurveFromScenario)]
-        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, List<PerformanceCurveDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioPerformanceCurves(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var dtos = _performanceCurvesService.GetSyncedScenarioDataset(simulationId, pagingSync);                   
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(dtos, simulationId);
                     UnitOfWork.Commit();
@@ -375,6 +418,15 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
                 throw;
             }
+        }
+
+        [HttpGet]
+        [Route("GetHasPermittedAccess")]
+        [Authorize]
+        [Authorize(Policy = Policy.ModifyOrDeletePerformanceCurveFromLibrary)]
+        public async Task<IActionResult> GetHasPermittedAccess()
+        {
+            return Ok(true);
         }
 
         private List<PerformanceCurveLibraryDTO> GetAllPerformanceCurveLibraries()

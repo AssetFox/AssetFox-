@@ -11,8 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.RemainingLifeLimit;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal
-    ;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.TargetConditionGoal;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -22,7 +21,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
-using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +29,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
@@ -49,7 +49,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();
-            var role = "PD-BAMS-Administrator";
             _testHelper.UnitOfWork.AddUser(randomName, true);
             var returnValue = await _testHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
             return returnValue;
@@ -70,6 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void CreateAuthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(
                 simulationAnalysisService,
+                new SimulationService(_testHelper.UnitOfWork),
                 _testHelper.MockEsecSecurityAdmin.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object,
@@ -78,6 +78,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService) =>
             _controller = new SimulationController(simulationAnalysisService,
+                new SimulationService(_testHelper.UnitOfWork),
                 _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork,
                 _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object,
@@ -496,14 +497,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        public async Task ShouldReturnOkResultOnGetUserScenariosPage()
         {
             // Arrange
             var service = Setup();
             CreateAuthorizedController(service);
 
+            var request = new PagingRequestModel<SimulationDTO>()
+            {
+                isDescending = false,
+                Page = 1,
+                RowsPerPage = 5,
+                search = "",
+                sortColumn = ""
+            };
+
             // Act
-            var result = await _controller.GetSimulations();
+            var result = await _controller.GetUserScenariosPage(request);
+
+            // Assert
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task ShouldReturnOkResultOnGetSharedScenariosPage()
+        {
+            // Arrange
+            var service = Setup();
+            CreateAuthorizedController(service);
+
+            var request = new PagingRequestModel<SimulationDTO>()
+            {
+                isDescending = false,
+                Page = 1,
+                RowsPerPage = 5,
+                search = "",
+                sortColumn = ""
+            };
+
+            // Act
+            var result = await _controller.GetSharedScenariosPage(request);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -557,7 +590,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldGetAllSimulations()
+        public async Task ShouldGetSimulationCreatedByUser()
+        {
+            var service = Setup();
+            // Arrange
+            CreateAuthorizedController(service);
+            var simulation = _testHelper.CreateSimulation(owner:_testHelper.UnitOfWork.CurrentUser.Id);
+            var request = new PagingRequestModel<SimulationDTO>()
+            {
+                isDescending = false,
+                Page = 1,
+                RowsPerPage = 5,
+                search = "",
+                sortColumn = ""
+            };
+
+            // Act
+            var userResult = await _controller.GetUserScenariosPage(request);
+
+            // Assert
+            var okObjResult = userResult as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
+            var dto = dtos.Single(dto => dto.Id == simulation.Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetSimulationSharedWithUser()
         {
             var service = Setup();
             // Arrange
@@ -565,14 +625,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var simulation = _testHelper.CreateSimulation();
 
             // Act
-            var result = await _controller.GetSimulations();
+            var request = new PagingRequestModel<SimulationDTO>()
+            {
+                isDescending = false,
+                Page = 1,
+                RowsPerPage = 5,
+                search = "",
+                sortColumn = ""
+            };
+
+            // Act
+            var sharedResult = await _controller.GetSharedScenariosPage(request);
 
             // Assert
-            var okObjResult = result as OkObjectResult;
+            var okObjResult = sharedResult as OkObjectResult;
             Assert.NotNull(okObjResult.Value);
 
-            var dtos = (List<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimulationDTO>));
-            var dto = dtos.Single(dto => dto.Id == simulation.Id);
+            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
+            Assert.NotEmpty(dtos);
+            Assert.True(dtos.All(_ => _.Users.All(__ => !__.IsOwner)));
+            //var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 
         [Fact]
@@ -624,11 +696,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             _testHelper.UnitOfWork.Context.SaveChanges();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = _testHelper.CreateSimulation(owner: _testHelper.UnitOfWork.CurrentUser.Id);
 
-            var getResult = await _controller.GetSimulations();
-            var dtos = (List<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<SimulationDTO>));
+            var request = new PagingRequestModel<SimulationDTO>()
+            {
+                isDescending = false,
+                Page = 1,
+                RowsPerPage = 5,
+                search = "",
+                sortColumn = ""
+            };
+
+            var getResult = await _controller.GetUserScenariosPage(request);
+
+            var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(PagingPageModel<SimulationDTO>))).Items;
 
             var simulationDTO = dtos.Single(s => s.Id == simulation.Id);
             simulationDTO.Name = "Updated Name";
@@ -657,8 +739,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(dto.Name, simulationEntity.Name);
 
             var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
-            Assert.Single(simulationUsers);
-            Assert.Equal(dto.Users[0].UserId, simulationUsers[0].UserId);
+            Assert.True(simulationUsers.Count == 2);
+            Assert.Equal(dto.Users.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId,
+                simulationUsers.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId);
         }
 
         [Fact]

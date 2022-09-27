@@ -248,7 +248,7 @@
                     @click="onShowConfirmDeleteAlert"
                     class="ghd-white-bg ghd-blue"
                     v-show="!hasScenario"
-                    :disabled="disableCrudButtonsResult || !hasLibraryEditPermission || !hasUnsavedChanges || !hasSelectedLibrary"
+                    :disabled="!hasSelectedLibrary"
                 >
                     Delete Library
                 </v-btn>
@@ -387,8 +387,9 @@ export default class TargetConditionGoalEditor extends Vue {
     stateScenarioTargetConditionGoals: TargetConditionGoal[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.targetConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getTargetConditionGoalLibraries') getTargetConditionGoalLibrariesAction: any;
     @Action('selectTargetConditionGoalLibrary') selectTargetConditionGoalLibraryAction: any;
@@ -489,6 +490,7 @@ export default class TargetConditionGoalEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getTargetConditionGoalLibrariesAction();
+            vm.getHasPermittedAccessAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.TargetConditionGoal) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
@@ -603,7 +605,7 @@ export default class TargetConditionGoalEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

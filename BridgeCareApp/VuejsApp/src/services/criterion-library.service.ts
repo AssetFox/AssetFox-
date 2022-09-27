@@ -18,4 +18,10 @@ export default class CriterionLibraryService {
     static getSelectedCriterionLibrary(libraryId: string): AxiosPromise{
         return coreAxiosInstance.get(`${API.CriterionLibrary}/GetSpecificCriteria/${libraryId}`);
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CriterionLibrary}/GetHasPermittedAccess`,
+        );
+    }
 }

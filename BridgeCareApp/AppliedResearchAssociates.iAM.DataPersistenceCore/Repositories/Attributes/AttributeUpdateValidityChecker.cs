@@ -18,10 +18,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attribu
             {
                 return AttributeUpdateValidityCheckResults.NotOk($"{NameChangeNotAllowed} The proposed update changes {compare.Name} to {proposedNewEntity.Name}");
             }
-            if (proposedNewEntity.ConnectionType != compare.ConnectionType)
+           /* if (proposedNewEntity.ConnectionType != compare.ConnectionType)
             {
                 return AttributeUpdateValidityCheckResults.NotOk($"{ConnectionTypeChangeNotAllowed} For the attribute named {proposedNewEntity.Name}, the update changes {compare.ConnectionType} to {proposedNewEntity.ConnectionType}");
-            }
+            }*/
             return AttributeUpdateValidityCheckResults.Ok();
         }
     }

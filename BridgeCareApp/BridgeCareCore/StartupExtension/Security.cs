@@ -50,16 +50,6 @@ namespace BridgeCareCore.StartupExtension
 
             services.AddAuthorization(options =>
             {
-                // TODO remove below 2 later
-                options.AddPolicy(Policy.AdminOrDistrictEngineer,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator, Role.DistrictEngineer)));
-                options.AddPolicy(Policy.Admin,
-                    policy => policy.Requirements.Add(
-                        new UserHasAllowedRoleRequirement(Role.Administrator)));
-                ////
-
-
                 // Deficient Condition Goal
                 options.AddPolicy(Policy.ViewDeficientConditionGoalFromlLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.DeficientConditionGoalViewPermittedFromLibraryAccess, Claim.DeficientConditionGoalViewAnyFromLibraryAccess));
@@ -101,7 +91,14 @@ namespace BridgeCareCore.StartupExtension
                 options.AddPolicy(Policy.ImportPerformanceCurveFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromLibraryAccess, Claim.PerformanceCurveImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportPerformanceCurveFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromScenarioAccess, Claim.PerformanceCurveImportPermittedFromScenarioAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveImportAnyFromScenarioAccess, Claim.PerformanceCurveImportPermittedFromScenarioAccess));                
+                options.AddPolicy(Policy.ModifyOrDeletePerformanceCurveFromLibrary,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.PerformanceCurveViewAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdateAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveAddPermittedFromLibraryAccess,
+                                                                   Claim.PerformanceCurveUpdatePermittedFromLibraryAccess,
+                                                                   Claim.PerformanceCurveDeleteAnyFromLibraryAccess,
+                                                                   Claim.PerformanceCurveDeletePermittedFromLibraryAccess));
 
                 //  Reamining Life Limit
                 options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
@@ -132,6 +129,13 @@ namespace BridgeCareCore.StartupExtension
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalModifyAnyFromScenarioAccess, Claim.TargetConditionGoalModifyPermittedFromScenarioAccess));
                 options.AddPolicy(Policy.DeleteTargetConditionGoalFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalDeleteAnyFromLibraryAccess, Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
+                options.AddPolicy(Policy.ModifyOrDeleteTargetConditionGoalFromLibrary,
+                   policy => policy.RequireClaim(ClaimTypes.Name, Claim.TargetConditionGoalAddAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalUpdateAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalAddPermittedFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalUpdatePermittedFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalDeleteAnyFromLibraryAccess,
+                                                                  Claim.TargetConditionGoalDeletePermittedFromLibraryAccess));
 
                 // Treatment
                 options.AddPolicy(Policy.ViewTreatmentFromLibrary,
@@ -151,7 +155,14 @@ namespace BridgeCareCore.StartupExtension
                 options.AddPolicy(Policy.ImportTreatmentFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromLibraryAccess, Claim.TreatmentImportPermittedFromLibraryAccess));
                 options.AddPolicy(Policy.ImportTreatmentFromScenario,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromScenarioAccess, Claim.TreatmentImportPermittedFromScenarioAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentImportAnyFromScenarioAccess, Claim.TreatmentImportPermittedFromScenarioAccess));                
+                options.AddPolicy(Policy.ModifyOrDeleteTreatmentFromLibrary,
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.TreatmentAddAnyFromLibraryAccess,
+                                                                   Claim.TreatmentUpdateAnyFromLibraryAccess,
+                                                                   Claim.TreatmentAddPermittedFromLibraryAccess,
+                                                                   Claim.TreatmentUpdatePermittedFromLibraryAccess,
+                                                                   Claim.TreatmentDeleteAnyFromLibraryAccess,
+                                                                   Claim.TreatmentDeletePermittedFromLibraryAccess));
 
                 // Analysis Method
                 options.AddPolicy(Policy.ViewAnalysisMethod,
@@ -164,17 +175,25 @@ namespace BridgeCareCore.StartupExtension
 
                 // Simulation
                 options.AddPolicy(Policy.ViewSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationViewPermittedAccess, Claim.SimulationViewAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationViewPermittedAccess,
+                                                                   Claim.SimulationViewAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.DeleteSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationDeletePermittedAccess, Claim.SimulationDeleteAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationDeletePermittedAccess,
+                                                                   Claim.SimulationDeleteAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.UpdateSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationUpdatePermittedAccess, Claim.SimulationUpdateAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationUpdatePermittedAccess,
+                                                                   Claim.SimulationUpdateAnyAccess,
+                                                                   Claim.SimulationAccess));
                 options.AddPolicy(Policy.RunSimulation,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationRunPermittedAccess, Claim.SimulationRunAnyAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.SimulationRunPermittedAccess,
+                                                                   Claim.SimulationRunAnyAccess,
+                                                                   Claim.SimulationAccess));
 
                 // Budget Priority
                 options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
-                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));
+                    policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityViewAnyFromLibraryAccess, Claim.BudgetPriorityViewPermittedFromLibraryAccess));                
                 options.AddPolicy(Policy.ModifyBudgetPriorityFromLibrary,
                     policy => policy.RequireClaim(ClaimTypes.Name, Claim.BudgetPriorityUpdateAnyFromLibraryAccess,
                                                                    Claim.BudgetPriorityUpdatePermittedFromLibraryAccess,

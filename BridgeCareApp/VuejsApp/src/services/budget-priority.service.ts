@@ -42,4 +42,10 @@ export default class BudgetPriorityService {
             data,
         );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.BudgetPriority}/GetHasPermittedAccess`,
+        );
+    }
 }

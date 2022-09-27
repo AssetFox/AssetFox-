@@ -33,24 +33,28 @@
                                 </v-select>                       
                             </v-layout>
                         </v-flex>
-                        <v-flex xs6>
-                            <v-text-field
-                                prepend-inner-icon=$vuetify.icons.ghd-search
-                                hide-details
-                                lablel="Search"
-                                placeholder="Search"
-                                single-line
-                                v-model="searchItems"
-                                outline
-                                class="ghd-text-field-border ghd-text-field search-icon-general"
-                                style="margin-top:17px !important">
-                            </v-text-field>
+                        <v-flex xs6 style="margin-left: 5px">
+                            <v-subheader class="ghd-control-label ghd-md-gray"></v-subheader>
+                            <v-layout>                                
+                                <v-text-field
+                                    prepend-inner-icon=$vuetify.icons.ghd-search
+                                    hide-details
+                                    lablel="Search"
+                                    placeholder="Search"
+                                    single-line
+                                    v-model="gridSearchTerm"
+                                    outline
+                                    class="ghd-text-field-border ghd-text-field search-icon-general">
+                                </v-text-field>
+                                <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
+                            </v-layout>
+                           
                         </v-flex>
                     </v-layout>
                 </v-flex>
                 <v-flex xs12>
                     <v-layout justify-end class="px-4">
-                        <p>Commited Projects: {{committedProjectsCount}}</p>
+                        <p>Commited Projects: {{totalItems}}</p>
                     </v-layout>
                 </v-flex>       
                 
@@ -58,10 +62,12 @@
                     <v-layout column>
                         <v-data-table
                         :headers="cpGridHeaders"
-                        :items="cpItems"
+                        :items="currentPage"
                         sort-icon=$vuetify.icons.ghd-table-sort
                         item-key='id'
-                        :search="searchItems"
+                        :pagination.sync="projectPagination"
+                        :total-items="totalItems"
+                        :rows-per-page-items=[5,10,25]
                         v-model="selectedCpItems"
                         class=" fixed-header v-table__overflow">
                             <template slot="items" slot-scope="props">
@@ -293,8 +299,8 @@ import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
-import { AxiosResponse } from 'axios';
-import { clone, find, findIndex, isEmpty, isNil, propEq, update } from 'ramda';
+import { AxiosPromise, AxiosResponse } from 'axios';
+import { any, clone, find, findIndex, isEmpty, isNil, map, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
@@ -313,6 +319,8 @@ import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { ValidationParameter } from '@/shared/models/iAM/expression-validation';
 import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -336,6 +344,20 @@ export default class CommittedProjectsEditor extends Vue  {
     networkId: string = getBlankGuid();
     rules: InputValidationRules = rules;
     network: Network = clone(emptyNetwork);
+
+    addedRows: SectionCommittedProject[] = [];
+    updatedRowsMap:Map<string, [SectionCommittedProject, SectionCommittedProject]> = new Map<string, [SectionCommittedProject, SectionCommittedProject]>();//0: original value | 1: updated value
+    deletionIds: string[] = [];
+    rowCache: SectionCommittedProject[] = [];
+    gridSearchTerm = '';
+    currentSearch = '';
+    totalItems = 0;
+    currentPage: SectionCommittedProjectTableData[] = [];
+    initializing: boolean = true;
+
+    isKeyAttributeValidMap: Map<string, boolean> = new Map<string, boolean>();
+
+    projectPagination: Pagination = clone(emptyPagination);
 
     @State(state => state.committedProjectsModule.sectionCommittedProjects) stateSectionCommittedProjects: SectionCommittedProject[];
     @State(state => state.treatmentModule.treatmentLibraries)stateTreatmentLibraries: TreatmentLibrary[];
@@ -487,13 +509,14 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentAction(vm.scenarioId).then(() => {
-                    vm.getCommittedProjects(vm.scenarioId);  
-                    vm.getTreatmentLibrariesAction();                            
-                    vm.getAttributesAction();
+                vm.getInvestmentAction(vm.scenarioId).then(() => {                                            
+                    vm.getAttributesAction().then(() => {                       
+                        vm.getTreatmentLibrariesAction().then(() => {
+                            vm.initializePages();                            
+                        });   
+                    });
                 })
-            });
-                      
+            });                     
         });
     }
 
@@ -561,8 +584,7 @@ export default class CommittedProjectsEditor extends Vue  {
         if(!isNil(library)){
             this.selectedLibraryTreatments = library.treatments;
             this.onSelectedLibraryTreatmentsChanged()
-        }
-         
+        }        
     }
 
     @Watch('selectedCommittedProject')
@@ -576,11 +598,12 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     @Watch('sectionCommittedProjects')
-    onSectionCommittedProjectsChanged() {    
-        this.committedProjectsCount = this.sectionCommittedProjects.length;
+    onSectionCommittedProjectsChanged() {  
+        this.setCpItems();  
+        // this.committedProjectsCount = this.sectionCommittedProjects.length;
 
-        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.sectionCommittedProjects, this.stateSectionCommittedProjects);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+        // const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.sectionCommittedProjects, this.stateSectionCommittedProjects);
+        // this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     @Watch('selectedCpItems')
@@ -591,10 +614,54 @@ export default class CommittedProjectsEditor extends Vue  {
             this.selectedCommittedProject = this.selectedCpItems[0].id;
     }
 
+    @Watch('projectPagination')
+    onPaginationChanged() {
+        if(this.initializing)
+            return;
+        this.checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = this.projectPagination;
+
+        const request: PagingRequest<SectionCommittedProject>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: this.deletionIds,
+                addedRows: this.addedRows,
+            },           
+            sortColumn: sortBy,
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch
+        };
+        if(this.scenarioId !== this.uuidNIL)
+            CommittedProjectsService.getCommittedProjectsPage(this.scenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<SectionCommittedProject>;
+                    this.sectionCommittedProjects = data.items;
+                    this.rowCache = clone(this.sectionCommittedProjects)
+                    this.totalItems = data.totalItems;
+                    const row = data.items.find(scp => scp.id == this.selectedCommittedProject)
+                    if(isNil(row))
+                        this.selectedCommittedProject = ''
+                }
+            }); 
+    }
+
+     @Watch('deletionIds')
+    onDeletionIdsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
+    @Watch('addedRows')
+    onAddedRowsChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
     //Events
     onCancelClick() {
-        this.sectionCommittedProjects = clone(this.stateSectionCommittedProjects);
-        this.setCpItems();
+        this.clearChanges()
+        this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
     }
@@ -626,10 +693,12 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.locationKeys[this.brkey_] = '';
         newRow.locationKeys['ID'] = getNewGuid();
         newRow.simulationId = this.scenarioId;
-        this.sectionCommittedProjects.push(newRow);
-        const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
-        newCpRow.errors = ['BRKEY does not exist']
-        this.cpItems.push(newCpRow);
+        this.addedRows.push(newRow)
+        this.onPaginationChanged();
+        // this.sectionCommittedProjects.push(newRow);
+        // const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
+        // newCpRow.errors = ['BRKEY does not exist']
+        // this.cpItems.push(newCpRow);
      }
      
      OnAddConsequenceClick(){
@@ -642,14 +711,38 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnSaveClick(){
-        if(this.idsForDeletion.length > 0){
-            this.deleteSpecificCommittedProjectsAction(this.idsForDeletion).then(() => {
-                this.upsertCommittedProjectsAction(this.sectionCommittedProjects)
-                this.idsForDeletion = [];
+        const upsertRequest = {
+                    libraryId: null,
+                    rowsForDeletion: this.deletionIds,
+                    updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: this.addedRows           
+                }
+
+        if(this.deletionIds.length > 0){
+            CommittedProjectsService.deleteSpecificCommittedProjects(this.idsForDeletion).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.deletionIds = [];
+                    this.addSuccessNotificationAction({message:'Deleted committed projects'})              
+                }
+                CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                        this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                        this.addedRows = [];
+                        this.updatedRowsMap.clear();
+                    }
+                    this.resetPage()
+                })
             })         
         }
         else
-            this.upsertCommittedProjectsAction(this.sectionCommittedProjects)     
+            CommittedProjectsService.upsertCommittedProjects(this.scenarioId, upsertRequest).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.addSuccessNotificationAction({message:'Committed Projects Updated Successfully'}) 
+                    this.addedRows = [];
+                    this.updatedRowsMap.clear();
+                }
+                this.resetPage()
+            })   
      }
 
      OnDeleteAllClick(){
@@ -663,10 +756,12 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnDeleteClick(id: string){
-        this.sectionCommittedProjects = this.sectionCommittedProjects.filter((scp: SectionCommittedProject) => scp.id !== id)
-        this.cpItems = this.cpItems.filter((scp: SectionCommittedProjectTableData) => scp.id !== id)
-        if(!isNil(find(propEq('id', id), this.stateSectionCommittedProjects)))
-            this.idsForDeletion.push(id);
+        if(!isNil(find(propEq('id', id), this.addedRows)))
+            this.deletionIds.push(id);
+        else
+            this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
+
+        this.onPaginationChanged();
      }
 
       onEditCommittedProjectProperty(scp: SectionCommittedProjectTableData, property: string, value: any) {
@@ -674,30 +769,19 @@ export default class CommittedProjectsEditor extends Vue  {
         if(!isNil(row))
         {
             if(property === 'treatment'){
-                this.handleTreatmentChange(scp, value, row)                  
+                this.handleTreatmentChange(scp, value, row)             
             }
             else if(property === 'brkey'){
-                this.handleBrkeyChange(row, scp, value);
+                this.handleBrkeyChange(row, scp, value);               
             }            
             else if(property === 'budget'){
                 this.handleBudgetChange(row, scp, value)
             }
             else{
-                this.checkYear(scp);
                 if(property === 'category')
                     value = this.catMap.get(value);
-                this.sectionCommittedProjects = update(
-                findIndex(
-                    propEq('id', scp.id),
-                    this.sectionCommittedProjects,
-                ),
-                setItemPropertyValue(
-                    property,
-                    value,
-                    row,
-                ) as SectionCommittedProject,
-                this.sectionCommittedProjects,
-                );
+                this.updateCommittedProject(row, value, property)
+                this.onPaginationChanged()
             }    
         }       
     }
@@ -778,8 +862,13 @@ export default class CommittedProjectsEditor extends Vue  {
 
         if (doDelete) {
             this.deleteSimulationCommittedProjectsAction(this.scenarioId);
-            this.sectionCommittedProjects = [];
-            this.cpItems = [];
+            CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
+                if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.addSuccessNotificationAction({message:'Added deterioration model library'})   
+                    this.clearChanges();
+                    this.projectPagination.page = 1
+                }
+            })
         }
     }
 
@@ -790,7 +879,8 @@ export default class CommittedProjectsEditor extends Vue  {
     //Subroutines
 
     disableCrudButtons() {
-        const dataIsValid: boolean = this.sectionCommittedProjects.every(
+        const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+        const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
@@ -826,29 +916,18 @@ export default class CommittedProjectsEditor extends Vue  {
     updateSelectedProjectConsequences(){
         let row = this.sectionCommittedProjects.find(o => o.id == this.selectedCommittedProject)
         if(!isNil(row)){
-            row.consequences = this.selectedConsequences
-            this.sectionCommittedProjects = update(
-                findIndex(
-                    propEq('id', this.selectedCommittedProject),
-                    this.sectionCommittedProjects,
-                ),
-                setItemPropertyValue(
-                    'consequences',
-                    this.selectedConsequences,
-                    row,
-                ) as SectionCommittedProject,
-                this.sectionCommittedProjects,
-            );
+            row.consequences = this.selectedConsequences;
+            this.updateCommittedProjects(row, this.selectedConsequences, 'consequences')
         }
     }
 
     setCpItems(){
-        this.cpItems = this.sectionCommittedProjects.map(o => 
+        this.currentPage = this.sectionCommittedProjects.map(o => 
         {          
             const row: SectionCommittedProjectTableData = this.cpItemFactory(o);
             return row
         })
-        this.checkBrkeys(0);
+        this.checkBrkeys();
         this.checkYears();
     }
 
@@ -878,8 +957,7 @@ export default class CommittedProjectsEditor extends Vue  {
 
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName
-        this.updateCommittedProjects(row, treatmentName, 'treatment')  
-        
+        this.updateCommittedProject(row, treatmentName, 'treatment')  
         CommittedProjectsService.FillTreatmentValues(row, row.locationKeys[this.brkey_])
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
@@ -888,9 +966,10 @@ export default class CommittedProjectsEditor extends Vue  {
                 let cat = this.reverseCatMap.get(row.category);
                 if(!isNil(cat))
                     scp.category = cat;           
-                this.updateCommittedProjects(row, row.cost, 'cost')  
-                this.updateCommittedProjects(row, row.consequences, 'consequences')  
+                this.updateCommittedProject(row, row.cost, 'cost')  
+                this.updateCommittedProject(row, row.consequences, 'consequences')  
                 this.onSelectedCommittedProject();
+                this.onPaginationChanged();
             }                            
         });                                                
     }
@@ -904,13 +983,14 @@ export default class CommittedProjectsEditor extends Vue  {
         }  
         else
             row.scenarioBudgetId = null;
-        this.updateCommittedProjects(row, row.scenarioBudgetId, 'scenarioBudgetId')        
+        this.updateCommittedProject(row, row.scenarioBudgetId, 'scenarioBudgetId') 
+        this.onPaginationChanged();       
     }
 
     handleBrkeyChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, brkey: string){
         row.locationKeys[this.brkey_] = brkey;
-        this.updateCommittedProjects(row, brkey, 'brkey');
-        this.checkBrkey(scp, brkey);
+        this.updateCommittedProject(row, brkey, 'brkey');
+        this.onPaginationChanged();
     }
 
     checkBrkey(scp: SectionCommittedProjectTableData, brkey: string){
@@ -924,18 +1004,34 @@ export default class CommittedProjectsEditor extends Vue  {
         });
     }
 
-    checkBrkeys(index: number){
-        if(index < this.cpItems.length)
-            CommittedProjectsService.ValidateBRKEY(this.network, this.cpItems[index].brkey).then((response: AxiosResponse) => {
+    checkBrkeys(){//todo: refine this
+        const uncheckKeys = this.currentPage.map(scp => scp.brkey).filter(key => isNil(this.isKeyAttributeValidMap.get(key)))
+        if(uncheckKeys.length > 0){
+            CommittedProjectsService.ValidateBRKEYs(uncheckKeys, this.network.id).then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    if(!response.data)
-                        this.cpItems[index].errors = ['BRKEY does not exist'];
-                    else
-                        this.cpItems[index].errors = [];
+                    for(let i = 0; i < this.currentPage.length; i++)
+                    {
+                        const check = response.data[this.currentPage[i].brkey]
+                        if(!isNil(check)){
+                            if(!response.data[this.currentPage[i].brkey])
+                                this.currentPage[i].errors = ['BRKEY does not exist'];
+                            else
+                                this.currentPage[i].errors = [];
+
+                            this.isKeyAttributeValidMap.set(this.currentPage[i].brkey,response.data[this.currentPage[i].brkey] )
+                        }
+                    }                  
                 }
-                index++;
-                this.checkBrkeys(index)
-            });
+            }); 
+        }
+        for(let i = 0; i < this.currentPage.length; i++)
+        {
+            if(!this.isKeyAttributeValidMap.get(this.currentPage[i].brkey))
+                this.currentPage[i].errors = ['BRKEY does not exist'];
+            else
+                this.currentPage[i].errors = [];
+        }
+                          
     }
 
     checkYear(scp:SectionCommittedProjectTableData){
@@ -951,39 +1047,122 @@ export default class CommittedProjectsEditor extends Vue  {
 
     checkYears()
     {
-        this.cpItems.forEach(scp => {
+        this.currentPage.forEach(scp => {
             this.checkYear(scp);
         })
     }
 
+    updateCommittedProject(row: SectionCommittedProject, value: any, property: string){
+        const updatedRow = setItemPropertyValue(
+                    property,
+                    value,
+                    row
+                ) as SectionCommittedProject
+        this.onUpdateRow(row.id, updatedRow);
+    }
+
     updateCommittedProjects(row: SectionCommittedProject, value: any, property: string){
+        const updatedRow = setItemPropertyValue(
+                    property,
+                    value,
+                    row
+                ) as SectionCommittedProject
+        this.onUpdateRow(row.id, updatedRow);
         this.sectionCommittedProjects = update(
             findIndex(
                 propEq('id', row.id),
                 this.sectionCommittedProjects,
             ),
-            setItemPropertyValue(
-                property,
-                value,
-                row,
-            ) as SectionCommittedProject,
+            updatedRow,
             this.sectionCommittedProjects,
         );
     }
 
     updateCommittedProjectTableData(row: SectionCommittedProjectTableData, value: any, property: string ){
-        this.cpItems = update(
+        this.currentPage = update(
             findIndex(
                 propEq('id', row.id),
-                this.cpItems,
+                this.currentPage,
             ),
             setItemPropertyValue(
                 property,
                 value,
                 row,
             ) as SectionCommittedProjectTableData,
-            this.cpItems,
+            this.currentPage,
         );
+    }
+
+    onSearchClick(){
+        this.currentSearch = this.gridSearchTerm;
+        this.resetPage();
+    }
+
+    onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
+        if(any(propEq('id', rowId), this.addedRows)){
+            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
+            this.addedRows[index] = updatedRow;
+            return;
+        }
+
+        let mapEntry = this.updatedRowsMap.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.rowCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
+                this.updatedRowsMap.set(rowId, [row , updatedRow])
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+        }
+        else
+            this.updatedRowsMap.delete(rowId)
+
+        this.checkHasUnsavedChanges();
+    }
+
+    clearChanges(){
+        this.updatedRowsMap.clear();
+        this.addedRows = [];
+        this.deletionIds = [];
+    }
+
+    resetPage(){
+        this.projectPagination.page = 1;
+        this.onPaginationChanged();
+    }
+
+    checkHasUnsavedChanges(){
+        const hasUnsavedChanges: boolean = 
+            this.deletionIds.length > 0 || 
+            this.addedRows.length > 0 ||
+            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    initializePages(){
+        const request: PagingRequest<SectionCommittedProject>= {
+            page: 1,
+            rowsPerPage: 5,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: '',
+            isDescending: false,
+            search: ''
+        };
+        CommittedProjectsService.getCommittedProjectsPage(this.scenarioId,request).then(response => {
+            this.initializing = false
+            if(response.data){
+                let data = response.data as PagingPage<SectionCommittedProject>;
+                this.sectionCommittedProjects = data.items;
+                this.rowCache = clone(this.sectionCommittedProjects)
+                this.totalItems = data.totalItems;
+            }
+        }); 
     }
 }
 </script>

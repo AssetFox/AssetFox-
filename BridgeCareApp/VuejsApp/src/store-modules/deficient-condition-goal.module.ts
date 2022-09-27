@@ -24,6 +24,7 @@ const state = {
         emptyDeficientConditionGoalLibrary,
     ) as DeficientConditionGoalLibrary,
     scenarioDeficientConditionGoals: [] as DeficientConditionGoal[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -90,6 +91,9 @@ const mutations = {
         deficientConditionGoals: DeficientConditionGoal[],
     ) {
         state.scenarioDeficientConditionGoals = clone(deficientConditionGoals);
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
     },
 };
 
@@ -196,6 +200,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted target condition goal library',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await DeficientConditionGoalService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

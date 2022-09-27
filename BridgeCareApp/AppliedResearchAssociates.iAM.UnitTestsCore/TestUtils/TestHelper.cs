@@ -56,11 +56,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 return lazy.Value;
             }
         }
-
-        public void CreateSingletons()
-        {
-            AttributeTestSetup.CreateAttributes(UnitOfWork);
-            NetworkTestSetup.CreateNetwork(UnitOfWork);
-        }
     }
 }

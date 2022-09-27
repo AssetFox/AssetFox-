@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Logging;
@@ -33,12 +34,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private ExpressionValidationController SetupController()
         {
-            _testHelper.CreateSingletons();
+            var unitOfWork = _testHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
             AddTestData();
             var service = CreateValidationService();
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new ExpressionValidationController(service, EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
+            var controller = new ExpressionValidationController(service, EsecSecurityMocks.Admin, unitOfWork,
                 hubService,
                 accessor);
             return controller;

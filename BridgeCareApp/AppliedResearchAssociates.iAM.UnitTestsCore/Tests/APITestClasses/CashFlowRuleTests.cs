@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void Setup()
         {
-            _testHelper.CreateSingletons();
+            var unitOfWork = _testHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
         }
 
         private void CreateAuthorizedController()

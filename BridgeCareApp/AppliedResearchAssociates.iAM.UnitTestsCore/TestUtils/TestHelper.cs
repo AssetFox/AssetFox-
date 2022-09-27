@@ -21,6 +21,7 @@ using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -67,7 +68,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     Name = "pdsystbamsusr01",
                     HasAdminClaim = true,
-                    //Role = "PD-BAMS-Administrator",
                     Email = "pdstseseca5@pa.gov"
                 });
             MockEsecSecurityDBE = new Mock<IEsecSecurity>();
@@ -76,7 +76,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 {
                     Name = "b-bamsadmin",
                     HasAdminClaim= false,
-                    //Role = "PD-BAMS-DBEngineer",
                     Email = "jmalmberg@ara.com"
                 });
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
@@ -84,7 +83,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Logger = new LogNLog();
 
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
-
             MockHubService = new Mock<HubService>(MockHubContext.Object);
             var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
@@ -92,8 +90,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Options);
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
-            //UserDTO testUser = new UserDTO() { Username = "testname", Id = new Guid() };
-            //UnitOfWork.SetUser("testname");
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
@@ -133,24 +129,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Id = NetworkId,
             Name = "Test Network"
         };
-        public void SetAuthorizationClaims(string securityType, string internalRole, List<string> testClaims)
-        {
-            var MockRoleClaimsMapper = new Mock<IRoleClaimsMapper>();
-            MockRoleClaimsMapper.Setup(r => r.GetInternalRole(It.IsAny<string>(), It.IsAny<string>())).Returns(internalRole);
-            MockRoleClaimsMapper.Setup(c => c.GetClaims(It.IsAny<string>(), It.IsAny<string>())).Returns(testClaims);
+        //public void SetAuthorizationClaims(string securityType, string internalRole, List<string> testClaims)
+        //{
+        //    var MockRoleClaimsMapper = new Mock<IRoleClaimsMapper>();
+        //    MockRoleClaimsMapper.Setup(r => r.GetInternalRole(It.IsAny<string>(), It.IsAny<string>())).Returns(internalRole);
+        //    MockRoleClaimsMapper.Setup(c => c.GetClaims(It.IsAny<string>(), It.IsAny<string>())).Returns(testClaims);
 
-            List<Claim> oclaims = new List<Claim>();
-            var claims = MockRoleClaimsMapper.Object.GetClaims(securityType, internalRole);
-            foreach (var claim in claims)
-            {
-                oclaims.Add(new Claim(ClaimTypes.Name, claim));
-            }
-            var identity = new ClaimsIdentity(oclaims);
-            var claimsPrincipal = new ClaimsPrincipal(identity);
-            var mockHttpContext = new Mock<HttpContext>();
-            mockHttpContext.Setup(m => m.User).Returns(claimsPrincipal);
-            MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
-        }
+        //    List<Claim> oclaims = new List<Claim>();
+        //    var claims = MockRoleClaimsMapper.Object.GetClaims(securityType, internalRole);
+        //    foreach (var claim in claims)
+        //    {
+        //        oclaims.Add(new Claim(ClaimTypes.Name, claim));
+        //    }
+        //    var identity = new ClaimsIdentity(oclaims);
+        //    var claimsPrincipal = new ClaimsPrincipal(identity);
+        //    var mockHttpContext = new Mock<HttpContext>();
+        //    mockHttpContext.Setup(m => m.User).Returns(claimsPrincipal);
+        //    MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+        //}
         public SimulationEntity TestSimulation(Guid? id = null, string name = null)
         {
             var resolveName = name ?? RandomStrings.Length11();

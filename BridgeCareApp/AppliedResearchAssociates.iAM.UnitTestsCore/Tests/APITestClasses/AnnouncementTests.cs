@@ -202,7 +202,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         [Fact]
         public async Task UserIsModifyAnnouncementAuthorized()
         {
-            // Non-admin authorized
+            // Non-admin unauthorized
             // Arrange
             var authorizationService = _testHelper.BuildAuthorizationService(services =>
             {
@@ -218,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, "ModifyAnnouncementClaim");
             // Assert
-            Assert.True(allowed.Succeeded);
+            Assert.False(allowed.Succeeded);
         }
     }
 }

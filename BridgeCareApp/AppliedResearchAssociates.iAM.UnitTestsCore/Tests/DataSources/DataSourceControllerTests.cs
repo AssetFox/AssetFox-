@@ -302,7 +302,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, "ViewDataSourceClaim");
             // Assert

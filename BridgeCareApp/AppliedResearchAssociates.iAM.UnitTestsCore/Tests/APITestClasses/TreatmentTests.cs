@@ -416,25 +416,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldThrowUnauthorizedException()
-        {
-            // Arrange
-            Setup();
-            var simulation = _testHelper.CreateSimulation();
-            var controller = CreateUnauthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
-                .GetScenarioSelectableTreatments(simulation.Id);
-
-            // Act
-            var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
-        }
-
-        [Fact]
         public async Task ShouldDeleteLibraryData()
         {
             // Arrange

@@ -361,23 +361,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
-        {
-            // Arrange
-            Setup();
-            var simulation = _testHelper.CreateSimulation();
-            CreateUnauthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            var dtos = new List<CashFlowRuleDTO>();
-
-            // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
-        }
-        [Fact]
         public async Task UserIsViewCashFlowFromLibraryAuthorized()
         {
             // non-admin authorize test

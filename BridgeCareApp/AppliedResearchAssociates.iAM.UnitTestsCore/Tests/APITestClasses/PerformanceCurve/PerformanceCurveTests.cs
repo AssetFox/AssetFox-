@@ -310,42 +310,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Single(page.Items);
             Assert.Equal(performanceCurveId, page.Items[0].Id);
         }
-
-        [Fact]
-        public async Task Post_UserIsUnauthorized_ReturnsUnauthorized()
-        {
-            Setup();
-            // Arrange
-            var simulation = _testHelper.CreateSimulation();
-            _testHelper.SetupDefaultHttpContext();
-            var mockedUnauthorized = new Mock<IEsecSecurity>();
-            mockedUnauthorized.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
-                .Returns(new UserInfo
-                {
-                    Name = "districtEngineer",
-                    HasAdminAccess = false,
-                    Email = "fake@pa.gov"
-                });
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, mockedUnauthorized);
-            var performanceCurveId = Guid.NewGuid();
-            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.ScenarioEntity(simulation.Id, attribute.Id, performanceCurveId);
-            performanceCurve.Attribute = attribute;
-            var performanceCurveDto = performanceCurve.ToDto();
-            var request = new PagingSyncModel<PerformanceCurveDTO>()
-            {
-                AddedRows = new List<PerformanceCurveDTO> { performanceCurveDto},
-                RowsForDeletion = new List<Guid>(),
-                UpdateRows = new List<PerformanceCurveDTO>()
-            };
-            // Act
-            var upsertScenarioPerformanceCurveLibraryResult = await controller
-                .UpsertScenarioPerformanceCurves(simulation.Id,
-                    request);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(upsertScenarioPerformanceCurveLibraryResult);
-        }
         [Fact]
         public async Task UserIsViewPerformanceCurveFromLibraryAuthorized()
         {

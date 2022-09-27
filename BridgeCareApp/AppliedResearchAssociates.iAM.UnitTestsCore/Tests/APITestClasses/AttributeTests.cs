@@ -34,10 +34,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 claims.Add(claim);
             }
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var service = new Mock<AttributeService>();
-            var importService = new Mock<AttributeImportService>();
-
-            var controller = new AttributeController(service.Object, importService.Object, _testHelper.MockEsecSecurityDBE.Object,
+            var aservice = new AttributeService(_testHelper.UnitOfWork);
+            var aimportService = new AttributeImportService(_testHelper.UnitOfWork);
+            var controller = new AttributeController(aservice, aimportService, _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
             controller.ControllerContext = new ControllerContext()
             {

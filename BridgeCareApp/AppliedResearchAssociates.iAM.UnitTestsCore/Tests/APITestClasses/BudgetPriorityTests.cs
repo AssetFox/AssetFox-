@@ -380,23 +380,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
-        {
-            // Arrange
-            Setup();
-            var simulation = _testHelper.CreateSimulation();
-            var controller = CreateUnauthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            var dtos = new List<BudgetPriorityDTO>();
-
-            // Act
-            var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
-        }
-        [Fact]
         public async Task UserIsViewBudgetPriorityFromLibraryAuthorized()
         {
             // Arrange
@@ -461,12 +444,3 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
     }
 }
-
-
-// Set up the claims for testing
-//List<string> testClaims = new List<string>()
-//{
-//    BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess,
-//    BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess
-//};
-

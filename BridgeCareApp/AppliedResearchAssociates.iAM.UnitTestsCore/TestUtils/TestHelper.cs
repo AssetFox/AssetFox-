@@ -12,10 +12,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
+            var options = new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
-                .Options);
-
+                .Options;
+            var dbContext = new IAMContext(options);
             UnitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }

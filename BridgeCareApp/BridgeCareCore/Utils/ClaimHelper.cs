@@ -24,10 +24,12 @@ namespace BridgeCareCore.Utils
         /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
         /// </summary>
         /// <param name="simulationId"></param>
+        /// <param name="userId"></param>
+        /// <param name="checkSimulationAccess"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserSimulationReadAuthorization(Guid simulationId, Guid userId)
+        public void CheckUserSimulationReadAuthorization(Guid simulationId, Guid userId, bool checkSimulationAccess)
         {
-            if (RequirePermittedCheck())
+            if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
                 var simulation = GetSimulationWithUsers(simulationId);
                 if (!simulation.Users.Any(_ => _.UserId == userId))
@@ -41,10 +43,12 @@ namespace BridgeCareCore.Utils
         /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
         /// </summary>
         /// <param name="simulationId"></param>
+        /// <param name="userId"></param>
+        /// <param name="checkSimulationAccess"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId)
+        public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId, bool checkSimulationAccess)
         {
-            if (RequirePermittedCheck())
+            if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
                 var simulation = GetSimulationWithUsers(simulationId);
                 if (!simulation.Users.Any(_ => _.UserId == userId && _.CanModify))
@@ -95,6 +99,11 @@ namespace BridgeCareCore.Utils
         private bool HasAdminAccess()
         {
             return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.AdminAccess);
+        }
+
+        private bool HasSimulationAccess()
+        {
+            return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.SimulationAccess);
         }
     }
 }

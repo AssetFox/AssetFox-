@@ -9,6 +9,7 @@ namespace BridgeCareCore.Security
     public class SecurityAuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
     {
         private readonly AuthorizationMiddlewareResultHandler defaultHandler = new();
+
         public async Task HandleAsync(
             RequestDelegate next,
             HttpContext context,

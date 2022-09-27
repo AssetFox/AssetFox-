@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Common;
+using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -18,10 +19,14 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
@@ -49,6 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public Mock<IHttpContextAccessor> MockHttpContextAccessor { get; }
 
+        public Mock<IRoleClaimsMapper> MockRoleClaimsMapper { get; }
 
         public TestHelper()
         {
@@ -73,13 +79,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     HasAdminAccess = false,
                     Email = "jmalmberg@ara.com"
                 });
-
             MockHttpContextAccessor = new Mock<IHttpContextAccessor>();
 
             Logger = new LogNLog();
 
             MockHubContext = new Mock<IHubContext<BridgeCareHub>>();
-
             MockHubService = new Mock<HubService>(MockHubContext.Object);
             var connectionString = TestConnectionStrings.BridgeCare(Config);
             DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
@@ -87,7 +91,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Options);
 
             UnitOfWork = new UnitOfDataPersistenceWork(Config, DbContext);
-
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
 
@@ -228,6 +231,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 };
                 UnitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
             }
+        }
+        public virtual IAuthorizationService BuildAuthorizationService(Action<IServiceCollection> setupServices = null)
+        {
+            var services = new ServiceCollection();
+            services.AddAuthorizationCore();
+            services.AddLogging();
+            services.AddOptions();
+            setupServices?.Invoke(services);
+            return services.BuildServiceProvider().GetRequiredService<IAuthorizationService>();
         }
     }
 }

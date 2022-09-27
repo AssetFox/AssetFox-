@@ -72,7 +72,10 @@
 
         public static class Role
         {            
-            public const string Administrator = "Administrator";                     
+            public const string Administrator = "Administrator";
+            public const string Editor = "Editor";
+            public const string ReadOnly = "ReadOnly";
+            public const string SimulationPowerUser = "SimulationPowerUser";
         }
 
         public static class Claim

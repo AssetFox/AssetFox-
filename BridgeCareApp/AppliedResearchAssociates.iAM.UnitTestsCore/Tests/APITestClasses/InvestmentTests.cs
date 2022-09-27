@@ -522,27 +522,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !_testHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
                     _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
-
-        [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
-        {
-            // Arrange
-            var service = Setup();
-            var controller = CreateUnauthorizedController(service);
-            var simulation = _testHelper.CreateSimulation();
-            CreateScenarioTestData(simulation.Id);
-            var dto = new InvestmentDTO
-            {
-                ScenarioBudgets = new List<BudgetDTO> { _testScenarioBudget.ToDto() },
-                InvestmentPlan = _testInvestmentPlan.ToDto()
-            };
-
-            // Act
-            var result = await controller.UpsertInvestment(simulation.Id, dto);
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
-        }
         [Fact]
         public async Task UserIsViewInvestmentFromScenarioAuthorized()
         {
@@ -610,23 +589,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
-        [Fact]
-        public async Task ShouldReturnUnauthorizedOnScenarioImport()
-        {
-            // Arrange
-            var service = Setup();
-            var simulation = _testHelper.CreateSimulation();
-            var controller = CreateUnauthorizedController(service);
-            CreateScenarioTestData(simulation.Id);
-            CreateRequestWithScenarioFormData(simulation.Id);
-
-            // Act
-            var result = await controller.ImportScenarioInvestmentBudgetsExcelFile();
-
-            // Assert
-            Assert.IsType<UnauthorizedResult>(result);
-        }
-
         [Fact]
         public async Task ShouldImportLibraryBudgetsFromFile()
         {

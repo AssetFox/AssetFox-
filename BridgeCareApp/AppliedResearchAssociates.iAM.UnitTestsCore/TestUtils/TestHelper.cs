@@ -1,59 +1,59 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using AppliedResearchAssociates.iAM.Common;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataUnitTests;
-using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using BridgeCareCore.Interfaces;
-using BridgeCareCore.Logging;
-using BridgeCareCore.Models;
-using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Moq;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public class TestHelper
     {
+        private readonly IAMContext IamContext;
 
-        public readonly IAMContext DbContext;
+        static TestHelper()
+        {
+            lazy = new Lazy<TestHelper>(new TestHelper());
+        }
 
-        public UnitOfDataPersistenceWork UnitOfWork { get; }
+        private UnitOfDataPersistenceWork UnitOfDataPersistenceWork { get; }
 
-        public TestHelper()
+        private TestHelper()
         {
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            DbContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
+            IamContext = new IAMContext(new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options);
 
-            UnitOfWork = new UnitOfDataPersistenceWork(config, DbContext);
+            UnitOfDataPersistenceWork = new UnitOfDataPersistenceWork(config, IamContext);
 
-            DatabaseResetter.ResetDatabase(UnitOfWork);
+            DatabaseResetter.ResetDatabase(UnitOfDataPersistenceWork);
         }
 
-        private static readonly Lazy<TestHelper> lazy = new Lazy<TestHelper>(new TestHelper());
-        public static TestHelper Instance
+        private static readonly Lazy<TestHelper> lazy;
+        private static TestHelper Instance
         {
             get
             {
                 return lazy.Value;
+            }
+        }
+
+        public static IAMContext DbContext
+        {
+            get
+            {
+                var dbContext = Instance.IamContext;
+                return dbContext;
+            }
+        }
+
+        public static UnitOfDataPersistenceWork UnitOfWork
+        {
+            get
+            {
+                var unitOfWork = Instance.UnitOfDataPersistenceWork;
+                return unitOfWork;
             }
         }
     }

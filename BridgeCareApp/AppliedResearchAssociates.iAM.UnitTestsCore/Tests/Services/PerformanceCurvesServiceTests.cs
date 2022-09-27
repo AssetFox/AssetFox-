@@ -17,13 +17,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
     public class PerformanceCurvesServiceTests
     {
         private PerformanceCurvesService performanceCurvesService;
-        private static TestHelper _testHelper => TestHelper.Instance;
 
         private Mock<IExpressionValidationService> SetupMock(Guid performanceCurveLibraryId)
         {
-            var dbContext = _testHelper.DbContext;
-            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
+            var dbContext = TestHelper.DbContext;
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var mockExpressionValidationService = new Mock<IExpressionValidationService>();
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
                 dbContext.SaveChanges();
@@ -39,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurve.xlsx");
@@ -63,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurveInvalidAttribute.xlsx");
@@ -84,13 +83,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
@@ -111,14 +110,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = false });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
 
             var simulationId = Guid.NewGuid();
-            var simulationEntity = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
             // Assert
 
@@ -136,13 +135,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
             mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = false });
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(_testHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, simulationId);
+            SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert

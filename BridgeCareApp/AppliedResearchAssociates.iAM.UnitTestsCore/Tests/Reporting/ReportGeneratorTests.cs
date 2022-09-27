@@ -20,7 +20,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Reporting
         private ReportLookupLibrary _testReportLibrary;
         private UnitOfDataPersistenceWork _testRepo;
         private DictionaryBasedReportGenerator _generator;
-        private TestHelper _testHelper => TestHelper.Instance;
 
         public ReportGeneratorTests()
         {

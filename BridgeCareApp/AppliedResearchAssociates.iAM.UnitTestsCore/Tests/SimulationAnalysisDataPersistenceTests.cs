@@ -698,10 +698,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             });
         }        
 
-        private void CleanUp(BrokenSimulationAnalysisDataPersistenceTestHelper testHelper)
-        {
-            testHelper.UnitOfWork.Context.Database.EnsureDeleted();
-            testHelper.UnitOfWork.Dispose();
-        }
+        //private void CleanUp(BrokenSimulationAnalysisDataPersistenceTestHelper testHelper)
+        //{
+        //    TestHelper.UnitOfWork.Context.Database.EnsureDeleted();
+        //    TestHelper.UnitOfWork.Dispose();
+        //}
     }
 }

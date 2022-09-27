@@ -23,7 +23,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {
     public class DataSourceControllerTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
         private Mock<IUnitOfWork> _mockUOW;
         private Mock<IDataSourceRepository> _mockDataSource;
         private Guid _badSource = Guid.Parse("7ed4d236-7f8c-450a-ae05-9c1359ed0ce6");

@@ -16,19 +16,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
     public class AttributeImportServiceTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
         //private AttributeImportService CreateAttributeImportService()
         //{
-        //    var returnValue = new AttributeImportService(_testHelper.UnitOfWork);
+        //    var returnValue = new AttributeImportService(TestHelper.UnitOfWork);
         //    return returnValue;
         //}
 
         private ExcelRawDataImportService CreateExcelSpreadsheetImportService()
         {
-            var returnValue = new ExcelRawDataImportService(_testHelper.UnitOfWork);
+            var returnValue = new ExcelRawDataImportService(TestHelper.UnitOfWork);
             return returnValue;
         }
 
@@ -146,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    var warningMessage = result.WarningMessage;
         //    Assert.True(string.IsNullOrEmpty(warningMessage));
         //    var networkId = result.NetworkId.Value;
-        //    var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+        //    var assets = TestHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
         //    var assetCount = assets.Count;
         //    var datum0 = assets[0].AssignedData[0];
         //    var doubleDatum0 = datum0 as AttributeDatum<double>;
@@ -219,7 +218,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    var service = CreateAttributeImportService();
         //    var result = service.ImportExcelAttributes("BRKEY", InspectionDateColumnTitle, SpatialWeighting, excelPackage);
         //    var networkId = result.NetworkId.Value;
-        //    var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+        //    var assets = TestHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
         //    var asset1 = assets.Single(a => a.Location.LocationIdentifier == "1");
         //    var asset1AttributeDatum = asset1.AssignedData[0];
         //    var doubleAsset1AttributeDatum = (AttributeDatum<double>)asset1AttributeDatum;
@@ -257,7 +256,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         //    var warningMessage = result.WarningMessage;
         //    Assert.True(string.IsNullOrEmpty(warningMessage));
         //    var networkId = result.NetworkId.Value;
-        //    var assets = _testHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
+        //    var assets = TestHelper.UnitOfWork.MaintainableAssetRepo.GetAllInNetworkWithAssignedDataAndLocations(networkId);
         //    var assetCount = assets.Count;
         //    Assert.Equal(4, assetCount);
         //    var assetNamed1 = assets.Single(a => a.Location.LocationIdentifier == "1");

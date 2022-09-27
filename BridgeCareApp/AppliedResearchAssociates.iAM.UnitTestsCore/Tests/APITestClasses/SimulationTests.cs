@@ -31,7 +31,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class SimulationTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         private SimulationController _controller;
 
         private UserEntity _testUserEntity;
@@ -43,19 +42,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var randomName = RandomStrings.Length11();
             var role = "PD-BAMS-Administrator";
-            _testHelper.UnitOfWork.AddUser(randomName, role);
-            var returnValue = await _testHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
+            TestHelper.UnitOfWork.AddUser(randomName, role);
+            var returnValue = await TestHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
             return returnValue;
         }
 
         public SimulationAnalysisService Setup()
         {
-            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
-            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(_testHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(TestHelper.UnitOfWork);
 
             var simulationAnalysisService =
-                new SimulationAnalysisService(_testHelper.UnitOfWork, new());
+                new SimulationAnalysisService(TestHelper.UnitOfWork, new());
             return simulationAnalysisService;
         }
 
@@ -65,9 +64,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(
                 simulationAnalysisService,
-                new SimulationService(_testHelper.UnitOfWork),
+                new SimulationService(TestHelper.UnitOfWork),
                 EsecSecurityMocks.Admin,
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService,
                 accessor);
         }
@@ -77,26 +76,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(simulationAnalysisService,
-                new SimulationService(_testHelper.UnitOfWork),
+                new SimulationService(TestHelper.UnitOfWork),
                 EsecSecurityMocks.Dbe,
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService,
                 accessor);
         }
 
         private void CreateTestData()
         {
-            if (!_testHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))
+            if (!TestHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))
             {
                 _testUserEntity = new UserEntity { Id = Guid.NewGuid(), Username = "Clone Tester" };
-                _testHelper.UnitOfWork.Context.AddEntity(_testUserEntity);
-                _testHelper.UnitOfWork.SetUser(_testUserEntity.Username);
-                _testHelper.UnitOfWork.Context.SaveChanges();
+                TestHelper.UnitOfWork.Context.AddEntity(_testUserEntity);
+                TestHelper.UnitOfWork.SetUser(_testUserEntity.Username);
+                TestHelper.UnitOfWork.Context.SaveChanges();
             }
 
-            if (!_testHelper.UnitOfWork.Context.Simulation.Any(s => s.Name == SimulationName))
+            if (!TestHelper.UnitOfWork.Context.Simulation.Any(s => s.Name == SimulationName))
             {
-                var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+                var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
                 var budgetId = Guid.NewGuid();
                 var committedProjectEnity = new CommittedProjectEntity
                 {
@@ -129,11 +128,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 {
                     new SimulationUserEntity
                     {
-                        UserId = _testHelper.UnitOfWork.UserEntity.Id,
+                        UserId = TestHelper.UnitOfWork.UserEntity.Id,
                         CanModify = true,
                         IsOwner = true,
-                        CreatedBy = _testHelper.UnitOfWork.UserEntity.Id,
-                        LastModifiedBy = _testHelper.UnitOfWork.UserEntity.Id
+                        CreatedBy = TestHelper.UnitOfWork.UserEntity.Id,
+                        LastModifiedBy = TestHelper.UnitOfWork.UserEntity.Id
                     }
                 },
                     AnalysisMethod =
@@ -458,8 +457,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
                 };
-                _testHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
-                _testHelper.UnitOfWork.Context.SaveChanges();
+                TestHelper.UnitOfWork.Context.AddEntity(_testSimulationToClone);
+                TestHelper.UnitOfWork.Context.SaveChanges();
             }
         }
 
@@ -469,13 +468,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
             await _controller.DeleteSimulation(simulation.Id);
 
             // Assert
-            Assert.True(!_testHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
         }
 
         [Fact]
@@ -549,7 +548,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             // Act
             var result = await _controller.UpdateSimulation(simulation.ToDto(null));
 
@@ -577,7 +576,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, owner:_testHelper.UnitOfWork.CurrentUser.Id);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner:TestHelper.UnitOfWork.CurrentUser.Id);
             var request = new PagingRequestModel<SimulationDTO>()
             {
                 isDescending = false,
@@ -604,7 +603,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
             var request = new PagingRequestModel<SimulationDTO>()
@@ -635,7 +634,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             var newSimulationDTO = simulation.ToDto(null);
             newSimulationDTO.Id = Guid.NewGuid();
@@ -658,7 +657,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
             // Assert
-            var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
                 .SingleOrDefault(_ => _.Id == dto.Id);
@@ -677,8 +676,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             CreateAuthorizedController(service);
-            _testHelper.UnitOfWork.Context.SaveChanges();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, owner: _testHelper.UnitOfWork.CurrentUser.Id);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, owner: TestHelper.UnitOfWork.CurrentUser.Id);
 
             var request = new PagingRequestModel<SimulationDTO>()
             {
@@ -713,7 +712,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var dto = (SimulationDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(SimulationDTO));
 
             // Assert
-            var simulationEntity = _testHelper.UnitOfWork.Context.Simulation
+            var simulationEntity = TestHelper.UnitOfWork.Context.Simulation
                 .Include(_ => _.SimulationUserJoins)
                 .ThenInclude(_ => _.User)
                 .Single(_ => _.Id == dto.Id);
@@ -722,8 +721,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var simulationUsers = simulationEntity.SimulationUserJoins.ToList();
             Assert.True(simulationUsers.Count == 2);
-            Assert.Equal(dto.Users.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId,
-                simulationUsers.Single(_ => _.UserId != _testHelper.UnitOfWork.CurrentUser.Id).UserId);
+            Assert.Equal(dto.Users.Single(_ => _.UserId != TestHelper.UnitOfWork.CurrentUser.Id).UserId,
+                simulationUsers.Single(_ => _.UserId != TestHelper.UnitOfWork.CurrentUser.Id).UserId);
         }
 
         [Fact]
@@ -733,7 +732,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             CreateAuthorizedController(service);
             CreateTestData();
-            var simulationDto = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(_testSimulationToClone.Id);
+            var simulationDto = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(_testSimulationToClone.Id);
             var cloneSimulationDto = new CloneSimulationDTO
             {
                 networkId = _testSimulationToClone.NetworkId,
@@ -750,7 +749,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.NotNull(okObjResult.Value);
             var dto = (SimulationDTO)Convert.ChangeType(okObjResult.Value, typeof(SimulationDTO));
 
-            var originalSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
+            var originalSimulation = TestHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                 // analysis method
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.Benefit)
@@ -831,7 +830,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Include(_ => _.SimulationUserJoins)
                 .Single(_ => _.Id == _testSimulationToClone.Id);
 
-            var clonedSimulation = _testHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
+            var clonedSimulation = TestHelper.UnitOfWork.Context.Simulation.AsNoTracking().AsSplitQuery()
                 // analysis method
                 .Include(_ => _.AnalysisMethod)
                 .ThenInclude(_ => _.Benefit)

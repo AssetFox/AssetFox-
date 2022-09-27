@@ -25,8 +25,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class NetworkGetTests
     {
 
-        private TestHelper _testHelper => TestHelper.Instance;
-
         private void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
         {
             var networkId = Guid.NewGuid();
@@ -45,8 +43,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 var resultAttribute = AttributeTestSetup.Numeric();
                 resultAttributes.Add(resultAttribute);
             }
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
             var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
             {
@@ -67,17 +65,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 
                 results.Add(result);
             }
-            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+            TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
 
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
 
-            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
+            var simulationAnalysisNetwork = TestHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
 
             Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
             var assets = simulationAnalysisNetwork.Assets;

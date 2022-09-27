@@ -33,8 +33,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class InvestmentTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         private BudgetLibraryEntity _testBudgetLibrary;
         private BudgetEntity _testBudget;
         private InvestmentPlanEntity _testInvestmentPlan;
@@ -45,11 +43,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         public InvestmentBudgetsService Setup()
         {
-            AttributeTestSetup.CreateAttributes(_testHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(_testHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var hubService = HubServiceMocks.Default();
             var logger = new LogNLog();
-            var service = new InvestmentBudgetsService(_testHelper.UnitOfWork, new ExpressionValidationService(_testHelper.UnitOfWork, logger), hubService);
+            var service = new InvestmentBudgetsService(TestHelper.UnitOfWork, new ExpressionValidationService(TestHelper.UnitOfWork, logger), hubService);
             return service;
         }
 
@@ -59,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService,
                 accessor,
                 _mockInvestmentDefaultDataService.Object);
@@ -72,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new InvestmentController(service, EsecSecurityMocks.Dbe,
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService, accessor, _mockInvestmentDefaultDataService.Object);
             return controller;
         }
@@ -81,8 +79,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var year = DateTime.Now.Year;
             _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
-            _testHelper.UnitOfWork.Context.AddEntity(_testBudgetLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.AddEntity(_testBudgetLibrary);
+            TestHelper.UnitOfWork.Context.SaveChanges();
 
             _testBudget = new BudgetEntity
             {
@@ -104,8 +102,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testBudget);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.AddEntity(_testBudget);
+            TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private void CreateScenarioTestData(Guid simulationId)
@@ -120,12 +118,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 MinimumProjectCostLimit = 500000,
                 InflationRatePercentage = 3
             };
-            var investmentPlan = _testHelper.UnitOfWork.Context.InvestmentPlan.FirstOrDefault(ip => ip.SimulationId == simulationId);
+            var investmentPlan = TestHelper.UnitOfWork.Context.InvestmentPlan.FirstOrDefault(ip => ip.SimulationId == simulationId);
             if (investmentPlan != null)
             {
-                _testHelper.UnitOfWork.Context.Remove(investmentPlan);
+                TestHelper.UnitOfWork.Context.Remove(investmentPlan);
             }
-            _testHelper.UnitOfWork.Context.AddEntity(_testInvestmentPlan);
+            TestHelper.UnitOfWork.Context.AddEntity(_testInvestmentPlan);
 
             _testScenarioBudget = new ScenarioBudgetEntity
             {
@@ -150,13 +148,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            var scenarioBudget = _testHelper.UnitOfWork.Context.ScenarioBudget.FirstOrDefault(b => b.Name == BudgetEntityName);
+            var scenarioBudget = TestHelper.UnitOfWork.Context.ScenarioBudget.FirstOrDefault(b => b.Name == BudgetEntityName);
             if (scenarioBudget != null)
             {
-                _testHelper.UnitOfWork.Context.Remove(scenarioBudget);
+                TestHelper.UnitOfWork.Context.Remove(scenarioBudget);
             }
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioBudget);
+            TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private IHttpContextAccessor CreateRequestWithLibraryFormData(bool overwriteBudgets = false)
@@ -284,7 +282,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
             var result = await controller.GetInvestment(simulation.Id);
@@ -314,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var service = Setup();
             // Arrange
             var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var dto = new InvestmentDTO
             {
                 ScenarioBudgets = new List<BudgetDTO>(),
@@ -381,7 +379,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var service = Setup();
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
 
@@ -430,7 +428,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertBudgetLibrary(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
+            var modifiedDto = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
 
             Assert.Equal(dto.Description, modifiedDto.Description);
 
@@ -449,7 +447,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
 
             var dto = new InvestmentDTO
@@ -467,9 +465,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Assert
             var modifiedBudgetDto =
-                _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)[0];
+                TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)[0];
             var modifiedInvestmentPlanDto =
-                _testHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
+                TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
 
             Assert.Equal(dto.ScenarioBudgets[0].Name, modifiedBudgetDto.Name);
             Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
@@ -497,13 +495,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!_testHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
-            Assert.True(!_testHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
+                !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
                     _.BudgetId == _testBudget.Id));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
+                !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
                     _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
 
@@ -513,7 +511,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var controller = CreateUnauthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var dto = new InvestmentDTO
             {
@@ -534,7 +532,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var service = Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateUnauthorizedController(service, accessor);
@@ -561,7 +559,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.ImportLibraryInvestmentBudgetsExcelFile();
 
             // Assert
-            var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetLibraryBudgetAmounts(_testBudgetLibrary.Id)
                 .Where(_ => _.Budget.Name.IndexOf("Sample") != -1)
                 .ToList();
@@ -570,7 +568,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
             Assert.Equal(3, budgets.Count);
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
@@ -578,7 +576,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
             // broken assertions below were hidden behind a timer
-            //var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+            //var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
             //    .Where(_ => _.IsSingleUse &&
             //                _.CriterionLibraryScenarioBudgetJoins.Any(join =>
             //                    budgetNames.Contains(join.ScenarioBudget.Name)))
@@ -606,31 +604,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var controller = CreateAuthorizedController(service, accessor);
 
             _testBudget.Name = "Sample Budget 1";
-            _testHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
+            TestHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
 
             var budgetAmount = _testBudget.BudgetAmounts.ToList()[0];
             budgetAmount.Year = year;
             budgetAmount.Value = 4000000;
-            _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
+            TestHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
             // Act
             await controller.ImportLibraryInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts =
-                _testHelper.UnitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(_testBudgetLibrary.Id);
+                TestHelper.UnitOfWork.BudgetAmountRepo.GetLibraryBudgetAmounts(_testBudgetLibrary.Id);
             Assert.Equal(2, budgetAmounts.Count);
             Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
             Assert.Equal(2, budgets.Count);
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-            var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+            var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
                 .Where(_ => _.IsSingleUse &&
                             _.CriterionLibraryScenarioBudgetJoins.Any(join =>
                                 budgetNames.Contains(join.ScenarioBudget.Name)))
@@ -657,7 +655,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateAuthorizedController(service, accessor);
-            _testHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
+            TestHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
 
             // Act
             var result =
@@ -785,7 +783,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var year = DateTime.Now.Year;
             var service = Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateAuthorizedController(service, accessor);
             CreateScenarioTestData(simulation.Id);
@@ -794,7 +792,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
-            var budgetAmounts = _testHelper.UnitOfWork.BudgetAmountRepo
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
                 .GetScenarioBudgetAmounts(simulation.Id)
                 .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
                 .ToList();
@@ -803,7 +801,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Equal(3, budgets.Count);
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
@@ -811,7 +809,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
             // Assertions below were already broken. This broken-ness was hidden because they were inside the delegate of a timer that never fired.
-            //var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+            //var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
             //    .Where(_ => _.IsSingleUse &&
             //                _.CriterionLibraryScenarioBudgetJoins.Any(join =>
             //                    budgetNames.Contains(join.ScenarioBudget.Name)))
@@ -834,37 +832,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var year = DateTime.Now.Year;
             var service = Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateAuthorizedController(service, accessor);
 
             _testScenarioBudget.Name = "Sample Budget 1";
-            _testHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
+            TestHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
 
             var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
             budgetAmount.Year = year;
             budgetAmount.Value = 4000000;
-            _testHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
+            TestHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
 
             // Act
             await controller.ImportScenarioInvestmentBudgetsExcelFile();
 
             // Assert
             var budgetAmounts =
-                _testHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
+                TestHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
             Assert.Equal(2, budgetAmounts.Count);
             Assert.True(budgetAmounts.All(_ => _.Year == year));
             Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-            var budgets = _testHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Equal(2, budgets.Count);
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
             Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-            var criteria = _testHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+            var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
                 .Where(_ => _.IsSingleUse &&
                             _.CriterionLibraryScenarioBudgetJoins.Any(join =>
                                 budgetNames.Contains(join.ScenarioBudget.Name)))
@@ -889,7 +887,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var year = DateTime.Now.Year;
             var service = Setup();
             var simulationName = RandomStrings.Length11();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, null, simulationName);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateAuthorizedController(service, accessor);
@@ -937,7 +935,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var service = Setup();
             var simulationName = RandomStrings.Length11();
-            var simulation = SimulationTestSetup.CreateSimulation(_testHelper.UnitOfWork, null, simulationName);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateAuthorizedController(service, accessor);

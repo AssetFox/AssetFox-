@@ -16,19 +16,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class DeficientConditionGoalTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
-
         private static readonly Guid DeficientConditionGoalLibraryId = Guid.Parse("569618ce-ee50-45de-99ce-cd4625134d07");
         private static readonly Guid DeficientConditionGoalId = Guid.Parse("c148ab58-8b27-40c0-a4a4-84454022d032");
 
         private static DeficientConditionGoalController Setup()
         {
-            var unitOfWork = _testHelper.UnitOfWork;
+            var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, _testHelper.UnitOfWork,
+            var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService,
                 accessor);
             return controller;
@@ -51,16 +49,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void SetupForGet()
         {
-            if (!_testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any())
+            if (!TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any())
             {
-                _testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Add(TestDeficientConditionGoalLibrary);
+                TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Add(TestDeficientConditionGoalLibrary);
             }
-            if (!_testHelper.UnitOfWork.Context.DeficientConditionGoal.Any())
+            if (!TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any())
             {
-                var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+                var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
                 TestDeficientConditionGoal.AttributeId = attribute.Id;
-                _testHelper.UnitOfWork.Context.DeficientConditionGoal.Add(TestDeficientConditionGoal);
-                _testHelper.UnitOfWork.Context.SaveChanges();
+                TestHelper.UnitOfWork.Context.DeficientConditionGoal.Add(TestDeficientConditionGoal);
+                TestHelper.UnitOfWork.Context.SaveChanges();
             }
         }
 
@@ -68,8 +66,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             SetupForGet();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
         }
         [Fact]
@@ -152,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Assert
 
-            var modifiedDto = _testHelper.UnitOfWork.DeficientConditionGoalRepo
+            var modifiedDto = TestHelper.UnitOfWork.DeficientConditionGoalRepo
                 .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
             Assert.Equal(dto.Description, modifiedDto.Description);
             Assert.Equal(dto.DeficientConditionGoals[0].Attribute,
@@ -190,10 +188,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!_testHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == DeficientConditionGoalLibraryId));
-            Assert.True(!_testHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == DeficientConditionGoalId));
+            Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == DeficientConditionGoalLibraryId));
+            Assert.True(!TestHelper.UnitOfWork.Context.DeficientConditionGoal.Any(_ => _.Id == DeficientConditionGoalId));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
+                !TestHelper.UnitOfWork.Context.CriterionLibraryDeficientConditionGoal.Any(_ =>
                     _.DeficientConditionGoalId == DeficientConditionGoalId));
         }
     }

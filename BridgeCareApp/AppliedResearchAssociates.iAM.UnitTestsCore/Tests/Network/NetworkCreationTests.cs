@@ -20,16 +20,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class NetworkCreationTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         [Fact]
         public void CreateNetworkViaFactoryAndRepository_Does()
         {
             var networkName = RandomStrings.WithPrefix("Network");
             var config = TestConfiguration.Get();
-            var allNetworksBefore = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            var allNetworksBefore = TestHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var attribute = UnitTestsCoreAttributeTestSetup.ExcelAttributeForEntityInDb(dataSourceDto);
             var allDataSourceDto = AllDataSourceDtoFakeFrontEndFactory.ToAll(dataSourceDto);
 
@@ -42,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
             var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource);
             var textAttribute = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
-            var attributeConnection = AttributeConnectionBuilder.Build(textAttribute, mappedDataSource, _testHelper.UnitOfWork);
+            var attributeConnection = AttributeConnectionBuilder.Build(textAttribute, mappedDataSource, TestHelper.UnitOfWork);
             var data = AttributeDataBuilder.GetData(attributeConnection);
             var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
                   data, parameters.DefaultEquation);
@@ -50,9 +48,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var networkId = network.Id;
 
             // insert network domain data into the data source
-            _testHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
+            TestHelper.UnitOfWork.NetworkRepo.CreateNetwork(network);
 
-            var allNetworks = _testHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
+            var allNetworks = TestHelper.UnitOfWork.NetworkRepo.GetAllNetworks();
             var actual = allNetworks.Single(n => n.Id == networkId);
         }
     }

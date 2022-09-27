@@ -13,14 +13,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationRunTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         [Fact (Skip ="Fails as we apparently need a CalculatedAttribute library. Setup is likely nowhere near rich enough.")]
         public void RunSimulation()
         {
             var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
@@ -35,7 +33,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
             var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
-                _testHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
+                TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
 
             var simulationId = Guid.NewGuid();
             var simulationName = RandomStrings.WithPrefix("Simulation");
@@ -45,11 +43,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 NetworkId = network.Id,
                 Name = simulationName,
             };
-            _testHelper.UnitOfWork.SimulationRepo.CreateSimulation(network.Id, simulationDto);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
-            var analysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(
+            TestHelper.UnitOfWork.SimulationRepo.CreateSimulation(network.Id, simulationDto);
+            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
+            var analysisNetwork = TestHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(
                 network.Id, explorer);
-            _testHelper.UnitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, analysisNetwork);
+            TestHelper.UnitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, analysisNetwork);
         }
     }
 }

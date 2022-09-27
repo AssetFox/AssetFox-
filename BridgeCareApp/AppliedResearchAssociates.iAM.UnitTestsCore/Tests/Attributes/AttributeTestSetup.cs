@@ -15,11 +15,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
     {
         public static void EnsureAttributeExists(AttributeDTO dto)
         {
-            var testHelper = TestHelper.Instance;
-            var existingAttribute = testHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
+            var existingAttribute = TestHelper.UnitOfWork.AttributeRepo.GetSingleByName(dto.Name);
             if (existingAttribute == null)
             {
-                testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
+                TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(dto);
             }
         }
 

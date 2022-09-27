@@ -14,16 +14,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public static class PerformanceCurveControllerTestSetup
     {
 
-        public static PerformanceCurveController SetupController(TestHelper testHelper, IEsecSecurity esecSecurity)
+        public static PerformanceCurveController SetupController(IEsecSecurity esecSecurity)
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new PerformanceCurveController(
                 esecSecurity,
-                testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService,
                 accessor,
-                TestUtils.TestServices.PerformanceCurves(testHelper.UnitOfWork, hubService)
+                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService)
                 );
             return controller;
         }

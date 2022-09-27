@@ -16,11 +16,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class CriterionTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
-
         private CriterionLibraryController SetupController()
         {
-            var unitOfWork = _testHelper.UnitOfWork;
+            var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
             var accessor = HttpContextAccessorMocks.Default();
@@ -36,8 +34,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CriterionLibraryEntity Setup()
         {
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
         }
 
@@ -125,12 +123,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkObjectResult>(updateResult);
             Assert.IsType<OkObjectResult>(addResult);
 
-            var updatedCriterionLibraryEntity = _testHelper.UnitOfWork.Context.CriterionLibrary
+            var updatedCriterionLibraryEntity = TestHelper.UnitOfWork.Context.CriterionLibrary
                 .Single(_ => _.Id == criterionLibrary.Id);
             Assert.Equal(newDescription, updatedCriterionLibraryEntity.Description);
 
             var newCriterionLibraryEntity =
-                _testHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
+                TestHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
                     _.Id == newCriterionLibraryDTO.Id);
             Assert.NotNull(newCriterionLibraryEntity);
         }
@@ -149,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
 
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
+                !TestHelper.UnitOfWork.Context.CriterionLibrary.Any(_ =>
                     _.Id == criterionLibrary.Id));
         }
     }

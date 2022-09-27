@@ -27,7 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
     public class CommittedProjectControllerTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
         private Mock<IUnitOfWork> _mockUOW;
         private Mock<ICommittedProjectService> _mockService;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
@@ -204,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.Admin,
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 hubService,
                 accessor);
 

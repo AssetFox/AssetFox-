@@ -22,19 +22,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class ExpressionValidationTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
         private static readonly Guid MaintainableAssetLocationId = Guid.Parse("14580d3b-d99a-45f6-b854-adaa3f78910d");
 
         private ExpressionValidationService CreateValidationService()
         {
-            var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
+            var service = new ExpressionValidationService(TestHelper.UnitOfWork, new LogNLog());
             return service;
         }
 
         private ExpressionValidationController SetupController()
         {
-            var unitOfWork = _testHelper.UnitOfWork;
+            var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
             AddTestData();
@@ -91,10 +90,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         var culvAttribute = AttributeDtos.CulvDurationN;
                         var actionTypeAttribute = AttributeDtos.ActionType;
                         TestMaintainableAsset.NetworkId = NetworkTestSetup.NetworkId;
-                        _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
+                        TestHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
                         TestNumericAggregatedResult.AttributeId = AttributeDtos.CulvDurationN.Id;
                         TestTextAggregatedResult.AttributeId = AttributeDtos.ActionType.Id;
-                        _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
+                        TestHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
                         {
                             TestNumericAggregatedResult, TestTextAggregatedResult
                         });

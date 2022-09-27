@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
@@ -10,10 +11,16 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -47,6 +54,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
                 _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            return controller;
+        }
+
+        private TreatmentController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimstr in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
+                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
             return controller;
         }
 
@@ -430,6 +455,71 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.True(
                 !_testHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
                     _.Id == _testTreatmentConsequence.Id));
+        }
+        [Fact]
+        public async Task UserIsViewTreatmentFromLibraryAuthorized()
+        {
+            // Admin authorized
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewTreatmentFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentViewAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTreatmentFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsModifyTreatementFromScenarioAuthorized()
+        {
+            // Non-admin authorized
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyTreatmentFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentModifyAnyFromScenarioAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentModifyPermittedFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyTreatmentFromScenario);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsDeleteTreatmentFromLibraryAuthorized()
+        {
+            // Non-admin unauthorized
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.DeleteTreatmentFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentDeletePermittedFromLibraryAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.TreatmentDeleteAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteTreatmentFromLibrary);
+            // Assert
+            Assert.False(allowed.Succeeded);
         }
     }
 }

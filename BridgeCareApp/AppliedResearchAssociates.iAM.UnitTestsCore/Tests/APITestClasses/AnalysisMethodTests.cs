@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -9,10 +11,16 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models.DefaultData;
+using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -33,6 +41,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             return controller;
         }
 
+        private AnalysisMethodController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimstr in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object, _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         public AnalysisMethodEntity TestAnalysis(Guid simulationId, Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -193,6 +218,48 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.Equal(dto.CriterionLibrary.Id, analysisMethodDto.CriterionLibrary.Id);
             Assert.Equal(dto.Benefit.Id, analysisMethodDto.Benefit.Id);
             Assert.Equal(dto.Benefit.Attribute, analysisMethodDto.Benefit.Attribute);
+        }
+        [Fact]
+        public async Task UserIsViewAnalysisMethodAuthorized()
+        {
+            // Admin authorize
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewAnalysisMethod,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.AnalysisMethodViewAnyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewAnalysisMethod);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsModifyAnalysisMethodAuthorized()
+        {
+            // Non-admin authorize
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyAnalysisMethod,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.AnalysisMethodModifyPermittedAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyAnalysisMethod);
+            // Assert
+            Assert.True(allowed.Succeeded);
         }
     }
 }

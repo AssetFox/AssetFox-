@@ -7,9 +7,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCore.Controllers;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class PerformanceCurveTests
     {
         private TestHelper _testHelper => TestHelper.Instance;
+        private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
         {
@@ -34,6 +38,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             _testHelper.SetupDefaultHttpContext();
         }
 
+        private PerformanceCurveController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimstr in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new PerformanceCurveController(
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _testHelper.UnitOfWork,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object,
+                TestUtils.TestServices.PerformanceCurves,
+                _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         [Fact]
         public async Task GetPerformanceCurveLibraries_Ok()
         {
@@ -237,63 +263,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             // Assert
             Assert.IsType<UnauthorizedResult>(upsertScenarioPerformanceCurveLibraryResult);
         }
-        //private IAuthorizationService BuildAuthorizationService(Action<IServiceCollection> setupServices = null)
-        //{
-        //    var services = new ServiceCollection();
-        //    services.AddAuthorizationCore();
-        //    services.AddLogging();
-        //    services.AddOptions();
-        //    setupServices?.Invoke(services);
-        //    return services.BuildServiceProvider().GetRequiredService<IAuthorizationService>();
-        //}
-
         [Fact]
         public async Task UserIsViewPerformanceCurveFromLibraryAuthorized()
         {
+            // Non-admin authorize
             // Arrange
             var authorizationService = _testHelper.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
                     options.AddPolicy(Policy.ViewPerformanceCurveFromLibrary,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewAnyFromLibraryAccess,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
                                                       BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromLibraryAccess));
                 });
             });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewAnyFromLibraryAccess,
-                              BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromLibraryAccess )
-                }));
-
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ViewPerformanceCurveFromLibrary);
-
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsViewPerformanceCurveFromScenarioAuthorized()
-        {
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewPerformanceCurveFromScenario,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewAnyFromScenarioAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromScenarioAccess));
-                });
-            });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewAnyFromScenarioAccess,
-                              BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromScenarioAccess )
-                }));
-
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ViewPerformanceCurveFromScenario);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewPerformanceCurveFromLibrary);
             // Assert
             Assert.True(allowed.Succeeded);
         }
@@ -301,130 +288,63 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public async Task UserIsModifyPerformanceCurveFromScenarioAuthorized()
         {
+            // Admin authorize
             // Arrange
             var authorizationService = _testHelper.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
                     options.AddPolicy(Policy.ModifyPerformanceCurveFromScenario,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveModifyAnyFromScenarioAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveModifyPermittedFromScenarioAccess));
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveModifyAnyFromScenarioAccess));
                 });
             });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewAnyFromLibraryAccess,
-                              BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromLibraryAccess )
-                }));
-
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyPerformanceCurveFromScenario);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyPerformanceCurveFromScenario);
             // Assert
             Assert.True(allowed.Succeeded);
         }
         [Fact]
-        public async Task UserIsModifyPerformanceCurveFromLibraryAuthorized()
+        public async Task UserIsDeletePerformanceCurveFromLibraryAuthorized()
         {
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyPerformanceCurveFromLibrary,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveUpdateAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveUpdatePermittedFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveAddAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveAddPermittedFromLibraryAccess));
-                });
-            });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveUpdateAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveUpdatePermittedFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveViewPermittedFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveAddAnyFromLibraryAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveAddPermittedFromLibraryAccess )
-                }));
-
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ModifyPerformanceCurveFromLibrary);
-
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsDeleteFromLibraryAuthorized()
-        {
+            // Non-admin unauthorize
             // Arrange
             var authorizationService = _testHelper.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
                     options.AddPolicy(Policy.DeletePerformanceCurveFromLibrary,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveDeleteAnyFromLibraryAccess,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
                                                       BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveDeletePermittedFromLibraryAccess));
                 });
             });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveDeletePermittedFromLibraryAccess, BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveDeleteAnyFromLibraryAccess )
-                }));
-
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.DeletePerformanceCurveFromLibrary);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeletePerformanceCurveFromLibrary);
             // Assert
-            Assert.True(allowed.Succeeded);
+            Assert.False(allowed.Succeeded);
         }
         [Fact]
-        public async Task UserIsImportFromLibraryAuthorized()
+        public async Task UserIsImportPerformanceCurveFromLibraryAuthorized()
         {
+            // Non-admin authorize
             // Arrange
             var authorizationService = _testHelper.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
                     options.AddPolicy(Policy.ImportPerformanceCurveFromLibrary,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportAnyFromLibraryAccess,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
                                                       BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportPermittedFromLibraryAccess));
                 });
             });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportAnyFromLibraryAccess,
-                              BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportPermittedFromLibraryAccess )
-                }));
-
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ImportPerformanceCurveFromLibrary);
-
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsImportFromScenarioAuthorized()
-        {
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ImportPerformanceCurveFromScenario,
-                        policy => policy.RequireClaim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportAnyFromScenarioAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportPermittedFromScenarioAccess));
-                });
-            });
-            var user = new ClaimsPrincipal(new ClaimsIdentity(
-                new Claim[] {
-                    new Claim(BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportAnyFromScenarioAccess,
-                              BridgeCareCore.Security.SecurityConstants.Claim.PerformanceCurveImportPermittedFromScenarioAccess )
-                }));
-
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ImportPerformanceCurveFromScenario);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ImportPerformanceCurveFromLibrary);
             // Assert
             Assert.True(allowed.Succeeded);
         }

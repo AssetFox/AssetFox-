@@ -18,6 +18,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection;
+using BridgeCareCore.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 {
@@ -43,7 +47,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
 
             _mockUOW.Setup(_ => _.DataSourceRepo).Returns(_mockDataSource.Object);
         }
-
+        public DataSourceController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimstr in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new DataSourceController(
+                _testHelper.MockEsecSecurityAdmin.Object,
+                _mockUOW.Object,
+                _testHelper.MockHubService.Object,
+                _testHelper.MockHttpContextAccessor.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         [Fact]
         public async Task UpsertSQLWorksWithValidData()
         {
@@ -263,6 +286,48 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
             Assert.IsType<List<string>>(objectResult.Value);
             var resultValue = objectResult.Value as List<string>;
             Assert.Equal(4, resultValue.Count);
+        }
+        [Fact]
+        public async Task UserIsViewDataSourceAuthorized()
+        {
+            // Non-admin authorized
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("ViewDataSourceClaim",
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.DataSourceViewAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, "ViewDataSourceClaim");
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsDeleteDataSourceAuthorized()
+        {
+            // Non-admin unauthorized
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy("DeleteDataSourceClaim",
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.DataSourceModifyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, "DeleteDataSourceClaim");
+            // Assert
+            Assert.False(allowed.Succeeded);
         }
     }
 }

@@ -5,7 +5,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using MoreLinq.Extensions;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Network
 {
     // These tests were accessing a specific simulation on the real
     // db. They are likely to remain broken. We may want to consider

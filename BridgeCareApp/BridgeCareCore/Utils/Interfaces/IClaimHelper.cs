@@ -4,9 +4,9 @@ namespace BridgeCareCore.Utils.Interfaces
 {
     public interface IClaimHelper
     {
-        public void CheckUserSimulationReadAuthorization(Guid simulationId, Guid userId);
+        public void CheckUserSimulationReadAuthorization(Guid simulationId, Guid userId, bool checkSimulationAccess = false);
 
-        public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId);
+        public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId, bool checkSimulationAccess = false);
 
         public bool RequirePermittedCheck();
 

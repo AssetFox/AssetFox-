@@ -448,7 +448,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        [Fact]
         public async Task UpsertSectionWorksWithValidProjects()
         {
             // Arrange
@@ -470,7 +469,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             };
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -483,13 +482,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
-            
+
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
             {
@@ -501,7 +501,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -533,11 +533,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
         }
+
 
         #region Helpers
         private bool SimulationInTestData(Guid simulationId) =>

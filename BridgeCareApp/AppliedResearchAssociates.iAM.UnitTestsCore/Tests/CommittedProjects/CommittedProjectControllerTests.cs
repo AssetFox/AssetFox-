@@ -497,7 +497,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             };
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(new Guid(), sync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -528,7 +528,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(new Guid(), sync); 
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -560,7 +560,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
             // Act
-            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects);
+            var result = await controller.UpsertCommittedProjects(new Guid(), sync);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers.BaseController;
 using Microsoft.AspNetCore.Http;
+using Moq;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -45,6 +46,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var path = new PathString("/UserTokens");
             request.Path = path;
             var controller = CreateController(accessor);
+            var hasBearer = controller.RequestHasBearer();
+            Assert.False(hasBearer);
+        }
+
+        [Fact]
+        public void RequestHasBearer_NoContextAccessor_False()
+        {
+            var accessor = new Mock<IHttpContextAccessor>();
+            accessor.Setup(a => a.HttpContext).Returns(null as HttpContext);
+            var controller = CreateController(accessor.Object);
+            var hasBearer = controller.RequestHasBearer();
+            Assert.False(hasBearer);
+        }
+
+        [Fact]
+        public void RequestHasBearer_NoRequestInHttpContext_False()
+        {
+            var context = new Mock<HttpContext>();
+            context.Setup(c => c.Request).Returns(null as HttpRequest);
+            var accessor = new Mock<IHttpContextAccessor>();
+            accessor.Setup(a => a.HttpContext).Returns(context.Object);
+            var controller = CreateController(accessor.Object);
             var hasBearer = controller.RequestHasBearer();
             Assert.False(hasBearer);
         }

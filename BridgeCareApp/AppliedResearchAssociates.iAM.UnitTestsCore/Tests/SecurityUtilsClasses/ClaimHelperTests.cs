@@ -13,10 +13,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
 {
     public class ClaimHelperTests
     {
-        ClaimHelper _claimHelper;
+        private ClaimHelper _claimHelper;
         private static TestHelper _testHelper => TestHelper.Instance;
-        Guid ownerId = Guid.NewGuid();
-        Guid userId = Guid.NewGuid();
+        private Guid ownerId = Guid.NewGuid();
+        private Guid userId = Guid.NewGuid();
 
         public void Setup()
         {

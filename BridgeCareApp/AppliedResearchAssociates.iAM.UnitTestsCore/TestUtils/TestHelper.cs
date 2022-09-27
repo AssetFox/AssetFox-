@@ -130,11 +130,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             Id = NetworkId,
             Name = "Test Network"
         };
-        //public void SetAuthorizationClaims(string securityType, string internalRole, List<string> testClaims)
-        //{
-        //    var MockRoleClaimsMapper = new Mock<IRoleClaimsMapper>();
-        //    MockRoleClaimsMapper.Setup(r => r.GetInternalRole(It.IsAny<string>(), It.IsAny<string>())).Returns(internalRole);
-        //    MockRoleClaimsMapper.Setup(c => c.GetClaims(It.IsAny<string>(), It.IsAny<string>())).Returns(testClaims);
 
         public SimulationEntity TestSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {

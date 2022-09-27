@@ -28,8 +28,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             var entity = dto.ToEntity();
             var userId = _unitOfWork.UserEntity?.Id;
-            var entities = new List<ExcelRawDataEntity> { entity };
-            _unitOfWork.Context.AddAll(entities, userId);
+            _unitOfWork.Context.Add(entity);
+            _unitOfWork.Context.SaveChanges();
             return entity.Id;
         }
 

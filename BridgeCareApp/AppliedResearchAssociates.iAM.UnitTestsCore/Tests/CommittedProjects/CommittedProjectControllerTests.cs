@@ -19,12 +19,6 @@ using Microsoft.Extensions.Primitives;
 using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
-using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-using BridgeCareCore.Utils;
-
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using Microsoft.AspNetCore.Authorization;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -62,28 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());
         }
-        public CommittedProjectController CreateTestController(List<string> userClaims)
-        {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimstr in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimstr);
-                claims.Add(claim);
-            }
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new CommittedProjectController(
-                _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _mockUOW.Object,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object,
-                _mockClaimHelper.Object);
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
+
         [Fact]
         public async Task ExportWorksOnValidUser()
         {
@@ -475,7 +448,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
-        [Fact]
         public async Task UpsertSectionWorksWithValidProjects()
         {
             // Arrange
@@ -497,7 +469,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             };
 
             // Act
-            var result = await controller.UpsertCommittedProjects(new Guid(), sync);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -510,13 +482,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Arrange
             _testHelper.SetupDefaultHttpContext();
             _mockUOW.Setup(_ => _.CurrentUser).Returns(UnauthorizedUser);
-            
+
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 _testHelper.MockEsecSecurityDBE.Object,
                 _mockUOW.Object,
                 _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+                _testHelper.MockHttpContextAccessor.Object,
+                _mockClaimHelper.Object);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
             {
@@ -528,7 +501,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
-            var result = await controller.UpsertCommittedProjects(new Guid(), sync); 
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<UnauthorizedResult>(result);
@@ -560,75 +533,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
             // Act
-            var result = await controller.UpsertCommittedProjects(new Guid(), sync);
+            var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
 
             // Assert
             Assert.IsType<BadRequestObjectResult>(result);
-        }
-        [Fact]
-        public async Task UserIsModifyCommittedProjectsAuthorized()
-        {
-            // non-admin unauthorize test
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyCommittedProjects,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectModifyAnyAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCommittedProjects);
-            // Assert
-            Assert.False(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsViewCommittedAuthorized()
-        {
-            // non-admin authorize test
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewCommittedProjects,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectViewAnyAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectViewPermittedAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCommittedProjects);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsImportCommittedProjectsAuthorized()
-        {
-            // admin authorize test
-            // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ImportCommittedProjects,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectImportAnyAccess,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectImportPermittedAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ImportCommittedProjects);
-            // Assert
-            Assert.True(allowed.Succeeded);
         }
 
 

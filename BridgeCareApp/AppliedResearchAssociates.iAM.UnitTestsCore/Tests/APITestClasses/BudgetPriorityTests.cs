@@ -440,7 +440,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteBudgetPriorityFromLibrary);
             // Assert
             Assert.False(allowed.Succeeded);
-
         }
+        [Fact]
+        public async Task UserIsViewBudgetPriorityFromLibraryAuthorized_B2C()
+        {
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name, BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewBudgetPriorityFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+
     }
 }

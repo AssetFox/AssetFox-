@@ -631,6 +631,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             Assert.True(allowed.Succeeded);
         }
+        [Fact]
+        public async Task UserIsViewCommittedAuthorized_B2C()
+        {
+            // non-admin authorize test
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewCommittedProjects,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectViewAnyAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CommittedProjectViewPermittedAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCommittedProjects);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
 
 
         #region Helpers

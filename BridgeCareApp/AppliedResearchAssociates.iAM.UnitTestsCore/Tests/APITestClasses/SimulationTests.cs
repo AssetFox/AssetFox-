@@ -999,5 +999,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.True(allowed.Succeeded);
         }
+        [Fact]
+        public async Task UserIsViewSimulationAuthorized_B2C()
+        {
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewSimulation,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.SimulationViewAnyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewSimulation);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
     }
 }

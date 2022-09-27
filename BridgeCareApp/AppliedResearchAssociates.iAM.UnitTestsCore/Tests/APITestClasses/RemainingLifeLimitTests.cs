@@ -287,5 +287,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.False(allowed.Succeeded);
         }
+        [Fact]
+        public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized_B2C()
+        {
+            // Admin authorize
+            // Arrange
+            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewRemainingLifeLimitFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.RemainingLifeLimitViewAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewRemainingLifeLimitFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
     }
 }

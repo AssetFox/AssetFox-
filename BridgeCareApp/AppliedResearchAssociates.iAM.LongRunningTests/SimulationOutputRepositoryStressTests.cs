@@ -13,8 +13,6 @@ namespace AppliedResearchAssociates.iAM.StressTesting
 {
     public class SimulationOutputRepositoryStressTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         //[Fact]
         [Fact(Skip = "Takes about 30-50 minutes to run, provided the 522MB file exists.")]
 
@@ -45,9 +43,9 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             var attributeNamesToIgnore = new List<string> { "AREA" };
             var numericAttributeNames = assetSummary.ValuePerNumericAttribute.Keys.Except(attributeNamesToIgnore).ToList();
             var textAttributeNames = assetSummary.ValuePerTextAttribute.Keys.ToList();
-            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(_testHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, yearCount);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
-            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(TestHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, yearCount);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             SimulationOutputAssertions.SameSimulationOutput(loadedOutput, simulationOutput);
         }
 
@@ -64,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
 
         [Fact (Skip ="Takes about 2 hours to run, assuming the 965Mb file exists.")]
         //[Fact]
-        public void SaveSimulationOutput965_ThenLoad_Saqme()
+        public void SaveSimulationOutput965_ThenLoad_Same()
         {
             SaveSimulationOutput_ThenLoad_Same(CannedSimulationOutput.Filename965);
         }

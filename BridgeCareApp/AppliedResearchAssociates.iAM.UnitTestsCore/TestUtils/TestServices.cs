@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.StartupExtension;
@@ -14,42 +18,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class TestServices
     {
-        public static IServiceCollection AddBridgecareCoreServices(this IServiceCollection serviceCollection)
+        public static ILog Logger()
         {
-            serviceCollection.AddSimulationData();
-            serviceCollection.AddDefaultData();
-            return serviceCollection;
+            var logger = new LogNLog();
+            return logger;
         }
 
-        private static IServiceProvider CreateServiceProvider()
+        public static ExpressionValidationService ExpressionValidation(UnitOfDataPersistenceWork unitOfWork)
         {
-            var serviceCollection = new ServiceCollection();
-            var testHelper = TestHelper.Instance;
-            serviceCollection.AddSingleton(testHelper.Config);
-            serviceCollection.AddSingleton(testHelper.DbContext);
-            var hubService = testHelper.MockHubService.Object;
-            serviceCollection.AddSingleton(hubService);
-            serviceCollection.AddSingleton<IHubService>(hubService);
-            var log = testHelper.Logger;
-            serviceCollection.AddSingleton(log);
-            serviceCollection.AddBridgecareCoreServices();
-            var provider = serviceCollection.BuildServiceProvider();
-            return provider;
-        }
-
-        public static Lazy<IServiceProvider> LazyServiceProvider
-            => new Lazy<IServiceProvider>(() => CreateServiceProvider());
-
-        public static IServiceProvider ServiceProvider
-            => LazyServiceProvider.Value;
-
-        public static T GetService<T>()
-        {
-            var provider = ServiceProvider;
-            var service = provider.GetService<T>();
+            var log = Logger();
+            var service = new ExpressionValidationService(unitOfWork, log);
             return service;
         }
 
-        public static IPerformanceCurvesService PerformanceCurves => GetService<IPerformanceCurvesService>();
+        public static IPerformanceCurvesService PerformanceCurves(UnitOfDataPersistenceWork unitOfWork, IHubService hubService)
+        {
+            var logger = new LogNLog();
+            var expressionValidation = ExpressionValidation(unitOfWork);
+            var service = new PerformanceCurvesService(unitOfWork, hubService, expressionValidation);
+            return service;
+        }
     }
 }

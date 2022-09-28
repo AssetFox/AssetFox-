@@ -45,7 +45,7 @@ export interface InvestmentPlan {
 
 export interface BudgetYearsGridData {
     year: number;
-    [budgetName: string]: number | null;
+    values: {[budgetName: string]: number | null};
 }
 
 export interface SimpleBudgetDetail {

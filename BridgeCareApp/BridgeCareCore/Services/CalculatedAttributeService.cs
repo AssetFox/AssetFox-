@@ -24,7 +24,7 @@ using BridgeCareCore.Interfaces.DefaultData;
 
 namespace BridgeCareCore.Services
 {
-    public class CalculatedAttributeService
+    public class CalculatedAttributeService : ICalculatedAttributeService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public CalculatedAttributeService(UnitOfDataPersistenceWork unitOfWork)

@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using BridgeCareCore.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {
@@ -23,11 +24,11 @@ namespace BridgeCareCore.Controllers
     public class CalculatedAttributesController : BridgeCareCoreBaseController
     {
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
-        private readonly CalculatedAttributeService _calulatedAttributeService;
+        private readonly ICalculatedAttributeService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
 
         public CalculatedAttributesController(IEsecSecurity esec, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, CalculatedAttributeService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ICalculatedAttributeService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
         {
             attributeRepo = unitOfWork.AttributeRepo;
             calculatedAttributesRepo = unitOfWork.CalculatedAttributeRepo;
@@ -100,29 +101,34 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                UnitOfWork.BeginTransaction();
-                var attributes = new List<CalculatedAttributeDTO>();
-                if (upsertRequest.SyncModel.LibraryId != null)
-                    attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.SyncModel.LibraryId.Value, upsertRequest.SyncModel);
-                else if (!upsertRequest.IsNewLibrary)
-                    attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.SyncModel);
-                if (upsertRequest.SyncModel.LibraryId != null && upsertRequest.SyncModel.LibraryId != upsertRequest.Library.Id)
-                    attributes.ForEach(attribute =>
-                    {
-                        attribute.Id = Guid.NewGuid();
-                        var equations = attribute.Equations.ToList();
-                        equations.ForEach(_ =>
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var attributes = new List<CalculatedAttributeDTO>();
+                    if (upsertRequest.SyncModel.LibraryId != null)
+                        attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.SyncModel.LibraryId.Value, upsertRequest.SyncModel);
+                    else if (!upsertRequest.IsNewLibrary)
+                        attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.SyncModel);
+                    if (upsertRequest.SyncModel.LibraryId != null && upsertRequest.SyncModel.LibraryId != upsertRequest.Library.Id)
+                        attributes.ForEach(attribute =>
                         {
-                            _.Id = Guid.NewGuid();
-                            _.Equation.Id = Guid.NewGuid();
-                            _.CriteriaLibrary.Id = Guid.NewGuid();
+                            attribute.Id = Guid.NewGuid();
+                            var equations = attribute.Equations.ToList();
+                            equations.ForEach(_ =>
+                            {
+                                _.Id = Guid.NewGuid();
+                                _.Equation.Id = Guid.NewGuid();
+                                _.CriteriaLibrary.Id = Guid.NewGuid();
+                            });
+                            attribute.Equations = equations;
                         });
-                        attribute.Equations = equations;
-                    });
-                var dto = upsertRequest.Library;
-                dto.CalculatedAttributes = attributes;
-                calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
-                UnitOfWork.Commit();
+                    var dto = upsertRequest.Library;
+                    dto.CalculatedAttributes = attributes;
+                    calculatedAttributesRepo.UpsertCalculatedAttributeLibrary(dto);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+                
             }
             catch (Exception e)
             {
@@ -130,7 +136,6 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
                 throw;
             }
-            return Ok();
         }
 
         [HttpPost]
@@ -160,10 +165,14 @@ namespace BridgeCareCore.Controllers
             if (!SimulationExists(simulationId)) return BadRequest($"Unable to find {simulationId} when upserting simulation attributes");
             try
             {
-                UnitOfWork.BeginTransaction();
-                var dto = _calulatedAttributeService.GetSyncedScenarioDataset(simulationId, syncModel);
-                calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
-                UnitOfWork.Commit();
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var dto = _calulatedAttributeService.GetSyncedScenarioDataset(simulationId, syncModel);
+                    calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
+                    UnitOfWork.Commit();
+                });
+                return Ok();             
             }
             catch (Exception e)
             {
@@ -171,7 +180,6 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
                 throw;
             }
-            return Ok();
         }
 
         [HttpDelete]

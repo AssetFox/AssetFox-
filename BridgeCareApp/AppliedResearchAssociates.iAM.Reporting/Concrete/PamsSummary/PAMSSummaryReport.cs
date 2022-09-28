@@ -282,7 +282,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 reportDetailDto.Status = $"Gathering summary report data";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                 Errors.Add(reportDetailDto.Status);
 
                 byte[] summaryReportData = File.ReadAllBytes(filePath);
@@ -291,7 +291,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             Errors.Add(reportDetailDto.Status);
 
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");

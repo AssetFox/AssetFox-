@@ -92,14 +92,14 @@ namespace BridgeCareCore.Services
                     simulationAnalysisDetail.Status = "Simulation initializing...";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 
                 case ProgressStatus.Running:
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 
                 case ProgressStatus.Completed:
@@ -107,7 +107,7 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results);
 
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
                 }
                 _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
@@ -124,15 +124,17 @@ namespace BridgeCareCore.Services
                 switch (message.Status)
                 {
                 case SimulationLogStatus.Warning:
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
+                    simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 
                 case SimulationLogStatus.Error:
                 case SimulationLogStatus.Fatal:
                     simulationAnalysisDetail.Status = message.Message;
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, eventArgs.MessageBuilder.Message, simulationId);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                    simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
                 }
             };

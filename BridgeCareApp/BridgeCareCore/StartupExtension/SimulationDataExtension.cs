@@ -34,6 +34,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<IUnitOfWork, UnitOfDataPersistenceWork>();
             services.AddScoped<UnitOfDataPersistenceWork>();
             services.AddScoped< ISimulationService,SimulationService>();
+            services.AddScoped<IBudgetPriortyService, BudgetPriortyService>();
         }
     }
 }

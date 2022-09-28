@@ -38,7 +38,7 @@ namespace BridgeCareCore.Controllers
             _investmentBudgetsService = investmentBudgetsService ?? throw new ArgumentNullException(nameof(investmentBudgetsService));
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-        }        
+        }
 
         [HttpPost]
         [Route("GetScenarioInvestmentPage/{simulationId}")]
@@ -107,12 +107,16 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+
                     var dtos = _investmentBudgetsService.GetSyncedInvestmentDataset(simulationId, pagingSync);
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;
                     investment.ScenarioBudgets = dtos;
                     investment.InvestmentPlan = investmentPlan;
-                    _investmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, investment);
+
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(dtos, simulationId);
+                    UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
                     UnitOfWork.Commit();
                 });
 
@@ -167,6 +171,8 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    _claimHelper.CheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
+
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
@@ -180,7 +186,9 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.Budgets = budgets;
-                    _investmentCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
+
+                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
                     UnitOfWork.Commit();
                 });
 

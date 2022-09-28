@@ -9,6 +9,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
     {
         public IReadOnlyCollection<BudgetCondition> BudgetConditions => _BudgetConditions;
 
+        /// <summary>
+        ///     The order of budgets determines the order in which they are considered to fund each treatment.
+        /// </summary>
         public IReadOnlyList<Budget> Budgets => _Budgets;
 
         /// <summary>
@@ -47,6 +50,9 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public IEnumerable<int> YearsOfAnalysis => Enumerable.Range(FirstYearOfAnalysisPeriod, NumberOfYearsInAnalysisPeriod);
 
+        /// <summary>
+        ///     Add a new budget at the end of the current list of <see cref="Budgets"/>.
+        /// </summary>
         public Budget AddBudget()
         {
             var budget = new Budget(this);
@@ -60,8 +66,16 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public CashFlowRule AddCashFlowRule() => _CashFlowRules.GetAdd(new CashFlowRule(Simulation.Network.Explorer));
 
+        /// <summary>
+        ///     Move the given budget into the next higher priority.
+        /// </summary>
+        /// <param name="budget"></param>
         public void DecrementIndexOf(Budget budget) => _Budgets.DecrementIndexOf(budget);
 
+        /// <summary>
+        ///     Move the given cash flow rule into the next higher priority.
+        /// </summary>
+        /// <param name="cashFlowRule"></param>
         public void DecrementIndexOf(CashFlowRule cashFlowRule) => _CashFlowRules.DecrementIndexOf(cashFlowRule);
 
         public ValidationResultBag GetDirectValidationResults()
@@ -81,10 +95,22 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return results;
         }
 
+        /// <summary>
+        ///     Move the given budget into the next lower priority.
+        /// </summary>
+        /// <param name="budget"></param>
         public void IncrementIndexOf(Budget budget) => _Budgets.IncrementIndexOf(budget);
 
+        /// <summary>
+        ///     Move the given cash flow rule into the next lower priority.
+        /// </summary>
+        /// <param name="cashFlowRule"></param>
         public void IncrementIndexOf(CashFlowRule cashFlowRule) => _CashFlowRules.IncrementIndexOf(cashFlowRule);
 
+        /// <summary>
+        ///     Remove the given budget from the list of <see cref="Budgets"/>.
+        /// </summary>
+        /// <param name="budget"></param>
         public void Remove(Budget budget)
         {
             if (_Budgets.Remove(budget))

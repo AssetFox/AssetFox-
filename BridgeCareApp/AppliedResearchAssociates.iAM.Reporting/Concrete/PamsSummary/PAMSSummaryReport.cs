@@ -10,7 +10,9 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PamsData;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Parameters;
@@ -18,6 +20,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pavemen
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
+using BridgeCareCore.Services;
 using OfficeOpenXml;
 
 
@@ -33,6 +36,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
         private readonly IPavementWorkSummary _pavementWorkSummary;
         private readonly IPavementWorkSummaryByBudget _pavementWorkSummaryByBudget;
         private readonly UnfundedPavementProjects _unfundedPavementProjects;
+
+        private readonly ICountySummary _countySummary;
 
         private readonly IAddGraphsInTabs _addGraphsInTabs;
         private readonly SummaryReportGlossary _summaryReportGlossary;
@@ -68,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _pavementWorkSummary = new PavementWorkSummary();
             _pavementWorkSummaryByBudget = new PavementWorkSummaryByBudget();
             _unfundedPavementProjects = new UnfundedPavementProjects();
+            _countySummary = new CountySummary();
             _addGraphsInTabs = new AddGraphsInTabs();
             _summaryReportGlossary = new SummaryReportGlossary();
 
@@ -163,7 +169,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var functionReturnValue = "";
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new CallbackLogger((string message) =>
+            {
+                var dto = new SimulationReportDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = message,
+                };
+                UpdateSimulationAnalysisDetail(dto);
+            });
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();
@@ -232,6 +247,11 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var _unfundedPavementProjectsWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.UnfundedPavementProjects_Tab);
             _unfundedPavementProjects.Fill(_unfundedPavementProjectsWorksheet, reportOutputData);
 
+            // County Summary TAB
+            reportDetailDto.Status = $"County Summary TAB";
+            var _countySummaryWorksheet = excelPackage.Workbook.Worksheets.Add(PAMSConstants.CountySummary_Tab);
+            _countySummary.Fill(_countySummaryWorksheet, reportOutputData, simulationYears, simulation);
+
             //Graph TABs
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -273,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 reportDetailDto.Status = $"Gathering summary report data";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                 Errors.Add(reportDetailDto.Status);
 
                 byte[] summaryReportData = File.ReadAllBytes(filePath);
@@ -282,7 +302,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             Errors.Add(reportDetailDto.Status);
 
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");

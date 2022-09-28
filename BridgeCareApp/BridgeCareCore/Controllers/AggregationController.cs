@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {

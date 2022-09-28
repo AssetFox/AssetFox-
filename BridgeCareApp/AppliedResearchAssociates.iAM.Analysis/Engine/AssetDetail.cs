@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
@@ -11,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         }
 
         [JsonConstructor]
-        public AssetDetail(string assetName) : base(assetName)
+        public AssetDetail(string assetName, Guid assetId) : base(assetName, assetId)
         {
         }
 

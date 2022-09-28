@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,6 +31,8 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeW
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
 using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using BridgeCareCore.Services;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -182,7 +184,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Generating...";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             var functionReturnValue = "";
 
@@ -198,7 +200,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 $"{BAMSConstants.CulvDurationN}"
             };
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new CallbackLogger(str => UpdateSimulationAnalysisDetailWithStatus(reportDetailDto, str));
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
 
             var initialSectionValues = reportOutputData.InitialAssetSummaries[0].ValuePerNumericAttribute;
 
@@ -208,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 {
                     reportDetailDto.Status = $"{item} was not found in initial section";
                     UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                     Errors.Add(reportDetailDto.Status);
                     throw new KeyNotFoundException($"{item} was not found in initial section");
                 }
@@ -222,7 +225,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 {
                     reportDetailDto.Status = $"{item} was not found in sections";
                     UpdateSimulationAnalysisDetail(reportDetailDto);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                     Errors.Add(reportDetailDto.Status);
                     throw new KeyNotFoundException($"{item} was not found in sections");
                 }
@@ -276,7 +279,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
@@ -291,20 +294,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //// Unfunded Treatment - Final List TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Final List TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var unfundedTreatmentFinalListWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Final List");
             _unfundedTreatmentFinalList.Fill(unfundedTreatmentFinalListWorksheet, reportOutputData);
 
             //// Unfunded Treatment - Time TAB
             reportDetailDto.Status = $"Creating Unfunded Treatment - Time TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var unfundedTreatmentTimeWorksheet = excelPackage.Workbook.Worksheets.Add("Unfunded Treatment - Time");
             _unfundedTreatmentTime.Fill(unfundedTreatmentTimeWorksheet, reportOutputData);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
@@ -312,7 +315,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
@@ -321,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             _addGraphsInTabs.Add(excelPackage, worksheet, bridgeWorkSummaryWorksheet, chartRowModel, simulationYearsCount);
 
@@ -342,7 +345,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Report generation completed";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
 
             //return value
             return functionReturnValue;
@@ -359,7 +362,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             {
                 reportDetailDto.Status = $"Gathering summary report data";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
                 Errors.Add(reportDetailDto.Status);
 
                 byte[] summaryReportData = File.ReadAllBytes(filePath);
@@ -368,13 +371,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             reportDetailDto.Status = $"Summary report is not available in the path {filePath}";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto.Status, simulationId);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             Errors.Add(reportDetailDto.Status);
 
             throw new FileNotFoundException($"Summary report is not available in the path {filePath}", "SummaryReport.xlsx");
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) => _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(dto);
+
+        private void UpdateSimulationAnalysisDetailWithStatus(SimulationReportDetailDTO dto, string message)
+        {
+            dto.Status = message;
+            UpdateSimulationAnalysisDetail(dto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, dto.Status, dto.SimulationId);
+        }
 
         private void IndicateError()
         {

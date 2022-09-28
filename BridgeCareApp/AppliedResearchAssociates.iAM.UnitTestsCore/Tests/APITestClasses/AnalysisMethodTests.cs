@@ -42,7 +42,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new AnalysisMethodController(EsecSecurityMocks.Admin, unitOfWork,
-                hubService, accessor, _mockAnalysisDefaultDataService.Object);
+                hubService, accessor, _mockAnalysisDefaultDataService.Object, _mockClaimHelper.Object);
             return controller;
         }
 
@@ -54,9 +54,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new AnalysisMethodController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockAnalysisDefaultDataService.Object, _mockClaimHelper.Object);
+            var controller = new AnalysisMethodController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockAnalysisDefaultDataService.Object, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -229,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -250,7 +252,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -270,7 +272,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewAnalysisMethodAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

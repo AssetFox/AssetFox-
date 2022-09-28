@@ -50,28 +50,31 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new CashFlowController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
             };
             return controller;
         }
-        private void CreateAuthorizedController() =>
-            _controller = new CashFlowController(_testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+        private void CreateAuthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                    hubService, accessor, _mockClaimHelper.Object);
+        }
 
         private void CreateUnauthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            _controller = new CashFlowController(EsecSecurityMocks.Dbe,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor
-                );
+            _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
         }
 
         private void CreateLibraryTestData()
@@ -374,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // non-admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -396,7 +399,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -418,7 +421,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // non-admin unauthorized test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -438,7 +441,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewCashFlowFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

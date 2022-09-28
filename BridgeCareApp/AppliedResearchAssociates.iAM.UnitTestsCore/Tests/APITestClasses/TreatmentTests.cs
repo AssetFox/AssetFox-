@@ -47,14 +47,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor);
+                hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
         private TreatmentController CreateUnauthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
@@ -66,9 +68,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -420,7 +424,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -441,7 +445,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -463,7 +467,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin unauthorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -484,7 +488,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewTreatmentFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

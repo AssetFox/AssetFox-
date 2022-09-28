@@ -18,7 +18,6 @@ using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -42,7 +41,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
-
         public static IAMContext DbContext => UnitOfWork.Context;
 
         public static readonly UnitOfDataPersistenceWork UnitOfWork;

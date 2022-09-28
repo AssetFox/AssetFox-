@@ -69,13 +69,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new CommittedProjectController(
                 _mockService.Object,
-                _testHelper.MockEsecSecurityAdmin.Object,
+                EsecSecurityMocks.AdminMock.Object,
                 _mockUOW.Object,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object,
+                hubService,
+                accessor,
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -95,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
@@ -120,7 +122,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ExportCommittedProjects(TestDataForCommittedProjects.Simulations.First().Id);
@@ -142,7 +144,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -166,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -189,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -210,7 +212,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -231,7 +233,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act + Asset
             var result = await controller.ImportCommittedProjects();
@@ -254,7 +256,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                mockContextAccessor.Object);
+                mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.ImportCommittedProjects();
@@ -275,7 +277,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
@@ -297,7 +299,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
@@ -318,7 +320,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.DeleteSimulationCommittedProjects(_badScenario);
@@ -339,7 +341,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
@@ -368,7 +370,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
@@ -394,7 +396,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
             var deleteList = new List<Guid>()
             {
                 _badScenario
@@ -420,7 +422,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
@@ -444,7 +446,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
@@ -466,7 +468,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             // Act
             var result = await controller.GetCommittedProjects(_badScenario);
@@ -485,7 +487,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
             {
@@ -516,7 +518,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
 
             var sync = new PagingSyncModel<SectionCommittedProjectDTO>()
             {
@@ -546,7 +548,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
-                accessor);
+                accessor, _mockClaimHelper.Object);
             _mockCommittedProjectRepo.Setup(_ => _.UpsertCommittedProjects(It.IsAny<List<SectionCommittedProjectDTO>>()))
                 .Throws<RowNotInTableException>();
 
@@ -570,7 +572,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // non-admin unauthorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -591,7 +593,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // non-admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -613,7 +615,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -635,7 +637,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // non-admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

@@ -22,7 +22,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AttributeTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private AttributeController CreateTestController(List<string> userClaims)
@@ -34,10 +33,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 claims.Add(claim);
             }
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var aservice = new AttributeService(_testHelper.UnitOfWork);
-            var aimportService = new AttributeImportService(_testHelper.UnitOfWork);
-            var controller = new AttributeController(aservice, aimportService, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var aservice = new AttributeService(TestHelper.UnitOfWork);
+            var aimportService = new AttributeImportService(TestHelper.UnitOfWork);
+            var controller = new AttributeController(aservice, aimportService, EsecSecurityMocks.DbeMock.Object,
+                TestHelper.UnitOfWork,hubService, accessor);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -49,7 +50,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -72,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -92,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewAttributesAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

@@ -19,8 +19,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,
-                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService)
-                );
+                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                _mockClaimHelper.Object);
             return controller;
         }
     }

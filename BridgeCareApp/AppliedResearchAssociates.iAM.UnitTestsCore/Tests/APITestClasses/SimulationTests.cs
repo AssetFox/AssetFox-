@@ -52,7 +52,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var randomName = RandomStrings.Length11();
             var role = "PD-BAMS-Administrator";
-            TestHelper.UnitOfWork.AddUser(randomName, role);
+            TestHelper.UnitOfWork.AddUser(randomName, true);
             var returnValue = await TestHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
             return returnValue;
         }
@@ -78,7 +78,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
         }
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService)
@@ -90,7 +91,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
         }
 
 
@@ -102,9 +104,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var service = Setup();
-            var controller = new SimulationController(service, new SimulationService(_testHelper.UnitOfWork), _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new SimulationController(service,
+                new SimulationService(TestHelper.UnitOfWork),
+                EsecSecurityMocks.Dbe,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
+                _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -950,7 +960,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -971,7 +981,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin unauthorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -992,7 +1002,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -1012,7 +1022,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewSimulationAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

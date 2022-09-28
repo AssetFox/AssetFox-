@@ -48,15 +48,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object,
+                EsecSecurityMocks.AdminMock.Object,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
                 _mockClaimHelper.Object);
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = tuser }
-            };
             return controller;
         }
         private BudgetPriorityController CreateTestController(List<string> uClaims)
@@ -67,12 +63,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims)); 
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var hubService = HubServiceMocks.Default();
+            var accessor = HttpContextAccessorMocks.Default();
             var controller = new BudgetPriorityController(
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object,
+                EsecSecurityMocks.AdminMock.Object,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -86,10 +84,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
-                EsecSecurityMocks.Dbe,
+                EsecSecurityMocks.DbeMock.Object,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
             return controller;
         }
 
@@ -382,7 +381,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewBudgetPriorityFromLibraryAuthorized()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -402,7 +401,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsModifyBudgetPriorityFromScenarioAuthorized()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -423,7 +422,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsDeleteBudgetPriorityFromLibraryAuthorized()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -444,7 +443,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewBudgetPriorityFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

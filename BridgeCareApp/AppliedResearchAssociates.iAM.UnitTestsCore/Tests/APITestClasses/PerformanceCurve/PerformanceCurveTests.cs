@@ -29,7 +29,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class PerformanceCurveTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
@@ -46,13 +45,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new PerformanceCurveController(
-                _testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object,
-                _testHelper.MockHttpContextAccessor.Object,
-                TestUtils.TestServices.PerformanceCurves,
+                EsecSecurityMocks.AdminMock.Object,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
+                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -315,7 +316,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -337,7 +338,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -358,7 +359,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin unauthorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -379,7 +380,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -399,7 +400,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task UserIsViewPerformanceCurveFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

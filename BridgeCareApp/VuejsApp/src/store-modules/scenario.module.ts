@@ -61,7 +61,7 @@ const mutations = {
             updatedScenario.runTime = simulationAnalysisDetail.runTime;
 
             state.currentUserScenarioPage = update(
-                findIndex(propEq('id', updatedScenario.id), state.currentShcurrentUserScenarioPagearedScenariosPage),
+                findIndex(propEq('id', updatedScenario.id), state.currentUserScenarioPage),
                 updatedScenario,
                 state.currentUserScenarioPage
             );         

@@ -3,11 +3,15 @@ using System.Collections.Generic;
 
 namespace BridgeCareCore.Models
 {
-    public class PagingRequestModel<T>
+    public abstract class BasePagingRequest
     {
-        public PagingRequestModel()
+        public BasePagingRequest()
         {
-            PagingSync = new PagingSyncModel<T>();
+            Page = 1;
+            RowsPerPage = 5;
+            isDescending = false;
+            sortColumn = "";
+            search = "";
         }
 
         public int Page { get; set; }
@@ -15,6 +19,5 @@ namespace BridgeCareCore.Models
         public bool isDescending { get; set; }
         public string sortColumn { get; set; }
         public string search { get; set; }
-        public PagingSyncModel<T> PagingSync {get;set;}
     }
 }

@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Logging;
@@ -21,23 +22,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class ExpressionValidationTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         private static readonly Guid MaintainableAssetId = Guid.Parse("04580d3b-d99a-45f6-b854-adaa3f78910d");
         private static readonly Guid MaintainableAssetLocationId = Guid.Parse("14580d3b-d99a-45f6-b854-adaa3f78910d");
 
         private ExpressionValidationService CreateValidationService()
         {
-            var service = new ExpressionValidationService(_testHelper.UnitOfWork, new LogNLog());
+            var service = new ExpressionValidationService(TestHelper.UnitOfWork, new LogNLog());
             return service;
         }
 
         private ExpressionValidationController SetupController()
         {
-            _testHelper.CreateSingletons();
+            var unitOfWork = TestHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
             AddTestData();
             var service = CreateValidationService();
-            var controller = new ExpressionValidationController(service, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new ExpressionValidationController(service, EsecSecurityMocks.Admin, unitOfWork,
+                hubService,
+                accessor);
             return controller;
         }
 
@@ -84,11 +89,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                         TestDataHaveBeenAdded = true;
                         var culvAttribute = AttributeDtos.CulvDurationN;
                         var actionTypeAttribute = AttributeDtos.ActionType;
-                        TestMaintainableAsset.NetworkId = _testHelper.TestNetwork.Id;
-                        _testHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
+                        TestMaintainableAsset.NetworkId = NetworkTestSetup.NetworkId;
+                        TestHelper.UnitOfWork.Context.AddEntity(TestMaintainableAsset);
                         TestNumericAggregatedResult.AttributeId = AttributeDtos.CulvDurationN.Id;
                         TestTextAggregatedResult.AttributeId = AttributeDtos.ActionType.Id;
-                        _testHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
+                        TestHelper.UnitOfWork.Context.AddAll(new List<AggregatedResultEntity>
                         {
                             TestNumericAggregatedResult, TestTextAggregatedResult
                         });
@@ -260,7 +265,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1' AND [{AttributeDtos.ActionType.Name}]='test'",
-                NetworkId = _testHelper.TestNetwork.Id
+                NetworkId = NetworkTestSetup.NetworkId,
             };
 
             // Act
@@ -342,7 +347,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             foreach (var testDataSet in invalid)
             {
                 var validationParams = testDataSet[0] as ValidationParameter;
-                validationParams.NetworkId = _testHelper.TestNetwork.Id;
+                validationParams.NetworkId = NetworkTestSetup.NetworkId;
                 var result =
                     await controller.GetCriterionValidationResult(validationParams);
 
@@ -366,7 +371,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 CurrentUserCriteriaFilter = new UserCriteriaDTO(),
                 Expression = $"[{AttributeDtos.CulvDurationN.Name}]='1'",
-                NetworkId = _testHelper.TestNetwork.Id
+                NetworkId = NetworkTestSetup.NetworkId,
             };
 
             // Act

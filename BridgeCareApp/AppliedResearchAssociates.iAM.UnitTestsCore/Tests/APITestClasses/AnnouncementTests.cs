@@ -21,14 +21,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class AnnouncementTests
     {
-        private readonly TestHelper _testHelper = TestHelper.Instance;
         private readonly AnnouncementController _controller;
 
         public AnnouncementTests()
         {
-            _testHelper.SetupDefaultHttpContext();
-            _controller = new AnnouncementController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            _controller = new AnnouncementController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor);
         }
 
         public AnnouncementEntity TestAnnouncement(Guid? id = null)
@@ -97,7 +97,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var announcementId = Guid.NewGuid();
             var announcement = TestAnnouncement(announcementId);
-            _testHelper.UnitOfWork.Context.AddEntity(announcement);
+            TestHelper.UnitOfWork.Context.AddEntity(announcement);
 
             // Act
             var result = await _controller.Announcements();
@@ -125,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
-                var newDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                var newDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
                 Assert.Equal(dto.Id, newDto.Id);
                 Assert.Equal(dto.Title, newDto.Title);
                 Assert.Equal(dto.Content, newDto.Content);
@@ -138,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var announcement = TestAnnouncement();
-            _testHelper.UnitOfWork.Context.AddEntity(announcement);
+            TestHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
@@ -153,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var timer = new Timer { Interval = 5000 };
             timer.Elapsed += delegate
             {
-                var modifiedDto = _testHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+                var modifiedDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
                 Assert.Equal(dto.Id, modifiedDto.Id);
                 Assert.Equal(dto.Title, modifiedDto.Title);
                 Assert.Equal(dto.Content, modifiedDto.Content);
@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var announcement = TestAnnouncement();
-            _testHelper.UnitOfWork.Context.AddEntity(announcement);
+            TestHelper.UnitOfWork.Context.AddEntity(announcement);
             var getResult = await _controller.Announcements();
             var dtos = (List<AnnouncementDTO>)Convert.ChangeType((getResult as OkObjectResult).Value, typeof(List<AnnouncementDTO>));
 
@@ -176,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result.Result);
 
-            Assert.True(!_testHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.Announcement.Any(_ => _.Id == dtos[0].Id));
         }
         [Fact]
         public async Task UserIsViewAnnouncementAuthorized()

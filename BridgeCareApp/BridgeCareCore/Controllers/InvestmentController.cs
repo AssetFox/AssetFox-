@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
@@ -38,6 +39,40 @@ namespace BridgeCareCore.Controllers
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }        
+
+        [HttpPost]
+        [Route("GetScenarioInvestmentPage/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _investmentBudgetsService.GetScenarioInvestmentPage(simulationId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryInvestmentPage/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _investmentBudgetsService.GetLibraryInvestmentPage(libraryId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("GetInvestment/{simulationId}")]
@@ -65,16 +100,19 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertInvestment/{simulationId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromScenario)]
-        public async Task<IActionResult> UpsertInvestment(Guid simulationId, [FromBody] InvestmentDTO data)
+        public async Task<IActionResult> UpsertInvestment(Guid simulationId, InvestmentPagingSyncModel pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(data.ScenarioBudgets, simulationId);
-                    UnitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(data.InvestmentPlan, simulationId);
+                    var dtos = _investmentBudgetsService.GetSyncedInvestmentDataset(simulationId, pagingSync);
+                    InvestmentDTO investment = new InvestmentDTO();
+                    var investmentPlan = pagingSync.Investment;
+                    investment.ScenarioBudgets = dtos;
+                    investment.InvestmentPlan = investmentPlan;
+                    _investmentCRUDMethods[UserInfo.Role].UpsertScenario(simulationId, investment);
                     UnitOfWork.Commit();
                 });
 
@@ -122,16 +160,27 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertBudgetLibrary")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
-        public async Task<IActionResult> UpsertBudgetLibrary([FromBody] BudgetLibraryDTO data)
+        public async Task<IActionResult> UpsertBudgetLibrary(InvestmentLibraryUpsertPagingRequestModel upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserLibraryModifyAuthorization(data.Owner, UserId);
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(data);
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(data.Budgets, data.Id);
+                    var budgets = new List<BudgetDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if (!upsertRequest.IsNewLibrary)
+                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                        budgets.ForEach(budget =>
+                        {
+                            budget.Id = Guid.NewGuid();
+                            budget.BudgetAmounts.ForEach(_ => _.Id = Guid.NewGuid());
+                        });
+                    var dto = upsertRequest.Library;
+                    dto.Budgets = budgets;
+                    _investmentCRUDMethods[UserInfo.Role].UpsertLibrary(dto);
                     UnitOfWork.Commit();
                 });
 

@@ -26,8 +26,8 @@ using MoreLinq;
 using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -357,7 +357,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetLibraryDTO>));
-            Assert.True(dtos.Any(b => b.Id == _testBudgetLibrary.Id));
+            Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
             var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
 
             Assert.Single(resultBudgetLibrary.Budgets);
@@ -570,27 +570,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
             Assert.Equal(3, budgets.Count);
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-            // broken assertions below were hidden behind a timer
-            //var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
-            //    .Where(_ => _.IsSingleUse &&
-            //                _.CriterionLibraryScenarioBudgetJoins.Any(join =>
-            //                    budgetNames.Contains(join.ScenarioBudget.Name)))
-            //    .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
-            //    .ThenInclude(_ => _.ScenarioBudget)
-            //    .ToList();
-            //Assert.NotEmpty(criteria);
-            //GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
-            //{
-            //    var databaseCriterion = criteria.Single(_ =>
-            //        _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
-            //    var excelCriterion = criteriaPerBudgetName[budgetName];
-            //    Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
-            //});
         }
 
         [Fact]
@@ -623,8 +607,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var budgets = TestHelper.UnitOfWork.BudgetRepo.GetLibraryBudgets(_testBudgetLibrary.Id);
             Assert.Equal(2, budgets.Count);
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
@@ -635,15 +619,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .ToList();
-            // broken and previously hidden behind a timer
-            //Assert.NotEmpty(criteria);
-            //GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
-            //{
-            //    var databaseCriterion = criteria.Single(_ =>
-            //        _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
-            //    var excelCriterion = criteriaPerBudgetName[budgetName];
-            //    Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
-            //});
         }
 
         [Fact]
@@ -725,7 +700,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<string>()).ToList();
-            Assert.Equal(1, worksheetBudgetNames.Count);
+            Assert.Single(worksheetBudgetNames);
             Assert.Equal(_testBudget.Name, worksheetBudgetNames[0]);
 
             var worksheetBudgetYearAndAmount = worksheet.Cells[2, 1, 2, worksheet.Dimension.End.Column]
@@ -803,27 +778,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Equal(3, budgets.Count);
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-            // Assertions below were already broken. This broken-ness was hidden because they were inside the delegate of a timer that never fired.
-            //var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
-            //    .Where(_ => _.IsSingleUse &&
-            //                _.CriterionLibraryScenarioBudgetJoins.Any(join =>
-            //                    budgetNames.Contains(join.ScenarioBudget.Name)))
-            //    .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
-            //    .ThenInclude(_ => _.ScenarioBudget)
-            //    .ToList();
-            //Assert.NotEmpty(criteria);
-            //GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
-            //{
-            //    var databaseCriterion = criteria.Single(_ =>
-            //        _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
-            //    var excelCriterion = criteriaPerBudgetName[budgetName];
-            //    Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
-            //});
         }
 
         [Fact]
@@ -857,8 +816,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Equal(2, budgets.Count);
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 1"));
-            Assert.True(budgets.Any(_ => _.Name == "Sample Budget 2"));
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
 
             var criteriaPerBudgetName = GetCriteriaPerBudgetName();
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
@@ -869,15 +828,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .ToList();
-            // broken and previously hidden behind a timer
-            //Assert.NotEmpty(criteria);
-            //GetCriteriaPerBudgetName().Keys.ForEach(budgetName =>
-            //{
-            //    var databaseCriterion = criteria.Single(_ =>
-            //        _.CriterionLibraryScenarioBudgetJoins.Any(join => join.ScenarioBudget.Name == budgetName));
-            //    var excelCriterion = criteriaPerBudgetName[budgetName];
-            //    Assert.Equal(excelCriterion, databaseCriterion.MergedCriteriaExpression);
-            //});
         }
 
         [Fact]
@@ -926,7 +876,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var budgetAmounts = worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
                 .Select(cell => cell.GetValue<decimal>()).ToList();
-            Assert.True(budgetAmounts.Any(amount => amount == decimal.Parse("5000000")));
+            Assert.Contains(budgetAmounts, amount => amount == decimal.Parse("5000000"));
         }
 
         [Fact]

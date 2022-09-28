@@ -110,7 +110,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CalculatedAttributes
             var result = repo.GetCalculatedAttributeLibraries();
 
             // Assert
-            Assert.Equal(0, result.Count());
+            Assert.Empty(result);
         }
 
         //[Fact]

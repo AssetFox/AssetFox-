@@ -67,7 +67,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
-
         }
 
         [Fact]

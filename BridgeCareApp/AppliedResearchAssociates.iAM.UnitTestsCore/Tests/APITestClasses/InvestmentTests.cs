@@ -49,7 +49,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var hubService = HubServiceMocks.Default();
             var logger = new LogNLog();
-            var service = new InvestmentBudgetsService(TestHelper.UnitOfWork, new ExpressionValidationService(TestHelper.UnitOfWork, logger), hubService);
+            var service = new InvestmentBudgetsService(
+                TestHelper.UnitOfWork,
+                new ExpressionValidationService(TestHelper.UnitOfWork, logger),
+                hubService,
+                new InvestmentDefaultDataService());
             return service;
         }
 

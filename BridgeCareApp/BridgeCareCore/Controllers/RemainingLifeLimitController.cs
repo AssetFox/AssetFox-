@@ -50,11 +50,11 @@ namespace BridgeCareCore.Controllers
             }
 
             List<RemainingLifeLimitLibraryDTO> RetrieveAnyForLibraries() =>
-                UnitOfWork.RemainingLifeLimitRepo.RemainingLifeLimitLibrariesWithRemainingLifeLimits();
+                UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
 
             List<RemainingLifeLimitLibraryDTO> RetrievePermittedForLibraries()
             {
-                var result = UnitOfWork.RemainingLifeLimitRepo.RemainingLifeLimitLibrariesWithRemainingLifeLimits();
+                var result = UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
                 return result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
             }
 
@@ -67,7 +67,7 @@ namespace BridgeCareCore.Controllers
             void UpsertPermittedForLibrary(RemainingLifeLimitLibraryDTO dto)
             {
                 var currentRecord = UnitOfWork.RemainingLifeLimitRepo
-                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                    .GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
                     .FirstOrDefault(_ => _.Id == dto.Id);
                 if (currentRecord?.Owner == UserId || currentRecord == null)
                 {
@@ -85,7 +85,7 @@ namespace BridgeCareCore.Controllers
             void DeletePermittedFromLibrary(Guid libraryId)
             {
                 var dto = UnitOfWork.RemainingLifeLimitRepo
-                    .RemainingLifeLimitLibrariesWithRemainingLifeLimits()
+                    .GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
                     .FirstOrDefault(_ => _.Id == libraryId);
 
                 if (dto == null) return;  // Mimic existing code that does not inform the user the library ID does not exist

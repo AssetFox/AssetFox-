@@ -96,12 +96,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return new List<DeficientConditionGoalLibraryDTO>();
             }
 
-            return _unitOfWork.Context.DeficientConditionGoalLibrary
+            return _unitOfWork.Context.DeficientConditionGoalLibrary.AsNoTracking()
                 .Include(_ => _.DeficientConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.DeficientConditionGoals)
                 .ThenInclude(_ => _.CriterionLibraryDeficientConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any())
+            {
+                return new List<DeficientConditionGoalLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.DeficientConditionGoalLibrary.AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -222,6 +234,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return res;
         }
+
+        public List<DeficientConditionGoalDTO> GetDeficientConditionGoalsByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"No simulation found for the given scenario.");
+            }
+
+            var res = _unitOfWork.Context.DeficientConditionGoal.Where(_ => _.DeficientConditionGoalLibraryId == libraryId)
+                .Include(_ => _.CriterionLibraryDeficientConditionGoalJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute)
+                .Select(_ => _.ToDto())
+                .AsNoTracking()
+                .ToList();
+            return res;
+        }
+
         public void UpsertOrDeleteScenarioDeficientConditionGoals(List<DeficientConditionGoalDTO> scenarioDeficientConditionGoal, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

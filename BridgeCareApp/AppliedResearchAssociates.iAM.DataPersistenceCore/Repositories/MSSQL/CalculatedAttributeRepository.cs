@@ -39,6 +39,39 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
 
+        public List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildren()
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<CalculatedAttributeDTO> GetCalcuatedAttributesByScenarioIdNoChildren(Guid scenarioId)
+        {
+            if (!_unitOfDataPersistanceWork.Context.Simulation.Any(_ => _.Id == scenarioId))
+            {
+                throw new RowNotInTableException("The specified scenario was not found");
+            }
+
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+                .Where(_ => _.SimulationId == scenarioId)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<CalculatedAttributeDTO> GetCalcuatedAttributesByLibraryIdNoChildren(Guid libraryid)
+        {
+            if (!_unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.Any(_ => _.Id == libraryid))
+            {
+                throw new RowNotInTableException("The specified calculated attribute library was not found");
+            }
+
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute
+                .Where(_ => _.CalculatedAttributeLibraryId == libraryid)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
             // Does the library have a provided ID?

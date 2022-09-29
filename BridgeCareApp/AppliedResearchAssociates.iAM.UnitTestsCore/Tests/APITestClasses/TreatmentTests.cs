@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private ScenarioTreatmentCostEntity _testScenarioTreatmentCost;
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
 
-        public void Setup()
+        private void Setup()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -223,7 +223,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TreatmentLibraryDTO>));
-            Assert.True(dtos.Any(t => t.Id == _testTreatmentLibrary.Id));
+            Assert.Contains(dtos, t => t.Id == _testTreatmentLibrary.Id);
             var resultTreatmentLibrary = dtos.FirstOrDefault(t => t.Id == _testTreatmentLibrary.Id);
             Assert.Equal(_testTreatmentLibrary.Id, resultTreatmentLibrary.Id);
             Assert.Single(resultTreatmentLibrary.Treatments);
@@ -261,7 +261,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
             Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
-            Assert.True(dtos[0].BudgetIds.Contains(budget.Id));
+            Assert.Contains(budget.Id, dtos[0].BudgetIds);
         }
 
         [Fact]
@@ -307,30 +307,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var modifiedDto =
                 TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().Single(lib => lib.Id == dtoLibrary.Id);
             Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
-            // below assertions are broken. Broken-ness was hidden behind a timer.
-            //Assert.True(modifiedDto.AppliedScenarioIds.Any());
-            //Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Name, modifiedDto.Treatments[0].Name);
-            //Assert.Equal(dtoLibrary.Treatments[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].CriterionLibrary.Id);
-            //Assert.True(modifiedDto.Treatments[0].Costs.Any());
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].Equation.Id,
-            //    modifiedDto.Treatments[0].Costs[0].Equation.Id);
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
-            //Assert.Equal(dtoLibrary.Treatments[0].Consequences[0].Equation.Id,
-            //    modifiedDto.Treatments[0].Consequences[0].Equation.Id);
         }
 
         [Fact]
         public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
@@ -382,15 +366,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .GetScenarioSelectableTreatments(simulation.Id);
             Assert.Equal(dto[0].Description, modifiedDto[0].Description);
             Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-            // below was already broken. Broken-ness was hidden behind a timer.
-            //Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
-            //Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
-            //    modifiedDto[0].Consequences[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
-            //Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-            //Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
+            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+            Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
         }
 
         [Fact]

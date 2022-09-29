@@ -12,6 +12,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class EsecSecurityMocks
     {
+        public const string AdminUsername = "pdsystbamsusr01";
+        public const string AdminRole = "PD-BAMS-Administrator";
+        public const string AdminEmail = "pdstseseca5@pa.gov";
+
+        public const string DbeUsername = "b-bamsadmin";
+        public const string DbeRole = "PD-BAMS-DBEngineer";
+        public const string DbeEmail = "jmalmberg@ara.com";
+
         public static Mock<IEsecSecurity> AdminMock
         {
             get
@@ -20,9 +28,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 mock.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                 .Returns(new UserInfo
                 {
-                    Name = "pdsystbamsusr01",
-                    Role = "PD-BAMS-Administrator",
-                    Email = "pdstseseca5@pa.gov"
+                    Name = AdminUsername,
+                    Role = AdminRole,
+                    Email = AdminEmail,
                 });
                 return mock;
             }
@@ -45,9 +53,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 mock.Setup(_ => _.GetUserInformation(It.IsAny<HttpRequest>()))
                     .Returns(new UserInfo
                     {
-                        Name = "b-bamsadmin",
-                        Role = "PD-BAMS-DBEngineer",
-                        Email = "jmalmberg@ara.com"
+                        Name = DbeUsername,
+                        Role = DbeRole,
+                        Email = DbeEmail,
                     });
                 return mock;
             }

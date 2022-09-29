@@ -231,6 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
         }
 
+
         [Fact]
         public async Task ShouldGetLibraryData()
         {
@@ -248,18 +249,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<CashFlowRuleLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<CashFlowRuleLibraryDTO>));
-            Assert.Single(dtos);
+            var relevantDto = dtos.Single(dto => dto.Id == _testCashFlowRuleLibrary.Id);
 
-            Assert.Equal(_testCashFlowRuleLibrary.Id, dtos[0].Id);
-            Assert.Single(dtos[0].CashFlowRules);
+            Assert.NotNull(relevantDto);
+            Assert.Single(relevantDto.CashFlowRules);
 
-            Assert.Equal(_testCashFlowRule.Id, dtos[0].CashFlowRules[0].Id);
+            Assert.Equal(_testCashFlowRule.Id, relevantDto.CashFlowRules[0].Id);
             Assert.Equal(_testCashFlowRule.CriterionLibraryCashFlowRuleJoin.CriterionLibrary.Id,
-                dtos[0].CashFlowRules[0].CriterionLibrary.Id);
-            Assert.Single(dtos[0].CashFlowRules[0].CashFlowDistributionRules);
+                relevantDto.CashFlowRules[0].CriterionLibrary.Id);
+            Assert.Single(relevantDto.CashFlowRules[0].CashFlowDistributionRules);
 
             Assert.Equal(_testCashFlowDistributionRule.Id,
-                dtos[0].CashFlowRules[0].CashFlowDistributionRules[0].Id);
+                relevantDto.CashFlowRules[0].CashFlowDistributionRules[0].Id);
         }
 
         [Fact]

@@ -21,14 +21,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
 {
     public class SqlAggregationTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
-
         [Fact]
         public async Task Aggregate_SqlDataSourceInDb_AttributesInDb_Aggregates()
         {
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
@@ -43,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
             var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
-                _testHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
+                TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
 
 
             var networkId = network.Id;
@@ -53,9 +51,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
             var spatialWeightingValue = "[Deck_Area]";
             var newAsset = new MaintainableAsset(maintainableAssetId, networkId, location, spatialWeightingValue);
             var assetList = new List<MaintainableAsset> { newAsset };
-            _testHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
+            TestHelper.UnitOfWork.MaintainableAssetRepo.CreateMaintainableAssets(assetList, networkId);
 
-            var aggregationService = new AggregationService(_testHelper.UnitOfWork);
+            var aggregationService = new AggregationService(TestHelper.UnitOfWork);
 
             var channel = Channel.CreateUnbounded<AggregationStatusMemo>();
             var aggregationState = new AggregationState();

@@ -14,6 +14,7 @@ namespace BridgeCareCore.Services
     {
 
         public const string TopSpreadsheetRowIsEmpty = "The top row of the spreadsheet is empty. It is expected to contain column names.";
+        public const string DataSourceDoesNotExist = "No DataSource in the database with id";
         private const int MaximumRows = 100000;
         private const int MaximumColumns = 1000;
 
@@ -34,6 +35,14 @@ namespace BridgeCareCore.Services
             bool includeColumnsWithoutTitles = false
             )
         {
+            var dataSource = _unitOfWork.DataSourceRepo.GetDataSource(dataSourceId);
+            if (dataSource == null)
+            {
+                return new ExcelRawDataImportResultDTO
+                {
+                    WarningMessage = $"{DataSourceDoesNotExist} {dataSourceId}"
+                };
+            }
             var columnIndexesToInclude = new List<int>();
 
             var cells = worksheet.Cells;

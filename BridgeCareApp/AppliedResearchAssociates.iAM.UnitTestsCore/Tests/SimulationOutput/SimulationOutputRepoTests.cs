@@ -17,23 +17,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class SimulationOutputRepoTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         [Fact]
         public void SaveSimulationOutput_Does()
         {
-            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(_testHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
         }
 
         [Fact]
         public void SaveSimulationOutput_ThenLoad_Same()
         {
-            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(_testHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
-            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
@@ -46,10 +44,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
       //  [InlineData(100000)] // typically fails on a TimeOutException
         public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
         {
-            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(_testHelper.UnitOfWork, numberOfYears);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
-            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
         }
@@ -64,14 +62,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var numericAttributeNames = new List<string> { numericAttributeName };
             var textAttributeNames = new List<string> { textAttributeName };
             var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(
-                _testHelper.UnitOfWork,
+                TestHelper.UnitOfWork,
                 assetNameIdPairs,
                 numericAttributeNames,
                 textAttributeNames
                 );
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
-            _testHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
-            var loadedOutput = _testHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             SimulationOutputAssertions.SameSimulationOutput(simulationOutput, loadedOutput);
         }

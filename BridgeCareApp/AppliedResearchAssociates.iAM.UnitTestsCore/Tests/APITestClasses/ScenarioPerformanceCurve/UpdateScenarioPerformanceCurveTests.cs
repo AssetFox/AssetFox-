@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
@@ -15,13 +16,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class UpdateScenarioPerformanceCurveTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-
         private void Setup()
         {
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
         }
 
         [Fact]
@@ -31,11 +29,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Shift = true;
 
@@ -50,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulation.Id, request);
 
             // Assert
-            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
             Assert.Equal(performanceCurveDto.Shift, performanceCurveDtoAfter.Shift);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
@@ -63,12 +61,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation = equation.ToDto();
 
@@ -83,7 +81,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
             Assert.Equal(performanceCurveDto.Equation.Id, performanceCurveDtoAfter.Equation.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
@@ -96,12 +94,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation = null;
 
@@ -116,11 +114,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var performanceCurveLibraryDtoAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
             Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var equationAfter = _testHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
+            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
             Assert.Null(equationAfter);
         }
 
@@ -131,13 +129,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(_testHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.CriterionLibrary = criterionLibrary.ToDto();
 
@@ -152,7 +150,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             Assert.Equal(criterionLibrary.Id, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
@@ -165,13 +163,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(_testHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.CriterionLibrary = null;
 
@@ -186,11 +184,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             Assert.Equal(Guid.Empty, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var criterionLibraryJoinAfter = _testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
+            var criterionLibraryJoinAfter = TestHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
             clpc.PerformanceCurveId == curveId
             && clpc.CriterionLibraryId == criterionLibrary.Id);
             Assert.Null(criterionLibraryJoinAfter);
@@ -204,13 +202,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(_testHelper.UnitOfWork);
-            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(_testHelper.UnitOfWork, curveId, criterionLibrary.Id);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(TestHelper.UnitOfWork, curveId, criterionLibrary.Id);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -222,9 +220,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Empty(scenarioCurvesAfter);
-            var criterionLibraryJoinAfter = _testHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
+            var criterionLibraryJoinAfter = TestHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.SingleOrDefault(clpc =>
             clpc.PerformanceCurveId == curveId
             && clpc.CriterionLibraryId == simulationId);
             Assert.Null(criterionLibraryJoinAfter);
@@ -237,12 +235,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation.Expression = "123";
 
@@ -257,7 +255,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             Assert.Equal("123", performanceCurveDtoAfter.Equation.Expression);
             Assert.Equal(performanceCurveDto.Equation.Id, performanceCurveDtoAfter.Equation.Id);
@@ -270,12 +268,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(_testHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(_testHelper.UnitOfWork, null, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
-            var scenarioCurves = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
+            var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -288,7 +286,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
             // Assert
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Empty(scenarioCurvesAfter);
         }
 
@@ -299,16 +297,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var performanceCurveDto = new PerformanceCurveDTO
             {
                 Attribute = attribute.Name,
                 Id = Guid.NewGuid(),
                 Name = "Curve",
             };
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -319,7 +317,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             Assert.Single(scenarioCurvesAfter);
         }
 
@@ -330,9 +328,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
             {
                 Expression = "3",
@@ -345,7 +343,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Curve",
                 Equation = equation,
             };
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -356,11 +354,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             var equationAfter = performanceCurveDtoAfter.Equation;
             Assert.Equal("3", performanceCurveDtoAfter.Equation.Expression);
-            var equationEntity = _testHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationAfter.Id);
+            var equationEntity = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationAfter.Id);
             Assert.NotNull(equationEntity);
         }
 
@@ -371,9 +369,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
             {
                 Expression = "3",
@@ -386,7 +384,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Curve",
                 Equation = equation,
             };
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -397,11 +395,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             var equationAfter = performanceCurveDtoAfter.Equation;
             Assert.Null(equationAfter.Expression);
-            var equationEntity = _testHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationAfter.Id);
+            var equationEntity = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationAfter.Id);
             Assert.Null(equationEntity);
         }
 
@@ -412,9 +410,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var simulationEntity = _testHelper.CreateSimulation(simulationId);
-            var simulation = _testHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
-            var attribute = _testHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var criterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -429,7 +427,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "Curve",
                 CriterionLibrary = criterionLibrary,
             };
-            var controller = PerformanceCurveControllerTestSetup.SetupController(_testHelper, _testHelper.MockEsecSecurityAdmin);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
@@ -440,7 +438,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             await controller.UpsertScenarioPerformanceCurves(simulationId, request);
 
-            var scenarioCurvesAfter = _testHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             var criterionLibraryAfter = performanceCurveDtoAfter.CriterionLibrary;
             Assert.Equal("MergedCriteriaExpression", criterionLibraryAfter.MergedCriteriaExpression);

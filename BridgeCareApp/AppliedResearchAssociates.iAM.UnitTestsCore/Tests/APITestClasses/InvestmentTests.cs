@@ -27,6 +27,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using BridgeCareCore.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Models;

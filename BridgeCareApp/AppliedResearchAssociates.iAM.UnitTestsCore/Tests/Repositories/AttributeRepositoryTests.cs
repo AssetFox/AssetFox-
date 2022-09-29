@@ -17,19 +17,19 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
     public class AttributeRepositoryTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
-        private IAttributeRepository attributeRepository => _testHelper.UnitOfWork.AttributeRepo;
+        private IAttributeRepository attributeRepository => TestHelper.UnitOfWork.AttributeRepo;
 
         private void Setup()
         {
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.CreateCalculatedAttributeLibrary();
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(TestHelper.UnitOfWork);
         }
 
         [Fact]
@@ -176,7 +176,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var repo = attributeRepository;
             var randomName = RandomStrings.Length11();
             var attributeId = Guid.NewGuid();
-            var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(_testHelper.UnitOfWork);
+            var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(TestHelper.UnitOfWork);
             var attributeDto = new AttributeDTO
             {
                 Id = attributeId,
@@ -236,7 +236,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 Id = dataSourceId,
                 Name = randomName,
             };
-            var dataSourceRepo = _testHelper.UnitOfWork.DataSourceRepo;
+            var dataSourceRepo = TestHelper.UnitOfWork.DataSourceRepo;
             dataSourceRepo.UpsertDatasource(dataSource);
             var attributeId = Guid.NewGuid();
             var attributeName = RandomStrings.WithPrefix("AttributeName");
@@ -249,8 +249,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 Name = attributeName,
                 Type = "STRING"//AppliedResearchAssociates.iAM.AttributeTypeNames.String
             };
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
-            var attributeAfter = _testHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
+            var attributeAfter = TestHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
             var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
             Assert.Equal("connectionString123", sqlDataSourceAfter.ConnectionString);
             var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter);
@@ -266,19 +266,19 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var location = Locations.Section(locationIdentifier);
             var maintainableAsset = new MaintainableAsset(assetId, networkId, location, "[Deck_Area]");
             var maintainableAssets = new List<MaintainableAsset> { maintainableAsset };
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
             var attributeId = Guid.NewGuid();
             var attribute = AttributeTestSetup.Numeric(attributeId);
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
             var aggregatedDatum = (2022, 123.4);
             var triplet = (attribute, aggregatedDatum);
             var triplets = new List<(DataAttribute, (int, double))> { triplet };
             var aggregatedResultId = Guid.NewGuid();
             var aggregatedResult = new AggregatedResult<double>(aggregatedResultId, maintainableAsset, triplets);
             var aggregatedResults = new List<IAggregatedResult> { aggregatedResult };
-            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
+            TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(aggregatedResults);
 
-            var attributeIds = _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
+            var attributeIds = TestHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId);
 
             var actual = attributeIds.Single();
             Assert.Equal(actual, attributeId);
@@ -290,7 +290,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 
             var networkId = Guid.NewGuid();
 
-            var exception = Assert.Throws<RowNotInTableException>(() => _testHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId));
+            var exception = Assert.Throws<RowNotInTableException>(() => TestHelper.UnitOfWork.AttributeRepo.GetAttributeIdsInNetwork(networkId));
 
         }
 
@@ -299,9 +299,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
         {
             var attributeId = Guid.NewGuid();
             var attribute = AttributeTestSetup.Text(attributeId, calculated: true);
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attribute);
 
-            var calculatedAttributes = await _testHelper.UnitOfWork.AttributeRepo.CalculatedAttributes();
+            var calculatedAttributes = await TestHelper.UnitOfWork.AttributeRepo.CalculatedAttributes();
 
             var actual = calculatedAttributes.Single(a => a.Id == attribute.Id);
             Assert.NotNull(actual);

@@ -22,6 +22,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Guid AddExcelRawData(ExcelRawDataDTO dto)
         {
+            if (!_unitOfWork.Context.DataSource.Any(ds => ds.Id == dto.DataSourceId)) {
+                throw new InvalidOperationException($"There is no DataSource with id {dto.DataSourceId}");
+            };
             if(_unitOfWork.Context.ExcelRawData.Any(_ => _.DataSourceId == dto.DataSourceId))
             {
                 _unitOfWork.Context.DeleteAll<ExcelRawDataEntity>(_ => _.DataSourceId == dto.DataSourceId);

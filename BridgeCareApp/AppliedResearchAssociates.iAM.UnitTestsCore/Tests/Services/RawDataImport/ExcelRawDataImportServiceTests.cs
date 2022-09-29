@@ -100,9 +100,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
             var excelPackage = new ExcelPackage(stream);
             var spreadsheetService = CreateExcelSpreadsheetImportService();
             var dataSourceId = Guid.NewGuid();
-            var dataSourceName = RandomStrings.WithPrefix("DataSourceName");
             var importResult = spreadsheetService.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);
             var warning = importResult.WarningMessage;
+            Assert.Contains(ExcelRawDataImportService.DataSourceDoesNotExist, warning);
         }
     }
 }

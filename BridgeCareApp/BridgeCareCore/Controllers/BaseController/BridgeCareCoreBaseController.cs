@@ -41,8 +41,8 @@ namespace BridgeCareCore.Controllers.BaseController
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }
         }
-
-        private bool RequestHasBearer()
+        
+        public bool RequestHasBearer()
         {
             if (ContextAccessor?.HttpContext?.Request != null)
             {

@@ -267,6 +267,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioTreatmentData()
         {
             // Arrange
+            Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             var budget = CreateScenarioTestData(simulation.Id);

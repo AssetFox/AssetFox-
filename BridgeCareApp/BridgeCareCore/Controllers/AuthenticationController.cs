@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using AppliedResearchAssociates.iAM.Common;
 
 namespace BridgeCareCore.Controllers
 {

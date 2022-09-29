@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.PAMSSummaryReport;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.CountySummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.GraphTabs;
@@ -19,6 +20,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.Pavemen
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.PavementWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.PAMSSummaryReport.UnfundedPavementProjects;
+using BridgeCareCore.Services;
 using OfficeOpenXml;
 
 
@@ -167,7 +169,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
         {
             var functionReturnValue = "";
 
-            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId);
+            var logger = new CallbackLogger((string message) =>
+            {
+                var dto = new SimulationReportDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = message,
+                };
+                UpdateSimulationAnalysisDetail(dto);
+            });
+            var reportOutputData = _unitOfWork.SimulationOutputRepo.GetSimulationOutput(simulationId, logger);
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId };
 
             var simulationYears = new List<int>();

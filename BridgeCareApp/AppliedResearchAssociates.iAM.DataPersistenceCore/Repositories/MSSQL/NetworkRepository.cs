@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.AttributeJoins)
                 .Select(_ => _.ToDto(attributeDbSet))
                 .ToList();
-                });
+            });
         }
 
         public NetworkEntity GetMainNetwork()
@@ -89,7 +89,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             if (areFacilitiesRequired)
             {
+
+                var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
+                var attributeIdLookup = new Dictionary<Guid, string>();
+                foreach (var attribute in allAttributes)
+                {
+                    attributeIdLookup[attribute.Id] = attribute.Name;
+                }
+
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
+                    .Include(a => a.MaintainableAssetLocation)
+                    .Include(a => a.AggregatedResults)
                     .Where(_ => _.NetworkId == networkId)
                     .Select(asset => new MaintainableAssetEntity
                     {
@@ -108,12 +118,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             NumericValue = result.NumericValue,
                             Attribute = new AttributeEntity
                             {
-                                Name = result.Attribute.Name
+                                Name = attributeIdLookup[result.AttributeId],
                             }
                         }).ToList()
                     }).AsNoTracking().ToList();
             }
-            return networkEntity.ToDomain(explorer);
+
+            var domain = networkEntity.ToDomain(explorer);
+            return domain;
         }
 
         public void DeleteNetworkData()
@@ -150,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("The specified network was not found.");
             }
 
-            var networkRollupDetailEntity = new NetworkRollupDetailEntity {NetworkId = networkId, Status = status};
+            var networkRollupDetailEntity = new NetworkRollupDetailEntity { NetworkId = networkId, Status = status };
 
             _unitOfWork.Context.Upsert(networkRollupDetailEntity, _ => _.NetworkId == networkId,
                 _unitOfWork.UserEntity?.Id);

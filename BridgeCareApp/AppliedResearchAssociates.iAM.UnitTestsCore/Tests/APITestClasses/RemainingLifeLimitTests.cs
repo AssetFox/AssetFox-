@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.RemainingLifeLimit;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
@@ -24,16 +25,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class RemainingLifeLimitTests
     {
-        private TestHelper _testHelper => TestHelper.Instance;
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         public RemainingLifeLimitController SetupController()
         {
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
-            var controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
@@ -45,9 +46,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new RemainingLifeLimitController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
 
             controller.ControllerContext = new ControllerContext()
             {
@@ -81,21 +84,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private RemainingLifeLimitLibraryEntity SetupForGet()
         {
             var library = TestRemainingLifeLimitLibrary();
-            var attribute = _testHelper.UnitOfWork.Context.Attribute.First();
+            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
             var lifeLimit = TestRemainingLifeLimit(library.Id, attribute.Id);
-            _testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Add(library);
-            _testHelper.UnitOfWork.Context.RemainingLifeLimit.Add(lifeLimit);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Add(library);
+            TestHelper.UnitOfWork.Context.RemainingLifeLimit.Add(lifeLimit);
+            TestHelper.UnitOfWork.Context.SaveChanges();
             return library;
         }
 
         private CriterionLibraryEntity SetupForUpsertOrDelete()
         {
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            _testHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
+            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
-
         }
 
         [Fact]
@@ -162,7 +164,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             var controller = SetupController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var lifeLimitLibrary = SetupForGet();
             var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await controller.RemainingLifeLimitLibraries();
@@ -179,19 +181,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertRemainingLifeLimitLibrary(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.RemainingLifeLimitRepo
+            var modifiedDto = TestHelper.UnitOfWork.RemainingLifeLimitRepo
                 .RemainingLifeLimitLibrariesWithRemainingLifeLimits().Single(rll => rll.Id == lifeLimitLibrary.Id);
 
             Assert.Equal(dto.Description, modifiedDto.Description);
-            // Below was already broken. Brokenness hidden behind a timer that never fired.
-            //Assert.Single(modifiedDto.AppliedScenarioIds);
-            //Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
-
-            //Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
-            //Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
-            //    modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
-            //Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
-
+            Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
         }
 
         [Fact]
@@ -217,18 +211,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
-            Assert.True(!_testHelper.UnitOfWork.Context.RemainingLifeLimit.Any());
+            Assert.True(!TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any());
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any());
-            Assert.True(!_testHelper.UnitOfWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
+                !TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any());
+            Assert.True(!TestHelper.UnitOfWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
         }
         [Fact]
         public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized()
         {
             // Admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -249,7 +243,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -270,7 +264,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin unauthorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -292,7 +286,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorize
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

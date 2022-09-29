@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
@@ -26,8 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class TreatmentTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
-
         private TreatmentLibraryEntity _testTreatmentLibrary;
         private SelectableTreatmentEntity _testTreatment;
         private TreatmentCostEntity _testTreatmentCost;
@@ -37,23 +36,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private ScenarioConditionalTreatmentConsequenceEntity _testScenarioTreatmentConsequence;
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public void Setup()
+        private void Setup()
         {
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
         }
 
         private TreatmentController CreateAuthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
         private TreatmentController CreateUnauthorizedController()
         {
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
@@ -65,9 +68,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new TreatmentController(_testHelper.MockTreatmentService.Object, _testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -78,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private void CreateLibraryTestData()
         {
             _testTreatmentLibrary = new TreatmentLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
-            _testHelper.UnitOfWork.Context.TreatmentLibrary.Add(_testTreatmentLibrary);
+            TestHelper.UnitOfWork.Context.TreatmentLibrary.Add(_testTreatmentLibrary);
 
             _testTreatment = new SelectableTreatmentEntity
             {
@@ -88,21 +93,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testTreatment);
+            TestHelper.UnitOfWork.Context.AddEntity(_testTreatment);
 
             _testTreatmentCost = new TreatmentCostEntity { Id = Guid.NewGuid(), TreatmentId = _testTreatment.Id };
-            _testHelper.UnitOfWork.Context.AddEntity(_testTreatmentCost);
+            TestHelper.UnitOfWork.Context.AddEntity(_testTreatmentCost);
 
             _testTreatmentConsequence = new ConditionalTreatmentConsequenceEntity
             {
                 Id = Guid.NewGuid(),
                 SelectableTreatmentId = _testTreatment.Id,
                 ChangeValue = "1",
-                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
+                AttributeId = TestHelper.UnitOfWork.Context.Attribute.First().Id
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testTreatmentConsequence);
+            TestHelper.UnitOfWork.Context.AddEntity(_testTreatmentConsequence);
 
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
         private ScenarioBudgetEntity CreateScenarioTestData(Guid simulationId)
@@ -113,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 SimulationId = simulationId,
                 Name = "Test Name"
             };
-            _testHelper.UnitOfWork.Context.AddEntity(budget);
+            TestHelper.UnitOfWork.Context.AddEntity(budget);
 
 
             _testScenarioTreatment = new ScenarioSelectableTreatmentEntity
@@ -124,8 +129,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
-            _testHelper.UnitOfWork.Context.AddEntity(new ScenarioSelectableTreatmentScenarioBudgetEntity
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatment);
+            TestHelper.UnitOfWork.Context.AddEntity(new ScenarioSelectableTreatmentScenarioBudgetEntity
             {
                 ScenarioBudgetId = budget.Id,
                 ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
@@ -136,7 +141,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Id = Guid.NewGuid(),
                 ScenarioSelectableTreatmentId = _testScenarioTreatment.Id
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentCost);
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentCost);
 
 
             _testScenarioTreatmentConsequence = new ScenarioConditionalTreatmentConsequenceEntity
@@ -144,12 +149,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Id = Guid.NewGuid(),
                 ScenarioSelectableTreatmentId = _testScenarioTreatment.Id,
                 ChangeValue = "1",
-                AttributeId = _testHelper.UnitOfWork.Context.Attribute.First().Id
+                AttributeId = TestHelper.UnitOfWork.Context.Attribute.First().Id
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentConsequence);
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioTreatmentConsequence);
 
 
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.SaveChanges();
             return budget;
         }
 
@@ -170,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             // Act
             var controller = CreateAuthorizedController();
             var result = await controller.GetScenarioSelectedTreatments(simulation.Id);
@@ -206,7 +211,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Setup();
             var controller = CreateAuthorizedController();
             var dtos = new List<TreatmentDTO>();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
             var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
@@ -245,7 +250,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TreatmentLibraryDTO>));
-            Assert.True(dtos.Any(t => t.Id == _testTreatmentLibrary.Id));
+            Assert.Contains(dtos, t => t.Id == _testTreatmentLibrary.Id);
             var resultTreatmentLibrary = dtos.FirstOrDefault(t => t.Id == _testTreatmentLibrary.Id);
             Assert.Equal(_testTreatmentLibrary.Id, resultTreatmentLibrary.Id);
             Assert.Single(resultTreatmentLibrary.Treatments);
@@ -262,7 +267,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldGetScenarioTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             var budget = CreateScenarioTestData(simulation.Id);
 
@@ -283,18 +288,18 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
             Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
-            Assert.True(dtos[0].BudgetIds.Contains(budget.Id));
+            Assert.Contains(budget.Id, dtos[0].BudgetIds);
         }
 
         [Fact]
         public async Task ShouldModifyLibraryTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
-            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
+            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
             var dtoLibrary = dto.Where(t => t.Name == "Test Name").FirstOrDefault();
             dtoLibrary.Description = "Updated Description";
             dtoLibrary.Treatments[0].Name = "Updated Name";
@@ -327,33 +332,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // Assert
             var modifiedDto =
-                _testHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().Single(lib => lib.Id == dtoLibrary.Id);
+                TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().Single(lib => lib.Id == dtoLibrary.Id);
             Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
-            // below assertions are broken. Broken-ness was hidden behind a timer.
-            //Assert.True(modifiedDto.AppliedScenarioIds.Any());
-            //Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Name, modifiedDto.Treatments[0].Name);
-            //Assert.Equal(dtoLibrary.Treatments[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].CriterionLibrary.Id);
-            //Assert.True(modifiedDto.Treatments[0].Costs.Any());
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].Costs[0].CriterionLibrary.Id);
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].Equation.Id,
-            //    modifiedDto.Treatments[0].Costs[0].Equation.Id);
-
-            //Assert.Equal(dtoLibrary.Treatments[0].Costs[0].CriterionLibrary.Id,
-            //    modifiedDto.Treatments[0].Consequences[0].CriterionLibrary.Id);
-            //Assert.Equal(dtoLibrary.Treatments[0].Consequences[0].Equation.Id,
-            //    modifiedDto.Treatments[0].Consequences[0].Equation.Id);
         }
 
         [Fact]
         public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
-            var simulation = _testHelper.CreateSimulation();
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -363,10 +352,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "",
                 SimulationId = simulation.Id
             };
-            _testHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
-            _testHelper.UnitOfWork.Context.SaveChanges();
+            TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
+            TestHelper.UnitOfWork.Context.SaveChanges();
 
-            var dto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
                 .GetScenarioSelectableTreatments(simulation.Id);
 
             dto[0].Description = "Updated Description";
@@ -400,19 +389,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.SelectableTreatmentRepo
+            var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
                 .GetScenarioSelectableTreatments(simulation.Id);
             Assert.Equal(dto[0].Description, modifiedDto[0].Description);
             Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-            // below was already broken. Broken-ness was hidden behind a timer.
-            //Assert.Equal(dto[0].CriterionLibrary.Id, modifiedDto[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Costs[0].CriterionLibrary.Id, modifiedDto[0].Costs[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Costs[0].Equation.Id, modifiedDto[0].Costs[0].Equation.Id);
-            //Assert.Equal(dto[0].Consequences[0].CriterionLibrary.Id,
-            //    modifiedDto[0].Consequences[0].CriterionLibrary.Id);
-            //Assert.Equal(dto[0].Consequences[0].Equation.Id, modifiedDto[0].Consequences[0].Equation.Id);
-            //Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-            //Assert.True(modifiedDto[0].BudgetIds.Contains(scenarioBudget.Id));
+            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+            Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
         }
 
         [Fact]
@@ -430,11 +412,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
 
             Assert.True(
-                !_testHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
-            Assert.True(!_testHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
-            Assert.True(!_testHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
+                !TestHelper.UnitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == _testTreatmentLibrary.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.SelectableTreatment.Any(_ => _.Id == _testTreatment.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.TreatmentCost.Any(_ => _.Id == _testTreatmentCost.Id));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
+                !TestHelper.UnitOfWork.Context.TreatmentConsequence.Any(_ =>
                     _.Id == _testTreatmentConsequence.Id));
         }
         [Fact]
@@ -442,7 +424,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -463,7 +445,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -485,7 +467,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Non-admin unauthorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -506,7 +488,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewTreatmentFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

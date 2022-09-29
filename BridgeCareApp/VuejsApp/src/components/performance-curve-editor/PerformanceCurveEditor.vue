@@ -821,7 +821,7 @@ export default class PerformanceCurveEditor extends Vue {
         return getUserName();
     }
 
-    onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { //need to do upsert things
+    onShowCreatePerformanceCurveLibraryDialog(createAsNewLibrary: boolean) { 
         this.createPerformanceCurveLibraryDialogData = {
             showDialog: true,
             performanceCurves: createAsNewLibrary

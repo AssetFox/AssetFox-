@@ -5,12 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
@@ -40,5 +44,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var attribute = new TextAttribute("defaultValue", resolvedId, randomName, "PREDOMINANT", "command", Data.ConnectionType.MSSQL, "connectionString", calculated, true, Guid.Empty);
             return attribute;
         }
+
+
+        private static bool AttributesHaveBeenCreated = false;
+        private static readonly object AttributeLock = new object();
+
+        public static void CreateAttributes(IUnitOfWork unitOfWork)
+        {
+            if (!AttributesHaveBeenCreated)
+            {
+                lock (AttributeLock)  // Necessary as long as there is a chance that some tests may run in paralell. Can we eliminate that possiblity?
+                {
+                    if (!AttributesHaveBeenCreated)
+                    {
+                        var config = TestConfiguration.Get();
+                        SQLDataSourceDTO dataSourceToApply = null;
+                        if (!unitOfWork.DataSourceRepo.GetDataSources().Any(_ => _.Type == "SQL"))
+                        {
+                            dataSourceToApply = new SQLDataSourceDTO
+                            {
+                                Id = Guid.NewGuid(),
+                                Name = "Test SQL DataSource",
+                                ConnectionString = config.GetConnectionString("BridgeCareConnex")
+                            };
+                            unitOfWork.DataSourceRepo.UpsertDatasource(dataSourceToApply);
+                        }
+                        else
+                        {
+                            dataSourceToApply = (SQLDataSourceDTO)unitOfWork.DataSourceRepo.GetDataSources().First(_ => _.Type == "SQL");
+                        }
+                        var attributesToInsert = AttributeDtoLists.AttributeSetupDtos();
+                        foreach (var attribute in attributesToInsert)
+                        {
+                            attribute.DataSource = dataSourceToApply;
+                        }
+                        unitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
+                        AttributesHaveBeenCreated = true;
+                    }
+                }
+            }
+        }
+
     }
 }

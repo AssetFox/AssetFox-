@@ -10,14 +10,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public static PerformanceCurveController SetupController(TestHelper testHelper, Moq.Mock<IEsecSecurity> mockedEsecSecurity)
+        public static PerformanceCurveController SetupController(IEsecSecurity esecSecurity)
         {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var controller = new PerformanceCurveController(
-                mockedEsecSecurity.Object,
-                testHelper.UnitOfWork,
-                testHelper.MockHubService.Object,
-                testHelper.MockHttpContextAccessor.Object,
-                TestUtils.TestServices.PerformanceCurves,
+                esecSecurity,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
+                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
                 _mockClaimHelper.Object);
             return controller;
         }

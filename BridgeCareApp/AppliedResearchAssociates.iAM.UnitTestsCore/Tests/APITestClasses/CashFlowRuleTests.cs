@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Utils;
@@ -26,7 +27,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
     public class CashFlowRuleTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         private CashFlowController _controller;
 
         private CashFlowRuleLibraryEntity _testCashFlowRuleLibrary;
@@ -38,7 +38,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private void Setup()
         {
-            _testHelper.CreateSingletons();
+            var unitOfWork = TestHelper.UnitOfWork;
+            AttributeTestSetup.CreateAttributes(unitOfWork);
+            NetworkTestSetup.CreateNetwork(unitOfWork);
         }
         private CashFlowController CreateTestController(List<string> userClaims)
         {
@@ -48,22 +50,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new CashFlowController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork,
-                _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+            var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
             };
             return controller;
         }
-        private void CreateAuthorizedController() =>
-            _controller = new CashFlowController(_testHelper.MockEsecSecurityAdmin.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+        private void CreateAuthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                    hubService, accessor, _mockClaimHelper.Object);
+        }
 
-        private void CreateUnauthorizedController() =>
-            _controller = new CashFlowController(_testHelper.MockEsecSecurityDBE.Object,
-                _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object, _mockClaimHelper.Object);
+        private void CreateUnauthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
+        }
 
         private void CreateLibraryTestData()
         {
@@ -73,7 +85,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 Name = "TestCashFlowRuleLibrary",
                 Description = ""
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testCashFlowRuleLibrary);
+            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowRuleLibrary);
 
 
             _testCashFlowRule = new CashFlowRuleEntity
@@ -93,7 +105,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testCashFlowRule);
+            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowRule);
 
 
             _testCashFlowDistributionRule = new CashFlowDistributionRuleEntity
@@ -104,7 +116,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CostCeiling = 500000,
                 YearlyPercentages = "100"
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testCashFlowDistributionRule);
+            TestHelper.UnitOfWork.Context.AddEntity(_testCashFlowDistributionRule);
         }
 
         private void CreateScenarioTestData(Guid simulationId)
@@ -126,7 +138,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                     }
                 }
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowRule);
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowRule);
 
 
             _testScenarioCashFlowDistributionRule = new ScenarioCashFlowDistributionRuleEntity
@@ -137,7 +149,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 CostCeiling = 500000,
                 YearlyPercentages = "100"
             };
-            _testHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowDistributionRule);
+            TestHelper.UnitOfWork.Context.AddEntity(_testScenarioCashFlowDistributionRule);
         }
 
         [Fact]
@@ -160,7 +172,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             CreateAuthorizedController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
             var result = await _controller.GetScenarioCashFlowRules(simulation.Id);
@@ -195,7 +207,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Arrange
             Setup();
             CreateAuthorizedController();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var dtos = new List<CashFlowRuleDTO>();
 
             // Act
@@ -255,7 +267,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -300,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertCashFlowRuleLibrary(dto);
 
             // Assert
-            var modifiedDto = _testHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
+            var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
         }
 
         [Fact]
@@ -308,7 +320,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // Arrange
             Setup();
-            var simulation = _testHelper.CreateSimulation();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateAuthorizedController();
             CreateScenarioTestData(simulation.Id);
 
@@ -323,7 +335,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
 
             // Assert
-            var modifiedDtos = _testHelper.UnitOfWork.CashFlowRuleRepo
+            var modifiedDtos = TestHelper.UnitOfWork.CashFlowRuleRepo
                 .GetScenarioCashFlowRules(simulation.Id);
             Assert.Single(modifiedDtos);
 
@@ -350,13 +362,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.IsType<OkResult>(result);
 
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == _testCashFlowRuleLibrary.Id));
-            Assert.True(!_testHelper.UnitOfWork.Context.CashFlowRule.Any(_ => _.Id == _testCashFlowRule.Id));
+                !TestHelper.UnitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == _testCashFlowRuleLibrary.Id));
+            Assert.True(!TestHelper.UnitOfWork.Context.CashFlowRule.Any(_ => _.Id == _testCashFlowRule.Id));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CriterionLibraryCashFlowRule.Any(_ =>
+                !TestHelper.UnitOfWork.Context.CriterionLibraryCashFlowRule.Any(_ =>
                     _.CashFlowRuleId == _testCashFlowRule.Id));
             Assert.True(
-                !_testHelper.UnitOfWork.Context.CashFlowDistributionRule.Any(_ =>
+                !TestHelper.UnitOfWork.Context.CashFlowDistributionRule.Any(_ =>
                     _.Id == _testCashFlowDistributionRule.Id));
         }
 
@@ -365,7 +377,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // non-admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -387,7 +399,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // admin authorize test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -409,7 +421,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             // non-admin unauthorized test
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -429,7 +441,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task UserIsViewCashFlowFromLibraryAuthorized_B2C()
         {
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

@@ -12,14 +12,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 {
     public class ExcelRawDataImportServiceTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
         public const string SpatialWeighting = "[DECK_AREA]";
         public const string BrKey = "BRKEY";
         public const string InspectionDateColumnTitle = "Inspection_Date";
 
         private static ExcelRawDataImportService CreateExcelSpreadsheetImportService()
         {
-            var returnValue = TestServices.CreateExcelSpreadsheetImportService(_testHelper.UnitOfWork);
+            var returnValue = TestServices.CreateExcelSpreadsheetImportService(TestHelper.UnitOfWork);
             return returnValue;
         }
 
@@ -53,10 +52,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
                 Id = dataSourceId,
                 Name = dataSourceName,
             };
-            _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+            TestHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
             var importResult = spreadsheetService.ImportRawData(dataSourceDto.Id, excelPackage.Workbook.Worksheets[0]);
             var spreadsheetId = importResult.RawDataId;
-            var upsertedSpreadsheet = _testHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(spreadsheetId);
+            var upsertedSpreadsheet = TestHelper.UnitOfWork.ExcelWorksheetRepository.GetExcelRawData(spreadsheetId);
             var serializedWorksheetContent = upsertedSpreadsheet.SerializedWorksheetContent;
             Assert.StartsWith("[[", serializedWorksheetContent);
             Assert.EndsWith("]]", serializedWorksheetContent);
@@ -83,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
                 Id = dataSourceId,
                 Name = dataSourceName,
             };
-            _testHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
+            TestHelper.UnitOfWork.DataSourceRepo.UpsertDatasource(dataSourceDto);
 
             var service = CreateExcelSpreadsheetImportService();
             var result = service.ImportRawData(dataSourceId, excelPackage.Workbook.Worksheets[0]);

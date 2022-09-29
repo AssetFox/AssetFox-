@@ -17,8 +17,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class NetworkTests
     {
-        private static TestHelper _testHelper => TestHelper.Instance;
-
         private NetworkController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
@@ -27,8 +25,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Claim claim = new Claim(ClaimTypes.Name, claimstr);
                 claims.Add(claim);
             }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new NetworkController(_testHelper.MockEsecSecurityAdmin.Object, _testHelper.UnitOfWork, _testHelper.MockHubService.Object, _testHelper.MockHttpContextAccessor.Object);
+            var controller = new NetworkController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork, hubService, accessor);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin unauthorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {
@@ -104,7 +104,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             // Non-admin authorized
             // Arrange
-            var authorizationService = _testHelper.BuildAuthorizationService(services =>
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
                 services.AddAuthorization(options =>
                 {

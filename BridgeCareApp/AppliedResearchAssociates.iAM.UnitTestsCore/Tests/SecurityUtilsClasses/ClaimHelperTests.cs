@@ -14,15 +14,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
     public class ClaimHelperTests
     {
         private ClaimHelper _claimHelper;
-        private static TestHelper _testHelper => TestHelper.Instance;
         private Guid ownerId = Guid.NewGuid();
         private Guid userId = Guid.NewGuid();
 
         public void Setup()
         {
-            _testHelper.CreateAttributes();
-            _testHelper.CreateNetwork();
-            _testHelper.SetupDefaultHttpContext();            
+            //_testHelper.CreateAttributes();
+            //_testHelper.CreateNetwork();
+            //_testHelper.SetupDefaultHttpContext();            
         }
 
         [Fact]
@@ -33,7 +32,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
             var result = _claimHelper.RequirePermittedCheck();
 
             // Assert
@@ -49,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
             var result = _claimHelper.RequirePermittedCheck();
 
             // Assert
@@ -66,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
             _claimHelper.CheckUserSimulationReadAuthorization(Guid.NewGuid(), userId, true);
         }        
 
@@ -78,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
             _claimHelper.CheckUserSimulationModifyAuthorization(Guid.NewGuid(), userId, false);
         }
 
@@ -90,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
 
             var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
@@ -104,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             MockHttpContext(claims);
 
             // Act
-            _claimHelper = new ClaimHelper(_testHelper.UnitOfWork, _testHelper.MockHttpContextAccessor.Object);
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.Default());
             userId = ownerId;
             _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId);
             
@@ -116,7 +115,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
             var claimsPrincipal = new ClaimsPrincipal(identity);
             var mockHttpContext = new Mock<HttpContext>();
             mockHttpContext.Setup(m => m.User).Returns(claimsPrincipal);
-            _testHelper.MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
+            HttpContextAccessorMocks.Default().HttpContext = mockHttpContext.Object;
+            //_testHelper.MockHttpContextAccessor.Setup(x => x.HttpContext).Returns(mockHttpContext.Object);
         }
     }
 }

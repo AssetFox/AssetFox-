@@ -67,7 +67,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
-
         }
 
         [Fact]
@@ -155,15 +154,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 .RemainingLifeLimitLibrariesWithRemainingLifeLimits().Single(rll => rll.Id == lifeLimitLibrary.Id);
 
             Assert.Equal(dto.Description, modifiedDto.Description);
-            // Below was already broken. Brokenness hidden behind a timer that never fired.
-            //Assert.Single(modifiedDto.AppliedScenarioIds);
-            //Assert.Equal(simulation.Id, modifiedDto.AppliedScenarioIds[0]);
-
-            //Assert.Equal(dto.RemainingLifeLimits[0].Value, modifiedDto.RemainingLifeLimits[0].Value);
-            //Assert.Equal(dto.RemainingLifeLimits[0].CriterionLibrary.Id,
-            //    modifiedDto.RemainingLifeLimits[0].CriterionLibrary.Id);
-            //Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
-
+            Assert.Equal(dto.RemainingLifeLimits[0].Attribute, modifiedDto.RemainingLifeLimits[0].Attribute);
         }
 
         [Fact]

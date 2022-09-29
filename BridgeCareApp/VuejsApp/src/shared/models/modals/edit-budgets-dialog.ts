@@ -7,8 +7,21 @@ export interface EditBudgetsDialogData {
     scenarioId: string;
 }
 
+
+export interface EmitedBudgetChanges{
+    updatedBudgets: Budget[];
+    addedBudgets: Budget[];
+    deletionIds: string[];
+}
+
 export const emptyEditBudgetsDialogData: EditBudgetsDialogData = {
     showDialog: false,
     budgets: [],
     scenarioId: getBlankGuid(),
 };
+
+export const emptyEmitBudgetChanges: EmitedBudgetChanges = {
+    updatedBudgets: [],
+    addedBudgets: [],
+    deletionIds: []
+}

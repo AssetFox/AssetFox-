@@ -100,9 +100,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
         private CriterionLibraryEntity SetupCriterionLibraryForUpsertOrDelete()
         {
-            //var criterionLibraries = TestHelper.UnitOfWork.Context.CriterionLibrary.ToList();
-            //TestHelper.UnitOfWork.Context.CriterionLibrary.RemoveRange(criterionLibraries);
-            //TestHelper.UnitOfWork.Context.SaveChanges();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             TestHelper.UnitOfWork.Context.SaveChanges();
@@ -214,10 +211,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
             // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-            // WjJake -- the below assert fails because the repo churns the CriterionLibrary, similar
-            // to what we had with PerformanceCurves.
-            //Assert.Equal(dto.TargetConditionGoals[0].CriterionLibrary.Id,
-            //    modifiedDto.TargetConditionGoals[0].CriterionLibrary.Id);
             Assert.Equal(dto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
         }
 
@@ -335,7 +328,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             ObjectAssertions.Equivalent(localNewTargetGoal, serverNewTargetGoal);
             Assert.Equal(localUpdatedTargetGoal.Name, serverUpdatedTargetGoal.Name);
             Assert.Equal(localUpdatedTargetGoal.Attribute, serverUpdatedTargetGoal.Attribute);
-            //Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.Id, serverUpdatedTargetGoal.CriterionLibrary.Id);
             Assert.Equal(localUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression,
                 serverUpdatedTargetGoal.CriterionLibrary.MergedCriteriaExpression);
         }

@@ -25,11 +25,11 @@ namespace BridgeCareCore.Controllers
     public class SimulationController : BridgeCareCoreBaseController
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
-        private readonly SimulationService _simulationService;
+        private readonly ISimulationService _simulationService;
 
         private readonly IReadOnlyDictionary<string, SimulationCRUDMethods> _simulationCRUDMethods;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis,SimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis,ISimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));

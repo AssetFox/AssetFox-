@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateDeficientConditionGoals(List<DeficientConditionGoal> deficientConditionGoals, Guid simulationId);
 
         List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesWithDeficientConditionGoals();
+        List<DeficientConditionGoalLibraryDTO> GetDeficientConditionGoalLibrariesNoChildren();
 
         void UpsertDeficientConditionGoalLibrary(DeficientConditionGoalLibraryDTO dto);
 
@@ -18,6 +19,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteDeficientConditionGoalLibrary(Guid libraryId);
 
         List<DeficientConditionGoalDTO> GetScenarioDeficientConditionGoals(Guid simulationId);
+
+        List<DeficientConditionGoalDTO> GetDeficientConditionGoalsByLibraryId(Guid libraryId);
 
         void UpsertOrDeleteScenarioDeficientConditionGoals(List<DeficientConditionGoalDTO> scenarioDeficientConditionGoal, Guid simulationId);
     }

@@ -90,6 +90,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public List<BudgetPriorityLibraryDTO> GetBudgetPriortyLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.BudgetPriorityLibrary.Any())
+            {
+                return new List<BudgetPriorityLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.BudgetPriorityLibrary.AsNoTracking()
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
         public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 

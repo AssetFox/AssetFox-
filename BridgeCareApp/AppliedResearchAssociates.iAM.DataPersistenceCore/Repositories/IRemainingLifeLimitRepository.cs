@@ -9,7 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
     {
         void CreateRemainingLifeLimits(List<RemainingLifeLimit> remainingLifeLimits, Guid simulationId);
 
-        List<RemainingLifeLimitLibraryDTO> RemainingLifeLimitLibrariesWithRemainingLifeLimits();
+        List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
+
+        List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesNoChildren();
 
         void UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto);
 
@@ -17,6 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteRemainingLifeLimitLibrary(Guid libraryId);
         List<RemainingLifeLimitDTO> GetScenarioRemainingLifeLimits(Guid simulationId);
+        List<RemainingLifeLimitDTO> GetRemainingLifeLimitsByLibraryId(Guid libraryId);
         void UpsertOrDeleteScenarioRemainingLifeLimits(List<RemainingLifeLimitDTO> scenarioRemainingLifeLimit, Guid simulationId);
     }
 }

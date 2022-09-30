@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesWithTargetConditionGoals();
 
+        List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildren();
+
         void UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto);
 
         void UpsertOrDeleteTargetConditionGoals(List<TargetConditionGoalDTO> targetConditionGoals, Guid libraryId);
@@ -18,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteTargetConditionGoalLibrary(Guid libraryId);
 
         List<TargetConditionGoalDTO> GetScenarioTargetConditionGoals(Guid simulationId);
+        List<TargetConditionGoalDTO> GetTargetConditionGoalsByLibraryId(Guid libraryId);
 
         void UpsertOrDeleteScenarioTargetConditionGoals(List<TargetConditionGoalDTO> scenarioTargetConditionGoal, Guid simulationId);
     }

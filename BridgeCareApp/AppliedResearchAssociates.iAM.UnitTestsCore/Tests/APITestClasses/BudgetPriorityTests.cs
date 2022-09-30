@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
@@ -12,8 +13,16 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -25,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
         private BudgetPriorityEntity _testBudgetPriority;
         private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
         {
@@ -38,10 +48,34 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
-                EsecSecurityMocks.Admin,
+                EsecSecurityMocks.AdminMock.Object,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
+            return controller;
+        }
+        private BudgetPriorityController CreateTestController(List<string> uClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimName in uClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var hubService = HubServiceMocks.Default();
+            var accessor = HttpContextAccessorMocks.Default();
+            var controller = new BudgetPriorityController(
+                EsecSecurityMocks.AdminMock.Object,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
+                _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
             return controller;
         }
 
@@ -50,10 +84,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var controller = new BudgetPriorityController(
-                EsecSecurityMocks.Dbe,
+                EsecSecurityMocks.DbeMock.Object,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
             return controller;
         }
 
@@ -343,21 +378,86 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
+        public async Task UserIsViewBudgetPriorityFromLibraryAuthorized()
         {
             // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateUnauthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            var dtos = new List<BudgetPriorityDTO>();
-
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
-            var result = await controller.UpsertScenarioBudgetPriorities(simulation.Id, dtos);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewBudgetPriorityFromLibrary);
             // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            Assert.True(allowed.Succeeded);
+
         }
+        [Fact]
+        public async Task UserIsModifyBudgetPriorityFromScenarioAuthorized()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyBudgetPriorityFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityModifyAnyFromScenarioAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityModifyPermittedFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyBudgetPriorityFromScenario);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsDeleteBudgetPriorityFromLibraryAuthorized()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.DeleteBudgetPriorityFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.AnnouncementModifyAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.AttributesUpdateAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteBudgetPriorityFromLibrary);
+            // Assert
+            Assert.False(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsViewBudgetPriorityFromLibraryAuthorized_B2C()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name, BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewBudgetPriorityFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+
     }
 }

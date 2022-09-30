@@ -29,7 +29,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 .Returns(new UserInfo
                 {
                     Name = AdminUsername,
-                    Role = AdminRole,
+                    HasAdminAccess = true,
+                    HasSimulationAccess = true,
                     Email = AdminEmail,
                 });
                 return mock;
@@ -54,7 +55,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     .Returns(new UserInfo
                     {
                         Name = DbeUsername,
-                        Role = DbeRole,
+                        HasAdminAccess = false,
+                        HasSimulationAccess = false,
                         Email = DbeEmail,
                     });
                 return mock;

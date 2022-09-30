@@ -138,7 +138,7 @@
                             </template>
                         </v-data-table>
                     </div>
-                    <!-- <div class="pad-button" v-if="isAdmin">
+                    <!-- <div class="pad-button" v-if="hasAdminAccess">
                             <v-btn @click="showCreateNetworkDialog = true" color="green darken-2 white--text" round>Create network
                             </v-btn>
                         </div> -->

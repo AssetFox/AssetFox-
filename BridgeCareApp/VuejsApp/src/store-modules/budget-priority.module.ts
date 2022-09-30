@@ -24,6 +24,7 @@ const state = {
         emptyBudgetPriorityLibrary,
     ) as BudgetPriorityLibrary,
     scenarioBudgetPriorities: [] as BudgetPriority[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -65,6 +66,9 @@ const mutations = {
         budgetPriorities: BudgetPriority[],
     ) {
         state.scenarioBudgetPriorities = clone(budgetPriorities);
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
     },
 };
 
@@ -167,6 +171,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Modified scenario budget priorities',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await BudgetPriorityService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

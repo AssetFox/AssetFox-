@@ -1,5 +1,4 @@
-﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataUnitTests;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +18,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             UnitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }
-
         public static IAMContext DbContext => UnitOfWork.Context;
 
         public static readonly UnitOfDataPersistenceWork UnitOfWork;

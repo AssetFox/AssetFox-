@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
@@ -11,8 +12,16 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -25,6 +34,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private CashFlowDistributionRuleEntity _testCashFlowDistributionRule;
         private ScenarioCashFlowRuleEntity _testScenarioCashFlowRule;
         private ScenarioCashFlowDistributionRuleEntity _testScenarioCashFlowDistributionRule;
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
         {
@@ -32,26 +42,39 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
         }
-
+        private CashFlowController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimName in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
+                claims.Add(claim);
+            }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         private void CreateAuthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            _controller = new CashFlowController(EsecSecurityMocks.Admin,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor);
+            _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
+                    hubService, accessor, _mockClaimHelper.Object);
         }
 
         private void CreateUnauthorizedController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            _controller = new CashFlowController(EsecSecurityMocks.Dbe,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor
-                );
+            _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
         }
 
         private void CreateLibraryTestData()
@@ -350,21 +373,90 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
+        public async Task UserIsViewCashFlowFromLibraryAuthorized()
+        {
+            // non-admin authorize test
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewCashFlowFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewAnyFromLibraryAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewPermittedFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsModifyCashFlowFromScenarioAuthorized()
+        {
+            // admin authorize test
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyCashFlowFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyPermittedFromScenarioAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyAnyFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromScenario);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsModifyCashFlowFromLibraryAuthorized()
+        {
+            // non-admin unauthorized test
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyCashFlowFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowModifyAnyFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromLibrary);
+            // Assert
+            Assert.False(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsViewCashFlowFromLibraryAuthorized_B2C()
         {
             // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateUnauthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            var dtos = new List<CashFlowRuleDTO>();
-
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewCashFlowFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewAnyFromLibraryAccess,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.CashFlowViewPermittedFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
             // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            Assert.True(allowed.Succeeded);
         }
     }
 }

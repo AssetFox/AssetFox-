@@ -534,9 +534,10 @@ export default class PerformanceCurveEditor extends Vue {
     stateNumericAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
+    @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
@@ -647,6 +648,7 @@ export default class PerformanceCurveEditor extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
+            vm.getHasPermittedAccessAction();
             vm.getPerformanceCurveLibrariesAction().then(() => {
                 if (to.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
                     vm.selectedScenarioId = to.query.scenarioId;
@@ -805,7 +807,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

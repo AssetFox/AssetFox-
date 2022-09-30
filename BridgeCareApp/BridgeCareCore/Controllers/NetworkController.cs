@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Utils;
+using BridgeCareCore.Security;
 
 namespace BridgeCareCore.Controllers
 {
@@ -30,7 +31,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllNetworks")]
-        [Authorize]
+        [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> AllNetworks()
         {
             List<NetworkDTO> result;
@@ -63,7 +64,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateNetwork/{networkName}")]
-        [Authorize]
+        [ClaimAuthorize("NetworkAddAccess")]
         public async Task<IActionResult> CreateNetwork(string networkName, NetworkCreationParameters parameters)
         {
             try
@@ -106,7 +107,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("GetCompatibleNetworks/{networkId}")]
-        [Authorize]
+        [ClaimAuthorize("NetworkViewAccess")]
         public async Task<IActionResult> GetCompatibleNetworks(Guid networkId)
         {
 
@@ -148,7 +149,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpPost]
         [Route("UpsertBenefitQuantifier")]
-        [Authorize]
+        [ClaimAuthorize("NetworkAggregateAccess")]
         public async Task<IActionResult> UpsertBenefitQuantifier([FromBody] BenefitQuantifierDTO dto)
         {
             try

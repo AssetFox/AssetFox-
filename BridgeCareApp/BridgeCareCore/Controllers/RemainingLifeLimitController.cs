@@ -96,7 +96,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var currentRecord = UnitOfWork.RemainingLifeLimitRepo
-                   .RemainingLifeLimitLibrariesWithRemainingLifeLimits().FirstOrDefault(_ => _.Id == dto.Id);
+                   .GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits().FirstOrDefault(_ => _.Id == dto.Id);
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
@@ -191,7 +191,7 @@ namespace BridgeCareCore.Controllers
 
         private List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
-            return UnitOfWork.RemainingLifeLimitRepo.RemainingLifeLimitLibrariesWithRemainingLifeLimits();
+            return UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
         }
     }
 }

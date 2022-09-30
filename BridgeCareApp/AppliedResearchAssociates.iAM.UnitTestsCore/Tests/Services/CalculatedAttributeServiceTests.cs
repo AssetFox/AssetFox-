@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CalculatedAttribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CalculatedAttribute;
@@ -74,7 +73,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             var request = new CalculatedAttributePagingRequestModel()
             {
-                AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id
+                AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id,
+                SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
             var result = service.GetLibraryCalculatedAttributePage(libraryId, request);
@@ -93,7 +93,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             var request = new CalculatedAttributePagingRequestModel()
             {
-                AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id
+                AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id,
+                SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
             var result = service.GetScenarioCalculatedAttributePage(simulationId, request);
@@ -110,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
 
-            var SyncModel = new CalculatedAttributePagingSyncModel();
+            var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
             var result = service.GetSyncedScenarioDataset(simulationId, SyncModel);
             var calcAttrIds = _testScenarionCalcAttributes.Select(_ => _.Id);
@@ -124,7 +125,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
 
             var libraryId = TestDataForCalculatedAttributesRepository.GetLibraryRepo().First(_ => _.Name == "First").Id;
 
-            var SyncModel = new CalculatedAttributePagingSyncModel();
+            var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
             var result = service.GetSyncedLibraryDataset(libraryId, SyncModel);
             var calcAttrIds = _testLIbraryCalcAttributes.Select(_ => _.Id);

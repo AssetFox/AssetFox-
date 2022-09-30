@@ -13,6 +13,7 @@ namespace BridgeCareCore.Models
             AddedPairs = new Dictionary<Guid, List<CalculatedAttributeEquationCriteriaPairDTO>>();
             UpdatedPairs = new Dictionary<Guid, List<CalculatedAttributeEquationCriteriaPairDTO>>();
             DeletedPairs = new Dictionary<Guid, List<Guid>>();
+            AddedCalculatedAttributes = new List<CalculatedAttributeDTO>();
         }
         public Guid? LibraryId { get; set; }
         public List<CalculatedAttributeDTO> UpdatedCalculatedAttributes { get; set; }

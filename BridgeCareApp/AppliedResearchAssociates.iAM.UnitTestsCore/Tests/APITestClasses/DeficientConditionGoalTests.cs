@@ -44,9 +44,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private DeficientConditionGoalController CreateTestController(List<string> uClaims)
         {
             List<Claim> claims = new List<Claim>();
-            foreach (string claimstr in uClaims)
+            foreach (string claimName in uClaims)
             {
-                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
                 claims.Add(claim);
             }
             var accessor = HttpContextAccessorMocks.Default();

@@ -64,9 +64,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
-            foreach (string claimstr in userClaims)
+            foreach (string claimName in userClaims)
             {
-                Claim claim = new Claim(ClaimTypes.Name, claimstr);
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
                 claims.Add(claim);
             }
             var accessor = HttpContextAccessorMocks.Default();

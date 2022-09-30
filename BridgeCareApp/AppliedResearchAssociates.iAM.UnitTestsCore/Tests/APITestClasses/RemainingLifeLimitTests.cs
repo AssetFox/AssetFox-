@@ -211,11 +211,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any());
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any());
-            Assert.True(!TestHelper.UnitOfWork.Context.Attribute.Any(_ => _.RemainingLifeLimits.Any()));
+            Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any());
         }
         [Fact]
         public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized()

@@ -662,7 +662,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
             Assert.NotEmpty(dtos);
-            Assert.True(dtos.All(_ => _.Users.All(__ => !__.IsOwner)));
+            Assert.True(dtos.All(_ => _.Owner != TestHelper.UnitOfWork.CurrentUser.Username));
             //var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 

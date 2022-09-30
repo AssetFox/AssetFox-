@@ -382,7 +382,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         }
 
         [Fact]
-        public async Task ShouldGetLibraryData()
+        public async Task ShouldGetLibraryDataNoChildren()
         {
             // Arrange
             var service = Setup();
@@ -400,6 +400,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 typeof(List<BudgetLibraryDTO>));
             Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
             var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
+
+            Assert.True(resultBudgetLibrary.Budgets.Count == 0);
         }
 
         [Fact]

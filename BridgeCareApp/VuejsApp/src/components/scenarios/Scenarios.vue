@@ -499,8 +499,8 @@ export default class Scenarios extends Vue {
     @State(state => state.authenticationModule.authenticated)
     authenticated: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
 
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
@@ -883,8 +883,8 @@ export default class Scenarios extends Vue {
         const scenarioUserCanModify = (user: ScenarioUser) =>
             user.username === currentUser && user.canModify;
         return (
-            this.isAdmin ||
-            this.isCWOPA ||
+            this.hasAdminAccess ||
+            this.hasSimulationAccess ||
             any(scenarioUserCanModify, scenarioUsers)
         );
     }

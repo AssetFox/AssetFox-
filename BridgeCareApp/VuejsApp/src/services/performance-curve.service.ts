@@ -93,4 +93,10 @@ export default class PerformanceCurveService {
             `${API.PerformanceCurve}/DownloadPerformanceCurvesTemplate`,
         );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.PerformanceCurve}/GetHasPermittedAccess`,
+        );
+    }
 }

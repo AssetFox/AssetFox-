@@ -22,6 +22,7 @@ const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
     selectedTreatmentLibrary: clone(emptyTreatmentLibrary) as TreatmentLibrary,
     scenarioSelectableTreatments: [] as Treatment[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -66,6 +67,9 @@ const mutations = {
         selectableTreatments: Treatment[],
     ) {
         state.scenarioSelectableTreatments = clone(selectableTreatments);
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
     },
 };
 
@@ -238,6 +242,19 @@ const actions = {
                 }
             },
         );
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await TreatmentService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
     },
 };
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -19,13 +20,21 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Services;
+using BridgeCareCore.Utils;
 using BridgeCareCore.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
+using BridgeCareCore.Utils.Interfaces;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -37,12 +46,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private SimulationEntity _testSimulationToClone;
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();
             var role = "PD-BAMS-Administrator";
-            TestHelper.UnitOfWork.AddUser(randomName, role);
+            TestHelper.UnitOfWork.AddUser(randomName, true);
             var returnValue = await TestHelper.UnitOfWork.UserRepo.GetUserByUserName(randomName);
             return returnValue;
         }
@@ -68,7 +78,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
         }
 
         private void CreateUnauthorizedController(SimulationAnalysisService simulationAnalysisService)
@@ -80,9 +91,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
                 hubService,
-                accessor);
+                accessor,
+                _mockClaimHelper.Object);
         }
 
+
+        private SimulationController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimName in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
+                claims.Add(claim);
+            }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var service = Setup();
+            var controller = new SimulationController(service,
+                new SimulationService(TestHelper.UnitOfWork),
+                EsecSecurityMocks.Dbe,
+                TestHelper.UnitOfWork,
+                hubService,
+                accessor,
+                _mockClaimHelper.Object);
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         private void CreateTestData()
         {
             if (!TestHelper.UnitOfWork.Context.User.Any(u => u.Username == "Clone Tester"))
@@ -916,6 +954,89 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             Assert.NotEqual(clonedSimulation.AnalysisMethod.Id, originalSimulation.AnalysisMethod.Id);
             Assert.Equal(clonedSimulation.AnalysisMethod.Benefit.AttributeId,
                 originalSimulation.AnalysisMethod.Benefit.AttributeId);
+        }
+        [Fact]
+        public async Task UserIsViewSimulationAuthorized()
+        {
+            // Non-admin authorized
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewSimulation,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.SimulationViewPermittedAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewSimulation);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsDeleteSimulationAuthorized()
+        {
+            // Non-admin unauthorized
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.DeleteSimulation,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.SimulationDeleteAnyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteSimulation);
+            // Assert
+            Assert.False(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsRunSimulationAuthorized()
+        {
+            // Admin authorized
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.RunSimulation,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.SimulationRunAnyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.RunSimulation);
+            // Assert
+            Assert.True(allowed.Succeeded);
+        }
+        [Fact]
+        public async Task UserIsViewSimulationAuthorized_B2C()
+        {
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewSimulation,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.SimulationViewAnyAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewSimulation);
+            // Assert
+            Assert.True(allowed.Succeeded);
         }
     }
 }

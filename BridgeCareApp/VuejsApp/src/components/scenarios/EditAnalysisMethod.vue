@@ -19,7 +19,7 @@
                                 outline
                                 clearable
                                 :value="analysisMethod.attribute"
-                                :disabled="!isAdmin"
+                                :disabled="!hasAdminAccess"
                             >
                             </v-select>
                         </v-flex>
@@ -36,7 +36,7 @@
                                 "
                                 outline
                                 :value="analysisMethod.optimizationStrategy"
-                                :disabled="!isAdmin"
+                                :disabled="!hasAdminAccess"
                             >
                             </v-select>
                         </v-flex>
@@ -71,7 +71,7 @@
                                 "
                                 outline
                                 :value="analysisMethod.benefit.attribute"
-                                :disabled="!isAdmin"
+                                :disabled="!hasAdminAccess"
                             >
                             </v-select>
                         </v-flex>
@@ -91,7 +91,7 @@
                                         analysisMethod.benefit.limit,
                                     ),
                                 ]"
-                                :disabled="!isAdmin"
+                                :disabled="!hasAdminAccess"
                             >
                             </v-text-field>
                         </v-flex>
@@ -224,7 +224,7 @@ export default class EditAnalysisMethod extends Vue {
     stateAnalysisMethod: AnalysisMethod;
     @State(state => state.attributeModule.numericAttributes)
     stateNumericAttributes: Attribute[];
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
 
     @Action('getAnalysisMethod') getAnalysisMethodAction: any;
     @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;

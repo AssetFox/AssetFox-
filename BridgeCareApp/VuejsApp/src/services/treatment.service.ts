@@ -108,4 +108,10 @@ export default class TreatmentService {
                   `${API.Treatment}/DownloadLibraryTreatmentsTemplate`,
               );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetHasPermittedAccess`,
+        );
+    }
 }

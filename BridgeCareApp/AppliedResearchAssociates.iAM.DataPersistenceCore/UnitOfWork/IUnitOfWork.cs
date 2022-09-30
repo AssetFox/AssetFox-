@@ -103,7 +103,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
 
         void SetUser(string username);
 
-        void AddUser(string username, string role);
+        void AddUser(string username, bool hasAdminClaim);
 
         void Commit();
 

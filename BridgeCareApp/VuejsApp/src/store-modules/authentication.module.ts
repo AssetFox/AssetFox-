@@ -16,8 +16,8 @@ const state = {
     authenticated: false,
     hasRole: false,
     checkedForRole: false,
-    isAdmin: false,
-    isCWOPA: false,
+    hasAdminAccess: false,
+    hasSimulationAccess: false,
     username: '',
     refreshing: false,
     securityType: SecurityTypes.esec,
@@ -35,11 +35,11 @@ const mutations = {
     checkedForRoleMutator(state: any, status: boolean) {
         state.checkedForRole = status;
     },
-    isAdminMutator(state: any, status: boolean) {
-        state.isAdmin = status;
+    adminAccessMutator(state: any, status: boolean) {
+        state.hasAdminAccess = status;
     },
-    isCWOPAMutator(state: any, status: boolean) {
-        state.isCWOPA = status;
+    simulationAccessMutator(state: any, status: boolean) {
+        state.hasSimulationAccess = status;
     },
     usernameMutator(state: any, username: string) {
         state.username = username;
@@ -149,22 +149,19 @@ const actions = {
                     localStorage.setItem('UserInfo', JSON.stringify(userInfo));
                     commit('usernameMutator', parseLDAP(userInfo.sub)[0]);
 
-                    const hasRole: boolean = regexCheckLDAP(
-                        userInfo.roles,
-                        /PD-BAMS-(Administrator|CWOPA|PlanningPartner|DBEngineer)/,
-                    );
+                    const hasRole: boolean = userInfo.internalRole != null && userInfo.internalRole != '';
 
                     commit('checkedForRoleMutator', hasRole);
                     commit('hasRoleMutator', hasRole);
 
                     if (hasRole) {
                         commit(
-                            'isAdminMutator',
-                            checkLDAP(userInfo.roles, 'PD-BAMS-Administrator'),
-                        );
+                            'adminAccessMutator',
+                            userInfo.hasAdminAccess,
+                        );                       
                         commit(
-                            'isCWOPAMutator',
-                            checkLDAP(userInfo.roles, 'PD-BAMS-CWOPA'),
+                            'simulationAccessMutator',
+                            userInfo.hasSimulationAccess,
                         );
                     }
 
@@ -211,15 +208,17 @@ const actions = {
         if (payload.status) {
             commit('hasRoleMutator', true);
             commit('checkedForRoleMutator', true);
-            commit('isAdminMutator', true);
+            commit('adminAccessMutator', true);
             commit('usernameMutator', payload.username);
             commit('authenticatedMutator', true);
+            commit('simulationAccessMutator', false);
         } else {
             commit('hasRoleMutator', false);
             commit('checkedForRoleMutator', false);
-            commit('isAdminMutator', false);
+            commit('adminAccessMutator', false);
             commit('usernameMutator', '');
             commit('authenticatedMutator', false);
+            commit('simulationAccessMutator', false);
         }
     },
 };

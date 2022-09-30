@@ -40,4 +40,10 @@ export default class CashFlowService {
             data,
         );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.CashFlow}/GetHasPermittedAccess`,
+        );
+    }
 }

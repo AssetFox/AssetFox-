@@ -30,6 +30,13 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Models;
+using BridgeCareCore.Utils.Interfaces;
+using System.Security.Claims;
+using Microsoft.Extensions.DependencyInjection;
+
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 {
@@ -40,8 +47,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private InvestmentPlanEntity _testInvestmentPlan;
         private ScenarioBudgetEntity _testScenarioBudget;
         private const string BudgetEntityName = "Budget";
-
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
+        private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         public InvestmentBudgetsService Setup()
         {
@@ -66,7 +73,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,
-                _mockInvestmentDefaultDataService.Object);
+                _mockInvestmentDefaultDataService.Object,
+                _mockClaimHelper.Object);
             return controller;
         }
 
@@ -75,12 +83,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Dbe,
+            var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
-                hubService, accessor, _mockInvestmentDefaultDataService.Object);
+                hubService,
+                accessor,
+                _mockInvestmentDefaultDataService.Object,
+                _mockClaimHelper.Object);
             return controller;
         }
 
+        private InvestmentController CreateTestController(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimName in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
+                claims.Add(claim);
+            }
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var service = Setup();
+            var controller = new InvestmentController(service, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
+
+            controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext() { User = testUser }
+            };
+            return controller;
+        }
         private void CreateLibraryTestData()
         {
             var year = DateTime.Now.Year;
@@ -524,50 +555,92 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
                     _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
-
         [Fact]
-        public async Task ShouldThrowUnauthorizedOnInvestmentPost()
+        public async Task UserIsViewInvestmentFromScenarioAuthorized()
         {
+            // admin authorized
             // Arrange
-            var service = Setup();
-            var controller = CreateUnauthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
-            var dto = new InvestmentDTO
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
             {
-                ScenarioBudgets = new List<BudgetDTO> { _testScenarioBudget.ToDto() },
-                InvestmentPlan = _testInvestmentPlan.ToDto()
-            };
-
-            var request = new InvestmentPagingSyncModel();
-            request.Investment = dto.InvestmentPlan;
-            request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
-
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewInvestmentFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentViewAnyFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
-            var result = await controller.UpsertInvestment(simulation.Id, request);
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
             // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            Assert.True(allowed.Succeeded);
         }
-
-        /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
         [Fact]
-        public async Task ShouldReturnUnauthorizedOnScenarioImport()
+        public async Task UserIsModifyInestmentFromLibraryAuthorized()
+        {
+            // non-admin authorized
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ModifyInvestmentFromLibrary,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentModifyPermittedFromLibraryAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyInvestmentFromLibrary);
+            // Assert
+            Assert.True(allowed.Succeeded);
+
+        }
+        [Fact]
+        public async Task UserIsImportInvestmentFromScenarioAuthorized()
+        {
+            // non-admin unauthorized
+            // Arrange
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ImportInvestmentFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentImportPermittedFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            // Act
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ImportInvestmentFromScenario);
+            // Assert
+            Assert.False(allowed.Succeeded);
+
+        }
+        [Fact]
+        public async Task UserIsViewInvestmentFromScenarioAuthorized_B2C()
         {
             // Arrange
-            var service = Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
-            var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateUnauthorizedController(service, accessor);
-
+            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
+            {
+                services.AddAuthorization(options =>
+                {
+                    options.AddPolicy(Policy.ViewInvestmentFromScenario,
+                        policy => policy.RequireClaim(ClaimTypes.Name,
+                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentViewAnyFromScenarioAccess));
+                });
+            });
+            var roleClaimsMapper = new RoleClaimsMapper();
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
-            var result = await controller.ImportScenarioInvestmentBudgetsExcelFile();
-
+            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
             // Assert
-            Assert.IsType<UnauthorizedResult>(result);
+            Assert.True(allowed.Succeeded);
         }
-
+        /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
         [Fact]
         public async Task ShouldImportLibraryBudgetsFromFile()
         {

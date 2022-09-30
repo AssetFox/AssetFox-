@@ -73,7 +73,7 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public PagingPageModel<SimulationDTO> GetSharedScenarioPage(PagingRequestModel<SimulationDTO> request, string role)
+        public PagingPageModel<SimulationDTO> GetSharedScenarioPage(PagingRequestModel<SimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess)
         {
             var skip = 0;
             var take = 0;
@@ -87,10 +87,10 @@ namespace BridgeCareCore.Services
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
                 .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
-                    (role == Role.Administrator ||
-                    role == Role.Cwopa ||
+                    hasAdminAccess ||
+                    hasSimulationAccess ||
                     _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    )).ToList();
+                    ).ToList();
 
 
             if (request.search.Trim() != "")

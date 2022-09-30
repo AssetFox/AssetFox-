@@ -350,8 +350,9 @@ export default class DeficientConditionGoalEditor extends Vue {
     stateScenarioDeficientConditionGoals: DeficientConditionGoal[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.deficientConditionGoalModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('getDeficientConditionGoalLibraries')
     getDeficientConditionGoalLibrariesAction: any;
@@ -456,6 +457,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getDeficientConditionGoalLibrariesAction();
+            vm.getHasPermittedAccessAction();
 
             if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
@@ -576,7 +578,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

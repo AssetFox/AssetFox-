@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,13 +16,12 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class UserCriteriaController : BridgeCareCoreBaseController
     {
-
         public UserCriteriaController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
         [HttpGet]
         [Route("GetUserCriteria")]
-        [Authorize]
+        [ClaimAuthorize("UserCriteriaViewAccess")]
         public async Task<IActionResult> GetUserCriteria()
         {
             try
@@ -31,8 +29,7 @@ namespace BridgeCareCore.Controllers
                 var result = await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var userCriteria = UnitOfWork.UserCriteriaRepo
-                        .GetOwnUserCriteria(UserInfo.ToDto(), SecurityConstants.Role.BAMSAdmin);
+                    var userCriteria = UnitOfWork.UserCriteriaRepo.GetOwnUserCriteria(UserInfo.ToDto());
                     UnitOfWork.Commit();
                     return userCriteria;
                 });
@@ -49,7 +46,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAllUserCriteria")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaViewAccess")]
         public async Task<IActionResult> GetAllUserCriteria()
         {
             try
@@ -66,7 +63,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("UpsertUserCriteria")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> UpsertUserCriteria([FromBody] UserCriteriaDTO userCriteria)
         {
             try
@@ -90,7 +87,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("RevokeUserAccess/{userCriteriaId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> RevokeUserAccess(Guid userCriteriaId)
         {
             try
@@ -114,7 +111,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteUser/{userId}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("UserCriteriaModifyAccess")]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
             try

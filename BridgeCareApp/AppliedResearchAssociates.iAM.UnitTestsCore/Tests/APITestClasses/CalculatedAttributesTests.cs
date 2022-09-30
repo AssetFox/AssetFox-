@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new CalculatedAttributesController(EsecSecurityMocks.DbeMock.Object,
-                TestHelper.UnitOfWork, hubService, accessor);
+                TestHelper.UnitOfWork, hubService, accessor, null);
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }

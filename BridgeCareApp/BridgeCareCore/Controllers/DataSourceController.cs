@@ -161,7 +161,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("CheckSqlConnection/{connectionString}")]
+        [Route("CheckSqlConnection")]
         [ClaimAuthorize("DataSourceModifyAccess")]
         public async Task<IActionResult> CheckSqlConnection(TestStringData stringData)
         {

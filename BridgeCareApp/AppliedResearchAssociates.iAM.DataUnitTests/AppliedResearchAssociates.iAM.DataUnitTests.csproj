@@ -8,9 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
+    <None Remove="testConnections..json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
+    <Content Include="testConnections..json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

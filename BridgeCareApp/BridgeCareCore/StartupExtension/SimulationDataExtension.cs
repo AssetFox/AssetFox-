@@ -33,7 +33,8 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ExcelTreatmentLoader>();
             services.AddScoped<IUnitOfWork, UnitOfDataPersistenceWork>();
             services.AddScoped<UnitOfDataPersistenceWork>();
-            services.AddScoped< ISimulationService,SimulationService>();
+            services.AddScoped<ISimulationService,SimulationService>();
+            services.AddScoped<ICalculatedAttributeService, CalculatedAttributeService>();
         }
     }
 }

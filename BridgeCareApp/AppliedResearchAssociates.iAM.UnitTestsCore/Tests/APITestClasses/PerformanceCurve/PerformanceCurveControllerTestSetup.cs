@@ -14,13 +14,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new PerformanceCurveController(
-                esecSecurity,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
-                _mockClaimHelper.Object);
+            var controller = new PerformanceCurveController(esecSecurity,
+                                                            TestHelper.UnitOfWork,
+                                                            hubService,
+                                                            accessor,
+                                                            TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                                                            _mockClaimHelper.Object);
             return controller;
         }
     }

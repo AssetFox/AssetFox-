@@ -268,7 +268,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    checkDeletePermit(projectIds);
+                    CheckDeletePermit(projectIds);
                     UnitOfWork.CommittedProjectRepo.DeleteSpecificCommittedProjects(projectIds);
                 });
 
@@ -286,26 +286,7 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
-            }
-
-            void checkDeletePermit(List<Guid> projectIds)
-            {
-                if (_claimHelper.RequirePermittedCheck())
-                {
-                    foreach (var project in projectIds)
-                    {
-                        try
-                        {
-                            var simulationId = UnitOfWork.CommittedProjectRepo.GetSimulationId(project);
-                            _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                        }
-                        catch (RowNotInTableException)
-                        {
-                            // Do nothing - project not found
-                        }
-                    }
-                }
-            }
+            }            
         }
 
         [HttpGet]
@@ -410,6 +391,25 @@ namespace BridgeCareCore.Controllers
                     foreach (var simulation in simulationIds)
                     {
                         _claimHelper.CheckUserSimulationModifyAuthorization(simulation, UserId);
+                    }
+                }
+            }
+        }
+
+        private void CheckDeletePermit(List<Guid> projectIds)
+        {
+            if (_claimHelper.RequirePermittedCheck())
+            {
+                foreach (var project in projectIds)
+                {
+                    try
+                    {
+                        var simulationId = UnitOfWork.CommittedProjectRepo.GetSimulationId(project);
+                        _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    }
+                    catch (RowNotInTableException)
+                    {
+                        // Do nothing - project not found
                     }
                 }
             }

@@ -296,7 +296,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         public async Task ShouldModifyLibraryTreatmentData()
         {
             // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            Setup();
             var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 

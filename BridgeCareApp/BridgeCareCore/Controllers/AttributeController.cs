@@ -160,7 +160,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("CheckCommand/{sqlCommand}")]
+        [Route("CheckCommand")]
         [Authorize(Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CheckCommand(TestStringData sqlCommand)
         {

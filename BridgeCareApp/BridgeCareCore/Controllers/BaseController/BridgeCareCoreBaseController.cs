@@ -1,17 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using static BridgeCareCore.Security.SecurityConstants;
 
 namespace BridgeCareCore.Controllers.BaseController
 {

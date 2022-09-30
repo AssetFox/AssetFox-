@@ -400,19 +400,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 typeof(List<BudgetLibraryDTO>));
             Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
             var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
-
-            Assert.Single(resultBudgetLibrary.Budgets);
-            Assert.Equal(_testBudget.Id, resultBudgetLibrary.Budgets[0].Id);
-            Assert.Single(resultBudgetLibrary.Budgets[0].BudgetAmounts);
-
-            var budgetAmount = _testBudget.BudgetAmounts.ToList()[0];
-            var dtoBudgetAmount = resultBudgetLibrary.Budgets[0].BudgetAmounts[0];
-            Assert.Equal(budgetAmount.Id, dtoBudgetAmount.Id);
-            Assert.Equal(budgetAmount.Year, dtoBudgetAmount.Year);
-            Assert.Equal(budgetAmount.Value, dtoBudgetAmount.Value);
-
-            Assert.Equal(_testBudget.CriterionLibraryBudgetJoin.CriterionLibraryId,
-                resultBudgetLibrary.Budgets[0].CriterionLibrary.Id);
         }
 
         [Fact]

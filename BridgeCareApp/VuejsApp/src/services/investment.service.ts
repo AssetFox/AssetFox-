@@ -52,6 +52,12 @@ export default class InvestmentService {
         );
     }
 
+    static GetInvestmentPlan(scenarioId: string) {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetInvestmentPlan/${scenarioId}`,
+        );
+    }
+
     static exportInvestmentBudgets(
         id: string,
         forScenario: boolean = false,

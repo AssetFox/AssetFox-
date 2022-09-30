@@ -151,7 +151,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<BudgetLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = UnitOfWork.BudgetRepo.GetBudgetLibraries();
+                    result = UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
@@ -250,13 +250,35 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetScenarioSimpleBudgetDetails/{simulationId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewInvestmentFromScenario)]
         public async Task<IActionResult> GetScenarioSimpleBudgetDetails(Guid simulationId)
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => UnitOfWork.BudgetRepo
-                    .GetScenarioSimpleBudgetDetails(simulationId));
+                var result = await Task.Factory.StartNew(() => {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    return UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulationId);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetInvestmentPlan/{simulationId}")]
+        [Authorize(Policy = Policy.ViewInvestmentFromScenario)]
+        public async Task<IActionResult> GetInvestmentPlan(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    return UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+                });
                 return Ok(result);
             }
             catch (Exception e)

@@ -131,15 +131,14 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<PerformanceCurveDTO>();
-            var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(libraryId);
+            var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(libraryId);           
 
+            curves = SyncedDataset(curves, request.PagingSync);
 
             if (request.search.Trim() != "")
                 curves = SearchCurves(curves, request.search);
             if (request.sortColumn.Trim() != "")
                 curves = OrderByColumn(curves, request.sortColumn, request.isDescending);
-
-            curves = SyncedDataset(curves, request.PagingSync);
 
             if (request.RowsPerPage > 0)
             {
@@ -172,13 +171,12 @@ namespace BridgeCareCore.Services
             var curves = request.PagingSync.LibraryId == null ? _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurvesOrderedById(simulationId) :
                 _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(request.PagingSync.LibraryId.Value);
 
+            curves = SyncedDataset(curves, request.PagingSync);
 
             if (request.search != null && request.search.Trim() != "")
                 curves = SearchCurves(curves, request.search);
             if (request.sortColumn != null && request.sortColumn.Trim() != "")
                 curves = OrderByColumn(curves, request.sortColumn, request.isDescending);
-
-            curves = SyncedDataset(curves, request.PagingSync);
 
             if (request.RowsPerPage > 0)
             {

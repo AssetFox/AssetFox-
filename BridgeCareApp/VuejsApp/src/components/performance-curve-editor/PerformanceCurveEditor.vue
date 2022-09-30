@@ -838,7 +838,7 @@ export default class PerformanceCurveEditor extends Vue {
         if (!isNil(performanceCurveLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: performanceCurveLibrary,    
-                isNewLIbrary: true,           
+                isNewLibrary: true,           
                  pagingSync: {
                     libraryId: performanceCurveLibrary.performanceCurves.length == 0 ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
@@ -988,7 +988,7 @@ export default class PerformanceCurveEditor extends Vue {
     onUpsertPerformanceCurveLibrary() { // need to do upsert things
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
-                isNewLIbrary: false,
+                isNewLibrary: false,
                  pagingSync: {
                     libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: this.deletionIds,

@@ -2,6 +2,7 @@ import {
     CalculatedAttribute,
     CalculatedAttributeLibrary,
 } from '@/shared/models/iAM/calculated-attribute';
+import { CalculatedAttributeLibraryUpsertPagingRequestModel, CalculatedAttributePagingRequestModel, CalculatedAttributePagingSyncModel } from '@/shared/models/iAM/paging';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
 
@@ -22,8 +23,22 @@ export default class CalculatedAttributeService {
         );
     }
 
+    static getScenarioCalculatedAttrbiutetPage(scenarioId: string, data: CalculatedAttributePagingRequestModel): AxiosPromise{
+        return coreAxiosInstance.post(
+            `${API.CalculatedAttributes}/GetScenarioCalculatedAttrbiutetPage/${scenarioId}`,
+            data,
+        );
+    }
+
+    static getLibraryCalculatedAttributePage(libraryId: string, data: CalculatedAttributePagingRequestModel): AxiosPromise{
+        return coreAxiosInstance.post(
+            `${API.CalculatedAttributes}/GetLibraryCalculatedAttrbiutePage/${libraryId}`,
+            data,
+        );
+    }
+
     static upsertCalculatedAttributeLibrary(
-        data: CalculatedAttributeLibrary,
+        data: CalculatedAttributeLibraryUpsertPagingRequestModel,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.CalculatedAttributes}/UpsertLibrary`,
@@ -32,7 +47,7 @@ export default class CalculatedAttributeService {
     }
 
     static upsertScenarioCalculatedAttribute(
-        data: CalculatedAttribute[],
+        data: CalculatedAttributePagingSyncModel,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(

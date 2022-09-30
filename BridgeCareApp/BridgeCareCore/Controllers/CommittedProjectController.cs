@@ -78,9 +78,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -103,9 +104,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -244,9 +246,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (RowNotInTableException)
             {
@@ -274,9 +277,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (RowNotInTableException)
             {
@@ -304,9 +308,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (RowNotInTableException)
             {
@@ -336,9 +341,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (RowNotInTableException)
             {
@@ -361,15 +367,16 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     var projects = _committedProjectService.GetSyncedDataset(simulationId, request);
-                    checkUpsertPermit(projects);
+                    CheckUpsertPermit(projects);
                     UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
                 });
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
+                return Ok();
             }
             catch (RowNotInTableException)
             {
@@ -379,21 +386,7 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Committed Project error::{e.Message}");
                 throw;
-            }
-
-            void checkUpsertPermit(List<SectionCommittedProjectDTO> projects)
-            {
-                if (_claimHelper.RequirePermittedCheck())
-                {
-                    var simulationIds = projects
-                    .Select(_ => _.SimulationId)
-                    .Distinct();
-                    foreach (var simulation in simulationIds)
-                    {
-                        _claimHelper.CheckUserSimulationModifyAuthorization(simulation, UserId);
-                    }
-                }
-            }
+            }            
         }
 
         private void CheckDeletePermit(List<Guid> projectIds)
@@ -411,6 +404,20 @@ namespace BridgeCareCore.Controllers
                     {
                         // Do nothing - project not found
                     }
+                }
+            }
+        }
+
+        void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
+        {
+            if (_claimHelper.RequirePermittedCheck())
+            {
+                var simulationIds = projects
+                .Select(_ => _.SimulationId)
+                .Distinct();
+                foreach (var simulation in simulationIds)
+                {
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulation, UserId);
                 }
             }
         }

@@ -512,14 +512,14 @@ export default class AppComponent extends Vue {
 
     onAddErrorNotification(data: any) {
         this.addErrorNotificationAction({
-            message: 'Server Error.',
+            message: 'Server Error',
             longMessage: data.error,
         });
     }
 
     onAddWarningNotification(data: any) {
         this.addWarningNotificationAction({
-            message: 'Server Warning.',
+            message: 'Server Warning',
             longMessage: data.warning,
         });
     }

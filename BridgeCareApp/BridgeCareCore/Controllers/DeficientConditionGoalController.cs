@@ -72,6 +72,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                return Ok();
+            }
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
@@ -97,10 +102,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -128,10 +134,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -162,6 +169,11 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.Commit();
                 });
 
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deficient Condition Goal error::{e.Message}");
                 return Ok();
             }
             catch (Exception e)

@@ -34,7 +34,7 @@ namespace BridgeCareCore.Utils
                 var simulation = GetSimulationWithUsers(simulationId);
                 if (!simulation.Users.Any(_ => _.UserId == userId))
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");
+                    throw new UnauthorizedAccessException("You are not authorized to view this simulation's data.");                    
                 }
             }
         }

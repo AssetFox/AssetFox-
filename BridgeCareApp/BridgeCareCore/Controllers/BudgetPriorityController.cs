@@ -80,10 +80,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -115,6 +116,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                return Ok();
+            }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
@@ -138,6 +144,11 @@ namespace BridgeCareCore.Controllers
                 });
 
                 return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {
@@ -163,10 +174,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                return Unauthorized();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                return Ok();
             }
             catch (Exception e)
             {

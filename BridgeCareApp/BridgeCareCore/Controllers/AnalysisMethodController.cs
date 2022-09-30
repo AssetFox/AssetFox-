@@ -57,13 +57,18 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     result = UnitOfWork.AnalysisMethodRepo.GetAnalysisMethod(simulationId);
                     SetDefaultDataForNewScenario(result);
-                });                     
+                });
 
                 return Ok(result);
             }
-            catch (Exception e)
+            catch(UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");                
                 throw;
             }
         }
@@ -81,6 +86,11 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.AnalysisMethodRepo.UpsertAnalysisMethod(simulationId, dto);                    
                 });
 
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method error::{e.Message}");
                 return Ok();
             }
             catch (Exception e)

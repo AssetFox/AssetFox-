@@ -39,6 +39,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
 
+        public CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId)
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute.AsNoTracking()
+            .Include(_ => _.Attribute)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Attribute.Id == attributeId && _.CalculatedAttributeLibraryId == libraryId)
+            .ToDto();
+        }
+
+        public CalculatedAttributeDTO GetScenarioCalulatedAttributesByScenarioAndAttributeId(Guid scenarioId, Guid attributeId)
+        {
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
+            .Include(_ => _.Attribute)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Attribute.Id == attributeId && _.SimulationId == scenarioId)
+            .ToDto();
+        }
+
+        public CalculatedAttributeLibraryDTO GetCalculatedAttributeLibraryByID(Guid id)
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Attribute)
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Id == id).ToDto();
+        }
+
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
             // Does the library have a provided ID?

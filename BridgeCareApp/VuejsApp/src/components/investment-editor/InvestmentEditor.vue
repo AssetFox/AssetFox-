@@ -283,6 +283,9 @@ import { PagingRequest, PagingPage, InvestmentPagingRequestModel, InvestmentLibr
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
 import { BudgetGridRow } from '@/shared/models/iAM/treatment';
+import {
+    mapToIndexSignature
+} from '../../shared/utils/conversion-utils';
 
 @Component({
     components: {
@@ -402,9 +405,12 @@ export default class InvestmentEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
 
-                    vm.hasScenario = true;                 
+                    vm.hasScenario = true;    
+                    vm.initializePages();             
                 }
-                vm.initializePages();
+                else
+                    vm.initializing = false;
+                
             });          
         });
     }
@@ -428,14 +434,14 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: !isNil(this.investmentPlan) ? {
                 ...this.investmentPlan,
                 minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 } : this.investmentPlan,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -739,7 +745,7 @@ export default class InvestmentEditor extends Vue {
             this.librarySelectItemValue = budgetLibrary.id;
             const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: budgetLibrary,
-                isNewLIbrary: true,
+                isNewLibrary: true,
                 pagingSync: {
                     libraryId: budgetLibrary.budgets.length === 0 ? null : this.selectedBudgetLibrary.id,
                     Investment: this.investmentPlan,
@@ -747,8 +753,8 @@ export default class InvestmentEditor extends Vue {
                     updatedBudgets: budgetLibrary.budgets === [] ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                     addedBudgets: budgetLibrary.budgets === [] ? [] : this.addedBudgets,
                     deletionyears: budgetLibrary.budgets === [] ? [] : this.deletionYears,
-                    updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : this.mapToIndexSignature(this.updatedBudgetAmounts),
-                    addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : this.mapToIndexSignature(this.addedBudgetAmounts),
+                    updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
+                    addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 }
             }
 
@@ -1014,14 +1020,14 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: {
                 ...this.investmentPlan,
                 minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 },
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1048,7 +1054,7 @@ export default class InvestmentEditor extends Vue {
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: this.selectedBudgetLibrary,
-                isNewLIbrary: false,
+                isNewLibrary: false,
                 pagingSync: sync
         }
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
@@ -1221,14 +1227,6 @@ export default class InvestmentEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    mapToIndexSignature<T>(map: Map<string, T>): {[key: string]: T}{
-        let toReturn: {[key: string]: T} = {}
-
-        Array.from(map.keys()).forEach(key => toReturn[key] = map.get(key)!)
-
-        return toReturn;
-    }
-
     initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,
@@ -1239,9 +1237,9 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: 'year',
             isDescending: false,

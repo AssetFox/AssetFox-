@@ -21,6 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void DeleteCalculatedAttributeLibrary(Guid libraryId);
 
+        CalculatedAttributeDTO GetScenarioCalulatedAttributesByScenarioAndAttributeId(Guid scenarioId, Guid attributeId);
         // Scenarios
         ICollection<CalculatedAttributeDTO> GetScenarioCalculatedAttributes(Guid simulationId);
 
@@ -30,8 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         void PopulateScenarioCalculatedFields(Simulation simulation);
 
-        CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId);
-
-        CalculatedAttributeDTO GetScenarioCalulatedAttributesByScenarioAndAttributeId(Guid scenarioId, Guid attributeId);
+        CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId);       
     }
 }

@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -23,7 +24,7 @@ using Xunit;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class CashFlowRuleTests
     {

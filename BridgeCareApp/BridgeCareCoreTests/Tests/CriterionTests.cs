@@ -6,13 +6,14 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class CriterionTests
     {

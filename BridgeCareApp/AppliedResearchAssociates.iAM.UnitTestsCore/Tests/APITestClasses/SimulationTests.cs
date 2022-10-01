@@ -648,7 +648,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             {
                 isDescending = false,
                 Page = 1,
-                RowsPerPage = 5,
+                RowsPerPage = 100,
                 search = "",
                 sortColumn = ""
             };

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Timers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -17,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class AnnouncementTests
     {
@@ -124,15 +119,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var newDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                Assert.Equal(dto.Id, newDto.Id);
-                Assert.Equal(dto.Title, newDto.Title);
-                Assert.Equal(dto.Content, newDto.Content);
-                Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
-            };
+            var newDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+            Assert.Equal(dto.Id, newDto.Id);
+            Assert.Equal(dto.Title, newDto.Title);
+            Assert.Equal(dto.Content, newDto.Content);
+            Assert.Equal(dto.CreatedDate, newDto.CreatedDate);
         }
 
         [Fact]
@@ -152,15 +143,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             await _controller.UpsertAnnouncement(dto);
 
             // Assert
-            var timer = new Timer { Interval = 5000 };
-            timer.Elapsed += delegate
-            {
-                var modifiedDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
-                Assert.Equal(dto.Id, modifiedDto.Id);
-                Assert.Equal(dto.Title, modifiedDto.Title);
-                Assert.Equal(dto.Content, modifiedDto.Content);
-                Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
-            };
+            var modifiedDto = TestHelper.UnitOfWork.AnnouncementRepo.Announcements()[0];
+            Assert.Equal(dto.Id, modifiedDto.Id);
+            Assert.Equal(dto.Title, modifiedDto.Title);
+            Assert.Equal(dto.Content, modifiedDto.Content);
+            Assert.Equal(dto.CreatedDate, modifiedDto.CreatedDate);
         }
 
         [Fact]

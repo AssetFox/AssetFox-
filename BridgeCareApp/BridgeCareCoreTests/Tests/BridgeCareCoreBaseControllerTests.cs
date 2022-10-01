@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace BridgeCareCoreTests.Tests
 {
     public class BridgeCareCoreBaseControllerTests
     {

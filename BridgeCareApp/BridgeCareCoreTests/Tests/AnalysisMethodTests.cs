@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -24,7 +25,7 @@ using Xunit;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class AnalysisMethodTests
     {

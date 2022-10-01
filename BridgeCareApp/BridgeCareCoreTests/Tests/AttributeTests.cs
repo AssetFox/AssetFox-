@@ -18,7 +18,7 @@ using Xunit;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class AttributeTests
     {

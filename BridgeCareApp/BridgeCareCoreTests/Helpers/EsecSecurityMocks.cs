@@ -8,7 +8,7 @@ using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
+namespace BridgeCareCoreTests
 {
     public static class EsecSecurityMocks
     {

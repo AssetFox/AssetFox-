@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Models;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace BridgeCareCoreTests.Tests
 {
     public class DataSourceDtoPropertyTests
     {

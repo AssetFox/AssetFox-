@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
+namespace BridgeCareCoreTests
 {
     public static class HttpContextAccessorMocks
     {

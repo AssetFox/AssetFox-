@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BridgeCareCore.Services;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
+namespace BridgeCareCoreTests.Tests
 {
     public class SequentialWorkQueueTests
     {

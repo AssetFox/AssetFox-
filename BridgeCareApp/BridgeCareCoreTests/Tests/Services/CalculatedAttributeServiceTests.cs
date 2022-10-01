@@ -17,9 +17,8 @@ using System.Data;
 using BridgeCareCore.Services;
 using BridgeCareCore.Models;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
+namespace BridgeCareCoreTests.Tests
 {
-
     public class CalculatedAttributeServiceTests
     {
         private UnitOfDataPersistenceWork _testRepo;

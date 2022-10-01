@@ -8,7 +8,7 @@ using BridgeCareCore.Services;
 using OfficeOpenXml;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
+namespace BridgeCareCoreTests.Tests
 {
     public class ExcelRawDataImportServiceTests
     {

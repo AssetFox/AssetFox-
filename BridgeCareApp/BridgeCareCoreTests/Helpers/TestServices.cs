@@ -5,16 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataUnitTests;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
-using BridgeCareCore.StartupExtension;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
+namespace BridgeCareCoreTests
 {
     public static class TestServices
     {
@@ -37,6 +33,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var expressionValidation = ExpressionValidation(unitOfWork);
             var service = new PerformanceCurvesService(unitOfWork, hubService, expressionValidation);
             return service;
+        }
+        public static ExcelRawDataImportService CreateExcelSpreadsheetImportService(UnitOfDataPersistenceWork unitOfWork)
+        {
+            var returnValue = new ExcelRawDataImportService(unitOfWork);
+            return returnValue;
         }
     }
 }

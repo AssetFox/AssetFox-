@@ -38,8 +38,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class InvestmentTests
     {

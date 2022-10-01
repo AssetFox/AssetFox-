@@ -16,8 +16,9 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services.Aggregation;
 using OfficeOpenXml;
 using Xunit;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.Aggregation
+namespace BridgeCareCoreTests.Tests
 {
     public class ExcelAggregationTests
     {

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -25,7 +26,7 @@ using static BridgeCareCore.Security.SecurityConstants;
 using Assert = Xunit.Assert;
 using Claim = System.Security.Claims.Claim;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace BridgeCareCoreTests.Tests
 {
     public class PerformanceCurveTests
     {
@@ -53,7 +54,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,
-                TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {

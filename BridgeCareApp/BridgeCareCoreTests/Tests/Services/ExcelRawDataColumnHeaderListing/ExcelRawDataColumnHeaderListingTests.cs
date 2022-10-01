@@ -12,7 +12,7 @@ using BridgeCareCore.Services;
 using OfficeOpenXml;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services.ExcelRawDataColumnHeaderListing
+namespace BridgeCareCoreTests.Tests
 {
     public class ExcelRawDataColumnHeaderListingTests
     {

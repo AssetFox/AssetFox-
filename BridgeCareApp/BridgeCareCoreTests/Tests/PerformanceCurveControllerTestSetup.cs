@@ -4,8 +4,7 @@ using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
 using Moq;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
-{
+namespace BridgeCareCoreTests.Tests { 
     public static class PerformanceCurveControllerTestSetup
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
@@ -18,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                                                             TestHelper.UnitOfWork,
                                                             hubService,
                                                             accessor,
-                AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils.TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                                                            TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
                                                             _mockClaimHelper.Object);
             return controller;
         }

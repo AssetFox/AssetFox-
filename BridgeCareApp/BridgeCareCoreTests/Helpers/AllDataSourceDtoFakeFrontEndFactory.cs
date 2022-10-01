@@ -7,7 +7,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Models;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
+namespace BridgeCareCoreTests
 {
     public static class AllDataSourceDtoFakeFrontEndFactory
     {

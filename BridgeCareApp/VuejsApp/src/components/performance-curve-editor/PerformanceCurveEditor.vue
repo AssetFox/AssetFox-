@@ -884,6 +884,7 @@ export default class PerformanceCurveEditor extends Vue {
                 this.currentPage,
             ) as PerformanceCurve;
             this.onUpdateRow(id, performanceCurve);
+            this.onPaginationChanged();
         }
     }
 

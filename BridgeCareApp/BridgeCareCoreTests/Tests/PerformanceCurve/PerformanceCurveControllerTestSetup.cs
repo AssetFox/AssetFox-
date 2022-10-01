@@ -18,7 +18,8 @@ namespace BridgeCareCoreTests.Tests {
                                                             hubService,
                                                             accessor,
                                                             TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
-                                                            _mockClaimHelper.Object);
+                                                            _mockClaimHelper.Object
+                                                            );
             return controller;
         }
     }

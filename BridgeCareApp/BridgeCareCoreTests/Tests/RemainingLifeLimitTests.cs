@@ -200,7 +200,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
                 typeof(List<RemainingLifeLimitLibraryDTO>));
 
             var remainingLifeLimitLibraryDTO = dtos.Single(lib => lib.Id == library.Id);
-            remainingLifeLimitLibraryDTO.RemainingLifeLimits[0].CriterionLibrary =
+            var remainingLifeLimitDto = remainingLifeLimitLibraryDTO.RemainingLifeLimits[0];
+            remainingLifeLimitDto.CriterionLibrary =
                 criterionLibraryEntity.ToDto();
 
             await controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
@@ -213,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == library.Id));
             Assert.False(TestHelper.UnitOfWork.Context.RemainingLifeLimit.Any(_ => _.RemainingLifeLimitLibraryId == library.Id));
-            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any());
+            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryRemainingLifeLimit.Any(_ => _.RemainingLifeLimitId == remainingLifeLimitDto.Id));
         }
         [Fact]
         public async Task UserIsViewRemainingLifeLimitFromLibraryAuthorized()

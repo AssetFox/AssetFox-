@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
+using BridgeCareCoreTests.Helpers;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -33,7 +34,7 @@ namespace BridgeCareCoreTests.Tests
                 DefaultEquation = "[Deck_Area]",
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
-            var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
+            var network = NetworkTestSetupViaFactory.ModelForEntityInDbViaFactory(
                 TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
 
             var simulationId = Guid.NewGuid();

@@ -23,7 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.DataSources
+namespace BridgeCareCoreTests.Tests
 {
     public class DataSourceControllerTests
     {

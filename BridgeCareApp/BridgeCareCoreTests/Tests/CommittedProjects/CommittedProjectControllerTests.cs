@@ -26,7 +26,7 @@ using BridgeCareCore.Utils;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using Microsoft.AspNetCore.Authorization;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
+namespace BridgeCareCoreTests.Tests
 {
     public class CommittedProjectControllerTests
     {

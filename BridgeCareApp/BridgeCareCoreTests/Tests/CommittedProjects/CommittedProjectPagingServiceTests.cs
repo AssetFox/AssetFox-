@@ -24,7 +24,7 @@ using BridgeCareCore.Logging;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
+namespace BridgeCareCoreTests.Tests
 {
     public class CommittedProjectPagingServiceTests
     {

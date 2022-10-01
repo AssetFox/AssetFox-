@@ -5,7 +5,7 @@ using BridgeCareCore.Security;
 using BridgeCareCore.Utils;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class RoleClaimsMapperTests
     {

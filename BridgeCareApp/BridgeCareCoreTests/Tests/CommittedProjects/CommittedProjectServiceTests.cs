@@ -19,7 +19,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
+namespace BridgeCareCoreTests.Tests
 {
     public class CommittedProjectServiceTests : IClassFixture<ExcelAccess>
     {

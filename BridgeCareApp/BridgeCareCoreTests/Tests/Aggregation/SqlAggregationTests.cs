@@ -17,6 +17,7 @@ using BridgeCareCore.Services.Aggregation;
 using OfficeOpenXml;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -41,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
                 DefaultEquation = "[Deck_Area]",
                 NetworkDefinitionAttribute = networkDefinitionAttribute
             };
-            var network = NetworkTestSetup.ModelForEntityInDbViaFactory(
+            var network = NetworkTestSetupViaFactory.ModelForEntityInDbViaFactory(
                 TestHelper.UnitOfWork, districtAttributeDomain, parameters, networkName);
 
 

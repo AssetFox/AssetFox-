@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using BridgeCareCore.Security;
 using System;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.SecurityUtilsClasses
+namespace BridgeCareCoreTests.Tests
 {
     public class ClaimHelperTests
     {

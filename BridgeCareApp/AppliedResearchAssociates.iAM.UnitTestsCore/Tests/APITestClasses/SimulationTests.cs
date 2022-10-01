@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -662,7 +662,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
 
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
             Assert.NotEmpty(dtos);
-            Assert.True(dtos.All(_ => _.Users.All(__ => !__.IsOwner)));
+            var dtoFromThisTest = dtos.Single(dto => dto.Id == simulation.Id);
+            Assert.True(dtoFromThisTest.Users.All(__ => !__.IsOwner));
             //var dto = dtos.Single(dto => dto.Id == simulation.Id);
         }
 

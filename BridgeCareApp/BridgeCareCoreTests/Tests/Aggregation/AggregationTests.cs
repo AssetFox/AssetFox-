@@ -15,8 +15,6 @@ using Moq;
 using NUnit.Framework; //using AppliedResearchAssociates.iAM.Aggregation;
 using Xunit;
 
-
-
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class AggregationTests

@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using AppliedResearchAssociates.iAM.Data.Attributes;
-using AppliedResearchAssociates.iAM.Data.Networking;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using BridgeCareCore.Services;
-using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
-using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using System.Linq;
+using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using TNetwork = AppliedResearchAssociates.iAM.Data.Networking.Network;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -22,21 +17,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var resolvedNetworkId = networkId ?? Guid.NewGuid();
             var network = new TNetwork(maintainableAssets, resolvedNetworkId);
-            unitOfWork.NetworkRepo.CreateNetwork(network);
-            return network;
-        }
-
-        public static TNetwork ModelForEntityInDbViaFactory(IUnitOfWork unitOfWork, DataAttribute attribute, NetworkCreationParameters parameters, string networkName)
-        {
-            var allDataSource = parameters.NetworkDefinitionAttribute.DataSource;
-            var mappedDataSource = AllDataSourceMapper.ToSpecificDto(allDataSource); 
-            var attributeConnection = AttributeConnectionBuilder.Build(attribute, mappedDataSource, unitOfWork);
-            var data = AttributeDataBuilder.GetData(attributeConnection);
-            var network = NetworkFactory.CreateNetworkFromAttributeDataRecords(
-                  data, parameters.DefaultEquation);
-            network.Name = networkName;
-
-            // insert network domain data into the data source
             unitOfWork.NetworkRepo.CreateNetwork(network);
             return network;
         }

@@ -37,7 +37,8 @@ const state = {
     investmentPlan: clone(emptyInvestmentPlan) as InvestmentPlan,
     scenarioSimpleBudgetDetails: [] as SimpleBudgetDetail[],
     scenarioBudgets: [] as Budget[],
-    isSuccessfulImport: false
+    isSuccessfulImport: false,
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -80,7 +81,10 @@ const mutations = {
     },
     isSuccessfulImportMutator(State: any, isSuccessful: boolean){
         state.isSuccessfulImport = isSuccessful;
-    }
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -141,33 +145,6 @@ const actions = {
             },
         );
     },
-    // async upsertBudgetLibrary(
-    //     { dispatch, commit }: any,
-    //     budgetLibrary: BudgetLibrary,
-    // ) {
-    //     await InvestmentService.upsertBudgetLibrary(budgetLibrary).then(
-    //         (response: AxiosResponse) => {
-    //             if (
-    //                 hasValue(response, 'status') &&
-    //                 http2XX.test(response.status.toString())
-    //             ) {
-    //                 const message: string = any(
-    //                     propEq('id', budgetLibrary.id),
-    //                     state.budgetLibraries,
-    //                 )
-    //                     ? 'Updated budget library'
-    //                     : 'Added budget library';
-
-    //                 commit('budgetLibraryMutator', budgetLibrary);
-    //                 commit('selectedBudgetLibraryMutator', budgetLibrary.id);
-
-    //                 dispatch('addSuccessNotification', {
-    //                     message: message,
-    //                 });
-    //             }
-    //         },
-    //     );
-    // },
     async deleteBudgetLibrary(
         { dispatch, commit, state }: any,
         libraryId: string,
@@ -199,6 +176,18 @@ const actions = {
                 commit(
                     'scenarioSimpleBudgetDetailsMutator',
                     response.data as SimpleBudgetDetail[],
+                );
+            }
+        });
+    },
+    async getInvestmentPlan({ commit }: any, payload: any) {
+        await InvestmentService.GetInvestmentPlan(
+            payload.scenarioId,
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'investmentPlanMutator',
+                    response.data as InvestmentPlan,
                 );
             }
         });
@@ -248,6 +237,19 @@ const actions = {
             }
             else
                 commit('isSuccessfulImportMutator', false);
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await InvestmentService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
         });
     },
 };

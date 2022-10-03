@@ -10,7 +10,8 @@ const state = {
     criterionLibraries: [] as CriterionLibrary[],
     selectedCriterionLibrary: clone(emptyCriterionLibrary) as CriterionLibrary,
     selectedCriterionIsValid: false as boolean,
-    scenarioRelatedCriteria: clone(emptyCriterionLibrary) as CriterionLibrary
+    scenarioRelatedCriteria: clone(emptyCriterionLibrary) as CriterionLibrary,
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -19,11 +20,6 @@ const mutations = {
     },
     selectedCriterionLibraryMutator(state: any, criterionLibrary: CriterionLibrary) {
         state.selectedCriterionLibrary = clone(criterionLibrary);
-        // if (any(propEq('id', libraryId), state.criterionLibraries)) {
-        //     state.selectedCriterionLibrary = find(propEq('id', libraryId), state.criterionLibraries);
-        // } else {
-        //     state.selectedCriterionLibrary = clone(emptyCriterionLibrary);
-        // }
     },
     addedOrUpdatedCriterionLibraryMutator(state: any, library: CriterionLibrary) {
         state.criterionLibraries = any(propEq('id', library.id), state.criterionLibraries)
@@ -39,15 +35,13 @@ const mutations = {
     },
     scenarioRelatedCriterionMutator(state: any, library: CriterionLibrary){
         state.scenarioRelatedCriteria = clone(library);
-        // if (any(propEq('id', libraryId), state.criterionLibraries)) {
-        //     state.scenarioRelatedCriteria = find(propEq('id', libraryId), state.criterionLibraries);
-        // } else {
-        //     state.scenarioRelatedCriteria = clone(emptyCriterionLibrary);
-        // }
     },
     upsertScenarioRelatedCriteriaMutator(state: any, library: CriterionLibrary){
         state.scenarioRelatedCriteria = clone(library);
-    }
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -81,7 +75,6 @@ const actions = {
             var emptyData = clone(emptyCriterionLibrary) as CriterionLibrary;
             commit('scenarioRelatedCriterionMutator', emptyData);
         }
-        //commit('scenarioRelatedCriterionMutator', payload.libraryId);
     },
     setSelectedCriterionIsValid({commit}: any, payload: any) {
         commit('selectedCriterionIsValidMutator', payload.isValid);
@@ -110,10 +103,7 @@ const actions = {
                         commit('selectedCriterionLibraryMutator', library);
                     }
                     else{
-
-                        //if(isExistingCriteria){
                             commit('scenarioRelatedCriterionMutator', library);
-                        //}
                     }
                 dispatch('addSuccessNotification', { message: message });
                 returningId = response.data;
@@ -134,7 +124,20 @@ async deleteCriterionLibrary({commit, dispatch}: any, payload: any) {
 },
 upsertSelectedScenarioRelatedCriterion({commit, dispatch}: any, payload: any){
     commit('upsertScenarioRelatedCriteriaMutator', payload.library);
-}
+},
+async getHasPermittedAccess({ commit }: any)
+    {
+        await CriterionLibraryService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
+            }
+        });
+    },
 };
 
 const getters = {};

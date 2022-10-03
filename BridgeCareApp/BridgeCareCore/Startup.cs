@@ -18,6 +18,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces;
 using AppliedResearchAssociates.iAM.Common;
+using Microsoft.AspNetCore.Authentication;
+using BridgeCareCore.Security;
+using Microsoft.AspNetCore.Authorization;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore
 {
@@ -56,6 +60,7 @@ namespace BridgeCareCore
             }));
 
             services.AddSecurityConfig(Configuration);
+            services.AddTransient<IClaimsTransformation, ClaimsTransformation>();
 
             services.AddSingleton(Configuration);
             services.AddControllers().AddNewtonsoftJson();
@@ -69,6 +74,7 @@ namespace BridgeCareCore
             services.AddScoped<IHubService, HubService>();
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IAuthorizationMiddlewareResultHandler, SecurityAuthorizationMiddlewareResultHandler>();
             var connectionString = Configuration.GetConnectionString("BridgeCareConnex");
 
             services.AddDbContext<IAMContext>(options => options.UseSqlServer(

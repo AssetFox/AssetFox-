@@ -23,6 +23,47 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
+        public List<TreatmentConsequenceDTO> GetScenarioTreatmentConsequencesByTreatmentId(Guid treatmentId)
+        {
+            if (!_unitOfWork.Context.ScenarioConditionalTreatmentConsequences.Any(_ => _.Id == treatmentId))
+            {
+                throw new RowNotInTableException("The specified scenario treamtment was not found");
+            }
+
+            return  _unitOfWork.Context.ScenarioConditionalTreatmentConsequences
+                .Include(_ => _.Attribute)
+                .Include(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary).Select(_ => _.ToDto()).ToList();
+        }
+
+        public List<TreatmentConsequenceDTO> GetTreatmentConsequencesByTreatmentId(Guid treatmentId)
+        {
+            if (!_unitOfWork.Context.TreatmentConsequence.Any(_ => _.Id == treatmentId))
+            {
+                throw new RowNotInTableException("The specified treamtment was not found");
+            }
+
+            return _unitOfWork.Context.TreatmentConsequence
+                .Include(_ => _.Attribute)
+                .Include(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary).Select(_ => _.ToDto()).ToList();
+        }
+
+        public List<CommittedProjectConsequenceDTO> GetCommittedProjectConsequencesByProjectId(Guid projectId)
+        {
+            if (!_unitOfWork.Context.CommittedProject.Any(_ => _.Id == projectId))
+            {
+                throw new RowNotInTableException("The specified committed project was not found");
+            }
+
+            return _unitOfWork.Context.CommittedProjectConsequence
+                .Include(_ => _.Attribute).Select(_ => _.ToDTO()).ToList();
+        }
+
         public void CreateScenarioConditionalTreatmentConsequences(Dictionary<Guid, List<ConditionalTreatmentConsequence>> consequencesPerTreatmentId)
         {
             var consequenceEntities = new List<ScenarioConditionalTreatmentConsequenceEntity>();

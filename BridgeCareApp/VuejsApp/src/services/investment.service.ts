@@ -52,6 +52,12 @@ export default class InvestmentService {
         );
     }
 
+    static GetInvestmentPlan(scenarioId: string) {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetInvestmentPlan/${scenarioId}`,
+        );
+    }
+
     static exportInvestmentBudgets(
         id: string,
         forScenario: boolean = false,
@@ -100,5 +106,11 @@ export default class InvestmentService {
             return coreAxiosInstance.get(               
                   `${API.Investment}/DownloadInvestmentBudgetsTemplate`,
               );
-        }
+    }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetHasPermittedAccess`,
+        );
+    }
 }

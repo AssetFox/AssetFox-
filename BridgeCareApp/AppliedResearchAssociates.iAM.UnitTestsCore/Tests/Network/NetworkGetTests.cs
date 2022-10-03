@@ -9,9 +9,6 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils;
-using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
@@ -38,7 +35,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 maintainableAssets.Add(maintainableAsset);
             }
             var resultAttributes = new List<IamAttribute>();
-            for (int i=0; i<aggregatedResultPerAssetCount; i++)
+            for (int i = 0; i < aggregatedResultPerAssetCount; i++)
             {
                 var resultAttribute = AttributeTestSetup.Numeric();
                 resultAttributes.Add(resultAttribute);
@@ -62,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     asset,
                     resultData
                     );
-                
+
                 results.Add(result);
             }
             TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);

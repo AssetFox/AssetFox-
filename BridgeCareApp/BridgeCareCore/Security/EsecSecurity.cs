@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,6 +17,7 @@ namespace BridgeCareCore.Security
         private readonly RsaSecurityKey _esecPublicKey;
         private readonly string _securityType;
         private readonly IConfiguration _config;
+        private IRoleClaimsMapper _roleClaimsMapper;
 
         /// <summary>
         ///     Each key is a token that has been revoked. Its value is the unix timestamp of the
@@ -24,12 +25,13 @@ namespace BridgeCareCore.Security
         /// </summary>
         private ConcurrentDictionary<string, long> _revokedTokens;
 
-        public EsecSecurity(IConfiguration config)
+        public EsecSecurity(IConfiguration config, IRoleClaimsMapper roleClaimsMapper)
         {
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
             _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
+            _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
         }
 
         /// <summary>
@@ -76,6 +78,7 @@ namespace BridgeCareCore.Security
             }
 
             var decodedToken = DecodeToken(idToken);
+            var claimsPrincipal = request.HttpContext.User;
 
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
@@ -85,25 +88,37 @@ namespace BridgeCareCore.Security
                     throw new UnauthorizedAccessException("User has no security roles assigned.");
                 }
 
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings[0]);
+                var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+                var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
+
                 return new UserInfo
                 {
-                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],
-                    Role = roleStrings.First(roleString => Role.AllValidRoles.Contains(roleString)),
-                    Email = decodedToken.GetClaimValue("email")
+                    Name = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("sub"))[0],                    
+                    Email = decodedToken.GetClaimValue("email"),
+                    HasAdminAccess = HasAdminAccess,
+                    HasSimulationAccess = HasSimulationAccess,
+                    InternalRole = internalRole,
                 };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, SecurityConstants.Role.Administrator);
+                var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
+                var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
+
                 return new UserInfo
                 {
                     Name = decodedToken.GetClaimValue("name"),
                     Email = decodedToken.GetClaimValue("email"),
-                    Role = SecurityConstants.Role.BAMSAdmin
+                    HasAdminAccess = HasAdminAccess, 
+                    HasSimulationAccess = HasSimulationAccess, 
+                    InternalRole = internalRole,
                 };
             }
 
-            return new UserInfo { Name = "", Role = "", Email = "" };
+            return new UserInfo { Name = "", Email = "" };
         }
 
         /// <summary>
@@ -114,11 +129,9 @@ namespace BridgeCareCore.Security
         /// <returns></returns>
         public UserInfo GetUserInformation(Dictionary<string, string> userInformationDictionary)
         {
-            var role = SecurityFunctions.ParseLdap(userInformationDictionary["roles"])
-                .First(roleString => Role.AllValidRoles.Contains(roleString));
             var name = SecurityFunctions.ParseLdap(userInformationDictionary["sub"])[0];
             var email = userInformationDictionary.ContainsKey("email") ? userInformationDictionary["email"] : null;
-            return new UserInfo { Name = name, Role = role, Email = email };
+            return new UserInfo { Name = name, Email = email };
         }
 
         /// <summary>

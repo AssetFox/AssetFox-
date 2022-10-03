@@ -158,10 +158,11 @@ export default class CriterionLibraryEditor extends Vue {
     stateCriterionLibraries: CriterionLibrary[];
     @State(state => state.criterionModule.selectedCriterionLibrary)
     stateSelectedCriterionLibrary: CriterionLibrary;
-
     @State(state => state.criterionModule.scenarioRelatedCriteria)
     scenarioRelatedCriteria: CriterionLibrary;
-
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.criterionModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
     @Action('upsertCriterionLibrary') upsertCriterionLibraryAction: any;
     @Action('selectCriterionLibrary') selectCriterionLibraryAction: any;
@@ -203,6 +204,8 @@ export default class CriterionLibraryEditor extends Vue {
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
+            vm.getHasPermittedAccessAction();
+
             if (to.path.indexOf('CriterionLibraryEditor/Library') !== -1) {
                 vm.librarySelectItemValue = null;
                 vm.getCriterionLibrariesAction();
@@ -347,7 +350,7 @@ export default class CriterionLibraryEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {

@@ -225,9 +225,8 @@
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
-                                    :items="currentSharedScenariosPage"                      
+                                    :items="queuedScenariosPage"                      
                                     :pagination.sync="sharedScenariosPagination"
-                                    :total-items="totalSharedScenarios"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
@@ -529,6 +528,7 @@ import {
     ScenarioActions,
     TabItems,
     ScenarioUser,
+    QueuedScenario,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -617,6 +617,7 @@ export default class Scenarios extends Vue {
     @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getScenarios') getScenariosAction: any;
     @Action('getSharedScenariosPage') getSharedScenariosPageAction: any;
+    @Action('getQueuedScenariosPage') getQueuedScenariosPageAction: any;
     @Action('getUserScenariosPage') getUserScenariosPageAction: any;
     @Action('createScenario') createScenarioAction: any;
     @Action('cloneScenario') cloneScenarioAction: any;
@@ -852,8 +853,13 @@ export default class Scenarios extends Vue {
 
     sharedScenarios: Scenario[] = [];
     currentSharedScenariosPage: Scenario[] = [];
-    sharedScenariosPagination:  Pagination = clone(emptyPagination);
+    sharedScenariosPagination:  Pagination = clone(emptyPagination);    
     totalSharedScenarios: number = 0;
+
+    queuedScenarios: QueuedScenario[] = [];
+    queuedScenariosPage: QueuedScenario[] = [];
+    queuedScenariosPagination: Pagination = clone(emptyPagination);
+    totalQueuedScenarios: number = 0;
 
     initializing: boolean = true
     searchMine: string = '';
@@ -962,6 +968,28 @@ export default class Scenarios extends Vue {
             this.getSharedScenariosPageAction(request); 
     }
 
+    @Watch('queuedScenariosPagination') onQueuedScenariosPagination() {
+        if(this.initializing)
+            return;
+        const { sortBy, descending, page, rowsPerPage } = this.queuedScenariosPagination;
+
+        const request: PagingRequest<QueuedScenario>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: sortBy != null ? sortBy : '',
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearchShared
+        };
+        if(hasValue(this.networks) )
+            this.getQueuedScenariosPageAction(request); 
+    }    
+
     mounted() {
         this.networks = clone(this.stateNetworks);
         if (hasValue(this.networks) ) {
@@ -1067,7 +1095,7 @@ export default class Scenarios extends Vue {
     initializeScenarioPages(){
         const { sortBy, descending, page, rowsPerPage } = this.sharedScenariosPagination;
 
-        const request: PagingRequest<Scenario>= {
+        const request: PagingRequest<Scenario> = {
             page: 1,
             rowsPerPage: 5,
             pagingSync: {
@@ -1080,13 +1108,29 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };
-        this.getSharedScenariosPageAction(request).then(() => this.getUserScenariosPageAction(request).then(() => {
-            this.initializing = false
-            this.totalUserScenarios = this.stateTotalUserScenarios;
-            this.totalSharedScenarios = this.stateTotalSharedScenarios;
-            this.currentSharedScenariosPage = clone(this.stateUserScenariosPage);
-            this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
-        })); 
+        const queuedScenarioRequest: PagingRequest<QueuedScenario> = {
+            page: 1,
+            rowsPerPage: 5,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: '',
+            isDescending: false,
+            search: ''
+        };        
+        this.getSharedScenariosPageAction(request)
+            .then(() => this.getUserScenariosPageAction(request)
+            .then(() => this.getQueuedScenariosPageAction(queuedScenarioRequest)
+            .then(() => {
+                this.initializing = false
+                this.totalUserScenarios = this.stateTotalUserScenarios;
+                this.totalSharedScenarios = this.stateTotalSharedScenarios;
+                this.currentSharedScenariosPage = clone(this.stateUserScenariosPage);
+                this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
+            }))); 
     }
 
     formatDate(dateToFormat: Date) {

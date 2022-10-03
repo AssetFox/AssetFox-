@@ -1,4 +1,4 @@
-import {CloneScenarioData, emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, emptyScenario, QueuedScenario, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
@@ -15,6 +15,7 @@ const state = {
     currentUserScenarioPage: [] as Scenario[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
+    queuedScenariosPage: [] as QueuedScenario[],
     selectedScenario: clone(emptyScenario) as Scenario
 };
 
@@ -29,6 +30,9 @@ const mutations = {
     SharedScenarioPageMutator(state: any, scenarios: PagingPage<Scenario>){
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
+    },
+    QueuedScenarioPageMutator(state: any, scenarios: PagingPage<QueuedScenario>){
+        state.queuedScenariosPage = clone(scenarios.items);
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
@@ -117,6 +121,14 @@ const actions = {
                 }
             });
     },
+    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedScenario>) {
+        await ScenarioService.getSimulationQueuePage(payload)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('QueuedScenarioPageMutator', response.data as PagingPage<QueuedScenario>);
+                }
+            });
+    },    
     async getUserScenariosPage({commit}: any, payload: PagingRequest<Scenario>) {
         await ScenarioService.getUserScenariosPage(payload)
             .then((response: AxiosResponse) => {

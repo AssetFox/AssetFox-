@@ -9,5 +9,6 @@ namespace BridgeCareCore.Interfaces
     {
         PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request);
         public PagingPageModel<SimulationDTO> GetSharedScenarioPage(PagingRequestModel<SimulationDTO> request, string role);
+        PagingPageModel<QueuedSimulationDTO> RetrieveSimulationQueue(PagingRequestModel<QueuedSimulationDTO> request, string role);
     }
 }

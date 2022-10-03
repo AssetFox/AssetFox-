@@ -22,6 +22,22 @@ export interface Scenario {
     runTime?: string;
 }
 
+export interface QueuedScenario {
+    id: string;
+    name: string;
+    networkId: string;
+    networkName: string;
+    users: ScenarioUser[];
+    owner?: string;
+    creator?: string;
+    createdDate?: Date;
+    lastModifiedDate?: Date;
+    lastRun?: Date;
+    status?: string;
+    reportStatus?: string;
+    runTime?: string;
+}
+
 export interface ScenarioActions {
     title: string;
     action: string;

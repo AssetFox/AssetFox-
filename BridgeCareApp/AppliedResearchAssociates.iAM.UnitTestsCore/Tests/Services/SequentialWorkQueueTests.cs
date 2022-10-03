@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using Xunit;
 
@@ -43,6 +44,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Services
         private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkItem
         {
             public string WorkId { get; } = Id.ToString();
+
+            public UserInfo UserInfo => throw new NotImplementedException(); // TODO: Implement appropriately
 
             public void DoWork(IServiceProvider serviceProvider)
             {

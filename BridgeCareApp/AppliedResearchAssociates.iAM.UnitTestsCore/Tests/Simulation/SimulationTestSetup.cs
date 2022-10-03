@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -56,6 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null)
         {
+            CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(unitOfWork);
             var dto = TestSimulation(id, name, owner);
             unitOfWork.SimulationRepo.CreateSimulation(NetworkTestSetup.NetworkId, dto);;
             return dto;

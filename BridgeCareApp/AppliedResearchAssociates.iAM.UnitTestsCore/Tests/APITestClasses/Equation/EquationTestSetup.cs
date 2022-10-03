@@ -11,7 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class EquationTestSetup
+    public static class EquationTestSetup // WjTestSetupEntity
     {
         public static EquationEntity Two(Guid? id)
         {

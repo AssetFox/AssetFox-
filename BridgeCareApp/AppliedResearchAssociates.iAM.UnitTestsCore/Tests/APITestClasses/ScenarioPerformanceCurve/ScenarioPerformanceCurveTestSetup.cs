@@ -11,13 +11,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class ScenarioPerformanceCurveTestSetup
     {
-        // Wjwjwj -- This is a for-example of setups that return an entity. All calls to it either
-        // add the entity to the db via the Context (I think you said that was a no-no?) or
-        // convert the entity to a dto before using it. Thus it is likely possible to replace the
-        // call with a call that returns a dto. If doing this, I'd want to do it as broadly as possible,
-        // i.e. across different types of entities.
-        // Jake says -- pass in the DbContext where possible and set up that way. If needed, pass the unit of work
-        // as an IUnitOfWork.
         public static ScenarioPerformanceCurveEntity ScenarioEntity(Guid simulationId, Guid attributeId, Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();

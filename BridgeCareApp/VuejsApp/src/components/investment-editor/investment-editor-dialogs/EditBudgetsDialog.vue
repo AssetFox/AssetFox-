@@ -22,12 +22,12 @@
                         <template slot='items' slot-scope='props'>
                             <td>
                                 <v-layout row>
-                                <v-text-field class='order_input'/>
+                                <v-text-field :value='props.item.order' class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
                                     <v-layout column>
-                                    <v-icon title="up"> fas fa-chevron-up
+                                    <v-icon title="up" @click="reorderBudgetsUp"> fas fa-chevron-up
                                     </v-icon>
-                                    <v-icon title="dn"> fas fa-chevron-down
+                                    <v-icon title="dn" @click="reorderBudgetsDn"> fas fa-chevron-down
                                     </v-icon>
                                     </v-layout>
                                 </v-btn>
@@ -134,17 +134,23 @@ export default class EditBudgetsDialog extends Vue {
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
+        this.editBudgetsDialogGridData.map(this.defaultOrder);
+        this.editBudgetsDialogGridData.sort(budget => budget.order);
+
         this.budgetChanges.addedBudgets = [];
         this.budgetChanges.updatedBudgets = [];
         this.budgetChanges.deletionIds = [];
     }
-
+    defaultOrder(budget: Budget) {
+        budget.order = 1;
+    }
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.name.match(/Unnamed Budget/));
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
+            order: 1,
             name: `Unnamed Budget ${unnamedBudgets.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }
@@ -260,11 +266,18 @@ export default class EditBudgetsDialog extends Vue {
 
         return !allDataIsValid;
     }
+    reorderBudgetsUp() {
+
+    }
+    reorderBudgetsDn() {
+
+    }
 }
 </script>
 <style>
 .order_input {
-    width: 10%;
+    width: 15px;
     justify-content: center;
+    padding: 5px;
 }
 </style>

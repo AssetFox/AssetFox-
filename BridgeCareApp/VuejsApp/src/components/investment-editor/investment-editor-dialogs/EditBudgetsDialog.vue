@@ -21,6 +21,19 @@
                                   class="ghd-table">
                         <template slot='items' slot-scope='props'>
                             <td>
+                                <v-layout row>
+                                <v-text-field class='order_input'/>
+                                <v-btn class="ghd-blue" icon>
+                                    <v-layout column>
+                                    <v-icon title="up"> fas fa-chevron-up
+                                    </v-icon>
+                                    <v-icon title="dn"> fas fa-chevron-down
+                                    </v-icon>
+                                    </v-layout>
+                                </v-btn>
+                                </v-layout>
+                            </td>
+                            <td>
                                 <v-edit-dialog :return-value.sync='props.item.name' persistent
                                                @save='onEditBudgetName(props.item)' large lazy>
                                     <v-text-field readonly single-line class='sm-txt' :value='props.item.name'
@@ -104,6 +117,7 @@ export default class EditBudgetsDialog extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
 
     editBudgetsDialogGridHeaders: DataTableHeader[] = [
+        { text: 'Order', value: 'order', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Budget', value: 'name', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Criteria', value: 'criterionLibrary', sortable: false, align: 'left', class: '', width: '' },
         { text: 'Actions', value: 'actions', sortable: false, align: 'left', class: '', width: '' }
@@ -248,3 +262,9 @@ export default class EditBudgetsDialog extends Vue {
     }
 }
 </script>
+<style>
+.order_input {
+    width: 10%;
+    justify-content: center;
+}
+</style>

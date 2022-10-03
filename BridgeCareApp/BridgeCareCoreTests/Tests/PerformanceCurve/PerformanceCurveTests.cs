@@ -104,6 +104,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<OkResult>(result);
         }
 
+        [Fact]
         public async Task UpsertPerformanceCurveLibraryPage_Ok()
         {
             Setup();

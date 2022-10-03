@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class PerformanceCurveLibraryTestSetup
+    public static class PerformanceCurveLibraryTestSetup // WjTestSetupDto
     {
 
         public static PerformanceCurveLibraryDTO TestPerformanceCurveLibrary(Guid id)

@@ -77,7 +77,7 @@ namespace BridgeCareCore.Controllers
         [Route("UpsertAnalysisMethod/{simulationId}")]
         [Authorize(Policy = Policy.ModifyAnalysisMethod)]
         public async Task<IActionResult> UpsertAnalysisMethod(Guid simulationId, AnalysisMethodDTO dto)
-        {
+        { // TODO add new bool in AnalysisMethodDTO, make sure it gets saved (new field to AnalysisMethodEntity, update code in mapper etc)
             try
             {
                 await Task.Factory.StartNew(() =>

@@ -35,6 +35,7 @@ export interface AnalysisMethod {
     attribute: string;
     benefit: Benefit;
     criterionLibrary: CriterionLibrary;
+    shouldApplyYearToYearBudgetBanking: boolean;
 }
 
 export const emptyBenefit: Benefit = {
@@ -53,5 +54,6 @@ export const emptyAnalysisMethod: AnalysisMethod = {
     shouldUseExtraFundsAcrossBudgets: false,
     attribute: '',
     benefit: clone(emptyBenefit),
-    criterionLibrary: clone(emptyCriterionLibrary)
+    criterionLibrary: clone(emptyCriterionLibrary),
+    shouldApplyYearToYearBudgetBanking: false
 };

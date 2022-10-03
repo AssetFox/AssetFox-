@@ -4,7 +4,7 @@
             <v-flex xs6>
                 <v-layout column>
                     <v-layout justify-center>
-                        <v-flex xs4>
+                        <v-flex xs3>
                             <v-subheader class="ghd-control-label ghd-md-gray">Weighting</v-subheader>
                             <v-select
                                 class="ghd-select ghd-control-border ghd-control-text"
@@ -23,7 +23,7 @@
                             >
                             </v-select>
                         </v-flex>
-                        <v-flex xs4>
+                        <v-flex xs3>
                             <v-subheader class="ghd-control-label ghd-md-gray">Optimization Strategy</v-subheader>
                             <v-select class="ghd-select ghd-control-border ghd-control-text"
                                 :items="optimizationStrategy"
@@ -57,6 +57,12 @@
                             >
                             </v-select>
                         </v-flex>
+                        <v-switch style="margin-left:10px;margin-top:35px;"
+                                class="sharing ghd-checkbox"
+                                label="Year To Year Budget Banking"
+                                v-if="hasAdminAccess"
+                                v-model="analysisMethod.shouldApplyYearToYearBudgetBanking"
+                            /> 
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />

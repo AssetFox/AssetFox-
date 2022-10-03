@@ -18,6 +18,7 @@ using BridgeCareCore.Models;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Utils.Interfaces;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Controllers
 {

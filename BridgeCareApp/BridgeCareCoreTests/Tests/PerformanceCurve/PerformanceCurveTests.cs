@@ -212,8 +212,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-
+            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb2(TestHelper.UnitOfWork, libraryId, curveId, "ACTIONTYPE");
 
             // Act
             var result = await controller.GetPerformanceCurveLibraries();
@@ -240,8 +239,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveLibraryId = Guid.NewGuid();
             var performanceCurveId = Guid.NewGuid();
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, performanceCurveLibraryId);
-            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId);
-            var curveDto = curve.ToDto();
+            var curveDto = PerformanceCurveTestSetup.TestPerformanceCurveInDb2(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId, "ACTIONTYPE");
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,

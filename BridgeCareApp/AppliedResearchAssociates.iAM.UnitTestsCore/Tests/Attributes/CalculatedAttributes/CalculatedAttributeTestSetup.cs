@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes
 {
-    public static class CalculatedAttributeTestSetup
+    public static class CalculatedAttributeTestSetup // WjTestSetupDto
     {
         public static void CreateCalculatedAttributeLibrary(UnitOfDataPersistenceWork unitOfWork)
         {

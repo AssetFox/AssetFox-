@@ -18,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
 {
-    public static class AttributeTestSetup
+    public static class AttributeTestSetup // WjTestSetupDto
     {
         public static string ValidAttributeName() => "A" + RandomStrings.Length11();
 

@@ -10,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         internal Network(Explorer explorer) => Explorer = explorer ?? throw new ArgumentNullException(nameof(explorer));
 
         public const string DefaultSpatialWeightingIdentifier = "AREA";
+
         public static string SpatialWeightIdentifier => DefaultSpatialWeightingIdentifier;
 
         public Explorer Explorer { get; }
@@ -17,6 +18,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public IReadOnlyCollection<AnalysisMaintainableAsset> Assets => _Assets;
 
         public string Name { get; set; }
+
+        public NetworkHistory History { get; } = new NetworkHistory();
 
         public IReadOnlyCollection<Simulation> Simulations => _Simulations;
 

@@ -92,13 +92,11 @@ namespace BridgeCareCoreTests.Tests
             }
         }
 
-        private CriterionLibraryEntity SetupForUpsertOrDelete()
+        private CriterionLibraryDTO SetupForUpsertOrDelete()
         {
             SetupForGet();
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-            return criterionLibrary;
+             return criterionLibrary;
         }
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
@@ -173,7 +171,7 @@ namespace BridgeCareCoreTests.Tests
             dto.Description = "Updated Description";
             dto.DeficientConditionGoals[0].Name = "Updated Name";
             dto.DeficientConditionGoals[0].CriterionLibrary =
-                criterionLibrary.ToDto();
+                criterionLibrary;
 
             // Act
             await controller.UpsertDeficientConditionGoalLibrary(dto);
@@ -207,7 +205,7 @@ namespace BridgeCareCoreTests.Tests
 
             var deficientConditionGoalLibraryDTO = dtos[0];
             deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
-               criterionLibrary.ToDto();
+               criterionLibrary;
 
             await controller.UpsertDeficientConditionGoalLibrary(
                 deficientConditionGoalLibraryDTO);

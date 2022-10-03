@@ -247,7 +247,7 @@ namespace BridgeCareCoreTests.Tests
                 typeof(List<PerformanceCurveLibraryDTO>));
 
             var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
-            curveDto.CriterionLibrary = criterionLibrary.ToDto();
+            curveDto.CriterionLibrary = criterionLibrary;
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = performanceCurveLibraryDTO,

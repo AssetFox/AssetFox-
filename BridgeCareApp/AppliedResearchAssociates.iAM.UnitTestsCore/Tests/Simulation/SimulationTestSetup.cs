@@ -41,7 +41,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return returnValue;
         }
 
-
         public static SimulationDTO CreateSimulation(UnitOfDataPersistenceWork unitOfWork, Guid? id = null, string name = null, Guid? owner = null)
         {
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(unitOfWork);

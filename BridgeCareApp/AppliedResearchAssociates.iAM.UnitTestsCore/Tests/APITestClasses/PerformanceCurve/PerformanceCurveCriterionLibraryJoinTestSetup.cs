@@ -12,12 +12,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             IUnitOfWork unitOfWork,
             Guid performanceCurveId,
             Guid criterionLibraryId,
-            string simulationName)
+            string simulationName,
+            string mergedCriteriaExpression)
         {
             var dictionary = new Dictionary<string, List<Guid>>();
-            var guids = new List<Guid> { criterionLibraryId };
-            dictionary["Hello"] = guids;
+            var guids = new List<Guid> { performanceCurveId };
+            dictionary[mergedCriteriaExpression] = guids;
             unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(dictionary, "PerformanceCurveEntity", simulationName);
+            unitOfWork.Context.SaveChanges();
             //var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
             //{
             //    PerformanceCurveId = performanceCurveId,

@@ -12,25 +12,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class CriterionLibraryTestSetup // WjTestSetupDto
     {
-        public static CriterionLibraryDTO TestCriterionLibrary(string? namePrefix = null)
+        public static CriterionLibraryDTO TestCriterionLibrary(string? namePrefix = null, string mergedCriteriaExpression = null)
         {
             var resolvedNamePrefix = namePrefix ?? "Test Criterion Library ";
+            var resolvedCriteriaExpression = mergedCriteriaExpression ?? "Test Expression";
             var id = Guid.NewGuid();
             var resolvedName = resolvedNamePrefix + RandomStrings.Length11();
             var returnValue = new CriterionLibraryDTO
             {
                 Id = id,
                 Name = resolvedName,
-                MergedCriteriaExpression = "Test Expression"
+                MergedCriteriaExpression = resolvedCriteriaExpression,
             };
             return returnValue;
         }
 
 
-        public static CriterionLibraryDTO TestCriterionLibraryInDb(IUnitOfWork unitOfWork, string namePrefix = null)
+        public static CriterionLibraryDTO TestCriterionLibraryInDb(IUnitOfWork unitOfWork, string namePrefix = null, string mergedCreteriaExpression = null)
         {
             var resolvedNamePrefix = namePrefix ?? "TestCriterionLibrary";
-            var criterionLibrary = TestCriterionLibrary(resolvedNamePrefix);
+            var resolvedExpression = mergedCreteriaExpression ?? "Test Expression";
+            var criterionLibrary = TestCriterionLibrary(resolvedNamePrefix, resolvedExpression);
             unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(criterionLibrary);
             return criterionLibrary;
         }

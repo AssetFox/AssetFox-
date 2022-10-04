@@ -5,27 +5,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class NetworkHistory : IDisposable
     {
-        // 2 "modes", write & read. starts in write. when writing, there is no index and there's an
-        // active transaction. when reading, there is an index and the transaction is committed and
-        // closed. a read attempt will transition to read mode if in write mode, and vice versa.
-
-        private readonly SqliteConnection Connection;
-
-        private SqliteTransaction Transaction;
-
-        // public (asset, attribute, year) => value
-
-        // public (asset, attribute) => years
-
-        // public (asset, attribute, year, value) => insert
-
-        public void Dispose()
-        {
-            Transaction?.Dispose();
-            Connection?.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
         public NetworkHistory()
         {
             SqliteConnection connection = new("Data Source=");
@@ -34,21 +13,94 @@ namespace AppliedResearchAssociates.iAM.Analysis
                 connection?.Dispose();
             };
 
+            GetValueCommand = connection.CreateCommand();
+            GetYearsCommand = connection.CreateCommand();
+            SetValueCommand = connection.CreateCommand();
+
             Connection = connection;
 
-            // initialize SqliteCommand objects for reuse in read/write operations
+            Initialize();
+        }
+
+        public void Dispose()
+        {
+            Transaction?.Dispose();
+            Connection?.Dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        public T GetValue<T>(string asset, string attribute, int year)
+        {
+            EnsureReadMode();
+        }
+
+        public int[] GetYears(string asset, string attribute)
+        {
+            EnsureReadMode();
+        }
+
+        public void SetValue<T>(string asset, string attribute, int year, T value)
+        {
+            EnsureWriteMode();
+        }
+
+        private readonly SqliteConnection Connection;
+        private readonly SqliteCommand GetValueCommand;
+        private readonly SqliteCommand GetYearsCommand;
+        private readonly object ModeLock = new();
+        private readonly SqliteCommand SetValueCommand;
+        private SqliteTransaction Transaction;
+
+        ~NetworkHistory()
+        {
+            Transaction?.Dispose();
+            Connection?.Dispose();
         }
 
         private void EnsureReadMode()
         {
-
+            lock (ModeLock)
+            {
+                if (Transaction is not null)
+                {
+                    Transaction.Commit();
+                    Transaction.Dispose();
+                    Transaction = null;
+                }
+            }
         }
 
         private void EnsureWriteMode()
         {
-
+            lock (ModeLock)
+            {
+                Transaction ??= Connection.BeginTransaction();
+            }
         }
 
-        ~NetworkHistory() => Dispose();
+        private void Initialize()
+        {
+            GetValueCommand.CommandText = "INSERT INTO ";
+
+            GetYearsCommand.CommandText = "INSERT INTO ";
+
+            SetValueCommand.CommandText = "REPLACE INTO ";
+
+            Connection.Open();
+
+            var createTableCommand = Connection.CreateCommand();
+            createTableCommand.CommandText =
+@"CREATE TABLE network_history (
+    asset TEXT,
+    attribute TEXT,
+    year INTEGER,
+    value,
+    PRIMARY KEY ( asset, attribute, year )
+)";
+
+            _ = createTableCommand.ExecuteNonQuery();
+
+            Transaction = Connection.BeginTransaction();
+        }
     }
 }

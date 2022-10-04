@@ -6,12 +6,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class PerformanceCurveCriterionLibraryJoinTestSetup
+    public static class PerformanceCurveCriterionLibraryJoinTestSetup // WjTestSetupDto
     {
         public static void JoinPerformanceCurveToCriterionLibrary(
             IUnitOfWork unitOfWork,
             Guid performanceCurveId,
-            Guid criterionLibraryId,
             string simulationName,
             string mergedCriteriaExpression)
         {
@@ -20,13 +19,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             dictionary[mergedCriteriaExpression] = guids;
             unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(dictionary, "PerformanceCurveEntity", simulationName);
             unitOfWork.Context.SaveChanges();
-            //var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
-            //{
-            //    PerformanceCurveId = performanceCurveId,
-            //    CriterionLibraryId = criterionLibraryId
-            //};
-            //unitOfWork.Context.Add(criterionCurveJoin);
-            //unitOfWork.Context.SaveChanges();
         }
     }
 }

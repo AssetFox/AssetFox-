@@ -21,7 +21,8 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<BudgetPriorityDTO> GetBudgetPriortyPage(Guid simulationId, PagingRequestModel<BudgetPriorityDTO> request)
         {
-            var rows = _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId);
+            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
+                _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.PagingSync.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
@@ -41,7 +42,15 @@ namespace BridgeCareCore.Services
             var rows = request.LibraryId == null ?
                     _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
                     _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.LibraryId.Value);
-            return SyncedDataset(rows, request);
+            rows = SyncedDataset(rows, request);
+
+            if(request.LibraryId != null)
+                rows.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.CriterionLibrary.Id = Guid.NewGuid();
+                });
+            return rows;
         }
 
         private PagingPageModel<BudgetPriorityDTO> HandlePaging(List<BudgetPriorityDTO> rows, PagingRequestModel<BudgetPriorityDTO> request)
@@ -50,12 +59,12 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<BudgetPriorityDTO>();
 
+            rows = SyncedDataset(rows, request.PagingSync);
+
             if (request.search.Trim() != "")
                 rows = SearchRows(rows, request.search);
             if (request.sortColumn.Trim() != "")
                 rows = OrderByColumn(rows, request.sortColumn, request.isDescending);
-
-            rows = SyncedDataset(rows, request.PagingSync);
 
             if (request.RowsPerPage > 0)
             {
@@ -85,13 +94,29 @@ namespace BridgeCareCore.Services
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
             {
-            case "priorityLevel":
+            case "prioritylevel":
                 if (isDescending)
                     return rows.OrderByDescending(_ => _.PriorityLevel).ToList();
                 else
                     return rows.OrderBy(_ => _.PriorityLevel).ToList();
+            default:
+                if (isDescending)
+                {
+                    return rows.OrderByDescending(_ =>
+                    {
+                        var pair = _.BudgetPercentagePairs.FirstOrDefault(__ => __.BudgetName.ToLower() == sortColumn);
+                        return pair != null ? pair.Percentage : 0;
+                    }).ToList();
+                }
+                else
+                {
+                    return rows.OrderBy(_ =>
+                    {
+                        var pair = _.BudgetPercentagePairs.FirstOrDefault(__ => __.BudgetName.ToLower() == sortColumn);
+                        return pair != null ? pair.Percentage : 0;
+                    }).ToList();
+                }
             }
-            return rows;
         }
 
         private List<BudgetPriorityDTO> SearchRows(List<BudgetPriorityDTO> rows, string search)

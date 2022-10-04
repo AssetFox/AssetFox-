@@ -149,8 +149,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve");
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id, "meow");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.CriterionLibrary = criterionLibrary;
@@ -187,9 +187,9 @@ namespace BridgeCareCoreTests.Tests
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve");
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(
-                TestHelper.UnitOfWork, curveId, criterionLibrary.Id);
+                TestHelper.UnitOfWork, curveId, criterionLibrary.Id, "meow");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.CriterionLibrary = null;
@@ -230,8 +230,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve");
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id, "meow");
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {

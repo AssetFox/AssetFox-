@@ -7,5 +7,3 @@ Then . . .
 
 PS C:\Code\Infrastructure Asset Management\BridgeCareApp\AppliedResearchAssociates.iAM.DataPersistenceCore> 
 dotnet ef database update -c IAMContext
-
-The first of the above commands gives a bunch of warnings (in yellow text) in the Powershell window.

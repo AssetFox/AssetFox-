@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -12,7 +14,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Guid criterionLibraryId,
             string simulationName)
         {
-            unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(null, "PerformanceCurveEntity", simulationName);
+            var dictionary = new Dictionary<string, List<Guid>>();
+            var guids = new List<Guid> { criterionLibraryId };
+            dictionary["Hello"] = guids;
+            unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(dictionary, "PerformanceCurveEntity", simulationName);
             //var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
             //{
             //    PerformanceCurveId = performanceCurveId,

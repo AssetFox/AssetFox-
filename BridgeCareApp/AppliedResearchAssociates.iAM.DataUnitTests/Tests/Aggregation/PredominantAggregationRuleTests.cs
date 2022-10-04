@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
                 "defaultValue",
                 Guid.Empty,
                 AttributeTypeNames.String,
-                CommonTestParameterValues.RuleType,
+                "Predominant",
                 CommonTestParameterValues.TestCommand,
                 ConnectionType.MSSQL,
                 CommonTestParameterValues.ConnectionString,

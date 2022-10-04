@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
                 Guid.Empty,
                 CommonTestParameterValues.Name,
                 AttributeTypeNames.String,
-                CommonTestParameterValues.RuleType,
+                "Last",
                 CommonTestParameterValues.TestCommand,
                 ConnectionType.MSSQL,
                 CommonTestParameterValues.ConnectionString,

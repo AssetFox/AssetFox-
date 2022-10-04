@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
             {
                 var currentYearAttributeDate = test.Where(_ => _.TimeStamp.Year == distinctYear);
                 yield return (attribute, (distinctYear, currentYearAttributeDate
-                    .OrderBy(__ => __.TimeStamp)
+                    .OrderByDescending(__ => __.TimeStamp)
                     .Select(__ => __.Value)
                     .First()));
             }

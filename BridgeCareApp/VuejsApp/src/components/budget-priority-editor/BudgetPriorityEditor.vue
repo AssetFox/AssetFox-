@@ -274,10 +274,15 @@ export default class BudgetPriorityEditor extends Vue {
     currentPage: BudgetPriority[] = [];
     initializing: boolean = true;
 
+    unsavedDialogAllowed: boolean = true;
+    trueLibrarySelectItemValue: string | null = ''
+    librarySelectItemValueAllowedChanged: boolean = true;
+    librarySelectItemValue: string | null = null;
+
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
+    
     selectedBudgetPriorityLibrary: BudgetPriorityLibrary = clone(emptyBudgetPriorityLibrary);
     budgetPriorityGridRows: BudgetPriorityGridDatum[] = [];
     actionHeader: DataTableHeader = { text: 'Action', value: '', align: 'left', sortable: false, class: '', width: ''}
@@ -338,9 +343,23 @@ export default class BudgetPriorityEditor extends Vue {
             value: library.id,
         }));
     }
-
+    //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
+    //but only when in libraries
     @Watch('librarySelectItemValue')
+    onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(this.hasScenario){
+            this.onSelectItemValueChanged();
+            this.unsavedDialogAllowed = false;
+        }           
+        else if(this.librarySelectItemValueAllowedChanged)
+            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
+                this.librarySelectItemValueAllowedChanged = false;
+                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+            })
+        this.librarySelectItemValueAllowedChanged = true;
+    }
     onSelectItemValueChanged() {
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         this.selectBudgetPriorityLibraryAction({ libraryId: this.librarySelectItemValue });
     }
 
@@ -383,15 +402,12 @@ export default class BudgetPriorityEditor extends Vue {
                 return;
             }
         }
-        
-
         // const hasUnsavedChanges: boolean = this.hasScenario
         //     ? hasUnsavedChangesCore('', this.currentPage, this.stateScenarioBudgetPriorities)
         //     : hasUnsavedChangesCore('',
         //         {...clone(this.selectedBudgetPriorityLibrary), budgetPriorities: clone(this.currentPage)},
         //         this.stateSelectedBudgetPriorityLibrary);
         // this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();
@@ -469,9 +485,17 @@ export default class BudgetPriorityEditor extends Vue {
         const budgetPriorities: BudgetPriority[] = clone(this.currentPage);
 
         if (hasValue(this.stateScenarioSimpleBudgetDetails)) {
+            var ids = this.stateScenarioSimpleBudgetDetails.map(_ => _.id);
             budgetPriorities.forEach((budgetPriority: BudgetPriority) => {
                 if (!this.hasBudgetPercentagePairsThatMatchBudgets(budgetPriority)) {
-                    budgetPriority.budgetPercentagePairs = this.createNewBudgetPercentagePairsFromBudgets();
+                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.filter(_ => ids.includes(_.budgetId))
+                    var newPairs = this.stateScenarioSimpleBudgetDetails.filter(_ => !budgetPriority.budgetPercentagePairs.some(__ => __.budgetId == _.id)).map((simpleBudgetDetail: SimpleBudgetDetail) => ({
+                        id: getNewGuid(),
+                        budgetId: simpleBudgetDetail.id,
+                        budgetName: simpleBudgetDetail.name,
+                        percentage: 100,
+                    })) as BudgetPercentagePair[];
+                    budgetPriority.budgetPercentagePairs = budgetPriority.budgetPercentagePairs.concat(newPairs)
                     this.onUpdateRow(budgetPriority.id, budgetPriority);
                 }
             });
@@ -872,6 +896,24 @@ export default class BudgetPriorityEditor extends Vue {
             (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetPriorityLibrary, this.stateSelectedBudgetPriorityLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
+
+    CheckUnsavedDialog(next: any, otherwise: any) {
+        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+            // @ts-ignore
+            Vue.dialog
+                .confirm(
+                    'You have unsaved changes. Are you sure you wish to continue?',
+                    { reverse: true },
+                )
+                .then(() => next())
+                .catch(() => otherwise())
+
+        } 
+        else {
+            this.unsavedDialogAllowed = true;
+            next();
+        }
+    };
 
     initializePages(){
         const request: PagingRequest<BudgetPriority>= {

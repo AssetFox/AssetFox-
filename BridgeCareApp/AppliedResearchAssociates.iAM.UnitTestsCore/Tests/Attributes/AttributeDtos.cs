@@ -12,7 +12,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = Guid.Parse("85e2b431-05ec-4ea9-92cd-4d663d657262"),
-                Name = "ACTIONTYPE",
+                Name = TestAttributeNames.ActionType,
                 DefaultValue = "0",
                 Minimum = 100.0,
                 Maximum = 0.0,

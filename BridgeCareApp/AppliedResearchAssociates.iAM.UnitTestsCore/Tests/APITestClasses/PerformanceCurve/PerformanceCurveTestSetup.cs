@@ -13,18 +13,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveTestSetup
     {
-        public static PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
-        {
-            var returnValue = new PerformanceCurveEntity
-            {
-                Id = curveId,
-                PerformanceCurveLibraryId = libraryId,
-                Name = "Test Name",
-                Shift = false
-            };
-            return returnValue;
-        }
-
         private static PerformanceCurveDTO TestPerformanceCurveDto(Guid libraryId, Guid curveId, string attributeName)
         {
             var randomName = RandomStrings.WithPrefix("Curve");
@@ -41,21 +29,11 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return curve;
         }
 
-        public static PerformanceCurveDTO TestPerformanceCurveInDb2(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName)
+        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName)
         {
             var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName);
             var curves = new List<PerformanceCurveDTO> { curve };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(curves, libraryId);
-            return curve;
-        }
-
-        public static PerformanceCurveEntity TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId)
-        {
-            var curve = TestPerformanceCurve(libraryId, curveId);
-            var attributeId = unitOfWork.Context.Attribute.First().Id;
-            curve.AttributeId = attributeId;
-            unitOfWork.Context.PerformanceCurve.Add(curve);
-            unitOfWork.Context.SaveChanges();
             return curve;
         }
     }

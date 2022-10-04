@@ -259,8 +259,8 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
-    @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutatorMutator: any;
-    @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutatorMutator: any;
+    @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
+    @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
 
     addedRows: BudgetPriority[] = [];
     updatedRowsMap:Map<string, [BudgetPriority, BudgetPriority]> = new Map<string, [BudgetPriority, BudgetPriority]>();//0: original value | 1: updated value
@@ -628,8 +628,8 @@ export default class BudgetPriorityEditor extends Vue {
                     this.clearChanges();
                 }
 
-                this.budgetPriorityLibraryMutatorMutator(budgetPriorityLibrary);
-                this.selectedBudgetPriorityLibraryMutatorMutator(budgetPriorityLibrary.id);
+                this.budgetPriorityLibraryMutator(budgetPriorityLibrary);
+                this.selectedBudgetPriorityLibraryMutator(budgetPriorityLibrary.id);
                 this.addSuccessNotificationAction({message:'Added budget priority library'})
             })
         }
@@ -772,7 +772,8 @@ export default class BudgetPriorityEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
-                this.selectedBudgetPriorityLibraryMutatorMutator(this.selectedBudgetPriorityLibrary.id);
+                this.budgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary);
+                this.selectedBudgetPriorityLibraryMutator(this.selectedBudgetPriorityLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget priority library",});
             }
         });

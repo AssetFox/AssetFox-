@@ -1260,6 +1260,11 @@ export default class InvestmentEditor extends Vue {
                     this.lastYear = data.lastYear;
                 }
                 this.initializing = false;
+                let inc = 1;
+                this.currentPage.forEach(element => {
+                        element.order = inc;
+                        inc++;
+                });
             });
         }            
         else if(this.hasSelectedLibrary)

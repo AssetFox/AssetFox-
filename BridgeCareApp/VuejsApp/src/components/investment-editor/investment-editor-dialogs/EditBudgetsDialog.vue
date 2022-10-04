@@ -25,9 +25,9 @@
                                 <v-text-field :value='props.item.order' class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
                                     <v-layout column>
-                                    <v-icon title="up" @click="reorderBudgetsUp"> fas fa-chevron-up
+                                    <v-icon title="up" @click="swapItemOrder(props.item, 'up')"> fas fa-chevron-up
                                     </v-icon>
-                                    <v-icon title="dn" @click="reorderBudgetsDn"> fas fa-chevron-down
+                                    <v-icon title="down" @click="swapItemOrder(props.item, 'down')"> fas fa-chevron-down
                                     </v-icon>
                                     </v-layout>
                                 </v-btn>
@@ -128,7 +128,8 @@ export default class EditBudgetsDialog extends Vue {
     selectedBudgetForCriteriaEdit: Budget = clone(emptyBudget);
     rules: InputValidationRules = rules;
     uuidNIL: string = getBlankGuid();
-
+    Up: string = "up";
+    Down: string = "down";
     budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
 
     @Watch('dialogData')
@@ -142,7 +143,7 @@ export default class EditBudgetsDialog extends Vue {
         this.budgetChanges.deletionIds = [];
     }
     defaultOrder(budget: Budget) {
-        budget.order = 1;
+        //budget.order = 1;
     }
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
@@ -266,11 +267,35 @@ export default class EditBudgetsDialog extends Vue {
 
         return !allDataIsValid;
     }
-    reorderBudgetsUp() {
-
+    compareOrder(b1: Budget, b2: Budget) {
+        return b1.order - b2.order;
     }
-    reorderBudgetsDn() {
-
+    swapItemOrder(item:Budget, direction: string) {
+        
+        if (direction.toLowerCase() === this.Up) {    
+            if (item.order === 1) return;
+            this.editBudgetsDialogGridData.forEach(element => {
+            if( element.order === (item.order-1)) {
+                    element.order = item.order;
+                }
+                else if (element.order === item.order) {
+                    element.order = item.order -1;
+                }
+            });
+        } else {
+            if (item.order === this.editBudgetsDialogGridData.length) return;
+            let hold: number = item.order;
+            this.editBudgetsDialogGridData.forEach(element => {
+                if( element.order === (hold)) {
+                    element.order = item.order + 1;
+                }
+                else if (element.order === hold + 1) {
+                    element.order = hold;
+                }
+            });
+        }
+        // sort after the reorder
+        this.editBudgetsDialogGridData.sort(this.compareOrder);
     }
 }
 </script>

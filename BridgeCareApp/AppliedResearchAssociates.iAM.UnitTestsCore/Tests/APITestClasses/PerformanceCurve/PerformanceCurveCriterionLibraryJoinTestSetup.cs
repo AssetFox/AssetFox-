@@ -9,15 +9,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static void JoinPerformanceCurveToCriterionLibrary(
             IUnitOfWork unitOfWork,
             Guid performanceCurveId,
-            Guid criterionLibraryId)
+            Guid criterionLibraryId,
+            string simulationName)
         {
-            var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
-            {
-                PerformanceCurveId = performanceCurveId,
-                CriterionLibraryId = criterionLibraryId
-            };
-            unitOfWork.Context.Add(criterionCurveJoin);
-            unitOfWork.Context.SaveChanges();
+            unitOfWork.CriterionLibraryRepo.JoinEntitiesWithCriteria(null, "PerformanceCurveEntity", simulationName);
+            //var criterionCurveJoin = new CriterionLibraryPerformanceCurveEntity
+            //{
+            //    PerformanceCurveId = performanceCurveId,
+            //    CriterionLibraryId = criterionLibraryId
+            //};
+            //unitOfWork.Context.Add(criterionCurveJoin);
+            //unitOfWork.Context.SaveChanges();
         }
     }
 }

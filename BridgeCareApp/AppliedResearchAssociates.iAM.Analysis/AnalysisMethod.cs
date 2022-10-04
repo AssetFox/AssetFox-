@@ -36,6 +36,10 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public bool ShouldRestrictCashFlowToFirstYearBudget { get; set; } = true;
 
+        /// <summary>
+        ///     When this is enabled, the order in which the budgets are considered for funding is
+        ///     determined by the order of <see cref="InvestmentPlan.Budgets"/>.
+        /// </summary>
         public bool ShouldUseExtraFundsAcrossBudgets { get; set; }
 
         public SpendingStrategy SpendingStrategy { get; set; } = SpendingStrategy.AsBudgetPermits;

@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.TransactSql.ScriptDom;
 using OfficeOpenXml;
+using BridgeCareCore.Security;
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
 {
@@ -41,7 +43,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetAttributes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> Attributes()
         {
             try
@@ -57,7 +59,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetAggregationRuleTypes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAggregationRuleTypes()
         {
             try
@@ -73,7 +75,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetAttributeDataSourceTypes")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAttributeDataSourceTypes()
         {
             try
@@ -91,7 +93,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("GetAttributesSelectValues")]
-        [Authorize]
+        [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAttributeSelectValues([FromBody] List<string> attributeNames)
         {
             try
@@ -109,7 +111,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateAttributes")]
-        [Authorize]
+        [Authorize (Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CreateAttributes(List<AllAttributeDTO> attributeDTOs)
         {
             try
@@ -134,7 +136,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CreateAttribute")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CreateAttribute(AllAttributeDTO attributeDto)
         {
             try
@@ -159,7 +161,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("CheckCommand")]
-        [Authorize]
+        [Authorize(Policy = Policy.ModifyAttributes)]
         public async Task<IActionResult> CheckCommand(TestStringData sqlCommand)
         {
             try

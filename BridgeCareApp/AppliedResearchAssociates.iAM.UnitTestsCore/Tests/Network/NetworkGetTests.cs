@@ -9,9 +9,6 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using Xunit;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils;
-using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using AppliedResearchAssociates.iAM.DataUnitTests;
@@ -24,8 +21,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class NetworkGetTests
     {
-
-        private TestHelper _testHelper => TestHelper.Instance;
 
         private void RunGetSimulationAnalysisNetwork_NetworkInDb_Does(int assetCount, int aggregatedResultPerAssetCount)
         {
@@ -40,13 +35,13 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 maintainableAssets.Add(maintainableAsset);
             }
             var resultAttributes = new List<IamAttribute>();
-            for (int i=0; i<aggregatedResultPerAssetCount; i++)
+            for (int i = 0; i < aggregatedResultPerAssetCount; i++)
             {
                 var resultAttribute = AttributeTestSetup.Numeric();
                 resultAttributes.Add(resultAttribute);
             }
-            _testHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
-            var network = NetworkTestSetup.ModelForEntityInDb(_testHelper.UnitOfWork, maintainableAssets, networkId);
+            TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(resultAttributes);
+            var network = NetworkTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, maintainableAssets, networkId);
             var results = new List<IAggregatedResult>();
             foreach (var asset in maintainableAssets)
             {
@@ -64,20 +59,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                     asset,
                     resultData
                     );
-                
+
                 results.Add(result);
             }
-            _testHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
+            TestHelper.UnitOfWork.AggregatedResultRepo.AddAggregatedResults(results);
 
-            var config = _testHelper.Config;
+            var config = TestConfiguration.Get();
             var connectionString = TestConnectionStrings.BridgeCare(config);
-            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(_testHelper.UnitOfWork, connectionString);
+            var dataSourceDto = DataSourceTestSetup.DtoForSqlDataSourceInDb(TestHelper.UnitOfWork, connectionString);
             var districtAttributeDomain = AttributeConnectionAttributes.String(connectionString, dataSourceDto.Id);
             var districtAttribute = AttributeMapper.ToDto(districtAttributeDomain, dataSourceDto);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
-            var explorer = _testHelper.UnitOfWork.AttributeRepo.GetExplorer();
+            var explorer = TestHelper.UnitOfWork.AttributeRepo.GetExplorer();
 
-            var simulationAnalysisNetwork = _testHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
+            var simulationAnalysisNetwork = TestHelper.UnitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(network.Id, explorer);
 
             Assert.Equal(network.Id, simulationAnalysisNetwork.Id);
             var assets = simulationAnalysisNetwork.Assets;

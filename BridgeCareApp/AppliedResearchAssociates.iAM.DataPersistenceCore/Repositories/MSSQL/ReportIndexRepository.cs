@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public bool Add(ReportIndexEntity report)
         {
             // Ensure required fields are present
-            if (report.Id == Guid.Empty || String.IsNullOrEmpty(report.ReportTypeName))
+            if (report.Id == Guid.Empty || string.IsNullOrEmpty(report.ReportTypeName))
             {
                 throw new ArgumentException("Report does not have required values");
             }

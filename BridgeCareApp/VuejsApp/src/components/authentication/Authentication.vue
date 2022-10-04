@@ -25,7 +25,7 @@
     export default class Authentication extends Vue {
         @State(state => state.authenticationModule.authenticated) authenticated: boolean;
         @State(state => state.authenticationModule.hasRole) hasRole: boolean;
-        @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+        @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
         @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
         @State(state => state.authenticationModule.securityType) securityType: string;
 
@@ -55,7 +55,7 @@
                     } else {
                         this.getUserInfoAction().then(() => {
                             this.getUserCriteriaFilterAction().then(() => {
-                                if (!this.hasRole || (!this.currentUserCriteriaFilter.hasAccess && !this.isAdmin)) {
+                                if (!this.hasRole || (!this.currentUserCriteriaFilter.hasAccess && !this.hasAdminAccess)) {
                                     this.onRoleFailure();
                                 } else {
                                     this.onAuthenticationSuccess();

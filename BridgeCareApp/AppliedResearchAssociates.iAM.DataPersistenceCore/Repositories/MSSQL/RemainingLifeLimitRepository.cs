@@ -85,19 +85,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
         }
 
-        public List<RemainingLifeLimitLibraryDTO> RemainingLifeLimitLibrariesWithRemainingLifeLimits()
+        public List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits()
         {
             if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any())
             {
                 return new List<RemainingLifeLimitLibraryDTO>();
             }
 
-            return _unitOfWork.Context.RemainingLifeLimitLibrary
+            return _unitOfWork.Context.RemainingLifeLimitLibrary.AsNoTracking()
                 .Include(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.RemainingLifeLimits)
                 .ThenInclude(_ => _.CriterionLibraryRemainingLifeLimitJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<RemainingLifeLimitLibraryDTO> GetAllRemainingLifeLimitLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any())
+            {
+                return new List<RemainingLifeLimitLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.RemainingLifeLimitLibrary.AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -207,6 +219,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var res = _unitOfWork.Context.ScenarioRemainingLifeLimit.Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.CriterionLibraryScenarioRemainingLifeLimitJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute)
+                .Select(_ => _.ToDto())
+                .AsNoTracking()
+                .ToList();
+            return res;
+        }
+
+        public List<RemainingLifeLimitDTO> GetRemainingLifeLimitsByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.RemainingLifeLimitLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"The specified remaining life limit library was not found.");
+            }
+
+            var res = _unitOfWork.Context.RemainingLifeLimit
+                .Where(_ => _.RemainingLifeLimitLibraryId == libraryId)
+                .Include(_ => _.CriterionLibraryRemainingLifeLimitJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Attribute)
                 .Select(_ => _.ToDto())

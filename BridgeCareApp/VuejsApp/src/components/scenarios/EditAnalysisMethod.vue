@@ -59,9 +59,9 @@
                         </v-flex>
                         <v-switch style="margin-left:10px;margin-top:35px;"
                                 class="sharing ghd-checkbox"
-                                label="Year To Year Budget Banking"
+                                label="Allow Funding Carryover"
                                 v-if="hasAdminAccess"
-                                v-model="analysisMethod.shouldApplyYearToYearBudgetBanking"
+                                v-model="analysisMethod.allowFundingCarryover"
                             /> 
                     </v-layout>
                     <v-layout justify-center>

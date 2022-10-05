@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
             {
                 "AVERAGE" => new AverageAggregationRule(),
                 "LAST" => new LastNumericAggregationRule(),
+                "PREDOMINANT" => new PredominantNumericAggregationRule(),
                 _ => throw new InvalidOperationException(),
             };
         }

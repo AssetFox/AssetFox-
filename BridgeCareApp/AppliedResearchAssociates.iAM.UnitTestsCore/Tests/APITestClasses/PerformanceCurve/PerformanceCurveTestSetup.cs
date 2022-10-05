@@ -31,6 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName)
         {
+            // wjwjwj see here for a related example
             var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName);
             var curves = new List<PerformanceCurveDTO> { curve };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(curves, libraryId);

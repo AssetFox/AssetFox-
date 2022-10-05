@@ -126,13 +126,11 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            CriterionLibraryScenarioPerformanceCurveJoinTestSetup.JoinCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, criterionLibrary);
+            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
-            performanceCurveDto.CriterionLibrary = criterionLibrary;
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {

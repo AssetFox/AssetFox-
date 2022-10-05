@@ -26,14 +26,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-
-        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId)
+        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null)
         {
             var performanceCurveDto = new PerformanceCurveDTO
             {
                 Attribute = TestAttributeNames.ActionType,
                 Id = curveId,
                 Name = "Curve",
+                CriterionLibrary = criterionLibraryDto,
             };
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);

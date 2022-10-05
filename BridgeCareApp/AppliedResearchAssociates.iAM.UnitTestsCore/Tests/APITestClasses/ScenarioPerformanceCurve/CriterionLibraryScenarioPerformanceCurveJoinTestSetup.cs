@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public static class CriterionLibraryScenarioPerformanceCurveJoinTestSetup
     {
         public static void JoinCurveToCriterionLibrary(
+            // wjwjwj work via UpsertOrDeleteScenarioPerformanceCurves?
             IUnitOfWork unitOfWork,
             Guid performanceCurveId,
             Guid criterionLibraryId) {

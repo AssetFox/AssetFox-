@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Cryptography.X509Certificates;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -26,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = Guid.Parse("6a473634-ce64-4cae-acda-7306a2495454"),
-                Name = "ADTTOTAL",
+                Name = TestAttributeNames.AdtTotal,
                 DefaultValue = "1000",
                 Minimum = 0.0,
                 Type = "NUMBER",
@@ -40,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
         {
 
             Id = Guid.Parse("d27f24d1-7f8a-4778-a2b2-e61911a58897"),
-            Name = "AGE",
+            Name = TestAttributeNames.Age,
             DefaultValue = "0",
             Minimum = 0.0,
             Maximum = 100.0,
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = new Guid("80ad7772-af11-4f2c-8f48-e243ec872014"),
-                Name = "CULV_SEEDED",
+                Name = TestAttributeNames.CulvSeeded,
                 DefaultValue = "10",
                 Minimum = 0.0,
                 Maximum = 10.0,
@@ -70,7 +71,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = Guid.Parse("01b059ea-ac64-4bba-8da1-3ef6a466fa92"),
-                Name = "DECK_SEEDED",
+                Name = TestAttributeNames.DeckSeeded,
                 DefaultValue = "10",
                 Minimum = 0.0,
                 Maximum = 10.0,
@@ -83,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
 
         public static AttributeDTO District(BaseDataSourceDTO dataSourceDTO) => new()
         {
-            Name = "DISTRICT",
+            Name = TestAttributeNames.District,
             AggregationRuleType = TextAttributeAggregationRules.Predominant,
             Id = Guid.NewGuid(),
             Command = "DISTRICT",
@@ -97,7 +98,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
         public static AttributeDTO SubSeeded => new()
         {
             Id = Guid.Parse("2ea9ef40-a59d-4cdf-ae75-f5596d4030a5"),
-            Name = "SUB_SEEDED",
+            Name = TestAttributeNames.SubSeeded,
             DefaultValue = "10",
             Minimum = 0.0,
             Maximum = 10.0,
@@ -110,7 +111,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
         public static AttributeDTO SupSeeded => new()
         {
             Id = Guid.Parse("c8cfea90-9cdc-4e02-a19e-fdcf698776a4"),
-            Name = "SUP_SEEDED",
+            Name = TestAttributeNames.SupSeeded,
             DefaultValue = "10",
             Minimum = 0.0,
             Maximum = 10.0,
@@ -125,7 +126,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = Guid.Parse("efca598b-9fca-4e3c-ac48-0d95a9eaa867"),
-                Name = "CULV_DURATION_N",
+                Name = TestAttributeNames.CulvDurationN,
                 DefaultValue = "1",
                 Type = "NUMBER",
                 Command = "SELECT CAST(BRKEY AS int) AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(BRKEY AS VARCHAR(MAX)) AS FACILITY, BRIDGE_ID AS SECTION, NULL AS SAMPLE_, CAST(INSPDATE AS DATETIME) AS DATE_, CAST(CULV_DUR AS float) AS DATA_ FROM dbo.PennDot_Report_A WHERE (CULV_DUR <> 'N')",
@@ -139,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             new()
             {
                 Id = Guid.Parse("497bb1c9-640d-4433-be88-13c524b9593b"),
-                Name = "DECK_DURATION_N",
+                Name = TestAttributeNames.DeckDurationN,
                 DefaultValue = "1",
                 Type = "NUMBER",
                 Command = "SELECT CAST(BRKEY AS int) AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(BRKEY AS VARCHAR(MAX)) AS FACILITY, BRIDGE_ID AS SECTION, NULL AS SAMPLE_, CAST(INSPDATE AS DATETIME) AS DATE_, CAST(DECK_DUR AS float) AS DATA_ FROM dbo.PennDot_Report_A WHERE (DECK_DUR <> 'N')",
@@ -152,7 +153,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             new()
             {
                 Id = Guid.Parse("df0c899f-4791-4418-b012-90146f4397f3"),
-                Name = "SUB_DURATION_N",
+                Name = TestAttributeNames.SubDurationN,
                 DefaultValue = "1",
                 Type = "NUMBER",
                 Command = "SELECT CAST(BRKEY AS int) AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(BRKEY AS VARCHAR(MAX)) AS FACILITY, BRIDGE_ID AS SECTION, NULL AS SAMPLE_, CAST(INSPDATE AS DATETIME) AS DATE_, CAST(SUB_DUR AS float) AS DATA_ FROM dbo.PennDot_Report_A WHERE (SUB_DUR <> 'N')",
@@ -165,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes
             => new()
             {
                 Id = Guid.Parse("286965d4-ba60-44aa-a368-d6de784fa90e"),
-                Name = "SUP_DURATION_N",
+                Name = TestAttributeNames.SupDurationN,
                 DefaultValue = "1",
                 Type = "NUMBER",
                 Command = "SELECT CAST(BRKEY AS int) AS ID_, NULL AS ROUTES, NULL AS BEGIN_STATION, NULL AS END_STATION, NULL AS DIRECTION, CAST(BRKEY AS VARCHAR(MAX)) AS FACILITY, BRIDGE_ID AS SECTION, NULL AS SAMPLE_, CAST(INSPDATE AS DATETIME) AS DATE_, CAST(SUP_DUR AS float) AS DATA_ FROM dbo.PennDot_Report_A WHERE (SUP_DUR <> 'N')",

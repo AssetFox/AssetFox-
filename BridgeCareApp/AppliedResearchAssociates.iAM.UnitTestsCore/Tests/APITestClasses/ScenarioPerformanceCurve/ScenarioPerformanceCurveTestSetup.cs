@@ -30,7 +30,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         /// If a criterionLibrary is passed in, it is expected to NOT yet
         /// be in the db. This setup will add it, but with a different id.
         /// </summary>
-        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null)
+        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null, EquationDTO equationDto = null)
         {
             var performanceCurveDto = new PerformanceCurveDTO
             {
@@ -38,6 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = curveId,
                 Name = "Curve",
                 CriterionLibrary = criterionLibraryDto,
+                Equation = equationDto,
             };
             var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);

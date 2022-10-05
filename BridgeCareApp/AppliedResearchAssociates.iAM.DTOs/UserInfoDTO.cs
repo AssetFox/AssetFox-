@@ -4,8 +4,14 @@
     {
         public string Sub { get; set; }
 
-        public string Roles { get; set; }
+        public string Roles { get; set; }        
 
         public string Email { get; set; }
+
+        public bool HasAdminAccess { get; set; }
+
+        public bool HasSimulationAccess { get; set; }
+
+        public string InternalRole { get; set; }
     }
 }

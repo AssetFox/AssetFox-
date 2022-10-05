@@ -119,53 +119,53 @@ const actions = {
             }
         });
     },
-    async upsertCalculatedAttributeLibrary(
-        { dispatch, commit }: any,
-        library: CalculatedAttributeLibrary,
-    ) {
-        await CalculatedAttributeService.upsertCalculatedAttributeLibrary(
-            library,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                const message: string = any(
-                    propEq('id', library.id),
-                    state.calculatedAttributeLibraries,
-                )
-                    ? 'Updated calculated attribute library'
-                    : 'Added calculated attribute library';
+    // async upsertCalculatedAttributeLibrary(
+    //     { dispatch, commit }: any,
+    //     library: CalculatedAttributeLibrary,
+    // ) {
+    //     await CalculatedAttributeService.upsertCalculatedAttributeLibrary(
+    //         library,
+    //     ).then((response: AxiosResponse) => {
+    //         if (
+    //             hasValue(response, 'status') &&
+    //             http2XX.test(response.status.toString())
+    //         ) {
+    //             const message: string = any(
+    //                 propEq('id', library.id),
+    //                 state.calculatedAttributeLibraries,
+    //             )
+    //                 ? 'Updated calculated attribute library'
+    //                 : 'Added calculated attribute library';
 
-                commit('calculatedAttributeLibraryMutator', library);
-                commit('selectedCalculatedAttributeLibraryMutator', library.id);
+    //             commit('calculatedAttributeLibraryMutator', library);
+    //             commit('selectedCalculatedAttributeLibraryMutator', library.id);
 
-                dispatch('addSuccessNotification', { message: message });
-            }
-        });
-    },
-    async upsertScenarioCalculatedAttribute(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await CalculatedAttributeService.upsertScenarioCalculatedAttribute(
-            payload.scenarioCalculatedAttribute,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioCalculatedAttributeMutator',
-                    payload.scenarioCalculatedAttribute,
-                );
-                dispatch('addSuccessNotification', {
-                    message: "Modified scenario's calculated attribute",
-                });
-            }
-        });
-    },
+    //             dispatch('addSuccessNotification', { message: message });
+    //         }
+    //     });
+    // },
+    // async upsertScenarioCalculatedAttribute(
+    //     { dispatch, commit }: any,
+    //     payload: any,
+    // ) {
+    //     await CalculatedAttributeService.upsertScenarioCalculatedAttribute(
+    //         payload.scenarioCalculatedAttribute,
+    //         payload.scenarioId,
+    //     ).then((response: AxiosResponse) => {
+    //         if (
+    //             hasValue(response, 'status') &&
+    //             http2XX.test(response.status.toString())
+    //         ) {
+    //             commit(
+    //                 'scenarioCalculatedAttributeMutator',
+    //                 payload.scenarioCalculatedAttribute,
+    //             );
+    //             dispatch('addSuccessNotification', {
+    //                 message: "Modified scenario's calculated attribute",
+    //             });
+    //         }
+    //     });
+    // },
     async deleteCalculatedAttributeLibrary(
         { dispatch, commit }: any,
         libraryId: string,

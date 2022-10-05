@@ -1,10 +1,26 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace AppliedResearchAssociates.iAM.Data.Attributes
 {
     public abstract class Attribute : IEquatable<Attribute>
     {
+        private static List<RuleDefinition> validAggregationRules = new List<RuleDefinition>() {
+            new RuleDefinition { RuleName = "PREDOMINANT", IsText = true, IsNumeric = true },
+            new RuleDefinition { RuleName = "AVERAGE", IsText = false, IsNumeric = true },
+            new RuleDefinition { RuleName = "LAST", IsText = true, IsNumeric = true },
+        };
+
+        private static List<string> validDataTypes = new List<string>()
+        {
+            "NUMBER",
+            "STRING"
+        };
+
         public Attribute(Guid id,
             string name,
             string dataType,
@@ -18,7 +34,15 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
         {
             Id = id;
             Name = name;
+            if (!validDataTypes.Any(_ => _ == dataType.ToUpper()))
+            {
+                throw new InvalidOperationException($"Data type {dataType} is not valid for attribute {name}");
+            }
             DataType = dataType;
+            if (!validAggregationRules.Any(_ => _.RuleName == ruleType.ToUpper()))
+            {
+                throw new InvalidOperationException($"Attribute {name} cannot have a rule of {ruleType}");
+            }
             AggregationRuleType = ruleType;
             Command = command;
             ConnectionType = connectionType;
@@ -52,5 +76,22 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
         {
             return Id.GetHashCode();
         }
+
+        public static List<RuleDefinition> AggregationRules
+        {
+            get { return validAggregationRules; }
+        }
+
+        public static List<string> DataTypes
+        {
+            get { return validDataTypes; }
+        }
+    }
+
+    public class RuleDefinition
+    {
+        public string RuleName { get; set; }
+        public bool IsText { get; set; }
+        public bool IsNumeric { get; set; }
     }
 }

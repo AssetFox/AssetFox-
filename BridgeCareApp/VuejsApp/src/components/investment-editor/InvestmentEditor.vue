@@ -23,7 +23,7 @@
                                       v-model='investmentPlan.minimumProjectCostLimit'
                                       v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"                                      
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
-                                      :disabled="!isAdmin" 
+                                      :disabled="!hasAdminAccess" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
                     <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
@@ -33,7 +33,7 @@
                                       @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
                                       :mask="'###'"
                                       :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
-                                      :disabled="!isAdmin" 
+                                      :disabled="!hasAdminAccess" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
                     <!-- this shows up everywhere -->
@@ -283,6 +283,9 @@ import { PagingRequest, PagingPage, InvestmentPagingRequestModel, InvestmentLibr
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
 import { BudgetGridRow } from '@/shared/models/iAM/treatment';
+import {
+    mapToIndexSignature
+} from '../../shared/utils/conversion-utils';
 
 @Component({
     components: {
@@ -301,9 +304,10 @@ export default class InvestmentEditor extends Vue {
     @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.investmentModule.isSuccessfulImport) isSuccessfulImport: boolean
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
+    @State(state => state.investmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getInvestment') getInvestmentAction: any;
     @Action('getBudgetLibraries') getBudgetLibrariesAction: any;
     @Action('selectBudgetLibrary') selectBudgetLibraryAction: any;
@@ -389,6 +393,7 @@ export default class InvestmentEditor extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
+            vm.getHasPermittedAccessAction();
             vm.getBudgetLibrariesAction().then(() => {
                 if (to.path.indexOf(ScenarioRoutePaths.Investment) !== -1) {
                     vm.selectedScenarioId = to.query.scenarioId;
@@ -400,9 +405,12 @@ export default class InvestmentEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
 
-                    vm.hasScenario = true;                 
+                    vm.hasScenario = true;    
+                    vm.initializePages();             
                 }
-                vm.initializePages();
+                else
+                    vm.initializing = false;
+                
             });          
         });
     }
@@ -426,14 +434,14 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: !isNil(this.investmentPlan) ? {
                 ...this.investmentPlan,
                 minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 } : this.investmentPlan,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -445,7 +453,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.investmentPlan = data.investmentPlan;                   
@@ -461,7 +470,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.lastYear = data.lastYear
@@ -737,7 +747,7 @@ export default class InvestmentEditor extends Vue {
             this.librarySelectItemValue = budgetLibrary.id;
             const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: budgetLibrary,
-                isNewLIbrary: true,
+                isNewLibrary: true,
                 pagingSync: {
                     libraryId: budgetLibrary.budgets.length === 0 ? null : this.selectedBudgetLibrary.id,
                     Investment: this.investmentPlan,
@@ -745,8 +755,8 @@ export default class InvestmentEditor extends Vue {
                     updatedBudgets: budgetLibrary.budgets === [] ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                     addedBudgets: budgetLibrary.budgets === [] ? [] : this.addedBudgets,
                     deletionyears: budgetLibrary.budgets === [] ? [] : this.deletionYears,
-                    updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : this.mapToIndexSignature(this.updatedBudgetAmounts),
-                    addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : this.mapToIndexSignature(this.addedBudgetAmounts),
+                    updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
+                    addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 }
             }
 
@@ -781,7 +791,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {
@@ -874,7 +884,7 @@ export default class InvestmentEditor extends Vue {
     onShowEditBudgetsDialog() {
         this.editBudgetsDialogData = {
             showDialog: true,
-            budgets: this.currentPage,
+            budgets: clone(this.BudgetCache),
             scenarioId: this.selectedScenarioId,
         };
     }
@@ -1021,14 +1031,14 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: {
                 ...this.investmentPlan,
                 minimumProjectCostLimit: hasValue(this.investmentPlan.minimumProjectCostLimit)
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 },
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -1055,7 +1065,7 @@ export default class InvestmentEditor extends Vue {
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: this.selectedBudgetLibrary,
-                isNewLIbrary: false,
+                isNewLibrary: false,
                 pagingSync: sync
         }
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
@@ -1226,14 +1236,6 @@ export default class InvestmentEditor extends Vue {
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
-    mapToIndexSignature<T>(map: Map<string, T>): {[key: string]: T}{
-        let toReturn: {[key: string]: T} = {}
-
-        Array.from(map.keys()).forEach(key => toReturn[key] = map.get(key)!)
-
-        return toReturn;
-    }
-
     initializePages(){
         const request: InvestmentPagingRequestModel= {
             page: 1,
@@ -1244,9 +1246,9 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             },           
             sortColumn: 'year',
             isDescending: false,
@@ -1258,7 +1260,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.investmentPlan = data.investmentPlan;
@@ -1279,7 +1282,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.lastYear = data.lastYear;

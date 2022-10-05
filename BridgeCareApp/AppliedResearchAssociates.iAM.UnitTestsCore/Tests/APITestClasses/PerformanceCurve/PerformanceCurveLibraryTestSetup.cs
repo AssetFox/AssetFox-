@@ -5,28 +5,27 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveLibraryTestSetup
     {
-
-        public static PerformanceCurveLibraryEntity TestPerformanceCurveLibrary(Guid id)
+        public static PerformanceCurveLibraryDTO TestPerformanceCurveLibrary(Guid id)
         {
-            var entity = new PerformanceCurveLibraryEntity
+            var dto = new PerformanceCurveLibraryDTO
             {
                 Id = id,
                 Name = "Test Name"
             };
-            return entity;
+            return dto;
         }
 
-        public static PerformanceCurveLibraryEntity TestPerformanceCurveLibraryInDb(IUnitOfWork unitOfWork, Guid id)
+        public static PerformanceCurveLibraryDTO TestPerformanceCurveLibraryInDb(IUnitOfWork unitOfWork, Guid id)
         {
-            var entity = TestPerformanceCurveLibrary(id);
-            unitOfWork.Context.Add(entity);
-            unitOfWork.Context.SaveChanges();
-            return entity;
+            var dto = TestPerformanceCurveLibrary(id);
+            unitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
+            return dto;
         }
     }
 }

@@ -73,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 var newCalculation = CreateNewCalculatedAttribute(attribute, $"[{attribute.Name}] + 1");
                 if (loopCount > 1) AddEquation(newCalculation, $"[{attribute.Name}] + 2", "[Status] = 'Good'");
+                newCalculation.CalculatedAttributeLibraryId = library.Id;
                 library.CalculatedAttributes.Add(newCalculation);
                 loopCount++;
             }
@@ -89,6 +90,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             {
                 var newCalculation = CreateNewCalculatedAttribute(attribute, $"[{attribute.Name}] - 1");
                 if (loopCount == 1) AddEquation(newCalculation, $"[{attribute.Name}] - 2", "[Status] = 'Bad'");
+                newCalculation.CalculatedAttributeLibraryId = library.Id;
                 library.CalculatedAttributes.Add(newCalculation);
                 loopCount++;
             }

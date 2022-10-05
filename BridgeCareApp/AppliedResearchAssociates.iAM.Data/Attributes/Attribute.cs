@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.Data.Attributes
     public abstract class Attribute : IEquatable<Attribute>
     {
         private static List<RuleDefinition> validAggregationRules = new List<RuleDefinition>() {
-            new RuleDefinition { RuleName = "PREDOMINANT", IsText = true, IsNumeric = false },
+            new RuleDefinition { RuleName = "PREDOMINANT", IsText = true, IsNumeric = true },
             new RuleDefinition { RuleName = "AVERAGE", IsText = false, IsNumeric = true },
             new RuleDefinition { RuleName = "LAST", IsText = true, IsNumeric = true },
         };

@@ -13,8 +13,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveTestSetup // WjTestSetupDto
     {
-        private static PerformanceCurveDTO TestPerformanceCurveDto(Guid libraryId, Guid curveId, string attributeName, EquationDTO equation)
+        private static PerformanceCurveDTO TestPerformanceCurveDto(Guid libraryId, Guid curveId, string attributeName, string equation)
         {
+            var equationDto = equation == null ? null : EquationTestSetup.Dto(equation);
             var randomName = RandomStrings.WithPrefix("Curve");
             var curve = new PerformanceCurveDTO
             {
@@ -25,16 +26,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 },
                 Name = randomName,
                 Attribute = attributeName,
-                Equation = equation,
+                Equation = equationDto,
             };
             return curve;
         }
 
         /// <summary>If an equation is passed in, it needs to have a nonempty id. BUT the id will
         /// be changed when it is inserted.</summary>
-        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, EquationDTO equation = null)
+        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, string equation = null)
         {
-            var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName, equation);
+            var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName, "2");
             var curves = new List<PerformanceCurveDTO> { curve };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(curves, libraryId);
             var curvesFromDb = unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);

@@ -12,14 +12,14 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class EquationTestSetup // WjTestSetupEntity
+    public static class EquationTestSetup // WjTestSetupDto
     {
-        public static EquationDTO TwoDto(Guid? id = null)
+        public static EquationDTO Dto(string equation, Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
             var dto = new EquationDTO
             {
-                Expression = "2",
+                Expression = equation,
                 Id = resolveId,
             };
             return dto;

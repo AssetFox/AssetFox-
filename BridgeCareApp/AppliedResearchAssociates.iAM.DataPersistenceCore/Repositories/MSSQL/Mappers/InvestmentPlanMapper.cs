@@ -8,7 +8,7 @@ using MoreLinq;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
     public static class InvestmentPlanMapper
-    {
+    { // TODO InvestmentPlanEntity and InvestmentPlanDTO will have new flag ShouldAccumulateUnusedBudgetAmounts, mapper will set it
         public static InvestmentPlanEntity ToEntity(this InvestmentPlan domain, Guid simulationId) =>
             new InvestmentPlanEntity
             {

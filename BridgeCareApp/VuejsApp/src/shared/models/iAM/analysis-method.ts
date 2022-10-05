@@ -35,7 +35,6 @@ export interface AnalysisMethod {
     attribute: string;
     benefit: Benefit;
     criterionLibrary: CriterionLibrary;
-    allowFundingCarryover: boolean;
 }
 
 export const emptyBenefit: Benefit = {
@@ -54,6 +53,5 @@ export const emptyAnalysisMethod: AnalysisMethod = {
     shouldUseExtraFundsAcrossBudgets: false,
     attribute: '',
     benefit: clone(emptyBenefit),
-    criterionLibrary: clone(emptyCriterionLibrary),
-    allowFundingCarryover: false
+    criterionLibrary: clone(emptyCriterionLibrary)
 };

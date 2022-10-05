@@ -65,8 +65,16 @@
                                 Create New Library
                             </v-btn>
                         </v-layout>
-                    </v-flex>
-
+                    </v-flex>                    
+        </v-layout>
+        <v-layout>
+            <!-- for scenario only ??-->
+                <v-switch style="margin-left:10px;"
+                    class="sharing ghd-checkbox"
+                    label="Allow Funding Carryover"
+                    v-if="hasAdminAccess"
+                    v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
+                />
         </v-layout>
         <v-divider v-if='hasScenario || hasSelectedLibrary' />
         <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>

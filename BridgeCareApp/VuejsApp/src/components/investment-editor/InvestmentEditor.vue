@@ -453,7 +453,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.investmentPlan = data.investmentPlan;                   
@@ -469,7 +470,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.lastYear = data.lastYear
@@ -882,7 +884,7 @@ export default class InvestmentEditor extends Vue {
     onShowEditBudgetsDialog() {
         this.editBudgetsDialogData = {
             showDialog: true,
-            budgets: this.currentPage,
+            budgets: clone(this.BudgetCache),
             scenarioId: this.selectedScenarioId,
         };
     }
@@ -1251,7 +1253,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.investmentPlan = data.investmentPlan;
@@ -1267,7 +1270,8 @@ export default class InvestmentEditor extends Vue {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
-                    this.rowCache = clone(this.currentPage)
+                    this.BudgetCache = clone(this.currentPage);
+                    this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
                     this.totalItems = data.totalItems;
                     this.lastYear = data.lastYear;

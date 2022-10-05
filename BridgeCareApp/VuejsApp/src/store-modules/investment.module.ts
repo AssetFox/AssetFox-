@@ -145,33 +145,6 @@ const actions = {
             },
         );
     },
-    // async upsertBudgetLibrary(
-    //     { dispatch, commit }: any,
-    //     budgetLibrary: BudgetLibrary,
-    // ) {
-    //     await InvestmentService.upsertBudgetLibrary(budgetLibrary).then(
-    //         (response: AxiosResponse) => {
-    //             if (
-    //                 hasValue(response, 'status') &&
-    //                 http2XX.test(response.status.toString())
-    //             ) {
-    //                 const message: string = any(
-    //                     propEq('id', budgetLibrary.id),
-    //                     state.budgetLibraries,
-    //                 )
-    //                     ? 'Updated budget library'
-    //                     : 'Added budget library';
-
-    //                 commit('budgetLibraryMutator', budgetLibrary);
-    //                 commit('selectedBudgetLibraryMutator', budgetLibrary.id);
-
-    //                 dispatch('addSuccessNotification', {
-    //                     message: message,
-    //                 });
-    //             }
-    //         },
-    //     );
-    // },
     async deleteBudgetLibrary(
         { dispatch, commit, state }: any,
         libraryId: string,
@@ -203,6 +176,18 @@ const actions = {
                 commit(
                     'scenarioSimpleBudgetDetailsMutator',
                     response.data as SimpleBudgetDetail[],
+                );
+            }
+        });
+    },
+    async getInvestmentPlan({ commit }: any, payload: any) {
+        await InvestmentService.GetInvestmentPlan(
+            payload.scenarioId,
+        ).then((response: AxiosResponse<any>) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'investmentPlanMutator',
+                    response.data as InvestmentPlan,
                 );
             }
         });

@@ -306,7 +306,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
 import ImportExportCommittedProjectsDialog from './committed-project-editor-dialogs/CommittedProjectsImportDialog.vue';
 import CreateConsequenceDialog from './committed-project-editor-dialogs/CreateCommittedProjectConsequenceDialog.vue';
-import { Budget, InvestmentPlan } from '@/shared/models/iAM/investment';
+import { Budget, InvestmentPlan, SimpleBudgetDetail } from '@/shared/models/iAM/investment';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import {InputValidationRules, rules} from '@/shared/utils/input-validation-rules';
 import { NIL } from 'uuid';
@@ -321,6 +321,7 @@ import Alert from '@/shared/modals/Alert.vue';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+import InvestmentService from '@/services/investment.service';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -364,14 +365,15 @@ export default class CommittedProjectsEditor extends Vue  {
     selectedLibraryTreatments: Treatment[];
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.investmentModule.investmentPlan) stateInvestmentPlan: InvestmentPlan;
-    @State(state => state.investmentModule.scenarioBudgets) stateScenarioBudgets: Budget[];
+    @State(state => state.investmentModule.scenarioSimpleBudgetDetails) stateScenarioSimpleBudgetDetails: SimpleBudgetDetail[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
     @State(state => state.networkModule.networks) networks: Network[];
 
     @Action('getCommittedProjects') getCommittedProjects: any;
     @Action('getTreatmentLibraries') getTreatmentLibrariesAction: any;
     @Action('getScenarioSelectableTreatments') getScenarioSelectableTreatmentsAction: any;
-    @Action('getInvestment') getInvestmentAction: any;
+    @Action('getInvestmentPlan') getInvestmentPlanAction: any;
+    @Action('getScenarioSimpleBudgetDetails') getScenarioSimpleBudgetDetailsAction:any;
     @Action('getAttributes') getAttributesAction: any;
     @Action('getNetworks') getNetworksAction: any;
     @Action('deleteSpecificCommittedProjects') deleteSpecificCommittedProjectsAction: any;
@@ -509,12 +511,14 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentAction(vm.scenarioId).then(() => {                                            
-                    vm.getAttributesAction().then(() => {                       
-                        vm.getTreatmentLibrariesAction().then(() => {
-                            vm.initializePages();                            
-                        });   
-                    });
+                vm.getInvestmentPlanAction({scenarioId: vm.scenarioId}).then(() => {   
+                    vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
+                        vm.getAttributesAction().then(() => {                       
+                            vm.getTreatmentLibrariesAction().then(() => {
+                                vm.initializePages();                            
+                            });   
+                        });
+                    })                                          
                 })
             });                     
         });
@@ -556,10 +560,10 @@ export default class CommittedProjectsEditor extends Vue  {
         );
     }
 
-    @Watch('stateScenarioBudgets')
-    onStateScenarioBudgetsChanged(){
-        this.budgetSelectItems = this.stateScenarioBudgets.map(
-            (budget: Budget) => ({
+    @Watch('stateScenarioSimpleBudgetDetails')
+    onStateScenarioSimpleBudgetDetailsChanged(){
+        this.budgetSelectItems = this.stateScenarioSimpleBudgetDetails.map(
+            (budget: SimpleBudgetDetail) => ({
                 text: budget.name,
                 value: budget.name
             }),
@@ -600,10 +604,6 @@ export default class CommittedProjectsEditor extends Vue  {
     @Watch('sectionCommittedProjects')
     onSectionCommittedProjectsChanged() {  
         this.setCpItems();  
-        // this.committedProjectsCount = this.sectionCommittedProjects.length;
-
-        // const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.sectionCommittedProjects, this.stateSectionCommittedProjects);
-        // this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     @Watch('selectedCpItems')
@@ -932,9 +932,9 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     cpItemFactory(scp: SectionCommittedProject): SectionCommittedProjectTableData {
-        const budget: Budget = find(
-            propEq('id', scp.scenarioBudgetId), this.stateScenarioBudgets,
-        ) as Budget;
+        const budget: SimpleBudgetDetail = find(
+            propEq('id', scp.scenarioBudgetId), this.stateScenarioSimpleBudgetDetails,
+        ) as SimpleBudgetDetail;
         let cat = this.reverseCatMap.get(scp.category);
         let value = '';
         if(!isNil(cat))
@@ -974,9 +974,9 @@ export default class CommittedProjectsEditor extends Vue  {
         });                                                
     }
     handleBudgetChange(row: SectionCommittedProject, scp: SectionCommittedProjectTableData, budgetName: string){
-        const budget: Budget = find(
-            propEq('name', budgetName), this.stateScenarioBudgets,
-        ) as Budget;
+        const budget: SimpleBudgetDetail = find(
+            propEq('name', budgetName), this.stateScenarioSimpleBudgetDetails,
+        ) as SimpleBudgetDetail;
         if(!isNil(budget)){
             row.scenarioBudgetId = budget.id;
             scp.budget = 'None'           

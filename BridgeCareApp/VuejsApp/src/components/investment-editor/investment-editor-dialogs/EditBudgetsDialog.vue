@@ -93,7 +93,7 @@ import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Action } from 'vuex-class';
-import { any, clone, isNil, update, findIndex, propEq } from 'ramda';
+import { any, clone, isNil, update, findIndex, propEq, isEmpty } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import {
@@ -108,6 +108,7 @@ import { rules, InputValidationRules } from '@/shared/utils/input-validation-rul
 import ObjectID from 'bson-objectid';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
+import { isNull } from 'util';
 
 @Component({
     components: {
@@ -140,8 +141,7 @@ export default class EditBudgetsDialog extends Vue {
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
-        this.editBudgetsDialogGridData.sort(budget => budget.order);
-
+        
         this.budgetChanges.addedBudgets = [];
         this.budgetChanges.updatedBudgets = [];
         this.budgetChanges.deletionIds = [];
@@ -167,7 +167,6 @@ export default class EditBudgetsDialog extends Vue {
             clone(budget),
             this.editBudgetsDialogGridData,
         );
-
         const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id)
         if(!isNil(origBudget)){
             if(origBudget.name !== budget.name){
@@ -180,7 +179,17 @@ export default class EditBudgetsDialog extends Vue {
             }
         }          
     }
-
+    onEditBudgetOrder(budget: Budget) {
+        this.editBudgetsDialogGridData = update(
+            findIndex(propEq('id', budget.id), this.editBudgetsDialogGridData),
+            clone(budget),
+            this.editBudgetsDialogGridData,
+        );
+        if(any(propEq('id', budget.id), this.budgetChanges.updatedBudgets))
+            this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+        else
+            this.budgetChanges.updatedBudgets.push(budget);
+    }
     disableDeleteButton() {
         return !hasValue(this.selectedGridRows);
     }
@@ -249,7 +258,6 @@ export default class EditBudgetsDialog extends Vue {
             this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
         }
     }
-
     onSubmit(submit: boolean) {
         if (submit) {
             this.$emit('submit', this.budgetChanges);
@@ -274,14 +282,18 @@ export default class EditBudgetsDialog extends Vue {
     }
     swapItemOrder(item:Budget, direction: string) {
         
+        if (isNil(direction) || isNil(item)) return;
+
         if (direction.toLowerCase() === this.Up) {    
             if (item.order === 1) return;
             this.editBudgetsDialogGridData.forEach(element => {
-            if( element.order === (item.order-1)) {
+                if( element.order === (item.order-1)) {
                     element.order = item.order;
+                    this.onEditBudgetOrder(element);
                 }
                 else if (element.order === item.order) {
                     element.order = item.order -1;
+                    this.onEditBudgetOrder(element);
                 }
             });
         } else {
@@ -290,9 +302,11 @@ export default class EditBudgetsDialog extends Vue {
             this.editBudgetsDialogGridData.forEach(element => {
                 if( element.order === (hold)) {
                     element.order = item.order + 1;
+                    this.onEditBudgetOrder(element);
                 }
                 else if (element.order === hold + 1) {
                     element.order = hold;
+                    this.onEditBudgetOrder(element);
                 }
             });
         }
@@ -315,7 +329,6 @@ export default class EditBudgetsDialog extends Vue {
             this.editBudgetsDialogGridData.forEach(element => {
                 if (element === this.currentSelectedBudget) { }
                 else if (element.order >=original && element.order <= replacement) {
-                    console.log("change: " + element.name + ", " + element.order);
                     element.order--;
                 }
             });

@@ -372,7 +372,7 @@ export default class InvestmentEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     showReminder: boolean = false;
     range: number = 1;
-
+   
     get addYearLabel() {
         return 'Add Year (' + this.getNextYear() + ')';
     }
@@ -899,12 +899,21 @@ export default class InvestmentEditor extends Vue {
             })
             let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
-            this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b))
-            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget))
+            this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
+            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
             this.onPaginationChanged();
+
+            // update the current page,
+            // pagination blows this away. Need to
+            // updated database.
+            this.currentPage.forEach(element => {
+              budgetChanges.updatedBudgets.forEach(budget => {
+                if (budget.id === element.id) {element = budget;}
+              });
+            });
+            
         }      
     }
-
     removeBudget(id: string){
         if(any(propEq('id', id), this.addedBudgets)){
             this.addedBudgets = this.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
@@ -1135,9 +1144,7 @@ export default class InvestmentEditor extends Vue {
     onUpdateBudget(rowId: string, updatedRow: Budget){
         if(any(propEq('id', rowId), this.addedBudgets))
             return;
-
         let mapEntry = this.updatedBudgetsMap.get(rowId)
-
         if(isNil(mapEntry)){
             const row = this.BudgetCache.find(r => r.id === rowId);
             if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))

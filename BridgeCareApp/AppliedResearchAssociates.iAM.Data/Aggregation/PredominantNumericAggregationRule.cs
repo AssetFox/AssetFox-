@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Attributes;
+using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
 namespace AppliedResearchAssociates.iAM.Data.Aggregation
 {
@@ -13,10 +15,15 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
             foreach (var distinctYear in distinctYears)
             {
                 var currentYearAttributeData = test.Where(_ => _.TimeStamp.Year == distinctYear);
+                var maxCount = currentYearAttributeData
+                    .GroupBy(_ => _.Value)
+                    .Select(_ => new { Key = _.Key, RecordCount = _.Count() })
+                    .Max(_ => _.RecordCount);
                 yield return (attribute, (distinctYear, currentYearAttributeData
                     .GroupBy(_ => _.Value)
-                    .OrderByDescending(group => group.Count())
-                    .Select(group => group.Key)
+                    .Select(_ => new { Key = _.Key, RecordCount = _.Count() })
+                    .Where(_ => _.RecordCount == maxCount)
+                    .Select(_ => _.Key)
                     .OrderByDescending(_ => _)
                     .First()));
             }

@@ -108,8 +108,9 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equation = EquationTestSetup.TwoDto();
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, equation);
+            var equationId = performanceCurve.Equation.Id;
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
@@ -126,6 +127,8 @@ namespace BridgeCareCoreTests.Tests
                     RowsForDeletion = new List<Guid>()
                 }
             };
+            var equationBefore = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationId);
+            Assert.NotNull(equationBefore);
 
             // Act
             await controller.UpsertPerformanceCurveLibrary(request);
@@ -135,7 +138,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
+            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationId);
             Assert.Null(equationAfter);
         }
 
@@ -268,8 +271,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equationDto = EquationTestSetup.TwoDto();
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, equationDto);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
@@ -294,7 +297,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves[0];
             Assert.Equal("123", performanceCurveAfter.Equation.Expression);
-            Assert.Equal(performanceCurveDto.Equation.Id, performanceCurveAfter.Equation.Id);
+            Assert.Equal(performanceCurve.Equation.Id, performanceCurveAfter.Equation.Id);
         }
 
         [Fact]

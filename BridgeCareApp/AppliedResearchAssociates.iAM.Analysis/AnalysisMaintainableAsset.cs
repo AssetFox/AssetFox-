@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
         {
             if (!HistoryPerAttribute.TryGetValue(attribute, out var history))
             {
-                history = new AttributeValueHistory<T>(attribute);
+                history = new AttributeValueHistory<T>(this, attribute);
                 HistoryPerAttribute.Add(attribute, history);
             }
 

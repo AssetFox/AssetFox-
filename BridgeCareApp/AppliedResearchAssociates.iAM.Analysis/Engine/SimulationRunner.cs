@@ -142,7 +142,12 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 Send(logMessage);
             }
 
-            InParallel(AssetContexts, context => context.RollForward());
+            //InParallel(AssetContexts, context => context.RollForward());
+            foreach (var context in AssetContexts)
+            {
+                // Not parallelizable due to network history access.
+                context.RollForward();
+            }
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 

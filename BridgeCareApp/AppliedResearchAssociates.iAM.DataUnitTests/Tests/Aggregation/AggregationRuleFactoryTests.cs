@@ -38,6 +38,19 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             Assert.IsType<LastNumericAggregationRule>(result);
         }
 
+        [Fact]
+        public void CreatePredominantNumericRuleTest()
+        {
+            // Arrange
+            Init("Number", "Predominant");
+
+            // Act
+            var result = AggregationRuleFactory.CreateNumericRule(mockAttribute.Object);
+
+            // Assert
+            Assert.IsType<PredominantNumericAggregationRule>(result);
+        }
+
         [Fact(Skip = "Invalid caught by attribute constructor")]
         public void CreateNumericRuleExceptionTest()
         {

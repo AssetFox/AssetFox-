@@ -285,7 +285,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveId = Guid.NewGuid();
-            ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulation.Id, performanceCurveId);
+            ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulation.Id, performanceCurveId);
             var request = new PagingRequestModel<PerformanceCurveDTO>()
             {
                 isDescending = false,

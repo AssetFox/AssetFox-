@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class ScenarioPerformanceCurveTestSetup
+    public static class ScenarioPerformanceCurveTestSetup // WjTestSetupDto
     {
         public static ScenarioPerformanceCurveEntity ScenarioEntity(Guid simulationId, Guid attributeId, Guid? id = null)
         {
@@ -26,14 +27,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
 
-        public static ScenarioPerformanceCurveEntity EntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId)
+        public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId)
         {
-            var attributeId = unitOfWork.Context.Attribute.First().Id;
-            var performanceCurve = ScenarioEntity(simulationId, attributeId, curveId);
-            performanceCurve.AttributeId = attributeId;
-            unitOfWork.Context.ScenarioPerformanceCurve.Add(performanceCurve);
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = TestAttributeNames.ActionType,
+                Id = curveId,
+                Name = "Curve",
+            };
+            var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
+            unitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulationId);
             unitOfWork.Context.SaveChanges();
-            return performanceCurve;
+            var scenarioPerformanceCurves = unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            var returnDto = scenarioPerformanceCurves.Single(curve => curve.Id == curveId);
+            return returnDto;
         }
     }
 }

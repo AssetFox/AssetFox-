@@ -36,8 +36,16 @@
                                       :disabled="!hasAdminAccess" 
                                       class="ghd-text-field-border ghd-text-field"/>
                     </v-flex>
-                    <!-- this shows up everywhere -->
-                    <v-flex xs4 class="ghd-constant-header">
+                    <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                        <v-switch style="margin-left:10px;margin-top:50px;"
+                            class="ghd-checkbox"
+                            label="Allow Funding Carryover"
+                            v-if="hasAdminAccess"
+                            v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
+                        />
+                    </v-flex>
+                    <!-- these are only in library -->
+                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
                         <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                         <v-select :items='librarySelectItems'
                               append-icon=$vuetify.icons.ghd-down
@@ -46,7 +54,6 @@
                               class="ghd-select ghd-text-field ghd-text-field-border">
                         </v-select>
                     </v-flex>
-                    <!-- these are only in library -->
                     <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
                         <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
                             <div class="header-text-content invest-owner-padding">                            
@@ -67,15 +74,18 @@
                         </v-layout>
                     </v-flex>                    
         </v-layout>
-        <v-layout>
-            <!-- for scenario only ??-->
-                <v-switch style="margin-left:10px;"
-                    class="sharing ghd-checkbox"
-                    label="Allow Funding Carryover"
-                    v-if="hasAdminAccess"
-                    v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
-                />
-        </v-layout>
+        <!-- below only for scenario to be at new line -->
+        <v-layout row style="margin-top:-10px;">
+            <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header" style="margin-top:-15px;">
+                <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
+                <v-select :items='librarySelectItems'
+                        append-icon=$vuetify.icons.ghd-down
+                        outline 
+                        v-model='librarySelectItemValue'
+                        class="ghd-select ghd-text-field ghd-text-field-border">
+                </v-select>
+            </v-flex>
+        </v-layout
         <v-divider v-if='hasScenario || hasSelectedLibrary' />
         <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
             <v-flex xs4>

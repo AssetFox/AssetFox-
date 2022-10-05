@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             repo.UpsertAttributes(attributes);
             var attributesBefore = await repo.GetAttributesAsync();
             var attributeBefore = attributesBefore.Single(a => a.Id == attribute.Id);
-            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "update rule type", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
+            var updateAttribute = new NumericAttribute(222, 1000, 123, attribute.Id, "this should kill the update", "Last", "update command", Data.ConnectionType.MSSQL, "connectionString", !attribute.IsCalculated, !attribute.IsAscending, Guid.Empty);
             Assert.Throws<InvalidAttributeUpsertException>(() => repo.UpsertAttributes(updateAttribute));
             var attributesAfter = await repo.GetAttributesAsync();
             var attributeAfter = attributesAfter.Single(a => a.Id == attribute.Id);
@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                 IsCalculated = false,
             };
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
-            Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
+            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributes(invalidAttributeList));
             var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.SingleOrDefault(a => a.Id == attributeId);
             Assert.Null(addedAttribute);
@@ -193,7 +193,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var validAttribute = AttributeTestSetup.NumericDto(dataSourceDto);
 
             var invalidAttributeList = new List<AttributeDTO> { attributeDto };
-            Assert.Throws<InvalidAttributeException>(() => repo.UpsertAttributes(invalidAttributeList));
+            Assert.Throws<InvalidOperationException>(() => repo.UpsertAttributes(invalidAttributeList));
             var attributesAfter = await repo.GetAttributesAsync();
             var addedAttribute = attributesAfter.FirstOrDefault(a =>
                a.Id == attributeId

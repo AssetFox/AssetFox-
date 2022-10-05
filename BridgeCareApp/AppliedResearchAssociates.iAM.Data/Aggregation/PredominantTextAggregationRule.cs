@@ -4,7 +4,7 @@ using AppliedResearchAssociates.iAM.Data.Attributes;
 
 namespace AppliedResearchAssociates.iAM.Data.Aggregation
 {
-    public class PredominantAggregationRule : TextAggregationRule
+    public class PredominantTextAggregationRule : TextAggregationRule
     {
         public override IEnumerable<(Attribute, (int, string))> Apply(IEnumerable<IAttributeDatum> attributeData, Attribute attribute) // (int = year, string = value of the attribute)
         {

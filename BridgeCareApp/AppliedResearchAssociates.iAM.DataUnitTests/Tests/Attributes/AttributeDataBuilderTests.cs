@@ -39,15 +39,6 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
             Assert.IsType<List<IAttributeDatum>>(result);
         }
 
-        [Fact]
-        public void GetDataForNoTypeTest()
-        {
-            // Arrange
-            Init(string.Empty);
-
-            Assert.Throws<InvalidOperationException>(() => AttributeDataBuilder.GetData(mockAttributeConnection.Object));            
-        }
-
         private void Init(string type)
         {
             mockAttribute = new Mock<Attribute>(Guid.Empty, CommonTestParameterValues.Name, type, CommonTestParameterValues.RuleType, CommonTestParameterValues.TestCommand, Data.ConnectionType.MSSQL, CommonTestParameterValues.ConnectionString, Guid.Empty, false, false);

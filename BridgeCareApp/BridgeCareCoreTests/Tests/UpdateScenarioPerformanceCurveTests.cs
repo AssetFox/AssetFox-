@@ -60,16 +60,14 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equation = EquationTestSetup.TwoDto();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equationDto: equation);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
-            var performanceCurveDto = scenarioCurves[0];
-            performanceCurveDto.Equation = equation.ToDto();
 
             var request = new PagingSyncModel<PerformanceCurveDTO>()
             {
-                UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
+                UpdateRows = new List<PerformanceCurveDTO> { performanceCurve },
                 AddedRows = new List<PerformanceCurveDTO>(),
                 RowsForDeletion = new List<Guid>()
             };
@@ -80,8 +78,8 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
-            Assert.Equal(performanceCurveDto.Equation.Id, performanceCurveDtoAfter.Equation.Id);
-            Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
+            Assert.Equal(performanceCurve.Equation.Id, performanceCurveDtoAfter.Equation.Id);
+            Assert.Equal(performanceCurve.Attribute, performanceCurveDtoAfter.Attribute);
         }
 
         [Fact]
@@ -92,8 +90,9 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equation = EquationTestSetup.TwoDto();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equationDto: equation);
+            var equationId = performanceCurve.Equation.Id;
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
@@ -114,7 +113,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.Single();
             Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
+            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationId);
             Assert.Null(equationAfter);
         }
 
@@ -225,9 +224,9 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
+            var equationDto = EquationTestSetup.TwoDto();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equationDto: equationDto);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDto = scenarioCurves[0];
             performanceCurveDto.Equation.Expression = "123";
@@ -257,8 +256,8 @@ namespace BridgeCareCoreTests.Tests
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var simulationId = simulation.Id;
-            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId);
-            var equation = EquationTestSetup.TwoWithScenarioJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equationDto = EquationTestSetup.TwoDto();
+            var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, equationDto: equationDto);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
 

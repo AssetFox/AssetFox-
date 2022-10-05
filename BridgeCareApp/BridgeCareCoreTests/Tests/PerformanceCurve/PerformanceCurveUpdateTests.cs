@@ -308,8 +308,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var equation = EquationTestSetup.TwoDto();
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, equation);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             performanceCurveLibraryDto.PerformanceCurves.RemoveAt(0);

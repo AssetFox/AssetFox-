@@ -14,17 +14,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class EquationTestSetup // WjTestSetupEntity
     {
-        public static EquationEntity Two(Guid? id)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var equation = new EquationEntity
-            {
-                Expression = "2",
-                Id = resolveId,
-            };
-            return equation;
-        }
-
         public static EquationDTO TwoDto(Guid? id = null)
         {
             var resolveId = id ?? Guid.NewGuid();
@@ -34,52 +23,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = resolveId,
             };
             return dto;
-        }
-
-        public static EquationEntity TwoWithJoin(Guid? id, Guid performanceCurveId)
-        {
-            var equation = Two(id);
-            var join = new PerformanceCurveEquationEntity
-            {
-                PerformanceCurveId = performanceCurveId,
-                EquationId = equation.Id,
-            };
-            equation.PerformanceCurveEquationJoin = join;
-            return equation;
-        }
-
-        public static EquationEntity TwoWithScenarioJoin(Guid? id, Guid performanceCurveId)
-        {
-            var equation = Two(id);
-            var join = new ScenarioPerformanceCurveEquationEntity
-            {
-                EquationId = equation.Id,
-                ScenarioPerformanceCurveId = performanceCurveId,
-            };
-            equation.ScenarioPerformanceCurveEquationJoin = join;
-            return equation;
-        }
-
-        public static EquationEntity TwoWithJoinInDb(
-            IUnitOfWork unitOfWork,
-            Guid? id,
-            Guid performanceCurveId)
-        {
-            var equation = TwoWithJoin(id, performanceCurveId);
-            unitOfWork.Context.Add(equation);
-            unitOfWork.Context.SaveChanges();
-            return equation;
-        }
-
-        public static EquationEntity TwoWithScenarioJoinInDb(
-            IUnitOfWork unitOfWork,
-            Guid? id,
-            Guid performanceCurveId)
-        {
-            var equation = TwoWithScenarioJoin(id, performanceCurveId);
-            unitOfWork.Context.Add(equation);
-            unitOfWork.Context.SaveChanges();
-            return equation;
         }
     }
 }

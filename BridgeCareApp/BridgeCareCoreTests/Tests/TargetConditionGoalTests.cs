@@ -32,7 +32,7 @@ namespace BridgeCareCoreTests.Tests
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public TargetConditionGoalController SetupController()
+        private TargetConditionGoalController SetupController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
-        public TargetConditionGoalController CreateTestController(List<string> userClaims)
+        private TargetConditionGoalController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
             foreach (string claimName in userClaims)
@@ -63,7 +63,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        public TargetConditionGoalLibraryEntity
+        private TargetConditionGoalLibraryEntity
             TestTargetConditionGoalLibraryEntity(
             Guid? id = null,
             string name = null
@@ -79,7 +79,7 @@ namespace BridgeCareCoreTests.Tests
             return returnValue;
         }
 
-        public TargetConditionGoalEntity TestTargetConditionGoal(
+        private TargetConditionGoalEntity TestTargetConditionGoal(
             Guid libraryId,
             Guid? id = null,
             string name = null)
@@ -95,7 +95,7 @@ namespace BridgeCareCoreTests.Tests
             };
             return returnValue;
         }
-        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
+        private ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
             Guid attributeId,
             Guid? id = null)
         {

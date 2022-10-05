@@ -11,14 +11,14 @@ using AppliedResearchAssociates.iAM.DataUnitTests.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
 {
-    public class PredominantAggregationRuleTests
+    public class PredominantTextAggregationRuleTests
     {
         private readonly Guid guId = Guid.Empty;
         private readonly TextAttribute textAttribute;
         List<IAttributeDatum> attributeData;
         private readonly SectionLocation sectionLocation;
 
-        public PredominantAggregationRuleTests()
+        public PredominantTextAggregationRuleTests()
         {
             attributeData = new List<IAttributeDatum>();
             sectionLocation = new SectionLocation(guId, CommonTestParameterValues.LocationIdentifier1);
@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
         {
             // Arrange
             attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation, CommonTestParameterValues.TimeStamp));
-            var predominantAggregationRule = new PredominantAggregationRule();
+            var predominantAggregationRule = new PredominantTextAggregationRule();
             var expectedValue = CommonTestParameterValues.StringValue;
 
             //Act            
@@ -62,7 +62,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             // Arrange            
             attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation, CommonTestParameterValues.TimeStamp));
             attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue2, sectionLocation, CommonTestParameterValues.TimeStamp));
-            var predominantAggregationRule = new PredominantAggregationRule();
+            var predominantAggregationRule = new PredominantTextAggregationRule();
             var expectedValue = CommonTestParameterValues.StringValue;
 
             //Act            
@@ -83,7 +83,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             // Arrange            
             attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue, sectionLocation, CommonTestParameterValues.TimeStamp));
             attributeData.Add(new AttributeDatum<string>(guId, null, CommonTestParameterValues.StringValue2, sectionLocation, CommonTestParameterValues.TimeStamp.AddYears(-1)));
-            var predominantAggregationRule = new PredominantAggregationRule();
+            var predominantAggregationRule = new PredominantTextAggregationRule();
             var expectedValue1 = CommonTestParameterValues.StringValue;
             var expectedValue2 = CommonTestParameterValues.StringValue2;
 

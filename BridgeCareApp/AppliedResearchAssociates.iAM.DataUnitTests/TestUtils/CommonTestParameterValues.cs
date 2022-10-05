@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.TestUtils
     {
         public static string Name => "TestName";
 
-        public static string RuleType => "TestRuleType";
+        public static string RuleType => "Predominant";
 
         public static string TestCommand => "TestCommand";
 

@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
             var result = AggregationRuleFactory.CreateTextRule(mockAttribute.Object);
 
             // Assert
-            Assert.IsType<PredominantAggregationRule>(result);
+            Assert.IsType<PredominantTextAggregationRule>(result);
         }
 
         [Fact]

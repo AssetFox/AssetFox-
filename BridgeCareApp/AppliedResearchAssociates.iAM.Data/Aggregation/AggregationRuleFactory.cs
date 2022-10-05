@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
         {
             return attribute.AggregationRuleType.ToUpper() switch
             {
-                "PREDOMINANT" => new PredominantAggregationRule(),
+                "PREDOMINANT" => new PredominantTextAggregationRule(),
                 "LAST" => new LastTextAggregationRule(),
                 _ => throw new InvalidOperationException(),
             };

@@ -32,7 +32,7 @@ namespace BridgeCareCoreTests.Tests
         private static readonly Guid TargetConditionGoalId = Guid.Parse("42b3bbfc-d590-4d3d-aea9-fc8221210c57");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public TargetConditionGoalController SetupController()
+        private TargetConditionGoalController SetupController()
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
-        public TargetConditionGoalController CreateTestController(List<string> userClaims)
+        private TargetConditionGoalController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
             foreach (string claimName in userClaims)
@@ -63,7 +63,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        public TargetConditionGoalLibraryEntity
+        private TargetConditionGoalLibraryEntity
             TestTargetConditionGoalLibraryEntity(
             Guid? id = null,
             string name = null
@@ -79,7 +79,7 @@ namespace BridgeCareCoreTests.Tests
             return returnValue;
         }
 
-        public TargetConditionGoalEntity TestTargetConditionGoal(
+        private TargetConditionGoalEntity TestTargetConditionGoal(
             Guid libraryId,
             Guid? id = null,
             string name = null)
@@ -95,7 +95,7 @@ namespace BridgeCareCoreTests.Tests
             };
             return returnValue;
         }
-        public ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
+        private ScenarioTargetConditionGoalEntity TestScenarioTargetConditionGoal(Guid simulationId,
             Guid attributeId,
             Guid? id = null)
         {
@@ -129,11 +129,9 @@ namespace BridgeCareCoreTests.Tests
             return targetConditionGoalEntity;
         }
 
-        private CriterionLibraryEntity SetupCriterionLibraryForUpsertOrDelete()
+        private CriterionLibraryDTO SetupCriterionLibraryForUpsertOrDelete()
         {
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
         }
 
@@ -146,12 +144,10 @@ namespace BridgeCareCoreTests.Tests
             return goal;
         }
 
-        private CriterionLibraryEntity SetupForScenarioTargetUpsertOrDelete(Guid simulationId)
+        private CriterionLibraryDTO SetupForScenarioTargetUpsertOrDelete(Guid simulationId)
         {
             SetupForScenarioTargetGet(simulationId);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
         }
 
@@ -218,7 +214,7 @@ namespace BridgeCareCoreTests.Tests
             var controller = SetupController();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
+            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
             var getResult = await controller.TargetConditionGoalLibraries();
@@ -229,7 +225,7 @@ namespace BridgeCareCoreTests.Tests
             dto.Description = "Updated Description";
             dto.TargetConditionGoals[0].Name = "Updated Name";
             dto.TargetConditionGoals[0].CriterionLibrary =
-                criterionLibraryEntity.ToDto();
+                criterionLibrary;
 
             // Act
             await controller.UpsertTargetConditionGoalLibrary(dto);
@@ -250,7 +246,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var controller = SetupController();
             // Arrange
-            var criterionLibraryEntity = SetupCriterionLibraryForUpsertOrDelete();
+            var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var targetConditionGoalLibraryEntity = SetupLibraryForGet();
             var targetConditionGoalEntity = SetupTargetConditionGoal(targetConditionGoalLibraryEntity.Id);
             var getResult = await controller.TargetConditionGoalLibraries();
@@ -259,7 +255,7 @@ namespace BridgeCareCoreTests.Tests
 
             var targetConditionGoalLibraryDTO = dtos.Single(dto => dto.Id == targetConditionGoalLibraryEntity.Id);
             targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
-                criterionLibraryEntity.ToDto();
+                criterionLibrary;
 
             await controller.UpsertTargetConditionGoalLibrary(
                 targetConditionGoalLibraryDTO);
@@ -304,7 +300,7 @@ namespace BridgeCareCoreTests.Tests
             var controller = SetupController();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var criterionLibraryEntity = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
+            var criterionLibrary = SetupForScenarioTargetUpsertOrDelete(simulation.Id);
             var getResult = await controller.GetScenarioTargetConditionGoals(simulation.Id);
             var dtos = (List<TargetConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalDTO>));
@@ -328,7 +324,7 @@ namespace BridgeCareCoreTests.Tests
             var goalToUpdate = localScenarioTargetGoals.Single(g => g.Id!=deletedTargetConditionId);
             var updatedGoalId = goalToUpdate.Id;
             goalToUpdate.Name = "Updated";  
-            goalToUpdate.CriterionLibrary = criterionLibraryEntity.ToDto();
+            goalToUpdate.CriterionLibrary = criterionLibrary;
             var newGoalId = Guid.NewGuid();
             localScenarioTargetGoals.Add(new TargetConditionGoalDTO
             {

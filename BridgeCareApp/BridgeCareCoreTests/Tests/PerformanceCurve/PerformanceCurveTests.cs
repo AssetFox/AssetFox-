@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -84,7 +85,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId).ToDto();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
@@ -104,13 +105,14 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<OkResult>(result);
         }
 
+        [Fact]
         public async Task UpsertPerformanceCurveLibraryPage_Ok()
         {
             Setup();
             // Arrange
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId).ToDto();
+            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibrary(libraryId);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
@@ -211,8 +213,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-
+            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
 
             // Act
             var result = await controller.GetPerformanceCurveLibraries();
@@ -239,15 +240,14 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveLibraryId = Guid.NewGuid();
             var performanceCurveId = Guid.NewGuid();
             var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, performanceCurveLibraryId);
-            var curve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId);
-            var curveDto = curve.ToDto();
+            var curveDto = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId, TestAttributeNames.ActionType);
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             var getResult = await controller.GetPerformanceCurveLibraries();
             var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<PerformanceCurveLibraryDTO>));
 
             var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
-            curveDto.CriterionLibrary = criterionLibrary.ToDto();
+            curveDto.CriterionLibrary = criterionLibrary;
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = performanceCurveLibraryDTO,
@@ -285,7 +285,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveId = Guid.NewGuid();
-            ScenarioPerformanceCurveTestSetup.EntityInDb(TestHelper.UnitOfWork, simulation.Id, performanceCurveId);
+            ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulation.Id, performanceCurveId);
             var request = new PagingRequestModel<PerformanceCurveDTO>()
             {
                 isDescending = false,

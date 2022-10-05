@@ -26,6 +26,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
+        /// <summary>
+        /// If a criterionLibrary is passed in, it is expected to NOT yet
+        /// be in the db. This setup will add it, but with a different id.
+        /// </summary>
         public static PerformanceCurveDTO DtoForEntityInDb(IUnitOfWork unitOfWork, Guid simulationId, Guid curveId, CriterionLibraryDTO criterionLibraryDto = null)
         {
             var performanceCurveDto = new PerformanceCurveDTO

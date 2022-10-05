@@ -8,7 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
 {
-    public static class DataSourceTestSetup // WjTestSetupDto
+    public static class DataSourceTestSetup
     {
         public static SQLDataSourceDTO DtoForSqlDataSourceInDb(IUnitOfWork unitOfWork, string connectionString)
         {

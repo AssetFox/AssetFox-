@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class PerformanceCurveCriterionLibraryJoinTestSetup // WjTestSetupDto
+    public static class PerformanceCurveCriterionLibraryJoinTestSetup
     {
         public static void JoinPerformanceCurveToCriterionLibrary(
             IUnitOfWork unitOfWork,

@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAttributes
 {
-    public static class CalculatedAttributeTestSetup // WjTestSetupDto
+    public static class CalculatedAttributeTestSetup
     {
         private static object DefaultCalculatedAttributeSetupLock = new object();
         private static bool DefaultCalculatedAttributeLibraryHasBeenCreated = false;

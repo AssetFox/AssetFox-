@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class CriterionLibraryTestSetup // WjTestSetupDto
+    public static class CriterionLibraryTestSetup
     {
         public static CriterionLibraryDTO TestCriterionLibrary(string? namePrefix = null, string mergedCriteriaExpression = null)
         {

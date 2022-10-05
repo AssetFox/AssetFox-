@@ -10,7 +10,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class ScenarioPerformanceCurveTestSetup // WjTestSetupDto
+    public static class ScenarioPerformanceCurveTestSetup
     {
         public static ScenarioPerformanceCurveEntity ScenarioEntity(Guid simulationId, Guid attributeId, Guid? id = null)
         {

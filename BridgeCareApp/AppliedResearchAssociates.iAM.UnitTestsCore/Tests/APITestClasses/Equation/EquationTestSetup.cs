@@ -12,7 +12,7 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class EquationTestSetup // WjTestSetupDto
+    public static class EquationTestSetup
     {
         public static EquationDTO Dto(string equation, Guid? id = null)
         {

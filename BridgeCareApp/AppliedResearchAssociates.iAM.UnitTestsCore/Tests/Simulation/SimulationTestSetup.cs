@@ -15,7 +15,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class SimulationTestSetup // WjTestSetupDto
+    public static class SimulationTestSetup
     {
         public static SimulationDTO TestSimulation(Guid? id = null, string name = null, Guid? owner = null)
         {

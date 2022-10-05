@@ -11,7 +11,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class PerformanceCurveTestSetup // WjTestSetupDto
+    public static class PerformanceCurveTestSetup
     {
         private static PerformanceCurveDTO TestPerformanceCurveDto(Guid libraryId, Guid curveId, string attributeName, string equation)
         {

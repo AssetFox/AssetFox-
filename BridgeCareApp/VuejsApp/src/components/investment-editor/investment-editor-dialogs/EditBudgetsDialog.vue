@@ -22,7 +22,7 @@
                         <template slot='items' slot-scope='props'>
                             <td>
                                 <v-layout row>
-                                <v-text-field :value='props.item.order' class='order_input'/>
+                                <v-text-field v-model="props.item.order" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
                                     <v-layout column>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')"> fas fa-chevron-up
@@ -63,6 +63,9 @@
                     </v-data-table>
                     </div>
                     <v-layout row align-end style="margin:0 !important">
+                        <v-btn @click='reorderList' class='ghd-blue ghd-button' flat>
+                            Apply
+                        </v-btn>
                         <v-btn @click='onAddBudget' class='ghd-blue ghd-button' flat>
                             Add
                         </v-btn>
@@ -129,21 +132,20 @@ export default class EditBudgetsDialog extends Vue {
     rules: InputValidationRules = rules;
     uuidNIL: string = getBlankGuid();
     Up: string = "up";
-    Down: string = "down";
     budgetChanges: EmitedBudgetChanges = clone(emptyEmitBudgetChanges);
+    
+    originalOrder: number = 0;
+    currentSelectedBudget: Budget = emptyBudget;
 
     @Watch('dialogData')
     onDialogDataChanged() {
         this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
-        this.editBudgetsDialogGridData.map(this.defaultOrder);
         this.editBudgetsDialogGridData.sort(budget => budget.order);
 
         this.budgetChanges.addedBudgets = [];
         this.budgetChanges.updatedBudgets = [];
         this.budgetChanges.deletionIds = [];
-    }
-    defaultOrder(budget: Budget) {
-        //budget.order = 1;
+
     }
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
@@ -296,6 +298,35 @@ export default class EditBudgetsDialog extends Vue {
         }
         // sort after the reorder
         this.editBudgetsDialogGridData.sort(this.compareOrder);
+    }
+    reorderList() {
+        const original = this.originalOrder;
+        const replacement = this.currentSelectedBudget.order;
+
+        const diff = original - replacement;
+        if (diff > 0) { // reorder up
+            this.editBudgetsDialogGridData.forEach(element => {
+                if (element === this.currentSelectedBudget) { }
+                else if (element.order >=replacement && element.order <= original) {
+                    element.order++;
+                }
+            });
+        } else { // reorder down
+            this.editBudgetsDialogGridData.forEach(element => {
+                if (element === this.currentSelectedBudget) { }
+                else if (element.order >=original && element.order <= replacement) {
+                    console.log("change: " + element.name + ", " + element.order);
+                    element.order--;
+                }
+            });
+        }
+        this.editBudgetsDialogGridData.sort(this.compareOrder);
+        this.originalOrder = 0;
+        this.currentSelectedBudget = emptyBudget;
+    }
+    setCurrentOrder(item: Budget) {
+        this.originalOrder = item.order;
+        this.currentSelectedBudget = item;
     }
 }
 </script>

@@ -29,10 +29,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             return curve;
         }
 
-        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName)
+        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, EquationDTO equation = null)
         {
-            // wjwjwj see here for a related example
             var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName);
+            curve.Equation = equation;
             var curves = new List<PerformanceCurveDTO> { curve };
             unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(curves, libraryId);
             return curve;

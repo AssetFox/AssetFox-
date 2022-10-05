@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -22,6 +23,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = resolveId,
             };
             return equation;
+        }
+
+        public static EquationDTO TwoDto(Guid? id = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new EquationDTO
+            {
+                Expression = "2",
+                Id = resolveId,
+            };
+            return dto;
         }
 
         public static EquationEntity TwoWithJoin(Guid? id, Guid performanceCurveId)

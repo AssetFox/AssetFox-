@@ -126,7 +126,7 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var performanceCurve = ScenarioPerformanceCurveTestSetup.DtoForEntityInDb(TestHelper.UnitOfWork, simulationId, curveId, criterionLibrary);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var scenarioCurves = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
@@ -145,7 +145,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             var scenarioCurvesAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
-            Assert.Equal(criterionLibrary.Id, performanceCurveDtoAfter.CriterionLibrary.Id);
+            Assert.Equal(performanceCurve.CriterionLibrary.Id, performanceCurveDtoAfter.CriterionLibrary.Id);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
         }
 

@@ -22,12 +22,12 @@
                         <template slot='items' slot-scope='props'>
                             <td>
                                 <v-layout row>
-                                <v-text-field v-model="props.item.order" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
+                                <v-text-field v-model="props.item.order" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
                                     <v-layout column>
-                                    <v-icon title="up" @click="swapItemOrder(props.item, 'up')"> fas fa-chevron-up
+                                    <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
                                     </v-icon>
-                                    <v-icon title="down" @click="swapItemOrder(props.item, 'down')"> fas fa-chevron-down
+                                    <v-icon title="down" @click="swapItemOrder(props.item, 'down')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-down
                                     </v-icon>
                                     </v-layout>
                                 </v-btn>
@@ -63,9 +63,9 @@
                     </v-data-table>
                     </div>
                     <v-layout row align-end style="margin:0 !important">
-                        <v-btn @click='reorderList' class='ghd-blue ghd-button' flat>
+                        <!-- <v-btn @click='reorderList' class='ghd-blue ghd-button' flat>
                             Apply
-                        </v-btn>
+                        </v-btn> -->
                         <v-btn @click='onAddBudget' class='ghd-blue ghd-button' flat>
                             Add
                         </v-btn>
@@ -285,7 +285,8 @@ export default class EditBudgetsDialog extends Vue {
         if (isNil(direction) || isNil(item)) return;
 
         if (direction.toLowerCase() === this.Up) {    
-            if (item.order === 1) return;
+            // console.log("item order on up: " + item.order);
+            if (item.order <= 1) return;
             this.editBudgetsDialogGridData.forEach(element => {
                 if( element.order === (item.order-1)) {
                     element.order = item.order;
@@ -297,25 +298,33 @@ export default class EditBudgetsDialog extends Vue {
                 }
             });
         } else {
-            if (item.order === this.editBudgetsDialogGridData.length) return;
+            if (item.order >= this.editBudgetsDialogGridData.length) return;
             let hold: number = item.order;
+            
             this.editBudgetsDialogGridData.forEach(element => {
+                // console.log("item order on down: " + element.name + ", " + element.order);
                 if( element.order === (hold)) {
                     element.order = item.order + 1;
                     this.onEditBudgetOrder(element);
+                    // console.log("down to: " + element.name + ", " +element.order);
                 }
-                else if (element.order === hold + 1) {
+                else if (element.order === (hold + 1)) {
                     element.order = hold;
                     this.onEditBudgetOrder(element);
+                    // console.log("move up: " + element.name + ", " +element.order);
                 }
             });
         }
         // sort after the reorder
         this.editBudgetsDialogGridData.sort(this.compareOrder);
+        this.originalOrder = 0;
+        this.currentSelectedBudget = emptyBudget;
     }
-    reorderList() {
+    reorderList(item: Budget) {
         const original = this.originalOrder;
         const replacement = this.currentSelectedBudget.order;
+       
+        if (isNil(replacement) || isEmpty(replacement)) return;
 
         const diff = original - replacement;
         if (diff > 0) { // reorder up

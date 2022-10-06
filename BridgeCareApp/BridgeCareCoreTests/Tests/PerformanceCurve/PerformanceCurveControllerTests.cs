@@ -29,7 +29,7 @@ using Claim = System.Security.Claims.Claim;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class PerformanceCurveTests
+    public class PerformanceCurveControllerTests
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
@@ -266,6 +266,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Single(page.Items);
             Assert.Equal(performanceCurveId, page.Items[0].Id);
         }
+
         [Fact]
         public async Task UserIsViewPerformanceCurveFromLibraryAuthorized()
         {

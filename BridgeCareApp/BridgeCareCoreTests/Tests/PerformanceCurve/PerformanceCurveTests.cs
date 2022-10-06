@@ -232,52 +232,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task Delete_PerformanceCurveLibraryExists_Deletes()
-        {
-            Setup();
-            // Arrange
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var performanceCurveLibraryId = Guid.NewGuid();
-            var performanceCurveId = Guid.NewGuid();
-            var testLibrary = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, performanceCurveLibraryId);
-            var curveDto = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, performanceCurveLibraryId, performanceCurveId, TestAttributeNames.ActionType);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            var getResult = await controller.GetPerformanceCurveLibraries();
-            var dtos = (List<PerformanceCurveLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<PerformanceCurveLibraryDTO>));
-
-            var performanceCurveLibraryDTO = dtos.Single(dto => dto.Id == performanceCurveLibraryId);
-            curveDto.CriterionLibrary = criterionLibrary;
-            var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
-            {
-                Library = performanceCurveLibraryDTO,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
-                {
-                    LibraryId = null,
-                    UpdateRows = new List<PerformanceCurveDTO> { curveDto },
-                    AddedRows = new List<PerformanceCurveDTO>(),
-                    RowsForDeletion = new List<Guid>()
-                }
-            };
-            await controller.UpsertPerformanceCurveLibrary(request);
-
-            // Act
-            var result = controller.DeletePerformanceCurveLibrary(performanceCurveLibraryId);
-
-            // Assert
-            Assert.IsType<OkResult>(result.Result);
-
-            Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurveLibrary.Any(_ => _.Id == performanceCurveLibraryId));
-            Assert.False(TestHelper.UnitOfWork.Context.PerformanceCurve.Any(_ => _.Id == performanceCurveId));
-            Assert.False(
-                TestHelper.UnitOfWork.Context.CriterionLibraryPerformanceCurve.Any(_ =>
-                    _.PerformanceCurveId == performanceCurveId));
-            Assert.False(
-                TestHelper.UnitOfWork.Context.PerformanceCurveEquation.Any(_ =>
-                    _.PerformanceCurveId == performanceCurveId));
-        }
-
-        [Fact]
         public async Task GetScenarioPerformanceCurves_SimulationInDbWithPerformanceCurve_Gets()
         {
             Setup();

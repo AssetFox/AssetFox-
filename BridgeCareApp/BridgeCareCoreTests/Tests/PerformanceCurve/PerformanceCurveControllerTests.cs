@@ -4,18 +4,22 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +36,14 @@ namespace BridgeCareCoreTests.Tests
     public class PerformanceCurveControllerTests
     {
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
+
+
+        private UserDTO AdminUser => new UserDTO
+        {
+            Username = "Admin",
+            HasInventoryAccess = true,
+            Id = TestDataForCommittedProjects.AuthorizedUser
+        };
 
         private void Setup()
         {
@@ -229,6 +241,34 @@ namespace BridgeCareCoreTests.Tests
             Assert.Single(dto.PerformanceCurves);
 
             Assert.Equal(curveId, dto.PerformanceCurves[0].Id);
+        }
+
+        [Fact]
+        public async Task Upsert_Calls_UpsertMethodOnRepository()
+        {
+            var repositoryMock = new Mock<IPerformanceCurveRepository>();
+            var user = AdminUser;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
+            unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);
+            var esecSecurity = EsecSecurityMocks.Admin;
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
+            var controller = PerformanceCurveControllerTestSetup.WithUnitOfWork(
+                esecSecurity,
+                unitOfWork.Object);
+            var libraryId = Guid.NewGuid();
+            var pagingSync = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var pagingRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
+            {
+                PagingSync = pagingSync,
+            };
+            await controller.UpsertPerformanceCurveLibrary(pagingRequest);
+
+            var calls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
+            var callList = calls.ToList();
         }
 
         [Fact]

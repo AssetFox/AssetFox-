@@ -24,7 +24,7 @@ namespace BridgeCareCoreTests.Tests {
             return controller;
         }
 
-        public static PerformanceCurveController WithUnitOfWork(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork)
+        public static PerformanceCurveController WithUnitOfWork(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork)
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();

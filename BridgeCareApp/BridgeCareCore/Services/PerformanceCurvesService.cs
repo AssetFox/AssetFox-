@@ -21,11 +21,11 @@ namespace BridgeCareCore.Services
 {
     public class PerformanceCurvesService : IPerformanceCurvesService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;        
+        private static IUnitOfWork _unitOfWork;        
         protected readonly IHubService _hubService;
         private readonly IExpressionValidationService _expressionValidationService;
 
-        public PerformanceCurvesService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IExpressionValidationService expressionValidationService)
+        public PerformanceCurvesService(IUnitOfWork unitOfWork, IHubService hubService, IExpressionValidationService expressionValidationService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));

@@ -90,7 +90,7 @@ namespace BridgeCareCoreTests.Tests
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
             var simulationId = Guid.NewGuid();
-            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
@@ -118,13 +118,13 @@ namespace BridgeCareCoreTests.Tests
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
 
             var simulationId = Guid.NewGuid();
-            var simulationEntity = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
-            // Assert
 
+            // Assert
             Assert.NotNull(result);
-            Assert.True(result.WarningMessage.Contains("The following performace curves are imported without criteria due to invalid values"));
-            Assert.True(result.PerformanceCurves.Count > 0);
+            Assert.Contains("The following performace curves are imported without criteria due to invalid values", result.WarningMessage);
+            Assert.NotEmpty(result.PerformanceCurves);
         }
 
         [Fact]

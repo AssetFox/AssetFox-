@@ -32,11 +32,9 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private CriterionLibraryEntity Setup()
+        private CriterionLibraryDTO Setup()
         {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -57,7 +55,7 @@ namespace BridgeCareCoreTests.Tests
             var controller = SetupController();
             // Act
             var result = await controller
-                .UpsertCriterionLibrary(CriterionLibraryTestSetup.TestCriterionLibrary().ToDto());
+                .UpsertCriterionLibrary(CriterionLibraryTestSetup.TestCriterionLibrary());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -90,7 +88,7 @@ namespace BridgeCareCoreTests.Tests
 
             var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<CriterionLibraryDTO>));
-            Assert.True(dtos.Any(cl => cl.Id == criterionLibrary.Id));
+            Assert.Contains(dtos, cl => cl.Id == criterionLibrary.Id);
         }
 
         [Fact]

@@ -8,7 +8,7 @@ using MoreLinq;
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
     public static class InvestmentPlanMapper
-    { // TODO InvestmentPlanEntity and InvestmentPlanDTO will have new flag ShouldAccumulateUnusedBudgetAmounts, mapper will set it
+    {
         public static InvestmentPlanEntity ToEntity(this InvestmentPlan domain, Guid simulationId) =>
             new InvestmentPlanEntity
             {
@@ -17,7 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 FirstYearOfAnalysisPeriod = domain.FirstYearOfAnalysisPeriod,
                 InflationRatePercentage = domain.InflationRatePercentage,
                 MinimumProjectCostLimit = domain.MinimumProjectCostLimit,
-                NumberOfYearsInAnalysisPeriod = domain.NumberOfYearsInAnalysisPeriod
+                NumberOfYearsInAnalysisPeriod = domain.NumberOfYearsInAnalysisPeriod,
+                ShouldAccumulateUnusedBudgetAmounts = domain.ShouldAccumulateUnusedBudgetAmounts
             };
 
         public static InvestmentPlanEntity ToEntity(this InvestmentPlanDTO dto, Guid simulationId) =>
@@ -28,7 +29,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 FirstYearOfAnalysisPeriod = dto.FirstYearOfAnalysisPeriod,
                 InflationRatePercentage = dto.InflationRatePercentage,
                 MinimumProjectCostLimit = dto.MinimumProjectCostLimit,
-                NumberOfYearsInAnalysisPeriod = dto.NumberOfYearsInAnalysisPeriod
+                NumberOfYearsInAnalysisPeriod = dto.NumberOfYearsInAnalysisPeriod,
+                ShouldAccumulateUnusedBudgetAmounts = dto.ShouldAccumulateUnusedBudgetAmounts
             };
 
         public static InvestmentPlanDTO ToDto(this InvestmentPlanEntity entity) =>
@@ -38,7 +40,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 FirstYearOfAnalysisPeriod = entity.FirstYearOfAnalysisPeriod,
                 InflationRatePercentage = entity.InflationRatePercentage,
                 MinimumProjectCostLimit = entity.MinimumProjectCostLimit,
-                NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod
+                NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod,
+                ShouldAccumulateUnusedBudgetAmounts = entity.ShouldAccumulateUnusedBudgetAmounts
             };
 
         public static void FillSimulationInvestmentPlan(this InvestmentPlanEntity entity, Simulation simulation)
@@ -48,7 +51,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.InvestmentPlan.InflationRatePercentage = entity.InflationRatePercentage;
             simulation.InvestmentPlan.MinimumProjectCostLimit = entity.MinimumProjectCostLimit;
             simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod;
-
+            simulation.InvestmentPlan.ShouldAccumulateUnusedBudgetAmounts = entity.ShouldAccumulateUnusedBudgetAmounts;
+            
             entity.Simulation.Budgets?.ForEach(_ =>
             {
                 var budget = simulation.InvestmentPlan.AddBudget();

@@ -1,134 +1,126 @@
 <template>
     <v-layout column>
-        <v-layout row  >
-            <!-- text boxes for scenario only -->
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
-                        <v-text-field readonly outline
-                                      @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
-                                      v-model='investmentPlan.firstYearOfAnalysisPeriod' 
-                                      class="ghd-text-field-border ghd-text-field"/>
-                    </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Number of Years in Analysis Period</span></v-subheader>
-                        <v-text-field readonly outline
-                                      @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
-                                      v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
-                                      class="ghd-text-field-border ghd-text-field" />
-                    </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Minimum Project Cost Limit</span></v-subheader>
-                        <v-text-field outline id='min-proj-cost-limit-txt'                                      
-                                      @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
-                                      v-model='investmentPlan.minimumProjectCostLimit'
-                                      v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"                                      
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
-                                      :disabled="!hasAdminAccess" 
-                                      class="ghd-text-field-border ghd-text-field"/>
-                    </v-flex>
-                    <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Inflation Rate Percentage</span></v-subheader>
-                        <v-text-field outline
-                                      v-model='investmentPlan.inflationRatePercentage'
-                                      @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
-                                      :mask="'###'"
-                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
-                                      :disabled="!hasAdminAccess" 
-                                      class="ghd-text-field-border ghd-text-field"/>
-                    </v-flex>
-                    <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
-                        <v-switch style="margin-left:10px;margin-top:50px;"
-                            class="ghd-checkbox"
-                            label="Allow Funding Carryover"
-                            v-if="hasAdminAccess"
-                            v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
-                        />
-                    </v-flex>
-                    <!-- these are only in library -->
-                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                        <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
-                        <v-select :items='librarySelectItems'
-                              append-icon=$vuetify.icons.ghd-down
-                              outline 
-                              v-model='librarySelectItemValue'
-                              class="ghd-select ghd-text-field ghd-text-field-border">
-                        </v-select>
-                    </v-flex>
-                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
-                        <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
-                            <div class="header-text-content invest-owner-padding">                            
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                            </div>
-                            <v-divider class="owner-shared-divider" inset vertical>
-                            </v-divider>
-                            <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />
-                        </v-layout>
-                    </v-flex>
-                    <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header"> 
-                        <v-layout row align-end class="header-alignment-padding-right">
-                            <v-spacer></v-spacer>
-                            <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
-                            v-show='!hasScenario'>
-                                Create New Library
-                            </v-btn>
-                        </v-layout>
-                    </v-flex>                    
-        </v-layout>
-        <!-- below only for scenario to be at new line -->
-        <v-layout row style="margin-top:-10px;">
-            <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header" style="margin-top:-15px;">
-                <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
-                <v-select :items='librarySelectItems'
-                        append-icon=$vuetify.icons.ghd-down
-                        outline 
-                        v-model='librarySelectItemValue'
-                        class="ghd-select ghd-text-field ghd-text-field-border">
-                </v-select>
-            </v-flex>
-        </v-layout
-        <v-divider v-if='hasScenario || hasSelectedLibrary' />
-        <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
-            <v-flex xs4>
-                <v-layout row>
-                    <v-btn @click='onShowEditBudgetsDialog' 
-                    outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
-                        Edit Budgets
-                    </v-btn>
-                    <v-text-field :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'" 
-                    class="ghd-text-field-border ghd-text-field ghd-left-paired-textbox shrink" 
-                    v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
-                    outline v-model.number="range"/>
-                    <v-btn :disabled='currentPage.length === 0'
-                        @click='onSubmitAddBudgetYearRange'
-                        class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' outline>
-                        Add Year(s)
-                    </v-btn>
-                </v-layout>
-            </v-flex>
-            <v-spacer></v-spacer>
-            <v-flex xs4>
-                <v-layout row align-end>
-                    <v-spacer></v-spacer>
-                    <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true; showReminder = false'
-                        flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                        Upload
-                    </v-btn>
-                    <v-divider class="investment-divider" inset vertical>
-                    </v-divider>
-                    <v-btn :disabled='false' @click='exportInvestmentBudgets()'
-                        flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                        Download
-                    </v-btn>
-                     <v-divider class="upload-download-divider" inset vertical>
+        <v-flex xs12>
+            <v-layout row style="margin-top:-30px;">
+                <v-flex xs4 v-if='!hasScenario || hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
+                    <v-select :items='librarySelectItems'
+                            append-icon=$vuetify.icons.ghd-down
+                            outline 
+                            v-model='librarySelectItemValue'
+                            class="ghd-select ghd-text-field ghd-text-field-border">
+                    </v-select>
+                </v-flex>
+                <!-- these are only in library -->
+                <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header">
+                    <v-layout v-if='hasSelectedLibrary && !hasScenario' row class="header-alignment-padding-center">
+                        <div class="header-text-content invest-owner-padding">                            
+                            Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                        </div>
+                        <v-divider class="owner-shared-divider" inset vertical>
                         </v-divider>
-                        <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
-                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
-                            Download Template
+                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />
+                    </v-layout>
+                </v-flex>
+                <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header"> 
+                    <v-layout row align-end class="header-alignment-padding-right">
+                        <v-spacer></v-spacer>
+                        <v-btn @click='onShowCreateBudgetLibraryDialog(false)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                        v-show='!hasScenario'>
+                            Create New Library
                         </v-btn>
-                </v-layout>
-            </v-flex>
-        </v-layout>
-
+                    </v-layout>
+                </v-flex>
+            </v-layout>
+            <!-- only for scenario -->
+            <v-layout row style="margin-top:-10px;">
+                <!-- text boxes for scenario only -->
+                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
+                    <v-text-field readonly outline
+                                    @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
+                                    v-model='investmentPlan.firstYearOfAnalysisPeriod' 
+                                    class="ghd-text-field-border ghd-text-field"/>
+                </v-flex>
+                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Number of Years in Analysis Period</span></v-subheader>
+                    <v-text-field readonly outline
+                                    @change='onEditInvestmentPlan("numberOfYearsInAnalysisPeriod", $event)'
+                                    v-model='investmentPlan.numberOfYearsInAnalysisPeriod'
+                                    class="ghd-text-field-border ghd-text-field" />
+                </v-flex>
+                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Minimum Project Cost Limit</span></v-subheader>
+                    <v-text-field outline id='min-proj-cost-limit-txt'                                      
+                                    @change='onEditInvestmentPlan("minimumProjectCostLimit", $event)'
+                                    v-model='investmentPlan.minimumProjectCostLimit'
+                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: true}"                                      
+                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['investmentRules'].minCostLimitGreaterThanZero(investmentPlan.minimumProjectCostLimit)]"
+                                    :disabled="!hasAdminAccess" 
+                                    class="ghd-text-field-border ghd-text-field"/>
+                </v-flex>
+                <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Inflation Rate Percentage</span></v-subheader>
+                    <v-text-field outline
+                                    v-model='investmentPlan.inflationRatePercentage'
+                                    @change='onEditInvestmentPlan("inflationRatePercentage", $event)'
+                                    :mask="'###'"
+                                    :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsWithinRange(investmentPlan.inflationRatePercentage, [0,100])]"
+                                    :disabled="!hasAdminAccess" 
+                                    class="ghd-text-field-border ghd-text-field"/>
+                </v-flex>
+                <v-flex xs4 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
+                    <v-switch style="margin-left:10px;margin-top:50px;"
+                        class="ghd-checkbox"
+                        label="Allow Funding Carryover"
+                        v-if="hasAdminAccess"
+                        v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
+                    />
+                </v-flex>
+            </v-layout
+            <v-divider v-if='hasScenario || hasSelectedLibrary' />
+            <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
+                <v-flex xs4>
+                    <v-layout row>
+                        <v-btn @click='onShowEditBudgetsDialog' 
+                        outline class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button'>
+                            Edit Budgets
+                        </v-btn>
+                        <v-text-field :disabled='currentPage.length === 0' type="number" min=1 :mask="'##########'" 
+                        class="ghd-text-field-border ghd-text-field ghd-left-paired-textbox shrink" 
+                        v-bind:class="{ 'ghd-blue-text-field': currentPage.length !== 0}"
+                        outline v-model.number="range"/>
+                        <v-btn :disabled='currentPage.length === 0'
+                            @click='onSubmitAddBudgetYearRange'
+                            class='ghd-right-paired-button ghd-blue ghd-button-text ghd-outline-button-padding ' outline>
+                            Add Year(s)
+                        </v-btn>
+                    </v-layout>
+                </v-flex>
+                <v-spacer></v-spacer>
+                <v-flex xs4>
+                    <v-layout row align-end>
+                        <v-spacer></v-spacer>
+                        <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true; showReminder = false'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Upload
+                        </v-btn>
+                        <v-divider class="investment-divider" inset vertical>
+                        </v-divider>
+                        <v-btn :disabled='false' @click='exportInvestmentBudgets()'
+                            flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                            Download
+                        </v-btn>
+                        <v-divider class="upload-download-divider" inset vertical>
+                            </v-divider>
+                            <v-btn :disabled='false' @click='OnDownloadTemplateClick()'
+                                flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
+                                Download Template
+                            </v-btn>
+                    </v-layout>
+                </v-flex>
+            </v-layout>
+        </v-flex>
         <v-flex v-show='hasSelectedLibrary || hasScenario' xs12>            
         <!-- datatable -->
             <v-flex >

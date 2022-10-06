@@ -7,18 +7,21 @@ namespace AppliedResearchAssociates.iAM.Data.Aggregation
     {
         public static NumericAggregationRule CreateNumericRule(Attribute attribute)
         {
-            return attribute.AggregationRuleType switch
+            return attribute.AggregationRuleType.ToUpper() switch
             {
                 "AVERAGE" => new AverageAggregationRule(),
+                "LAST" => new LastNumericAggregationRule(),
+                "PREDOMINANT" => new PredominantNumericAggregationRule(),
                 _ => throw new InvalidOperationException(),
             };
         }
 
         public static TextAggregationRule CreateTextRule(Attribute attribute)
         {
-            return attribute.AggregationRuleType switch
+            return attribute.AggregationRuleType.ToUpper() switch
             {
-                "PREDOMINANT" => new PredominantAggregationRule(),
+                "PREDOMINANT" => new PredominantTextAggregationRule(),
+                "LAST" => new LastTextAggregationRule(),
                 _ => throw new InvalidOperationException(),
             };
         }

@@ -89,11 +89,9 @@ namespace BridgeCareCoreTests.Tests
             return library;
         }
 
-        private CriterionLibraryEntity SetupForUpsertOrDelete()
+        private CriterionLibraryDTO SetupForUpsertOrDelete()
         {
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
             return criterionLibrary;
         }
 
@@ -172,7 +170,7 @@ namespace BridgeCareCoreTests.Tests
             dto.Description = "Updated Description";
             dto.RemainingLifeLimits[0].Value = 2.0;
             dto.RemainingLifeLimits[0].CriterionLibrary =
-                criterionLibrary.ToDto();
+                criterionLibrary;
 
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(dto);
@@ -191,7 +189,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var controller = SetupController();
             var library = SetupForGet();
-            var criterionLibraryEntity = SetupForUpsertOrDelete();
+            var criterionLibrary = SetupForUpsertOrDelete();
             var getResult = await controller.RemainingLifeLimitLibraries();
             var dtos = (List<RemainingLifeLimitLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<RemainingLifeLimitLibraryDTO>));
@@ -199,7 +197,7 @@ namespace BridgeCareCoreTests.Tests
             var remainingLifeLimitLibraryDTO = dtos.Single(lib => lib.Id == library.Id);
             var remainingLifeLimitDto = remainingLifeLimitLibraryDTO.RemainingLifeLimits[0];
             remainingLifeLimitDto.CriterionLibrary =
-                criterionLibraryEntity.ToDto();
+                criterionLibrary;
 
             await controller.UpsertRemainingLifeLimitLibrary(remainingLifeLimitLibraryDTO);
 

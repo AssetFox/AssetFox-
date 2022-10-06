@@ -103,12 +103,10 @@ namespace BridgeCareCoreTests.Tests
             return entity;
         }
 
-        private CriterionLibraryEntity SetupForUpsert(Guid simulationId)
+        private CriterionLibraryDTO SetupForUpsert(Guid simulationId)
         {
             SetupForGet(simulationId);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-            TestHelper.UnitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
-            TestHelper.UnitOfWork.Context.SaveChanges();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -207,7 +205,7 @@ namespace BridgeCareCoreTests.Tests
                 typeof(AnalysisMethodDTO));
             var attributeEntity = TestHelper.UnitOfWork.Context.Attribute.First();
             dto.Attribute = attributeEntity.Name;
-            dto.CriterionLibrary = criterionLibrary.ToDto();
+            dto.CriterionLibrary = criterionLibrary;
             var analysisMethod = TestAnalysis(simulation.Id);
             var benefit = TestBenefit(analysisMethod.Id);
             benefit.Attribute = attributeEntity;

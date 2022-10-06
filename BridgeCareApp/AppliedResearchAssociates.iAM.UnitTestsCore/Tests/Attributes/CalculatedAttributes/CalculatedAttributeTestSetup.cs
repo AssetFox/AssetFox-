@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,18 +11,28 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.Calculate
 {
     public static class CalculatedAttributeTestSetup
     {
+        private static object DefaultCalculatedAttributeSetupLock = new object();
+        private static bool DefaultCalculatedAttributeLibraryHasBeenCreated = false;
+
         public static void CreateCalculatedAttributeLibrary(UnitOfDataPersistenceWork unitOfWork)
         {
-            if (!unitOfWork.Context.CalculatedAttributeLibrary.Any(_ => _.IsDefault))
+            if (!DefaultCalculatedAttributeLibraryHasBeenCreated)
             {
-                var dto = new CalculatedAttributeLibraryDTO
+                lock (DefaultCalculatedAttributeSetupLock)
                 {
-                    IsDefault = true,
-                    Id = Guid.NewGuid(),
-                    Name = "Default Test Calculated Attribute Library",
-                    CalculatedAttributes = { },
-                };
-                unitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
+                    if (!DefaultCalculatedAttributeLibraryHasBeenCreated)
+                    {
+                        var dto = new CalculatedAttributeLibraryDTO
+                        {
+                            IsDefault = true,
+                            Id = Guid.NewGuid(),
+                            Name = "Default Test Calculated Attribute Library",
+                            CalculatedAttributes = { },
+                        };
+                        unitOfWork.CalculatedAttributeRepo.UpsertCalculatedAttributeLibrary(dto);
+                        DefaultCalculatedAttributeLibraryHasBeenCreated = true;
+                    }
+                }
             }
         }
     }

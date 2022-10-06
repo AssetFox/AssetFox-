@@ -1,7 +1,7 @@
 <template>
     <v-layout column>
         <v-flex xs12>
-            <v-layout row style="margin-top:-30px;">
+            <v-layout row style="margin-top:-40px;">
                 <v-flex xs4 v-if='!hasScenario || hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                     <v-select :items='librarySelectItems'
@@ -33,7 +33,7 @@
                 </v-flex>
             </v-layout>
             <!-- only for scenario -->
-            <v-layout row style="margin-top:-10px;">
+            <v-layout row style="margin-top:-40px;">
                 <!-- text boxes for scenario only -->
                 <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
@@ -77,7 +77,7 @@
                         v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
                     />
                 </v-flex>
-            </v-layout
+            </v-layout>
             <v-divider v-if='hasScenario || hasSelectedLibrary' />
             <v-layout row justify-space-between v-show='hasSelectedLibrary || hasScenario'>
                 <v-flex xs4>

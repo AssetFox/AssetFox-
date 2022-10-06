@@ -108,35 +108,6 @@ const actions = {
             },
         );
     },
-    async upsertTargetConditionGoalLibrary(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await TargetConditionGoalService.upsertTargetConditionGoalLibrary(
-            payload.library,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                const message: string = any(
-                    propEq('id', payload.library.id),
-                    state.targetConditionGoalLibraries,
-                )
-                    ? 'Updated target condition goal library'
-                    : 'Added target condition goal library';
-                commit(
-                    'addedOrUpdatedTargetConditionGoalLibraryMutator',
-                    payload.library,
-                );
-                commit(
-                    'selectedTargetConditionGoalLibraryMutator',
-                    payload.library.id,
-                );
-                dispatch('addSuccessNotification', { message: message });
-            }
-        });
-    },
     async getScenarioTargetConditionGoals({ commit }: any, scenarioId: string) {
         await TargetConditionGoalService.getScenarioTargetConditionGoals(
             scenarioId,
@@ -146,28 +117,6 @@ const actions = {
                     'scenarioTargetConditionGoalsMutator',
                     response.data as TargetConditionGoal[],
                 );
-            }
-        });
-    },
-    async upsertScenarioTargetConditionGoals(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await TargetConditionGoalService.upsertScenarioTargetConditionGoals(
-            payload.scenarioTargetConditionGoals,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioTargetConditionGoalsMutator',
-                    payload.scenarioTargetConditionGoals,
-                );
-                dispatch('addSuccessNotification', {
-                    message: 'Modified target condition goals',
-                });
             }
         });
     },

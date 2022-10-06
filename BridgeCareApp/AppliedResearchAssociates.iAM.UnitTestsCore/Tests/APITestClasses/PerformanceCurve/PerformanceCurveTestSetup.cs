@@ -6,32 +6,41 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class PerformanceCurveTestSetup
     {
-        public static PerformanceCurveEntity TestPerformanceCurve(Guid libraryId, Guid curveId)
+        private static PerformanceCurveDTO TestPerformanceCurveDto(Guid libraryId, Guid curveId, string attributeName, string equation)
         {
-            var returnValue = new PerformanceCurveEntity
+            var equationDto = equation == null ? null : EquationTestSetup.Dto(equation);
+            var randomName = RandomStrings.WithPrefix("Curve");
+            var curve = new PerformanceCurveDTO
             {
                 Id = curveId,
-                PerformanceCurveLibraryId = libraryId,
-                Name = "Test Name",
-                Shift = false
+                CriterionLibrary = new CriterionLibraryDTO
+                {
+                    Id = libraryId,
+                },
+                Name = randomName,
+                Attribute = attributeName,
+                Equation = equationDto,
             };
-            return returnValue;
+            return curve;
         }
 
-        public static PerformanceCurveEntity TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId)
+        /// <summary>If an equation is passed in, it needs to have a nonempty id. BUT the id will
+        /// be changed when it is inserted.</summary>
+        public static PerformanceCurveDTO TestPerformanceCurveInDb(IUnitOfWork unitOfWork, Guid libraryId, Guid curveId, string attributeName, string equation = null)
         {
-            var curve = TestPerformanceCurve(libraryId, curveId);
-            var attributeId = unitOfWork.Context.Attribute.First().Id;
-            curve.AttributeId = attributeId;
-            unitOfWork.Context.PerformanceCurve.Add(curve);
-            unitOfWork.Context.SaveChanges();
-            return curve;
+            var curve = TestPerformanceCurveDto(libraryId, curveId, attributeName, "2");
+            var curves = new List<PerformanceCurveDTO> { curve };
+            unitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(curves, libraryId);
+            var curvesFromDb = unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(libraryId);
+            var curveToReturn = curvesFromDb.Single(c => c.Id == curveId);
+            return curveToReturn;
         }
     }
 }

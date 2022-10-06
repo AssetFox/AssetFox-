@@ -13,10 +13,10 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
         private const string InvalidAggregationRuleType = "OTHER";
 
         [Fact]
-        public void CreateNumericRuleTest()
+        public void CreateAverageRuleTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Average);
+            Init("Number","Average");
 
             // Act
             var result = AggregationRuleFactory.CreateNumericRule(mockAttribute.Object);
@@ -26,41 +26,80 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Aggregation
         }
 
         [Fact]
+        public void CreateNumericLastRuleTest()
+        {
+            // Arrange
+            Init("Number", "Last");
+
+            // Act
+            var result = AggregationRuleFactory.CreateNumericRule(mockAttribute.Object);
+
+            // Assert
+            Assert.IsType<LastNumericAggregationRule>(result);
+        }
+
+        [Fact]
+        public void CreatePredominantNumericRuleTest()
+        {
+            // Arrange
+            Init("Number", "Predominant");
+
+            // Act
+            var result = AggregationRuleFactory.CreateNumericRule(mockAttribute.Object);
+
+            // Assert
+            Assert.IsType<PredominantNumericAggregationRule>(result);
+        }
+
+        [Fact(Skip = "Invalid caught by attribute constructor")]
         public void CreateNumericRuleExceptionTest()
         {
             // Arrange
-            Init(InvalidAggregationRuleType);
+            Init("Number", InvalidAggregationRuleType);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateNumericRule(mockAttribute.Object));
         }
 
         [Fact]
-        public void CreateTextRuleTest()
+        public void CreatePredominantTextRuleTest()
         {
             // Arrange
-            Init(AggregationRuleTypeNames.Predominant);
+            Init("String", "Predominant");
 
             // Act
             var result = AggregationRuleFactory.CreateTextRule(mockAttribute.Object);
 
             // Assert
-            Assert.IsType<PredominantAggregationRule>(result);
+            Assert.IsType<PredominantTextAggregationRule>(result);
         }
 
         [Fact]
+        public void CreateTextLastRuleTest()
+        {
+            // Arrange
+            Init("String", "Last");
+
+            // Act
+            var result = AggregationRuleFactory.CreateTextRule(mockAttribute.Object);
+
+            // Assert
+            Assert.IsType<LastTextAggregationRule>(result);
+        }
+
+        [Fact(Skip = "Invalid caught by attribute constructor")]
         public void CreateTextRuleExceptionTest()
         {
             // Arrange
-            Init(InvalidAggregationRuleType);
+            Init("String", InvalidAggregationRuleType);
 
             // Act, Assert
             Assert.Throws<InvalidOperationException>(() => AggregationRuleFactory.CreateTextRule(mockAttribute.Object));
         }
 
-        public void Init(string aggregationRuleType)
+        public void Init(string dataType, string aggregationRuleType)
         {
-            mockAttribute = new Mock<Attribute>(guId, null, null, aggregationRuleType, null, Data.ConnectionType.MSSQL, null, Guid.Empty, false, false);
+            mockAttribute = new Mock<Attribute>(guId, null, dataType, aggregationRuleType, null, Data.ConnectionType.MSSQL, null, Guid.Empty, false, false);
         }
     }
 }

@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
@@ -34,7 +36,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             performanceCurveLibraryDto.Description = "Updated Description";
@@ -69,14 +71,11 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
-            performanceCurveDto.Equation = equation.ToDto();
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -107,10 +106,9 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
+            var equationId = performanceCurve.Equation.Id;
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
@@ -127,6 +125,8 @@ namespace BridgeCareCoreTests.Tests
                     RowsForDeletion = new List<Guid>()
                 }
             };
+            var equationBefore = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationId);
+            Assert.NotNull(equationBefore);
 
             // Act
             await controller.UpsertPerformanceCurveLibrary(request);
@@ -136,7 +136,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
             Assert.Null(performanceCurveDtoAfter.Equation?.Expression);
             Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equation.Id);
+            var equationAfter = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationId);
             Assert.Null(equationAfter);
         }
 
@@ -147,15 +147,15 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, "meow", mergedExpression);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
-            performanceCurveDto.CriterionLibrary = criterionLibrary.ToDto();
+            performanceCurveDto.CriterionLibrary = criterionLibrary;
 
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -186,13 +186,13 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
+            var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
             PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(
-                TestHelper.UnitOfWork, curveId, criterionLibrary.Id);
+                TestHelper.UnitOfWork, curveId, "meow", mergedExpression);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
             performanceCurveDto.CriterionLibrary = null;
@@ -230,12 +230,12 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
-            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, criterionLibrary.Id);
+            var mergedExpression = RandomStrings.WithPrefix("MergedExpression");
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, "Performance Curve", mergedExpression);
+            PerformanceCurveCriterionLibraryJoinTestSetup.JoinPerformanceCurveToCriterionLibrary(TestHelper.UnitOfWork, performanceCurve.Id, "meow", mergedExpression);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
@@ -268,10 +268,8 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
@@ -296,7 +294,7 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves[0];
             Assert.Equal("123", performanceCurveAfter.Equation.Expression);
-            Assert.Equal(performanceCurveDto.Equation.Id, performanceCurveAfter.Equation.Id);
+            Assert.Equal(performanceCurve.Equation.Id, performanceCurveAfter.Equation.Id);
         }
 
         [Fact]
@@ -306,10 +304,8 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId);
-            var equation = EquationTestSetup.TwoWithJoinInDb(TestHelper.UnitOfWork, null, curveId);
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType, "2");
             var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             performanceCurveLibraryDto.PerformanceCurves.RemoveAt(0);
@@ -339,8 +335,7 @@ namespace BridgeCareCoreTests.Tests
         {
             Setup();
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var performanceCurveDto = new PerformanceCurveDTO
@@ -375,8 +370,7 @@ namespace BridgeCareCoreTests.Tests
         {
             Setup();
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
@@ -423,8 +417,7 @@ namespace BridgeCareCoreTests.Tests
         {
             Setup();
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var equation = new EquationDTO
@@ -470,8 +463,7 @@ namespace BridgeCareCoreTests.Tests
         {
             Setup();
             var libraryId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var libraryDto = library.ToDto();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
             var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
             var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
             var criterionLibrary = new CriterionLibraryDTO

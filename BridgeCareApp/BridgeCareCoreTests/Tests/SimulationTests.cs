@@ -564,13 +564,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             CreateAuthorizedController(service);
             var simulation = SimulationTestSetup.TestSimulation();
-            simulation.NetworkId = NetworkTestSetup.TestNetwork.Id;
-            simulation.Network = NetworkTestSetup.TestNetwork;
-
-            // Act
-            var dto = simulation.ToDto(null);
-            dto.Id = Guid.NewGuid();
-            var result = await _controller.CreateSimulation(NetworkTestSetup.NetworkId, dto);
+            var result = await _controller.CreateSimulation(NetworkTestSetup.NetworkId, simulation);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -584,7 +578,7 @@ namespace BridgeCareCoreTests.Tests
             CreateAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             // Act
-            var result = await _controller.UpdateSimulation(simulation.ToDto(null));
+            var result = await _controller.UpdateSimulation(simulation);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -669,13 +663,10 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             // Arrange
             CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
-            var newSimulationDTO = simulation.ToDto(null);
-            newSimulationDTO.Id = Guid.NewGuid();
+            var newSimulationDto = SimulationTestSetup.TestSimulation();
             var testUser = await AddTestUser();
 
-            newSimulationDTO.Users = new List<SimulationUserDTO>
+            newSimulationDto.Users = new List<SimulationUserDTO>
                 {
                     new SimulationUserDTO
                     {
@@ -688,7 +679,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Act
             var result =
-                await _controller.CreateSimulation(NetworkTestSetup.NetworkId, newSimulationDTO) as OkObjectResult;
+                await _controller.CreateSimulation(NetworkTestSetup.NetworkId, newSimulationDto) as OkObjectResult;
             var dto = (SimulationDTO)Convert.ChangeType(result!.Value, typeof(SimulationDTO));
 
             // Assert

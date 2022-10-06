@@ -12,9 +12,9 @@ namespace BridgeCareCore.Services
 {
     public class BudgetPriortyService : IBudgetPriortyService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
 
-        public BudgetPriortyService(UnitOfDataPersistenceWork unitOfWork)
+        public BudgetPriortyService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
@@ -116,7 +116,7 @@ namespace BridgeCareCore.Services
                     return rows.OrderByDescending(_ => _.PriorityLevel).ToList();
                 else
                     return rows.OrderBy(_ => _.PriorityLevel).ToList();
-            default:
+            default://This is sorting the budget priorities by a given budget name
                 if (isDescending)
                 {
                     return rows.OrderByDescending(_ =>

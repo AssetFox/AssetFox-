@@ -16,7 +16,7 @@ using Xunit;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class PerformanceCurvesServiceTests
+    public class PerformanceCurvesServiceImportTests
     {
         private PerformanceCurvesService performanceCurvesService;
 

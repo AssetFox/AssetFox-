@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
@@ -36,6 +37,33 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
 
             var dataset = service.GetSyncedLibraryDataset(libraryId, request);
             Assert.Empty(dataset);
+        }
+
+        [Fact]
+        public void GetLibrarySyncedDataSet_OneCurveInLibrary_ReturnsTheCurve()
+        {
+            // wjwjwj also this test
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var libraryId = Guid.NewGuid();
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+            };
+            var curve = new PerformanceCurveDTO
+            {
+                Id = Guid.NewGuid(),
+            };
+            var curves = new List<PerformanceCurveDTO> { curve};
+            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+
+            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var returnedCurve = dataset.Single();
+            ObjectAssertions.Equivalent(curve, returnedCurve);
         }
     }
 }

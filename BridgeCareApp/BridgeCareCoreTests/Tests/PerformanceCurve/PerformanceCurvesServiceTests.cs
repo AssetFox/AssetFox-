@@ -49,7 +49,7 @@ namespace BridgeCareCoreTests.Tests
             // Assert
             Assert.NotNull(result);
             Assert.Null(result.WarningMessage);
-            Assert.Equal(result.PerformanceCurveLibraryDTO.PerformanceCurves.Count, 1);
+            Assert.Single(result.PerformanceCurveLibraryDTO.PerformanceCurves);
             Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary);
             Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].Equation);
         }
@@ -123,7 +123,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.Contains("The following performace curves are imported without criteria due to invalid values", result.WarningMessage);
+            Assert.Contains(PerformanceCurvesService.ImportedWithoutCriterioDueToInvalidValues, result.WarningMessage);
             Assert.NotEmpty(result.PerformanceCurves);
         }
 

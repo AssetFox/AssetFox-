@@ -24,6 +24,7 @@ namespace BridgeCareCore.Services
         private static IUnitOfWork _unitOfWork;        
         protected readonly IHubService _hubService;
         private readonly IExpressionValidationService _expressionValidationService;
+        public const string ImportedWithoutCriterioDueToInvalidValues = "The following performace curves are imported without criteria due to invalid values:";
 
         public PerformanceCurvesService(IUnitOfWork unitOfWork, IHubService hubService, IExpressionValidationService expressionValidationService)
         {
@@ -269,7 +270,7 @@ namespace BridgeCareCore.Services
         {
             if (performanceCurvesWithInvalidCriteria.Any())
             {
-                warningSb.Append($"The following performace curves are imported without criteria due to invalid values: {string.Join(", ", performanceCurvesWithInvalidCriteria)}");
+                warningSb.Append($"{ImportedWithoutCriterioDueToInvalidValues} {string.Join(", ", performanceCurvesWithInvalidCriteria)}");
             }
         }
 

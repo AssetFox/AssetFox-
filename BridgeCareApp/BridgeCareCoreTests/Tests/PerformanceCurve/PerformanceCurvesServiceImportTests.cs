@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.PerformanceCurve;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -22,12 +25,7 @@ namespace BridgeCareCoreTests.Tests
 
         private Mock<IExpressionValidationService> SetupMock(Guid performanceCurveLibraryId)
         {
-            var dbContext = TestHelper.DbContext;
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
-                dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
-                dbContext.SaveChanges();
             return mockExpressionValidationService;
         }
 
@@ -36,11 +34,23 @@ namespace BridgeCareCoreTests.Tests
         {
             // Setup
             var libraryId = Guid.NewGuid();
+            var libraryName = RandomStrings.WithPrefix("PerformanceCurve library");
             var mockExpressionValidationService = SetupMock(libraryId);
             mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
             mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var performanceCurveRepo = new Mock<IPerformanceCurveRepository>();
+            var outputDto = new PerformanceCurveLibraryDTO
+            {
+                Id = libraryId,
+                Name = libraryName,
+                PerformanceCurves = new List<PerformanceCurveDTO> { },
+            };
+            performanceCurveRepo.Setup(r => r.GetPerformanceCurveLibrary(libraryId)).Returns(outputDto);
+            performanceCurveRepo.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(outputDto.PerformanceCurves);
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
+            performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService, mockExpressionValidationService.Object);
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurve.xlsx");

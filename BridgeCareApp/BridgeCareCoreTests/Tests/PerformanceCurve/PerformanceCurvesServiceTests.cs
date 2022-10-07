@@ -9,6 +9,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
+using BridgeCareCoreTests.Helpers;
 using Moq;
 using OfficeOpenXml;
 using Xunit;
@@ -24,7 +25,7 @@ namespace BridgeCareCoreTests.Tests
             var dbContext = TestHelper.DbContext;
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var mockExpressionValidationService = new Mock<IExpressionValidationService>();
+            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
                 dbContext.Add(new PerformanceCurveLibraryEntity { Id = performanceCurveLibraryId, Name = "TestPerformanceCurveLibrary" });
                 dbContext.SaveChanges();
             return mockExpressionValidationService;
@@ -36,8 +37,8 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = SetupMock(libraryId);
-            mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
-            mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
             performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
@@ -60,8 +61,8 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = SetupMock(libraryId);
-            mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
-            mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
             performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
@@ -81,8 +82,8 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = SetupMock(libraryId);
-            mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
-            mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
             performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
@@ -108,8 +109,8 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = SetupMock(libraryId);
-            mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = false });
-            mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = true });
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(false);
+            mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
             performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 
@@ -133,8 +134,8 @@ namespace BridgeCareCoreTests.Tests
             // Setup
             var libraryId = Guid.NewGuid();
             var mockExpressionValidationService = SetupMock(libraryId);
-            mockExpressionValidationService.Setup(m => m.ValidateCriterionWithoutResults(It.IsAny<string>(), It.IsAny<UserCriteriaDTO>())).Returns(new CriterionValidationResult { IsValid = true });
-            mockExpressionValidationService.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = false });
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(true);
+            mockExpressionValidationService.SetupValidateAnyEquation(false);
             var hubService = HubServiceMocks.Default();
             performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
 

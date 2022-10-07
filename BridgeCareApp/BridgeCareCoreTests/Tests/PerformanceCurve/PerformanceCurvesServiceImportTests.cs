@@ -13,6 +13,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
 using BridgeCareCore.Services;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.PerformanceCurve;
 using Moq;
 using OfficeOpenXml;
 using Xunit;
@@ -40,21 +41,40 @@ namespace BridgeCareCoreTests.Tests
             mockExpressionValidationService.SetupValidateAnyEquation(true);
             var hubService = HubServiceMocks.Default();
             var unitOfWork = UnitOfWorkMocks.New();
-            var performanceCurveRepo = new Mock<IPerformanceCurveRepository>();
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
+            var expectedPerformanceCurve = new PerformanceCurveDTO
+            {
+                Attribute = "AGE",
+                Name = "Performance_Eq1",
+                Shift = false,
+                CriterionLibrary = new CriterionLibraryDTO
+                {
+                    MergedCriteriaExpression = "[AGE]='5'",
+                    Id = Guid.NewGuid(),
+                },
+                Equation = new EquationDTO
+                {
+                    Expression = "[AGE]",
+                    Id = Guid.NewGuid(),
+                },
+                Id = Guid.NewGuid(),
+            };
+            var outputCurves = new List<PerformanceCurveDTO> { expectedPerformanceCurve };
             var outputDto = new PerformanceCurveLibraryDTO
             {
                 Id = libraryId,
                 Name = libraryName,
-                PerformanceCurves = new List<PerformanceCurveDTO> { },
+                PerformanceCurves = new List<PerformanceCurveDTO> { expectedPerformanceCurve},
             };
-            performanceCurveRepo.Setup(r => r.GetPerformanceCurveLibrary(libraryId)).Returns(outputDto);
-            performanceCurveRepo.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(outputDto.PerformanceCurves);
+            performanceCurveRepo.SetupGetPerformanceCurveLibrary(outputDto);
+            performanceCurveRepo.SetupGetPerformanceCurvesForLibrary(libraryId, outputCurves);
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
             performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService, mockExpressionValidationService.Object);
 
             // Act
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
+
             var result = performanceCurvesService.ImportLibraryPerformanceCurvesFile(libraryId, excelPackage, new UserCriteriaDTO());
 
             // Assert
@@ -63,6 +83,9 @@ namespace BridgeCareCoreTests.Tests
             Assert.Single(result.PerformanceCurveLibraryDTO.PerformanceCurves);
             Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].CriterionLibrary);
             Assert.NotNull(result.PerformanceCurveLibraryDTO.PerformanceCurves[0].Equation);
+            var upsertedCurves = performanceCurveRepo.GetUpsertedOrDeletedPerformanceCurves(libraryId);
+            var upsertedCurve = upsertedCurves.Single();
+            ObjectAssertions.EquivalentExcluding(expectedPerformanceCurve, upsertedCurve, c => c.Id, c => c.CriterionLibrary.Id, c => c.Equation.Id);
         }
 
         [Fact]

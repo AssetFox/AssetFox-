@@ -16,6 +16,7 @@ using System.IO;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using System.Data;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {
@@ -59,7 +60,6 @@ namespace BridgeCareCore.Services
                 //// Combine curves to be imported
                 //performanceCurvesToImport.AddRange(existingPerformanceCurves);
                 #endregion
-
                 performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
                 performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurvesToImport, performanceCurveLibraryId);
             }

@@ -11,9 +11,14 @@ namespace BridgeCareCoreTests.Helpers
 {
     public static class UnitOfWorkMocks
     {
-        public static Mock<IUnitOfWork> WithCurrentUser(UserDTO user)
+        public static Mock<IUnitOfWork> New()
         {
             var unitOfWork = new Mock<IUnitOfWork>();
+            return unitOfWork;
+        }
+        public static Mock<IUnitOfWork> WithCurrentUser(UserDTO user)
+        {
+            var unitOfWork = New();
             unitOfWork.Setup(u => u.CurrentUser).Returns(user);
             return unitOfWork;
         }

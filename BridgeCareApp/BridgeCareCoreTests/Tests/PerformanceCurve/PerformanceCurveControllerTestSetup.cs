@@ -1,6 +1,7 @@
 ﻿using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Utils.Interfaces;
 using Moq;
@@ -24,11 +25,10 @@ namespace BridgeCareCoreTests.Tests {
             return controller;
         }
 
-        public static PerformanceCurveController WithUnitOfWork(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork)
+        public static PerformanceCurveController Create(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IPerformanceCurvesService performanceCurvesService)
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var performanceCurvesService = TestServices.PerformanceCurves(unitOfWork, hubService);
             var controller = new PerformanceCurveController(
                 esecSecurity,
                 unitOfWork,

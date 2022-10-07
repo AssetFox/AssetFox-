@@ -244,31 +244,45 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task Upsert_Calls_UpsertMethodOnRepository()
+        public async Task Upsert_AsksRepositoryToUpsertCurvesAndLibrary()
         {
+            // wjwjwj this test
             var repositoryMock = new Mock<IPerformanceCurveRepository>();
             var user = AdminUser;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
             unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);
             var esecSecurity = EsecSecurityMocks.Admin;
-            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
-            var controller = PerformanceCurveControllerTestSetup.WithUnitOfWork(
-                esecSecurity,
-                unitOfWork.Object);
+            var service = new Mock<IPerformanceCurvesService>();
+
+            var performanceCurves = new List<PerformanceCurveDTO>();
             var libraryId = Guid.NewGuid();
             var pagingSync = new PagingSyncModel<PerformanceCurveDTO>
             {
                 LibraryId = libraryId,
             };
+            service.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
+            var controller = PerformanceCurveControllerTestSetup.Create(
+                esecSecurity,
+                unitOfWork.Object,
+                service.Object);
+            var library = new PerformanceCurveLibraryDTO
+            {
+                Id = libraryId,
+            };
             var pagingRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 PagingSync = pagingSync,
+                Library = library,
             };
+
             await controller.UpsertPerformanceCurveLibrary(pagingRequest);
 
-            var calls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertOrDeleteScenarioPerformanceCurves));
-            var callList = calls.ToList();
+            var libraryCalls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertPerformanceCurveLibrary));
+            Assert.Single(libraryCalls);
+            var curveCalls = repositoryMock.Invocations.Where(i => i.Method.Name == nameof(IPerformanceCurveRepository.UpsertOrDeletePerformanceCurves));
+            Assert.Single(curveCalls);
         }
 
         [Fact]

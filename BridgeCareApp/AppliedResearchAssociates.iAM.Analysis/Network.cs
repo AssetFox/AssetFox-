@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string Name { get; set; }
 
-        public NetworkHistory History { get; } = new NetworkHistory();
+        public INetworkHistory History { get; } = new NetworkHistoryOnDisk();
 
         public IReadOnlyCollection<Simulation> Simulations => _Simulations;
 

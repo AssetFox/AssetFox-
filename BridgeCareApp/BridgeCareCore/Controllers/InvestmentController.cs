@@ -107,12 +107,6 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.ModifyInvestmentFromScenario)]
         public async Task<IActionResult> UpsertInvestment(Guid simulationId, InvestmentPagingSyncModel pagingSync)
         {
-            //  TODO ShouldAccumulateUnusedBudgetAmounts of InvestmentPlan should get assigned value per selection of "allowFundingCarryover" flag
-
-            // TODO InvestmentPlanEntity and InvestmentPlanDTO will have new flag ShouldAccumulateUnusedBudgetAmounts
-            // make sure pagingSync.Investment.pagingSync.InvestmentPlan get user input flag value from UI
-
-            // TODO add migration
             try
             {
                 await Task.Factory.StartNew(() =>

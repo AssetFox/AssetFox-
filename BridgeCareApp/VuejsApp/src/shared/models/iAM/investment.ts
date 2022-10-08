@@ -41,7 +41,7 @@ export interface InvestmentPlan {
     inflationRatePercentage: number;
     minimumProjectCostLimit: number;
     numberOfYearsInAnalysisPeriod: number;
-    ShouldAccumulateUnusedBudgetAmounts: boolean;
+    shouldAccumulateUnusedBudgetAmounts: boolean;
 }
 
 export interface BudgetYearsGridData {
@@ -98,5 +98,5 @@ export const emptyInvestmentPlan: InvestmentPlan = {
     inflationRatePercentage: 0,
     minimumProjectCostLimit: 0,
     numberOfYearsInAnalysisPeriod: 1,
-    ShouldAccumulateUnusedBudgetAmounts: false
+    shouldAccumulateUnusedBudgetAmounts: false
 };

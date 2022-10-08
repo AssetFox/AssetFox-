@@ -2,7 +2,7 @@
     <v-layout column>
         <v-flex xs12>
             <v-layout row style="margin-top:-40px;">
-                <v-flex xs4 v-if='!hasScenario || hasInvestmentPlanForScenario' class="ghd-constant-header">
+                <v-flex xs4 class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>Select an Investment library</span></v-subheader>
                     <v-select :items='librarySelectItems'
                             append-icon=$vuetify.icons.ghd-down
@@ -73,8 +73,9 @@
                     <v-switch style="margin-left:10px;margin-top:50px;"
                         class="ghd-checkbox"
                         label="Allow Funding Carryover"
-                        v-if="hasAdminAccess"
-                        v-model="investmentPlan.ShouldAccumulateUnusedBudgetAmounts"
+                        :disabled="!hasAdminAccess"
+                        v-model="investmentPlan.shouldAccumulateUnusedBudgetAmounts"
+                        @change='onEditInvestmentPlan("shouldAccumulateUnusedBudgetAmounts", $event)'
                     />
                 </v-flex>
             </v-layout>

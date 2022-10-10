@@ -49,12 +49,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.InvestmentPlan.MinimumProjectCostLimit = entity.MinimumProjectCostLimit;
             simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod = entity.NumberOfYearsInAnalysisPeriod;
 
-            entity.Simulation.Budgets?.ForEach(_ =>
+            entity.Simulation.Budgets?.OrderBy(_ => _.BudgetOrder).ForEach(_ =>
             {
                 var budget = simulation.InvestmentPlan.AddBudget();
                 budget.Id = _.Id;
                 budget.Name = _.Name;
-
                 if (_.ScenarioBudgetAmounts.Any())
                 {
                     var sortedBudgetAmountEntities = _.ScenarioBudgetAmounts.OrderBy(__ => __.Year);

@@ -793,6 +793,7 @@ namespace BridgeCareCore.Services
                 if(item != null)
                 {
                     budget.Name = item.Name;
+                    budget.BudgetOrder = item.BudgetOrder;
                     budget.CriterionLibrary = item.CriterionLibrary;
                 }
                 if(syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))

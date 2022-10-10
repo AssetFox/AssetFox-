@@ -7,5 +7,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public Guid Id { get; set; }
 
         public string Name { get; set; }
+
+        public int BudgetOrder { get; set; }
     }
 }

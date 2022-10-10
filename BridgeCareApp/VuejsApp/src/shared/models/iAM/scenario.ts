@@ -36,6 +36,9 @@ export interface QueuedScenario {
     status?: string;
     reportStatus?: string;
     runTime?: string;
+    queueEntryTimestamp: Date;
+    workStartedTimestamp?: Date;
+    queueingUser: string;
 }
 
 export interface ScenarioActions {

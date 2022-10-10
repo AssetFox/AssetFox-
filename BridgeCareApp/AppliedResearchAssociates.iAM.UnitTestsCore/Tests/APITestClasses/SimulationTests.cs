@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
 
+        private SequentialWorkQueue _sequentialWorkQueue;
+
         private async Task<UserDTO> AddTestUser()
         {
             var randomName = RandomStrings.Length11();
@@ -53,8 +55,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             CalculatedAttributeTestSetup.CreateCalculatedAttributeLibrary(TestHelper.UnitOfWork);
 
+            _sequentialWorkQueue = new SequentialWorkQueue();
             var simulationAnalysisService =
-                new SimulationAnalysisService(TestHelper.UnitOfWork, new());
+                new SimulationAnalysisService(TestHelper.UnitOfWork, _sequentialWorkQueue);
             return simulationAnalysisService;
         }
 
@@ -62,9 +65,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
+            var simulationService = new SimulationService(TestHelper.UnitOfWork);
+            var simulationQueueService = new SimulationQueueService(TestHelper.UnitOfWork, _sequentialWorkQueue, simulationService, simulationAnalysisService);
             _controller = new SimulationController(
                 simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork),
+                simulationService,
+                simulationQueueService,
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
@@ -75,8 +81,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            _controller = new SimulationController(simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork),
+            var simulationService = new SimulationService(TestHelper.UnitOfWork);
+            var simulationQueueService = new SimulationQueueService(TestHelper.UnitOfWork, _sequentialWorkQueue, simulationService, simulationAnalysisService);
+            _controller = new SimulationController(
+                simulationAnalysisService,
+                simulationService,
+                simulationQueueService,
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
                 hubService,

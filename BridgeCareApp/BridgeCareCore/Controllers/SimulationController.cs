@@ -26,14 +26,16 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationService _simulationService;
+        private readonly ISimulationQueueService _simulationQueueService;
 
         private readonly IReadOnlyDictionary<string, SimulationCRUDMethods> _simulationCRUDMethods;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis,ISimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis,ISimulationService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
+            _simulationQueueService = simulationQueueService ?? throw new ArgumentNullException(nameof(simulationQueueService));
             _simulationCRUDMethods = CreateCRUDMethods();
         }
 
@@ -67,7 +69,7 @@ namespace BridgeCareCore.Controllers
             PagingPageModel<SimulationDTO> RetrieveUserSimulations(PagingRequestModel<SimulationDTO> request) => _simulationService.GetUserScenarioPage(request);
             PagingPageModel<SimulationDTO> RetrieveSharedSimulations(PagingRequestModel<SimulationDTO> request) => _simulationService.GetSharedScenarioPage(request, UserInfo.Role);
 
-            PagingPageModel<QueuedSimulationDTO> RetrieveSimulationQueue(PagingRequestModel<QueuedSimulationDTO> request) => _simulationService.RetrieveSimulationQueue(request, UserInfo.Role);
+            PagingPageModel<QueuedSimulationDTO> RetrieveSimulationQueue(PagingRequestModel<QueuedSimulationDTO> request) => _simulationQueueService.GetSimulationQueuePage(request, UserInfo.Role);
 
 
             // TODO: Add another 2 methods in to controll simulation cloning (the user should only be able to clone scenarios that they have access to)

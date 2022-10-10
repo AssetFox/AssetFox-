@@ -363,9 +363,8 @@
                                 >                                 -->
                                 <v-data-table
                                     :headers="simulationQueueGridHeaders"
-                                    :items="sharedScenarios"
+                                    :items="queuedScenarios"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-                                    :search="searchShared"
                                 >
                                     <template slot="items" slot-scope="props">
                                         <td>
@@ -394,23 +393,19 @@
                                         </td>
                                         <td>
                                             <!-- TODO: Replace with Queue Date -->
-                                            {{
-                                                formatDate(
-                                                    props.item.createdDate,
-                                                )
-                                            }}
+                                            {{ formatDate(props.item.queueEntryTimestamp) }}
                                         </td>
                                         <td>
                                             <!-- TODO: Replace with Queue Time -->
-                                            {{ props.item.runTime }}
+                                            {{ formatDate(props.item.queueEntryTimestamp) }}
                                         </td>
                                         <td>
                                             <!-- TODO: Replace with Start Date -->
-                                            {{ formatDate(props.item.lastRun) }}
+                                            {{ formatDate(props.item.workStartedTimestamp) }}
                                         </td>
                                         <td>
                                             <!-- TODO: Replace with Start Time -->                                            
-                                            {{ props.item.runTime }}
+                                            {{ formatDate(props.item.workStartedTimestamp) }}
                                         </td>
                                         <td>{{ props.item.runTime }}</td>
                                         <td>{{ props.item.status }}</td>
@@ -924,7 +919,7 @@ export default class Scenarios extends Vue {
         this.setTabTotals();
     }
 
-    @Watch('userScenariosPagination')onUserScenariosPagination() {
+    @Watch('userScenariosPagination') onUserScenariosPagination() {
         if(this.initializing)
             return;
         const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
@@ -1128,7 +1123,7 @@ export default class Scenarios extends Vue {
                 this.initializing = false
                 this.totalUserScenarios = this.stateTotalUserScenarios;
                 this.totalSharedScenarios = this.stateTotalSharedScenarios;
-                this.currentSharedScenariosPage = clone(this.stateUserScenariosPage);
+                this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
                 this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
             }))); 
     }
@@ -1497,8 +1492,8 @@ export default class Scenarios extends Vue {
         this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
-            CommittedProjectsService.deleteCommittedProjects(
-                this.selectedScenarioId,
+            CommittedProjectsService.deleteSpecificCommittedProjects(
+                [this.selectedScenarioId],
             ).then((response: AxiosResponse) => {
                 if (
                     hasValue(response) &&

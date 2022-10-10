@@ -41,14 +41,5 @@ namespace BridgeCareCore.Services
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
             return workHandle;
         }
-
-
-        public IReadOnlyList<IQueuedWorkHandle> GetSimulationQueue(UserInfo userInfo)
-        {
-            return _sequentialWorkQueue.Snapshot;
-        }
-
-
-
     }
 }

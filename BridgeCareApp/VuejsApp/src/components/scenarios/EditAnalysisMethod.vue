@@ -56,7 +56,7 @@
                                 :value="analysisMethod.spendingStrategy"
                             >
                             </v-select>
-                        </v-flex>
+                        </v-flex>                        
                     </v-layout>
                     <v-layout justify-center>
                         <v-spacer />

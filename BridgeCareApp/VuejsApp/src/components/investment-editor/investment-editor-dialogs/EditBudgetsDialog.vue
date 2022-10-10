@@ -337,27 +337,22 @@ export default class EditBudgetsDialog extends Vue {
     reorderList(item: Budget) {
         const original = this.originalOrder;
         const replacement = this.currentSelectedBudget.budgetOrder;
-        console.log("original: " + original);
-        console.log("replacement: " + replacement);
         if (isNil(replacement) || isEmpty(replacement) || original === 0) return;
 
         const diff = original - replacement;
-        console.log("diff: " + diff);
         if (diff > 0) { // reorder up
             this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); console.log("up stay: " + element.name + ", " + element.budgetOrder); }
+                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=replacement && element.budgetOrder <= original) {
                     element.budgetOrder++;
-                    console.log("moves up: " + element.name + ", " + element.budgetOrder);
                     this.onEditBudgetOrder(element);
                 }
             });
         } else { // reorder down
             this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); console.log("down stay: " + element.name + ", " + element.budgetOrder); }
+                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); }
                 else if (element.budgetOrder >=original && element.budgetOrder <= replacement) {
                     element.budgetOrder--;
-                    console.log("moves down: " + element.name + ", " + element.budgetOrder);
                     this.onEditBudgetOrder(element);
                 }
             });

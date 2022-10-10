@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void CreateAggregatedResults<T>(
-            Dictionary<(Guid maintainableAssetId, Guid attributeId), AttributeValueHistory<T>>
+            Dictionary<(Guid maintainableAssetId, Guid attributeId), IAttributeValueHistory<T>>
                 attributeValueHistoryPerMaintainableAssetIdAttributeIdTuple)
         {
 

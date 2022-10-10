@@ -132,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 });
             });
 
-        private void CopyOldHistoryToNewHistory<T>(AttributeValueHistory<T> oldHistory, AttributeValueHistory<T> newHistory)
+        private void CopyOldHistoryToNewHistory<T>(IAttributeValueHistory<T> oldHistory, IAttributeValueHistory<T> newHistory)
         {
             newHistory.MostRecentValue = oldHistory.MostRecentValue;
             newHistory.ForEach(oldHistory.Add);

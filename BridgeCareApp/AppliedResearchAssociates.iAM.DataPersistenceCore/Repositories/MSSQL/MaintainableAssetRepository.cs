@@ -136,9 +136,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
 
             var numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>();
+                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<double>>();
             var textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>();
+                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<string>>();
 
             var maintainableAssetEntities = maintainableAssets.Select(_ =>
             {

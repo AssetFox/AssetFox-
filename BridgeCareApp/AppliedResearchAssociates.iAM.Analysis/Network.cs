@@ -19,8 +19,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public string Name { get; set; }
 
-        public INetworkHistory History { get; } = new NetworkHistoryOnDisk();
-
         public IReadOnlyCollection<Simulation> Simulations => _Simulations;
 
         public string SpatialWeightUnit

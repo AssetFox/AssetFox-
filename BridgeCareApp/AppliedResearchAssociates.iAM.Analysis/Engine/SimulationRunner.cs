@@ -142,8 +142,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 Send(logMessage);
             }
 
-            InParallel(AssetContexts, context => context.RollForward());
-            Simulation.Network.History.GetAccessor().Clear();
+            InParallel(AssetContexts, context =>
+            {
+                context.RollForward();
+                context.Asset.ClearHistory();
+            });
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;
 

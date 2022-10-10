@@ -20,7 +20,7 @@ export interface BudgetAmount {
 
 export interface Budget {
     id: string;
-    order: number;
+    budgetOrder: number;
     name: string;
     budgetAmounts: BudgetAmount[];
     criterionLibrary: CriterionLibrary;

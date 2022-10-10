@@ -418,6 +418,7 @@ export default class InvestmentEditor extends Vue {
     beforeDestroy() {
         this.setHasUnsavedChangesAction({ value: false });
     }
+
     // Watchers
     @Watch('pagination')
     onPaginationChanged() {
@@ -452,7 +453,7 @@ export default class InvestmentEditor extends Vue {
             InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.currentPage = data.items;
+                    this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
                     this.BudgetCache = clone(this.currentPage);
                     this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)
@@ -689,7 +690,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     setGridHeaders() {
-        const budgetNames: string[] = sorter(getPropertyValues('name', this.currentPage)) as string[];
+        const budgetNames: string[] = getPropertyValues('name', this.currentPage) as string[];
         const budgetHeaders: DataTableHeader[] = budgetNames
             .map((name: string) => ({
                 text: name,
@@ -881,14 +882,13 @@ export default class InvestmentEditor extends Vue {
         }
     }
 
+    
     onShowEditBudgetsDialog() {
-        let inc = 1;
-        const budgets = clone(this.BudgetCache);
-        budgets.forEach(budget=>{budget.order = inc++;});
 
+        this.currentPage.sort((b1, b2) => b1.budgetOrder - b2.budgetOrder);
         this.editBudgetsDialogData = {
             showDialog: true,
-            budgets: budgets,
+            budgets: clone(this.BudgetCache),
             scenarioId: this.selectedScenarioId,
         };
     }
@@ -914,8 +914,6 @@ export default class InvestmentEditor extends Vue {
             let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
             this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
-            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
-            this.onPaginationChanged();
 
             // update the current page,
             // pagination blows this away. Need to
@@ -925,7 +923,8 @@ export default class InvestmentEditor extends Vue {
                 if (budget.id === element.id) {element = budget;}
               });
             });
-            
+            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
+            this.onPaginationChanged();
         }      
     }
     removeBudget(id: string){
@@ -1263,7 +1262,7 @@ export default class InvestmentEditor extends Vue {
             InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
-                    this.currentPage = data.items;
+                    this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
                     this.BudgetCache = clone(this.currentPage);
                     this.BudgetCache.forEach(_ => _.budgetAmounts = []);
                     this.budgetAmountCache = this.currentPage.flatMap(_ => _.budgetAmounts)

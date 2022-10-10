@@ -22,7 +22,7 @@
                         <template slot='items' slot-scope='props'>
                             <td>
                                 <v-layout row>
-                                <v-text-field v-model="props.item.order" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
+                                <v-text-field v-model="props.item.budgetOrder" @change="reorderList(props.item)" @mousedown="setCurrentOrder(props.item)" class='order_input'/>
                                 <v-btn class="ghd-blue" icon>
                                     <v-layout column>
                                     <v-icon title="up" @click="swapItemOrder(props.item, 'up')" @mousedown="setCurrentOrder(props.item)"> fas fa-chevron-up
@@ -140,12 +140,30 @@ export default class EditBudgetsDialog extends Vue {
 
     @Watch('dialogData')
     onDialogDataChanged() {
-        this.editBudgetsDialogGridData = clone(this.dialogData.budgets);
-        
         this.budgetChanges.addedBudgets = [];
         this.budgetChanges.updatedBudgets = [];
         this.budgetChanges.deletionIds = [];
 
+        this.editBudgetsDialogGridData = this.setDefaultBudgetOrder(this.dialogData.budgets.sort(this.compareOrder));
+    }
+    setDefaultBudgetOrder(loadedBudgets: Budget[]): Budget[] {
+        let inc = 1;
+        let cloneBudgets = clone(loadedBudgets);
+        // If there is a 0 in the ordering, we need to reset the
+        // ordering.
+        const budgetCheck = cloneBudgets.find(b => b.budgetOrder === 0);
+        if(!isNil(budgetCheck) && this.budgetChanges.updatedBudgets.length === 0) {
+            cloneBudgets.forEach(b => {
+                b.budgetOrder = inc++;
+                // Update order
+                if(any(propEq('id', b.id), this.budgetChanges.updatedBudgets))
+                    this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((budget => budget.id == b.id))] = b;
+                else
+                    this.budgetChanges.updatedBudgets.push(b);
+
+            });
+        }
+        return cloneBudgets;
     }
     onAddBudget() {
         const unnamedBudgets = this.editBudgetsDialogGridData
@@ -153,7 +171,7 @@ export default class EditBudgetsDialog extends Vue {
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
-            order: 1,
+            budgetOrder: 1,
             name: `Unnamed Budget ${unnamedBudgets.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }
@@ -278,40 +296,36 @@ export default class EditBudgetsDialog extends Vue {
         return !allDataIsValid;
     }
     compareOrder(b1: Budget, b2: Budget) {
-        return b1.order - b2.order;
+        return b1.budgetOrder - b2.budgetOrder;
     }
     swapItemOrder(item:Budget, direction: string) {
         
         if (isNil(direction) || isNil(item)) return;
 
         if (direction.toLowerCase() === this.Up) {    
-            // console.log("item order on up: " + item.order);
-            if (item.order <= 1) return;
+            if (item.budgetOrder <= 1) return;
             this.editBudgetsDialogGridData.forEach(element => {
-                if( element.order === (item.order-1)) {
-                    element.order = item.order;
+                if( element.budgetOrder === (item.budgetOrder-1)) {
+                    element.budgetOrder = item.budgetOrder;
                     this.onEditBudgetOrder(element);
                 }
-                else if (element.order === item.order) {
-                    element.order = item.order -1;
+                else if (element.budgetOrder === item.budgetOrder) {
+                    element.budgetOrder = item.budgetOrder -1;
                     this.onEditBudgetOrder(element);
                 }
             });
         } else {
-            if (item.order >= this.editBudgetsDialogGridData.length) return;
-            let hold: number = item.order;
+            if (item.budgetOrder >= this.editBudgetsDialogGridData.length) return;
+            let hold: number = item.budgetOrder;
             
             this.editBudgetsDialogGridData.forEach(element => {
-                // console.log("item order on down: " + element.name + ", " + element.order);
-                if( element.order === (hold)) {
-                    element.order = item.order + 1;
+                if( element.budgetOrder === (hold)) {
+                    element.budgetOrder = item.budgetOrder + 1;
                     this.onEditBudgetOrder(element);
-                    // console.log("down to: " + element.name + ", " +element.order);
                 }
-                else if (element.order === (hold + 1)) {
-                    element.order = hold;
+                else if (element.budgetOrder === (hold + 1)) {
+                    element.budgetOrder = hold;
                     this.onEditBudgetOrder(element);
-                    // console.log("move up: " + element.name + ", " +element.order);
                 }
             });
         }
@@ -322,23 +336,29 @@ export default class EditBudgetsDialog extends Vue {
     }
     reorderList(item: Budget) {
         const original = this.originalOrder;
-        const replacement = this.currentSelectedBudget.order;
-       
-        if (isNil(replacement) || isEmpty(replacement)) return;
+        const replacement = this.currentSelectedBudget.budgetOrder;
+        console.log("original: " + original);
+        console.log("replacement: " + replacement);
+        if (isNil(replacement) || isEmpty(replacement) || original === 0) return;
 
         const diff = original - replacement;
+        console.log("diff: " + diff);
         if (diff > 0) { // reorder up
             this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { }
-                else if (element.order >=replacement && element.order <= original) {
-                    element.order++;
+                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); console.log("up stay: " + element.name + ", " + element.budgetOrder); }
+                else if (element.budgetOrder >=replacement && element.budgetOrder <= original) {
+                    element.budgetOrder++;
+                    console.log("moves up: " + element.name + ", " + element.budgetOrder);
+                    this.onEditBudgetOrder(element);
                 }
             });
         } else { // reorder down
             this.editBudgetsDialogGridData.forEach(element => {
-                if (element === this.currentSelectedBudget) { }
-                else if (element.order >=original && element.order <= replacement) {
-                    element.order--;
+                if (element === this.currentSelectedBudget) { this.onEditBudgetOrder(element); console.log("down stay: " + element.name + ", " + element.budgetOrder); }
+                else if (element.budgetOrder >=original && element.budgetOrder <= replacement) {
+                    element.budgetOrder--;
+                    console.log("moves down: " + element.name + ", " + element.budgetOrder);
+                    this.onEditBudgetOrder(element);
                 }
             });
         }
@@ -347,7 +367,7 @@ export default class EditBudgetsDialog extends Vue {
         this.currentSelectedBudget = emptyBudget;
     }
     setCurrentOrder(item: Budget) {
-        this.originalOrder = item.order;
+        this.originalOrder = item.budgetOrder;
         this.currentSelectedBudget = item;
     }
 }

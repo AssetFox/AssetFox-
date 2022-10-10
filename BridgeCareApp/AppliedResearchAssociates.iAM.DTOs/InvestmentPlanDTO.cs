@@ -11,5 +11,7 @@ namespace AppliedResearchAssociates.iAM.DTOs
         public decimal MinimumProjectCostLimit { get; set; }
 
         public int NumberOfYearsInAnalysisPeriod { get; set; }
+
+        public bool ShouldAccumulateUnusedBudgetAmounts { get; set; }
     }
 }

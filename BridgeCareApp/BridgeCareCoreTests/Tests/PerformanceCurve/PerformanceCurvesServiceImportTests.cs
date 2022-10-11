@@ -81,7 +81,7 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EquivalentExcluding(expectedPerformanceCurve, upsertedCurve, c => c.Id, c => c.CriterionLibrary.Id, c => c.Equation.Id);
         }
 
-        [Fact]
+        [Fact (Skip =WjFixMe)]
         public void ImportLibraryPerformanceCurvesFile_InvalidAttributeTest()
         {
             // Setup

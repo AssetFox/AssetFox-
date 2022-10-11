@@ -71,9 +71,6 @@
     <None Update="TestUtils\Files\TestImportPerformanceCurve.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestUtils\Files\TestImportPerformanceCurveInvalidAttribute.xlsx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="TestUtils\Files\TestImportScenarioPerformanceCurve.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

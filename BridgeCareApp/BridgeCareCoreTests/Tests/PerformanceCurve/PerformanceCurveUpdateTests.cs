@@ -29,42 +29,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task UpsertPerformanceCurveLibrary_CurveInDb_UpdatesShiftAndDescription()
-        {
-            Setup();
-            // Arrange
-            var libraryId = Guid.NewGuid();
-            var curveId = Guid.NewGuid();
-            var library = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurve = PerformanceCurveTestSetup.TestPerformanceCurveInDb(TestHelper.UnitOfWork, libraryId, curveId, TestAttributeNames.ActionType);
-            var controller = PerformanceCurveControllerTestSetup.SetupController(EsecSecurityMocks.Admin);
-            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            performanceCurveLibraryDto.Description = "Updated Description";
-            var performanceCurveDto = performanceCurveLibraryDto.PerformanceCurves[0];
-            performanceCurveDto.Shift = true;
-            var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
-            {
-                Library = performanceCurveLibraryDto,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
-                {
-                    LibraryId = performanceCurveLibraryDto.Id,
-                    UpdateRows = new List<PerformanceCurveDTO> { performanceCurveDto },
-                    AddedRows = new List<PerformanceCurveDTO>(),
-                    RowsForDeletion = new List<Guid>()
-                }
-            };
-            // Act
-            await controller.UpsertPerformanceCurveLibrary(request);
-
-            // Assert
-            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            Assert.Equal(performanceCurveLibraryDto.Description, performanceCurveLibraryDtoAfter.Description);
-            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
-            Assert.Equal(performanceCurveDto.Shift, performanceCurveDtoAfter.Shift);
-            Assert.Equal(performanceCurveDto.Attribute, performanceCurveDtoAfter.Attribute);
-        }
-
-        [Fact]
         public async Task UpsertPerformanceCurveLibrary_CurveInDbWithEquation_EquationUnchanged()
         {
             Setup();

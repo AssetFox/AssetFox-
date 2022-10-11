@@ -230,5 +230,126 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             Assert.Equal("123", performanceCurveAfter.Equation.Expression);
             Assert.Equal(performanceCurve.Equation.Id, performanceCurveAfter.Equation.Id);
         }
+
+
+        [Fact]
+        public void UpsertPerformanceCurve_EmptyLibraryInDb_Adds()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = attribute.Name,
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+            };
+            Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
+            var performanceCurveDtos = new List<PerformanceCurveDTO> { performanceCurveDto };
+
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurveDtos, libraryId);
+
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            Assert.Single(performanceCurveLibraryDtoAfter.PerformanceCurves);
+        }
+        [Fact]
+        public void UpsertPerformanceCurveWithEquation_EmptyLibraryInDb_AddsCurveAndEquationToLibrary()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var equation = new EquationDTO
+            {
+                Expression = "3",
+                Id = Guid.NewGuid(),
+            };
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = attribute.Name,
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+                Equation = equation,
+            };
+            Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
+            var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
+
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurves, libraryId); ;
+
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            var equationAfter = performanceCurveAfter.Equation;
+            Assert.Equal("3", equationAfter.Expression);
+            var equationEntity = TestHelper.UnitOfWork.Context.Equation.SingleOrDefault(e => e.Id == equationAfter.Id);
+            Assert.NotNull(equationEntity);
+        }
+
+        [Fact]
+        public void UpsertPerformanceCurveWithEquationWithEmptyId_EmptyLibraryInDb_AddsCurveToLibraryWithoutEquation()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var equation = new EquationDTO
+            {
+                Expression = "3",
+                Id = Guid.Empty,
+            };
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = attribute.Name,
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+                Equation = equation,
+            };
+            Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
+            var performanceCurveDtos = new List<PerformanceCurveDTO> { performanceCurveDto };
+
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurveDtos, libraryId);
+
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            var equationAfter = performanceCurveAfter.Equation;
+            Assert.Null(equationAfter.Expression);
+        }
+
+        [Fact]
+        public void UpsertPerformanceCurveWithCriterionLibrary_EmptyLibraryInDb_AddsPerformanceCurveAndCriterionLibrary()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var attribute = TestHelper.UnitOfWork.AttributeRepo.GetAttributes().First();
+            var criterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                MergedCriteriaExpression = "MergedCriteriaExpression",
+                Description = "Description",
+                IsSingleUse = true,
+            };
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = attribute.Name,
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+                CriterionLibrary = criterionLibrary,
+            };
+            Assert.Empty(performanceCurveLibraryDto.PerformanceCurves);
+            var performanceCurveDtos = new List<PerformanceCurveDTO> { performanceCurveDto };
+
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurveDtos, libraryId);
+
+            var performanceCurveLibraryDtoAfter = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var performanceCurveDtoAfter = performanceCurveLibraryDtoAfter.PerformanceCurves.Single();
+            var criterionLibraryAfter = performanceCurveDtoAfter.CriterionLibrary;
+            Assert.Equal("MergedCriteriaExpression", criterionLibraryAfter.MergedCriteriaExpression);
+        }
+
     }
 }

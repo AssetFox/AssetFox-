@@ -28,5 +28,16 @@ namespace BridgeCareCoreTests.Tests
             var theInvocation = invocationsForLibraryId.Single();
             return (List<PerformanceCurveDTO>)theInvocation.Arguments[0];
         }
+
+        public static void SetupUpsertOrDeleteScenarioPerformanceCurvesThrows(
+            this Mock<IPerformanceCurveRepository> mock,
+            string exceptionMessage)
+        {
+            var exception = new Exception(exceptionMessage);
+            mock.Setup(m => m.UpsertOrDeleteScenarioPerformanceCurves(
+                It.IsAny<List<PerformanceCurveDTO>>(),
+                It.IsAny<Guid>()))
+                .Throws(exception);
+        }
     }
 }

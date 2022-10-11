@@ -107,27 +107,31 @@ namespace BridgeCareCoreTests.Tests
             Assert.NotNull(performanceCurve.Equation);
         }
 
-        [Fact(Skip = WjFixMe)]
-        public void ImportScenarioPerformanceCurvesFileInvalidCriterionTest()
+        [Fact]
+        public void ImportScenarioPerformanceCurvesFile_ImportScenarioCurvesThrows_ExceptionMessageIsReturned()
         {
             // Setup
             var libraryId = Guid.NewGuid();
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
+            var simulationId = Guid.NewGuid();
+            var mockExpressionValidationService = ExpressionValidationServiceMocks.New();
+            mockExpressionValidationService.SetupValidateAnyCriterionWithoutResults(false);
+            mockExpressionValidationService.SetupValidateAnyEquation(true);
+            var performanceCurveRepo = PerformanceCurveRepositoryMocks.New();
+            performanceCurveRepo.SetupUpsertOrDeleteScenarioPerformanceCurvesThrows("exception message");
+            var mockUnitOfWork = UnitOfWorkMocks.New();
+            mockUnitOfWork.Setup(m => m.PerformanceCurveRepo).Returns(performanceCurveRepo.Object);
             var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
+            performanceCurvesService = new PerformanceCurvesService(mockUnitOfWork.Object, hubService, mockExpressionValidationService.Object);
 
             // Act            
             var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportScenarioPerformanceCurve.xlsx");
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
 
-            var simulationId = Guid.NewGuid();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, simulationId);
             var result = performanceCurvesService.ImportScenarioPerformanceCurvesFile(simulationId, excelPackage, new UserCriteriaDTO());
 
             // Assert
             Assert.NotNull(result);
-            Assert.Contains(PerformanceCurvesService.ImportedWithoutCriterioDueToInvalidValues, result.WarningMessage);
-            Assert.NotEmpty(result.PerformanceCurves);
+            Assert.Contains("exception message", result.WarningMessage);
         }
 
         [Fact(Skip = WjFixMe)]

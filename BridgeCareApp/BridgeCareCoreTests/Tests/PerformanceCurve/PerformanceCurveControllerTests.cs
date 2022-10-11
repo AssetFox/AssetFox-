@@ -75,6 +75,7 @@ namespace BridgeCareCoreTests.Tests
             };
             return controller;
         }
+
         [Fact]
         public async Task GetPerformanceCurveLibraries_Ok()
         {

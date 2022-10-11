@@ -81,25 +81,6 @@ namespace BridgeCareCoreTests.Tests
             ObjectAssertions.EquivalentExcluding(expectedPerformanceCurve, upsertedCurve, c => c.Id, c => c.CriterionLibrary.Id, c => c.Equation.Id);
         }
 
-        [Fact (Skip =WjFixMe)]
-        public void ImportLibraryPerformanceCurvesFile_InvalidAttributeTest()
-        {
-            // Setup
-            var libraryId = Guid.NewGuid();
-            var mockExpressionValidationService = ExpressionValidationServiceMocks.EverythingIsValid();
-            var hubService = HubServiceMocks.Default();
-            performanceCurvesService = new PerformanceCurvesService(TestHelper.UnitOfWork, hubService, mockExpressionValidationService.Object);
-
-            // Act
-            var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurveInvalidAttribute.xlsx");
-            var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
-            var result = performanceCurvesService.ImportLibraryPerformanceCurvesFile(libraryId, excelPackage, new UserCriteriaDTO());
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Error occured in import of performance curve(s): No attribute found having name AGE_.", result.WarningMessage);
-        }
-
         [Fact(Skip = WjFixMe)]
         public void ImportScenarioPerformanceCurvesFileTest()
         {

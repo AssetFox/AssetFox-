@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class AnalysisMaintainableAsset : WeakEntity, IValidator
     {
-        public static Func<AttributeValueHistoryProvider> GetHistoryProvider { get; set; } = () => new AttributeValueHistoryOnDiskProvider();
+        public static Func<AttributeValueHistoryProvider> GetHistoryProvider { get; set; } = () => new AttributeValueHistoryProvider();
 
         public string AssetName { get; set; }
 
@@ -21,8 +21,6 @@ namespace AppliedResearchAssociates.iAM.Analysis
         public Equation SpatialWeighting { get; }
 
         public ValidatorBag Subvalidators => new() { SpatialWeighting };
-
-        public void ClearHistory() => HistoryProvider.ClearHistory();
 
         public ValidationResultBag GetDirectValidationResults()
         {

@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             InParallel(AssetContexts, context =>
             {
                 context.RollForward();
-                context.Asset.ClearHistory();
+                context.Asset.HistoryProvider.ClearHistory();
             });
 
             SpendingLimit = Simulation.AnalysisMethod.SpendingLimit;

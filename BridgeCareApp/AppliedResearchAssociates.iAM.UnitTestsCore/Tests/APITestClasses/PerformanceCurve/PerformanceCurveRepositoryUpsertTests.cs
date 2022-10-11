@@ -351,34 +351,5 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.APITestClasses.Perfo
             var criterionLibraryAfter = performanceCurveDtoAfter.CriterionLibrary;
             Assert.Equal("MergedCriteriaExpression", criterionLibraryAfter.MergedCriteriaExpression);
         }
-
-        [Fact]
-        public void UpsertOrDeletePerformanceCurves_CurveHasInvalidAttribute_Throws()
-        {
-            Setup();
-            var libraryId = Guid.NewGuid();
-            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
-            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
-            var criterionLibrary = new CriterionLibraryDTO
-            {
-                Id = Guid.NewGuid(),
-                MergedCriteriaExpression = "MergedCriteriaExpression",
-                Description = "Description",
-                IsSingleUse = true,
-            };
-            var performanceCurveDto = new PerformanceCurveDTO
-            {
-                Attribute = "Invalid attribute name",
-                Id = Guid.NewGuid(),
-                Name = "Curve",
-                CriterionLibrary = criterionLibrary,
-            };
-            var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
-
-            var exception = Assert.ThrowsAny<Exception>(() =>
-            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurves, libraryId));
-            var message = exception.Message;
-            Assert.Contains(ErrorMessageConstants.NoAttributeFoundHavingName, message);
-        }
     }
 }

@@ -23,6 +23,7 @@ namespace BridgeCareCoreTests.Tests
     public class PerformanceCurvesServiceImportTests
     {
         public const string WjFixMe = "Wj fix me";
+        public const string Filename = "TestImportPerformanceCurve.xlsx";
         private PerformanceCurvesService performanceCurvesService;
 
         [Fact]
@@ -65,7 +66,7 @@ namespace BridgeCareCoreTests.Tests
             performanceCurvesService = new PerformanceCurvesService(unitOfWork.Object, hubService, mockExpressionValidationService.Object);
 
             // Act
-            var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", "TestImportPerformanceCurve.xlsx");
+            var filePathToImport = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files", Filename);
             var excelPackage = new ExcelPackage(File.OpenRead(filePathToImport));
 
             var result = performanceCurvesService.ImportLibraryPerformanceCurvesFile(libraryId, excelPackage, new UserCriteriaDTO());

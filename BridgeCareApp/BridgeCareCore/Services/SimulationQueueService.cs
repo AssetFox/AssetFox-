@@ -44,6 +44,45 @@ namespace BridgeCareCore.Services
             var items = new List<QueuedSimulationDTO>();
             var users = _unitOfWork.Context.User.ToList();
 
+
+
+
+            // TODO: DELETE BELOW
+
+            items.Add(new QueuedSimulationDTO
+            {
+                Id = Guid.NewGuid(), QueueEntryTimestamp = DateTime.Now,
+            });
+
+            items.Add(new QueuedSimulationDTO
+            {
+                Id = Guid.NewGuid(),
+                QueueEntryTimestamp = DateTime.Now,
+            });
+
+            items.Add(new QueuedSimulationDTO
+            {
+                Id = Guid.NewGuid(),
+                QueueEntryTimestamp = DateTime.Now,
+            });
+
+            items.Add(new QueuedSimulationDTO
+            {
+                Id = Guid.NewGuid(),
+                QueueEntryTimestamp = DateTime.Now,
+            });
+
+
+            return new PagingPageModel<QueuedSimulationDTO>()
+            {
+                Items = items,
+                TotalItems = items.Count
+            };
+
+            // TODO: DELETE ABOVE
+
+
+
             var simulationQueue = _sequentialWorkQueue.Snapshot;
 
             var simulationQueueIds = simulationQueue.Select(_ => new Guid(_.WorkId)).ToList();

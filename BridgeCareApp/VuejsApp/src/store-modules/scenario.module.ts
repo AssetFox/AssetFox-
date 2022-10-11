@@ -11,11 +11,13 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
     scenarios: [] as Scenario[],
+    queuedScenarios: [] as QueuedScenario[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
-    queuedScenariosPage: [] as QueuedScenario[],
+    currentQueuedScenariosPage: [] as QueuedScenario[],
+    totalQueuedScenarios: 0 as number,
     selectedScenario: clone(emptyScenario) as Scenario
 };
 
@@ -31,8 +33,9 @@ const mutations = {
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
     },
-    QueuedScenarioPageMutator(state: any, scenarios: PagingPage<QueuedScenario>){
-        state.queuedScenariosPage = clone(scenarios.items);
+    QueuedScenarioPageMutator(state: any, queuedScenarios: PagingPage<QueuedScenario>){
+        state.currentQueuedScenariosPage = clone(queuedScenarios.items);
+        state.totalQueuedScenarios = queuedScenarios.totalItems;
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {

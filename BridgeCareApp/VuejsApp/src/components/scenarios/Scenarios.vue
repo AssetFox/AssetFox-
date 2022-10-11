@@ -225,7 +225,7 @@
                                     </v-flex>
                                 </v-card-title>
                                 <v-data-table
-                                    :items="queuedScenariosPage"                      
+                                    :items="currentSharedScenariosPage"                      
                                     :pagination.sync="sharedScenariosPagination"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
@@ -364,6 +364,7 @@
                                 <v-data-table
                                     :headers="simulationQueueGridHeaders"
                                     :items="queuedScenarios"
+                                    :pagination.sync="queuedScenariosPagination"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
                                     <template slot="items" slot-scope="props">
@@ -592,11 +593,15 @@ import ScenarioService from '@/services/scenario.service';
 export default class Scenarios extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
+    @State(state => state.scenarioModule.queuedScenarios) stateQueuedScenarios: QueuedScenario[];
 
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
     @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
     @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
     @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
+
+    @State(state => state.scenarioModule.currentQueuedScenarioPage) stateQueuedScenariosPage: QueuedScenario[];
+    @State(state => state.scenarioModule.totalSharedScenarios) stateTotalQueuedScenarios: number;
 
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
 
@@ -612,7 +617,7 @@ export default class Scenarios extends Vue {
     @Action('addInfoNotification') addInfoNotificationAction: any;
     @Action('getScenarios') getScenariosAction: any;
     @Action('getSharedScenariosPage') getSharedScenariosPageAction: any;
-    @Action('getQueuedScenariosPage') getQueuedScenariosPageAction: any;
+    @Action('getSimulationQueuePage') getSimulationQueuePageAction: any;
     @Action('getUserScenariosPage') getUserScenariosPageAction: any;
     @Action('createScenario') createScenarioAction: any;
     @Action('cloneScenario') cloneScenarioAction: any;
@@ -852,7 +857,7 @@ export default class Scenarios extends Vue {
     totalSharedScenarios: number = 0;
 
     queuedScenarios: QueuedScenario[] = [];
-    queuedScenariosPage: QueuedScenario[] = [];
+    currentQueuedScenariosPage: QueuedScenario[] = [];
     queuedScenariosPagination: Pagination = clone(emptyPagination);
     totalQueuedScenarios: number = 0;
 
@@ -895,6 +900,11 @@ export default class Scenarios extends Vue {
     @Watch('stateScenarios', {deep: true})
     onStateScenariosChanged() {
         this.scenarios = clone(this.stateScenarios);
+    }
+
+    @Watch('stateQueuedScenarios', {deep: true})
+    onStateQueuedScenariosChanged() {
+        this.queuedScenarios = clone(this.stateQueuedScenarios);
     }
 
     @Watch('stateSharedScenariosPage', {deep: true}) onStateSharedScenariosPageChanged(){
@@ -979,10 +989,10 @@ export default class Scenarios extends Vue {
             },           
             sortColumn: sortBy != null ? sortBy : '',
             isDescending: descending != null ? descending : false,
-            search: this.currentSearchShared
+            search: ""
         };
         if(hasValue(this.networks) )
-            this.getQueuedScenariosPageAction(request); 
+            this.getSimulationQueuePageAction(request); 
     }    
 
     mounted() {
@@ -1067,7 +1077,7 @@ export default class Scenarios extends Vue {
         this.tabItems.push(
             { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: this.totalSharedScenarios },
-            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: 0 },
+            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedScenarios },
         );
         this.tab = 'My scenarios';
     }
@@ -1116,16 +1126,17 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };        
-        this.getSharedScenariosPageAction(request)
-            .then(() => this.getUserScenariosPageAction(request)
-            .then(() => this.getQueuedScenariosPageAction(queuedScenarioRequest)
-            .then(() => {
-                this.initializing = false
-                this.totalUserScenarios = this.stateTotalUserScenarios;
-                this.totalSharedScenarios = this.stateTotalSharedScenarios;
-                this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
-                this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
-            }))); 
+        this.getSharedScenariosPageAction(request).then(() =>
+        this.getUserScenariosPageAction(request).then(() =>
+        this.getSimulationQueuePageAction(queuedScenarioRequest).then(() => {
+            this.initializing = false
+            this.totalUserScenarios = this.stateTotalUserScenarios;
+            this.totalSharedScenarios = this.stateTotalSharedScenarios;
+            this.totalQueuedScenarios = this.stateTotalQueuedScenarios;
+            this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
+            this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
+            this.currentQueuedScenariosPage = clone(this.stateQueuedScenariosPage);
+        }))); 
     }
 
     formatDate(dateToFormat: Date) {

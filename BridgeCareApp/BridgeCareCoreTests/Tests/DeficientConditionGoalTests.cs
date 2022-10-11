@@ -5,19 +5,25 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Deficient;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Deficient;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using MathNet.Numerics.Statistics.Mcmc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using NUnit.Framework.Internal.Execution;
 using Xunit;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
@@ -39,7 +45,8 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService,
-                accessor,_mockClaimHelper.Object);
+                accessor, _mockClaimHelper.Object,
+                new DeficientConditionGoalService(TestHelper.UnitOfWork));
             return controller;
         }
         private DeficientConditionGoalController CreateTestController(List<string> uClaims)
@@ -55,7 +62,8 @@ namespace BridgeCareCoreTests.Tests
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService,
-                accessor, _mockClaimHelper.Object);
+                accessor, _mockClaimHelper.Object,
+                 new DeficientConditionGoalService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -77,7 +85,7 @@ namespace BridgeCareCoreTests.Tests
             DeficientLimit = 1.0
         };
 
-        private void SetupForGet()
+        private void SetupLibraryForGet()
         {
             if (!TestHelper.UnitOfWork.Context.DeficientConditionGoalLibrary.Any())
             {
@@ -92,12 +100,27 @@ namespace BridgeCareCoreTests.Tests
             }
         }
 
-        private CriterionLibraryDTO SetupForUpsertOrDelete()
+        public ScenarioDeficientConditionGoalEntity TestScenarioDeficientConditionGoal { get; } = new ScenarioDeficientConditionGoalEntity
         {
-            SetupForGet();
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
-             return criterionLibrary;
+            Id = Guid.NewGuid(),
+            Name = "Test Name",
+            AllowedDeficientPercentage = 100,
+            DeficientLimit = 1.0
+        };
+
+        private ScenarioDeficientConditionGoalEntity SetupScenarioGoalsForGet(Guid simulationId)
+        {
+            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
+            var goal = TestScenarioDeficientConditionGoal;
+            goal.AttributeId = attribute.Id;
+            goal.SimulationId = simulationId;
+            TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Add(goal);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            return goal;
+
         }
+
+
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
@@ -114,10 +137,12 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldReturnOkResultOnPost()
         {
             var controller = Setup();
-
+            SetupLibraryForGet();
+            var request = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>();
+            request.Library = TestDeficientConditionGoalLibrary.ToDto();
             // Act
             var result = await controller
-                .UpsertDeficientConditionGoalLibrary(TestDeficientConditionGoalLibrary.ToDto());
+                .UpsertDeficientConditionGoalLibrary(request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -136,11 +161,11 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetAllDeficientConditionGoalLibrariesWithDeficientConditionGoals()
+        public async Task ShouldGetAllDeficientConditionGoalLibraries()
         {
             // Arrange
             var controller = Setup();
-            SetupForGet();
+            SetupLibraryForGet();
 
             // Act
             var result = await controller.DeficientConditionGoalLibraries();
@@ -152,9 +177,7 @@ namespace BridgeCareCoreTests.Tests
             var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<DeficientConditionGoalLibraryDTO>));
             Assert.Single(dtos);
-            Assert.Equal(DeficientConditionGoalLibraryId, dtos[0].Id);
-            Assert.Single(dtos[0].DeficientConditionGoals);
-            Assert.Equal(DeficientConditionGoalId, dtos[0].DeficientConditionGoals[0].Id);
+            Assert.Empty(dtos[0].DeficientConditionGoals);
         }
 
         [Fact]
@@ -162,26 +185,35 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var controller = Setup();
-            var criterionLibrary = SetupForUpsertOrDelete();
-            var getResult = await controller.DeficientConditionGoalLibraries();
-            var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
-                (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
+            SetupLibraryForGet();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var libraryDto = TestDeficientConditionGoalLibrary.ToDto();
+            var goalDto = TestDeficientConditionGoal.ToDto();
+            libraryDto.Description = "Updated Description";
+            goalDto.Name = "Updated Name";
+            goalDto.CriterionLibrary = criterionLibrary;
 
-            var dto = dtos[0];
-            dto.Description = "Updated Description";
-            dto.DeficientConditionGoals[0].Name = "Updated Name";
-            dto.DeficientConditionGoals[0].CriterionLibrary =
-                criterionLibrary;
+            var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
+            {
+                UpdateRows = new List<DeficientConditionGoalDTO>() { goalDto }
+            };
+
+            var libraryRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>()
+            {
+                IsNewLibrary = false,
+                Library = libraryDto,
+                PagingSync = sync
+            };
 
             // Act
-            await controller.UpsertDeficientConditionGoalLibrary(dto);
+            await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);
 
             // Assert
 
             var modifiedDto = TestHelper.UnitOfWork.DeficientConditionGoalRepo
                 .GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
-            Assert.Equal(dto.Description, modifiedDto.Description);
-            Assert.Equal(dto.DeficientConditionGoals[0].Attribute,
+            Assert.Equal(libraryDto.Description, modifiedDto.Description);
+            Assert.Equal(goalDto.Attribute,
                 modifiedDto.DeficientConditionGoals[0].Attribute);
             // below asserts all fail as of 6/6/2022:
             //Assert.Single(modifiedDto.AppliedScenarioIds);
@@ -198,17 +230,25 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var controller = Setup();
-            var criterionLibrary = SetupForUpsertOrDelete();
+            SetupLibraryForGet();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
             var getResult = await controller.DeficientConditionGoalLibraries();
-            var dtos = (List<DeficientConditionGoalLibraryDTO>)Convert.ChangeType(
-                (getResult as OkObjectResult).Value, typeof(List<DeficientConditionGoalLibraryDTO>));
+            var deficientConditionGoalLibraryDTO = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalLibrariesWithDeficientConditionGoals()[0];
+            deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary = criterionLibrary;
 
-            var deficientConditionGoalLibraryDTO = dtos[0];
-            deficientConditionGoalLibraryDTO.DeficientConditionGoals[0].CriterionLibrary =
-               criterionLibrary;
+            var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
+            {
+                UpdateRows = new List<DeficientConditionGoalDTO>() { deficientConditionGoalLibraryDTO.DeficientConditionGoals[0] }
+            };
 
-            await controller.UpsertDeficientConditionGoalLibrary(
-                deficientConditionGoalLibraryDTO);
+            var libraryRequest = new LibraryUpsertPagingRequestModel<DeficientConditionGoalLibraryDTO, DeficientConditionGoalDTO>()
+            {
+                IsNewLibrary = false,
+                Library = deficientConditionGoalLibraryDTO,
+                PagingSync = sync
+            };
+
+            await controller.UpsertDeficientConditionGoalLibrary(libraryRequest);
 
             // Act
             var result = await controller.DeleteDeficientConditionGoalLibrary(DeficientConditionGoalLibraryId);
@@ -305,6 +345,102 @@ namespace BridgeCareCoreTests.Tests
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewDeficientConditionGoalFromlLibrary);
             // Assert
             Assert.True(allowed.Succeeded);
+        }
+
+        //Scenarios
+        [Fact]
+        public async Task ShouldModifyScenarioDeficientConditionGoalData()
+        {
+            var controller = Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            SetupScenarioGoalsForGet(simulation.Id);
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var getResult = await controller.GetScenarioDeficientConditionGoals(simulation.Id);
+            var dtos = (List<DeficientConditionGoalDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
+                typeof(List<DeficientConditionGoalDTO>));
+
+            var attribute = TestHelper.UnitOfWork.Context.Attribute.First();
+
+            var deletedGoalId = Guid.NewGuid();
+            TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Add(new ScenarioDeficientConditionGoalEntity
+            {
+                Id = deletedGoalId,
+                SimulationId = simulation.Id,
+                AttributeId = attribute.Id,
+                Name = "Deleted"
+            });
+            TestHelper.UnitOfWork.Context.SaveChanges();
+
+            var localScenarioDeficientGoals = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulation.Id);
+            var indexToDelete = localScenarioDeficientGoals.FindIndex(g => g.Id == deletedGoalId);
+            var deleteId = localScenarioDeficientGoals[indexToDelete].Id;
+            var goalToUpdate = localScenarioDeficientGoals.Single(g => g.Id != deletedGoalId);
+            var updatedGoalId = goalToUpdate.Id;
+            goalToUpdate.Name = "Updated";
+            goalToUpdate.CriterionLibrary = criterionLibrary;
+            var newGoalId = Guid.NewGuid();
+            var addedGoal = new DeficientConditionGoalDTO
+            {
+                Id = newGoalId,
+                Attribute = attribute.Name,
+                Name = "New"
+            };
+
+            var sync = new PagingSyncModel<DeficientConditionGoalDTO>()
+            {
+                UpdateRows = new List<DeficientConditionGoalDTO>() { goalToUpdate },
+                AddedRows = new List<DeficientConditionGoalDTO>() { addedGoal },
+                RowsForDeletion = new List<Guid>() { deleteId }
+            };
+
+            // Act
+            await controller.UpsertScenarioDeficientConditionGoals(simulation.Id, sync);
+
+            // Assert
+            var serverScenarioDeficientConditionGoals = TestHelper.UnitOfWork.DeficientConditionGoalRepo
+                .GetScenarioDeficientConditionGoals(simulation.Id);
+            Assert.Equal(serverScenarioDeficientConditionGoals.Count, serverScenarioDeficientConditionGoals.Count);
+
+            Assert.False(
+                TestHelper.UnitOfWork.Context.ScenarioDeficientConditionGoal.Any(_ => _.Id == deletedGoalId));
+            localScenarioDeficientGoals = TestHelper.UnitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulation.Id);
+            var localNewDeficientGoal = localScenarioDeficientGoals.Single(_ => _.Name == "New");
+            var serverNewDeficientGoal = localScenarioDeficientGoals.FirstOrDefault(_ => _.Id == newGoalId);
+            Assert.NotNull(serverNewDeficientGoal);
+            Assert.Equal(localNewDeficientGoal.Attribute, serverNewDeficientGoal.Attribute);
+
+            var localUpdatedDeficientGoal = localScenarioDeficientGoals.Single(_ => _.Id == updatedGoalId);
+            var serverUpdatedDeficientGoal = serverScenarioDeficientConditionGoals
+                .FirstOrDefault(_ => _.Id == updatedGoalId);
+            ObjectAssertions.Equivalent(localNewDeficientGoal, serverNewDeficientGoal);
+            Assert.Equal(localUpdatedDeficientGoal.Name, serverUpdatedDeficientGoal.Name);
+            Assert.Equal(localUpdatedDeficientGoal.Attribute, serverUpdatedDeficientGoal.Attribute);
+            Assert.Equal(localUpdatedDeficientGoal.CriterionLibrary.MergedCriteriaExpression,
+                serverUpdatedDeficientGoal.CriterionLibrary.MergedCriteriaExpression);
+        }
+
+        [Fact]
+        public async Task ShouldGetScenarioTargetConditionGoalPageData()
+        {
+            var controller = Setup();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var goal = SetupScenarioGoalsForGet(simulation.Id).ToDto();
+
+            // Act
+            var request = new PagingRequestModel<DeficientConditionGoalDTO>();
+            var result = await controller.GetScenarioDeficientConditionGoalPage(simulation.Id, request);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var page = (PagingPageModel<DeficientConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(PagingPageModel<DeficientConditionGoalDTO>));
+            var dtos = page.Items;
+            var dto = dtos.Single();
+            Assert.Equal(goal.Id, dto.Id);
         }
 
     }

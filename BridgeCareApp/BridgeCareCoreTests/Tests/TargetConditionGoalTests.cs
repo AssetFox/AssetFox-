@@ -221,11 +221,12 @@ namespace BridgeCareCoreTests.Tests
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
 
-            var dto = dtos.Single(l => l.Id == library.Id);
-            dto.Description = "Updated Description";
-            dto.TargetConditionGoals[0].Name = "Updated Name";
-            dto.TargetConditionGoals[0].CriterionLibrary =
-                criterionLibrary;
+            var libraryDto = library.ToDto();
+            var goalDto = goal.ToDto();
+            
+            libraryDto.Description = "Updated Description";
+            goalDto.Name = "Updated Name";
+            goalDto.CriterionLibrary = criterionLibrary;
 
             // Act
             await controller.UpsertTargetConditionGoalLibrary(dto);

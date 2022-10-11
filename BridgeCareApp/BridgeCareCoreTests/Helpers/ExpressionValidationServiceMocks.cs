@@ -27,5 +27,13 @@ namespace BridgeCareCoreTests.Helpers
         {
             mock.Setup(m => m.ValidateEquation(It.IsAny<EquationValidationParameters>())).Returns(new ValidationResult { IsValid = valid });
         }
+
+        public static Mock<IExpressionValidationService> EverythingIsValid()
+        {
+            var mock = New();
+            mock.SetupValidateAnyCriterionWithoutResults(true);
+            mock.SetupValidateAnyEquation(true);
+            return mock;
+        }
     }
 }

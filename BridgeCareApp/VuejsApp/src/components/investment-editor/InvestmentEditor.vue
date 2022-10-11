@@ -925,15 +925,6 @@ export default class InvestmentEditor extends Vue {
             let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
             this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
-
-            // update the current page,
-            // pagination blows this away. Need to
-            // updated database.
-            this.currentPage.forEach(element => {
-              budgetChanges.updatedBudgets.forEach(budget => {
-                if (budget.id === element.id) {element = budget;}
-              });
-            });
             budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
             this.onPaginationChanged();
         }      

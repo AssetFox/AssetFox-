@@ -4,16 +4,18 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public interface IAttributeValueHistory<T> : IEnumerable<KeyValuePair<int, T>>
     {
-        IEnumerable<int> Keys { get; }
+        T MostRecentValue { get; }
 
-        T MostRecentValue { get; set; }
+        int? MostRecentYear { get; }
 
-        T this[int key] { get; set; }
+        IEnumerable<int> Years { get; }
 
-        void Add(int key, T value);
+        T this[int year] { get; set; }
 
-        void Add(KeyValuePair<int, T> item);
+        void Add(int year, T value);
 
-        bool TryGetValue(int key, out T value);
+        void Add(KeyValuePair<int, T> yearValue);
+
+        bool TryGetValue(int year, out T value);
     }
 }

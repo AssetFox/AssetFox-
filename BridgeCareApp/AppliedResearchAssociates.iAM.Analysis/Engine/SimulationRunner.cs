@@ -195,6 +195,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 var unhandledContexts = ApplyRequiredEvents(year);
                 var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
                 ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
+                treatmentOptions = null;
 
                 InParallel(AssetContexts, context =>
                 {
@@ -594,6 +595,9 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 .OrderByDescending(_ => _.value * _.option.Context.GetSpatialWeight())
                 .Select(_ => _.option)
                 .ToArray();
+
+            treatmentOptionsBag.Clear();
+            treatmentOptionsBag = null;
 
             return treatmentOptions;
         }

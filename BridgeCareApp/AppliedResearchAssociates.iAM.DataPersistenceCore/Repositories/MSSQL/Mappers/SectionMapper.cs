@@ -1,32 +1,44 @@
 ﻿using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
-    public static class SectionMapper
+    public sealed class SectionMapper
     {
-        public static void CreateMaintainableAsset(this MaintainableAssetEntity entity, Network network)
+        public SectionMapper(Network network)
         {
-            var asset = network.AddAsset();
+            Network = network;
+            HistoryMapper = new(network);
+        }
+
+        public void CreateMaintainableAsset(MaintainableAssetEntity entity)
+        {
+            var asset = Network.AddAsset();
             asset.Id = entity.Id;
             asset.AssetName = entity.AssetName;
             asset.SpatialWeighting.Expression = entity.SpatialWeighting;
 
             if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator))
             {
-                entity.AggregatedResults
+                var numericResults = entity.AggregatedResults
                     .Where(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator)
-                    .ToList()
-                    .SetNumericAttributeValueHistories(asset);
+                    .ToList();
+
+                HistoryMapper.SetNumericAttributeValueHistories(numericResults, asset);
             }
 
             if (entity.AggregatedResults.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
             {
-                entity.AggregatedResults
-                    .Where(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator).ToList()
-                    .SetTextAttributeValueHistories(asset);
+                var textResults = entity.AggregatedResults
+                    .Where(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator)
+                    .ToList();
+
+                HistoryMapper.SetTextAttributeValueHistories(textResults, asset);
             }
         }
+
+        private readonly AttributeValueHistoryMapper HistoryMapper;
+        private readonly Network Network;
     }
 }

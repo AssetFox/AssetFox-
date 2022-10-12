@@ -157,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         var history = asset.GetHistory(numberAttribute);
                         var dataSourceHistory = dataSourceAsset.GetHistory(dataSourceNumberAttribute);
                         Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
-                        history.Keys.ForEach(historyKey =>
+                        history.Years.ForEach(historyKey =>
                         {
                             Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
                         });
@@ -175,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                         var history = asset.GetHistory(textAttribute);
                         var dataSourceHistory = dataSourceAsset.GetHistory(dataSourceTextAttribute);
                         Assert.Equal(history.MostRecentValue, dataSourceHistory.MostRecentValue);
-                        history.Keys.ForEach(historyKey =>
+                        history.Years.ForEach(historyKey =>
                         {
                             Assert.Equal(history[historyKey], dataSourceHistory[historyKey]);
                         });

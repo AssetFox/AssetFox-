@@ -14,9 +14,9 @@ const state = {
     queuedScenarios: [] as QueuedScenario[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
+    currentQueuedScenariosPage: [] as QueuedScenario[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
-    currentQueuedScenariosPage: [] as QueuedScenario[],
     totalQueuedScenarios: 0 as number,
     selectedScenario: clone(emptyScenario) as Scenario
 };

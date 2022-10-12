@@ -64,8 +64,8 @@
                                 </v-card-title>
                                 <v-data-table
                                     :items="currentUserScenariosPage"                      
+                                    :totalItems="totalUserScenarios"
                                     :pagination.sync="userScenariosPagination"
-                                    :total-items="totalUserScenarios"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
 
@@ -226,6 +226,7 @@
                                 </v-card-title>
                                 <v-data-table
                                     :items="currentSharedScenariosPage"                      
+                                    :totalItems="totalSharedScenarios"
                                     :pagination.sync="sharedScenariosPagination"
                                     :headers="scenarioGridHeaders"
                                     sort-icon=$vuetify.icons.ghd-table-sort
@@ -363,7 +364,8 @@
                                 >                                 -->
                                 <v-data-table
                                     :headers="simulationQueueGridHeaders"
-                                    :items="queuedScenarios"
+                                    :items="currentQueuedScenariosPage"
+                                    :totalItems="totalQueuedScenarios"
                                     :pagination.sync="queuedScenariosPagination"
                                     sort-icon=$vuetify.icons.ghd-table-sort
                                 >
@@ -597,11 +599,12 @@ export default class Scenarios extends Vue {
 
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
     @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
+    @State(state => state.scenarioModule.currentQueuedScenariosPage) stateQueuedScenariosPage: QueuedScenario[];
+
     @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
     @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
+    @State(state => state.scenarioModule.totalQueuedScenarios) stateTotalQueuedScenarios: number;
 
-    @State(state => state.scenarioModule.currentQueuedScenarioPage) stateQueuedScenariosPage: QueuedScenario[];
-    @State(state => state.scenarioModule.totalSharedScenarios) stateTotalQueuedScenarios: number;
 
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
 
@@ -910,22 +913,30 @@ export default class Scenarios extends Vue {
     @Watch('stateSharedScenariosPage', {deep: true}) onStateSharedScenariosPageChanged(){
         this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
     }
-    @Watch('stateUserScenariosPage', {deep: true}) onStateUserScenariosPageChanged(){
-        this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
-    }
     @Watch('stateTotalSharedScenarios') onStateTotalSharedScenariosChanged(){
         this.totalSharedScenarios = this.stateTotalSharedScenarios;
     }
-    
     @Watch('totalSharedScenarios') onTotalSharedScenariosChanged(){
         this.setTabTotals();
     }
     
+    @Watch('stateUserScenariosPage', {deep: true}) onStateUserScenariosPageChanged(){
+        this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
+    }
     @Watch('stateTotalUserScenarios') onStateTotalUserScenariosChanged(){
         this.totalUserScenarios = this.stateTotalUserScenarios;
     }
-
     @Watch('totalUserScenarios') onTotalUserScenariosChanged(){
+        this.setTabTotals();
+    }
+    
+    @Watch('stateQueuedScenariosPage', {deep: true}) onStateQueuedScenariosPageChanged(){
+        this.currentQueuedScenariosPage = clone(this.stateQueuedScenariosPage);
+    }
+    @Watch('stateTotalQueuedScenarios') onStateTotalQueuedScenariosChanged(){
+        this.totalQueuedScenarios = this.stateTotalQueuedScenarios;
+    }
+    @Watch('totalQueuedScenarios') onTotalQueuedScenariosChanged(){
         this.setTabTotals();
     }
 
@@ -1598,8 +1609,10 @@ export default class Scenarios extends Vue {
         this.tabItems.forEach(tab => {
             if(tab.name === 'Shared with me')
                 tab.count = this.totalSharedScenarios;
-            else
+            else if (tab.name === 'My scenarios')
                 tab.count = this.totalUserScenarios;
+            else
+                tab.count = this.totalQueuedScenarios;
         })
     }
 }

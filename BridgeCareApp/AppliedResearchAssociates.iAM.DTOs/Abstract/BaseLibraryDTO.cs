@@ -14,5 +14,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public Guid Owner { get; set; }
 
         public bool IsShared { get; set; }
+
+        public List<LibraryUserDTO> Users { get; set; } = new List<LibraryUserDTO>();
     }
 }

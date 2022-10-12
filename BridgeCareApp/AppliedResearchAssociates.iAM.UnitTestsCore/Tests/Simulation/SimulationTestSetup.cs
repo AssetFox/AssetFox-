@@ -53,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             unitOfWork.Context.AddEntity(entity);
             return entity;
         }
+
         public static Simulation DomainSimulation(UnitOfDataPersistenceWork unitOfWork)
         {
             var simulationEntity = SimulationTestSetup.EntityInDb(unitOfWork, NetworkTestSetup.NetworkId);

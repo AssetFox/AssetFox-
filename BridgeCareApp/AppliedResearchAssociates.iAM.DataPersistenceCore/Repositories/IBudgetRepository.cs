@@ -31,5 +31,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId);
 
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
+        void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers);
     }
 }

@@ -35,6 +35,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public async Task BudgetLibraryInDbWithUser_GetUsers_Gets()
+        {
+            var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
+            var budgetLibrary = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
+
+            var users = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
+
+            var actualUser = users.Single();
+            var expected = new LibraryUserDTO
+            {
+                AccessLevel = DTOs.Enums.LibraryAccessLevel.Read,
+                UserId = user.Id,
+            };
+            ObjectAssertions.Equivalent(expected, actualUser);
+        }
+
+        [Fact]
         public async Task BudgetLibraryInDbWithUser_UpsertOrDeleteUsers_UserNotInList_Removes()
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");

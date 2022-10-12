@@ -25,9 +25,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 AccessLevel = DTOs.Enums.LibraryAccessLevel.Modify,
                 UserId = user.Id,
             };
-            var userDtos = new List<LibraryUserDTO> { userDto };
+            budgetLibrary.Users.Add(userDto);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, userDtos);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
 
             var userEntitiesAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibrary.Id).ToList();
             var userAfter = userEntitiesAfter.Single();
@@ -63,8 +63,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
             var userBefore = usersBefore.Single();
             Assert.Equal(user.Id, userBefore.UserId);
+            budgetLibrary.Users.Clear();
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, new List<LibraryUserDTO>());
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
 
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
             Assert.Empty(usersAfter);

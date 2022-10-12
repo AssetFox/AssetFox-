@@ -99,7 +99,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
-        public void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
+        private void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
             var existingUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
             var existingUserIds = existingUsers.Select(u => u.UserId).ToList();
@@ -107,14 +107,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
             var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
             var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
-            _unitOfWork.BeginTransaction();
             var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToEntity(u, budgetLibraryId)).ToList();
             var entitiesToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
             _unitOfWork.Context.AddRange(entitiesToAdd);
             _unitOfWork.Context.UpdateRange(entitiesToUpdate);
             var entitiesToDelete = existingUsers.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
             _unitOfWork.Context.RemoveRange(entitiesToDelete);
-            _unitOfWork.Commit();
         }
 
         public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
@@ -124,8 +122,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) =>
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+            UpsertOrDeleteUsers(dto.Id, dto.Users);
+            _unitOfWork.Context.SaveChanges();
+        }
 
         public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {

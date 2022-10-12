@@ -112,20 +112,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void BudgetLibrary_SharedButNullUsers()
-        {
-            //setup
-            var unitOfWork = TestHelper.UnitOfWork;
-
-            //create budget library
-            var budgetLibraryDto = createBudgetLibraryDto("BudgetLibrary_SharedButNullUsers", true);
-            budgetLibraryDto.Users = null;
-
-            //testing and asserts
-            Assert.ThrowsAny<Exception>(() => unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto));
-        }
-
-        [Fact]
         public void BudgetLibrary_SharedButInvalidOrNoUsers()
         {
             //setup
@@ -137,7 +123,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             //testing and asserts
             var budgetLibraryDtoAfter = unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryDto.Id);
-            Assert.Empty(budgetLibraryDtoAfter.Users);
+            ObjectAssertions.EquivalentExcluding(budgetLibraryDto, budgetLibraryDtoAfter, bl => bl.Budgets);
         }
 
         [Fact (Skip ="Wj to figure out")]
@@ -146,8 +132,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             //setup
             var unitOfWork = TestHelper.UnitOfWork;
             var budgetLibraryDto = createBudgetLibraryDto("UpsertBudgetLibrary_SharedWithValidUsers", true);
-            var budgetLibraryUserList = await BudgetLibraryUserTestSetup.GetUserList(unitOfWork);
-            budgetLibraryDto.Users = budgetLibraryUserList;
 
             //act
             unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto);

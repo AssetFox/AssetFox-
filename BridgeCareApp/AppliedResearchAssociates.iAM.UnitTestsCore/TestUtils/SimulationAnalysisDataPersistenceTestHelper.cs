@@ -134,8 +134,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         private void CopyOldHistoryToNewHistory<T>(IAttributeValueHistory<T> oldHistory, IAttributeValueHistory<T> newHistory)
         {
-            newHistory.MostRecentValue = oldHistory.MostRecentValue;
-            newHistory.ForEach(oldHistory.Add);
+            oldHistory.ForEach(newHistory.Add);
         }
 
         public void CreateSimulationAnalysisNetwork()

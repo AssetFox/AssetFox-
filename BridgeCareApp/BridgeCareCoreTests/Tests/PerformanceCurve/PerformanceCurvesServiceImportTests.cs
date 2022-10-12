@@ -107,6 +107,10 @@ namespace BridgeCareCoreTests.Tests
             Assert.NotNull(performanceCurve.Equation);
         }
 
+        // The import goes ahead and completes, even if there are invalid
+        // equations and/or criteria. It simply issues warnings in that case.
+        // WJ is skeptical that this is correct. Jake will discuss with
+        // Tyler.
         [Fact]
         public void ImportScenarioPerformanceCurvesFile_ImportScenarioCurvesThrows_ExceptionMessageIsReturned()
         {

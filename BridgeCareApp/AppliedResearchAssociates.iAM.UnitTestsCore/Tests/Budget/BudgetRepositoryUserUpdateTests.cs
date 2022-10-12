@@ -33,5 +33,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var userAfter = userEntitiesAfter.Single();
             Assert.Equal(user.Id, userAfter.UserId);
         }
+
+        [Fact]
+        public async Task BudgetLibraryInDbWithUser_UpsertOrDeleteUsers_UserNotInList_Removes()
+        {
+            var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
+            var budgetLibrary = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
+            var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
+            var userBefore = usersBefore.Single();
+            Assert.Equal(user.Id, userBefore.UserId);
+
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, new List<LibraryUserDTO>());
+
+            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
+            Assert.Empty(usersAfter);
+        }
     }
 }

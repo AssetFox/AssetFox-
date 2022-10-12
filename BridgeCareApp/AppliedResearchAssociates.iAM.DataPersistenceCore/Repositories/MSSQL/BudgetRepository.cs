@@ -117,6 +117,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Commit();
         }
 
+        public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
+        {
+            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
+            var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
+            return dtos;
+        }
+
         public void UpsertBudgetLibrary(BudgetLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 

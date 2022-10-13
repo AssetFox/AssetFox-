@@ -154,7 +154,7 @@ namespace BridgeCareCore.Controllers
                     result = UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList(); // wjTodo -- keep this architecture, but check against the user's id here.
                     }
                 });
 

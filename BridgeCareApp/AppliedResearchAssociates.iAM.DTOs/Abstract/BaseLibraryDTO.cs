@@ -13,7 +13,7 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 
         public Guid Owner { get; set; }
 
-        public bool IsShared { get; set; }
+        public bool IsShared { get; set; } // wjTodo -- delete this all over the place
 
         public List<LibraryUserDTO> Users { get; set; } = new List<LibraryUserDTO>();
     }

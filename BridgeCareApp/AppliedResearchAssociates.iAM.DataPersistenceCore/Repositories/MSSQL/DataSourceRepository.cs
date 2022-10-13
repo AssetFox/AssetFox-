@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using System.Data;
+using Org.BouncyCastle.Crypto;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -62,6 +63,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (!dataSource.Validate())
                 throw new ArgumentException("The data source could not be validated");
 
+           // TODO call to encrypt string of connection str, and decrypt at time of get call
+           
             _unitOfWork.Context.Upsert(dataSource.ToEntity(), dataSource.Id, _unitOfWork.UserEntity?.Id);
         }
             

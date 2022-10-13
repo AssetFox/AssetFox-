@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
         public static Simulation DomainSimulation(UnitOfDataPersistenceWork unitOfWork)
         {
-            var simulationEntity = SimulationTestSetup.EntityInDb(unitOfWork, NetworkTestSetup.NetworkId);
+            var simulationEntity = EntityInDb(unitOfWork, NetworkTestSetup.NetworkId);
             var simulationDto = unitOfWork.SimulationRepo.GetSimulation(simulationEntity.Id);
             var networkId = NetworkTestSetup.NetworkId;
             var explorer = unitOfWork.AttributeRepo.GetExplorer();

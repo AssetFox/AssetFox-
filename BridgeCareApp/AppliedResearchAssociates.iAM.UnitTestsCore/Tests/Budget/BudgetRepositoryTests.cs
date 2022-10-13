@@ -164,6 +164,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var detail = details.Single();
             Assert.Equal(budgetName, detail.Name);
         }
+
         [Fact]
         public void GetScenarioBudgets_SimulationInDbWithScenarioBudget_Gets()
         {
@@ -183,6 +184,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(budgetName, actualBudget.Name);
             Assert.Equal(budget.Id, actualBudget.Id);
             Assert.Empty(actualBudget.BudgetAmounts);
+            Assert.Equal(Guid.Empty, actualBudget.CriterionLibrary.Id);
+        }
+
+        [Fact]
+        public void GetScenarioBudgets_SimulationInDbWithScenarioBudgetWithAmount_GetsWithAmount()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.DomainSimulation(TestHelper.UnitOfWork);
+            var investmentPlan = simulation.InvestmentPlan;
+            TestHelper.UnitOfWork.InvestmentPlanRepo.CreateInvestmentPlan(investmentPlan, simulation.Id);
+            investmentPlan.NumberOfYearsInAnalysisPeriod = 1;
+            var budgetName = RandomStrings.WithPrefix("Budget");
+            var budget = investmentPlan.AddBudget();
+            budget.YearlyAmounts[0].Value = 1234;
+            budget.Name = budgetName;
+            var budgets = investmentPlan.Budgets.ToList();
+            ScenarioBudgetTestSetup.CreateScenarioBudgets(TestHelper.UnitOfWork, budgets, simulation.Id);
+
+            var actualBudgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+
+            var actualBudget = actualBudgets.Single();
+            Assert.Equal(budgetName, actualBudget.Name);
+            Assert.Equal(budget.Id, actualBudget.Id);
+            var budgetAmount = actualBudget.BudgetAmounts.Single();
+            Assert.Equal(1234m, budgetAmount.Value);
             Assert.Equal(Guid.Empty, actualBudget.CriterionLibrary.Id);
         }
     }

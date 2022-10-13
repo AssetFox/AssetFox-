@@ -123,8 +123,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             AssetContexts = Simulation.Network.Assets
 #if !DEBUG
-                .AsParallel().
-                WithDegreeOfParallelism(maxThreadsForSimulation)
+                .AsParallel()
+                .WithDegreeOfParallelism(maxThreadsForSimulation)
 #endif
                 .Select(asset => new AssetContext(asset, this))
                 .Where(context => Simulation.AnalysisMethod.Filter.EvaluateOrDefault(context))

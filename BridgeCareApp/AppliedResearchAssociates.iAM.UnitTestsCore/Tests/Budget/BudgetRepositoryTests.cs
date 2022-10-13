@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var unitOfWork = TestHelper.UnitOfWork;
 
             //create budget library
-            var budgetLibraryDto = BudgetTestSetup.CreateBudgetLibraryDto("BudgetLibrary_SharedButInvalidOrNoUsers", true);
+            var budgetLibraryDto = BudgetLibraryTestSetup.CreateBudgetLibraryDto("BudgetLibrary_SharedButInvalidOrNoUsers", true);
             unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto);
 
             //testing and asserts
@@ -67,7 +67,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task GetBudgetLibrary_BudgetLibraryInDbWithUser_GetsWithUser()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
 
             var libraryWithUsers = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
@@ -86,7 +86,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task GetAllBudgetLibraries_BudgetLibraryInDbWithUser_GetsWithUser()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
 
             var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries();
@@ -102,11 +102,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             ObjectAssertions.Equivalent(expectedUser, actualUser);
         }
 
+
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithUser_GetsWithoutUser()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
+
+            var libraryAfter = libraries.Single(l => l.Id == library.Id);
+            var users = libraryAfter.Users;
+            Assert.Empty(users);
+        }
+
+
         [Fact]
         public async Task Delete_BudgetLibraryInDbWithUser_Deletes()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
 
             TestHelper.UnitOfWork.BudgetRepo.DeleteBudgetLibrary(library.Id);
@@ -116,6 +132,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Null(libraryAfter);
             var libraryUsersAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.UserId == user.Id).ToList();
             Assert.Empty(libraryUsersAfter);
+        }
+
+        [Fact]
+        public void GetScenarioSimpleBudgetDetails_SimulationInDb_EmptyList()
+        {
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+
+            var simpleDetails = TestHelper.UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulation.Id);
+
+            Assert.Empty(simpleDetails);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task BudgetLibraryInDb_AddBudgetUsers_Does()
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
-            var budgetLibrary = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
+            var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
             var userDto = new LibraryUserDTO
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task BudgetLibraryInDbWithUser_GetUsers_Gets()
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
-            var budgetLibrary = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
+            var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
 
@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public async Task BudgetLibraryInDbWithUser_UpsertOrDeleteUsers_UserNotInList_Removes()
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
-            var budgetLibrary = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
+            var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName, false);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
             var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
@@ -76,7 +76,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var libraryDto = BudgetTestSetup.CreateBudgetLibraryDto(libraryName, true);
+            var libraryDto = BudgetLibraryTestSetup.CreateBudgetLibraryDto(libraryName, true);
             var userDto = BudgetLibraryUserTestSetup.CreateLibraryUserDto(user.Id);
             libraryDto.Users.Add(userDto);
 

@@ -9,7 +9,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    public static class BudgetTestSetup
+    public static class BudgetLibraryTestSetup
     {
 
         private static CriterionLibraryDTO CreateCriterionLibraryObject(string criteriaExpression = "", bool singleUse = false)

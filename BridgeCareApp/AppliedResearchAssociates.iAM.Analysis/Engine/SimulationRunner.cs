@@ -184,8 +184,11 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             Simulation.ClearResults();
 
-            Simulation.Results.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
-            Simulation.Results.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+            SimulationOutput output = new();
+            output.InitialConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
+            output.InitialAssetSummaries.AddRange(AssetContexts.Select(context => context.SummaryDetail));
+            Simulation.ResultsOnDisk.Initialize(output);
+            output = null;
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
@@ -691,7 +694,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
         private void Snapshot(int year)
         {
-            var yearDetail = Simulation.Results.Years.GetAdd(new SimulationYearDetail(year));
+            SimulationYearDetail yearDetail = new(year);
 
             yearDetail.Budgets.AddRange(BudgetContexts.Select(context => new BudgetDetail(context.Budget, context.CurrentAmount)));
             yearDetail.ConditionOfNetwork = Simulation.AnalysisMethod.Benefit.GetNetworkCondition(AssetContexts);
@@ -706,6 +709,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             {
                 MoveBudgetsToNextYear();
             }
+
+            Simulation.ResultsOnDisk.AddYearDetail(yearDetail);
         }
 
         private CostCoverage TryToPayForTreatment(AssetContext assetContext, Treatment treatment, int year, Func<BudgetContext, decimal> getAvailableAmount)

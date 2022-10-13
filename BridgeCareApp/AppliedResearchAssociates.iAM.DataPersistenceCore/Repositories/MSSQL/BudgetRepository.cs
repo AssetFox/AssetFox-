@@ -82,6 +82,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Users)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -117,6 +118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
         {
+            // WjJake -- do we need this call?
             var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
             var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
             return dtos;
@@ -241,6 +243,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Users)
                 .Single(_ => _.Id == libraryId)
                 .ToDto();
         }

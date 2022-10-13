@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -65,9 +66,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetName, bool isShared)
+        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetLibraryName = null, bool isShared = false)
         {
-            var dto = CreateBudgetLibraryDto(budgetName, isShared);
+            var resolveBudgetLibraryName = budgetLibraryName ?? RandomStrings.WithPrefix("BudgetLibrary");
+            var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName, isShared);
             unitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
             return dto;
         }

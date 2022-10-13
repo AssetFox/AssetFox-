@@ -18,6 +18,8 @@ using System.Data;
 using AppliedResearchAssociates.iAM.DataUnitTests.Tests;
 using Humanizer;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -49,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void UpsertBudgetLibrary_NullDtoThrowException()
+        public void UpsertBudgetLibrary_NullDto_Throws()
         {
             //setup
             var unitOfWork = TestHelper.UnitOfWork;
@@ -72,6 +74,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             //testing and asserts
             var budgetLibraryDtoAfter = unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryDto.Id);
             ObjectAssertions.EquivalentExcluding(budgetLibraryDto, budgetLibraryDtoAfter, bl => bl.Budgets);
+        }
+
+        [Fact]
+        public async Task BudgetInDbWithUser_Get_GetsWithUser()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var libraryWithUsers = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
+
+            var users = libraryWithUsers.Users;
+            var actualUser = users.Single();
+            var expectedUser = new LibraryUserDTO
+            {
+                AccessLevel = LibraryAccessLevel.Modify,
+                UserId = user.Id,
+            };
+            ObjectAssertions.Equivalent(expectedUser, actualUser);
         }
     }
 }

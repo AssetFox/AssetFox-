@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static LibraryUserDTO ToDto(this BudgetLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
-                UserId = entity.User.Id,
+                UserId = entity.UserId,
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
             };
     }

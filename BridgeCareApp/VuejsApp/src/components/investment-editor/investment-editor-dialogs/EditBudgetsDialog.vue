@@ -171,7 +171,7 @@ export default class EditBudgetsDialog extends Vue {
         const budget: Budget = {
             ...emptyBudget,
             id: getNewGuid(),
-            budgetOrder: 1,
+            budgetOrder: 0,
             name: `Unnamed Budget ${unnamedBudgets.length + 1}`,
             criterionLibrary: clone(emptyCriterionLibrary),
         }

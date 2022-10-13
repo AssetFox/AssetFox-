@@ -11,23 +11,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class CriterionLibraryTestSetup
     {
-        public static CriterionLibraryEntity TestCriterionLibrary(Guid? id = null, string? name = null)
+        public static CriterionLibraryEntity TestCriterionLibrary(string? name = null)
         {
-            var resolvedId = id ?? Guid.NewGuid();
+            var resolvedId = Guid.NewGuid();
             var resolvedName = name ?? "Test Criterion " + RandomStrings.Length11();
+            var mergedCriteriaExpression = RandomStrings.WithPrefix("Test Expression");
             var returnValue = new CriterionLibraryEntity
             {
                 Id = resolvedId,
                 Name = resolvedName,
-                MergedCriteriaExpression = "Test Expression"
+                MergedCriteriaExpression = mergedCriteriaExpression,
             };
             return returnValue;
         }
 
 
-        public static CriterionLibraryEntity TestCriterionLibraryInDb(IUnitOfWork unitOfWork)
+        public static CriterionLibraryEntity TestCriterionLibraryInDb(IUnitOfWork unitOfWork, string name = null)
         {
-            var criterionLibrary = TestCriterionLibrary();
+            var criterionLibrary = TestCriterionLibrary(name);
             unitOfWork.Context.CriterionLibrary.Add(criterionLibrary);
             unitOfWork.Context.SaveChanges();
             return criterionLibrary;

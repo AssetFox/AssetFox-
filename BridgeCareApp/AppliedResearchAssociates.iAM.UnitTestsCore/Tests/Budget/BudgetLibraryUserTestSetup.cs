@@ -11,6 +11,16 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class BudgetLibraryUserTestSetup
     {
+        public static LibraryUserDTO CreateLibraryUserDto(Guid userId, LibraryAccessLevel accessLevel = LibraryAccessLevel.Read)
+        {
+            var dto = new LibraryUserDTO
+            {
+                UserId = userId,
+                AccessLevel = accessLevel,
+            };
+            return dto;
+        }
+
         /// <summary>The budgetLibrary and the user are both expected
         /// to exist before this method is called.</summary>  
         public static void SetUsersOfBudgetLibrary(

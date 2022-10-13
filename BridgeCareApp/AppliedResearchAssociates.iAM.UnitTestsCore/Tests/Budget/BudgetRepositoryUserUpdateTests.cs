@@ -70,5 +70,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
             Assert.Empty(usersAfter);
         }
+
+        [Fact]
+        public async Task CreateBudgetLibraryWithUser_Does()
+        {
+            var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var libraryDto = BudgetTestSetup.CreateBudgetLibraryDto(libraryName, true);
+            var userDto = BudgetLibraryUserTestSetup.CreateLibraryUserDto(user.Id);
+            libraryDto.Users.Add(userDto);
+
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryDto);
+
+            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(libraryDto.Id);
+            var userAfter = usersAfter.Single();
+            Assert.Equal(user.Id, userAfter.UserId);
+        }
     }
 }

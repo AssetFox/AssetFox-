@@ -53,6 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 IsShared = isShared
             };
         }
+
         private static BudgetAmountDTO CreateBudgetAmountObject(string budgetName, int year, decimal value)
         {
             return new BudgetAmountDTO()

@@ -123,6 +123,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
+            // WjJake -- Can't do a transaction here because this is
+            // called by InvestmentController, and that does use a transaction.
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
             UpsertOrDeleteUsers(dto.Id, dto.Users);
             _unitOfWork.Context.SaveChanges();

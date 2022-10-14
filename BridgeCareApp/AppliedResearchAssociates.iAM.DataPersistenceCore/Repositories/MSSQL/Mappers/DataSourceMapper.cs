@@ -15,6 +15,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (dto is SQLDataSourceDTO)
             {
                 entityDetail = ((SQLDataSourceDTO)dto).ConnectionString;
+                // key genaration, TODO need to see where to store key or set once in the class??
+                var newKey = AES256GCM.NewKey();
+                // Encrypt
+                var encryptedText = AES256GCM.Encrypt(entityDetail, newKey);
+                entityDetail = encryptedText;
+                // Decrypt, to test
+                var plainText = AES256GCM.Decrypt(encryptedText, newKey);
             }
             else if (dto is ExcelDataSourceDTO)
             {

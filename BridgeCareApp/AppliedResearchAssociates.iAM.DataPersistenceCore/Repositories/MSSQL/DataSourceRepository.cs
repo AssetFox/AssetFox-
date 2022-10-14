@@ -63,8 +63,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (!dataSource.Validate())
                 throw new ArgumentException("The data source could not be validated");
 
-           // TODO call to encrypt string of connection str, and decrypt at time of get call
-           
+            // TODO call to encrypt string of connection str, and decrypt at time of get call
+            var newKey = AES256GCM.NewKey(); // TODO need to see where to store key or set once in the class??
+            // Encrypt
+            var encryptedText = AES256GCM.Encrypt("my test message to encrypt!", newKey);
+
+            // Decrypt
+            var plainText = AES256GCM.Decrypt(encryptedText, newKey);           
+
             _unitOfWork.Context.Upsert(dataSource.ToEntity(), dataSource.Id, _unitOfWork.UserEntity?.Id);
         }
             

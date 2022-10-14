@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Engines;
-using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Modes;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
@@ -49,13 +48,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         /// <remarks>
         /// Adds overhead of (Optional-Payload + BlockSize(16) + Message +  HMac-Tag(16)) * 1.33 Base64
         /// </remarks>
-        public static string SimpleEncrypt(string secretMessage, byte[] key, byte[] nonSecretPayload = null)
+        public static string Encrypt(string secretMessage, byte[] key, byte[] nonSecretPayload = null)
         {
             if (string.IsNullOrEmpty(secretMessage))
+            {
                 throw new ArgumentException("Secret Message Required!", "secretMessage");
+            }
 
             var plainText = Encoding.UTF8.GetBytes(secretMessage);
-            var cipherText = SimpleEncrypt(plainText, key, nonSecretPayload);
+            var cipherText = EncryptText(plainText, key, nonSecretPayload);
             return Convert.ToBase64String(cipherText);
         }
 
@@ -67,13 +68,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         /// <param name="key">The key.</param>
         /// <param name="nonSecretPayloadLength">Length of the optional non-secret payload.</param>
         /// <returns>Decrypted Message</returns>
-        public static string SimpleDecrypt(string encryptedMessage, byte[] key, int nonSecretPayloadLength = 0)
+        public static string Decrypt(string encryptedMessage, byte[] key, int nonSecretPayloadLength = 0)
         {
             if (string.IsNullOrEmpty(encryptedMessage))
+            {
                 throw new ArgumentException("Encrypted Message Required!", "encryptedMessage");
+            }
 
             var cipherText = Convert.FromBase64String(encryptedMessage);
-            var plainText = SimpleDecrypt(cipherText, key, nonSecretPayloadLength);
+            var plainText = DecryptText(cipherText, key, nonSecretPayloadLength);
             return plainText == null ? null : Encoding.UTF8.GetString(plainText);
         }
 
@@ -128,19 +131,23 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         //    return plainText == null ? null : Encoding.UTF8.GetString(plainText);
         //}
 
-        private static byte[] SimpleEncrypt(byte[] secretMessage, byte[] key, byte[] nonSecretPayload = null)
+        private static byte[] EncryptText(byte[] secretMessage, byte[] key, byte[] nonSecretPayload = null)
         {
             //User Error Checks
             if (key == null || key.Length != KeyBitSize / 8)
+            {
                 throw new ArgumentException(String.Format("Key needs to be {0} bit!", KeyBitSize), "key");
+            }
 
             if (secretMessage == null || secretMessage.Length == 0)
+            {
                 throw new ArgumentException("Secret Message Required!", "secretMessage");
+            }
 
-            //Non-secret Payload Optional
+            // Non-secret Payload Optional
             nonSecretPayload = nonSecretPayload ?? new byte[] { };
 
-            //Using random nonce large enough not to repeat
+            // Using random nonce large enough not to repeat
             var nonce = new byte[NonceBitSize / 8];
             Random.NextBytes(nonce, 0, nonce.Length);
 
@@ -148,50 +155,54 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
             var parameters = new AeadParameters(new KeyParameter(key), MacBitSize, nonce, nonSecretPayload);
             cipher.Init(true, parameters);
 
-            //Generate Cipher Text With Auth Tag
+            // Generate Cipher Text With Auth Tag
             var cipherText = new byte[cipher.GetOutputSize(secretMessage.Length)];
             var len = cipher.ProcessBytes(secretMessage, 0, secretMessage.Length, cipherText, 0);
             cipher.DoFinal(cipherText, len);
 
-            //Assemble Message
+            // Assemble Message
             using (var combinedStream = new MemoryStream())
             {
                 using (var binaryWriter = new BinaryWriter(combinedStream))
                 {
-                    //Prepend Authenticated Payload
+                    // Prepend Authenticated Payload
                     binaryWriter.Write(nonSecretPayload);
-                    //Prepend Nonce
+                    // Prepend Nonce
                     binaryWriter.Write(nonce);
-                    //Write Cipher Text
+                    // Write Cipher Text
                     binaryWriter.Write(cipherText);
                 }
                 return combinedStream.ToArray();
             }
         }
 
-        private static byte[] SimpleDecrypt(byte[] encryptedMessage, byte[] key, int nonSecretPayloadLength = 0)
+        private static byte[] DecryptText(byte[] encryptedMessage, byte[] key, int nonSecretPayloadLength = 0)
         {
-            //User Error Checks
+            // User Error Checks
             if (key == null || key.Length != KeyBitSize / 8)
+            {
                 throw new ArgumentException(String.Format("Key needs to be {0} bit!", KeyBitSize), "key");
+            }
 
             if (encryptedMessage == null || encryptedMessage.Length == 0)
+            {
                 throw new ArgumentException("Encrypted Message Required!", "encryptedMessage");
+            }
 
             using (var cipherStream = new MemoryStream(encryptedMessage))
             using (var cipherReader = new BinaryReader(cipherStream))
             {
-                //Grab Payload
+                // Grab Payload
                 var nonSecretPayload = cipherReader.ReadBytes(nonSecretPayloadLength);
 
-                //Grab Nonce
+                // Grab Nonce
                 var nonce = cipherReader.ReadBytes(NonceBitSize / 8);
 
                 var cipher = new GcmBlockCipher(new AesFastEngine());
                 var parameters = new AeadParameters(new KeyParameter(key), MacBitSize, nonce, nonSecretPayload);
                 cipher.Init(false, parameters);
 
-                //Decrypt Cipher Text
+                // Decrypt Cipher Text
                 var cipherText = cipherReader.ReadBytes(encryptedMessage.Length - nonSecretPayloadLength - nonce.Length);
                 var plainText = new byte[cipher.GetOutputSize(cipherText.Length)];
 
@@ -203,7 +214,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
                 }
                 catch (InvalidCipherTextException)
                 {
-                    //Return null if it doesn't authenticate
+                    // Return null if it doesn't authenticate
                     return null;
                 }
 

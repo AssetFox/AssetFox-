@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 output.Years.Add(year);
             }
 
-            output.Years.Sort((y1, y2) => Comparer<int>.Default.Compare(y1.Year, y2.Year));
+            output.Years.Sort(static (y1, y2) => Comparer<int>.Default.Compare(y1.Year, y2.Year));
 
             return output;
         }

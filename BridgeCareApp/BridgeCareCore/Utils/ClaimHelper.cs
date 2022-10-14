@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -12,7 +15,12 @@ namespace BridgeCareCore.Utils
     public class ClaimHelper: IClaimHelper
     {
         private readonly IUnitOfWork UnitOfWork;
-        private readonly IHttpContextAccessor ContextAccessor; 
+        private readonly IHttpContextAccessor ContextAccessor;
+
+        public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
+        public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
+        public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
+        public const string CantDeleteNonexistentLibraryMessage = "We can't delete a nonexistent library.";
 
         public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         {
@@ -63,11 +71,50 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void CheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
+        public void ObsoleteCheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
         {
             if (RequirePermittedCheck() && owner != userId)
             {
-                throw new UnauthorizedAccessException("You are not authorized to modify this library's data.");
+                throw new UnauthorizedAccessException(LibraryModifyUnauthorizedMessage);
+            }
+        }
+
+        public void CheckUserLibraryModifyAuthorization(LibraryAccessModel accessModel, Guid userId)
+        {
+            if (RequirePermittedCheck() && accessModel.LibraryExists)
+            {
+                var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Modify);
+                if (unauthorized)
+                {
+                    throw new UnauthorizedAccessException(LibraryModifyUnauthorizedMessage);
+                }
+            }
+        }
+
+        public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel accessModel, Guid userId)
+        {
+            if (!accessModel.LibraryExists)
+            {
+                throw new InvalidOperationException(CantDeleteNonexistentLibraryMessage);
+            }
+            if (RequirePermittedCheck())
+            {
+                var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Owner);
+                if (unauthorized)
+                {
+                    throw new UnauthorizedAccessException(LibraryDeleteUnauthorizedMessage);
+                }
+            }
+        }
+
+        public void CheckUserLibraryRecreateAuthorization(LibraryAccessModel accessModel, Guid userId)
+        {
+            if (RequirePermittedCheck()) {
+                var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Owner);
+                if (unauthorized)
+                {
+                    throw new UnauthorizedAccessException(LibraryRecreateUnauthorizedMessage);
+                }
             }
         }
 
@@ -105,5 +152,6 @@ namespace BridgeCareCore.Utils
         {
             return ContextAccessor.HttpContext.User.HasClaim(claim => claim.Value == SecurityConstants.Claim.SimulationAccess);
         }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 
 namespace BridgeCareCore.Utils.Interfaces
 {
@@ -10,6 +11,9 @@ namespace BridgeCareCore.Utils.Interfaces
 
         public bool RequirePermittedCheck();
 
-        public void CheckUserLibraryModifyAuthorization(Guid owner, Guid userId);        
+        public void ObsoleteCheckUserLibraryModifyAuthorization(Guid owner, Guid userId);
+        public void CheckUserLibraryModifyAuthorization(LibraryAccessModel existingLibraryAccess, Guid userId);
+        public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel libraryAccess, Guid userId);
+        void CheckUserLibraryRecreateAuthorization(LibraryAccessModel accessModel, Guid userId);
     }
 }

@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -96,6 +97,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return _unitOfWork.Context.BudgetLibrary.AsNoTracking()
                 .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.BudgetLibraryUser
+                .Include(u => u.BudgetLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.BudgetLibrary.ToDto())
                 .ToList();
         }
 
@@ -211,6 +221,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.BudgetAmounts)
                 .Where(_ => _.BudgetLibrary.Id == libraryId)
                 .ToList();
+        }
+
+        public LibraryAccessModel GetLibraryAccess(Guid libraryId)
+        {
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
+            {
+                return LibraryAccessModels.DoesNotExist();
+            }
+            var users = GetLibraryUsers(libraryId);
+            return LibraryAccessModels.ExistsWithUsers(users);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)

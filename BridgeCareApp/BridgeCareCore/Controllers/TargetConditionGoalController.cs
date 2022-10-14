@@ -99,7 +99,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
@@ -168,7 +168,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTargetConditionGoalLibrariesWithTargetConditionGoals().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(libraryId);
                     UnitOfWork.Commit();

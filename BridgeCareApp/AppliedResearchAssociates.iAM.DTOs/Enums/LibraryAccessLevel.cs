@@ -4,6 +4,7 @@ using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Enums
 {
+    /// <summary>Enum is arranged in order of increasing access. The code depends on this.</summary>
     public enum LibraryAccessLevel
     {
         Read,

@@ -42,7 +42,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppliedResearchAssociates.iAM.DataUnitTests\AppliedResearchAssociates.iAM.DataUnitTests.csproj" />
-    <ProjectReference Include="..\BridgeCareCore\BridgeCareCore.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Hubs\AppliedResearchAssociates.iAM.Hubs.csproj" />
+    <ProjectReference Include="..\AppliedResearchAssociates.iAM.Reporting\AppliedResearchAssociates.iAM.Reporting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

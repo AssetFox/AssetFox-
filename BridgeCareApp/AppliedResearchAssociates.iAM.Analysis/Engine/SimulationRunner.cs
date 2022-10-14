@@ -928,15 +928,6 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
                     var availableAmount = getAvailableAmount(budgetContext);
 
-                    // [REVIEW] Could the "available amount" in a budget ever be zero? Seems
-                    // possible. If/when the available amount is zero and the "across budgets"
-                    // setting is true, this code will assign a status of "CostCoveredInPart" with
-                    // "CoveredCost" equal to zero, which doesn't make sense. In that situation, it
-                    // seems best to use the "CostNotCovered" logic. Updating this code to handle
-                    // the case when it is zero seems necessary. Furthermore, throwing an error if
-                    // it's negative is probably a good safety railing to add. (Note that this issue
-                    // only affects "descriptive" output, not treatment selection output.)
-
                     if (SpendingLimit == SpendingLimit.NoLimit || cost <= availableAmount)
                     {
                         budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInFull;
@@ -945,7 +936,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                         break;
                     }
 
-                    if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets)
+                    if (Simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets && availableAmount > 0)
                     {
                         budgetUsageDetail.Status = BudgetUsageStatus.CostCoveredInPart;
                         budgetUsageDetail.CoveredCost = availableAmount;

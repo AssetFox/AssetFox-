@@ -76,7 +76,7 @@ import CalculatedAttributeSvg from '@/shared/icons/CalculatedAttributeSvg.vue';
     },
 })
 export default class EditLibrary extends Vue {
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
 
     networkId: string = getBlankGuid();
@@ -165,7 +165,7 @@ export default class EditLibrary extends Vue {
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.isAdmin;
+                            navigationTab['visible'] = vm.hasAdminAccess;
                         }
 
                         return navigationTab;

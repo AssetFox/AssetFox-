@@ -42,4 +42,10 @@ export default class TargetConditionGoalService {
             data,
         );
     }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.TargetConditionGoal}/GetHasPermittedAccess`,
+        );
+    }
 }

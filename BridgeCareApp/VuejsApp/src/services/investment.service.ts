@@ -2,6 +2,7 @@ import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
 import { BudgetLibrary, Investment } from '@/shared/models/iAM/investment';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
+import { InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingRequestModel, InvestmentPagingSyncModel } from '@/shared/models/iAM/paging';
 
 export default class InvestmentService {
     static getInvestment(scenarioId: string): AxiosPromise {
@@ -11,12 +12,12 @@ export default class InvestmentService {
     }
 
     static upsertInvestment(
-        investment: Investment,
+        data: InvestmentPagingSyncModel,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Investment}/UpsertInvestment/${scenarioId}`,
-            investment,
+            data,
         );
     }
 
@@ -24,10 +25,18 @@ export default class InvestmentService {
         return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraries/`);
     }
 
-    static upsertBudgetLibrary(budgetLibrary: BudgetLibrary): AxiosPromise {
+    static getScenarioInvestmentPage(scenarioId: string, data: InvestmentPagingRequestModel): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Investment}/GetScenarioInvestmentPage/${scenarioId}`, data)
+    }
+
+    static getLibraryInvestmentPage(scenarioId: string, data: InvestmentPagingRequestModel): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Investment}/GetLibraryInvestmentPage/${scenarioId}`, data)
+    }
+
+    static upsertBudgetLibrary(data: InvestmentLibraryUpsertPagingRequestModel): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Investment}/UpsertBudgetLibrary`,
-            budgetLibrary,
+            data,
         );
     }
 
@@ -40,6 +49,12 @@ export default class InvestmentService {
     static getScenarioSimpleBudgetDetails(scenarioId: string) {
         return coreAxiosInstance.get(
             `${API.Investment}/GetScenarioSimpleBudgetDetails/${scenarioId}`,
+        );
+    }
+
+    static GetInvestmentPlan(scenarioId: string) {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetInvestmentPlan/${scenarioId}`,
         );
     }
 
@@ -91,5 +106,11 @@ export default class InvestmentService {
             return coreAxiosInstance.get(               
                   `${API.Investment}/DownloadInvestmentBudgetsTemplate`,
               );
-        }
+    }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetHasPermittedAccess`,
+        );
+    }
 }

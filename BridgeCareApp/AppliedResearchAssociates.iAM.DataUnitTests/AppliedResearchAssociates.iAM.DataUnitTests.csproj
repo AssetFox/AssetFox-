@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="testConnections..json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\AppliedResearchAssociates.iAM.TestHelpers\testConnections.json" Link="testConnections.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

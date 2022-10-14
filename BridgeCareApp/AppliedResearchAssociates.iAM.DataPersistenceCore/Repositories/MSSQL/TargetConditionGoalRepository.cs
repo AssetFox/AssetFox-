@@ -92,12 +92,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return new List<TargetConditionGoalLibraryDTO>();
             }
 
-            return _unitOfWork.Context.TargetConditionGoalLibrary
+            return _unitOfWork.Context.TargetConditionGoalLibrary.AsNoTracking()
                 .Include(_ => _.TargetConditionGoals)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.TargetConditionGoals)
                 .ThenInclude(_ => _.CriterionLibraryTargetConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<TargetConditionGoalLibraryDTO> GetTargetConditionGoalLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.TargetConditionGoalLibrary.Any())
+            {
+                return new List<TargetConditionGoalLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.TargetConditionGoalLibrary.AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -207,7 +219,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException($"No simulation found for the given scenario.");
             }
 
-            var res = _unitOfWork.Context.ScenarioTargetConditionGoals.Where(_ => _.SimulationId == simulationId)
+            var res = _unitOfWork.Context.ScenarioTargetConditionGoals.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.CriterionLibraryScenarioTargetConditionGoalJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Attribute)
@@ -216,6 +229,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
             return res;
         }
+
+        public List<TargetConditionGoalDTO> GetTargetConditionGoalsByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException($"The specified target condition goal library was not found.");
+            }
+
+            var res = _unitOfWork.Context.TargetConditionGoal.AsNoTracking()
+                .Where(_ => _.TargetConditionGoalLibraryId == libraryId)
+                .Include(_ => _.CriterionLibraryTargetConditionGoalJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Attribute)
+                .Select(_ => _.ToDto())
+                .AsNoTracking()
+                .ToList();
+            return res;
+        }
+
         public void UpsertOrDeleteScenarioTargetConditionGoals(List<TargetConditionGoalDTO> scenarioTargetConditionGoal, Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

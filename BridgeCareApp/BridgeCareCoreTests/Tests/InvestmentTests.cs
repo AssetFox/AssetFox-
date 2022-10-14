@@ -39,6 +39,7 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -72,9 +73,17 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var security = EsecSecurityMocks.Dbe;
             var service = _mockInvestmentDefaultDataService;
+            var unitOfWork = UnitOfWorkMocks.New();
+            var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
             var controller = new InvestmentController(
-                null, security, )
-            return null;
+                null,
+                security,
+                unitOfWork.Object,
+                hubService,
+                accessor,
+                service.Object,
+                claimHelper);
+            return controller;
         }
 
         private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)

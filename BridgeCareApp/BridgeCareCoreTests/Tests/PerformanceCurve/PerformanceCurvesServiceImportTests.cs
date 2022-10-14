@@ -109,8 +109,7 @@ namespace BridgeCareCoreTests.Tests
 
         // The import goes ahead and completes, even if there are invalid
         // equations and/or criteria. It simply issues warnings in that case.
-        // WJ is skeptical that this is correct. Jake will discuss with
-        // Tyler.
+        // This needs to change. Instead, it should reject if anything is invalid.
         [Fact]
         public void ImportScenarioPerformanceCurvesFile_ImportScenarioCurvesThrows_ExceptionMessageIsReturned()
         {

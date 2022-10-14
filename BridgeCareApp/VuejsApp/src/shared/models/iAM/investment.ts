@@ -25,11 +25,19 @@ export interface Budget {
     criterionLibrary: CriterionLibrary;
 }
 
+export interface BudgetLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
+
 export interface BudgetLibrary {
     id: string;
     name: string;
     description: string;
     budgets: Budget[];
+    users: BudgetLibraryUser[];
     appliedScenarioIds: string[];
     owner?: string;
     isShared: boolean;

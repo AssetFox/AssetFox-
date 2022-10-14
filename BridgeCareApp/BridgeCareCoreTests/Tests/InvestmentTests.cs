@@ -66,7 +66,18 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
+        private InvestmentController CreateAuthorizedController()
+        {
+            var hubService = HubServiceMocks.Default();
+            var accessor = HttpContextAccessorMocks.Default();
+            var security = EsecSecurityMocks.Dbe;
+            var service = _mockInvestmentDefaultDataService;
+            var controller = new InvestmentController(
+                null, security, )
+            return null;
+        }
+
+        private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
@@ -80,7 +91,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
+        private InvestmentController CreateDatabaseUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
@@ -306,7 +317,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = Setup();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act
             var result = await controller.GetBudgetLibraries();
@@ -320,7 +331,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = Setup();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
@@ -335,7 +346,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = Setup();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
 
             var request = new InvestmentLibraryUpsertPagingRequestModel();
@@ -355,7 +366,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = Setup();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             var request = new InvestmentPagingSyncModel();
@@ -374,7 +385,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var service = Setup();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act
             var result = await controller.DeleteBudgetLibrary(Guid.Empty);
@@ -388,7 +399,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
@@ -412,7 +423,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -446,7 +457,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             CreateLibraryTestData();
 
             _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
@@ -483,7 +494,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
 
@@ -528,7 +539,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             CreateLibraryTestData();
 
             // Act
@@ -639,7 +650,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
 
 
@@ -673,7 +684,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             _testBudget.Name = "Sample Budget 1";
             TestHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
@@ -717,7 +728,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             TestHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
 
             // Act
@@ -764,7 +775,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             CreateLibraryTestData();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
 
             // Act
@@ -802,7 +813,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -816,7 +827,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var service = Setup();
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -832,7 +843,7 @@ namespace BridgeCareCoreTests.Tests
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -848,7 +859,7 @@ namespace BridgeCareCoreTests.Tests
             var service = Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             CreateScenarioTestData(simulation.Id);
 
             // Act
@@ -882,7 +893,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             _testScenarioBudget.Name = "Sample Budget 1";
             TestHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
@@ -928,7 +939,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act
             var result =
@@ -976,7 +987,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             // Act
             var result =
                 await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
@@ -1012,7 +1023,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -1026,7 +1037,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var service = Setup();
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -1042,7 +1053,7 @@ namespace BridgeCareCoreTests.Tests
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

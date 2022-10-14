@@ -39,7 +39,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static BudgetLibraryDTO CreateBudgetLibraryDto(string name, bool isShared = true)
+        public static BudgetLibraryDTO CreateBudgetLibraryDto(string name)
         {
             //setup
             var budgetList = new List<BudgetDTO>();
@@ -51,7 +51,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = Guid.NewGuid(),
                 Name = name,
                 Budgets = budgetList?.ToList(),
-                IsShared = isShared
             };
         }
 
@@ -66,10 +65,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetLibraryName = null, bool isShared = false)
+        public static BudgetLibraryDTO ModelForEntityInDb(IUnitOfWork unitOfWork, string budgetLibraryName = null)
         {
             var resolveBudgetLibraryName = budgetLibraryName ?? RandomStrings.WithPrefix("BudgetLibrary");
-            var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName, isShared);
+            var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName);
             unitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
             return dto;
         }

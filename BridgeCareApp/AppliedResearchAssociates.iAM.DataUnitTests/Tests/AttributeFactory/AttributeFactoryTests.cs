@@ -8,6 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
     public class AttributeFactoryTests
     {
         AttributeMetaDatum attributeMetaDatum;
+        private const string DEFAULT_RULE = "Last";
 
         [Fact]
         public void CreateForStringTypeTest()
@@ -90,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests.Attributes
         {
             attributeMetaDatum = new AttributeMetaDatum();
             attributeMetaDatum.Type = type;
+            attributeMetaDatum.AggregationRule = DEFAULT_RULE;
             attributeMetaDatum.DefaultValue = defaultValue;
         }
     }

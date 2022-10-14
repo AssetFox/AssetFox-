@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataUnitTests.Tests
                 "TextAttribute",
                 Guid.NewGuid(),
                 "DISTRICT",
-                AttributeTypeNames.String,
+                AggregationRuleTypeNames.Predominant,
                 testCommand,
                 Data.ConnectionType.MSSQL,
                 "",

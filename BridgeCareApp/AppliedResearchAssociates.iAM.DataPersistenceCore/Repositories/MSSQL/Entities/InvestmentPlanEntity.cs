@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public int NumberOfYearsInAnalysisPeriod { get; set; }
 
+        public bool ShouldAccumulateUnusedBudgetAmounts { get; set; }
+
         public virtual SimulationEntity Simulation { get; set; }
     }
 }

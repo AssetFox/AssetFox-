@@ -1,23 +1,22 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
+using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 using OfficeOpenXml;
-using BridgeCareCore.Models;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using BridgeCareCore.Utils.Interfaces;
 
 namespace BridgeCareCore.Controllers
 {
@@ -29,7 +28,7 @@ namespace BridgeCareCore.Controllers
         private readonly IPerformanceCurvesService _performanceCurvesService;
         private readonly IClaimHelper _claimHelper;
 
-        public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public PerformanceCurveController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IPerformanceCurvesService performanceCurvesService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));

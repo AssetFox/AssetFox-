@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.1")
+                .HasAnnotation("ProductVersion", "6.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -1096,6 +1096,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Property<int>("NumberOfYearsInAnalysisPeriod")
                         .HasColumnType("int");
+
+                    b.Property<bool>("ShouldAccumulateUnusedBudgetAmounts")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("SimulationId")
                         .HasColumnType("uniqueidentifier");

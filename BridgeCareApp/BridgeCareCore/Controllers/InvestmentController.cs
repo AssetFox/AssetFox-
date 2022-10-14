@@ -21,6 +21,7 @@ using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using MoreLinq.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace BridgeCareCore.Controllers
 {
@@ -189,7 +190,6 @@ namespace BridgeCareCore.Controllers
                         throw new InvalidOperationException(errorMessage);
                     }
                     _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
-
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
@@ -203,6 +203,20 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.Budgets = budgets;
+                    if (libraryAccess.LibraryExists)
+                    {
+                        if (_claimHelper.CanModifyAccessLevels(libraryAccess, UserId))
+                        {
+                            LibraryUserDtolistUpdater.AdjustAccessForUpdate(libraryAccess, dto.Users);
+                        }
+                        else
+                        {
+                            dto.Users = libraryAccess.Users;
+                        }
+                    } else
+                    {
+                        LibraryUserDtolistUpdater.GrantOwnerAccess(UserId, dto.Users);
+                    }
 
                     UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
@@ -237,9 +251,10 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        var budgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
-                        if (budgetLibrary == null) return;
-                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(budgetLibrary.Owner, UserId);
+                        var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId);
+                        // There was an existence check here where we just returned if the library did not exist. WJ deleted it because
+                        // the new claim helper code checks for that. But is that the right approach?
+                        _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     }
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
                     UnitOfWork.Commit();

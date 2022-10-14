@@ -118,6 +118,14 @@ namespace BridgeCareCore.Utils
             }
         }
 
+        /// <summary>Returns true if the user can change the access levels of
+        /// users to the library. Does not throw.</summary>
+        public bool CanModifyAccessLevels(LibraryAccessModel accessModel, Guid userId)
+        {
+            bool canModify = HasAdminAccess() || accessModel.HasAccess(userId, LibraryAccessLevel.Owner);
+            return canModify;
+        }
+
         public bool RequirePermittedCheck()
         {
             return !HasAdminAccess();

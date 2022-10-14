@@ -51,21 +51,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void BudgetLibrary_SharedButInvalidOrNoUsers()
-        {
-            //setup
-            var unitOfWork = TestHelper.UnitOfWork;
-
-            //create budget library
-            var budgetLibraryDto = BudgetLibraryTestSetup.CreateBudgetLibraryDto("BudgetLibrary_SharedButInvalidOrNoUsers", true);
-            unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto);
-
-            //testing and asserts
-            var budgetLibraryDtoAfter = unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryDto.Id);
-            ObjectAssertions.EquivalentExcluding(budgetLibraryDto, budgetLibraryDtoAfter, bl => bl.Budgets);
-        }
-
-        [Fact]
         public async Task GetBudgetLibrary_BudgetLibraryInDbWithUser_GetsWithUser()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);

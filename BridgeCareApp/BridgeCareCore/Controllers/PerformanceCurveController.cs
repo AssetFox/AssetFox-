@@ -28,7 +28,7 @@ namespace BridgeCareCore.Controllers
         private readonly IPerformanceCurvesService _performanceCurvesService;
         private readonly IClaimHelper _claimHelper;
 
-        public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public PerformanceCurveController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IPerformanceCurvesService performanceCurvesService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));

@@ -16,5 +16,12 @@ namespace BridgeCareCoreTests.Helpers
             mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
             return mockUserRepo;
         }
+
+        public static Mock<IUserRepository> UserExists(string name)
+        {
+            var mockUserRepo = new Mock<IUserRepository>();
+            mockUserRepo.Setup(_ => _.UserExists(name)).Returns(true);
+            return mockUserRepo;
+        }
     }
 }

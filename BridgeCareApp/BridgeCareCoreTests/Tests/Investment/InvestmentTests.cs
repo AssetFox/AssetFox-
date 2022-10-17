@@ -40,6 +40,9 @@ using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.Investment;
+using BridgeCareCore.Interfaces;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -67,21 +70,21 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController()
+        private InvestmentController CreateAuthorizedController(Mock<IUnitOfWork> unitOfWork)
         {
             var hubService = HubServiceMocks.Default();
             var accessor = HttpContextAccessorMocks.Default();
             var security = EsecSecurityMocks.Dbe;
-            var service = _mockInvestmentDefaultDataService;
-            var unitOfWork = UnitOfWorkMocks.New();
+            var mockDataService = _mockInvestmentDefaultDataService;
             var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
+            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
             var controller = new InvestmentController(
-                null,
+                investmentBudgetServiceMock.Object,
                 security,
                 unitOfWork.Object,
                 hubService,
                 accessor,
-                service.Object,
+                mockDataService.Object,
                 claimHelper);
             return controller;
         }
@@ -321,6 +324,32 @@ namespace BridgeCareCoreTests.Tests
             return accessor.Object;
         }
 
+        [Fact (Skip ="Wj wip")]
+        public async Task RequestUpdateBudget_ForwardsRequestToService()
+        {
+            var user = UserDtos.Admin;
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAuthorizedController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
+
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = true,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var result = await controller.UpsertBudgetLibrary(upsertRequest);
+            
+        }
+
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
@@ -380,7 +409,7 @@ namespace BridgeCareCoreTests.Tests
 
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();
-            
+
 
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
@@ -520,7 +549,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentPagingSyncModel();
             request.Investment = dto.InvestmentPlan;
             request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
-            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0]};
+            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0] };
 
             // Act
             await controller.UpsertInvestment(simulation.Id, request);

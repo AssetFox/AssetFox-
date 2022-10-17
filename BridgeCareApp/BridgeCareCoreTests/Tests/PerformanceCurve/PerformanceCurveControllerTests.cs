@@ -38,12 +38,6 @@ namespace BridgeCareCoreTests.Tests
         private static readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
 
-        private UserDTO AdminUser => new UserDTO
-        {
-            Username = "Admin",
-            HasInventoryAccess = true,
-            Id = TestDataForCommittedProjects.AuthorizedUser
-        };
 
         private void Setup()
         {
@@ -249,7 +243,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // wjwjwj this test
             var repositoryMock = new Mock<IPerformanceCurveRepository>();
-            var user = AdminUser;
+            var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
             unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);

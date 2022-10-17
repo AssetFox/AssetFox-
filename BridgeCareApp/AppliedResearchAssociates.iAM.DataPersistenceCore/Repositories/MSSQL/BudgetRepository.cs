@@ -125,10 +125,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.RemoveRange(entitiesToDelete);
         }
 
-        public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
+        private List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId, Guid userId)
         {
-            // WjJake -- do we need this call?
-            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
+            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId).ToList();
             var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
             return dtos;
         }
@@ -223,15 +222,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public LibraryAccessModel GetLibraryAccess(Guid libraryId)
+        public LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
             var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
             {
-                return LibraryAccessModels.DoesNotExist();
+                return LibraryAccessModels.LibraryDoesNotExist();
             }
-            var users = GetLibraryUsers(libraryId);
-            return LibraryAccessModels.ExistsWithUsers(users);
+            var users = GetLibraryUsers(libraryId, userId);
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, users);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)

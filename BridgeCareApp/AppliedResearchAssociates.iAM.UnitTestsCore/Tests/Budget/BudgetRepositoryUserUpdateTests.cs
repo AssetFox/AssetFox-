@@ -42,9 +42,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
 
-            var users = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
+            var users = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
 
-            var actualUser = users.Single();
+            var actualUser = users.Users.Single();
             var expected = new LibraryUserDTO
             {
                 AccessLevel = DTOs.Enums.LibraryAccessLevel.Read,
@@ -60,15 +60,15 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, budgetLibrary.Id, DTOs.Enums.LibraryAccessLevel.Read, user.Id);
-            var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
-            var userBefore = usersBefore.Single();
+            var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
+            var userBefore = usersBefore.Users.Single();
             Assert.Equal(user.Id, userBefore.UserId);
             budgetLibrary.Users.Clear();
 
             TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
 
-            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
-            Assert.Empty(usersAfter);
+            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
+            Assert.Empty(usersAfter.Users);
         }
 
         [Fact]
@@ -82,8 +82,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryDto);
 
-            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(libraryDto.Id);
-            var userAfter = usersAfter.Single();
+            var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(libraryDto.Id, user.Id);
+            var userAfter = usersAfter.Users.Single();
             Assert.Equal(user.Id, userAfter.UserId);
         }
     }

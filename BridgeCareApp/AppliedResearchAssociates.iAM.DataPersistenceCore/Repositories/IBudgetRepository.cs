@@ -36,7 +36,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId);
-        List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId);
-        LibraryAccessModel GetLibraryAccess(Guid libraryId);
+        LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
     }
 }

@@ -20,7 +20,13 @@ namespace BridgeCareCoreTests.Tests
         public static Mock<IBudgetRepository> WithLibraryAccess(Guid libraryId, LibraryAccessModel libraryAccess)
         {
             var mock = New();
-            mock.Setup(m => m.GetLibraryAccess(libraryId)).Returns(libraryAccess);
+            if (libraryAccess.UserId != Guid.Empty)
+            {
+                mock.Setup(m => m.GetLibraryAccess(libraryId, libraryAccess.UserId)).Returns(libraryAccess);
+            } else
+            {
+                mock.Setup(m => m.GetLibraryAccess(libraryId, It.IsAny<Guid>())).Returns(libraryAccess);
+            }
             return mock;
         }
     }

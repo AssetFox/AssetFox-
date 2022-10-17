@@ -183,7 +183,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var libraryAccess = UnitOfWork.BudgetRepo.GetLibraryAccess(upsertRequest.Library.Id);
+                    var libraryAccess = UnitOfWork.BudgetRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     if (libraryAccess.LibraryExists == upsertRequest.IsNewLibrary)
                     {
                         var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;
@@ -251,7 +251,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId);
+                        var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
                         // There was an existence check here where we just returned if the library did not exist. WJ deleted it because
                         // the new claim helper code checks for that. But is that the right approach?
                         _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
@@ -364,7 +364,7 @@ namespace BridgeCareCore.Controllers
                         var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (existingBudgetLibrary != null)
                         {
-                            var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibraryId);
+                            var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibraryId, UserId);
                             _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
                         }
                     }

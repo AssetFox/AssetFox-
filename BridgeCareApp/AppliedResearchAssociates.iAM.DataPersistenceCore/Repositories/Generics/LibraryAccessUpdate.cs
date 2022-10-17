@@ -28,25 +28,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generic
                 userAccess.AccessLevel = LibraryAccessLevel.Owner;
             }
         }
-
-        public static void AdjustAccessForUpdate(LibraryAccessModel currentAccessModel, List<LibraryUserDTO> proposedUserList)
-        {
-            foreach (var user in currentAccessModel.Users)
-            {
-                if (user.AccessLevel == LibraryAccessLevel.Owner)
-                {
-                    GrantOwnerAccess(user.UserId, proposedUserList);
-                }
-            }
-            foreach (var proposedUser in proposedUserList)
-            {
-                if (proposedUser.AccessLevel == LibraryAccessLevel.Owner)
-                {
-                    if (!currentAccessModel.HasAccess(proposedUser.UserId, LibraryAccessLevel.Owner)) {
-                        proposedUser.AccessLevel = LibraryAccessLevel.Modify;
-                    };
-                }
-            }
-        }
     }
 }

@@ -16,11 +16,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetLibraryDTO> GetBudgetLibraries();
 
-        /// <summary>As of October, 2022, it is expected that the person who created the library will be an owner,
-        /// and no one else will be an owner. However, this is NOT enforced at the repository level. The repository
-        /// will blindly update the users to whatever the controller asks for. Therefore, it is the responsibility
-        /// of the controller to make sure the users are correct.</summary>
-        void UpsertBudgetLibrary(BudgetLibraryDTO dto);
+        /// <summary>If this call is an insert, userListModificationIsAllowed is ignored.</summary>
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed);
 
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 

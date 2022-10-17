@@ -203,22 +203,17 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.Budgets = budgets;
+                    bool canModifyAccessLevels = false;
                     if (libraryAccess.LibraryExists)
                     {
-                        if (_claimHelper.CanModifyAccessLevels(libraryAccess, UserId))
-                        {
-                            LibraryUserDtolistUpdater.AdjustAccessForUpdate(libraryAccess, dto.Users);
-                        }
-                        else
-                        {
-                            dto.Users = libraryAccess.Users;
-                        }
+                        canModifyAccessLevels = _claimHelper.CanModifyAccessLevels(libraryAccess, UserId);
                     } else
                     {
                         LibraryUserDtolistUpdater.GrantOwnerAccess(UserId, dto.Users);
+                        canModifyAccessLevels = true;
                     }
 
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
+                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto, canModifyAccessLevels);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
                     UnitOfWork.Commit();
                 });

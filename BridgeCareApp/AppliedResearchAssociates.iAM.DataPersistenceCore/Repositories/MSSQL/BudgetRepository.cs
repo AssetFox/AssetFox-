@@ -67,8 +67,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name})
                 .OrderBy(_ => _.Name)
                 .ToList();
-
         }
+
+
 
         public List<BudgetLibraryDTO> GetBudgetLibraries()
         {
@@ -132,11 +133,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return dtos;
         }
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
-            // WjJake -- Can't do a transaction here because this is
-            // called by InvestmentController, and that does use a transaction.
+
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed) {
+            var libraryExists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == dto.Id);
+            if (libraryExists && !userListModificationIsAllowed)
+            {
+                var currentUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == u.UserId)
+                    .Select(e => e.ToDto())
+                    .ToList();
+                var updatedUsers = dto.Users;
+                var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
+                if (changedUserId!=null)
+                {
+                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change.";
+                    throw new InvalidOperationException(errorMessage);
+                }
+            }
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
-            UpsertOrDeleteUsers(dto.Id, dto.Users);
+            if (userListModificationIsAllowed)
+            {
+                UpsertOrDeleteUsers(dto.Id, dto.Users);
+            }
             _unitOfWork.Context.SaveChanges();
         }
 

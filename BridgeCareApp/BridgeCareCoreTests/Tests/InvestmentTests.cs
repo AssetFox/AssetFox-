@@ -43,7 +43,7 @@ using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class InvestmentTests
+    public class InvestmentControllerTests
     {
         private BudgetLibraryEntity _testBudgetLibrary;
         private BudgetEntity _testBudget;
@@ -53,7 +53,7 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public InvestmentBudgetsService Setup()
+        public InvestmentBudgetsService SetupDatabaseBasedService()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -114,7 +114,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateTestController(List<string> userClaims)
+        private InvestmentController CreateDatabaseBasedController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
             foreach (string claimName in userClaims)
@@ -125,7 +125,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = new InvestmentController(service, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
 
             controller.ControllerContext = new ControllerContext()
@@ -134,7 +134,7 @@ namespace BridgeCareCoreTests.Tests
             };
             return controller;
         }
-        private void CreateLibraryTestData()
+        private void AddTestDataToDatabase()
         {
             var year = DateTime.Now.Year;
             _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
@@ -165,7 +165,7 @@ namespace BridgeCareCoreTests.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData(Guid simulationId)
+        private void AddScenarioDataToDatabase(Guid simulationId)
         {
             var year = DateTime.Now.Year;
             _testInvestmentPlan = new InvestmentPlanEntity
@@ -324,7 +324,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
 
@@ -338,7 +338,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -353,7 +353,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
             var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
@@ -373,7 +373,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -392,7 +392,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
 
@@ -407,9 +407,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldGetLibraryDataNoChildren()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
-            CreateLibraryTestData();
+            AddTestDataToDatabase();
 
             // Act
             var result = await controller.GetBudgetLibraries();
@@ -429,11 +429,11 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldGetInvestmentData()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var controller = CreateDatabaseAuthorizedController(service);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
 
             // Act
             var result = await controller.GetInvestment(simulation.Id);
@@ -465,9 +465,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyLibraryData()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
-            CreateLibraryTestData();
+            AddTestDataToDatabase();
 
             _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
             var dto = _testBudgetLibrary.ToDto();
@@ -502,10 +502,10 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyInvestmentData()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
 
             var dto = new InvestmentDTO
             {
@@ -547,9 +547,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldDeleteBudgetData()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
-            CreateLibraryTestData();
+            AddTestDataToDatabase();
 
             // Act
             var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
@@ -581,7 +581,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateDatabaseBasedController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
             // Assert
@@ -602,7 +602,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateDatabaseBasedController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyInvestmentFromLibrary);
             // Assert
@@ -624,7 +624,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            var controller = CreateDatabaseBasedController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ImportInvestmentFromScenario);
             // Assert
@@ -645,7 +645,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateDatabaseBasedController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
             // Assert
@@ -656,8 +656,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldImportLibraryBudgetsFromFile()
         {
             // Arrange
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
@@ -690,8 +690,8 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -734,8 +734,8 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
             TestHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
@@ -781,8 +781,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldExportLibraryBudgetsFile()
         {
             // Arrange
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
@@ -821,7 +821,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
@@ -834,7 +834,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var accessor = CreateRequestForExceptionTesting();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -848,7 +848,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
@@ -865,11 +865,11 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateDatabaseAuthorizedController(service, accessor);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
 
             // Act
             await controller.ImportScenarioInvestmentBudgetsExcelFile();
@@ -898,9 +898,9 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -943,10 +943,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -991,10 +991,10 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateDatabaseAuthorizedController(service, accessor);
             // Act
@@ -1031,7 +1031,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
@@ -1044,7 +1044,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var accessor = CreateRequestForExceptionTesting();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -1058,7 +1058,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);

@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Collections.Generic;
 using BridgeCareCore.Security;
 using System;
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -57,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void ShouldPassCheckUserSimulationModifyAuthorization()
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.AdminAccess) };
+            var claims = SystemSecurityClaimLists.Admin();
 
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));

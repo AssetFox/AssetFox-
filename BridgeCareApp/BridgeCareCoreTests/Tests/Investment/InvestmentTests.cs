@@ -45,6 +45,10 @@ using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
+using AppliedResearchAssociates.iAM.Hubs.Services;
+using Microsoft.AspNetCore.SignalR;
+using AppliedResearchAssociates.iAM.Hubs;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -72,10 +76,11 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(Mock<IUnitOfWork> unitOfWork)
+        private InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
         {
-            var hubService = HubServiceMocks.Default();
-            var accessor = HttpContextAccessorMocks.Default();
+            var resolveHubContext = mockHubContext ?? HubContextMocks.DefaultMock();
+            var hubService = HubServiceMocks.DefaultMock(resolveHubContext);
+            var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
             var security = EsecSecurityMocks.Dbe;
             var mockDataService = _mockInvestmentDefaultDataService;
             var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
@@ -84,10 +89,24 @@ namespace BridgeCareCoreTests.Tests
                 investmentBudgetServiceMock.Object,
                 security,
                 unitOfWork.Object,
-                hubService,
+                hubService.Object,
                 accessor,
                 mockDataService.Object,
                 claimHelper);
+            return controller;
+        }
+
+        private InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var claims = SystemSecurityClaimLists.Admin();
+            var controller = CreateController(unitOfWork, claims);
+            return controller;
+        }
+
+        private InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
+        {
+            var claims = SystemSecurityClaimLists.Empty();
+            var controller = CreateController(unitOfWork, claims, mockHubContext);
             return controller;
         }
 
@@ -327,7 +346,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task RequestUpdateBudget_ForwardsRequestToService()
+        public async Task RequestUpsertNewBudgetLibrary_ForwardsRequestToService()
         {
             var user = UserDtos.Admin;
             var libraryId = Guid.NewGuid();
@@ -335,14 +354,14 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
-            var controller = CreateAuthorizedController(unitOfWork);
+            var controller = CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
             };
             var pagingSync = new InvestmentPagingSyncModel
             {
-
+                
             };
             var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
             {
@@ -355,6 +374,102 @@ namespace BridgeCareCoreTests.Tests
             var upsertCall = upsertCalls.Single();
             var actualDto = upsertCall.Item1;
             ObjectAssertions.Equivalent(library, actualDto);
+        }
+
+        [Fact]
+        public async Task RequestUpsertExistingBudgetLibrary_ForwardsRequestToService()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
+
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
+            Assert.True(upsertCall.Item2);
+        }
+
+        [Fact]
+        public async Task RequestUpsertExistingBudgetLibrary_UserIsAdminWithoutExplicitAccess_ForwardsRequestToService()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
+
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
+            Assert.True(upsertCall.Item2);
+        }
+
+        [Fact]
+        public async Task RequestUpsertExistingBudgetLibrary_UserIsNotAdminWithoutExplicitAccess_DoesNotForwardRequestToService()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var hubContext = HubContextMocks.DefaultMock();
+            var controller = CreateNonAdminController(unitOfWork, hubContext);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
+
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            Assert.Empty(upsertCalls);
+            hubContext.GetStuff();
+            
         }
 
         [Fact]

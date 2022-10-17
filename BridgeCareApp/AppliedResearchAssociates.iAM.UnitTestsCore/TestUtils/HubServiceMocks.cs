@@ -13,15 +13,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class HubServiceMocks
     {
-        public static Mock<IHubContext<BridgeCareHub>> MockHubContext()
-        {
-            var mock = new Mock<IHubContext<BridgeCareHub>>();
-            return mock;
-        }
 
-        private static Mock<HubService> DefaultMock()
+        public static Mock<HubService> DefaultMock(Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
         {
-            var context = MockHubContext();
+            var context = mockHubContext ?? HubContextMocks.DefaultMock();
             var mock = new Mock<HubService>(context.Object);
             return mock;
         }

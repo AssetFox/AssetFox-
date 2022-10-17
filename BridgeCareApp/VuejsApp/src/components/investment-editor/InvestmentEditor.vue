@@ -738,8 +738,7 @@ export default class InvestmentEditor extends Vue {
 
         this.investmentPlan.firstYearOfAnalysisPeriod = hasValue(allBudgetYears)
             ? allBudgetYears[0] : this.investmentPlan.firstYearOfAnalysisPeriod;
-        this.investmentPlan.numberOfYearsInAnalysisPeriod = hasValue(allBudgetYears)
-            ? allBudgetYears.length : 1;
+        this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
     }
 
     onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
@@ -1044,7 +1043,8 @@ export default class InvestmentEditor extends Vue {
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.clearChanges()
+                this.investmentPlanMutator(this.investmentPlan)
+                this.clearChanges()               
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified investment"});
                 this.librarySelectItemValue = null
@@ -1228,6 +1228,20 @@ export default class InvestmentEditor extends Vue {
     }
 
     checkHasUnsavedChanges(){
+        const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
+        const stateInvestmentPlan: InvestmentPlan = {
+                ...clonedStateInvestmentPlan,
+                minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+            };
+        const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
+            const investmentPlan: InvestmentPlan = {
+                ...clonedInvestmentPlan,
+                minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
+                    ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
+                    : 0,
+            };
         const hasUnsavedChanges: boolean = 
             this.deletionBudgetIds.length > 0 || 
             this.addedBudgets.length > 0 ||
@@ -1236,7 +1250,7 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary) ||
-            hasUnsavedChangesCore('', this.investmentPlan, this.stateInvestmentPlan)
+            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

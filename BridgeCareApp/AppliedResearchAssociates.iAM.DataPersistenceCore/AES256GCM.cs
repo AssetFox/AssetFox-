@@ -18,11 +18,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
         public static readonly int MacBitSize = 128;
         public static readonly int KeyBitSize = 256;
 
-        // Preconfigured Password Key Derivation Parameters
-        public static readonly int SaltBitSize = 128;
-        public static readonly int Iterations = 10000;
-        public static readonly int MinPasswordLength = 12;
-
 
         /// <summary>
         /// Helper that generates a random new key on each call.
@@ -79,57 +74,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
             var plainText = DecryptText(cipherText, key, nonSecretPayloadLength);
             return plainText == null ? null : Encoding.UTF8.GetString(plainText);
         }
-
-        ///// <summary>
-        ///// Simple Encryption And Authentication (AES-GCM) of a UTF8 String
-        ///// using key derived from a password (PBKDF2).
-        ///// </summary>
-        ///// <param name="secretMessage">The secret message.</param>
-        ///// <param name="password">The password.</param>
-        ///// <param name="nonSecretPayload">The non secret payload.</param>
-        ///// <returns>
-        ///// Encrypted Message
-        ///// </returns>
-        ///// <remarks>
-        ///// Significantly less secure than using random binary keys.
-        ///// Adds additional non secret payload for key generation parameters.
-        ///// </remarks>
-        //public static string SimpleEncryptWithPassword(string secretMessage, string password,
-        //                         byte[] nonSecretPayload = null)
-        //{
-        //    if (string.IsNullOrEmpty(secretMessage))
-        //        throw new ArgumentException("Secret Message Required!", "secretMessage");
-
-        //    var plainText = Encoding.UTF8.GetBytes(secretMessage);
-        //    var cipherText = SimpleEncryptWithPassword(plainText, password, nonSecretPayload);
-        //    return Convert.ToBase64String(cipherText);
-        //}
-
-
-        ///// <summary>
-        ///// Simple Decryption and Authentication (AES-GCM) of a UTF8 message
-        ///// using a key derived from a password (PBKDF2)
-        ///// </summary>
-        ///// <param name="encryptedMessage">The encrypted message.</param>
-        ///// <param name="password">The password.</param>
-        ///// <param name="nonSecretPayloadLength">Length of the non secret payload.</param>
-        ///// <returns>
-        ///// Decrypted Message
-        ///// </returns>
-        ///// <exception cref="System.ArgumentException">Encrypted Message Required!;encryptedMessage</exception>
-        ///// <remarks>
-        ///// Significantly less secure than using random binary keys.
-        ///// </remarks>
-        //public static string SimpleDecryptWithPassword(string encryptedMessage, string password,
-        //                         int nonSecretPayloadLength = 0)
-        //{
-        //    if (string.IsNullOrWhiteSpace(encryptedMessage))
-        //        throw new ArgumentException("Encrypted Message Required!", "encryptedMessage");
-
-        //    var cipherText = Convert.FromBase64String(encryptedMessage);
-        //    var plainText = SimpleDecryptWithPassword(cipherText, password, nonSecretPayloadLength);
-        //    return plainText == null ? null : Encoding.UTF8.GetString(plainText);
-        //}
 
         private static byte[] EncryptText(byte[] secretMessage, byte[] key, byte[] nonSecretPayload = null)
         {
@@ -221,65 +165,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore
                 return plainText;
             }
 
-        }
-
-        //private static byte[] SimpleEncryptWithPassword(byte[] secretMessage, string password, byte[] nonSecretPayload = null)
-        //{
-        //    nonSecretPayload = nonSecretPayload ?? new byte[] { };
-
-        //    //User Error Checks
-        //    if (string.IsNullOrWhiteSpace(password) || password.Length < MinPasswordLength)
-        //        throw new ArgumentException(String.Format("Must have a password of at least {0} characters!", MinPasswordLength), "password");
-
-        //    if (secretMessage == null || secretMessage.Length == 0)
-        //        throw new ArgumentException("Secret Message Required!", "secretMessage");
-
-        //    var generator = new Pkcs5S2ParametersGenerator();
-
-        //    //Use Random Salt to minimize pre-generated weak password attacks.
-        //    var salt = new byte[SaltBitSize / 8];
-        //    Random.NextBytes(salt);
-
-        //    generator.Init(
-        //      PbeParametersGenerator.Pkcs5PasswordToBytes(password.ToCharArray()),
-        //      salt,
-        //      Iterations);
-
-        //    //Generate Key
-        //    var key = (KeyParameter)generator.GenerateDerivedMacParameters(KeyBitSize);
-
-        //    //Create Full Non Secret Payload
-        //    var payload = new byte[salt.Length + nonSecretPayload.Length];
-        //    Array.Copy(nonSecretPayload, payload, nonSecretPayload.Length);
-        //    Array.Copy(salt, 0, payload, nonSecretPayload.Length, salt.Length);
-
-        //    return SimpleEncrypt(secretMessage, key.GetKey(), payload);
-        //}
-
-        //private static byte[] SimpleDecryptWithPassword(byte[] encryptedMessage, string password, int nonSecretPayloadLength = 0)
-        //{
-        //    //User Error Checks
-        //    if (string.IsNullOrWhiteSpace(password) || password.Length < MinPasswordLength)
-        //        throw new ArgumentException(String.Format("Must have a password of at least {0} characters!", MinPasswordLength), "password");
-
-        //    if (encryptedMessage == null || encryptedMessage.Length == 0)
-        //        throw new ArgumentException("Encrypted Message Required!", "encryptedMessage");
-
-        //    var generator = new Pkcs5S2ParametersGenerator();
-
-        //    //Grab Salt from Payload
-        //    var salt = new byte[SaltBitSize / 8];
-        //    Array.Copy(encryptedMessage, nonSecretPayloadLength, salt, 0, salt.Length);
-
-        //    generator.Init(
-        //      PbeParametersGenerator.Pkcs5PasswordToBytes(password.ToCharArray()),
-        //      salt,
-        //      Iterations);
-
-        //    //Generate Key
-        //    var key = (KeyParameter)generator.GenerateDerivedMacParameters(KeyBitSize);
-
-        //    return SimpleDecrypt(encryptedMessage, key.GetKey(), salt.Length + nonSecretPayloadLength);
-        //}
+        }        
     }
 }

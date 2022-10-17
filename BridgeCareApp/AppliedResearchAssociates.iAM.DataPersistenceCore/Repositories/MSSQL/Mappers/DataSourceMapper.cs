@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (dto is SQLDataSourceDTO)
             {
                 entityDetail = ((SQLDataSourceDTO)dto).ConnectionString;
-                // key genaration, TODO need to see where to store key or set once in the class??
+                // key genaration, TODO get generated value once and put that in appsettings
                 var newKey = AES256GCM.NewKey();
                 // Encrypt
                 var encryptedText = AES256GCM.Encrypt(entityDetail, newKey);

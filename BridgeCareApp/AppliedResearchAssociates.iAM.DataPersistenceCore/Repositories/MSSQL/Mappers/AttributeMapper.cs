@@ -259,7 +259,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Type == "SQL")
             {
                 var dsDto = (SQLDataSourceDTO)entity.ToDTO();
-                connectionString = dsDto.ConnectionString;
+                connectionString = dsDto.ConnectionString; // TODO decryption will be needed here? 
             }
             return connectionString;
         }

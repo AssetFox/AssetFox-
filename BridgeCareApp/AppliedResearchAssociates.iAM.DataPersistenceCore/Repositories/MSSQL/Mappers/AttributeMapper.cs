@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -259,7 +260,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Type == "SQL")
             {
                 var dsDto = (SQLDataSourceDTO)entity.ToDTO();
-                connectionString = dsDto.ConnectionString; // TODO decryption will be needed here? 
+                var keyBytes = new byte[AES256GCM.KeyBitSize / 8];
+                keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);                
+                connectionString = AES256GCM.Decrypt(dsDto.ConnectionString, keyBytes);
             }
             return connectionString;
         }

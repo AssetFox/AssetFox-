@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Text.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -14,14 +15,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var entityDetail = "";
             if (dto is SQLDataSourceDTO)
             {
-                entityDetail = ((SQLDataSourceDTO)dto).ConnectionString;
-                // key genaration, TODO get generated value once and put that in appsettings
-                var newKey = AES256GCM.NewKey();
+                var connectionString = ((SQLDataSourceDTO)dto).ConnectionString;
+
+                AES256GCM.NewKey();
+                var keyBytes = new byte[AES256GCM.KeyBitSize / 8];
+                keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
                 // Encrypt
-                var encryptedText = AES256GCM.Encrypt(entityDetail, newKey);
+                var encryptedText = AES256GCM.Encrypt(connectionString, keyBytes);
                 entityDetail = encryptedText;
-                // Decrypt, to test
-                var plainText = AES256GCM.Decrypt(encryptedText, newKey);
             }
             else if (dto is ExcelDataSourceDTO)
             {
@@ -59,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 {
                     Id = entity.Id,
                     Name = entity.Name,
-                    ConnectionString = entity.Details
+                    ConnectionString = entity.Details // TODO decrypt
                 };
                 return source;
             }

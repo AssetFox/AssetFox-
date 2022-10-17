@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             BudgetLibraryDTO budgetLibraryDto = null;
 
             //testing and asserts
-            Assert.Throws<NullReferenceException>(() => unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto, true));
+            Assert.ThrowsAny<Exception>(() => unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto, true));
         }
 
         [Fact]

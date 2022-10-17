@@ -43,6 +43,8 @@ using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Investment;
 using BridgeCareCore.Interfaces;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -324,17 +326,19 @@ namespace BridgeCareCoreTests.Tests
             return accessor.Object;
         }
 
-        [Fact (Skip ="Wj wip")]
+        [Fact]
         public async Task RequestUpdateBudget_ForwardsRequestToService()
         {
             var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
             var controller = CreateAuthorizedController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
-                Id = Guid.NewGuid(),
+                Id = libraryId,
             };
             var pagingSync = new InvestmentPagingSyncModel
             {
@@ -346,8 +350,11 @@ namespace BridgeCareCoreTests.Tests
                 Library = library,
                 PagingSync = pagingSync,
             };
-            var result = await controller.UpsertBudgetLibrary(upsertRequest);
-            
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
         }
 
         [Fact]

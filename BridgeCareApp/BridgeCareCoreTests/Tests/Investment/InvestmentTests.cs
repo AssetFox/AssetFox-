@@ -1,58 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
+using System.Security.Claims;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces.DefaultData;
+using BridgeCareCore.Models;
 using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.DefaultData;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.Investment;
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using MoreLinq;
 using OfficeOpenXml;
 using Xunit;
-using MoreLinq;
-using System.Threading;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using BridgeCareCore.Logging;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
-using BridgeCareCore.Services.DefaultData;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils.Interfaces;
-using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using BridgeCareCore.Utils;
-using Microsoft.AspNetCore.Authorization;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
-using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Investment;
-using BridgeCareCore.Interfaces;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
-using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-using Microsoft.AspNetCore.SignalR;
-using AppliedResearchAssociates.iAM.Hubs;
-using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
-using System.Reflection;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -572,17 +558,74 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
+        public async Task GetBudgetLibraries_UserIsAdmin_CallsGetLibrariesWithoutChildrenOnRepo()
         {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var libraryId = Guid.NewGuid();
+            var budgetLibrary = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
+            budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildren()).Returns(budgetLibraries);
+            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
 
-            // Act
-            var result = await controller.GetBudgetLibraries();
+            var libraries = await controller.GetBudgetLibraries();
 
-            // Assert
-            ActionResultAssertions.OkObject(result);
+            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
+            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
+            ObjectAssertions.Equivalent(budgetLibrary, returnedBudgetLibrary);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibraries_UserIsNotAdmin_CallsGetBudgetLibrariesNoChildrenAccessibleToUser()
+        {
+            var user = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var libraryId = Guid.NewGuid();
+            var budgetLibrary = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
+            budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraries);
+            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var libraries = await controller.GetBudgetLibraries();
+
+            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
+            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
+            ObjectAssertions.Equivalent(budgetLibrary, returnedBudgetLibrary);
+        }
+
+        [Fact]
+        public async Task GetInvestment_UserIsAdmin_CallsBlah()
+        {
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var simulationId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budget = new BudgetDTO
+            {
+                Id = budgetId,
+            };
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
+
+            var libraries = await controller.GetInvestment(simulationId);
+
+            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
+            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
+            ObjectAssertions.Equivalent(budget, returnedBudgetLibrary);
         }
 
         [Fact]

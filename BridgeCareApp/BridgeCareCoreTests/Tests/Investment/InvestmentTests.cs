@@ -50,6 +50,9 @@ using AppliedResearchAssociates.iAM.Hubs.Services;
 using Microsoft.AspNetCore.SignalR;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using System.Reflection;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -474,6 +477,45 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistAdminUser_CallsDeleteOnRepo_Ok()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            var deleteCall = deleteCalls.Single();
+            var argument = (Guid)deleteCall.Arguments[0];
+            Assert.Equal(libraryId, argument);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_CallsDeleteOnRepo_Ok()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var exception = await Assert.ThrowsAnyAsync<Exception>(() => controller.DeleteBudgetLibrary(libraryId));
+
+            var message = exception.Message;
+            Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
+            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Empty(deleteCalls);
+        }
+
+        [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
         {
             var service = SetupDatabaseBasedService();
@@ -484,7 +526,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetBudgetLibraries();
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
         }
 
         [Fact]
@@ -499,7 +541,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetInvestment(simulation.Id);
 
             // Assert
-            Assert.IsType<OkObjectResult>(result);
+            ActionResultAssertions.OkObject(result);
         }
 
         [Fact]
@@ -519,7 +561,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.UpsertBudgetLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
@@ -538,7 +580,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.UpsertInvestment(simulation.Id, request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
@@ -552,7 +594,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.DeleteBudgetLibrary(Guid.Empty);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
@@ -707,7 +749,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
 
             Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
             Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
@@ -740,7 +782,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(allowed.Succeeded);
         }
         [Fact]
-        public async Task UserIsModifyInestmentFromLibraryAuthorized()
+        public async Task UserIsModifyInvestmentFromLibraryAuthorized()
         {
             // non-admin authorized
             // Arrange

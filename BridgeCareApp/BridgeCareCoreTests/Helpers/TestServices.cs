@@ -20,14 +20,14 @@ namespace BridgeCareCoreTests
             return logger;
         }
 
-        public static ExpressionValidationService ExpressionValidation(UnitOfDataPersistenceWork unitOfWork)
+        public static ExpressionValidationService ExpressionValidation(IUnitOfWork unitOfWork)
         {
             var log = Logger();
             var service = new ExpressionValidationService(unitOfWork, log);
             return service;
         }
 
-        public static IPerformanceCurvesService PerformanceCurves(UnitOfDataPersistenceWork unitOfWork, IHubService hubService)
+        public static IPerformanceCurvesService PerformanceCurves(IUnitOfWork unitOfWork, IHubService hubService)
         {
             var logger = new LogNLog();
             var expressionValidation = ExpressionValidation(unitOfWork);

@@ -16,16 +16,18 @@ using System.IO;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using System.Data;
+using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {
     public class PerformanceCurvesService : IPerformanceCurvesService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;        
+        private static IUnitOfWork _unitOfWork;        
         protected readonly IHubService _hubService;
         private readonly IExpressionValidationService _expressionValidationService;
+        public const string ImportedWithoutCriterioDueToInvalidValues = "The following performace curves are imported without criteria due to invalid values:";
 
-        public PerformanceCurvesService(UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IExpressionValidationService expressionValidationService)
+        public PerformanceCurvesService(IUnitOfWork unitOfWork, IHubService hubService, IExpressionValidationService expressionValidationService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _hubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
@@ -58,7 +60,6 @@ namespace BridgeCareCore.Services
                 //// Combine curves to be imported
                 //performanceCurvesToImport.AddRange(existingPerformanceCurves);
                 #endregion
-
                 performanceCurveRepo.UpsertPerformanceCurveLibrary(performanceCurveLibraryDto);
                 performanceCurveRepo.UpsertOrDeletePerformanceCurves(performanceCurvesToImport, performanceCurveLibraryId);
             }
@@ -269,7 +270,7 @@ namespace BridgeCareCore.Services
         {
             if (performanceCurvesWithInvalidCriteria.Any())
             {
-                warningSb.Append($"The following performace curves are imported without criteria due to invalid values: {string.Join(", ", performanceCurvesWithInvalidCriteria)}");
+                warningSb.Append($"{ImportedWithoutCriterioDueToInvalidValues} {string.Join(", ", performanceCurvesWithInvalidCriteria)}");
             }
         }
 

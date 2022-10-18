@@ -42,6 +42,8 @@
                             placeholder="Search Deterioration Equations"
                             single-line
                             outline
+                            clearable
+                            @click:clear="onClearClick()"
                             v-model="gridSearchTerm"
                         >
                         </v-text-field>
@@ -1124,6 +1126,11 @@ export default class PerformanceCurveEditor extends Vue {
     onSearchClick(){
         this.currentSearch = this.gridSearchTerm;
         this.resetPage();
+    }
+
+    onClearClick(){
+        this.gridSearchTerm = '';
+        this.onSearchClick();
     }
 
     onUpdateRow(rowId: string, updatedRow: PerformanceCurve){

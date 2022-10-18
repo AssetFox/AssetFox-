@@ -25,6 +25,7 @@ using BridgeCareCore.Utils;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using Microsoft.AspNetCore.Authorization;
+using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -53,8 +54,7 @@ namespace BridgeCareCoreTests.Tests
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
-            var mockUserRepo = new Mock<IUserRepository>();
-            mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
+            var mockUserRepo = UserRepositoryMocks.EveryoneExists();
             _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
 
             _mockService = new Mock<ICommittedProjectService>();

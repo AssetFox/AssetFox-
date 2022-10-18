@@ -11,6 +11,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetPriorityLibraryDTO> GetBudgetPriorityLibraries();
 
+        List<BudgetPriorityLibraryDTO> GetBudgetPriortyLibrariesNoChildren();
+
         void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto);
 
         void UpsertOrDeleteBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid libraryId);
@@ -18,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteBudgetPriorityLibrary(Guid libraryId);
 
         List<BudgetPriorityDTO> GetScenarioBudgetPriorities(Guid simulationId);
+        List<BudgetPriorityDTO> GetBudgetPrioritiesByLibraryId(Guid libraryId);
 
         void UpsertOrDeleteScenarioBudgetPriorities(List<BudgetPriorityDTO> budgetPriorities, Guid simulationId);
     }

@@ -17,9 +17,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var connectionString = ((SQLDataSourceDTO)dto).ConnectionString;
 
-                AES256GCM.NewKey();
-                var keyBytes = new byte[AES256GCM.KeyBitSize / 8];
-                keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
+                AES256GCM.NewKey();               
+                var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
                 // Encrypt
                 var encryptedText = AES256GCM.Encrypt(connectionString, keyBytes);
                 entityDetail = encryptedText;
@@ -56,11 +55,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
+                var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
+                var decryptedConnetionString = AES256GCM.Decrypt(entity.Details, keyBytes);
                 var source = new SQLDataSourceDTO
                 {
                     Id = entity.Id,
                     Name = entity.Name,
-                    ConnectionString = entity.Details // TODO decrypt
+                    ConnectionString = decryptedConnetionString
                 };
                 return source;
             }

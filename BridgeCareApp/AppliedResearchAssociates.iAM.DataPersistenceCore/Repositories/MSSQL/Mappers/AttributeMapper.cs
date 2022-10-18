@@ -259,9 +259,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity == null) return connectionString;
             if (entity.Type == "SQL")
             {
-                var dsDto = (SQLDataSourceDTO)entity.ToDTO();
-                var keyBytes = new byte[AES256GCM.KeyBitSize / 8];
-                keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);                
+                var dsDto = (SQLDataSourceDTO)entity.ToDTO();                
+                var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);                
                 connectionString = AES256GCM.Decrypt(dsDto.ConnectionString, keyBytes);
             }
             return connectionString;

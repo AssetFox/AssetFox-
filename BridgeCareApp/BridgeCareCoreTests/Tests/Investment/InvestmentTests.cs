@@ -342,7 +342,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
@@ -373,7 +373,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
@@ -405,7 +405,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
@@ -437,7 +437,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = new Mock<IHubService>();
             var controller = CreateNonAdminController(unitOfWork, hubService);
             var library = new BudgetLibraryDTO
@@ -470,7 +470,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
@@ -490,7 +490,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateNonAdminController(unitOfWork);
 
             var exception = await Assert.ThrowsAnyAsync<Exception>(() => controller.DeleteBudgetLibrary(libraryId));
@@ -508,7 +508,7 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
@@ -525,7 +525,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateNonAdminController(unitOfWork);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
@@ -543,7 +543,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Modify);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = HubServiceMocks.DefaultMock();
             var controller = CreateNonAdminController(unitOfWork, hubService);
 
@@ -570,7 +570,7 @@ namespace BridgeCareCoreTests.Tests
             };
             var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
             budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildren()).Returns(budgetLibraries);
-            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
 
             var libraries = await controller.GetBudgetLibraries();
@@ -593,7 +593,7 @@ namespace BridgeCareCoreTests.Tests
             };
             var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
             budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraries);
-            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateNonAdminController(unitOfWork);
 
             var libraries = await controller.GetBudgetLibraries();
@@ -604,7 +604,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task GetInvestment_UserIsAdmin_CallsBlah()
+        public async Task GetInvestment_UserIsAdmin_BudgetRepoAndInvestmentPlanRepo()
         {
             var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
@@ -618,49 +618,26 @@ namespace BridgeCareCoreTests.Tests
             };
             var budgets = new List<BudgetDTO> { budget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
-            unitOfWork.Setup(uow => uow.BudgetRepo).Returns(budgetRepo.Object);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock();
+            unitOfWork.SetupInvestmentPlanRepo(investmentPlanRepo);
+            var investmentPlanId = Guid.NewGuid();
+            var investmentPlanDto = new InvestmentPlanDTO
+            {
+                Id = investmentPlanId,
+            };
+            investmentPlanRepo.Setup(r => r.GetInvestmentPlan(simulationId)).Returns(investmentPlanDto);
             var controller = CreateAdminController(unitOfWork);
 
             var libraries = await controller.GetInvestment(simulationId);
 
-            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
-            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
-            ObjectAssertions.Equivalent(budget, returnedBudgetLibrary);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnScenarioGet()
-        {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
-            // Act
-            var result = await controller.GetInvestment(simulation.Id);
-
-            // Assert
-            ActionResultAssertions.OkObject(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnLibraryPost()
-        {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
-            var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
-
-            var request = new InvestmentLibraryUpsertPagingRequestModel();
-            request.IsNewLibrary = true;
-
-            request.Library = dto;
-
-            // Act
-            var result = await controller.UpsertBudgetLibrary(request);
-
-            // Assert
-            ActionResultAssertions.Ok(result);
+            var returnedInvestmentDto = ActionResultAssertions.OkObject(libraries) as InvestmentDTO;
+            var expected = new InvestmentDTO
+            {
+                InvestmentPlan = investmentPlanDto,
+                ScenarioBudgets = budgets,
+            };
+            ObjectAssertions.Equivalent(expected, returnedInvestmentDto);
         }
 
         [Fact]

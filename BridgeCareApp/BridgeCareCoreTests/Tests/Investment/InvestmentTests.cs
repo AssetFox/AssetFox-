@@ -49,6 +49,7 @@ using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using Microsoft.AspNetCore.SignalR;
 using AppliedResearchAssociates.iAM.Hubs;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -76,10 +77,9 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
+        private InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubService> hubServiceMock = null)
         {
-            var resolveHubContext = mockHubContext ?? HubContextMocks.DefaultMock();
-            var hubService = HubServiceMocks.DefaultMock(resolveHubContext);
+            var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
             var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
             var security = EsecSecurityMocks.Dbe;
             var mockDataService = _mockInvestmentDefaultDataService;
@@ -89,7 +89,7 @@ namespace BridgeCareCoreTests.Tests
                 investmentBudgetServiceMock.Object,
                 security,
                 unitOfWork.Object,
-                hubService.Object,
+                resolveHubService.Object,
                 accessor,
                 mockDataService.Object,
                 claimHelper);
@@ -103,10 +103,10 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
+        private InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Empty();
-            var controller = CreateController(unitOfWork, claims, mockHubContext);
+            var controller = CreateController(unitOfWork, claims, hubServiceMock);
             return controller;
         }
 
@@ -449,8 +449,8 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
-            var hubContext = HubContextMocks.DefaultMock();
-            var controller = CreateNonAdminController(unitOfWork, hubContext);
+            var hubService = new Mock<IHubService>();
+            var controller = CreateNonAdminController(unitOfWork, hubService);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
@@ -468,8 +468,9 @@ namespace BridgeCareCoreTests.Tests
             await controller.UpsertBudgetLibrary(upsertRequest);
             var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
             Assert.Empty(upsertCalls);
-            hubContext.GetStuff();
-            
+            var messages = hubService.ThreeArgumentUserMessages();
+            var message = messages.Single();
+            Assert.Contains(ClaimHelper.LibraryModifyUnauthorizedMessage, message);
         }
 
         [Fact]

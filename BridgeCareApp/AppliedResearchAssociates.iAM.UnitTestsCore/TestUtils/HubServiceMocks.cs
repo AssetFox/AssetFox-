@@ -14,17 +14,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
     public static class HubServiceMocks
     {
 
-        public static Mock<HubService> DefaultMock(Mock<IHubContext<BridgeCareHub>> mockHubContext = null)
+        public static Mock<IHubService> DefaultMock()
         {
-            var context = mockHubContext ?? HubContextMocks.DefaultMock();
-            var mock = new Mock<HubService>(context.Object);
+            var mock = new Mock<IHubService>();
             return mock;
         }
 
-        public static HubService Default()
+        public static IHubService Default()
         {
             var mock = DefaultMock();
             return mock.Object;
+        }
+
+        public static List<string> ThreeArgumentUserMessages(this Mock<IHubService> mock)
+        {
+            var invocations = mock.Invocations.ToList();
+            var realTimeMessageInvocations = invocations.Where(i => i.Method.Name == nameof(IHubService.SendRealTimeMessage)).ToList();
+            var threeArgumentInvocations = realTimeMessageInvocations.Where(i => i.Arguments.Count == 3).ToList();
+            var threeArgumentInvocationFinalArguments = threeArgumentInvocations.Select(i => i.Arguments[2].ToString()).ToList();
+            return threeArgumentInvocationFinalArguments;
         }
     }
 }

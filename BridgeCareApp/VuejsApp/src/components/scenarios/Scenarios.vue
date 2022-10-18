@@ -39,6 +39,8 @@
                                                 single-line
                                                 v-model="searchMine"
                                                 outline
+                                                clearable
+                                                @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
@@ -212,6 +214,8 @@
                                                 hide-details
                                                 single-line
                                                 v-model="searchShared"
+                                                clearable
+                                                @click:clear="onSharedClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
@@ -1285,8 +1289,13 @@ export default class Scenarios extends Vue {
     }
 
     onMineSearchClick(){
-        this.currentSearchMine =  this.searchMine;
+        this.currentSearchMine = this.searchMine;
         this.resetPageMine()
+    }
+
+    onMineClearClick(){
+        this.searchMine = '';
+        this.onMineSearchClick();
     }
 
     resetPageMine(){
@@ -1295,8 +1304,13 @@ export default class Scenarios extends Vue {
     }
 
     onSharedSearchClick(){
-        this.currentSearchShared =  this.searchShared;
+        this.currentSearchShared = this.searchShared;
         this.resetPageShared()
+    }
+
+    onSharedClearClick(){
+        this.searchShared = '';
+        this.onSharedSearchClick();
     }
 
     resetPageShared(){

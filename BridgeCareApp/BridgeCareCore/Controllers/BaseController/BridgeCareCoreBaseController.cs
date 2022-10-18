@@ -32,12 +32,12 @@ namespace BridgeCareCore.Controllers.BaseController
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             HubService = hubService ?? throw new ArgumentNullException(nameof(hubService));
             ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-            if (RequestHasBearer()) 
+            if (RequestHasBearer())
             {
                 SetUserInfo(ContextAccessor?.HttpContext?.Request);
             }
         }
-        
+
         public bool RequestHasBearer()
         {
             if (ContextAccessor?.HttpContext?.Request != null)
@@ -55,7 +55,7 @@ namespace BridgeCareCore.Controllers.BaseController
             {
                 UserInfo = EsecSecurity.GetUserInformation(request);
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, exception.Message);
                 throw;
@@ -72,22 +72,22 @@ namespace BridgeCareCore.Controllers.BaseController
                 {
                     _userInfo = value;
                     CheckIfUserExist();
-                    
+
                 }
             }
         }
 
         private void CheckIfUserExist()
         {
-                if (!string.IsNullOrEmpty(UserInfo.Name))
+            if (!string.IsNullOrEmpty(UserInfo.Name))
+            {
+                if (!UnitOfWork.UserRepo.UserExists(UserInfo.Name))
                 {
-                    if (!UnitOfWork.UserRepo.UserExists(UserInfo.Name))
-                    {
-                        UnitOfWork.AddUser(UserInfo.Name, UserInfo.HasAdminAccess);
-                    }
-
-                    UnitOfWork.SetUser(_userInfo.Name);
+                    UnitOfWork.AddUser(UserInfo.Name, UserInfo.HasAdminAccess);
                 }
+
+                UnitOfWork.SetUser(_userInfo.Name);
+            }
         }
     }
 }

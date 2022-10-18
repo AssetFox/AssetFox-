@@ -88,31 +88,6 @@ const actions = {
             },
         );
     },
-    async upsertBudgetPriorityLibrary(
-        { dispatch, commit }: any,
-        library: BudgetPriorityLibrary,
-    ) {
-        await BudgetPriorityService.upsertBudgetPriorityLibrary(library).then(
-            (response: AxiosResponse) => {
-                if (
-                    hasValue(response, 'status') &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    const message: string = any(
-                        propEq('id', library.id),
-                        state.budgetPriorityLibraries,
-                    )
-                        ? 'Updated budget priority library'
-                        : 'Added budget priority library';
-
-                    commit('budgetPriorityLibraryMutator', library);
-                    commit('selectedBudgetPriorityLibraryMutator', library.id);
-
-                    dispatch('addSuccessNotification', { message: message });
-                }
-            },
-        );
-    },
     async deleteBudgetPriorityLibrary(
         { dispatch, commit, state }: any,
         libraryId: string,
@@ -149,28 +124,6 @@ const actions = {
                     'scenarioBudgetPrioritiesMutator',
                     response.data as BudgetPriority[],
                 );
-            }
-        });
-    },
-    async upsertScenarioBudgetPriorities(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await BudgetPriorityService.upsertScenarioBudgetPriorities(
-            payload.scenarioBudgetPriorities,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioBudgetPrioritiesMutator',
-                    payload.scenarioBudgetPriorities,
-                );
-                dispatch('addSuccessNotification', {
-                    message: 'Modified scenario budget priorities',
-                });
             }
         });
     },

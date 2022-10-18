@@ -92,47 +92,6 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldModifyCriterionLibraries()
-        {
-            // Arrange
-            var controller = SetupController();
-            var criterionLibrary = Setup();
-            var getResult = await controller.CriterionLibraries();
-            var dtos = (List<CriterionLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<CriterionLibraryDTO>));
-
-            var criterionLibraryDTO = dtos.Single(dto => dto.Id == criterionLibrary.Id);
-            criterionLibraryDTO.Description = "Updated Description";
-
-            var newName = RandomStrings.WithPrefix("New Name");
-            var newDescription = RandomStrings.WithPrefix("Updated description");
-            var newCriterionLibraryDTO = new CriterionLibraryEntity
-            {
-                Id = criterionLibrary.Id,
-                Name = newName,
-                MergedCriteriaExpression = "New Expression",
-                Description = newDescription,
-            }.ToDto();
-
-            // Act
-            var updateResult = await controller.UpsertCriterionLibrary(criterionLibraryDTO);
-            var addResult = await controller.UpsertCriterionLibrary(newCriterionLibraryDTO);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(updateResult);
-            Assert.IsType<OkObjectResult>(addResult);
-
-            var updatedCriterionLibraryEntity = TestHelper.UnitOfWork.Context.CriterionLibrary
-                .Single(_ => _.Id == criterionLibrary.Id);
-            Assert.Equal(newDescription, updatedCriterionLibraryEntity.Description);
-
-            var newCriterionLibraryEntity =
-                TestHelper.UnitOfWork.Context.CriterionLibrary.Single(_ =>
-                    _.Id == newCriterionLibraryDTO.Id);
-            Assert.NotNull(newCriterionLibraryEntity);
-        }
-
-        [Fact]
         public async Task ShouldDeleteCriterionLibrary()
         {
             // Arrange

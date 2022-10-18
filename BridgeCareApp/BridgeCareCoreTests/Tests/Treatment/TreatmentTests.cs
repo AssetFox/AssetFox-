@@ -175,7 +175,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task GetSimpleTreatmentsByLibraryIdTest()
+        public async Task ShouldGetSimpleTreatmentsByLibraryId()
         {
             // Arrange
             Setup();
@@ -196,7 +196,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testTreatment.Name, dtos[0].Name);
         }
         [Fact]
-        public async Task GetSelectedTreatmentByIdTest()
+        public async Task ShouldGetSelectedTreatmentByIdWithData()
         {
             // Arrange
             Setup();
@@ -221,7 +221,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
         }
         [Fact]
-        public async Task GetScenarioSelectedTreatmentByIdTest()
+        public async Task ShouldGetScenarioSelectedTreatmentByIdWithData()
         {
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -247,7 +247,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Contains(budget.Id, dto.BudgetIds);
         }
         [Fact]
-        public async Task GetSimpleTreatmentsByScenarioIdTest()
+        public async Task ShouldGetSimpleTreatmentsByScenarioId()
         {
             // Arrange
             Setup();

@@ -499,7 +499,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_CallsDeleteOnRepo_Ok()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Dbe();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
@@ -513,6 +513,62 @@ namespace BridgeCareCoreTests.Tests
             Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
             var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
             Assert.Empty(deleteCalls);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_AdminUser_Ok()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_OwnerButNotAdminUser_Ok()
+        {
+            var user = UserDtos.Dbe();
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Single(calls);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_ModifyPermissionButNotAdminUser_DoesNotDelete()
+        {
+            var user = UserDtos.Dbe();
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Modify);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepo.Object);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = CreateNonAdminController(unitOfWork, hubService);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Empty(calls);
+            var messages = hubService.ThreeArgumentUserMessages();
+            var errorMessage = messages.Single();
+            Assert.Contains(ClaimHelper.LibraryDeleteUnauthorizedMessage, errorMessage);
         }
 
         [Fact]

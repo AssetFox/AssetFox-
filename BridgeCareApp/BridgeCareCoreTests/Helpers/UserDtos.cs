@@ -16,5 +16,17 @@ namespace BridgeCareCoreTests.Helpers
             HasInventoryAccess = true,
             Id = TestDataForCommittedProjects.AuthorizedUser
         };
+
+        public static UserDTO Dbe(Guid? id = null)
+        {
+            var resolveId = id ?? Guid.NewGuid();
+            var dto = new UserDTO
+            {
+                Username = "Dbe",
+                HasInventoryAccess = true,
+                Id = resolveId,
+            };
+            return dto;
+        }
     }
 }

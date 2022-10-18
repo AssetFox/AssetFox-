@@ -228,17 +228,17 @@ namespace BridgeCareCoreTests.Tests
                 criterionLibrary;
 
             // Act
-            await controller.UpsertTargetConditionGoalLibrary(dto);
+            await controller.UpsertTargetConditionGoalLibrary(libraryDto);
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
                 .GetTargetConditionGoalLibrariesWithTargetConditionGoals()
                 .Single(x => x.Id == library.Id);
-            Assert.Equal(dto.Description, modifiedDto.Description);
+            Assert.Equal(libraryDto.Description, modifiedDto.Description);
 
             // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
             // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-            Assert.Equal(dto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
+            Assert.Equal(libraryDto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
         }
 
         [Fact]

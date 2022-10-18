@@ -70,7 +70,9 @@
             </div>
         </v-layout>
         <v-layout column>
-            <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String</v-subheader>
+            <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String
+            <v-text v-show="this.currentDatasource.connectionString != ''" class="ghd-blue">: existing string is not displayed for security purpose, replace operation will be performed</v-text>
+            </v-subheader>
             <v-layout justify-start>
                     <v-flex xs8>
                         <v-textarea
@@ -167,7 +169,7 @@ export default class DataSource extends Vue {
     currentDatasource: Datasource = emptyDatasource;
     createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
 
-    selectedConnection: string = 'test';
+    selectedConnection: string = '';
     showMssql: boolean = false;
     showExcel: boolean = false;
     showSqlMessage: boolean = false;
@@ -247,12 +249,15 @@ export default class DataSource extends Vue {
             this.dataSourceTypeItem = this.currentDatasource.type;
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-            this.selectedConnection = this.currentDatasource.connectionString;
+            this.selectedConnection = '';
             this.showSqlMessage = false; this.showSaveMessage = false;
         }
         @Watch('selectedConnection')
         onSelectedConnectionChanged() {
-            this.currentDatasource.connectionString = this.selectedConnection;
+            if(this.selectedConnection != '')
+            {
+                this.currentDatasource.connectionString = this.selectedConnection;
+            }
         }
         @Watch('sqlCommandResponse')
         onSqlCommandResponseChanged() {
@@ -289,6 +294,7 @@ export default class DataSource extends Vue {
             this.upsertSqlDataSourceAction(sqldat).then(() => {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
+                this.selectedConnection = '';
                 this.getDataSourcesAction();
             });
         } else {

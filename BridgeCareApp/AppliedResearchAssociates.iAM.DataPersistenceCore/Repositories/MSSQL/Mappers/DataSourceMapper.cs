@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AES256GCM.NewKey();               
                 var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
                 // Encrypt
-                var encryptedText = AES256GCM.Encrypt(connectionString, keyBytes);
+                var encryptedText = string.IsNullOrEmpty(connectionString) ? string.Empty : AES256GCM.Encrypt(connectionString, keyBytes);
                 entityDetail = encryptedText;
             }
             else if (dto is ExcelDataSourceDTO)
@@ -56,7 +56,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
                 var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
-                var decryptedConnetionString = AES256GCM.Decrypt(entity.Details, keyBytes);
+                // Decrypt
+                var decryptedConnetionString = string.IsNullOrEmpty(entity.Details) ? string.Empty: AES256GCM.Decrypt(entity.Details, keyBytes);
                 var source = new SQLDataSourceDTO
                 {
                     Id = entity.Id,

@@ -859,9 +859,9 @@ namespace BridgeCareCoreTests.Tests
             });
             var roleClaimsMapper = new RoleClaimsMapper();
             var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator);
-            var controller = CreateDatabaseBasedController(claims);
+            var user = CreateTestUser(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
+            var allowed = await authorizationService.AuthorizeAsync(user, Policy.ViewInvestmentFromScenario);
             // Assert
             Assert.True(allowed.Succeeded);
         }

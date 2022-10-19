@@ -114,7 +114,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Year = budgetAmount.Year,
                     Value = budgetAmount.Value,
-                    Budget = new BudgetEntity {Name = budgetAmount.Budget.Name}
+                    Budget = new BudgetEntity {Name = budgetAmount.Budget.Name, BudgetOrder = budgetAmount.Budget.BudgetOrder }
                 }).AsNoTracking().ToList();
         }
 
@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     Year = budgetAmount.Year,
                     Value = budgetAmount.Value,
-                    ScenarioBudget = new ScenarioBudgetEntity {Name = budgetAmount.ScenarioBudget.Name}
+                    ScenarioBudget = new ScenarioBudgetEntity {Name = budgetAmount.ScenarioBudget.Name, BudgetOrder=budgetAmount.ScenarioBudget.BudgetOrder}
                 }).AsNoTracking().ToList();
         }
     }

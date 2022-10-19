@@ -456,10 +456,8 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
             ActionResultAssertions.Ok(result);
-            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
-            var deleteCall = deleteCalls.Single();
-            var argument = (Guid)deleteCall.Arguments[0];
-            Assert.Equal(libraryId, argument);
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(libraryId), Times.Once());
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(It.IsAny<Guid>()), Times.Once());
         }
 
         [Fact]

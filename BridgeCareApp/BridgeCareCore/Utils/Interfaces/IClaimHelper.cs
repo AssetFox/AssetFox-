@@ -1,5 +1,5 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 
 namespace BridgeCareCore.Utils.Interfaces
 {

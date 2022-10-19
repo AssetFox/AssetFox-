@@ -249,6 +249,7 @@ namespace BridgeCareCore.Controllers
                         var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
                         // There was an existence check here where we just returned if the library did not exist. WJ deleted it because
                         // the new claim helper code checks for that. But is that the right approach?
+                        // Amruta: yes it looks right, only TODO for policy will be: do we need separate claim for delete? or the existing ModifyInvestmentFromLibrary is fine(we considered modify = insert/update/delete unless delete has different handling than upserts
                         _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     }
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);

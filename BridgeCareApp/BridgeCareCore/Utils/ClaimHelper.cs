@@ -56,6 +56,7 @@ namespace BridgeCareCore.Utils
         /// <exception cref="UnauthorizedAccessException"></exception>
         public void CheckUserSimulationModifyAuthorization(Guid simulationId, Guid userId, bool checkSimulationAccess)
         {
+            // Amruta: comment for Todo: keep the check for checkSimulationAccess(it has its purpose, its for CWOPA user with full simulation access.
             if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
                 var simulation = GetSimulationWithUsers(simulationId);
@@ -96,6 +97,7 @@ namespace BridgeCareCore.Utils
             if (!accessModel.LibraryExists)
             {
                 throw new InvalidOperationException(CantDeleteNonexistentLibraryMessage);
+                // Amruta: this looks correct, TODO please use UnauthorizedAccessException type with CantDeleteNonexistentLibraryMessage, as UnauthorizedAccessException  is handled differently in controllers so that it won't show 2 error in UI.
             }
             if (RequirePermittedCheck())
             {

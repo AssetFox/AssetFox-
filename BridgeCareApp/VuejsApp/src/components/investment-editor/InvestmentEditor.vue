@@ -772,10 +772,24 @@ export default class InvestmentEditor extends Vue {
 
         this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 
-        if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid()) {
-            this.upsertBudgetLibraryAction({
-                BudgetLibrary: { ...BudgetLibrary, users: budgetLibraryUsers },
-            });
+        if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid())
+        {
+            this.upsertBudgetLibraryAction({ BudgetLibrary: { ...BudgetLibrary, users: budgetLibraryUsers } });
+
+            //update budget library sharing
+
+            //InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
+            //    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+            //        if (budgetLibrary.budgets === []) {
+            //            this.clearChanges();
+            //        }
+
+            //        this.budgetLibraryMutator(budgetLibrary); // mutation actions
+            //        this.selectedBudgetLibraryMutator(budgetLibrary.id);
+            //        this.addSuccessNotificationAction({ message: 'Shared budget library' })
+            //        this.resetPage();
+            //    }
+            //})
         }
     }
 

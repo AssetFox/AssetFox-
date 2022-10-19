@@ -34,5 +34,12 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var threeArgumentInvocationFinalArguments = threeArgumentInvocations.Select(i => i.Arguments[2].ToString()).ToList();
             return threeArgumentInvocationFinalArguments;
         }
+
+        public static string SingleThreeArgumentUserMessage(this Mock<IHubService> mock)
+        {
+            var messages = mock.ThreeArgumentUserMessages();
+            var message = messages.Single();
+            return message;
+        }
     }
 }

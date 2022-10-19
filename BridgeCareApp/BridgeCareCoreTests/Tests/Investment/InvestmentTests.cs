@@ -458,7 +458,8 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
             ActionResultAssertions.Ok(result);
-            budgetRepo.Verify(br => br.DeleteBudgetLibrary(It.IsAny<Guid>()), Times.Never());
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(libraryId), Times.Once());
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(It.IsAny<Guid>()), Times.Once());
             var message = hubService.SingleThreeArgumentUserMessage();
             Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
         }

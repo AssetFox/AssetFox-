@@ -91,14 +91,19 @@ namespace BridgeCareCore.Utils
                 }
             }
         }
-
-        public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel accessModel, Guid userId)
+                
+        public void CheckIfLibraryExists(LibraryAccessModel accessModel)
         {
             if (!accessModel.LibraryExists)
             {
-                throw new InvalidOperationException(CantDeleteNonexistentLibraryMessage);
-                // Amruta: this looks correct, TODO please use UnauthorizedAccessException type with CantDeleteNonexistentLibraryMessage, as UnauthorizedAccessException  is handled differently in controllers so that it won't show 2 error in UI.
+                throw new UnauthorizedAccessException(CantDeleteNonexistentLibraryMessage);
             }
+        }
+
+
+        public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel accessModel, Guid userId)
+        {
+            CheckIfLibraryExists(accessModel);
             if (RequirePermittedCheck())
             {
                 var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Owner);

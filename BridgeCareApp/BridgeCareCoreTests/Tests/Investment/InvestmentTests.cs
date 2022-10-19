@@ -129,15 +129,9 @@ namespace BridgeCareCoreTests.Tests
 
         private InvestmentController CreateDatabaseBasedController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = CreateTestUser(userClaims);
             var service = SetupDatabaseBasedService();
             var controller = new InvestmentController(service, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
 
@@ -147,6 +141,19 @@ namespace BridgeCareCoreTests.Tests
             };
             return controller;
         }
+
+        private static ClaimsPrincipal CreateTestUser(List<string> userClaims)
+        {
+            List<Claim> claims = new List<Claim>();
+            foreach (string claimName in userClaims)
+            {
+                Claim claim = new Claim(ClaimTypes.Name, claimName);
+                claims.Add(claim);
+            }
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            return testUser;
+        }
+
         private void AddTestDataToDatabase()
         {
             var year = DateTime.Now.Year;
@@ -851,7 +858,8 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateDatabaseBasedController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator);
+            var controller = CreateDatabaseBasedController(claims);
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
             // Assert

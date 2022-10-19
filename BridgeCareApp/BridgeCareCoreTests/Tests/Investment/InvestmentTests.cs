@@ -483,7 +483,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_CallsDeleteOnRepo_Ok()
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_ThrowsAndDoesNotCallDeleteOnRepo()
         {
             var user = UserDtos.Dbe();
             var libraryId = Guid.NewGuid();

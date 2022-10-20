@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class LibraryUserMapper
     {
-        public static BudgetLibraryUserEntity ToEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
+        public static BudgetLibraryUserEntity ToBudgetLibraryUserEntity(this LibraryUserDTO dto, Guid budgetLibraryId) =>
             new BudgetLibraryUserEntity
             {
                 BudgetLibraryId = budgetLibraryId,

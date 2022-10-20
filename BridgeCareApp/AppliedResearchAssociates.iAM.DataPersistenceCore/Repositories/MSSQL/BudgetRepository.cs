@@ -117,8 +117,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
             var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
             var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
-            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToEntity(u, budgetLibraryId)).ToList();
-            var entitiesToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToBudgetLibraryUserEntity(u, budgetLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = dtosToUpdate.Select(dto => dto.ToBudgetLibraryUserEntity(budgetLibraryId)).ToList();
             _unitOfWork.Context.AddRange(entitiesToAdd);
             _unitOfWork.Context.UpdateRange(entitiesToUpdate);
             var entitiesToDelete = existingUsers.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
@@ -127,8 +128,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId, Guid userId)
         {
-            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId).ToList();
-            var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
+            var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
             return dtos;
         }
 
@@ -144,7 +147,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
                 if (changedUserId!=null)
                 {
-                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change.";
+                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change. This is likely a programming error. Please contact ARA.";
                     throw new InvalidOperationException(errorMessage);
                 }
             }

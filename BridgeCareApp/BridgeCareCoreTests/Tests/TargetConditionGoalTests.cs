@@ -251,7 +251,7 @@ namespace BridgeCareCoreTests.Tests
             
             libraryDto.Description = "Updated Description";
             goalDto.Name = "Updated Name";
-            goalDto.CriterionLibrary = criterionLibraryEntity.ToDto();
+            goalDto.CriterionLibrary = criterionLibrary;
 
             var sync = new PagingSyncModel<TargetConditionGoalDTO>()
             {

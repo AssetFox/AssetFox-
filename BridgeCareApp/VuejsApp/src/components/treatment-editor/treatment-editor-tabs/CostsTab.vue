@@ -45,7 +45,7 @@
                                 <v-subheader class="ghd-control-label ghd-md-gray" style="width:90%">Criteria</v-subheader>
                                     <v-btn
                                         @click="
-                                            onShowCostCriterionLibraryEditorDialog(
+                                            onShowCostCriterionEditorDialog(
                                                 props.item,
                                             )
                                         "
@@ -97,9 +97,9 @@
             @submit="onSubmitCostEquationEditorDialogResult"
         />
 
-        <CostCriterionLibraryEditorDialog
-            :dialogData="costCriterionLibraryEditorDialogData"
-            @submit="onSubmitCostCriterionLibraryEditorDialogResult"
+        <GeneralCriterionEditorDialog
+            :dialogData="costCriterionEditorDialogData"
+            @submit="onSubmitCostCriterionEditorDialogResult"
         />
 
         <Alert :dialogData="alertData" @submit="onSubmitAlertResult" />
@@ -114,24 +114,21 @@ import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
-import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
 import { Equation } from '@/shared/models/iAM/equation';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import Alert from '@/shared/modals/Alert.vue';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
-        CostCriterionLibraryEditorDialog: CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         CostEquationEditorDialog: EquationEditorDialog,
         Alert
     },
@@ -171,8 +168,8 @@ export default class CostsTab extends Vue {
     costEquationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    costCriterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    costCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     selectedCostForEquationOrCriteriaEdit: TreatmentCost = clone(emptyCost);
     uuidNIL: string = getBlankGuid();
@@ -219,33 +216,33 @@ export default class CostsTab extends Vue {
         this.selectedCostForEquationOrCriteriaEdit = clone(emptyCost);
     }
 
-    onShowCostCriterionLibraryEditorDialog(cost: TreatmentCost) {
+    onShowCostCriterionEditorDialog(cost: TreatmentCost) {
         this.selectedCostForEquationOrCriteriaEdit = clone(cost);
 
-        this.costCriterionLibraryEditorDialogData = {
+        this.costCriterionEditorDialogData = {
             showDialog: true,
-            libraryId: cost.criterionLibrary.id,
-            isCallFromScenario: this.callFromScenario,
-            isCriterionForLibrary: this.callFromLibrary
+            CriteriaExpression: cost.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCostCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+    onSubmitCostCriterionEditorDialogResult(
+        criterionExpression: string,
     ) {
-        this.costCriterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.costCriterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
         if (
-            !isNil(criterionLibrary) &&
+            !isNil(criterionExpression) &&
             this.selectedCostForEquationOrCriteriaEdit.id !== this.uuidNIL
         ) {
+            if(this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedCostForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
             this.$emit(
                 'onModifyCost',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    criterionLibrary,
+                    {...this.selectedCostForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
                     this.selectedCostForEquationOrCriteriaEdit,
                 ),
             );

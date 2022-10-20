@@ -224,8 +224,8 @@
             @submit="onSubmitCreateCashFlowRuleLibraryDialogResult"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
             @submit="onSubmitCriterionLibraryEditorDialogResult"
         />
 
@@ -294,11 +294,13 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 
 @Component({
     components: {
         CreateCashFlowRuleLibraryDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
         CashFlowRuleEditDialog,
         AddCashFlowRuleDialog
@@ -405,8 +407,8 @@ export default class CashFlowEditor extends Vue {
     createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
         emptyCreateCashFlowLibraryDialogData,
     );
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     rules: InputValidationRules = clone(rules);
@@ -649,26 +651,25 @@ export default class CashFlowEditor extends Vue {
     onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
         this.selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary
-                .id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
     onSubmitCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+        criterionExpression: string,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.criterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
         if (
-            !isNil(criterionLibrary) &&
+            !isNil(criterionExpression) &&
             this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL
         ) {
+            if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
             this.cashFlowRuleGridData = update(
                 findIndex(
                     propEq('id', this.selectedCashFlowRuleForCriteriaEdit.id),
@@ -676,7 +677,7 @@ export default class CashFlowEditor extends Vue {
                 ),
                 {
                     ...this.selectedCashFlowRuleForCriteriaEdit,
-                    criterionLibrary: criterionLibrary,
+                    criterionLibrary: {...this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
                 },
                 this.cashFlowRuleGridData,
             );

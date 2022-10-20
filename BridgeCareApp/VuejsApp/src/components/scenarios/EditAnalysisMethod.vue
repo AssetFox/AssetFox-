@@ -126,7 +126,7 @@
                                     <v-btn
                                         style="padding-right:20px !important;"
                                         @click="
-                                            onShowCriterionLibraryEditorDialog
+                                            onShowCriterionEditorDialog
                                         "
                                         class="edit-icon ghd-control-label"
                                         icon
@@ -180,9 +180,9 @@
                 </v-layout>
             </v-flex>
 
-            <CriterionLibraryEditorDialog
-                :dialogData="criterionLibraryEditorDialogData"
-                @submit="onCriterionLibraryEditorDialogSubmit"
+            <GeneralCriterionEditorDialog
+                :dialogData="criterionEditorDialogData"
+                @submit="onCriterionEditorDialogSubmit"
             />
         </v-layout>
     </v-form>
@@ -193,11 +193,6 @@ import Vue from 'vue';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State } from 'vuex-class';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { clone, equals, isNil } from 'ramda';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -215,9 +210,11 @@ import {
     InputValidationRules,
     rules,
 } from '@/shared/utils/input-validation-rules';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
-    components: { CriterionLibraryEditorDialog },
+    components: { GeneralCriterionEditorDialog },
 })
 export default class EditAnalysisMethod extends Vue {
     @State(state => state.analysisMethodModule.analysisMethod)
@@ -269,8 +266,8 @@ export default class EditAnalysisMethod extends Vue {
     weightingAttributes: SelectItem[] = [{ text: '', value: '' }];
     simulationName: string;
     networkName: string = '';
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     rules: InputValidationRules = rules;
     valid: boolean = true;
@@ -376,24 +373,24 @@ export default class EditAnalysisMethod extends Vue {
         ];
     }
 
-    onShowCriterionLibraryEditorDialog() {
-        this.criterionLibraryEditorDialogData = {
+    onShowCriterionEditorDialog() {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: this.analysisMethod.criterionLibrary.id,
-            isCallFromScenario: true,
-            isCriterionForLibrary: false,
+            CriteriaExpression: this.analysisMethod.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onCriterionLibraryEditorDialogSubmit(criterionLibrary: CriterionLibrary) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+    onCriterionEditorDialogSubmit(criterionexpression: string) {
+        this.criterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionLibrary)) {
+        if (!isNil(criterionexpression)) {
+            if(this.analysisMethod.criterionLibrary.id == getBlankGuid())
+                this.analysisMethod.criterionLibrary.id = getNewGuid();
             this.analysisMethod = {
                 ...this.analysisMethod,
-                criterionLibrary: criterionLibrary,
+                criterionLibrary: {...this.analysisMethod.criterionLibrary, mergedCriteriaExpression: criterionexpression} as CriterionLibrary,
             };
         }
     }

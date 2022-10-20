@@ -111,7 +111,7 @@
                                     <v-flex xs2>                                 
                                         <v-btn
                                             @click="
-                                                onRemoveTreatmentCriterionLibrary
+                                                onRemoveTreatmentCriterion
                                             "
                                             class="ghd-white-bg ghd-blue ghd-button-text"
                                             icon
@@ -120,7 +120,7 @@
                                         </v-btn>
                                         <v-btn
                                             @click="
-                                                onShowTreatmentCriterionLibraryEditorDialog
+                                                onShowTreatmentCriterionEditorDialog
                                             "
                                             class="edit-icon"
                                             icon
@@ -169,9 +169,9 @@
             </v-layout>
         </v-flex>
 
-        <TreatmentCriterionLibraryEditorDialog
-            :dialogData="treatmentCriterionLibraryEditorDialogData"
-            @submit="onSubmitTreatmentCriterionLibraryEditorDialogResult"
+        <GeneralCriterionEditorDialog
+            :dialogData="treatmentCriterionEditorDialogData"
+            @submit="onSubmitTreatmentCriterionEditorDialogResult"
         />
     </v-layout>
 </template>
@@ -179,14 +179,9 @@
 <script lang="ts">
 import Vue from 'vue';
 import { Component, Prop, Watch } from 'vue-property-decorator';
-import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { clone, isNil } from 'ramda';
 import { InputValidationRules } from '@/shared/utils/input-validation-rules';
-import { getBlankGuid } from '@/shared/utils/uuid-utils';
+import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import {
   AssetType,
     TreatmentCategory,
@@ -201,10 +196,12 @@ import {
     emptyCriterionLibrary,
 } from '@/shared/models/iAM/criteria';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
-        TreatmentCriterionLibraryEditorDialog: CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
     },
 })
 export default class TreatmentDetailsTab extends Vue {
@@ -213,8 +210,8 @@ export default class TreatmentDetailsTab extends Vue {
     @Prop() callFromScenario: boolean;
     @Prop() callFromLibrary: boolean;
 
-    treatmentCriterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    treatmentCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     uuidNIL: string = getBlankGuid();
 
@@ -231,28 +228,28 @@ export default class TreatmentDetailsTab extends Vue {
         this.assetTypeBinding = this.assetTypeReverseMap.get(this.selectedTreatmentDetails.assetType)!;
     }
 
-    onShowTreatmentCriterionLibraryEditorDialog() {
-        this.treatmentCriterionLibraryEditorDialogData = {
+    onShowTreatmentCriterionEditorDialog() {
+        this.treatmentCriterionEditorDialogData = {
             showDialog: true,
-            libraryId: this.selectedTreatmentDetails.criterionLibrary.id,
-            isCallFromScenario: this.callFromScenario,
-            isCriterionForLibrary: this.callFromLibrary,
+            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.id
         };
     }
 
-    onSubmitTreatmentCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+    onSubmitTreatmentCriterionEditorDialogResult(
+        criterionExpression: string,
     ) {
-        this.treatmentCriterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.treatmentCriterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionLibrary)) {
+        if (!isNil(criterionExpression)) {
+            if(this.selectedTreatmentDetails.criterionLibrary.id === getBlankGuid())
+                this.selectedTreatmentDetails.criterionLibrary.id = getNewGuid();
             this.$emit(
                 'onModifyTreatmentDetails',
                 setItemPropertyValue(
                     'criterionLibrary',
-                    criterionLibrary,
+                    {...this.selectedTreatmentDetails.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary,
                     this.selectedTreatmentDetails,
                 ),
             );
@@ -279,7 +276,7 @@ export default class TreatmentDetailsTab extends Vue {
         );
     }
 
-    onRemoveTreatmentCriterionLibrary() {
+    onRemoveTreatmentCriterion() {
         this.$emit(
             'onModifyTreatmentDetails',
             setItemPropertyValue(

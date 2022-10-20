@@ -90,7 +90,7 @@
                                     </v-card-text>
                                 </v-card>
                             </v-menu>
-                            <v-btn v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionLibraryEditorDialog(props.item)'
+                            <v-btn v-if="header.value === 'criterionLibrary'" @click='onShowConsequenceCriterionEditorDialog(props.item)'
                                     class='edit-icon' icon>
                                 <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                             </v-btn>
@@ -111,8 +111,8 @@
                                          :isFromPerformanceCurveEditor=false
                                          @submit='onSubmitConsequenceEquationEditorDialogResult' />
 
-        <ConsequenceCriterionLibraryEditorDialog :dialogData='consequenceCriterionLibraryEditorDialogData'
-                                                 @submit='onSubmitConsequenceCriterionLibraryEditorDialogResult' />
+        <GeneralCriterionEditorDialog :dialogData='consequenceCriterionEditorDialogData'
+                                                 @submit='onSubmitConsequenceCriterionEditorDialogResult' />
     </v-layout>
 </template>
 
@@ -122,17 +122,13 @@ import { Component, Prop, Watch } from 'vue-property-decorator';
 import { State } from 'vuex-class';
 import { clone, isNil } from 'ramda';
 import EquationEditorDialog from '../../../shared/modals/EquationEditorDialog.vue';
-import CriterionLibraryEditorDialog from '../../../shared/modals/CriterionLibraryEditorDialog.vue';
 import { emptyConsequence, TreatmentConsequence } from '@/shared/models/iAM/treatment';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
 } from '@/shared/models/modals/equation-editor-dialog-data';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
+
 import { hasValue } from '@/shared/utils/has-value-util';
 import { SelectItem } from '@/shared/models/vue/select-item';
 import { Attribute } from '@/shared/models/iAM/attribute';
@@ -141,10 +137,12 @@ import { InputValidationRules } from '@/shared/utils/input-validation-rules';
 import { Equation } from '@/shared/models/iAM/equation';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
-        ConsequenceCriterionLibraryEditorDialog: CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConsequenceEquationEditorDialog: EquationEditorDialog,
     },
 })
@@ -165,7 +163,7 @@ export default class ConsequencesTab extends Vue {
     ];
     consequencesGridData: TreatmentConsequence[] = [];
     consequenceEquationEditorDialogData: EquationEditorDialogData = clone(emptyEquationEditorDialogData);
-    consequenceCriterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    consequenceCriterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
     selectedConsequenceForEquationOrCriteriaEdit: TreatmentConsequence = clone(emptyConsequence);
     attributeSelectItems: SelectItem[] = [];
     uuidNIL: string = getBlankGuid();
@@ -221,22 +219,24 @@ export default class ConsequencesTab extends Vue {
         this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);
     }
 
-    onShowConsequenceCriterionLibraryEditorDialog(consequence: TreatmentConsequence) {
+    onShowConsequenceCriterionEditorDialog(consequence: TreatmentConsequence) {
         this.selectedConsequenceForEquationOrCriteriaEdit = clone(consequence);
 
-        this.consequenceCriterionLibraryEditorDialogData = {
+        this.consequenceCriterionEditorDialogData = {
             showDialog: true,
-            libraryId: consequence.criterionLibrary.id,
-            isCallFromScenario: this.callFromScenario,
-            isCriterionForLibrary: this.callFromLibrary,
+            CriteriaExpression: consequence.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitConsequenceCriterionLibraryEditorDialogResult(criterionLibrary: CriterionLibrary) {
-        this.consequenceCriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onSubmitConsequenceCriterionEditorDialogResult(criterionExpression: string) {
+        this.consequenceCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
-            this.$emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', criterionLibrary, this.selectedConsequenceForEquationOrCriteriaEdit));
+        if (!isNil(criterionExpression) && this.selectedConsequenceForEquationOrCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary.id = getNewGuid();
+            this.$emit('onModifyConsequence', setItemPropertyValue('criterionLibrary', 
+            {...this.selectedConsequenceForEquationOrCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} as CriterionLibrary, 
+            this.selectedConsequenceForEquationOrCriteriaEdit));
         }
 
         this.selectedConsequenceForEquationOrCriteriaEdit = clone(emptyConsequence);

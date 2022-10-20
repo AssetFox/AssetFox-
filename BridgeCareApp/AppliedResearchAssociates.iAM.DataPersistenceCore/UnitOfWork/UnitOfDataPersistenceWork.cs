@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
             Config = config ?? throw new ArgumentNullException(nameof(config));
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
-            EncryptionKey = Config?.GetSection("EncryptionKey").Value;
+            EncryptionKey = Config.GetChildren().Count() > 0 && Config != null ? Config.GetSection("EncryptionKey").Value : String.Empty;
         }
                 
         public string EncryptionKey { get; }

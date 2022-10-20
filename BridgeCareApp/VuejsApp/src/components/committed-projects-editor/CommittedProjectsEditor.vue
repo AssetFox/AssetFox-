@@ -44,6 +44,8 @@
                                     single-line
                                     v-model="gridSearchTerm"
                                     outline
+                                    clearable
+                                    @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general">
                                 </v-text-field>
                                 <v-btn style="margin-top: 2px;" class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline @click="onSearchClick()">Search</v-btn>
@@ -1096,6 +1098,11 @@ export default class CommittedProjectsEditor extends Vue  {
     onSearchClick(){
         this.currentSearch = this.gridSearchTerm;
         this.resetPage();
+    }
+
+    onClearClick(){
+        this.gridSearchTerm = '';
+        this.onSearchClick();
     }
 
     onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){

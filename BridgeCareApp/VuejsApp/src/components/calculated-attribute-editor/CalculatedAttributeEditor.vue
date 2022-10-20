@@ -38,6 +38,8 @@
                                     single-line
                                     v-model="gridSearchTerm"
                                     outline
+                                    clearable
+                                    @click:clear="onClearClick()"
                                     class="ghd-text-field-border ghd-text-field search-icon-general"
                                     style="margin-top:20px !important">
                         </v-text-field>
@@ -1310,6 +1312,11 @@ export default class CalculatedAttributeEditor extends Vue {
     onSearchClick(){
         this.currentSearch = this.gridSearchTerm;
         this.resetPage();
+    }
+
+    onClearClick(){
+        this.gridSearchTerm = '';
+        this.onSearchClick();
     }
 
     CheckUnsavedDialog(next: any, otherwise: any) {

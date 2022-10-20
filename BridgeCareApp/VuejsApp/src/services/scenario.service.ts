@@ -1,5 +1,5 @@
 import {AxiosPromise} from 'axios';
-import {CloneScenarioData, Scenario, QueuedScenario} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, Scenario, QueuedSimulation} from '@/shared/models/iAM/scenario';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import { PagingRequest } from '@/shared/models/iAM/paging';
 
@@ -16,7 +16,7 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/GetSharedScenariosPage/`, data);
     }
 
-    static getSimulationQueuePage(data:PagingRequest<QueuedScenario>): AxiosPromise {
+    static getSimulationQueuePage(data:PagingRequest<QueuedSimulation>): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/GetSimulationQueuePage/`, data);
     }    
 
@@ -39,6 +39,10 @@ export default class ScenarioService {
     static runSimulation(networkId: string, scenarioId: string | undefined): AxiosPromise {
         return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
     }
+
+    static cancelSimulation(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${scenarioId}`);
+    }    
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {
         return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);

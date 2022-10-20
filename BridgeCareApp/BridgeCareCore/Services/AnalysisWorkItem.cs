@@ -45,8 +45,11 @@ namespace BridgeCareCore.Services
             var status = "Creating input...";
             StartTime = DateTime.Now;
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
+
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+
+            //_hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastQueuedSimulation, queuedSimulation);
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
 

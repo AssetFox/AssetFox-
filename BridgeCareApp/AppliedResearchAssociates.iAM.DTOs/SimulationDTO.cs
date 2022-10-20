@@ -31,15 +31,4 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string RunTime { get; set; }
     }
-
-
-
-    // Temporary class just to get up and running;
-    // TODO: refactored without inheritance?
-    public class QueuedSimulationDTO : SimulationDTO
-    {
-        public DateTime QueueEntryTimestamp { get; set; }
-        public DateTime? WorkStartedTimestamp { get; set; }
-        public string QueueingUser { get; set; }
-    }
 }

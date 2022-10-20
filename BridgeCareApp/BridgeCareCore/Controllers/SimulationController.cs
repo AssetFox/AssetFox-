@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Models;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -267,6 +268,8 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
+
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]
         [Authorize]
@@ -301,12 +304,22 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpDelete]
+        [Route("CancelSimulation/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelSimulation(Guid simulationId)
+        {
+            // TODO: Implement cancel
+            await Task.Delay(300);
+            return Ok();
+        }
     }
 
     internal class SimulationCRUDMethods
     {
         public Action<SimulationDTO> UpsertSimulation { get; set; }
-        public Func<PagingRequestModel<SimulationDTO>,PagingPageModel<SimulationDTO>> RetrieveSimulations { get; set; }
+        public Func<PagingRequestModel<SimulationDTO>, PagingPageModel<SimulationDTO>> RetrieveSimulations { get; set; }
         public Func<PagingRequestModel<SimulationDTO>, PagingPageModel<SimulationDTO>> RetrieveSharedSimulations { get; set; }
         public Action<Guid> DeleteSimulation { get; set; }
         public Func<Guid, Guid, IQueuedWorkHandle> RunSimulation { get; set; }

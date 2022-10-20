@@ -356,61 +356,33 @@
                     <v-tab-item>
                         <v-flex xs12>
                             <v-card elevation="5">
-                                <!-- <v-data-table
-                                    :headers="simulationQueueGridHeaders"
-                                    :items="sharedScenarios"
-                                    sort-icon=$vuetify.icons.ghd-table-sort
-                                    :search="searchShared"
-                                >                                 -->
                                 <v-data-table
                                     :headers="simulationQueueGridHeaders"
-                                    :items="currentQueuedScenariosPage"
-                                    :totalItems="totalQueuedScenarios"
-                                    :pagination.sync="queuedScenariosPagination"
+                                    :items="currentSimulationQueuePage"
+                                    :totalItems="totalQueuedSimulations"
+                                    :pagination.sync="simulationQueuePagination"
                                     sort-icon=$vuetify.icons.ghd-table-sort
-                                >
+                                >                           
                                     <template slot="items" slot-scope="props">
+                                        <td>{{ props.item.queuePosition }}</td>
                                         <td>
                                             {{ props.item.name }}
                                         </td>
                                         <td>
                                             {{
-                                                props.item.creator
-                                                    ? props.item.creator
+                                                props.item.queueingUser
+                                                    ? props.item.queueingUser
                                                     : '[ Unknown ]'
                                             }}
                                         </td>
                                         <td>
-                                            {{
-                                                props.item.owner
-                                                    ? props.item.owner
-                                                    : '[ No Owner ]'
-                                            }}
+                                            {{ formatDateWithTime(props.item.queueEntryTimestamp) }}
                                         </td>
                                         <td>
-                                            {{
-                                                props.item.networkName
-                                                    ? props.item.networkName
-                                                    : '[ Unknown ]'
-                                            }}
+                                            {{ formatDateWithTime(props.item.workStartedTimestamp) }}
                                         </td>
-                                        <td>
-                                            <!-- TODO: Replace with Queue Date -->
-                                            {{ formatDate(props.item.queueEntryTimestamp) }}
-                                        </td>
-                                        <td>
-                                            <!-- TODO: Replace with Queue Time -->
-                                            {{ formatDate(props.item.queueEntryTimestamp) }}
-                                        </td>
-                                        <td>
-                                            <!-- TODO: Replace with Start Date -->
-                                            {{ formatDate(props.item.workStartedTimestamp) }}
-                                        </td>
-                                        <td>
-                                            <!-- TODO: Replace with Start Time -->                                            
-                                            {{ formatDate(props.item.workStartedTimestamp) }}
-                                        </td>
-                                        <td>{{ props.item.runTime }}</td>
+                                        <td>{{ props.item.currentRunTime }}</td>
+                                        <td>{{ props.item.previousRunTime }}</td>
                                         <td>{{ props.item.status }}</td>
                                         <td>
                                             <v-menu offset-x left>
@@ -433,7 +405,7 @@
                                                 <v-list>
                                                     <v-list-tile v-for="(item,i) in actionItemsForSimulationQueue"
                                                         :key="i"
-                                                        @click="OnActionTaken(item.action,props.item.users,props.item,false)"
+                                                        @click="OnSimulationQueueActionTaken(item.action,props.item.users,props.item,false)"
                                                         class="menu-style">
                                                         <v-list-tile-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
@@ -443,16 +415,10 @@
                                                 </v-list>
                                             </v-menu>
                                         </td>
+                                    </template>                                         
+                                    <template slot="no-data">
+                                        {{ getEmptySimulationQueueMessage() }}
                                     </template>
-                                    <v-alert
-                                        :value="true"
-                                        class="ara-orange-bg"
-                                        icon="fas fa-exclamation"
-                                        slot="no-results"
-                                    >
-                                        Your search for "{{ searchShared }}"
-                                        found no results.
-                                    </v-alert>
                                 </v-data-table>
                             </v-card>
                         </v-flex>
@@ -526,7 +492,8 @@ import {
     ScenarioActions,
     TabItems,
     ScenarioUser,
-    QueuedScenario,
+    emptySimulation,
+    QueuedSimulation,
 } from '@/shared/models/iAM/scenario';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
@@ -595,15 +562,15 @@ import ScenarioService from '@/services/scenario.service';
 export default class Scenarios extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.scenarioModule.scenarios) stateScenarios: Scenario[];
-    @State(state => state.scenarioModule.queuedScenarios) stateQueuedScenarios: QueuedScenario[];
+    @State(state => state.scenarioModule.simulationQueue) stateSimulationQueue: QueuedSimulation[];
 
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
     @State(state => state.scenarioModule.currentUserScenarioPage) stateUserScenariosPage: Scenario[];
-    @State(state => state.scenarioModule.currentQueuedScenariosPage) stateQueuedScenariosPage: QueuedScenario[];
+    @State(state => state.scenarioModule.currentSimulationQueuePage) stateSimulationQueuePage: QueuedSimulation[];
 
     @State(state => state.scenarioModule.totalSharedScenarios) stateTotalSharedScenarios: number;
     @State(state => state.scenarioModule.totalUserScenarios) stateTotalUserScenarios: number;
-    @State(state => state.scenarioModule.totalQueuedScenarios) stateTotalQueuedScenarios: number;
+    @State(state => state.scenarioModule.totalQueuedSimulations) stateTotalQueuedSimulations: number;
 
 
     @State(state => state.breadcrumbModule.navigation) navigation: any[];
@@ -742,6 +709,14 @@ export default class Scenarios extends Vue {
     ];
     simulationQueueGridHeaders: DataTableHeader[] = [
         {
+            text: 'Queue Position',
+            value: 'queuePosition',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },        
+        {
             text: 'Scenario',
             value: 'name',
             align: 'left',
@@ -750,32 +725,8 @@ export default class Scenarios extends Vue {
             width: '',
         },
         {
-            text: 'Creator',
-            value: 'creator',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
-            text: 'Owner',
-            value: 'owner',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
-            text: 'Network',
-            value: 'network',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
-            text: 'Queue Date',
-            value: 'createdDate',
+            text: 'Queued By',
+            value: 'queueingUser',
             align: 'left',
             sortable: true,
             class: 'header-border',
@@ -783,15 +734,7 @@ export default class Scenarios extends Vue {
         },
         {
             text: 'Queue Time',
-            value: 'runTime',
-            align: 'left',
-            sortable: false,
-            class: 'header-border',
-            width: '',
-        },
-        {
-            text: 'Start Date',
-            value: 'lastRun',
+            value: 'queueEntryTimestamp',
             align: 'left',
             sortable: true,
             class: 'header-border',
@@ -799,20 +742,28 @@ export default class Scenarios extends Vue {
         },
         {
             text: 'Start Time',
-            value: 'runTime',
+            value: 'workStartedTimestamp',
+            align: 'left',
+            sortable: true,
+            class: 'header-border',
+            width: '',
+        },
+        {
+            text: 'Current Run Time',
+            value: 'currentRunTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
         },
         {
-            text: 'Run Time',
-            value: 'runTime',
+            text: 'Previous Run Time',
+            value: 'previousRunTime',
             align: 'left',
             sortable: false,
             class: 'header-border',
             width: '',
-        },
+        },        
         {
             text: 'Status',
             value: 'status',
@@ -845,6 +796,7 @@ export default class Scenarios extends Vue {
     tabItems: TabItems[] = [];
     tab: string = '';
     availableActions: any;
+    availableSimulationActions: any;
     nameUpdate: string = '';
 
     scenarios: Scenario[] = [];
@@ -859,10 +811,10 @@ export default class Scenarios extends Vue {
     sharedScenariosPagination:  Pagination = clone(emptyPagination);    
     totalSharedScenarios: number = 0;
 
-    queuedScenarios: QueuedScenario[] = [];
-    currentQueuedScenariosPage: QueuedScenario[] = [];
-    queuedScenariosPagination: Pagination = clone(emptyPagination);
-    totalQueuedScenarios: number = 0;
+    simulationQueue: QueuedSimulation[] = [];
+    currentSimulationQueuePage: QueuedSimulation[] = [];
+    simulationQueuePagination: Pagination = clone(emptyPagination);
+    totalQueuedSimulations: number = 0;
 
     initializing: boolean = true
     searchMine: string = '';
@@ -883,6 +835,7 @@ export default class Scenarios extends Vue {
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
+    selectedSimulation: QueuedSimulation = clone(emptySimulation);
     networkDataAssignmentStatus: string = '';
     rules: InputValidationRules = rules;
     showMigrateLegacySimulationDialog: boolean = false;
@@ -905,9 +858,9 @@ export default class Scenarios extends Vue {
         this.scenarios = clone(this.stateScenarios);
     }
 
-    @Watch('stateQueuedScenarios', {deep: true})
-    onStateQueuedScenariosChanged() {
-        this.queuedScenarios = clone(this.stateQueuedScenarios);
+    @Watch('stateSimulationQueue', {deep: true})
+    onStateSimulationQueueChanged() {
+        this.simulationQueue = clone(this.stateSimulationQueue);
     }
 
     @Watch('stateSharedScenariosPage', {deep: true}) onStateSharedScenariosPageChanged(){
@@ -930,13 +883,13 @@ export default class Scenarios extends Vue {
         this.setTabTotals();
     }
     
-    @Watch('stateQueuedScenariosPage', {deep: true}) onStateQueuedScenariosPageChanged(){
-        this.currentQueuedScenariosPage = clone(this.stateQueuedScenariosPage);
+    @Watch('stateSimulationQueuePage', {deep: true}) onStateSimulationQueuePageChanged(){
+        this.currentSimulationQueuePage = clone(this.stateSimulationQueuePage);
     }
-    @Watch('stateTotalQueuedScenarios') onStateTotalQueuedScenariosChanged(){
-        this.totalQueuedScenarios = this.stateTotalQueuedScenarios;
+    @Watch('stateTotalQueuedSimulations') onStateTotalQueuedSimulations(){
+        this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
     }
-    @Watch('totalQueuedScenarios') onTotalQueuedScenariosChanged(){
+    @Watch('totalQueuedSimulations') onTotalQueuedSimulationsChanged(){
         this.setTabTotals();
     }
 
@@ -984,12 +937,12 @@ export default class Scenarios extends Vue {
             this.getSharedScenariosPageAction(request); 
     }
 
-    @Watch('queuedScenariosPagination') onQueuedScenariosPagination() {
+    @Watch('simulationQueuePagination') onSimulationQueuePagination() {
         if(this.initializing)
             return;
-        const { sortBy, descending, page, rowsPerPage } = this.queuedScenariosPagination;
+        const { sortBy, descending, page, rowsPerPage } = this.simulationQueuePagination;
 
-        const request: PagingRequest<QueuedScenario>= {
+        const simulationQueueRequest: PagingRequest<QueuedSimulation>= {
             page: page,
             rowsPerPage: rowsPerPage,
             pagingSync: {
@@ -1002,8 +955,7 @@ export default class Scenarios extends Vue {
             isDescending: descending != null ? descending : false,
             search: ""
         };
-        if(hasValue(this.networks) )
-            this.getSimulationQueuePageAction(request); 
+        this.getSimulationQueuePageAction(simulationQueueRequest);
     }    
 
     mounted() {
@@ -1037,9 +989,11 @@ export default class Scenarios extends Vue {
             share: 'share',
             clone: 'clone',
             delete: 'delete',
-            commitedProjects: 'commitedProjects',
-            cancel: 'cancel'
+            commitedProjects: 'commitedProjects'
         };
+        this.availableSimulationActions = {
+            cancel: 'cancel'
+        }
         this.actionItemsForSharedScenario = [
             {
                 title: 'Run Analysis',
@@ -1088,7 +1042,7 @@ export default class Scenarios extends Vue {
         this.tabItems.push(
             { name: 'My scenarios', icon: require("@/assets/icons/star-empty.svg"), count: this.totalUserScenarios },
             { name: 'Shared with me', icon: require("@/assets/icons/share-empty.svg"), count: this.totalSharedScenarios },
-            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedScenarios },
+            { name: 'Simulation queue', icon: require("@/assets/icons/queue.svg"), count: this.totalQueuedSimulations },
         );
         this.tab = 'My scenarios';
     }
@@ -1124,7 +1078,7 @@ export default class Scenarios extends Vue {
             isDescending: false,
             search: ''
         };
-        const queuedScenarioRequest: PagingRequest<QueuedScenario> = {
+        const simulationQueueRequest: PagingRequest<QueuedSimulation> = {
             page: 1,
             rowsPerPage: 5,
             pagingSync: {
@@ -1139,14 +1093,14 @@ export default class Scenarios extends Vue {
         };        
         this.getSharedScenariosPageAction(request).then(() =>
         this.getUserScenariosPageAction(request).then(() =>
-        this.getSimulationQueuePageAction(queuedScenarioRequest).then(() => {
+        this.getSimulationQueuePageAction(simulationQueueRequest).then(() => {
             this.initializing = false
             this.totalUserScenarios = this.stateTotalUserScenarios;
             this.totalSharedScenarios = this.stateTotalSharedScenarios;
-            this.totalQueuedScenarios = this.stateTotalQueuedScenarios;
+            this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
             this.currentUserScenariosPage = clone(this.stateUserScenariosPage);
             this.currentSharedScenariosPage = clone(this.stateSharedScenariosPage);
-            this.currentQueuedScenariosPage = clone(this.stateQueuedScenariosPage);
+            this.currentSimulationQueuePage = clone(this.stateSimulationQueuePage);
         }))); 
     }
 
@@ -1154,6 +1108,12 @@ export default class Scenarios extends Vue {
         return hasValue(dateToFormat)
             ? moment(dateToFormat).format('M/D/YYYY')
             : null;
+    }
+
+    formatDateWithTime(dateToFormat: Date) {
+    return hasValue(dateToFormat)
+        ? moment(dateToFormat).format('M/D/YYYY hh:mm:ss')
+        : null;
     }
 
     canModifySharedScenario(scenarioUsers: ScenarioUser[]) {
@@ -1371,8 +1331,8 @@ export default class Scenarios extends Vue {
     }
 
 
-    onShowConfirmCancelAlert(scenario: Scenario) {
-        this.selectedScenario = clone(scenario);
+    onShowConfirmCancelAlert(simulation: QueuedSimulation) {
+        this.selectedScenario = clone(QueuedSimulation);
 
         this.confirmDeleteAlertData = {
             showDialog: true,
@@ -1559,9 +1519,6 @@ export default class Scenarios extends Vue {
             case this.availableActions.delete:
                 this.onShowConfirmDeleteAlert(scenario);
                 break;
-            case this.availableActions.cancel:
-                this.onShowConfirmCancelAlert(scenario);
-                break;
             case this.availableActions.commitedProjects:
                 if (this.canModifySharedScenario(scenarioUsers) || isOwner) {
                     this.onNavigateToCommittedProjectView(scenario);
@@ -1571,6 +1528,19 @@ export default class Scenarios extends Vue {
                 break;
         }
     }
+
+    OnSimulationQueueActionTaken(
+        action: string,
+        simulation: QueuedSimulation,
+    ) {
+        switch (action) {
+            case this.availableSimulationActions.cancel:
+                this.onShowConfirmCancelAlert(simulation);
+                break;
+        }
+    }
+
+
     onShowAggregatePopup() {
         this.aggragateDialogData = {
             showDialog: true,
@@ -1612,8 +1582,21 @@ export default class Scenarios extends Vue {
             else if (tab.name === 'My scenarios')
                 tab.count = this.totalUserScenarios;
             else
-                tab.count = this.totalQueuedScenarios;
+                tab.count = this.totalQueuedSimulations;
         })
+    }
+
+    getEmptySimulationQueueMessage()
+    {
+        if (this.totalSharedScenarios == 0 &&
+            this.totalUserScenarios == 0 &&
+            this.totalQueuedSimulations == 0){
+            
+            return "Retrieving data..."
+        }
+        else {
+            return "No running simulations"
+        }
     }
 }
 </script>

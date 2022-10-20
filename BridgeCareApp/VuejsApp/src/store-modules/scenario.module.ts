@@ -1,4 +1,4 @@
-import {CloneScenarioData, emptyScenario, QueuedScenario, Scenario} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, emptyScenario, QueuedSimulation, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
@@ -11,13 +11,13 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
     scenarios: [] as Scenario[],
-    queuedScenarios: [] as QueuedScenario[],
+    queuedSimulations: [] as QueuedSimulation[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
-    currentQueuedScenariosPage: [] as QueuedScenario[],
+    currentSimulationQueuePage: [] as QueuedSimulation[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
-    totalQueuedScenarios: 0 as number,
+    totalQueuedSimulations: 0 as number,
     selectedScenario: clone(emptyScenario) as Scenario
 };
 
@@ -33,9 +33,9 @@ const mutations = {
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
     },
-    QueuedScenarioPageMutator(state: any, queuedScenarios: PagingPage<QueuedScenario>){
-        state.currentQueuedScenariosPage = clone(queuedScenarios.items);
-        state.totalQueuedScenarios = queuedScenarios.totalItems;
+    SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
+        state.currentSimulationQueuePage = clone(queuedSimulations.items);
+        state.totalQueuedSimulations = queuedSimulations.totalItems;
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
@@ -73,6 +73,17 @@ const mutations = {
                 state.currentUserScenarioPage
             );         
         }
+        else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
+            const updatedScenario: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
+            updatedScenario.status = simulationAnalysisDetail.status;
+            updatedScenario.previousRunTime = simulationAnalysisDetail.runTime;
+
+            state.currentSimulationQueuePage = update(
+                findIndex(propEq('id', updatedScenario.id), state.currentSimulationQueuePage),
+                updatedScenario,
+                state.currentSimulationQueuePage
+            );         
+        }        
     },
     simulationReportDetailMutator(state: any, simulationReportDetail: SimulationReportDetail) {
         if (any(propEq('id', simulationReportDetail.simulationId), state.currentSharedScenariosPage)) {
@@ -124,11 +135,11 @@ const actions = {
                 }
             });
     },
-    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedScenario>) {
+    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedSimulation>) {
         await ScenarioService.getSimulationQueuePage(payload)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('QueuedScenarioPageMutator', response.data as PagingPage<QueuedScenario>);
+                    commit('SimulationQueuePageMutator', response.data as PagingPage<QueuedSimulation>);
                 }
             });
     },    
@@ -207,6 +218,17 @@ const actions = {
             },
         );
     },
+    async cancelQueuedSimulation({dispatch, state, commit}: any, payload: any) {
+        return await ScenarioService.cancelSimulation(payload.scenarioId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Canceled simulation analysis',
+                    });
+                }
+            },
+        );
+    },    
 };
 
 const getters = {};

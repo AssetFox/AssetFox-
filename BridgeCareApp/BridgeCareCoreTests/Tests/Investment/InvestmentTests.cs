@@ -626,6 +626,10 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
+            // Created a repository-level test for this. Unclear about the service level.
+            // Isolated testing theory would suggest that controller tests should mock the
+            // service. But are we ready to back in our dividing line between controller
+            // and service code?
             var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
@@ -637,20 +641,6 @@ namespace BridgeCareCoreTests.Tests
 
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
-
-            // Assert
-            ActionResultAssertions.Ok(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
-        {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
-
-            // Act
-            var result = await controller.DeleteBudgetLibrary(Guid.Empty);
 
             // Assert
             ActionResultAssertions.Ok(result);

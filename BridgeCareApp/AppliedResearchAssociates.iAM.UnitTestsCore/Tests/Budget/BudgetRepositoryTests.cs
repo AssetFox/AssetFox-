@@ -246,5 +246,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(budgetName, scenarioBudget.Name);
             var scenarioBudgetCriterionLibrary = scenarioBudget.CriterionLibrary;
         }
+
+        [Fact]
+        public void UpsertOrDeleteScenarioBudgets_SimulationExistsAndBudgetListIsEmpty_InsertsNothing()
+        {
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var budgetDtos = new List<BudgetDTO>();
+
+            // Act
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteScenarioBudgets(budgetDtos, simulation.Id);
+
+            var budgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            Assert.Empty(budgetsAfter);
+        }
     }
 }

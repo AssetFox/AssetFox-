@@ -339,6 +339,7 @@ export default class InvestmentEditor extends Vue {
     @Action('upsertInvestment') upsertInvestmentAction: any;
     @Action('upsertBudgetLibrary') upsertBudgetLibraryAction: any;
     @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
+    @Action('upsertOrDeleteBudgetLibraryUsers') upsertOrDeleteBudgetLibraryUsersAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
@@ -774,13 +775,12 @@ export default class InvestmentEditor extends Vue {
 
         if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid())
         {
-            this.upsertBudgetLibraryAction({ BudgetLibrary: { ...BudgetLibrary, users: budgetLibraryUsers } });
+            //this.upsertOrDeleteBudgetLibraryUsersAction(BudgetLibrary.id, budgetLibraryUsers);
 
-            //update budget library sharing
-
-            //InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
+            ////update budget library sharing
+            //InvestmentService.upsertOrDeleteBudgetLibraryUsers().then((response: AxiosResponse) => {
             //    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-            //        if (budgetLibrary.budgets === []) {
+            //        if (budgetLibrary.users === []) {
             //            this.clearChanges();
             //        }
 

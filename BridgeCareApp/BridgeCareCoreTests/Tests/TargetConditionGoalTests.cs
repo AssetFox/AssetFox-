@@ -135,7 +135,7 @@ namespace BridgeCareCoreTests.Tests
 
         private CriterionLibraryDTO SetupCriterionLibraryForUpsertOrDelete()
         {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -251,7 +251,7 @@ namespace BridgeCareCoreTests.Tests
             
             libraryDto.Description = "Updated Description";
             goalDto.Name = "Updated Name";
-            goalDto.CriterionLibrary = criterionLibraryEntity.ToDto();
+            goalDto.CriterionLibrary = criterionLibrary;
 
             var sync = new PagingSyncModel<TargetConditionGoalDTO>()
             {
@@ -289,9 +289,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = targetConditionGoalLibraryEntity.Id;
             var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
             var goalId = targetConditionGoalEntity.Id;
-            var criterion = SetupCriterionLibraryForUpsertOrDelete();
 
-            JoinCriterionToLibraryConditionGoal(goalId, criterion.Id);
+            JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
 
             // Act
             var result = await controller.DeleteTargetConditionGoalLibrary(libraryId);

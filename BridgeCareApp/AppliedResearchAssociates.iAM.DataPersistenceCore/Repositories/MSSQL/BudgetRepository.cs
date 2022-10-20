@@ -157,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
                 if (changedUserId!=null)
                 {
-                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change. This is likely a programming error. Please contact ARA.";
+                    var errorMessage = $"This user is not allowed to change access rights.";
                     throw new InvalidOperationException(errorMessage);
                 }
             }

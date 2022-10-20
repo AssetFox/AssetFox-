@@ -18,8 +18,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// <summary>
         /// If the library does not exist, adds it. If it does exist, updates the existing one.
         /// </summary>
-        /// <param name="budgets">the desired new state of the library</param>
-        /// <param name="libraryId">Indicates whether or not the call is allowed to update the user access list of the library. If this is false, and the proposed update does change the access list, an exception will be thrown. Ignored if the call is an insert.</param>
+        /// <param name="dto">the desired new state of the library</param>
+        /// <param name="userListModificationIsAllowed">Indicates whether or not the call is allowed to update the user access list of the library. If this is false, and the proposed update does change the access list, an exception will be thrown. Ignored if the call is an insert.</param>
+        /// <summary>If this call is an insert, userListModificationIsAllowed is ignored.</summary>
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed);
+
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
         void DeleteBudgetLibrary(Guid libraryId);

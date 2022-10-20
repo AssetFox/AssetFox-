@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
             new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
-        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList)
+        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList, string key)
         {
             var dto = new NetworkDTO
             {
@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var networkAttribute = attributeList.FirstOrDefault(_ => _.Id == join.AttributeId);
                 if (networkAttribute != null)
                 {
-                    dto.Attributes.Add(networkAttribute.ToDto());
+                    dto.Attributes.Add(networkAttribute.ToDto(key));
                 }
             }
             return dto;

@@ -18,12 +18,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork
         public UnitOfDataPersistenceWork(IConfiguration config, IAMContext context)
         {
             Config = config ?? throw new ArgumentNullException(nameof(config));
-
             Context = context ?? throw new ArgumentNullException(nameof(context));
 
-            // This is already done in the Startup.cs
-            // Context.Database.SetCommandTimeout(1800);
+            EncryptionKey = Config?.GetSection("SecurityType").Value;
         }
+                
+        public string EncryptionKey { get; }
 
         public IConfiguration Config { get; }
 

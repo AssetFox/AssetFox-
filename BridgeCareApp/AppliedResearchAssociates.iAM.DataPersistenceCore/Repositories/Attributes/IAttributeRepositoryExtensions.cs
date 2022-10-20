@@ -15,7 +15,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             var dataAttributes = new List<DataAttribute>();
             foreach (var dto in dtos)
             {
-                var mappedDto = AttributeMapper.ToDomain(dto);
+                var mappedDto = AttributeMapper.ToDomain(dto, repository.GetEncryptionKey());
                 var valid = AttributeValidityChecker.IsValid(mappedDto);
                 if (!valid)
                 {

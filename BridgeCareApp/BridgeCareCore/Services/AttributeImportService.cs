@@ -209,7 +209,7 @@ namespace BridgeCareCore.Services
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
             // Currently returns null if we fail. Not sure if that's the right end state.
-            var domainAttribute = AttributeMapper.ToDomain(attribute);
+            var domainAttribute = AttributeMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;
             IAttributeDatum returnValue = null;

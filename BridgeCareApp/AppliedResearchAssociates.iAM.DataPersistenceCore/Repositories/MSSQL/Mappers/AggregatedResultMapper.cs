@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     "Unable to determine Value data type for AttributeDatum entity")
             };
 
-        public static List<IAggregatedResult> ToDomain(this List<AggregatedResultEntity> entities)
+        public static List<IAggregatedResult> ToDomain(this List<AggregatedResultEntity> entities, string key)
         {
             var aggregatedResults = new List<IAggregatedResult>();
 
@@ -44,20 +44,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 var aggregatedData = entities.Where(_ =>
                         _.Discriminator == DataPersistenceConstants.AggregatedResultNumericDiscriminator)
-                    .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.NumericValue ?? 0)));
+                    .Select(_ => (_.Attribute.ToDomain(key), (_.Year, _.NumericValue ?? 0)));
 
                 aggregatedResults.Add(new AggregatedResult<double>(Guid.NewGuid(),
-                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+                    entities.First().MaintainableAsset.ToDomain(key), aggregatedData));
             }
 
             if (entities.Any(_ => _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator))
             {
                 var aggregatedData = entities.Where(_ =>
                         _.Discriminator == DataPersistenceConstants.AggregatedResultTextDiscriminator)
-                    .Select(_ => (_.Attribute.ToDomain(), (_.Year, _.TextValue ?? "")));
+                    .Select(_ => (_.Attribute.ToDomain(key), (_.Year, _.TextValue ?? "")));
 
                 aggregatedResults.Add(new AggregatedResult<string>(Guid.NewGuid(),
-                    entities.First().MaintainableAsset.ToDomain(), aggregatedData));
+                    entities.First().MaintainableAsset.ToDomain(key), aggregatedData));
             }
 
             return aggregatedResults;

@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class MaintainableAssetMapper
     {
-        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity)
+        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity, string key = null)
         {
             var maintainableAsset = new MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);

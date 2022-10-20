@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
                 .Include(_ => _.AttributeJoins)
-                .Select(_ => _.ToDto(attributeDbSet))
+                .Select(_ => _.ToDto(attributeDbSet, _unitOfWork.EncryptionKey))
                 .ToList();
             });
         }

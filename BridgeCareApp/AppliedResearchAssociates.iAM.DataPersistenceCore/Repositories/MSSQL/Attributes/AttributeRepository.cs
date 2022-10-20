@@ -25,7 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                          throw new ArgumentNullException(nameof(unitOfWork));
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo)).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo, _unitOfWork.EncryptionKey)).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
@@ -236,7 +236,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto(GetEncryptionKey())).ToList();
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()
@@ -253,7 +253,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return Task.Factory.StartNew(() =>
-                _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+                _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto(GetEncryptionKey())).ToList());
         }
 
         public AttributeDTO GetSingleById(Guid attributeId)
@@ -278,5 +278,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Commit();
             }
         }
+
+        public string GetEncryptionKey() => _unitOfWork.EncryptionKey;
     }
 }

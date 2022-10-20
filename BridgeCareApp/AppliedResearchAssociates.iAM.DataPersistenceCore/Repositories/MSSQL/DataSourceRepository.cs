@@ -26,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
-                    result.Add(source.ToDTO());
+                    result.Add(source.ToDTO(_unitOfWork.EncryptionKey));
                 }
                 catch
                 {
@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public BaseDataSourceDTO GetDataSource(Guid id) =>
-            _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO();
+            _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO(_unitOfWork.EncryptionKey);
 
         public void DeleteDataSource(Guid id)
         {
@@ -61,7 +61,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (!dataSource.Validate())
                 throw new ArgumentException("The data source could not be validated");                
 
-            _unitOfWork.Context.Upsert(dataSource.ToEntity(), dataSource.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.Upsert(dataSource.ToEntity(_unitOfWork.EncryptionKey), dataSource.Id, _unitOfWork.UserEntity?.Id);
         }
             
     }

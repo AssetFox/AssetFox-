@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AttributeDatumMapper
     {
-        public static IAttributeDatum ToDomain(this AttributeDatumEntity entity)
+        public static IAttributeDatum ToDomain(this AttributeDatumEntity entity, string key = null)
         {
             if (entity == null)
             {
@@ -17,7 +17,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 return new AttributeDatum<double>(
                     entity.Id,
-                    entity.Attribute.ToDomain(),
+                    entity.Attribute.ToDomain(key),
                     entity.NumericValue ?? 0,
                     entity.AttributeDatumLocation.ToDomain(),
                     entity.TimeStamp);
@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 return new AttributeDatum<string>(
                     entity.Id,
-                    entity.Attribute.ToDomain(),
+                    entity.Attribute.ToDomain(key),
                     entity.TextValue ?? "",
                     entity.AttributeDatumLocation.ToDomain(),
                     entity.TimeStamp);

@@ -10,16 +10,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class DataSourceMapper
     {
-        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto)
+        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto, string key)
         {
             var entityDetail = "";
             if (dto is SQLDataSourceDTO)
             {
                 var connectionString = ((SQLDataSourceDTO)dto).ConnectionString;
 
-                AES256GCM.NewKey();               
-                var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
                 // Encrypt
+                var keyBytes = key == null ? new byte[32] : Encoding.UTF8.GetBytes(key);                
                 var encryptedText = string.IsNullOrEmpty(connectionString) ? string.Empty : AES256GCM.Encrypt(connectionString, keyBytes);
                 entityDetail = encryptedText;
             }
@@ -48,15 +47,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity)
+        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity, string key)
         {
             if (string.IsNullOrEmpty(entity.Type))
                 throw new InvalidOperationException($"Data source {entity.Name} (ID: {entity.Id}) does not have a specified type");
 
             if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
-                var keyBytes = Encoding.UTF8.GetBytes(EncryptDecryptConstants.Key);
                 // Decrypt
+                var keyBytes = key == null ? new byte[32] : Encoding.UTF8.GetBytes(key);                
                 var decryptedConnetionString = string.IsNullOrEmpty(entity.Details) ? string.Empty: AES256GCM.Decrypt(entity.Details, keyBytes);
                 var source = new SQLDataSourceDTO
                 {

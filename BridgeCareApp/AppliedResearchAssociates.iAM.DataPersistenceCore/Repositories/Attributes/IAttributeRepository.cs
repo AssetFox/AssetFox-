@@ -32,5 +32,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         AttributeDTO GetSingleByName(string attributeName);
 
         void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete);
+
+        string GetEncryptionKey();
     }
 }

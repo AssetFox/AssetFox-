@@ -71,9 +71,6 @@
     <None Update="TestUtils\Files\TestImportPerformanceCurve.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="TestUtils\Files\TestImportPerformanceCurveInvalidAttribute.xlsx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="TestUtils\Files\TestImportScenarioPerformanceCurve.xlsx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -86,5 +83,9 @@
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tests\BudgetLibraryUser\" />
   </ItemGroup>
 </Project>

@@ -22,6 +22,7 @@ using System.Security.Claims;
 using Microsoft.Extensions.DependencyInjection;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
+using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -35,8 +36,7 @@ namespace BridgeCareCoreTests.Tests
         {
             _mockUOW = new Mock<IUnitOfWork>();
 
-            var mockUserRepo = new Mock<IUserRepository>();
-            mockUserRepo.Setup(_ => _.UserExists(It.IsAny<string>())).Returns(true);
+            var mockUserRepo = UserRepositoryMocks.EveryoneExists();
             _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
 
             _mockDataSource = new Mock<IDataSourceRepository>();
@@ -205,7 +205,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<List<BaseDataSourceDTO>>(objectResult.Value);
             var resultValue = objectResult.Value as List<BaseDataSourceDTO>;
             Assert.Equal(2, resultValue.Count);
-            Assert.True(resultValue.Any(_ => _.Name == "SQL Server Data Source"));
+            Assert.Contains(resultValue, _ => _.Name == "SQL Server Data Source");
         }
 
         [Fact]
@@ -229,7 +229,7 @@ namespace BridgeCareCoreTests.Tests
             var objectResult = result as OkObjectResult;
             Assert.IsType<List<BaseDataSourceDTO>>(objectResult.Value);
             var resultValue = objectResult.Value as List<BaseDataSourceDTO>;
-            Assert.Equal(0, resultValue.Count);
+            Assert.Empty(resultValue);
         }
 
         [Fact]

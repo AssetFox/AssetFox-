@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Services.Aggregation;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using NUnit.Framework; //using AppliedResearchAssociates.iAM.Aggregation;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -66,7 +64,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, "TestAggregatePolicy");
             // Assert
-            Xunit.Assert.True(allowed.Succeeded);
+            Assert.True(allowed.Succeeded);
         }
         [Fact]
         public async Task UserIsAggregateNetworkDataAuthorized_B2C()
@@ -86,7 +84,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, "TestAggregatePolicy");
             // Assert
-            Xunit.Assert.True(allowed.Succeeded);
+            Assert.True(allowed.Succeeded);
         }
     }
 }

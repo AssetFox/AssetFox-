@@ -28,7 +28,7 @@ namespace BridgeCareCore.Controllers
         private readonly IPerformanceCurvesService _performanceCurvesService;
         private readonly IClaimHelper _claimHelper;
 
-        public PerformanceCurveController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public PerformanceCurveController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IPerformanceCurvesService performanceCurvesService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _performanceCurvesService = performanceCurvesService ?? throw new ArgumentNullException(nameof(performanceCurvesService));
@@ -143,7 +143,7 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                         dto.PerformanceCurves = curves;
                     }
                     UnitOfWork.PerformanceCurveRepo.UpsertPerformanceCurveLibrary(dto);
@@ -213,7 +213,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllPerformanceCurveLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.PerformanceCurveRepo.DeletePerformanceCurveLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -278,7 +278,7 @@ namespace BridgeCareCore.Controllers
                         var existingPerformanceCurveLibrary = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(performanceCurveLibraryId);
                         if (existingPerformanceCurveLibrary != null)
                         {
-                            _claimHelper.CheckUserLibraryModifyAuthorization(existingPerformanceCurveLibrary.Owner, UserId);
+                            _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(existingPerformanceCurveLibrary.Owner, UserId);
                         }
                     }
                     result = _performanceCurvesService.ImportLibraryPerformanceCurvesFile(performanceCurveLibraryId, excelPackage, currentUserCriteriaFilter);

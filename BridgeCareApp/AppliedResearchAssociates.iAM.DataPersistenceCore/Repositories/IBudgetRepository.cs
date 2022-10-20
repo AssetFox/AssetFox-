@@ -4,6 +4,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
@@ -15,7 +16,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetLibraryDTO> GetBudgetLibraries();
 
-        void UpsertBudgetLibrary(BudgetLibraryDTO dto);
+        /// <summary>If this call is an insert, userListModificationIsAllowed is ignored.</summary>
+        void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed);
 
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
@@ -28,8 +30,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetDTO> GetScenarioBudgets(Guid simulationId);
 
         void UpsertOrDeleteScenarioBudgets(List<BudgetDTO> budgets, Guid simulationId);
-        ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId);
 
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
+        List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId);
+        LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
     }
 }

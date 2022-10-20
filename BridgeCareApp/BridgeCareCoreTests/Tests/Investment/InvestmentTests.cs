@@ -1,48 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
+using System.Security.Claims;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces.DefaultData;
+using BridgeCareCore.Models;
 using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
+using BridgeCareCore.Services.DefaultData;
+using BridgeCareCore.Utils;
+using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.Investment;
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
+using MoreLinq;
 using OfficeOpenXml;
 using Xunit;
-using MoreLinq;
-using System.Threading;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using BridgeCareCore.Logging;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
-using BridgeCareCore.Services.DefaultData;
-using BridgeCareCore.Models;
-using BridgeCareCore.Utils.Interfaces;
-using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using BridgeCareCore.Utils;
-using Microsoft.AspNetCore.Authorization;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 
 namespace BridgeCareCoreTests.Tests
 {
-    public class InvestmentTests
+    public class InvestmentControllerTests
     {
         private BudgetLibraryEntity _testBudgetLibrary;
         private BudgetEntity _testBudget;
@@ -52,7 +52,7 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public InvestmentBudgetsService Setup()
+        public InvestmentBudgetsService SetupDatabaseBasedService()
         {
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
@@ -66,7 +66,40 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
+        private InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubService> hubServiceMock = null)
+        {
+            var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
+            var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
+            var security = EsecSecurityMocks.Dbe;
+            var mockDataService = _mockInvestmentDefaultDataService;
+            var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
+            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
+            var controller = new InvestmentController(
+                investmentBudgetServiceMock.Object,
+                security,
+                unitOfWork.Object,
+                resolveHubService.Object,
+                accessor,
+                mockDataService.Object,
+                claimHelper);
+            return controller;
+        }
+
+        private InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var claims = SystemSecurityClaimLists.Admin();
+            var controller = CreateController(unitOfWork, claims);
+            return controller;
+        }
+
+        private InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
+        {
+            var claims = SystemSecurityClaimLists.Empty();
+            var controller = CreateController(unitOfWork, claims, hubServiceMock);
+            return controller;
+        }
+
+        private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
@@ -80,7 +113,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
+        private InvestmentController CreateDatabaseUnauthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
@@ -94,27 +127,7 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateTestController(List<string> userClaims)
-        {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var service = Setup();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
-
-            controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext() { User = testUser }
-            };
-            return controller;
-        }
-        private void CreateLibraryTestData()
+        private void AddTestDataToDatabase()
         {
             var year = DateTime.Now.Year;
             _testBudgetLibrary = new BudgetLibraryEntity { Id = Guid.NewGuid(), Name = "Test Name" };
@@ -145,7 +158,7 @@ namespace BridgeCareCoreTests.Tests
             TestHelper.UnitOfWork.Context.SaveChanges();
         }
 
-        private void CreateScenarioTestData(Guid simulationId)
+        private void AddScenarioDataToDatabase(Guid simulationId)
         {
             var year = DateTime.Now.Year;
             _testInvestmentPlan = new InvestmentPlanEntity
@@ -302,94 +315,351 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
+        public async Task RequestUpsertNewBudgetLibrary_ForwardsRequestToService()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-
-            // Act
-            var result = await controller.GetBudgetLibraries();
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
+                
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = true,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnScenarioGet()
+        public async Task RequestUpsertExistingBudgetLibrary_ForwardsRequestToService()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
 
-            // Act
-            var result = await controller.GetInvestment(simulation.Id);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
+            Assert.True(upsertCall.Item2);
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryPost()
+        public async Task RequestUpsertExistingBudgetLibrary_UserIsAdminWithoutExplicitAccess_ForwardsRequestToService()
         {
-            var service = Setup();
-            // Arrange
-            var controller = CreateAuthorizedController(service);
-            var dto = new BudgetLibraryDTO { Id = Guid.NewGuid(), Name = "", Budgets = new List<BudgetDTO>() };
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
 
-            var request = new InvestmentLibraryUpsertPagingRequestModel();
-            request.IsNewLibrary = true;
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            var _ = await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertCall = upsertCalls.Single();
+            var actualDto = upsertCall.Item1;
+            ObjectAssertions.Equivalent(library, actualDto);
+            Assert.True(upsertCall.Item2);
+        }
 
-            request.Library = dto;
+        [Fact]
+        public async Task RequestUpsertExistingBudgetLibrary_UserIsNotAdminWithoutExplicitAccess_DoesNotForwardRequestToService()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var hubService = new Mock<IHubService>();
+            var controller = CreateNonAdminController(unitOfWork, hubService);
+            var library = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var pagingSync = new InvestmentPagingSyncModel
+            {
 
-            // Act
-            var result = await controller.UpsertBudgetLibrary(request);
+            };
+            var upsertRequest = new InvestmentLibraryUpsertPagingRequestModel
+            {
+                IsNewLibrary = false,
+                Library = library,
+                PagingSync = pagingSync,
+            };
+            await controller.UpsertBudgetLibrary(upsertRequest);
+            var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            Assert.Empty(upsertCalls);
+            var messages = hubService.ThreeArgumentUserMessages();
+            var message = messages.Single();
+            Assert.Contains(ClaimHelper.LibraryModifyUnauthorizedMessage, message);
+        }
 
-            // Assert
-            Assert.IsType<OkResult>(result);
+        [Fact]
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistAdminUser_CallsDeleteOnRepo_Ok()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            var deleteCall = deleteCalls.Single();
+            var argument = (Guid)deleteCall.Arguments[0];
+            Assert.Equal(libraryId, argument);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_ThrowsAndDoesNotCallDeleteOnRepo()
+        {
+            var user = UserDtos.Dbe();
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var exception = await Assert.ThrowsAnyAsync<Exception>(() => controller.DeleteBudgetLibrary(libraryId));
+
+            var message = exception.Message;
+            Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
+            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Empty(deleteCalls);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_AdminUser_Ok()
+        {
+            var user = UserDtos.Admin;
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_OwnerButNotAdminUser_Ok()
+        {
+            var user = UserDtos.Dbe();
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Single(calls);
+        }
+
+        [Fact]
+        public async Task DeleteBudgetLibrary_ModifyPermissionButNotAdminUser_DoesNotDelete()
+        {
+            var user = UserDtos.Dbe();
+            var libraryId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Modify);
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = CreateNonAdminController(unitOfWork, hubService);
+
+            var result = await controller.DeleteBudgetLibrary(libraryId);
+
+            ActionResultAssertions.Ok(result);
+            var calls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
+            Assert.Empty(calls);
+            var messages = hubService.ThreeArgumentUserMessages();
+            var errorMessage = messages.Single();
+            Assert.Contains(ClaimHelper.LibraryDeleteUnauthorizedMessage, errorMessage);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibraries_UserIsAdmin_CallsGetLibrariesWithoutChildrenOnRepo()
+        {
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var libraryId = Guid.NewGuid();
+            var budgetLibrary = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
+            budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildren()).Returns(budgetLibraries);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateAdminController(unitOfWork);
+
+            var libraries = await controller.GetBudgetLibraries();
+
+            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
+            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
+            ObjectAssertions.Equivalent(budgetLibrary, returnedBudgetLibrary);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibraries_UserIsNotAdmin_CallsGetBudgetLibrariesNoChildrenAccessibleToUser()
+        {
+            var user = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var libraryId = Guid.NewGuid();
+            var budgetLibrary = new BudgetLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
+            budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraries);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var controller = CreateNonAdminController(unitOfWork);
+
+            var libraries = await controller.GetBudgetLibraries();
+
+            var returnedBudgetLibraries = ActionResultAssertions.OkObject(libraries) as List<BudgetLibraryDTO>;
+            var returnedBudgetLibrary = returnedBudgetLibraries.Single();
+            ObjectAssertions.Equivalent(budgetLibrary, returnedBudgetLibrary);
+        }
+
+        [Fact]
+        public async Task GetInvestment_UserIsAdmin_BudgetRepoAndInvestmentPlanRepo()
+        {
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var simulationId = Guid.NewGuid();
+            var libraryId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            var budget = new BudgetDTO
+            {
+                Id = budgetId,
+            };
+            var budgets = new List<BudgetDTO> { budget };
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock();
+            unitOfWork.SetupInvestmentPlanRepo(investmentPlanRepo);
+            var investmentPlanId = Guid.NewGuid();
+            var investmentPlanDto = new InvestmentPlanDTO
+            {
+                Id = investmentPlanId,
+            };
+            investmentPlanRepo.Setup(r => r.GetInvestmentPlan(simulationId)).Returns(investmentPlanDto);
+            var controller = CreateAdminController(unitOfWork);
+
+            var libraries = await controller.GetInvestment(simulationId);
+
+            var returnedInvestmentDto = ActionResultAssertions.OkObject(libraries) as InvestmentDTO;
+            var expected = new InvestmentDTO
+            {
+                InvestmentPlan = investmentPlanDto,
+                ScenarioBudgets = budgets,
+            };
+            ObjectAssertions.Equivalent(expected, returnedInvestmentDto);
         }
 
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();
-            
+
 
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
         public async Task ShouldReturnOkResultOnDelete()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
-            var controller = CreateAuthorizedController(service);
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act
             var result = await controller.DeleteBudgetLibrary(Guid.Empty);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
         public async Task ShouldGetLibraryDataNoChildren()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
+            AddTestDataToDatabase();
 
             // Act
             var result = await controller.GetBudgetLibraries();
@@ -409,11 +679,11 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldGetInvestmentData()
         {
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             // Arrange
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController(service);
-            CreateScenarioTestData(simulation.Id);
+            var controller = CreateDatabaseAuthorizedController(service);
+            AddScenarioDataToDatabase(simulation.Id);
 
             // Act
             var result = await controller.GetInvestment(simulation.Id);
@@ -445,9 +715,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyLibraryData()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
+            AddTestDataToDatabase();
 
             _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
             var dto = _testBudgetLibrary.ToDto();
@@ -482,10 +752,10 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyInvestmentData()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
 
             var dto = new InvestmentDTO
             {
@@ -500,7 +770,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentPagingSyncModel();
             request.Investment = dto.InvestmentPlan;
             request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
-            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0]};
+            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0] };
 
             // Act
             await controller.UpsertInvestment(simulation.Id, request);
@@ -527,15 +797,15 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldDeleteBudgetData()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
+            AddTestDataToDatabase();
 
             // Act
             var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
 
             Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
             Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
@@ -546,100 +816,16 @@ namespace BridgeCareCoreTests.Tests
                 !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
                     _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
-        [Fact]
-        public async Task UserIsViewInvestmentFromScenarioAuthorized()
-        {
-            // admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewInvestmentFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentViewAnyFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
-        [Fact]
-        public async Task UserIsModifyInestmentFromLibraryAuthorized()
-        {
-            // non-admin authorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ModifyInvestmentFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentModifyPermittedFromLibraryAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyInvestmentFromLibrary);
-            // Assert
-            Assert.True(allowed.Succeeded);
 
-        }
-        [Fact]
-        public async Task UserIsImportInvestmentFromScenarioAuthorized()
-        {
-            // non-admin unauthorized
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ImportInvestmentFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentImportPermittedFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ImportInvestmentFromScenario);
-            // Assert
-            Assert.False(allowed.Succeeded);
-
-        }
-        [Fact]
-        public async Task UserIsViewInvestmentFromScenarioAuthorized_B2C()
-        {
-            // Arrange
-            var authorizationService = BuildAuthorizationServiceMocks.BuildAuthorizationService(services =>
-            {
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy(Policy.ViewInvestmentFromScenario,
-                        policy => policy.RequireClaim(ClaimTypes.Name,
-                                                      BridgeCareCore.Security.SecurityConstants.Claim.InvestmentViewAnyFromScenarioAccess));
-                });
-            });
-            var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
-            // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewInvestmentFromScenario);
-            // Assert
-            Assert.True(allowed.Succeeded);
-        }
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
         [Fact]
         public async Task ShouldImportLibraryBudgetsFromFile()
         {
             // Arrange
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
 
 
@@ -670,10 +856,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             _testBudget.Name = "Sample Budget 1";
             TestHelper.UnitOfWork.Context.UpdateEntity(_testBudget, _testBudget.Id);
@@ -714,10 +900,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             TestHelper.UnitOfWork.Context.DeleteAll<BudgetAmountEntity>(_ => _.BudgetId == _testBudget.Id);
 
             // Act
@@ -761,10 +947,10 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldExportLibraryBudgetsFile()
         {
             // Arrange
-            var service = Setup();
-            CreateLibraryTestData();
+            var service = SetupDatabaseBasedService();
+            AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             var year = DateTime.Now.Year;
 
             // Act
@@ -801,8 +987,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -814,9 +1000,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -828,11 +1014,11 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -845,11 +1031,11 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
-            CreateScenarioTestData(simulation.Id);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
+            AddScenarioDataToDatabase(simulation.Id);
 
             // Act
             await controller.ImportScenarioInvestmentBudgetsExcelFile();
@@ -878,11 +1064,11 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             _testScenarioBudget.Name = "Sample Budget 1";
             TestHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
@@ -923,12 +1109,12 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act
             var result =
@@ -971,12 +1157,12 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
-            CreateScenarioTestData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
             // Act
             var result =
                 await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
@@ -1011,8 +1197,8 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
         {
             // Arrange
-            var service = Setup();
-            var controller = CreateAuthorizedController(service);
+            var service = SetupDatabaseBasedService();
+            var controller = CreateDatabaseAuthorizedController(service);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -1024,9 +1210,9 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -1038,11 +1224,11 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
-            var service = Setup();
+            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateAuthorizedController(service, accessor);
+            var controller = CreateDatabaseAuthorizedController(service, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

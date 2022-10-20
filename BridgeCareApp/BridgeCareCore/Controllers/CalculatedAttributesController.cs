@@ -29,7 +29,7 @@ namespace BridgeCareCore.Controllers
         private readonly ICalculatedAttributeService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
 
-        public CalculatedAttributesController(IEsecSecurity esec, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public CalculatedAttributesController(IEsecSecurity esec, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, ICalculatedAttributeService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
         {
             attributeRepo = unitOfWork.AttributeRepo;

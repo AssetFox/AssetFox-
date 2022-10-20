@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Collections.Generic;
 using BridgeCareCore.Security;
 using System;
+using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -57,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void ShouldPassCheckUserSimulationModifyAuthorization()
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.AdminAccess) };
+            var claims = SystemSecurityClaimLists.Admin();
 
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
@@ -72,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
 
-            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId));
+            var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
         }
 
@@ -84,7 +85,7 @@ namespace BridgeCareCoreTests.Tests
             // Act
             _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
             userId = ownerId;
-            _claimHelper.CheckUserLibraryModifyAuthorization(ownerId, userId);
+            _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(ownerId, userId);
             
         }
     }

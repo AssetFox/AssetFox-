@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -66,8 +67,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name})
                 .OrderBy(_ => _.Name)
                 .ToList();
-
         }
+
+
 
         public List<BudgetLibraryDTO> GetBudgetLibraries()
         {
@@ -82,6 +84,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Users)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -98,8 +101,61 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) =>
+        public List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.BudgetLibraryUser
+                .Include(u => u.BudgetLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.BudgetLibrary.ToDto())
+                .ToList();
+        }
+
+        private void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
+            var existingUserIds = existingUsers.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToEntity(u, budgetLibraryId)).ToList();
+            var entitiesToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingUsers.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+        }
+
+        private List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId, Guid userId)
+        {
+            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId).ToList();
+            var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
+            return dtos;
+        }
+
+
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed) {
+            var libraryExists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == dto.Id);
+            if (libraryExists && !userListModificationIsAllowed)
+            {
+                var currentUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == u.UserId)
+                    .Select(e => e.ToDto())
+                    .ToList();
+                var updatedUsers = dto.Users;
+                var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
+                if (changedUserId!=null)
+                {
+                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change.";
+                    throw new InvalidOperationException(errorMessage);
+                }
+            }
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+            if (userListModificationIsAllowed)
+            {
+                UpsertOrDeleteUsers(dto.Id, dto.Users);
+            }
+            _unitOfWork.Context.SaveChanges();
+        }
 
         public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {
@@ -183,20 +239,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId)
+        public LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
-            var r = _unitOfWork.Context.ScenarioBudget.AsNoTracking().SingleOrDefault(b => b.SimulationId == simulationId && b.Name == "Unknown");
-            if (r == null)
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
             {
-                r = new ScenarioBudgetEntity
-                {
-                    Name = "Unknown",
-                    Id = Guid.NewGuid(),
-                    SimulationId = simulationId,
-                };
-                _unitOfWork.Context.ScenarioBudget.Add(r);
+                return LibraryAccessModels.LibraryDoesNotExist();
             }
-            return r;
+            var users = GetLibraryUsers(libraryId, userId);
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, users);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
@@ -212,6 +263,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Users)
                 .Single(_ => _.Id == libraryId)
                 .ToDto();
         }

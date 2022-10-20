@@ -135,7 +135,7 @@ namespace BridgeCareCoreTests.Tests
 
         private CriterionLibraryDTO SetupCriterionLibraryForUpsertOrDelete()
         {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -289,9 +289,8 @@ namespace BridgeCareCoreTests.Tests
             var libraryId = targetConditionGoalLibraryEntity.Id;
             var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
             var goalId = targetConditionGoalEntity.Id;
-            var criterion = SetupCriterionLibraryForUpsertOrDelete();
 
-            JoinCriterionToLibraryConditionGoal(goalId, criterion.Id);
+            JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
 
             // Act
             var result = await controller.DeleteTargetConditionGoalLibrary(libraryId);

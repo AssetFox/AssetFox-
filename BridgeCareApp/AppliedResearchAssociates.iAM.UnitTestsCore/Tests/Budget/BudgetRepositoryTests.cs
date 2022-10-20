@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.ScenarioBudget;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -100,7 +101,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-      //      TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
 
             var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
 
@@ -109,6 +109,33 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Empty(budgets);
         }
 
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildrenAccessibleToUser_BudgetLibraryInDbWithAccessForUser_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            var actual = libraries.Single();
+            library.Budgets.Clear();
+            ObjectAssertions.Equivalent(library, actual);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildrenAccessibleToUser_BudgetLibraryInDbWithoutAccessForUser_DoesNotGet() { 
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user2.Id);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.Empty(libraries);
+        }
 
         [Fact]
         public async Task Delete_BudgetLibraryInDbWithUser_Deletes()

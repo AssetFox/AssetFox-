@@ -610,26 +610,59 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetLibraryDataNoChildren()
+        public async Task GetBudgetLibraries_AdminUser_CallsGetBudgetLibrariesNoChildrenOnRepo()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddTestDataToDatabase();
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildren()).Returns(budgetLibraryDtos);
+            var controller = CreateAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
 
             // Act
             var result = await controller.GetBudgetLibraries();
 
             // Assert
+            var getBudgetLibraryInvocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.GetBudgetLibrariesNoChildren));
+            Assert.Single(getBudgetLibraryInvocations);
             var okObjResult = result as OkObjectResult;
             Assert.NotNull(okObjResult.Value);
-
             var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetLibraryDTO>));
-            Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
-            var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
+            var actualId = dtos.Single().Id;
+            Assert.Equal(budgetLibraryId, actualId);
+        }
+        [Fact]
 
-            Assert.True(resultBudgetLibrary.Budgets.Count == 0);
+        public async Task GetBudgetLibraries_NonAdminUser_CallsGetBudgetLibrariesAccessibleToUserOnRepo()
+        {
+            // Arrange
+            var user = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraryDtos);
+            var controller = CreateNonAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            // Act
+            var result = await controller.GetBudgetLibraries();
+
+            // Assert
+            var getBudgetLibraryInvocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.GetBudgetLibrariesNoChildrenAccessibleToUser));
+            Assert.Single(getBudgetLibraryInvocations);
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+            var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<BudgetLibraryDTO>));
+            var actualId = dtos.Single().Id;
+            Assert.Equal(budgetLibraryId, actualId);
         }
 
         [Fact]

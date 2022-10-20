@@ -215,7 +215,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void CriterionLibraryInDb_IdkWut()
+        public void GetScenarioBudgets_CriterionLibraryInDb_GetsBudgetWithCriterionLibraryId()
         {
             var criterionLibraryName = RandomStrings.WithPrefix("Budget");
             var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork, criterionLibraryName);
@@ -261,6 +261,25 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 
             var budgetsAfter = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
             Assert.Empty(budgetsAfter);
+        }
+
+        [Fact]
+        public async Task UpdateBudgetLibraryWithUserListChange_Does()
+        {
+
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+            var libraryBefore = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
+            var libraryUserBefore = libraryBefore.Users.Single();
+            Assert.Equal(LibraryAccessLevel.Modify, libraryUserBefore.AccessLevel);
+            libraryUserBefore.AccessLevel = LibraryAccessLevel.Read;
+
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore, true);
+
+            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
+            var libraryUserAfter = libraryAfter.Users.Single();
+            Assert.Equal(LibraryAccessLevel.Read, libraryUserAfter.AccessLevel);
         }
     }
 }

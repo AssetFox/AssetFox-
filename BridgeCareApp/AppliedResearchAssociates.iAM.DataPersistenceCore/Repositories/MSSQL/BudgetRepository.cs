@@ -251,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
             var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
@@ -259,7 +259,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return LibraryAccessModels.LibraryDoesNotExist();
             }
             var users = GetLibraryUsers(libraryId, userId);
-            return LibraryAccessModels.LibraryExistsWithUsers(userId, users);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)

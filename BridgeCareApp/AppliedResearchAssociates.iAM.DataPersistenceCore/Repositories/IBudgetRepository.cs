@@ -15,9 +15,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetLibraryDTO> GetBudgetLibraries();
 
-        /// <summary>If this call is an insert, userListModificationIsAllowed is ignored.</summary>
-        void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed);
-
+        /// <summary>
+        /// If the library does not exist, adds it. If it does exist, updates the existing one.
+        /// </summary>
+        /// <param name="budgets">the desired new state of the library</param>
+        /// <param name="libraryId">Indicates whether or not the call is allowed to update the user access list of the library. If this is false, and the proposed update does change the access list, an exception will be thrown. Ignored if the call is an insert.</param>
         void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId);
 
         void DeleteBudgetLibrary(Guid libraryId);
@@ -32,6 +34,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId);
-        LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+        LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
     }
 }

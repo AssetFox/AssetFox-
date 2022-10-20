@@ -28,21 +28,20 @@ namespace BridgeCareCoreTests.Tests
         ///<summary>Pass in null for the access level to tell the mock to return a LibraryAccessModel with no users.</summary>  
         public static void SetupGetLibraryAccess(this Mock<IBudgetRepository> mock, Guid libraryId, Guid userId, LibraryAccessLevel? accessLevel)
         {
-            var users = new List<LibraryUserDTO>();
+            LibraryUserDTO access = null;
             if (accessLevel != null)
             {
-                var user = new LibraryUserDTO
+                access = new LibraryUserDTO
                 {
                     AccessLevel = accessLevel.Value,
                     UserId = userId,
                 };
-                users.Add(user);
             }
-            var dto = new LibraryAccessModel
+            var dto = new LibraryUserAccessModel
             {
                 LibraryExists = true,
                 UserId = userId,
-                Users = users,
+                Access = access,
             };
             mock.Setup(m => m.GetLibraryAccess(libraryId, userId)).Returns(dto);
         }

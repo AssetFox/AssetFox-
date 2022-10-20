@@ -7,29 +7,27 @@ using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore;
 
-public class LibraryAccessModel
+public class LibraryUserAccessModel
 {
     public bool LibraryExists { get; set; }
 
     public Guid UserId { get; set; }
-    /// <summary> always has length 0 or 1, depending on whether or not the user has access. </summary>
-    public List<LibraryUserDTO> Users { get; set; } 
+
+    public LibraryUserDTO Access { get; set; } 
 }
 
 public static class LibraryAccessModels
 {
-    public static LibraryAccessModel LibraryDoesNotExist() => new LibraryAccessModel
+    public static LibraryUserAccessModel LibraryDoesNotExist() => new LibraryUserAccessModel
     {
         LibraryExists = false,
     };
 
-    /// <summary>The list should typically have length zero or one. In other words,
-    /// either there is access information for the user, or their isn't.</summary>
-    public static LibraryAccessModel LibraryExistsWithUsers(Guid userId, List<LibraryUserDTO> users)
+    public static LibraryUserAccessModel LibraryExistsWithUsers(Guid userId, LibraryUserDTO user)
     {
-        var model = new LibraryAccessModel
+        var model = new LibraryUserAccessModel
         {
-            Users = users,
+            Access = user,
             UserId = userId,
             LibraryExists = true,
         };

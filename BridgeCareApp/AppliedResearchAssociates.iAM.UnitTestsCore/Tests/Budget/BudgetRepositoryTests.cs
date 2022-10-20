@@ -82,6 +82,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithUser_GetsWithoutUser()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
+
+            var libraryAfter = libraries.Single(l => l.Id == library.Id);
+            var users = libraryAfter.Users;
+            Assert.Empty(users);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithBudget_GetsWithoutBudget()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+      //      TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
+
+            var libraryAfter = libraries.Single(l => l.Id == library.Id);
+            var budgets = libraryAfter.Budgets;
+            Assert.Empty(budgets);
+        }
+
+
+        [Fact]
         public async Task Delete_BudgetLibraryInDbWithUser_Deletes()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);

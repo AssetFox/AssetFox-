@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Linq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
@@ -92,18 +92,18 @@ namespace BridgeCareCore.Utils
             }
         }
                 
-        public void CheckIfLibraryExists(LibraryAccessModel accessModel)
+        private void CheckIfLibraryExists(LibraryAccessModel accessModel, string failureMessage)
         {
             if (!accessModel.LibraryExists)
             {
-                throw new UnauthorizedAccessException(CantDeleteNonexistentLibraryMessage);
+                throw new UnauthorizedAccessException(failureMessage);
             }
         }
 
 
         public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel accessModel, Guid userId)
         {
-            CheckIfLibraryExists(accessModel);
+            CheckIfLibraryExists(accessModel, CantDeleteNonexistentLibraryMessage);
             if (RequirePermittedCheck())
             {
                 var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Owner);

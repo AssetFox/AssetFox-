@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
@@ -85,10 +86,10 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork)
+        private InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Admin();
-            var controller = CreateController(unitOfWork, claims);
+            var controller = CreateController(unitOfWork, claims, hubServiceMock);
             return controller;
         }
 
@@ -443,7 +444,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task DeleteBudgetLibrary_LibraryDoesNotExistAdminUser_CallsDeleteOnRepo_Ok()
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistAdminUser_UnauthorizedAndDoesNotCallDeleteOnRepo()
         {
             var user = UserDtos.Admin;
             var libraryId = Guid.NewGuid();
@@ -451,19 +452,19 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = CreateAdminController(unitOfWork, hubService);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
             ActionResultAssertions.Ok(result);
-            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
-            var deleteCall = deleteCalls.Single();
-            var argument = (Guid)deleteCall.Arguments[0];
-            Assert.Equal(libraryId, argument);
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(It.IsAny<Guid>()), Times.Never());
+            var message = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
         }
 
         [Fact]
-        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_ThrowsAndDoesNotCallDeleteOnRepo()
+        public async Task DeleteBudgetLibrary_LibraryDoesNotExistNonAdminUser_UnauthorizedAndDoesNotCallDeleteOnRepo()
         {
             var user = UserDtos.Dbe();
             var libraryId = Guid.NewGuid();
@@ -471,14 +472,15 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateNonAdminController(unitOfWork);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = CreateNonAdminController(unitOfWork, hubService);
 
-            var exception = await Assert.ThrowsAnyAsync<Exception>(() => controller.DeleteBudgetLibrary(libraryId));
+            var result = await controller.DeleteBudgetLibrary(libraryId);
 
-            var message = exception.Message;
+            ActionResultAssertions.Ok(result);
+            budgetRepo.Verify(br => br.DeleteBudgetLibrary(It.IsAny<Guid>()), Times.Never());
+            var message = hubService.SingleThreeArgumentUserMessage();
             Assert.Contains(ClaimHelper.CantDeleteNonexistentLibraryMessage, message);
-            var deleteCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.DeleteBudgetLibrary));
-            Assert.Empty(deleteCalls);
         }
 
         [Fact]
@@ -487,6 +489,7 @@ namespace BridgeCareCoreTests.Tests
             var user = UserDtos.Admin;
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
+            budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
             var controller = CreateAdminController(unitOfWork);
@@ -623,6 +626,10 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
+            // Created a repository-level test for this. Unclear about the service level.
+            // Isolated testing theory would suggest that controller tests should mock the
+            // service. But are we ready to back in our dividing line between controller
+            // and service code?
             var service = SetupDatabaseBasedService();
             // Arrange
             var controller = CreateDatabaseAuthorizedController(service);
@@ -634,20 +641,6 @@ namespace BridgeCareCoreTests.Tests
 
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
-
-            // Assert
-            ActionResultAssertions.Ok(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnDelete()
-        {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
-
-            // Act
-            var result = await controller.DeleteBudgetLibrary(Guid.Empty);
 
             // Assert
             ActionResultAssertions.Ok(result);

@@ -1,5 +1,5 @@
 ﻿using System;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repsitories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 
 namespace BridgeCareCore.Utils.Interfaces
 {
@@ -16,7 +16,5 @@ namespace BridgeCareCore.Utils.Interfaces
         public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel libraryAccess, Guid userId);
         public void CheckUserLibraryRecreateAuthorization(LibraryAccessModel accessModel, Guid userId);
         bool CanModifyAccessLevels(LibraryAccessModel accessModel, Guid userId);
-
-        public void CheckIfLibraryExists(LibraryAccessModel accessModel);
     }
 }

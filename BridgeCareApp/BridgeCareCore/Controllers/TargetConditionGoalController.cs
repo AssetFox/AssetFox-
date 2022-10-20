@@ -165,7 +165,7 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                         dto.TargetConditionGoals = items;
                     }
                     UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);

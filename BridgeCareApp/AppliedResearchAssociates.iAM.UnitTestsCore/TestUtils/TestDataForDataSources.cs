@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<BaseDataSourceDTO> SourceDTOs() => SimpleRepo()
             .Where(_ => _.Type != "Other")
-            .Select(_ => _.ToDTO())
+            .Select(_ => _.ToDTO(TestHelper.UnitOfWork.EncryptionKey))
             .ToList();
 
         public static List<AttributeEntity> SimpleAttributeRepo()

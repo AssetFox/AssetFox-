@@ -226,13 +226,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         /// <summary>Safe to call if the entity might be null. If it is
         /// in fact null, the returned DTO will also be null.</summary>
-        public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)
+        public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity, string key)
         {
             if (entity == null)
             {
                 return null;
             }
-            return ToDto(entity, null);
+            return ToDto(entity, key);
         }
 
         private static ConnectionType MapDTODataSourceTypes(string dtoType)
@@ -261,10 +261,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.Type == "SQL")
             {
+                // ToDTO decrypts the connection
                 var dsDto = (SQLDataSourceDTO)entity.ToDTO(key);
-                // Decrypt
-                var keyBytes = key == null ? new byte[32] : Encoding.UTF8.GetBytes(key);
-                connectionString = AES256GCM.Decrypt(dsDto.ConnectionString, keyBytes);
+                connectionString = dsDto.ConnectionString;
             }
 
             return connectionString;

@@ -14,7 +14,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             var options = new DbContextOptionsBuilder<IAMContext>()
                 .UseSqlServer(connectionString)
                 .Options;
-            var dbContext = new IAMContext(options);
+            var dbContext = new IAMContext(options);            
             UnitOfWork = new UnitOfDataPersistenceWork(config, dbContext);
             DatabaseResetter.ResetDatabase(UnitOfWork);
         }

@@ -16,8 +16,8 @@ const isAuthenticatedEsecUser = () => {
                     } else {
                         throw new Error('Failed to authenticate');
                     }
-                }),
-            ),
+                })
+               ),
         )
         .catch((error: any) => {
             store

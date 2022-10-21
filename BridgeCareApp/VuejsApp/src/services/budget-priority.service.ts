@@ -4,6 +4,7 @@ import {
     BudgetPriority,
     BudgetPriorityLibrary,
 } from '@/shared/models/iAM/budget-priority';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class BudgetPriorityService {
     static getBudgetPriorityLibraries(): AxiosPromise {
@@ -12,8 +13,20 @@ export default class BudgetPriorityService {
         );
     }
 
+    static getScenarioBudgetPriorityPage(scenarioId: string, data:PagingRequest<BudgetPriority>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.BudgetPriority}/GetScenarioBudgetPriorityPage/${scenarioId}`, data
+        );
+    }
+
+    static getLibraryBudgetPriorityPage(libraryId: string, data:PagingRequest<BudgetPriority>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.BudgetPriority}/GetLibraryBudgetPriorityPage/${libraryId}`, data
+        );
+    }
+
     static upsertBudgetPriorityLibrary(
-        data: BudgetPriorityLibrary,
+        data:LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority>,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.BudgetPriority}/UpsertBudgetPriorityLibrary`,
@@ -34,12 +47,17 @@ export default class BudgetPriorityService {
     }
 
     static upsertScenarioBudgetPriorities(
-        data: BudgetPriority[],
-        scenarioId: string,
+        data: PaginSync<BudgetPriority>, scenarioId: string
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.BudgetPriority}/UpsertScenarioBudgetPriorities/${scenarioId}`,
             data,
+        );
+    }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.BudgetPriority}/GetHasPermittedAccess`,
         );
     }
 }

@@ -39,6 +39,83 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => _.ToDto())
                 .ToList();
 
+        public List<CalculatedAttributeLibraryDTO> GetCalculatedAttributeLibrariesNoChildren()
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<CalculatedAttributeDTO> GetCalcuatedAttributesByScenarioIdNoChildren(Guid scenarioId)
+        {
+            if (!_unitOfDataPersistanceWork.Context.Simulation.Any(_ => _.Id == scenarioId))
+            {
+                throw new RowNotInTableException("The specified scenario was not found");
+            }
+
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+                .Where(_ => _.SimulationId == scenarioId)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<CalculatedAttributeDTO> GetCalcuatedAttributesByLibraryIdNoChildren(Guid libraryid)
+        {
+            if (!_unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary.Any(_ => _.Id == libraryid))
+            {
+                throw new RowNotInTableException("The specified calculated attribute library was not found");
+            }
+
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute
+                .Where(_ => _.CalculatedAttributeLibraryId == libraryid)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public CalculatedAttributeDTO GetLibraryCalulatedAttributesByLibraryAndAttributeId(Guid libraryId, Guid attributeId)
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttribute.AsNoTracking()
+            .Include(_ => _.Attribute)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Attribute.Id == attributeId && _.CalculatedAttributeLibraryId == libraryId)
+            .ToDto();
+        }
+
+        public CalculatedAttributeDTO GetScenarioCalulatedAttributesByScenarioAndAttributeId(Guid scenarioId, Guid attributeId)
+        {
+            return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute.AsNoTracking()
+            .Include(_ => _.Attribute)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Attribute.Id == attributeId && _.SimulationId == scenarioId)
+            .ToDto();
+        }
+
+        public CalculatedAttributeLibraryDTO GetCalculatedAttributeLibraryByID(Guid id)
+        {
+            return _unitOfDataPersistanceWork.Context.CalculatedAttributeLibrary
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Attribute)
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Equations)
+            .ThenInclude(_ => _.CriterionLibraryCalculatedAttributeJoin)
+            .ThenInclude(_ => _.CriterionLibrary)
+            .Include(_ => _.CalculatedAttributes)
+            .ThenInclude(_ => _.Equations)
+            .ThenInclude(_ => _.EquationCalculatedAttributeJoin)
+            .ThenInclude(_ => _.Equation)
+            .Single(_ => _.Id == id).ToDto();
+        }
+
         public void UpsertCalculatedAttributeLibrary(CalculatedAttributeLibraryDTO library)
         {
             // Does the library have a provided ID?

@@ -18,19 +18,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ??
                                          throw new ArgumentNullException(nameof(unitOfWork));
 
-        public void AddUser(string username, string role)
+        public void AddUser(string username, bool hasAdminClaim)
         {
             if (string.IsNullOrEmpty(username) || _unitOfWork.Context.User.Any(_ => _.Username == username))
             {
                 return;
             }
-
-            var hasInventoryAccess = !string.IsNullOrEmpty(role) && role == Role.Administrator;
+          
             _unitOfWork.Context.User.Add(new UserEntity
             {
                 Id = Guid.NewGuid(),
                 Username = username,
-                HasInventoryAccess = hasInventoryAccess,
+                HasInventoryAccess = hasAdminClaim,
             });
 
             _unitOfWork.Context.SaveChanges();

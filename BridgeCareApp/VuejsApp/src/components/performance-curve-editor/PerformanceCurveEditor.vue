@@ -42,6 +42,8 @@
                             placeholder="Search Deterioration Equations"
                             single-line
                             outline
+                            clearable
+                            @click:clear="onClearClick()"
                             v-model="gridSearchTerm"
                         >
                         </v-text-field>
@@ -534,9 +536,10 @@ export default class PerformanceCurveEditor extends Vue {
     stateNumericAttributes: Attribute[];
     @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges)
     hasUnsavedChanges: boolean;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
-
+    @State(state => state.performanceCurveModule.hasPermittedAccess) hasPermittedAccess: boolean;
+    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
     @Action('getPerformanceCurveLibraries')
     getPerformanceCurveLibrariesAction: any;
     @Action('selectPerformanceCurveLibrary')
@@ -647,6 +650,7 @@ export default class PerformanceCurveEditor extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
+            vm.getHasPermittedAccessAction();
             vm.getPerformanceCurveLibrariesAction().then(() => {
                 if (to.path.indexOf(ScenarioRoutePaths.PerformanceCurve) !== -1) {
                     vm.selectedScenarioId = to.query.scenarioId;
@@ -805,7 +809,7 @@ export default class PerformanceCurveEditor extends Vue {
     }
 
     checkLibraryEditPermission() {
-        this.hasLibraryEditPermission = this.isAdmin || this.checkUserIsLibraryOwner();
+        this.hasLibraryEditPermission = this.hasAdminAccess || (this.hasPermittedAccess && this.checkUserIsLibraryOwner());
     }
 
     checkUserIsLibraryOwner() {
@@ -838,7 +842,7 @@ export default class PerformanceCurveEditor extends Vue {
         if (!isNil(performanceCurveLibrary)) {
             const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: performanceCurveLibrary,    
-                isNewLIbrary: true,           
+                isNewLibrary: true,           
                  pagingSync: {
                     libraryId: performanceCurveLibrary.performanceCurves.length == 0 ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
@@ -882,6 +886,7 @@ export default class PerformanceCurveEditor extends Vue {
                 this.currentPage,
             ) as PerformanceCurve;
             this.onUpdateRow(id, performanceCurve);
+            this.onPaginationChanged();
         }
     }
 
@@ -988,7 +993,7 @@ export default class PerformanceCurveEditor extends Vue {
     onUpsertPerformanceCurveLibrary() { // need to do upsert things
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
-                isNewLIbrary: false,
+                isNewLibrary: false,
                  pagingSync: {
                     libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: this.deletionIds,
@@ -1121,6 +1126,11 @@ export default class PerformanceCurveEditor extends Vue {
     onSearchClick(){
         this.currentSearch = this.gridSearchTerm;
         this.resetPage();
+    }
+
+    onClearClick(){
+        this.gridSearchTerm = '';
+        this.onSearchClick();
     }
 
     onUpdateRow(rowId: string, updatedRow: PerformanceCurve){

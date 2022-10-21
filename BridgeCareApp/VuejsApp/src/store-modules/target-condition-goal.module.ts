@@ -24,6 +24,7 @@ const state = {
         emptyTargetConditionGoalLibrary,
     ) as TargetConditionGoalLibrary,
     scenarioTargetConditionGoals: [] as TargetConditionGoal[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -86,6 +87,9 @@ const mutations = {
     ) {
         state.scenarioTargetConditionGoals = clone(targetConditionGoals);
     },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -104,35 +108,6 @@ const actions = {
             },
         );
     },
-    async upsertTargetConditionGoalLibrary(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await TargetConditionGoalService.upsertTargetConditionGoalLibrary(
-            payload.library,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                const message: string = any(
-                    propEq('id', payload.library.id),
-                    state.targetConditionGoalLibraries,
-                )
-                    ? 'Updated target condition goal library'
-                    : 'Added target condition goal library';
-                commit(
-                    'addedOrUpdatedTargetConditionGoalLibraryMutator',
-                    payload.library,
-                );
-                commit(
-                    'selectedTargetConditionGoalLibraryMutator',
-                    payload.library.id,
-                );
-                dispatch('addSuccessNotification', { message: message });
-            }
-        });
-    },
     async getScenarioTargetConditionGoals({ commit }: any, scenarioId: string) {
         await TargetConditionGoalService.getScenarioTargetConditionGoals(
             scenarioId,
@@ -142,28 +117,6 @@ const actions = {
                     'scenarioTargetConditionGoalsMutator',
                     response.data as TargetConditionGoal[],
                 );
-            }
-        });
-    },
-    async upsertScenarioTargetConditionGoals(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await TargetConditionGoalService.upsertScenarioTargetConditionGoals(
-            payload.scenarioTargetConditionGoals,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioTargetConditionGoalsMutator',
-                    payload.scenarioTargetConditionGoals,
-                );
-                dispatch('addSuccessNotification', {
-                    message: 'Modified target condition goals',
-                });
             }
         });
     },
@@ -185,6 +138,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted target condition goal library',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await TargetConditionGoalService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

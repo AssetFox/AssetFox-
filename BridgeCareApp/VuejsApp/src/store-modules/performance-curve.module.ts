@@ -22,7 +22,9 @@ const state = {
     performanceCurveLibraries: [] as PerformanceCurveLibrary[],
     selectedPerformanceCurveLibrary: clone(
         emptyPerformanceCurveLibrary,
-    ) as PerformanceCurveLibrary
+    ) as PerformanceCurveLibrary,
+    scenarioPerformanceCurves: [] as PerformanceCurve[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -67,6 +69,9 @@ const mutations = {
         performanceCurves: PerformanceCurve[],
     ) {
         state.scenarioPerformanceCurves = clone(performanceCurves);
+    },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
     },
 };
 
@@ -150,6 +155,19 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deterioration Models file imported',
                 });
+            }
+        });
+    },
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await PerformanceCurveService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

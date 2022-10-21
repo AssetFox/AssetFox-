@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_Does()
         {
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
@@ -28,6 +29,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void SaveSimulationOutput_ThenLoad_Same()
         {
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
@@ -44,6 +46,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
       //  [InlineData(100000)] // typically fails on a TimeOutException
         public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
         {
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
             var simulationOutput = SimulationOutputModels.SimulationOutput(context);
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);

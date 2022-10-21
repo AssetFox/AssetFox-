@@ -24,6 +24,7 @@ const state = {
         emptyBudgetPriorityLibrary,
     ) as BudgetPriorityLibrary,
     scenarioBudgetPriorities: [] as BudgetPriority[],
+    hasPermittedAccess: false,
 };
 
 const mutations = {
@@ -66,6 +67,9 @@ const mutations = {
     ) {
         state.scenarioBudgetPriorities = clone(budgetPriorities);
     },
+    PermittedAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
 };
 
 const actions = {
@@ -80,31 +84,6 @@ const actions = {
                         'budgetPriorityLibrariesMutator',
                         response.data as BudgetPriorityLibrary[],
                     );
-                }
-            },
-        );
-    },
-    async upsertBudgetPriorityLibrary(
-        { dispatch, commit }: any,
-        library: BudgetPriorityLibrary,
-    ) {
-        await BudgetPriorityService.upsertBudgetPriorityLibrary(library).then(
-            (response: AxiosResponse) => {
-                if (
-                    hasValue(response, 'status') &&
-                    http2XX.test(response.status.toString())
-                ) {
-                    const message: string = any(
-                        propEq('id', library.id),
-                        state.budgetPriorityLibraries,
-                    )
-                        ? 'Updated budget priority library'
-                        : 'Added budget priority library';
-
-                    commit('budgetPriorityLibraryMutator', library);
-                    commit('selectedBudgetPriorityLibraryMutator', library.id);
-
-                    dispatch('addSuccessNotification', { message: message });
                 }
             },
         );
@@ -148,25 +127,16 @@ const actions = {
             }
         });
     },
-    async upsertScenarioBudgetPriorities(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await BudgetPriorityService.upsertScenarioBudgetPriorities(
-            payload.scenarioBudgetPriorities,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
+    async getHasPermittedAccess({ commit }: any)
+    {
+        await BudgetPriorityService.getHasPermittedAccess()
+        .then((response: AxiosResponse) => {
             if (
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
             ) {
-                commit(
-                    'scenarioBudgetPrioritiesMutator',
-                    payload.scenarioBudgetPriorities,
-                );
-                dispatch('addSuccessNotification', {
-                    message: 'Modified scenario budget priorities',
-                });
+                const hasPermittedAccess: boolean = response.data as boolean;
+                commit('PermittedAccessMutator', hasPermittedAccess);
             }
         });
     },

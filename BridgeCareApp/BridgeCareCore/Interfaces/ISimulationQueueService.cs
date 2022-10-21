@@ -5,6 +5,6 @@ namespace BridgeCareCore.Interfaces
 {
     public interface ISimulationQueueService
     {
-        PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, string role);
+        PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess);
     }
 }

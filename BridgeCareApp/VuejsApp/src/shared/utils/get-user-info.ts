@@ -12,7 +12,3 @@ export const getUserName = () => {
         ? parseLDAP(getUserInfo().sub)[0]
         : (localStorage.getItem('LoggedInUser') as string);
 };
-
-export const getUserRoles = () => {
-    return parseLDAP(getUserInfo().roles);
-};

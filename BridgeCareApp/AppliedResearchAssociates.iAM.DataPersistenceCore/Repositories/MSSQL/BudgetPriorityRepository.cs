@@ -90,6 +90,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public List<BudgetPriorityLibraryDTO> GetBudgetPriortyLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.BudgetPriorityLibrary.Any())
+            {
+                return new List<BudgetPriorityLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.BudgetPriorityLibrary.AsNoTracking()
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
         public void UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
@@ -244,6 +256,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             // Update last modified date
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
+        }
+
+        public List<BudgetPriorityDTO> GetBudgetPrioritiesByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException("No Library was found for the given library.");
+            }
+
+            return _unitOfWork.Context.BudgetPriority.AsNoTracking()
+                .Include(_ => _.CriterionLibraryBudgetPriorityJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.BudgetPriorityLibraryId == libraryId)
+                .Select(_ => _.ToDto())
+                .ToList();
         }
     }
 }

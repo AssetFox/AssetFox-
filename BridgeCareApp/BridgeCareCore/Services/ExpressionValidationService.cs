@@ -19,10 +19,10 @@ namespace BridgeCareCore.Services
 {
     public class ExpressionValidationService : IExpressionValidationService
     {
-        private readonly UnitOfDataPersistenceWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILog _log;
 
-        public ExpressionValidationService(UnitOfDataPersistenceWork unitOfDataPersistenceWork, ILog log)
+        public ExpressionValidationService(IUnitOfWork unitOfDataPersistenceWork, ILog log)
         {
             _unitOfWork = unitOfDataPersistenceWork ?? throw new ArgumentNullException(nameof(unitOfDataPersistenceWork));
             _log = log ?? throw new ArgumentNullException(nameof(_log));

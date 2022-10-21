@@ -95,6 +95,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
+        public List<CashFlowRuleLibraryDTO> GetCashFlowRuleLibrariesNoChildren()
+        {
+            if (!_unitOfWork.Context.CashFlowRuleLibrary.Any())
+            {
+                return new List<CashFlowRuleLibraryDTO>();
+            }
+
+            return _unitOfWork.Context.CashFlowRuleLibrary.AsNoTracking()
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
         public void UpsertCashFlowRuleLibrary(CashFlowRuleLibraryDTO dto) =>
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
 
@@ -186,6 +198,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioCashFlowRuleJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.SimulationId == simulationId)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<CashFlowRuleDTO> GetCashFlowRulesByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.CashFlowRuleLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException("The specified cash flow library was not found.");
+            }
+
+            return _unitOfWork.Context.CashFlowRule.AsNoTracking()
+                .Include(_ => _.CashFlowDistributionRules)
+                .Include(_ => _.CriterionLibraryCashFlowRuleJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.CashFlowRuleLibraryId == libraryId)
                 .Select(_ => _.ToDto())
                 .ToList();
         }

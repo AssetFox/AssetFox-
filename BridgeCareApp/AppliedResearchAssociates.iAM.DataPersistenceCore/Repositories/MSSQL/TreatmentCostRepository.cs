@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using System.Data;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -223,6 +224,38 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+        }
+
+        public List<TreatmentCostDTO> GetTreatmentCostByScenariotreatmentId(Guid treatmentId)
+        {
+            if (!_unitOfWork.Context.ScenarioSelectableTreatment.Any(_ => _.Id == treatmentId))
+            {
+                throw new RowNotInTableException("The specified scenario treatment was not found.");
+            }
+
+            return _unitOfWork.Context.ScenarioTreatmentCost.AsNoTracking()
+                .Include(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Select(_ => _.ToDto())
+                .ToList();
+        }
+
+        public List<TreatmentCostDTO> GetTreatmentCostByTreatmentId(Guid treatmentId)
+        {
+            if (!_unitOfWork.Context.SelectableTreatment.Any(_ => _.Id == treatmentId))
+            {
+                throw new RowNotInTableException("The specified treatment was not found.");
+            }
+
+            return _unitOfWork.Context.TreatmentCost.AsNoTracking()
+                .Include(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Select(_ => _.ToDto())
+                .ToList();
         }
     }
 }

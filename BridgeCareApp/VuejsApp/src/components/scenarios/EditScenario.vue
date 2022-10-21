@@ -123,7 +123,7 @@ import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 })
 export default class EditScenario extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
@@ -258,7 +258,7 @@ export default class EditScenario extends Vue {
                             || navigationTab.tabName === 'Target Condition Goal' 
                             || navigationTab.tabName === 'Deficient Condition Goal' 
                             || navigationTab.tabName === 'Calculated Attribute') {
-                            navigationTab['visible'] = vm.isAdmin;
+                            navigationTab['visible'] = vm.hasAdminAccess;
                         }
 
                         return navigationTab;

@@ -37,7 +37,7 @@ namespace BridgeCareCore.Services
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
         }
 
-        public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, string role)
+        public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess)
         {
             var skip = 0;
             var take = 0;

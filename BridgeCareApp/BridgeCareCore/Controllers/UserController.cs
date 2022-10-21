@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
@@ -95,7 +97,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPut]
         [Route("UpdateUser")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> UpdateUser([FromBody] UserDTO dto)
         {
             try
@@ -111,7 +113,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpDelete]
         [Route("DeleteUser/{username}")]
-        [Authorize(Policy = SecurityConstants.Policy.Admin)]
+        [ClaimAuthorize("AdminAccess")]
         public async Task<IActionResult> DeleteUser(string username)
         {
             try

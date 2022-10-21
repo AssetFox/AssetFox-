@@ -4,6 +4,7 @@ import {
     TargetConditionGoal,
     TargetConditionGoalLibrary,
 } from '@/shared/models/iAM/target-condition-goal';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class TargetConditionGoalService {
     static getTargetConditionGoalLibraries(): AxiosPromise {
@@ -12,8 +13,20 @@ export default class TargetConditionGoalService {
         );
     }
 
+    static getScenarioTargetConditionGoalPage(scenarioId: string, data:PagingRequest<TargetConditionGoal>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.TargetConditionGoal}/GetScenarioTargetConditionGoalPage/${scenarioId}`, data
+        );
+    }
+
+    static getLibraryTargetConditionGoalPage(libraryId: string, data:PagingRequest<TargetConditionGoal>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.TargetConditionGoal}/GetLibraryTargetConditionGoalPage/${libraryId}`, data
+        );
+    }
+
     static upsertTargetConditionGoalLibrary(
-        data: TargetConditionGoalLibrary,
+        data: LibraryUpsertPagingRequest<TargetConditionGoalLibrary, TargetConditionGoal>,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.TargetConditionGoal}/UpsertTargetConditionGoalLibrary/`,
@@ -34,12 +47,18 @@ export default class TargetConditionGoalService {
     }
 
     static upsertScenarioTargetConditionGoals(
-        data: TargetConditionGoal[],
+        data: PaginSync<TargetConditionGoal>,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.TargetConditionGoal}/UpsertScenarioTargetConditionGoals/${scenarioId}`,
             data,
+        );
+    }
+
+    static getHasPermittedAccess(): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.TargetConditionGoal}/GetHasPermittedAccess`,
         );
     }
 }

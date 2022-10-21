@@ -39,6 +39,8 @@
                                                 single-line
                                                 v-model="searchMine"
                                                 outline
+                                                clearable
+                                                @click:clear="onMineClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
@@ -212,6 +214,8 @@
                                                 hide-details
                                                 single-line
                                                 v-model="searchShared"
+                                                clearable
+                                                @click:clear="onSharedClearClick()"
                                                 class="ghd-text-field-border ghd-text-field search-icon-general"
                                             >
                                             </v-text-field>
@@ -578,8 +582,8 @@ export default class Scenarios extends Vue {
     @State(state => state.authenticationModule.authenticated)
     authenticated: boolean;
     @State(state => state.authenticationModule.userId) userId: string;
-    @State(state => state.authenticationModule.isAdmin) isAdmin: boolean;
-    @State(state => state.authenticationModule.isCWOPA) isCWOPA: boolean;
+    @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
 
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
@@ -1125,8 +1129,8 @@ export default class Scenarios extends Vue {
         const scenarioUserCanModify = (user: ScenarioUser) =>
             user.username === currentUser && user.canModify;
         return (
-            this.isAdmin ||
-            this.isCWOPA ||
+            this.hasAdminAccess ||
+            this.hasSimulationAccess ||
             any(scenarioUserCanModify, scenarioUsers)
         );
     }
@@ -1564,8 +1568,13 @@ export default class Scenarios extends Vue {
     }
 
     onMineSearchClick(){
-        this.currentSearchMine =  this.searchMine;
+        this.currentSearchMine = this.searchMine;
         this.resetPageMine()
+    }
+
+    onMineClearClick(){
+        this.searchMine = '';
+        this.onMineSearchClick();
     }
 
     resetPageMine(){
@@ -1574,8 +1583,13 @@ export default class Scenarios extends Vue {
     }
 
     onSharedSearchClick(){
-        this.currentSearchShared =  this.searchShared;
+        this.currentSearchShared = this.searchShared;
         this.resetPageShared()
+    }
+
+    onSharedClearClick(){
+        this.searchShared = '';
+        this.onSharedSearchClick();
     }
 
     resetPageShared(){

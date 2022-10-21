@@ -415,6 +415,7 @@ BridgeCareApp/BridgeCareCore/b2c.json
 BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.DataMinerUnitTests/testConnections.json
 /BridgeCareApp/AppliedResearchAssociates.iAM.UnitTestsCore/testConnections.json
+/BridgeCareApp/AppliedResearchAssociates.iAM.DataUnitTests/testConnections.json
 
 # Intended for large resource files, but really anything the coder wants to ignore
 [gG]it[iI]gnored/

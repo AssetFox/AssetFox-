@@ -113,7 +113,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Run(() =>
+                await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);

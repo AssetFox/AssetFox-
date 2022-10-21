@@ -3,7 +3,7 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 {
-    public static class LibraryAccessModelExtensions
+    public static class LibraryUserAccessModelExtensions
     {
         /// <summary>This method will not notice if the user is an admin. It checks only whether or not
         /// the accessModel knows that the user has the access.</summary>

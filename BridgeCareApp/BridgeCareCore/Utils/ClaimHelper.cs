@@ -72,7 +72,7 @@ namespace BridgeCareCore.Utils
         /// </summary>
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
-        public void ObsoleteCheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
+        public void OldWayCheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
         {
             if (RequirePermittedCheck() && owner != userId)
             {

@@ -339,7 +339,6 @@ export default class InvestmentEditor extends Vue {
     @Action('upsertInvestment') upsertInvestmentAction: any;
     @Action('upsertBudgetLibrary') upsertBudgetLibraryAction: any;
     @Action('deleteBudgetLibrary') deleteBudgetLibraryAction: any;
-    @Action('upsertOrDeleteBudgetLibraryUsers') upsertOrDeleteBudgetLibraryUsersAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
@@ -766,10 +765,7 @@ export default class InvestmentEditor extends Vue {
     }
 
     onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
-        const BudgetLibrary: BudgetLibrary = {
-            ...this.shareBudgetLibraryDialogData.budgetLibrary,
-            users: [],
-        };
+        const BudgetLibrary: BudgetLibrary = {...this.shareBudgetLibraryDialogData.budgetLibrary, users: [],};
 
         this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 

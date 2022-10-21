@@ -222,7 +222,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                // WjJake or Amruta -- if unauthorized, we don't do anything to close out the transaction?
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 return Ok();
             }
@@ -254,6 +254,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 return Ok();
             }

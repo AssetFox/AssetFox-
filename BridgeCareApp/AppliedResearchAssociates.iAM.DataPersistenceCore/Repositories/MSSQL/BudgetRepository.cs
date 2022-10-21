@@ -111,24 +111,37 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         private void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
-            var existingUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
-            var existingUserIds = existingUsers.Select(u => u.UserId).ToList();
+            var existingEntities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
             var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
             var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
             var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
             var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
-            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToEntity(u, budgetLibraryId)).ToList();
-            var entitiesToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToBudgetLibraryUserEntity(u, budgetLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<BudgetLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate!=null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
             _unitOfWork.Context.AddRange(entitiesToAdd);
             _unitOfWork.Context.UpdateRange(entitiesToUpdate);
-            var entitiesToDelete = existingUsers.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
             _unitOfWork.Context.RemoveRange(entitiesToDelete);
         }
 
         private List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId, Guid userId)
         {
-            var entities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId).ToList();
-            var dtos = entities.Select(LibraryUserMapper.ToDto).ToList();
+            var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
             return dtos;
         }
 
@@ -144,7 +157,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
                 if (changedUserId!=null)
                 {
-                    var errorMessage = $"This update is not allowed to change user access. However, the access of user {changedUserId.Value} is proposed to change.";
+                    var errorMessage = $"This user is not allowed to change access rights.";
                     throw new InvalidOperationException(errorMessage);
                 }
             }
@@ -238,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public LibraryAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
             var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
             if (!exists)
@@ -246,7 +259,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 return LibraryAccessModels.LibraryDoesNotExist();
             }
             var users = GetLibraryUsers(libraryId, userId);
-            return LibraryAccessModels.LibraryExistsWithUsers(userId, users);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)

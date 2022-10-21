@@ -20,7 +20,7 @@ namespace BridgeCareCore.Utils
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
         public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
-        public const string CantDeleteNonexistentLibraryMessage = "We can't delete a nonexistent library.";
+        public const string CantDeleteNonexistentLibraryMessage = "Cannot delete library. Not in system.";
 
         public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         {
@@ -80,7 +80,7 @@ namespace BridgeCareCore.Utils
             }
         }
 
-        public void CheckUserLibraryModifyAuthorization(LibraryAccessModel accessModel, Guid userId)
+        public void CheckUserLibraryModifyAuthorization(LibraryUserAccessModel accessModel, Guid userId)
         {
             if (RequirePermittedCheck() && accessModel.LibraryExists)
             {
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Utils
             }
         }
                 
-        private void CheckIfLibraryExists(LibraryAccessModel accessModel, string failureMessage)
+        private void CheckIfLibraryExists(LibraryUserAccessModel accessModel, string failureMessage)
         {
             if (!accessModel.LibraryExists)
             {
@@ -101,7 +101,7 @@ namespace BridgeCareCore.Utils
         }
 
 
-        public void CheckUserLibraryDeleteAuthorization(LibraryAccessModel accessModel, Guid userId)
+        public void CheckUserLibraryDeleteAuthorization(LibraryUserAccessModel accessModel, Guid userId)
         {
             CheckIfLibraryExists(accessModel, CantDeleteNonexistentLibraryMessage);
             if (RequirePermittedCheck())
@@ -114,7 +114,7 @@ namespace BridgeCareCore.Utils
             }
         }
 
-        public void CheckUserLibraryRecreateAuthorization(LibraryAccessModel accessModel, Guid userId)
+        public void CheckUserLibraryRecreateAuthorization(LibraryUserAccessModel accessModel, Guid userId)
         {
             if (RequirePermittedCheck()) {
                 var unauthorized = accessModel.Unauthorized(userId, LibraryAccessLevel.Owner);
@@ -127,7 +127,7 @@ namespace BridgeCareCore.Utils
 
         /// <summary>Returns true if the user can change the access levels of
         /// users to the library. Does not throw.</summary>
-        public bool CanModifyAccessLevels(LibraryAccessModel accessModel, Guid userId)
+        public bool CanModifyAccessLevels(LibraryUserAccessModel accessModel, Guid userId)
         {
             bool canModify = HasAdminAccess() || accessModel.HasAccess(userId, LibraryAccessLevel.Owner);
             return canModify;

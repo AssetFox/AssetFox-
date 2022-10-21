@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
         }
 
-        private static BudgetDTO CreateBudgetObject(string budgetName)
+        private static BudgetDTO CreateBudgetDto(string budgetName)
         {
             //create budget amounts
             var budgetAmountList = new List<BudgetAmountDTO>();
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             //setup
             var budgetList = new List<BudgetDTO>();
-            budgetList.Add(CreateBudgetObject("Budget 1"));
+            budgetList.Add(CreateBudgetDto("Budget 1"));
 
             //create budget library
             return new BudgetLibraryDTO()

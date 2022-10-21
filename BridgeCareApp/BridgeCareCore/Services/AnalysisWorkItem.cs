@@ -98,6 +98,7 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case ProgressStatus.Running:
@@ -105,11 +106,13 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
@@ -134,6 +137,7 @@ namespace BridgeCareCore.Services
                 case SimulationLogStatus.Warning:
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case SimulationLogStatus.Error:

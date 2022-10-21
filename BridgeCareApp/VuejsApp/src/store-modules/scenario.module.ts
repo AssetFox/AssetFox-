@@ -74,13 +74,13 @@ const mutations = {
             );         
         }
         else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
-            const updatedScenario: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
-            updatedScenario.status = simulationAnalysisDetail.status;
-            updatedScenario.previousRunTime = simulationAnalysisDetail.runTime;
+            const updatedSimulation: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
+            updatedSimulation.status = simulationAnalysisDetail.status;
+            updatedSimulation.previousRunTime = simulationAnalysisDetail.runTime;
 
             state.currentSimulationQueuePage = update(
-                findIndex(propEq('id', updatedScenario.id), state.currentSimulationQueuePage),
-                updatedScenario,
+                findIndex(propEq('id', updatedSimulation.id), state.currentSimulationQueuePage),
+                updatedSimulation,
                 state.currentSimulationQueuePage
             );         
         }        

@@ -733,7 +733,7 @@ export default class Scenarios extends Vue {
             width: '',
         },
         {
-            text: 'Queue Time',
+            text: 'Queued Time',
             value: 'queueEntryTimestamp',
             align: 'left',
             sortable: true,
@@ -938,6 +938,10 @@ export default class Scenarios extends Vue {
     }
 
     @Watch('simulationQueuePagination') onSimulationQueuePagination() {
+        this.doSimulationQueuePagination();
+    }
+
+    doSimulationQueuePagination() {
         if(this.initializing)
             return;
         const { sortBy, descending, page, rowsPerPage } = this.simulationQueuePagination;
@@ -955,8 +959,8 @@ export default class Scenarios extends Vue {
             isDescending: descending != null ? descending : false,
             search: ""
         };
-        this.getSimulationQueuePageAction(simulationQueueRequest);
-    }    
+        this.getSimulationQueuePageAction(simulationQueueRequest);    
+    }
 
     mounted() {
         this.networks = clone(this.stateNetworks);
@@ -1373,10 +1377,22 @@ export default class Scenarios extends Vue {
         }
     }
 
+    delay(ms: number) {
+        return new Promise( resolve => setTimeout(resolve, ms) );
+    }
+
     getScenarioAnalysisDetailUpdate(data: any) {
         this.updateSimulationAnalysisDetailAction({
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
+        (async () => { 
+            if ((data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
+                (data.simulationAnalysisDetail.status == "Queued to run."))
+            {
+                await this.delay(500);
+                this.doSimulationQueuePagination();
+            }
+        })();                            
     }
 
     getReportStatus(data: any) {

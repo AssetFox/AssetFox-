@@ -74,7 +74,7 @@ namespace BridgeCareCore.Services
                 {
                     simulation.WorkStartedTimestamp = null;
                     simulation.CurrentRunTime = null;
-                    simulation.Status = $"Waiting in queue";
+                    simulation.Status = $"Queued to run.";
                 }
             }
 

@@ -13,7 +13,6 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
@@ -232,7 +231,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             var randomName = RandomStrings.Length11();
             var dataSource = new SQLDataSourceDTO
             {
-                ConnectionString = "connectionString123",
+                ConnectionString = "data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework",
                 Id = dataSourceId,
                 Name = randomName,
             };
@@ -252,9 +251,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
             TestHelper.UnitOfWork.AttributeRepo.UpsertAttributes(attributeDto);
             var attributeAfter = TestHelper.UnitOfWork.AttributeRepo.GetSingleById(attributeId);
             var sqlDataSourceAfter = attributeAfter.DataSource as SQLDataSourceDTO;
-            Assert.Equal("connectionString123", sqlDataSourceAfter.ConnectionString);
-            var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter);
-            Assert.Equal("connectionString123", domainAttributeAfter.ConnectionString);
+            Assert.Equal("data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework", sqlDataSourceAfter.ConnectionString);
+            var domainAttributeAfter = AttributeMapper.ToDomain(attributeAfter, TestHelper.UnitOfWork.EncryptionKey);
+            Assert.Equal("data source=Test;initial catalog=TestDB;persist security info=True;user id=TestId;password=TestPassword;MultipleActiveResultSets=True;App=EntityFramework", domainAttributeAfter.ConnectionString);
         }
 
         [Fact]

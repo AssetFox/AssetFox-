@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
+using System.Text;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -39,11 +40,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var maintainableAssets = _unitOfWork.Context.MaintainableAsset
                 .Include(_ => _.AggregatedResults)
                 .Where(_ => _.Id == networkId)
-                .ToList();
+                .ToList();            
 
             return !maintainableAssets.Any()
                 ? throw new RowNotInTableException("The network has no maintainable assets for rollup")
-                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain());
+                : maintainableAssets.SelectMany(__ => __.AggregatedResults.ToList().ToDomain(_unitOfWork.EncryptionKey));            
         }
 
         private void DeleteAggregatedResults(Guid networkId)

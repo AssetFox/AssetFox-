@@ -22,8 +22,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
     {
         public static string ValidAttributeName() => "A" + RandomStrings.Length11();
 
-        public static string EncryptionKey = TestHelper.UnitOfWork.EncryptionKey;
-
         public static NumericAttribute Numeric(Guid? id = null, string name = null, Guid? dataSourceId = null, ConnectionType connectionType = ConnectionType.MSSQL)
         {
             var resolvedId = id ?? Guid.NewGuid();
@@ -80,7 +78,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories
                         {
                             attribute.DataSource = dataSourceToApply;
                         }
-                                                
+                        unitOfWork.AttributeRepo.UpsertAttributes(attributesToInsert);
                         AttributesHaveBeenCreated = true;
                     }
                 }

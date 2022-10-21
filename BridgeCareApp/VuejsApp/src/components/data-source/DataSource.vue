@@ -251,7 +251,7 @@ export default class DataSource extends Vue {
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
             this.selectedConnection = '';     
-            this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Enter a replacement connection string here" : 'Enter a connection string here';
+            this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
             this.showSqlMessage = false; this.showSaveMessage = false;
         }
         @Watch('selectedConnection')
@@ -297,7 +297,7 @@ export default class DataSource extends Vue {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
                 this.selectedConnection = '';
-                this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Enter a replacement connection string here' : 'Enter a connection string here';
+                this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
             });
         } else {
@@ -332,7 +332,7 @@ export default class DataSource extends Vue {
         this.sourceTypeItem = datasource.name;
         this.dataSourceTypeItem = datasource.type;
         this.selectedConnection = datasource.connectionString;
-        this.connectionStringPlaceHolderMessage = 'Enter a connection string here';
+        this.connectionStringPlaceHolderMessage = 'New connection string';
         this.datColumns = [];
         this.locColumns = [];
         this.isNewDataSource = true;
@@ -359,7 +359,7 @@ export default class DataSource extends Vue {
         this.showSqlMessage = false;
         this.showSaveMessage = false;
         this.selectedConnection = '';
-        this.connectionStringPlaceHolderMessage = 'Enter a connection string here';        
+        this.connectionStringPlaceHolderMessage = 'New connection string';        
     }
     chooseFiles(){
         if(document != null)

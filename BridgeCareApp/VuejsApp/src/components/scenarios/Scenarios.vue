@@ -1391,7 +1391,8 @@ export default class Scenarios extends Vue {
         });
         (async () => { 
             if ((data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
-                (data.simulationAnalysisDetail.status == "Queued to run."))
+                (data.simulationAnalysisDetail.status == "Queued to run.") ||
+                (data.simulationAnalysisDetail.status == "Getting simulation analysis network"))
             {
                 await this.delay(500);
                 this.doSimulationQueuePagination();

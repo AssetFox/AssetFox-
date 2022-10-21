@@ -97,8 +97,8 @@ export default class ShareBudgetLibraryDialog extends Vue {
     const isCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username === currentUser || budgetLibraryUser.isOwner;
     const isNotCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username !== currentUser && !budgetLibraryUser.isOwner;
 
-    this.currentUserAndOwner = filter(isCurrentUserOrOwner, this.dialogData.budgetLibrary.users) as BudgetLibraryUser[];
-    const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, this.dialogData.budgetLibrary.users) as BudgetLibraryUser[];
+    this.currentUserAndOwner = filter(isCurrentUserOrOwner, this.dialogData.budgetLibraryUsers) as BudgetLibraryUser[];
+    const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, this.dialogData.budgetLibraryUsers) as BudgetLibraryUser[];
 
     otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
       if (any(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows)) {

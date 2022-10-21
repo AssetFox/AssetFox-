@@ -83,9 +83,17 @@ export const emptyBudgetLibrary: BudgetLibrary = {
     name: '',
     description: '',
     budgets: [],
+    users: [],
     appliedScenarioIds: [],
     isShared: false
 };
+
+export const emptyBudgetLibraryUsers: BudgetLibraryUser[] = [{
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}];
 
 export const emptyBudget: Budget = {
     id: getBlankGuid(),

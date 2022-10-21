@@ -383,6 +383,7 @@ export default class InvestmentEditor extends Vue {
         this.actionHeader
     ];
     budgetYearsGridData: BudgetYearsGridData[] = []; 
+    budgetLibraryUserData: BudgetLibraryUser[] = []; 
     selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
     selectedBudgetYears: number[] = [];
     createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
@@ -557,10 +558,19 @@ export default class InvestmentEditor extends Vue {
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
+
+            //save users state
+            this.budgetLibraryUserData = clone(this.selectedBudgetLibrary.users);
         }
 
         this.clearChanges()
         this.onPaginationChanged()
+    }
+
+    @Watch('budgetLibraryUserData')
+    onBudgetLibraryUserDataChanged()
+    {
+        this.checkHasUnsavedChanges();
     }
 
     @Watch('stateInvestmentPlan')
@@ -757,35 +767,21 @@ export default class InvestmentEditor extends Vue {
         this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
     }
 
-    onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) {
+    onShowShareBudgetLibraryDialog() {
         this.shareBudgetLibraryDialogData = {
             showDialog: true,
-            budgetLibrary: clone(budgetLibrary),
+            budgetLibraryUsers: clone(this.budgetLibraryUserData),
         };
     }
 
-    onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
-        const BudgetLibrary: BudgetLibrary = {...this.shareBudgetLibraryDialogData.budgetLibrary, users: [],};
-
+    onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[])
+    {
         this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 
-        if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid())
+        if (budgetLibraryUsers !== null && budgetLibraryUsers !== undefined)
         {
-            //this.upsertOrDeleteBudgetLibraryUsersAction(BudgetLibrary.id, budgetLibraryUsers);
-
-            ////update budget library sharing
-            //InvestmentService.upsertOrDeleteBudgetLibraryUsers().then((response: AxiosResponse) => {
-            //    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-            //        if (budgetLibrary.users === []) {
-            //            this.clearChanges();
-            //        }
-
-            //        this.budgetLibraryMutator(budgetLibrary); // mutation actions
-            //        this.selectedBudgetLibraryMutator(budgetLibrary.id);
-            //        this.addSuccessNotificationAction({ message: 'Shared budget library' })
-            //        this.resetPage();
-            //    }
-            //})
+            //save users in memory
+            this.budgetLibraryUserData = budgetLibraryUsers;    
         }
     }
 
@@ -1109,10 +1105,11 @@ export default class InvestmentEditor extends Vue {
                 updatedBudgets: Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
-                deletionyears: this.deletionYears ,
+                deletionyears: this.deletionYears,
                 updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts),
+                users: this.budgetLibraryUserData
             }
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1298,7 +1295,9 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary) ||
-            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)
+            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan) ||
+            hasUnsavedChangesCore('', this.budgetLibraryUserData, this.selectedBudgetLibrary.users) //comparing users
+
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

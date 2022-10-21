@@ -8,7 +8,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class MaintainableAssetMapper
     {
-        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity, string key = null)
+        public static MaintainableAsset ToDomain(this MaintainableAssetEntity entity, string encryptionKey)
         {
             var maintainableAsset = new MaintainableAsset(
                 entity.Id, entity.NetworkId, entity.MaintainableAssetLocation.ToDomain(), entity.SpatialWeighting);
@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 {
                     var numericAttributeData = entity.AssignedData
                         .Where(e => e.Discriminator == "NumericAttributeDatum")
-                        .Select(e => e.ToDomain());
+                        .Select(e => e.ToDomain(encryptionKey));
 
                     maintainableAsset.AssignAttributeDataFromDataSource(numericAttributeData);
                 }
@@ -28,7 +28,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 {
                     var textAttributeData = entity.AssignedData
                         .Where(e => e.Discriminator == "TextAttributeDatum")
-                        .Select(e => e.ToDomain());
+                        .Select(e => e.ToDomain(encryptionKey));
 
                     maintainableAsset.AssignAttributeDataFromDataSource(textAttributeData);
                 }

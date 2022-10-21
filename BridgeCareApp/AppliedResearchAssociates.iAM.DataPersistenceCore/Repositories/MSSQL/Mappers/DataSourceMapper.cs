@@ -10,7 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class DataSourceMapper
     {
-        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto, string key)
+        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto, string encryptionKey)
         {
             var entityDetail = "";
             if (dto is SQLDataSourceDTO)
@@ -18,7 +18,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var connectionString = ((SQLDataSourceDTO)dto).ConnectionString;
 
                 // Encrypt
-                var keyBytes = key == null ? new byte[32] : Encoding.UTF8.GetBytes(key);                
+                var keyBytes = encryptionKey == null ? new byte[32] : Encoding.UTF8.GetBytes(encryptionKey);                
                 var encryptedText = string.IsNullOrEmpty(connectionString) ? string.Empty : AES256GCM.Encrypt(connectionString, keyBytes);
                 entityDetail = encryptedText;
             }
@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity, string key)
+        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity, string encryptionKey)
         {
             if (string.IsNullOrEmpty(entity.Type))
                 throw new InvalidOperationException($"Data source {entity.Name} (ID: {entity.Id}) does not have a specified type");
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
                 // Decrypt
-                var keyBytes = key == null ? new byte[32] : Encoding.UTF8.GetBytes(key);                
+                var keyBytes = encryptionKey == null ? new byte[32] : Encoding.UTF8.GetBytes(encryptionKey);                
                 var decryptedConnetionString = string.IsNullOrEmpty(entity.Details) ? string.Empty: AES256GCM.Decrypt(entity.Details, keyBytes);
                 var source = new SQLDataSourceDTO
                 {

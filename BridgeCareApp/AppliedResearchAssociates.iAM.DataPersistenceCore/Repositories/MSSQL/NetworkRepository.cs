@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var domain = _unitOfWork.Context.Network
                 .Include(n => n.MaintainableAssets)
                 .ThenInclude(ma => ma.MaintainableAssetLocation)
-                .Select(e => e.ToDomain())
+                .Select(e => e.ToDomain(_unitOfWork.EncryptionKey))
                 .ToList();
             return domain;
         }

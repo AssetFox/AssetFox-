@@ -12,10 +12,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class NetworkMapper
     {
-        public static Network ToDomain(this NetworkEntity entity) =>
+        public static Network ToDomain(this NetworkEntity entity, string encryptionKey) =>
             new Network(
                 entity.MaintainableAssets.Any()
-                    ? entity.MaintainableAssets.Select(e => e.ToDomain()).ToList()
+                    ? entity.MaintainableAssets.Select(e => e.ToDomain(encryptionKey)).ToList()
                     : new List<MaintainableAsset>(),
                 entity.Id,
                 entity.Name);
@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static NetworkEntity ToEntity(this SimulationAnalysisDomains.Network domain) =>
             new NetworkEntity { Id = domain.Id, Name = domain.Name };
 
-        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList, string key)
+        public static NetworkDTO ToDto(this NetworkEntity entity, List<AttributeEntity> attributeList, string encryptionKey)
         {
             var dto = new NetworkDTO
             {
@@ -60,7 +60,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var networkAttribute = attributeList.FirstOrDefault(_ => _.Id == join.AttributeId);
                 if (networkAttribute != null)
                 {
-                    dto.Attributes.Add(networkAttribute.ToDto(key));
+                    dto.Attributes.Add(networkAttribute.ToDto(encryptionKey));
                 }
             }
             return dto;

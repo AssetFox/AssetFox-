@@ -98,7 +98,7 @@ namespace BridgeCareCore.Controllers
                     // by pass owner check if no record
                     if (currentRecord != null)
                     {
-                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
                     }
                     UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);
                     UnitOfWork.CashFlowRuleRepo.UpsertOrDeleteCashFlowRules(dto.CashFlowRules, dto.Id);
@@ -167,7 +167,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllCashFlowRuleLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.ObsoleteCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.CashFlowRuleRepo.DeleteCashFlowRuleLibrary(libraryId);
                     UnitOfWork.Commit();

@@ -6,9 +6,9 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using DataAttribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
-namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
+namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
-    public static class IAttributeRepositoryExtensions
+    public static class AttributeRepositoryExtensions
     {
         public static void UpsertAttributes(this IAttributeRepository repository, List<AttributeDTO> dtos)
         {
@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
                 {
                     throw new InvalidAttributeException($"Invalid attribute {mappedDto.Name} with aggregation rule {mappedDto.AggregationRuleType}");
                 }
-                if (mappedDto!=null)
+                if (mappedDto != null)
                 {
                     dataAttributes.Add(mappedDto);
                 }

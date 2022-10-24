@@ -91,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
+                .AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }

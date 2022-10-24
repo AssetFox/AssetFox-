@@ -49,8 +49,6 @@ namespace BridgeCareCore.Services
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
-            //_hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastQueuedSimulation, queuedSimulation);
-
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
 
             simulationAnalysisDetail.Status = "Getting simulation analysis network";

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -45,7 +46,7 @@ namespace BridgeCareCoreTests.Tests
         {
             public string WorkId { get; } = Id.ToString();
 
-            public UserInfo UserInfo => throw new NotImplementedException(); // TODO: Implement appropriately
+            public UserInfo UserInfo => new();
 
             public void DoWork(IServiceProvider serviceProvider)
             {

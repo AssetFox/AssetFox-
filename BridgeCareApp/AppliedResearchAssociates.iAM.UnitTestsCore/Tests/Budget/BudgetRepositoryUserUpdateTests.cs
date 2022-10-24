@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
@@ -19,16 +20,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
             var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-
-            var libraryUsersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
             var userDto = new LibraryUserDTO
             {
-                AccessLevel = DTOs.Enums.LibraryAccessLevel.Modify,
+                AccessLevel = LibraryAccessLevel.Modify,
                 UserId = user.Id,
             };
-            libraryUsersBefore.Add(userDto);
+            var userDtos = new List<LibraryUserDTO> { userDto };
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, libraryUsersBefore);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, userDtos);
 
             var userEntitiesAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibrary.Id).ToList();
             var userAfter = userEntitiesAfter.Single();
@@ -76,7 +75,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var libraryDto = BudgetLibraryTestSetup.CreateBudgetLibraryDto(libraryName);
+            var libraryDto = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName);
             var userDto = BudgetLibraryUserTestSetup.CreateLibraryUserDto(user.Id);
             var userDtos = new List<LibraryUserDTO> { userDto };
 

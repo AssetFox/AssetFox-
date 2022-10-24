@@ -17,24 +17,27 @@ using System;
 using System.Linq;
 using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 
 namespace BridgeCareCore.Services
 {
     public class SimulationQueueService : ISimulationQueueService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
+        private static ISimulationRepository _simulationRepository;
         private ISimulationAnalysis _simulationAnalysis;
         private ISimulationService _simulationService;
         private SequentialWorkQueue _sequentialWorkQueue;
 
-        public SimulationQueueService(UnitOfDataPersistenceWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationService simulationService, ISimulationAnalysis simulationAnalysis)
+        public SimulationQueueService(IUnitOfWork unitOfWork, SequentialWorkQueue sequentialWorkQueue, ISimulationService simulationService, ISimulationAnalysis simulationAnalysis, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _sequentialWorkQueue = sequentialWorkQueue ?? throw new ArgumentNullException(nameof(sequentialWorkQueue));
 
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
+            _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
         }
 
         public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess)
@@ -42,22 +45,13 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<QueuedSimulationDTO>();
-            var users = _unitOfWork.Context.User.ToList();
-
             var simulationQueue = _sequentialWorkQueue.Snapshot;
 
             var simulationQueueIds = simulationQueue.Select(_ => new Guid(_.WorkId)).ToList();
 
-            var simulations = _unitOfWork.Context.Simulation
-                .Include(_ => _.SimulationAnalysisDetail)
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Include(_ => _.Network)
-            .ToList()
-            .Where(_ => simulationQueueIds.Contains(_.Id))
-            .Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)).ToQueuedSimulationDTO())
-            .ToList();
-
+            var simulations = _simulationRepository.GetScenariosWithIds(simulationQueueIds)
+                .Select(_ => _.ToQueuedSimulationDTO())
+                .ToList();
 
             foreach (var simulation in simulations)
             {

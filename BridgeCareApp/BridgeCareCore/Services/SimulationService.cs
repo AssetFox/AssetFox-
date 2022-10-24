@@ -17,18 +17,19 @@ using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Services
 {
     public class SimulationService : ISimulationService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
+        private static ISimulationRepository _simulationRepository;
 
-
-
-        public SimulationService(UnitOfDataPersistenceWork unitOfWork)
+        public SimulationService(IUnitOfWork unitOfWork, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
         }
 
         public PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request)
@@ -36,17 +37,9 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<SimulationDTO>();
-            var users = _unitOfWork.Context.User.ToList();
-            var simulations = _unitOfWork.Context.Simulation
-                .Include(_ => _.SimulationAnalysisDetail)
-                .Include(_ => _.SimulationReportDetail)
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Include(_ => _.Network)
-                .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username).ToList();
-                
 
+            var simulations = _simulationRepository.GetUserScenarios();
+              
             if (request.search.Trim() != "")
                 simulations = SearchSimulations(simulations, request.search);
             if (request.sortColumn.Trim() != "")
@@ -80,20 +73,8 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<SimulationDTO>();
-            var users = _unitOfWork.Context.User.ToList();
-            var simulations = _unitOfWork.Context.Simulation
-                .Include(_ => _.SimulationAnalysisDetail)
-                .Include(_ => _.SimulationReportDetail)
-                .Include(_ => _.SimulationUserJoins)
-                .ThenInclude(_ => _.User)
-                .Include(_ => _.Network)
-                .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
-                    hasAdminAccess ||
-                    hasSimulationAccess ||
-                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    ).ToList();
 
+            var simulations = _simulationRepository.GetSharedScenarios(hasAdminAccess, hasSimulationAccess);
 
             if (request.search.Trim() != "")
                 simulations = SearchSimulations(simulations, request.search);

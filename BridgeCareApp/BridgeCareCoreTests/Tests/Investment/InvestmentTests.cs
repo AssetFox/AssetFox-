@@ -973,11 +973,11 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
+        public async Task RequestLibraryImport_InvalidMimeType_Throws()
         {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = CreateAdminController(unitOfWork);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -986,13 +986,12 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
+        public async Task ImportLibrary_FileNotFound_Throws()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
-            var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateDatabaseAuthorizedController(service, accessor);
-
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = CreateAdminController(unitOfWork);
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                 await controller.ImportLibraryInvestmentBudgetsExcelFile());

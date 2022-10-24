@@ -213,7 +213,7 @@ namespace BridgeCareCore.Controllers
                         canModifyAccessLevels = true;
                     }
 
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto, canModifyAccessLevels);
+                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
                     UnitOfWork.Commit();
                 });

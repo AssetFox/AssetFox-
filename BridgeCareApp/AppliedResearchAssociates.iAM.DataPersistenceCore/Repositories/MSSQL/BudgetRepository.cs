@@ -103,13 +103,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId)
         {
             return _unitOfWork.Context.BudgetLibraryUser
+                .AsNoTracking()
                 .Include(u => u.BudgetLibrary)
                 .Where(u => u.UserId == userId)
                 .Select(u => u.BudgetLibrary.ToDto())
                 .ToList();
         }
 
-        private void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
+        public void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
         {
             var existingEntities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
             var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
@@ -146,26 +147,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto, bool userListModificationIsAllowed) {
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
             var libraryExists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == dto.Id);
-            if (libraryExists && !userListModificationIsAllowed)
-            {
-                var currentUsers = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == u.UserId)
-                    .Select(e => e.ToDto())
-                    .ToList();
-                var updatedUsers = dto.Users;
-                var changedUserId = LibraryUserDtoListExtensions.IdOfAnyUserWithChangedAccess(currentUsers, updatedUsers);
-                if (changedUserId!=null)
-                {
-                    var errorMessage = $"This user is not allowed to change access rights.";
-                    throw new InvalidOperationException(errorMessage);
-                }
-            }
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
-            if (userListModificationIsAllowed)
-            {
-                UpsertOrDeleteUsers(dto.Id, dto.Users);
-            }
             _unitOfWork.Context.SaveChanges();
         }
 

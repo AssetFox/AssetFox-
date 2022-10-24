@@ -47,7 +47,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             BudgetLibraryDTO budgetLibraryDto = null;
 
             //testing and asserts
-            Assert.ThrowsAny<Exception>(() => unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto, true));
+            Assert.ThrowsAny<Exception>(() => unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibraryDto));
         }
 
         [Fact]
@@ -274,7 +274,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(LibraryAccessLevel.Modify, libraryUserBefore.AccessLevel);
             libraryUserBefore.AccessLevel = LibraryAccessLevel.Read;
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
 
             var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
             var libraryUserAfter = libraryAfter.Users.Single();
@@ -291,7 +291,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryUserBefore = libraryBefore.Users.Single();
             libraryBefore.Users.Remove(libraryUserBefore);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
 
             var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
             Assert.Empty(libraryAfter.Users);
@@ -312,7 +312,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             libraryBefore.Users.Add(newUser);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
 
             var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
             var libraryUsersAfter = libraryAfter.Users;

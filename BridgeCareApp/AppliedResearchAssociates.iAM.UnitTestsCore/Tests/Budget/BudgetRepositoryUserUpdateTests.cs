@@ -27,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             };
             budgetLibrary.Users.Add(userDto);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
 
             var userEntitiesAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibrary.Id).ToList();
             var userAfter = userEntitiesAfter.Single();
@@ -65,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Equal(user.Id, userBefore.UserId);
             budgetLibrary.Users.Clear();
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
 
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
             Assert.Null(usersAfter.Access);
@@ -80,7 +80,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var userDto = BudgetLibraryUserTestSetup.CreateLibraryUserDto(user.Id);
             libraryDto.Users.Add(userDto);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryDto, true);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryDto);
 
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(libraryDto.Id, user.Id);
             var accessAfter = usersAfter.Access;

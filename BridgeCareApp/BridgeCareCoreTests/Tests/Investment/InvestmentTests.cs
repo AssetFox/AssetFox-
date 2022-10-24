@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Security.Claims;
 using System.Text;
+using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -33,13 +34,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Moq;
 using MoreLinq;
 using OfficeOpenXml;
 using Xunit;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -999,14 +998,15 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
+        public async Task ImportLibraryInvestmentBudgetsExcelFile_BudgetLibraryIdNotFound_Throws()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateDatabaseAuthorizedController(service, accessor);
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

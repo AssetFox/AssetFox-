@@ -153,6 +153,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             Assert.Empty(libraryUsersAfter);
         }
 
+
+        [Fact]
+        public void Delete_LibraryInDbWithBudget_DeletesBoth()
+        {
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
+
+            // Act
+            TestHelper.UnitOfWork.BudgetRepo.DeleteBudgetLibrary(library.Id);
+
+            // Assert
+            Assert.False(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
+            //Assert.True(
+            //    !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
+            //        _.BudgetId == _testBudget.Id));
+            //Assert.True(
+            //    !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
+            //        _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
+        }
+
+
         [Fact]
         public void GetScenarioSimpleBudgetDetails_SimulationInDb_EmptyList()
         {

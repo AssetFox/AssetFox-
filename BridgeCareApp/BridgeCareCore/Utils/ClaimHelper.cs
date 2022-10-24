@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
@@ -20,7 +21,10 @@ namespace BridgeCareCore.Utils
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
         public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
+        public const string LibraryAccessModificationUnauthorizedMessage = "You are not authorized to modify access to this library.";
         public const string CantDeleteNonexistentLibraryMessage = "Cannot delete library. Not in system.";
+        public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
+        public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
 
         public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         {
@@ -131,6 +135,36 @@ namespace BridgeCareCore.Utils
         {
             bool canModify = HasAdminAccess() || accessModel.HasAccess(userId, LibraryAccessLevel.Owner);
             return canModify;
+        }
+
+        public void CheckAccessModifyValidity(List<LibraryUserDTO> usersBefore, List<LibraryUserDTO> proposedUsersAfter, Guid userId)
+        {
+            var relevantUser = usersBefore.SingleOrDefault(u => u.UserId == userId);
+            var accessModel = new LibraryUserAccessModel
+            {
+                UserId = userId,
+                LibraryExists = true,
+                Access = relevantUser,
+            };
+            var canModify = CanModifyAccessLevels(accessModel, userId);
+            if (!canModify)
+            {
+                throw new UnauthorizedAccessException(LibraryAccessModificationUnauthorizedMessage);
+            }
+            var ownersBefore = usersBefore.Where(u => u.AccessLevel == LibraryAccessLevel.Owner).Select(u => u.UserId).ToList();
+            var ownersAfter = proposedUsersAfter.Where(u => u.AccessLevel == LibraryAccessLevel.Owner).Select(u => u.UserId).ToList();
+            var addedOwners = ownersAfter.Except(ownersBefore).ToList();
+            var removedOwners = ownersBefore.Except(ownersAfter).ToList();
+            if (addedOwners.Any())
+            {
+                var addedOwner = addedOwners.First();
+                throw new UnauthorizedAccessException($"{AddingOwnersIsNotAllowedMessage} This update added {addedOwner}");
+            }
+            if (removedOwners.Any())
+            {
+                var removedOwner = removedOwners.First();
+                throw new UnauthorizedAccessException($"{RemovingOwnersIsNotAllowedMessage} This update removed {removedOwner}");
+            }
         }
 
         public bool RequirePermittedCheck()

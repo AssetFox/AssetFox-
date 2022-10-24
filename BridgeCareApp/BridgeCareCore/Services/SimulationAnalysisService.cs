@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
@@ -39,6 +41,11 @@ namespace BridgeCareCore.Services
             AnalysisWorkItem workItem = new(networkId, simulationId, userInfo);
             _sequentialWorkQueue.Enqueue(workItem, out var workHandle).Wait();
             return workHandle;
+        }
+
+        public void CancelSimulation(Guid simulationId, UserInfo userInfo)
+        {
+            // TODO: Implement
         }
     }
 }

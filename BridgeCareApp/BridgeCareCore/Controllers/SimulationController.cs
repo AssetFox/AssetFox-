@@ -26,13 +26,16 @@ namespace BridgeCareCore.Controllers
     {
         private readonly ISimulationAnalysis _simulationAnalysis;
         private readonly ISimulationService _simulationService;
+        private readonly ISimulationQueueService _simulationQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationService simulationService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));
             _simulationService = simulationService ?? throw new ArgumentNullException(nameof(simulationService));
+            _simulationQueueService = simulationQueueService ?? throw new ArgumentNullException(nameof(simulationQueueService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
 
@@ -51,6 +54,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
                 throw;
             }
+
         }
 
         [HttpPost]
@@ -79,6 +83,23 @@ namespace BridgeCareCore.Controllers
             {
                 // copied comment for // TODO:  Replace with query to find all shared simulations
                 var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetAllScenario());
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Scenario error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetSimulationQueuePage")]
+        [Authorize]
+        public async Task<IActionResult> GetSimulationQueuePage([FromBody] PagingRequestModel<QueuedSimulationDTO> request)
+        {
+            try
+            {                
+                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request, UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess));
                 return Ok(result);
             }
             catch (Exception e)
@@ -206,6 +227,8 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+
+
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]
         [Authorize(Policy = Policy.RunSimulation)]
@@ -245,6 +268,16 @@ namespace BridgeCareCore.Controllers
                 }
                 throw;
             }
+        }
+
+        [HttpDelete]
+        [Route("CancelSimulation/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> CancelSimulation(Guid simulationId)
+        {
+            // TODO: Implement cancel
+            await Task.Delay(300);
+            return Ok();
         }
     }
 }

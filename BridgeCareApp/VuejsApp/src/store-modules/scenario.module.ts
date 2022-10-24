@@ -1,4 +1,4 @@
-import {CloneScenarioData, emptyScenario, Scenario} from '@/shared/models/iAM/scenario';
+import {CloneScenarioData, emptyScenario, QueuedSimulation, Scenario} from '@/shared/models/iAM/scenario';
 import ScenarioService from '@/services/scenario.service';
 import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
@@ -11,10 +11,13 @@ import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 
 const state = {
     scenarios: [] as Scenario[],
+    queuedSimulations: [] as QueuedSimulation[],
     currentSharedScenariosPage: [] as Scenario[],
     currentUserScenarioPage: [] as Scenario[],
+    currentSimulationQueuePage: [] as QueuedSimulation[],
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
+    totalQueuedSimulations: 0 as number,
     selectedScenario: clone(emptyScenario) as Scenario
 };
 
@@ -29,6 +32,10 @@ const mutations = {
     SharedScenarioPageMutator(state: any, scenarios: PagingPage<Scenario>){
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
+    },
+    SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
+        state.currentSimulationQueuePage = clone(queuedSimulations.items);
+        state.totalQueuedSimulations = queuedSimulations.totalItems;
     },
     selectedScenarioMutator(state: any, id: string) {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
@@ -66,6 +73,17 @@ const mutations = {
                 state.currentUserScenarioPage
             );         
         }
+        else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
+            const updatedSimulation: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
+            updatedSimulation.status = simulationAnalysisDetail.status;
+            updatedSimulation.previousRunTime = simulationAnalysisDetail.runTime;
+
+            state.currentSimulationQueuePage = update(
+                findIndex(propEq('id', updatedSimulation.id), state.currentSimulationQueuePage),
+                updatedSimulation,
+                state.currentSimulationQueuePage
+            );         
+        }        
     },
     simulationReportDetailMutator(state: any, simulationReportDetail: SimulationReportDetail) {
         if (any(propEq('id', simulationReportDetail.simulationId), state.currentSharedScenariosPage)) {
@@ -117,6 +135,14 @@ const actions = {
                 }
             });
     },
+    async getSimulationQueuePage({commit}: any, payload: PagingRequest<QueuedSimulation>) {
+        await ScenarioService.getSimulationQueuePage(payload)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('SimulationQueuePageMutator', response.data as PagingPage<QueuedSimulation>);
+                }
+            });
+    },    
     async getUserScenariosPage({commit}: any, payload: PagingRequest<Scenario>) {
         await ScenarioService.getUserScenariosPage(payload)
             .then((response: AxiosResponse) => {
@@ -192,6 +218,17 @@ const actions = {
             },
         );
     },
+    async cancelQueuedSimulation({dispatch, state, commit}: any, payload: any) {
+        return await ScenarioService.cancelSimulation(payload.scenarioId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Canceled simulation analysis',
+                    });
+                }
+            },
+        );
+    },    
 };
 
 const getters = {};

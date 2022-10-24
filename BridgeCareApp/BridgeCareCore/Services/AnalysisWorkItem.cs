@@ -7,13 +7,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
-using AppliedResearchAssociates.Validation;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.Reporting.Logging;
+using AppliedResearchAssociates.Validation;
 using BridgeCareCore.Models;
 using Microsoft.Extensions.DependencyInjection;
-using BridgeCareCore.Logging;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
 
 namespace BridgeCareCore.Services
 {
@@ -22,6 +21,8 @@ namespace BridgeCareCore.Services
         public string WorkId => simulationId.ToString();
 
         public DateTime StartTime { get; set; }
+
+        public UserInfo UserInfo { get; } = userInfo;
 
         public void DoWork(IServiceProvider serviceProvider)
         {
@@ -44,6 +45,7 @@ namespace BridgeCareCore.Services
             var status = "Creating input...";
             StartTime = DateTime.Now;
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
+
             _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(simulationAnalysisDetail);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
@@ -94,6 +96,7 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case ProgressStatus.Running:
@@ -101,11 +104,13 @@ namespace BridgeCareCore.Services
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case ProgressStatus.Completed:
                     simulationAnalysisDetail.Status = $"Simulation complete. 100%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
@@ -130,6 +135,7 @@ namespace BridgeCareCore.Services
                 case SimulationLogStatus.Warning:
                     simulationAnalysisDetail.Status = eventArgs.MessageBuilder.Message;
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     break;
 
                 case SimulationLogStatus.Error:
@@ -191,10 +197,10 @@ namespace BridgeCareCore.Services
         }
 
         private SimulationAnalysisDetailDTO CreateSimulationAnalysisDetailDto(string status, DateTime lastRun) => new SimulationAnalysisDetailDTO
-            {
-                SimulationId = simulationId,
-                LastRun = lastRun,
-                Status = status,
-            };
+        {
+            SimulationId = simulationId,
+            LastRun = lastRun,
+            Status = status,
+        };
     }
 }

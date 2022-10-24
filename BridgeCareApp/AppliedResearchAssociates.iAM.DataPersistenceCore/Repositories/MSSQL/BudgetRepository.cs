@@ -83,7 +83,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.Users)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -135,12 +134,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.UpdateRange(entitiesToUpdate);
             var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
             _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
         }
 
-        private List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId, Guid userId)
+        private List<LibraryUserDTO> GetAccessForUser(Guid budgetLibraryId, Guid userId)
         {
             var dtos = _unitOfWork.Context.BudgetLibraryUser
                 .Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
+        {
+            var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Where(u => u.BudgetLibraryId == budgetLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();
             return dtos;
@@ -242,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 return LibraryAccessModels.LibraryDoesNotExist();
             }
-            var users = GetLibraryUsers(libraryId, userId);
+            var users = GetAccessForUser(libraryId, userId);
             var user = users.FirstOrDefault();
             return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }

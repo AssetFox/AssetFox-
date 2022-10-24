@@ -17,7 +17,5 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 
         [Obsolete("This should go away. Instead, we have user-by-user sharing.")]
         public bool IsShared { get; set; } 
-
-        public List<LibraryUserDTO> Users { get; set; } = new List<LibraryUserDTO>();
     }
 }

@@ -7,23 +7,18 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics
 {
-    public static class LibraryUserDtolistUpdater
+    public static class LibraryUserDtolists
     {
-        public static void GrantOwnerAccess(Guid userId, List<LibraryUserDTO> proposedUserList)
+        public static List<LibraryUserDTO> OwnerAccess(Guid userId)
         {
-            var userAccess = proposedUserList.SingleOrDefault(u => u.UserId == userId);
-            if (userAccess == null)
+
+            var owner = new LibraryUserDTO
             {
-                var owner = new LibraryUserDTO
-                {
-                    AccessLevel = LibraryAccessLevel.Owner,
-                    UserId = userId,
-                };
-                proposedUserList.Add(owner);
-            } else
-            {
-                userAccess.AccessLevel = LibraryAccessLevel.Owner;
-            }
+                AccessLevel = LibraryAccessLevel.Owner,
+                UserId = userId,
+            };
+            var userList = new List<LibraryUserDTO> { owner };
+            return userList;
         }
     }
 }

@@ -70,8 +70,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Budgets = entity.Budgets.Any()
                     ? entity.Budgets.Select(_ => _.ToDto()).ToList()
                     : new List<BudgetDTO>(),
-                Users = entity.Users == null ? new List<LibraryUserDTO>()
-                : entity.Users.Select(LibraryUserMapper.ToDto).ToList(),
             };
     }
 }

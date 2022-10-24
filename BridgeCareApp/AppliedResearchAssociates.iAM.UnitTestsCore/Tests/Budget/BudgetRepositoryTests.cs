@@ -51,15 +51,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task GetBudgetLibrary_BudgetLibraryInDbWithUser_GetsWithUser()
+        public async Task GetLibraryUsers_BudgetLibraryInDbWithUser_GetsWithUser()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
 
-            var libraryWithUsers = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
+            var users = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
 
-            var users = libraryWithUsers.Users;
             var actualUser = users.Single();
             var expectedUser = new LibraryUserDTO
             {
@@ -70,40 +69,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public async Task GetAllBudgetLibraries_BudgetLibraryInDbWithUser_GetsWithUser()
+        public async Task GetAllBudgetLibraries_BudgetLibraryInDb_Gets()
         {
+            // wjwjwj is this now duplicative?
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
 
             var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries();
-
-            var libraryAfter = libraries.Single(l => l.Id == library.Id);
-            var users = libraryAfter.Users;
-            var actualUser = users.Single();
-            var expectedUser = new LibraryUserDTO
-            {
-                AccessLevel = LibraryAccessLevel.Modify,
-                UserId = user.Id,
-            };
-            ObjectAssertions.Equivalent(expectedUser, actualUser);
+            var actualLibrary = libraries.Single(l => l.Id == library.Id);
+            Assert.Equal(library.Name, actualLibrary.Name);
         }
-
-
-        [Fact]
-        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithUser_GetsWithoutUser()
-        {
-            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
-
-            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
-
-            var libraryAfter = libraries.Single(l => l.Id == library.Id);
-            var users = libraryAfter.Users;
-            Assert.Empty(users);
-        }
-
 
         [Fact]
         public async Task Delete_BudgetLibraryInDbWithUser_Deletes()
@@ -269,53 +245,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
-            var libraryBefore = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
-            var libraryUserBefore = libraryBefore.Users.Single();
+            var libraryUsersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
+            var libraryUserBefore = libraryUsersBefore.Single();
             Assert.Equal(LibraryAccessLevel.Modify, libraryUserBefore.AccessLevel);
             libraryUserBefore.AccessLevel = LibraryAccessLevel.Read;
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(library.Id, libraryUsersBefore);
 
-            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
-            var libraryUserAfter = libraryAfter.Users.Single();
+            var libraryUsersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
+            var libraryUserAfter = libraryUsersAfter.Single();
             Assert.Equal(LibraryAccessLevel.Read, libraryUserAfter.AccessLevel);
         }
 
         [Fact]
-        public async Task UpdateBudgetLibraryWithUserAccessRemoval_Does()
+        public async Task UpdateBudgetLibraryUsers_RequestAccessRemoval_Does()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
-            var libraryBefore = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
-            var libraryUserBefore = libraryBefore.Users.Single();
-            libraryBefore.Users.Remove(libraryUserBefore);
+            var libraryUsersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
+            var libraryUserBefore = libraryUsersBefore.Single();
+            libraryUsersBefore.Remove(libraryUserBefore);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
-
-            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
-            Assert.Empty(libraryAfter.Users);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(library.Id, libraryUsersBefore);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+            
+            var libraryUsersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
+            Assert.Empty(libraryUsersAfter);
         }
 
         [Fact]
-        public async Task UpdateBudgetLibraryWithUserAccessAdd_Does()
+        public async Task UpdateLibraryUsers_AddAccessForUser_Does()
         {
             var user1 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user1.Id);
-            var libraryBefore = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
+            var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
             var newUser = new LibraryUserDTO
             {
                 AccessLevel = LibraryAccessLevel.Read,
                 UserId = user2.Id,
             };
-            libraryBefore.Users.Add(newUser);
+            usersBefore.Add(newUser);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryBefore);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(library.Id, usersBefore);
 
-            var libraryAfter = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrary(library.Id);
-            var libraryUsersAfter = libraryAfter.Users;
+            var libraryUsersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(library.Id);
             var user1After = libraryUsersAfter.Single(u => u.UserId == user1.Id);
             var user2After = libraryUsersAfter.Single(u => u.UserId == user2.Id);
             Assert.Equal(LibraryAccessLevel.Modify, user1After.AccessLevel);

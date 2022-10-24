@@ -14,20 +14,21 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
     public class BudgetRepositoryUserUpdateTests
     {
         [Fact]
-        public async Task BudgetLibraryInDb_AddBudgetUsers_Does()
+        public async Task BudgetLibraryInDb_AddUsers_Does()
         {
             var libraryName = RandomStrings.WithPrefix("BudgetLibrary");
             var budgetLibrary = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork, libraryName);
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
 
+            var libraryUsersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibrary.Id);
             var userDto = new LibraryUserDTO
             {
                 AccessLevel = DTOs.Enums.LibraryAccessLevel.Modify,
                 UserId = user.Id,
             };
-            budgetLibrary.Users.Add(userDto);
+            libraryUsersBefore.Add(userDto);
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, libraryUsersBefore);
 
             var userEntitiesAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibrary.Id).ToList();
             var userAfter = userEntitiesAfter.Single();
@@ -63,9 +64,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var usersBefore = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
             var userBefore = usersBefore.Access;
             Assert.Equal(user.Id, userBefore.UserId);
-            budgetLibrary.Users.Clear();
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibrary.Id, new List<LibraryUserDTO>());
 
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibrary.Id, user.Id);
             Assert.Null(usersAfter.Access);
@@ -78,9 +78,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
             var libraryDto = BudgetLibraryTestSetup.CreateBudgetLibraryDto(libraryName);
             var userDto = BudgetLibraryUserTestSetup.CreateLibraryUserDto(user.Id);
-            libraryDto.Users.Add(userDto);
+            var userDtos = new List<LibraryUserDTO> { userDto };
 
-            TestHelper.UnitOfWork.BudgetRepo.UpsertBudgetLibrary(libraryDto);
+            TestHelper.UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(libraryDto.Id, userDtos);
 
             var usersAfter = TestHelper.UnitOfWork.BudgetRepo.GetLibraryAccess(libraryDto.Id, user.Id);
             var accessAfter = usersAfter.Access;

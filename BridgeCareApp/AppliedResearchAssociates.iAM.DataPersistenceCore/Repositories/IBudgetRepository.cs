@@ -38,6 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildren();
         List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId);
         LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+
         void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers);
+        List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId);
     }
 }

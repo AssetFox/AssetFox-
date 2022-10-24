@@ -104,7 +104,7 @@ namespace BridgeCareCore.Security
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, SecurityConstants.Role.Administrator);
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, SecurityConstants.Role.Administrator);
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 

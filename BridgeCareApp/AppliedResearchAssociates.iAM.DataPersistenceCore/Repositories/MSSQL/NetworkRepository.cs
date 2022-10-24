@@ -40,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var domain = _unitOfWork.Context.Network
                 .Include(n => n.MaintainableAssets)
                 .ThenInclude(ma => ma.MaintainableAssetLocation)
-                .Select(e => e.ToDomain())
+                .Select(e => e.ToDomain(_unitOfWork.EncryptionKey))
                 .ToList();
             return domain;
         }
@@ -59,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.Equation)
                 .Include(_ => _.NetworkRollupDetail)
                 .Include(_ => _.AttributeJoins)
-                .Select(_ => _.ToDto(attributeDbSet))
+                .Select(_ => _.ToDto(attributeDbSet, _unitOfWork.EncryptionKey))
                 .ToList();
             });
         }

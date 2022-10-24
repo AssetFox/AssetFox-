@@ -70,12 +70,13 @@
             </div>
         </v-layout>
         <v-layout column>
-            <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String</v-subheader>
+            <v-subheader v-show="showMssql" class="ghd-control-label ghd-md-gray Montserrat-font-family">Connection String            
+            </v-subheader>
             <v-layout justify-start>
                     <v-flex xs8>
                         <v-textarea
                           class="ghd-control-border Montserrat-font-family"
-                          placeholder="Enter a connection string"
+                          :placeholder=connectionStringPlaceHolderMessage
                           v-show="showMssql"
                           v-model="selectedConnection"
                           no-resize
@@ -167,14 +168,14 @@ export default class DataSource extends Vue {
     currentDatasource: Datasource = emptyDatasource;
     createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
 
-    selectedConnection: string = 'test';
+    selectedConnection: string = '';
     showMssql: boolean = false;
     showExcel: boolean = false;
     showSqlMessage: boolean = false;
     showSaveMessage: boolean = false;
     isNewDataSource: boolean = false;
     allowSaveData: boolean = false;
-
+        
     fileName: string | null = '';
     fileSelect: HTMLInputElement = {} as HTMLInputElement;
     files: File[] = [];
@@ -182,6 +183,8 @@ export default class DataSource extends Vue {
 
     locColumns: string[] =[];
     datColumns: string[] =[];
+
+    connectionStringPlaceHolderMessage: string = '';    
 
     mounted() {
 
@@ -247,12 +250,16 @@ export default class DataSource extends Vue {
             this.dataSourceTypeItem = this.currentDatasource.type;
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-            this.selectedConnection = this.currentDatasource.connectionString;
+            this.selectedConnection = '';     
+            this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
             this.showSqlMessage = false; this.showSaveMessage = false;
         }
         @Watch('selectedConnection')
         onSelectedConnectionChanged() {
-            this.currentDatasource.connectionString = this.selectedConnection;
+            if(this.selectedConnection != '')
+            {
+                this.currentDatasource.connectionString = this.selectedConnection;
+            }
         }
         @Watch('sqlCommandResponse')
         onSqlCommandResponseChanged() {
@@ -289,6 +296,8 @@ export default class DataSource extends Vue {
             this.upsertSqlDataSourceAction(sqldat).then(() => {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
+                this.selectedConnection = '';
+                this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
             });
         } else {
@@ -323,6 +332,7 @@ export default class DataSource extends Vue {
         this.sourceTypeItem = datasource.name;
         this.dataSourceTypeItem = datasource.type;
         this.selectedConnection = datasource.connectionString;
+        this.connectionStringPlaceHolderMessage = 'New connection string';
         this.datColumns = [];
         this.locColumns = [];
         this.isNewDataSource = true;
@@ -349,6 +359,7 @@ export default class DataSource extends Vue {
         this.showSqlMessage = false;
         this.showSaveMessage = false;
         this.selectedConnection = '';
+        this.connectionStringPlaceHolderMessage = 'New connection string';        
     }
     chooseFiles(){
         if(document != null)

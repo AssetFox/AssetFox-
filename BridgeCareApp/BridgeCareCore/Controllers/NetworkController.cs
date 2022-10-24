@@ -71,7 +71,7 @@ namespace BridgeCareCore.Controllers
             {
                 var idAttribute = AttributeService.ConvertAllAttribute(parameters.NetworkDefinitionAttribute);
 
-                var attribute = AttributeMapper.ToDomain(idAttribute);
+                var attribute = AttributeMapper.ToDomain(idAttribute, UnitOfWork.EncryptionKey);
                 var result = await Task.Factory.StartNew(() =>
                 {
                     // throw an exception if not network definition attribute is present

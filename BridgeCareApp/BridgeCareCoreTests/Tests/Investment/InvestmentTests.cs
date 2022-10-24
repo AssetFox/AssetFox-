@@ -341,8 +341,7 @@ namespace BridgeCareCoreTests.Tests
             };
             var _ = await controller.UpsertBudgetLibrary(upsertRequest);
             var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
-            var upsertCall = upsertCalls.Single();
-            var actualDto = upsertCall.Item1;
+            var actualDto = upsertCalls.Single();
             ObjectAssertions.Equivalent(library, actualDto);
         }
 
@@ -372,10 +371,8 @@ namespace BridgeCareCoreTests.Tests
             };
             var _ = await controller.UpsertBudgetLibrary(upsertRequest);
             var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
-            var upsertCall = upsertCalls.Single();
-            var actualDto = upsertCall.Item1;
+            var actualDto = upsertCalls.Single();
             ObjectAssertions.Equivalent(library, actualDto);
-            Assert.True(upsertCall.Item2);
         }
 
         [Fact]
@@ -404,10 +401,8 @@ namespace BridgeCareCoreTests.Tests
             };
             var _ = await controller.UpsertBudgetLibrary(upsertRequest);
             var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
-            var upsertCall = upsertCalls.Single();
-            var actualDto = upsertCall.Item1;
+            var actualDto = upsertCalls.Single();
             ObjectAssertions.Equivalent(library, actualDto);
-            Assert.True(upsertCall.Item2);
         }
 
         [Fact]

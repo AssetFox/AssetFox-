@@ -4,7 +4,6 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
-using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using SimulationAnalysisDomains = AppliedResearchAssociates.iAM.Analysis;
 
@@ -28,7 +27,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
             if (entity.MaintainableAssets.Any())
             {
-                entity.MaintainableAssets.ForEach(_ => _.CreateMaintainableAsset(network));
+                SectionMapper mapper = new(network);
+                entity.MaintainableAssets.ForEach(mapper.CreateMaintainableAsset);
             }
 
             return network;

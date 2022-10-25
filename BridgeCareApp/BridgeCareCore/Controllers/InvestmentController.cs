@@ -231,11 +231,30 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        public void UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        [HttpPost]
+        // route and policy needed here
+        public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
         {
-            var libraryUsers = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
-            _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
-            UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var libraryUsers = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
+                    _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
         }
 
         [HttpDelete]

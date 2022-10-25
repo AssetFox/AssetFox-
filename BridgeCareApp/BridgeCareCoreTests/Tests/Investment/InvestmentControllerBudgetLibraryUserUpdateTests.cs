@@ -20,7 +20,7 @@ namespace BridgeCareCoreTests.Tests
     {
 
         [Fact]
-        public void ChangeUsersOfBudgetLibrary_RequesterIsNotOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsNotOwner_Throws()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -52,14 +52,15 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1Dto, user2DtoModify };
 
-            var exception = Assert.Throws<UnauthorizedAccessException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
+            var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
-            var message = exception.Message;
-            Assert.Contains(ClaimHelper.LibraryAccessModificationUnauthorizedMessage, message);
+            ActionResultAssertions.Ok(result);
+            var hubMessage = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.LibraryAccessModificationUnauthorizedMessage, hubMessage);
         }
 
         [Fact]
-        public void ChangeUsersOfBudgetLibrary_RequesterIsOwner_Does()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsOwner_Does()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -90,8 +91,9 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1Dto, user2DtoModify };
 
-            controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
+            var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
+            ActionResultAssertions.Ok(result);
             var invocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
             var invocation = invocations.Single();
             var requestedUpdateLibraryId = invocation.Arguments[0];
@@ -101,7 +103,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public void ChangeUsersOfBudgetLibrary_RequesterAddsOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterAddsOwner_Throws()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -132,14 +134,14 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1Dto, user2DtoOwner };
 
-            var exception = Assert.Throws<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
 
             var message = exception.Message;
             Assert.Contains(ClaimHelper.AddingOwnersIsNotAllowedMessage, message);
         }
 
         [Fact]
-        public void ChangeUsersOfBudgetLibrary_RequesterIsAdmin_Does()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsAdmin_Does()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -172,8 +174,9 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1Dto, user2DtoModify };
 
-            controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
+            var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
+            ActionResultAssertions.Ok(result);
             var invocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
             var invocation = invocations.Single();
             var requestedUpdateLibraryId = invocation.Arguments[0];
@@ -184,7 +187,7 @@ namespace BridgeCareCoreTests.Tests
 
 
         [Fact]
-        public void ChangeUsersOfBudgetLibrary_RequesterIsAdminButRequestRemovesOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsAdminButRequestRemovesOwner_Throws()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -217,7 +220,7 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1DtoModify, user2DtoRead };
 
-            var exception = Assert.Throws<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
 
             var message = exception.Message;
             Assert.Contains(ClaimHelper.RemovingOwnersIsNotAllowedMessage, message);

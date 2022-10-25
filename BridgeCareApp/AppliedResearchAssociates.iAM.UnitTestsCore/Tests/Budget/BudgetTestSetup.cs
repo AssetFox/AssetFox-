@@ -14,8 +14,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         public static void AddBudgetToLibrary(
             UnitOfDataPersistenceWork unitOfWork,
             Guid libraryId,
-            Guid? budgetId = null)
+            Guid? budgetId = null,
+            Guid? criterionLibraryId = null)
         {
+            CriterionLibraryDTO criterionLibraryDto = null;
+            if (criterionLibraryId.HasValue)
+            {
+                var criterionLibraryName = RandomStrings.WithPrefix("CriterionLibrary");
+                criterionLibraryDto = new CriterionLibraryDTO
+                {
+                    Id = criterionLibraryId.Value,
+                    Name = criterionLibraryName,
+                    MergedCriteriaExpression = "MergedCriteriaExpression",
+                };
+            }
             var resolvedBudgetId = budgetId ?? Guid.NewGuid();
             var budgetName = RandomStrings.WithPrefix("Budget");
             var amount = new BudgetAmountDTO
@@ -31,6 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 Id = resolvedBudgetId,
                 Name = budgetName,
                 BudgetAmounts = amounts,
+                CriterionLibrary = criterionLibraryDto,
             };
             var budgets = new List<BudgetDTO> { budget };
             unitOfWork.BudgetRepo.UpsertOrDeleteBudgets(budgets, libraryId);

@@ -139,30 +139,23 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
-        public void Delete_LibraryInDbWithCriterionLibrary_DeletesBoth()
-        {
-
-        }
-
-        [Fact]
         public void Delete_LibraryInDbWithBudget_DeletesBoth()
         {
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            BudgetTestSetup.AddBudgetToLibrary(TestHelper.UnitOfWork, library.Id);
+            var criterionLibraryId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            BudgetTestSetup.AddBudgetToLibrary(TestHelper.UnitOfWork, library.Id, budgetId, criterionLibraryId);
             Assert.True(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
             Assert.True(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
-
+            Assert.True(TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ => _.BudgetId == budgetId));
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ => _.BudgetId == budgetId));
             TestHelper.UnitOfWork.BudgetRepo.DeleteBudgetLibrary(library.Id);
 
             // Assert
             Assert.False(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
             Assert.False(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
-            //Assert.True(
-            //    !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
-            //        _.BudgetId == _testBudget.Id));
-            //Assert.True(
-            //    !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
-            //        _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ => _.BudgetId == budgetId));
+            Assert.False(TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ => _.BudgetId == budgetId));
         }
 
 

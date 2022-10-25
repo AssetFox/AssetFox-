@@ -600,7 +600,6 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();
 
-
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
 
@@ -779,30 +778,6 @@ namespace BridgeCareCoreTests.Tests
 
             Assert.Equal(dto.InvestmentPlan.MinimumProjectCostLimit,
                 modifiedInvestmentPlanDto.MinimumProjectCostLimit);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteBudgetData()
-        {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddTestDataToDatabase();
-
-            // Act
-            var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
-
-            // Assert
-            ActionResultAssertions.Ok(result);
-
-            Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
-                    _.BudgetId == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
-                    _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
 
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/

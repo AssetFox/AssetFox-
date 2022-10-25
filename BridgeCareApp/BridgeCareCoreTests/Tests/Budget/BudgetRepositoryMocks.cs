@@ -46,6 +46,11 @@ namespace BridgeCareCoreTests.Tests
             mock.Setup(m => m.GetLibraryAccess(libraryId, userId)).Returns(dto);
         }
 
+        public static void SetupGetLibaryUsers(this Mock<IBudgetRepository> repository, Guid libraryId, List<LibraryUserDTO> users)
+        {
+            repository.Setup(r => r.GetLibraryUsers(libraryId)).Returns(users);
+        }
+
         public static List<BudgetLibraryDTO> GetUpsertBudgetLibraryCalls(this Mock<IBudgetRepository> mock)
         {
             var r = new List<BudgetLibraryDTO>();

@@ -158,12 +158,12 @@ namespace BridgeCareCore.Utils
             if (addedOwners.Any())
             {
                 var addedOwner = addedOwners.First();
-                throw new UnauthorizedAccessException($"{AddingOwnersIsNotAllowedMessage} This update added {addedOwner}");
+                throw new InvalidOperationException($"{AddingOwnersIsNotAllowedMessage} This update added {addedOwner}");
             }
             if (removedOwners.Any())
             {
                 var removedOwner = removedOwners.First();
-                throw new UnauthorizedAccessException($"{RemovingOwnersIsNotAllowedMessage} This update removed {removedOwner}");
+                throw new InvalidOperationException($"{RemovingOwnersIsNotAllowedMessage} This update removed {removedOwner}");
             }
         }
 

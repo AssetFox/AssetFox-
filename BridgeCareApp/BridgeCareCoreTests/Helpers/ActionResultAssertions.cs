@@ -16,5 +16,10 @@ namespace BridgeCareCoreTests.Helpers
         {
             Assert.IsType<OkResult>(result);
         }
+
+        public static void BadRequest(IActionResult result)
+        {
+            Assert.IsType<BadRequestResult>(result);
+        }
     }
 }

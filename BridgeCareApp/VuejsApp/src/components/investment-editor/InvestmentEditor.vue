@@ -774,21 +774,22 @@
             this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 
             if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid()) {
-                //this.upsertOrDeleteBudgetLibraryUsersAction(BudgetLibrary.id, budgetLibraryUsers);
+                this.upsertOrDeleteBudgetLibraryUsersAction(BudgetLibrary.id, budgetLibraryUsers);
 
-                ////update budget library sharing
-                //InvestmentService.upsertOrDeleteBudgetLibraryUsers().then((response: AxiosResponse) => {
-                //    if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
-                //        if (budgetLibrary.users === []) {
-                //            this.clearChanges();
-                //        }
+                //update budget library sharing
+                InvestmentService.upsertOrDeleteBudgetLibraryUsers(BudgetLibrary.id, budgetLibraryUsers).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                    {
+                        if (this.budgetLibrary.users === []) {
+                            this.clearChanges();
+                        }
 
-                //        this.budgetLibraryMutator(budgetLibrary); // mutation actions
-                //        this.selectedBudgetLibraryMutator(budgetLibrary.id);
-                //        this.addSuccessNotificationAction({ message: 'Shared budget library' })
-                //        this.resetPage();
-                //    }
-                //})
+                        this.budgetLibraryMutator(this.budgetLibrary); // mutation actions
+                        this.selectedBudgetLibraryMutator(this.budgetLibrary.id);
+                        this.addSuccessNotificationAction({ message: 'Shared budget library' })
+                        this.resetPage();
+                    }
+                })
             }
         }
 

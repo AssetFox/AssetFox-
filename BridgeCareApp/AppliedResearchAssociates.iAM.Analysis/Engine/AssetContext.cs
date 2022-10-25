@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             // Forward uses the No Treatment consequences. It should in the new code."
 
             IEnumerable<int?> getMostRecentYearPerAttribute<T>(IEnumerable<Attribute<T>> attributes) =>
-                attributes.Select(attribute => Asset.GetHistory(attribute).Keys.AsNullables().Max());
+                attributes.Select(attribute => Asset.GetHistory(attribute).MostRecentYear);
 
             var earliestYearOfMostRecentValue = Enumerable.Concat(
                 getMostRecentYearPerAttribute(SimulationRunner.Simulation.Network.Explorer.NumberAttributes),
@@ -478,7 +478,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                 }
                 else if (fallForward)
                 {
-                    var earliestFutureYear = attributeHistory.Keys.Where(year => year > referenceYear).AsNullables().Min();
+                    var earliestFutureYear = attributeHistory.Years.Where(year => year > referenceYear).AsNullables().Min();
                     if (earliestFutureYear.HasValue)
                     {
                         setValue(attribute.Name, attributeHistory[earliestFutureYear.Value]);

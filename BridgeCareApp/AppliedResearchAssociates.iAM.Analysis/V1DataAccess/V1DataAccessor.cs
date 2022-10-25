@@ -303,13 +303,6 @@ order by simulationid
                                     {
                                         var history = asset.GetHistory(attribute);
 
-                                        var latestValueColumnOrdinal = latestValueColumnPerAttribute[attribute.Name];
-
-                                        if (!reader.IsDBNull(latestValueColumnOrdinal))
-                                        {
-                                            history.MostRecentValue = getValue(latestValueColumnOrdinal);
-                                        }
-
                                         foreach (var (historyColumnOrdinal, year, _) in historyColumnsPerAttribute[attribute.Name])
                                         {
                                             if (!reader.IsDBNull(historyColumnOrdinal))

@@ -99,7 +99,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {                
-                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request, UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess));
+                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request));
                 return Ok(result);
             }
             catch (Exception e)
@@ -275,8 +275,14 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> CancelSimulation(Guid simulationId)
         {
-            // TODO: Implement cancel
-            await Task.Delay(300);
+            _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
+            _simulationAnalysis.Cancel(simulationId);
+            await Task.Delay(125);
+            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+            {
+                SimulationId = simulationId,
+                Status = "Canceling..."
+            });
             return Ok();
         }
     }

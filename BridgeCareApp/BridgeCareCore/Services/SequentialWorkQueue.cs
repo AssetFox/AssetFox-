@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing.Text;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -13,7 +14,15 @@ namespace BridgeCareCore.Services
     {
         public IReadOnlyList<IQueuedWorkHandle> Snapshot => IncompleteElements.Values.ToList();
 
-        public async Task<IWorkItem> Dequeue(CancellationToken cancellationToken) => await ElementChannel.Reader.ReadAsync(cancellationToken);
+        public async Task<IWorkItem> Dequeue(CancellationToken cancellationToken)
+        {
+            var workItem = await ElementChannel.Reader.ReadAsync(cancellationToken);
+            while (workItem != null && workItem.WorkCompletion.IsCanceled)
+            {
+                workItem = await ElementChannel.Reader.ReadAsync(cancellationToken);
+            }
+            return workItem;
+        }
 
         public Task Enqueue(IWorkItem workItem, out IQueuedWorkHandle workHandle)
         {
@@ -27,6 +36,20 @@ namespace BridgeCareCore.Services
                 var queueElement = new QueueElement(workItem, this);
                 workHandle = queueElement;
                 return ElementChannel.Writer.WriteAsync(queueElement).AsTask();
+            }
+        }
+
+        public void Cancel(Guid workId)
+        {
+            IQueuedWorkHandle queuedWorkHandle = null;
+
+            if (!queuedWorkHandle.WorkHasStarted)
+            {
+                queuedWorkHandle.RemoveFromQueue(true);
+            }
+            else
+            {
+                queuedWorkHandle.WorkCancellationTokenSource.Cancel();
             }
         }
 
@@ -69,19 +92,26 @@ namespace BridgeCareCore.Services
 
             public DateTime? WorkStartTimestamp { get; private set; }
 
-            public void DoWork(IServiceProvider serviceProvider)
+            public CancellationTokenSource WorkCancellationTokenSource { get; private set; }
+
+            public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
             {
                 if (WorkQueue.EntryTimestampPerId.ContainsKey(WorkId))
                 {
                     WorkStartTimestamp = DateTime.Now;
+                    WorkCancellationTokenSource = new CancellationTokenSource();
 
                     try
                     {
-                        WorkItem.DoWork(serviceProvider);
+                        WorkItem.DoWork(serviceProvider, WorkCancellationTokenSource.Token);
                     }
                     catch (Exception e)
                     {
                         WorkCompletionSource.SetException(e);
+                    }
+                    finally
+                    {
+                        WorkCancellationTokenSource.Dispose();
                     }
 
                     if (!WorkCompletion.IsFaulted)
@@ -97,10 +127,14 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            public void RemoveFromQueue()
+            public void RemoveFromQueue(bool setCanceled = false)
             {
                 _ = WorkQueue.IncompleteElements.TryRemove(WorkId, out _);
                 _ = WorkQueue.EntryTimestampPerId.TryRemove(WorkId, out _);
+                if (setCanceled)
+                {
+                    WorkCompletionSource.SetCanceled();
+                }
             }
 
             private readonly TaskCompletionSource WorkCompletionSource = new();

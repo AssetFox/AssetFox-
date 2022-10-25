@@ -19,5 +19,6 @@ namespace BridgeCareCore.Utils.Interfaces
         public void CheckUserLibraryRecreateAuthorization(LibraryUserAccessModel accessModel, Guid userId);
         bool CanModifyAccessLevels(LibraryUserAccessModel accessModel, Guid userId);
         void CheckAccessModifyValidity(List<LibraryUserDTO> currentUsers, List<LibraryUserDTO> proposedUsers, Guid userId);
+        void CheckGetLibraryUsersValidity(LibraryUserAccessModel accessModel, Guid userId);
     }
 }

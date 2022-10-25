@@ -15,13 +15,13 @@ export default class RemainingLifeLimitService {
 
     static getScenarioRemainingLifeLimitPage(scenarioId: string, data:PagingRequest<RemainingLifeLimit>): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.TargetConditionGoal}/GetScenarioRemainingLifeLimitPage/${scenarioId}`, data
+            `${API.RemainingLifeLimit}/GetScenarioRemainingLifeLimitPage/${scenarioId}`, data
         );
     }
 
     static getLibraryRemainingLifeLimitPage(libraryId: string, data:PagingRequest<RemainingLifeLimit>): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.TargetConditionGoal}/GetLibraryRemainingLifeLimitPage/${libraryId}`, data
+            `${API.RemainingLifeLimit}/GetLibraryRemainingLifeLimitPage/${libraryId}`, data
         );
     }
 

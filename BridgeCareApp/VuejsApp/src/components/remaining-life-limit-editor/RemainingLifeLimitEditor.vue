@@ -23,8 +23,12 @@
         <div v-show="librarySelectItemValue != null || hasScenario">
             <v-data-table
             :headers="gridHeaders"
+            :items="currentPage"  
+            :pagination.sync="pagination"
+            :must-sort='true'
+            :total-items="totalItems"
+            :rows-per-page-items=[5,10,25]
             sort-icon=$vuetify.icons.ghd-table-sort
-            :items="currentPage"
             class="elevation-1 fixed-header v-table__overflow"
             v-model="selectedGridRows"
             >
@@ -134,8 +138,6 @@
                 </template>
                 </v-data-table>
                 <v-layout justify-start align-center class="pa-2">
-                    <v-text class="ghd-control-text" v-if="totalDataFound > 0">Showing {{ dataPerPage }} of {{ totalDataFound }} results</v-text>
-                    <v-text class="ghd-control-text" v-else>No results found!</v-text>
                     <!-- <v-divider vertical class="mx-3"/>
                     <v-btn flat right
                       class="ghd-control-label ghd-blue"
@@ -155,7 +157,7 @@
                     </v-textarea>
                 </v-flex>
                 <v-layout justify-center row>
-                    <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges">Cancel</v-btn>
+                    <v-btn class="ghd-blue" flat v-show="hasScenario" @click="onDiscardChanges" :disabled="!hasUnsavedChanges">Cancel</v-btn>
                     <v-btn class="ghd-blue" flat v-show="!hasScenario" @click="onShowConfirmDeleteAlert">Delete Library</v-btn>
                     <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" outline>Create as New Library</v-btn>
                     <v-btn class="ghd-blue-bg ghd-white ghd-button" v-show="hasScenario" @click="onUpsertScenarioRemainingLifeLimits" :disabled="disableCrudButton() || !hasUnsavedChanges">Save</v-btn>
@@ -383,7 +385,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
                     vm.hasScenario = true;
-                    vm.getScenarioRemainingLifeLimitsAction(vm.selectedScenarioId);
+                    vm.initializePages();
                 }
             });
             
@@ -421,7 +423,7 @@ export default class RemainingLifeLimitEditor extends Vue {
             })
         this.librarySelectItemValueAllowedChanged = true;
     }
-    onSelectItemValueChanged() {
+    onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue
         this.selectRemainingLifeLimitLibraryAction({
             libraryId: this.librarySelectItemValue,
@@ -464,16 +466,6 @@ export default class RemainingLifeLimitEditor extends Vue {
     }
     @Watch('currentPage')
     onGridDataChanged() {
-        const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore('', this.remainingLifeLimits, this.stateScenarioRemainingLifeLimits)
-            : hasUnsavedChangesCore('',
-                { ...clone(this.selectedRemainingLifeLimitLibrary), remainingLifeLimits: clone(this.remainingLifeLimits) },
-                this.stateSelectedRemainingLifeLimitLibrary);
-
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
-        // Update total data found and "showing results portion"
-        this.totalDataFound = this.remainingLifeLimits.length;
-        (this.totalDataFound < this.itemsPerPage) ? this.dataPerPage = this.totalDataFound : this.dataPerPage = this.itemsPerPage;
     }
 
     @Watch('stateNumericAttributes')
@@ -583,7 +575,7 @@ export default class RemainingLifeLimitEditor extends Vue {
         this.createRemainingLifeLimitLibraryDialogData = {
             showDialog: true,
             remainingLifeLimits: createAsNewLibrary
-                ? this.selectedRemainingLifeLimitLibrary.remainingLifeLimits
+                ? this.currentPage
                 : [],
         };
     }
@@ -722,7 +714,7 @@ export default class RemainingLifeLimitEditor extends Vue {
                 this.addSuccessNotificationAction({message: "Modified scenario's remaining life limits"});
             }           
         });
-    }
+    } 
 
     onDiscardChanges() {
         this.librarySelectItemValue = null;

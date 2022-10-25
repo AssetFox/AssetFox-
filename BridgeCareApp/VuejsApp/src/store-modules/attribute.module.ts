@@ -14,7 +14,8 @@ const state = {
     attributesSelectValues: [] as AttributeSelectValues[],
     attributeAggregationRuleTypes: [] as string[],
     attributeDataSourceTypes: [] as string[],
-    aggregationRules: [] as RuleDefinition[]
+    aggregationRules: [] as RuleDefinition[],
+    aggregationRulesForType: [] as string[]
 };
 
 const mutations = {
@@ -69,6 +70,9 @@ const mutations = {
     },
     attributeAggregationRulesMutator(state: any, aggregationRules: RuleDefinition[]) {
         state.aggregationRules = clone(aggregationRules);
+    },
+    attributeAggregationRulesForTypeMutator(state: any, aggregationRulesForType: RuleDefinition[]) {
+        state.aggregationRulesForType = clone(aggregationRulesForType.map(ar=>ar.ruleName));
     },
     attributeDataSourceTypesMutator(state: any, attributeDataSourceTypes: string[]) {
         state.attributeDataSourceTypes = clone(attributeDataSourceTypes);
@@ -185,6 +189,16 @@ const actions = {
                     commit('attributeAggregationRulesMutator', response.data);
                 }
             });
+    },
+    async getAggregationRulesForType({commit}: any, type: String) {        
+        if(type == 'NUMBER')
+        {
+            commit('attributeAggregationRulesForTypeMutator', state.aggregationRules.filter((ruleDefinition: RuleDefinition) => ruleDefinition.isNumeric));
+        }
+        if(type == 'STRING')
+        {
+            commit('attributeAggregationRulesForTypeMutator', state.aggregationRules.filter((ruleDefinition: RuleDefinition) => ruleDefinition.isText));
+        }
     },
     async getAttributeDataSourceTypes({commit}: any) {
         await AttributeService.GetAttributeDataSourceTypes()

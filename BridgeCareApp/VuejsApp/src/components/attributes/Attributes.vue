@@ -198,9 +198,9 @@ export default class Attributes extends Vue {
     ];
 
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
-    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
-    @State(state => state.attributeModule.attributeAggregationRuleTypes) stateAttributeAggregationRuleTypes: string[];
+    @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];    
     @State(state => state.attributeModule.aggregationRules) stateAggregationRules: RuleDefinition[];
+    @State(state => state.attributeModule.aggregationRulesForType) stateAggregationRulesForType: string[];
     @State(state => state.attributeModule.attributeDataSourceTypes) stateAttributeDataSourceTypes: string[];
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
     @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
@@ -208,9 +208,9 @@ export default class Attributes extends Vue {
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
     
     @Action('getAttributes') getAttributes: any;
-    @Action('getDataSources') getDataSourcesAction: any;
-    @Action('getAttributeAggregationRuleTypes') getAttributeAggregationRuleTypes: any;
-    @Action('getAttributeAggregationRules') getAttributeAggregationRulesAction: any;
+    @Action('getDataSources') getDataSourcesAction: any;    
+    @Action('getAttributeAggregationRules') getAttributeAggregationRulesAction: any;    
+    @Action('getAggregationRulesForType') getAggregationRulesForTypeAction: any;    
     @Action('getAttributeDataSourceTypes') getAttributeDataSourceTypes: any;
     @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
     @Action('selectAttribute') selectAttributeAction: any;
@@ -222,7 +222,6 @@ export default class Attributes extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.getAttributes();
-            vm.getAttributeAggregationRuleTypes();
             vm.getAttributeAggregationRulesAction();
             vm.getAttributeDataSourceTypes();
             vm.getDataSourcesAction();
@@ -247,13 +246,12 @@ export default class Attributes extends Vue {
             text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
-    }
+    } 
 
- 
-
-    @Watch('stateAttributeAggregationRuleTypes')
-    onStateAttributeAggregationRuleTypesChanged() {
-        this.aggregationRuleSelectValues = this.stateAttributeAggregationRuleTypes.map((rule: string) => ({
+    @Watch('stateAggregationRules')
+    onStateAggregationRulesChanged() {
+        this.getAggregationRulesForTypeAction(this.selectAttributeItemValue)
+        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
             text: rule,
             value: rule,
         }));

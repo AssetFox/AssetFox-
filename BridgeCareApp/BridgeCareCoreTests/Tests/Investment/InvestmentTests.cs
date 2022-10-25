@@ -28,7 +28,6 @@ using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Investment;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -619,7 +618,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
             var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
             budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildren()).Returns(budgetLibraryDtos);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
             unitOfWork.SetupBudgetRepo(budgetRepo);
 
             // Act
@@ -647,7 +646,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
             var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
             budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraryDtos);
-            var controller = CreateNonAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
             unitOfWork.SetupBudgetRepo(budgetRepo);
 
             // Act
@@ -976,7 +975,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -990,7 +989,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                 await controller.ImportLibraryInvestmentBudgetsExcelFile());
@@ -1006,7 +1005,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = CreateRequestForExceptionTesting(file);
             var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            var controller = CreateController(unitOfWork, accessor);
+            var controller = TestInvestmentControllerSetup.CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

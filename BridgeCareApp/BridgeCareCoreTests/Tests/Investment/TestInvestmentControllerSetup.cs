@@ -5,29 +5,45 @@ using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace BridgeCareCoreTests.Tests.Investment
+namespace BridgeCareCoreTests.Tests
 {
     public static class TestInvestmentControllerSetup
     {
-        public static InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubService> hubServiceMock = null)
+
+        public static InvestmentController CreateController(
+            Mock<IUnitOfWork> unitOfWork,
+            IHttpContextAccessor contextAccessor,
+            Mock<IHubService> hubServiceMock = null
+            )
         {
             var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
-            var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
             var security = EsecSecurityMocks.Dbe;
             var mockDataService = new Mock<IInvestmentDefaultDataService>();
-            var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
+            var claimHelper = new ClaimHelper(unitOfWork.Object, contextAccessor);
             var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
             var controller = new InvestmentController(
                 investmentBudgetServiceMock.Object,
                 security,
                 unitOfWork.Object,
                 resolveHubService.Object,
-                accessor,
+                contextAccessor,
                 mockDataService.Object,
                 claimHelper);
             return controller;
+
+        }
+
+        public static InvestmentController CreateController(
+            Mock<IUnitOfWork> unitOfWork,
+            List<Claim> contextAccessorClaims,
+            Mock<IHubService> hubServiceMock = null
+            )
+        {
+            var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
+            return CreateController(unitOfWork, accessor, hubServiceMock);
         }
 
         public static InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
@@ -43,6 +59,5 @@ namespace BridgeCareCoreTests.Tests.Investment
             var controller = CreateController(unitOfWork, claims, hubServiceMock);
             return controller;
         }
-
     }
 }

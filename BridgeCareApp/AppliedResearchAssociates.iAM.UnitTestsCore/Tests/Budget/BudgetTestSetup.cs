@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Budget
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
-    internal class BudgetTestSetup
+    public static class BudgetTestSetup
     {
     }
 }

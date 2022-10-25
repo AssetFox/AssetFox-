@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.ScenarioBudget
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public static class ScenarioBudgetTestSetup
     {

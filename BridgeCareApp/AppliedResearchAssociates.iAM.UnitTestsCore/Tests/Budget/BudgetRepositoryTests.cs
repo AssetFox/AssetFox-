@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.ScenarioBudget;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
@@ -80,20 +79,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries();
             var actualLibrary = libraries.Single(l => l.Id == library.Id);
             Assert.Equal(library.Name, actualLibrary.Name);
-        }
-
-        [Fact]
-        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithUser_GetsWithoutUser()
-        {
-            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
-            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
-
-            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
-
-            var libraryAfter = libraries.Single(l => l.Id == library.Id);
-            var users = libraryAfter.Users;
-            Assert.Empty(users);
         }
 
         [Fact]

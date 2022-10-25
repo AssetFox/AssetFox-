@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Utils;
 using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Investment;
 using NuGet.ContentModel;
 using Xunit;
 

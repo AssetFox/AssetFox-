@@ -191,10 +191,7 @@ export default class Attributes extends Vue {
     commandIsValid: boolean = true;
     checkedCommand = '';
 
-    aggregationRuleSelectValues: SelectItem[] = []
-    //     {text: 'PREDOMINANT', value: 'PREDOMINANT'},
-    //     {text: 'AVERAGE', value: 'AVERAGE'}
-    // ];
+    aggregationRuleSelectValues: SelectItem[] = []    
     typeSelectValues: SelectItem[] = [
         {text: 'STRING', value: 'STRING'},
         {text: 'NUMBER', value: 'NUMBER'}

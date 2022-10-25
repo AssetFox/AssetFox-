@@ -46,14 +46,18 @@ namespace BridgeCareCoreTests.Tests
             return CreateController(unitOfWork, accessor, hubServiceMock);
         }
 
-        public static InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
+        public static InvestmentController CreateAdminController(
+            Mock<IUnitOfWork> unitOfWork,
+            Mock<IHubService> hubServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Admin();
             var controller = CreateController(unitOfWork, claims, hubServiceMock);
             return controller;
         }
 
-        public static InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
+        public static InvestmentController CreateNonAdminController(
+            Mock<IUnitOfWork> unitOfWork,
+            Mock<IHubService> hubServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Empty();
             var controller = CreateController(unitOfWork, claims, hubServiceMock);

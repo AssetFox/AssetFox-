@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using AppliedResearchAssociates;
@@ -989,10 +990,18 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var user = UserDtos.Admin;
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
+            var claims = SystemSecurityClaimLists.Admin();
+            var contextAccessor = HttpContextAccessorMocks.DefaultMock();
+            contextAccessor.AddClaims(claims);
+            var request = contextAccessor.Object.HttpContext.Request;
+            var formFileCollection = new FormFileCollection();
+            request.Form = new FormCollection(new Dictionary<string, StringValues>(), formFileCollection);
+            var controller = TestInvestmentControllerSetup.CreateController(unitOfWork, contextAccessor.Object);
             // Act + Asset
+
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                 await controller.ImportLibraryInvestmentBudgetsExcelFile());
+
             Assert.Equal("Investment budgets file not found.", exception.Message);
         }
 

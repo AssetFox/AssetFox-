@@ -142,7 +142,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         [Fact]
         public void Delete_LibraryInDbWithBudget_DeletesBoth()
         {
+            // wjwjwj this test
             var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetTestSetup.AddBudgetToLibrary(TestHelper.UnitOfWork, library.Id);
             Assert.True(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
             Assert.True(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
 

@@ -52,6 +52,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
         [HttpGet]
         [Route("GetAggregationRuleTypes")]
         [ClaimAuthorize("AttributesViewAccess")]
@@ -68,6 +69,24 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+        [HttpGet]
+        [Route("GetAggregationRules")]
+        [ClaimAuthorize("AttributesViewAccess")]
+        public async Task<IActionResult> GetAggregationRules()
+        {
+            try
+            {
+                var result = await UnitOfWork.AttributeRepo.GetAggregationRules();
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpGet]
         [Route("GetAttributeDataSourceTypes")]
         [ClaimAuthorize("AttributesViewAccess")]

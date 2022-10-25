@@ -1,7 +1,7 @@
 import {clone, any, propEq, update, findIndex, append, find, isNil} from 'ramda';
 import AttributeService from '@/services/attribute.service';
 import {AxiosResponse} from 'axios';
-import {Attribute, AttributeSelectValues, AttributeSelectValuesResult, emptyAttribute} from '@/shared/models/iAM/attribute';
+import {Attribute, AttributeSelectValues, AttributeSelectValuesResult, emptyAttribute, RuleDefinition} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import { noneDatasource } from '@/shared/models/iAM/data-source';
@@ -13,7 +13,8 @@ const state = {
     numericAttributes: [] as Attribute[],
     attributesSelectValues: [] as AttributeSelectValues[],
     attributeAggregationRuleTypes: [] as string[],
-    attributeDataSourceTypes: [] as string[]
+    attributeDataSourceTypes: [] as string[],
+    aggregationRules: [] as RuleDefinition[]
 };
 
 const mutations = {
@@ -65,6 +66,9 @@ const mutations = {
     },
     attributeAggregationRuleTypesMutator(state: any, attributeAggregationRuleTypes: string[]) {
         state.attributeAggregationRuleTypes = clone(attributeAggregationRuleTypes);
+    },
+    attributeAggregationRulesMutator(state: any, aggregationRules: RuleDefinition[]) {
+        state.aggregationRules = clone(aggregationRules);
     },
     attributeDataSourceTypesMutator(state: any, attributeDataSourceTypes: string[]) {
         state.attributeDataSourceTypes = clone(attributeDataSourceTypes);
@@ -171,6 +175,14 @@ const actions = {
             .then((response: AxiosResponse<Attribute[]>) => {
                 if (hasValue(response, 'data')) {
                     commit('attributeAggregationRuleTypesMutator', response.data);
+                }
+            });
+    },
+    async getAttributeAggregationRules({commit}: any) {
+        await AttributeService.GetAttributeAggregationRules()
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('attributeAggregationRulesMutator', response.data);
                 }
             });
     },

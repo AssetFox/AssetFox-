@@ -154,7 +154,7 @@
 
 <script lang='ts'>
 import AttributeService from '@/services/attribute.service';
-import { Attribute, emptyAttribute } from '@/shared/models/iAM/attribute';
+import { Attribute, emptyAttribute, RuleDefinition } from '@/shared/models/iAM/attribute';
 import { Datasource, emptyDatasource, RawDataColumns, noneDatasource } from '@/shared/models/iAM/data-source';
 import { ValidationResult } from '@/shared/models/iAM/expression-validation';
 import { SelectItem } from '@/shared/models/vue/select-item';
@@ -200,6 +200,7 @@ export default class Attributes extends Vue {
     @State(state => state.attributeModule.attributes) stateAttributes: Attribute[];
     @State(state => state.datasourceModule.dataSources) stateDataSources: Datasource[];
     @State(state => state.attributeModule.attributeAggregationRuleTypes) stateAttributeAggregationRuleTypes: string[];
+    @State(state => state.attributeModule.aggregationRules) stateAggregationRules: RuleDefinition[];
     @State(state => state.attributeModule.attributeDataSourceTypes) stateAttributeDataSourceTypes: string[];
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
     @State(state => state.attributeModule.selectedAttribute) stateSelectedAttribute: Attribute;
@@ -209,6 +210,7 @@ export default class Attributes extends Vue {
     @Action('getAttributes') getAttributes: any;
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getAttributeAggregationRuleTypes') getAttributeAggregationRuleTypes: any;
+    @Action('getAttributeAggregationRules') getAttributeAggregationRulesAction: any;
     @Action('getAttributeDataSourceTypes') getAttributeDataSourceTypes: any;
     @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
     @Action('selectAttribute') selectAttributeAction: any;
@@ -221,6 +223,7 @@ export default class Attributes extends Vue {
         next((vm: any) => {
             vm.getAttributes();
             vm.getAttributeAggregationRuleTypes();
+            vm.getAttributeAggregationRulesAction();
             vm.getAttributeDataSourceTypes();
             vm.getDataSourcesAction();
         });

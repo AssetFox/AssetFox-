@@ -46,15 +46,19 @@ namespace BridgeCareCoreTests.Tests
             mock.Setup(m => m.GetLibraryAccess(libraryId, userId)).Returns(dto);
         }
 
-        public static List<(BudgetLibraryDTO, bool)> GetUpsertBudgetLibraryCalls(this Mock<IBudgetRepository> mock)
+        public static void SetupGetLibaryUsers(this Mock<IBudgetRepository> repository, Guid libraryId, List<LibraryUserDTO> users)
         {
-            var r = new List<(BudgetLibraryDTO, bool)>();
+            repository.Setup(r => r.GetLibraryUsers(libraryId)).Returns(users);
+        }
+
+        public static List<BudgetLibraryDTO> GetUpsertBudgetLibraryCalls(this Mock<IBudgetRepository> mock)
+        {
+            var r = new List<BudgetLibraryDTO>();
             var invocations = mock.Invocations.Where(i => i.Method.Name == nameof(IBudgetRepository.UpsertBudgetLibrary)).ToList();
             foreach (var invocation in invocations)
             {
                 var dto = (BudgetLibraryDTO)invocation.Arguments[0];
-                var accessModificationAllowed = (bool)invocation.Arguments[1];
-                r.Add((dto, accessModificationAllowed));
+                r.Add(dto);
             }
             return r;
         }

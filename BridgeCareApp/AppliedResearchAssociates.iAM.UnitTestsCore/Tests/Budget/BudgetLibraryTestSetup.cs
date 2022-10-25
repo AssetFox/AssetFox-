@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         {
             var resolveBudgetLibraryName = budgetLibraryName ?? RandomStrings.WithPrefix("BudgetLibrary");
             var dto = CreateBudgetLibraryDto(resolveBudgetLibraryName);
-            unitOfWork.BudgetRepo.UpsertBudgetLibrary(dto, true);
+            unitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
             return dto;
         }
     }

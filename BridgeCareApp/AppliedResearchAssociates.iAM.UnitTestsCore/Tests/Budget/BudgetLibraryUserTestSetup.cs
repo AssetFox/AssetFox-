@@ -38,9 +38,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
                 };
                 dtos.Add(libraryUserDto);
             }
-            var budgetLibrary = unitOfWork.BudgetRepo.GetBudgetLibrary(budgetLibraryId);
-            budgetLibrary.Users = dtos;
-            unitOfWork.BudgetRepo.UpsertBudgetLibrary(budgetLibrary, true);
+            unitOfWork.BudgetRepo.UpsertOrDeleteUsers(budgetLibraryId, dtos);
         }
     }
 }

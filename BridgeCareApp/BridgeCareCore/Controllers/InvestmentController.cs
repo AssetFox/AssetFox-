@@ -105,7 +105,7 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-                
+
         [HttpPost]
         [Route("UpsertInvestment/{simulationId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromScenario)]
@@ -158,7 +158,8 @@ namespace BridgeCareCore.Controllers
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildrenAccessibleToUser(UserId);
-                    } else
+                    }
+                    else
                     {
                         result = UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
                     }
@@ -203,18 +204,14 @@ namespace BridgeCareCore.Controllers
                         });
                     var dto = upsertRequest.Library;
                     dto.Budgets = budgets;
-                    bool canModifyAccessLevels = false;
-                    if (libraryAccess.LibraryExists)
-                    {
-                        canModifyAccessLevels = _claimHelper.CanModifyAccessLevels(libraryAccess, UserId);
-                    } else
-                    {
-                        LibraryUserDtolistUpdater.GrantOwnerAccess(UserId, dto.Users);
-                        canModifyAccessLevels = true;
-                    }
 
-                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto, canModifyAccessLevels);
+                    UnitOfWork.BudgetRepo.UpsertBudgetLibrary(dto);
                     UnitOfWork.BudgetRepo.UpsertOrDeleteBudgets(dto.Budgets, dto.Id);
+                    if (upsertRequest.IsNewLibrary)
+                    {
+                        var users = LibraryUserDtolists.OwnerAccess(UserId);
+                        UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    }
                     UnitOfWork.Commit();
                 });
 
@@ -234,6 +231,32 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        // route and policy needed here
+        public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var libraryUsers = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
+                    _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
+                    UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpDelete]
         [Route("DeleteBudgetLibrary/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
@@ -244,7 +267,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);                    
+                    var access = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
                     _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -273,7 +296,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => {
+                var result = await Task.Factory.StartNew(() =>
+                {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     return UnitOfWork.BudgetRepo.GetScenarioSimpleBudgetDetails(simulationId);
                 });
@@ -293,7 +317,8 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => {
+                var result = await Task.Factory.StartNew(() =>
+                {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     return UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
                 });

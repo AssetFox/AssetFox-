@@ -232,7 +232,8 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        // route and policy needed here
+        [Route("UpsertOrDeleteBudgetLibraryUsers")]
+        [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
         public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
         {
             try
@@ -249,6 +250,11 @@ namespace BridgeCareCore.Controllers
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
                 return Ok();
+            }
+            catch (InvalidOperationException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment error::{e.Message}");
+                return BadRequest();
             }
             catch (Exception e)
             {

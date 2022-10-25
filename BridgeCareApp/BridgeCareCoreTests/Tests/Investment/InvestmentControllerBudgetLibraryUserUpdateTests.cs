@@ -103,7 +103,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ChangeUsersOfBudgetLibrary_RequesterAddsOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequestAddsOwner_Throws()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -134,10 +134,11 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1Dto, user2DtoOwner };
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
+            var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
-            var message = exception.Message;
-            Assert.Contains(ClaimHelper.AddingOwnersIsNotAllowedMessage, message);
+            ActionResultAssertions.BadRequest(result);
+            var hubMessage = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.AddingOwnersIsNotAllowedMessage, hubMessage);
         }
 
         [Fact]
@@ -220,10 +221,10 @@ namespace BridgeCareCoreTests.Tests
             var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, hubService);
             var updatedUserDtos = new List<LibraryUserDTO> { user1DtoModify, user2DtoRead };
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos));
+            var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
-            var message = exception.Message;
-            Assert.Contains(ClaimHelper.RemovingOwnersIsNotAllowedMessage, message);
+            var hubMessage = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.RemovingOwnersIsNotAllowedMessage, hubMessage);
         }
     }
 }

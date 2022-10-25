@@ -67,39 +67,6 @@ namespace BridgeCareCoreTests.Tests
             return service;
         }
 
-        private InvestmentController CreateController(Mock<IUnitOfWork> unitOfWork, List<Claim> contextAccessorClaims, Mock<IHubService> hubServiceMock = null)
-        {
-            var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
-            var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
-            var security = EsecSecurityMocks.Dbe;
-            var mockDataService = _mockInvestmentDefaultDataService;
-            var claimHelper = new ClaimHelper(unitOfWork.Object, accessor);
-            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
-            var controller = new InvestmentController(
-                investmentBudgetServiceMock.Object,
-                security,
-                unitOfWork.Object,
-                resolveHubService.Object,
-                accessor,
-                mockDataService.Object,
-                claimHelper);
-            return controller;
-        }
-
-        private InvestmentController CreateAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
-        {
-            var claims = SystemSecurityClaimLists.Admin();
-            var controller = CreateController(unitOfWork, claims, hubServiceMock);
-            return controller;
-        }
-
-        private InvestmentController CreateNonAdminController(Mock<IUnitOfWork> unitOfWork, Mock<IHubService> hubServiceMock = null)
-        {
-            var claims = SystemSecurityClaimLists.Empty();
-            var controller = CreateController(unitOfWork, claims, hubServiceMock);
-            return controller;
-        }
-
         private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
@@ -324,7 +291,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
@@ -354,7 +321,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
@@ -384,7 +351,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
@@ -415,7 +382,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = new Mock<IHubService>();
-            var controller = CreateNonAdminController(unitOfWork, hubService);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var library = new BudgetLibraryDTO
             {
                 Id = libraryId,
@@ -448,7 +415,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = HubServiceMocks.DefaultMock();
-            var controller = CreateAdminController(unitOfWork, hubService);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, hubService);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
@@ -468,7 +435,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = HubServiceMocks.DefaultMock();
-            var controller = CreateNonAdminController(unitOfWork, hubService);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
@@ -487,7 +454,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
@@ -504,7 +471,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateNonAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
@@ -523,7 +490,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
             var hubService = HubServiceMocks.DefaultMock();
-            var controller = CreateNonAdminController(unitOfWork, hubService);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
 
             var result = await controller.DeleteBudgetLibrary(libraryId);
 
@@ -549,7 +516,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
             budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildren()).Returns(budgetLibraries);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
             var libraries = await controller.GetBudgetLibraries();
 
@@ -572,7 +539,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetLibraries = new List<BudgetLibraryDTO> { budgetLibrary };
             budgetRepo.Setup(br => br.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraries);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var controller = CreateNonAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
 
             var libraries = await controller.GetBudgetLibraries();
 
@@ -605,7 +572,7 @@ namespace BridgeCareCoreTests.Tests
                 Id = investmentPlanId,
             };
             investmentPlanRepo.Setup(r => r.GetInvestmentPlan(simulationId)).Returns(investmentPlanDto);
-            var controller = CreateAdminController(unitOfWork);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
             var libraries = await controller.GetInvestment(simulationId);
 
@@ -617,6 +584,7 @@ namespace BridgeCareCoreTests.Tests
             };
             ObjectAssertions.Equivalent(expected, returnedInvestmentDto);
         }
+
 
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()

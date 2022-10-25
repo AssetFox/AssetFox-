@@ -27,11 +27,11 @@ namespace BridgeCareCore.Controllers
     {
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly IRemainingLifeService _remainingLIfeLimitService;
+        private readonly IRemainingLifeLimitService _remainingLIfeLimitService;
 
         public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IRemainingLifeService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IRemainingLifeLimitService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _remainingLIfeLimitService = remainingLifeService ?? throw new ArgumentNullException(nameof(remainingLifeService));
@@ -203,7 +203,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     var dtos = _remainingLIfeLimitService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(dtos, simulationId);
+                    UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                     UnitOfWork.Commit();
                 });
 

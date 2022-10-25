@@ -8,11 +8,11 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class RemainingLifeService : IRemainingLifeService
+    public class RemainingLifeLimitService : IRemainingLifeLimitService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public RemainingLifeService(IUnitOfWork unitOfWork)
+        public RemainingLifeLimitService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

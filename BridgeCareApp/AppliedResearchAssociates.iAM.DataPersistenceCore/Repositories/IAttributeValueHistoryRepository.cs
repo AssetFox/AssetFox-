@@ -10,11 +10,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void CreateTextAttributeValueHistories(List<((Guid sectionId, Guid attributeId) sectionIdAttributeId, AttributeValueHistory<string> textAttributeValueHistory)> textAttributeValueHistorySectionIdAttributeIdTupleTuples);*/
 
         void CreateNumericAttributeValueHistories(
-            Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>
+            Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<double>>
                 numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
 
         void CreateTextAttributeValueHistories(
-            Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>
+            Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<string>>
                 numericAttributeValueHistoryPerSectionIdAttributeIdTuple);
     }
 }

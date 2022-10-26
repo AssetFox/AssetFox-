@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DTOs;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 
@@ -19,7 +20,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<AttributeDTO> GetAttributes();
 
-        Task<List<string>> GetAggregationRuleTypes();
+        Task<List<RuleDefinition>> GetAggregationRules();
+
         Task<List<string>> GetAttributeDataTypes();
         Task<List<string>> GetAttributeDataSourceTypes();
         Task<List<AttributeDTO>> GetAttributesAsync();

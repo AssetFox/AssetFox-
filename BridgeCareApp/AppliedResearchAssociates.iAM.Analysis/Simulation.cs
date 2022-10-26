@@ -16,11 +16,11 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public InvestmentPlan InvestmentPlan { get; }
 
-        public string Name { get; set; }
+        public DateTime LastModifiedDate { get; set; }
 
         public DateTime LastRun { get; set; }
 
-        public DateTime LastModifiedDate { get; set; }
+        public string Name { get; set; }
 
         public Network Network { get; }
 
@@ -28,7 +28,20 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public IReadOnlyCollection<PerformanceCurve> PerformanceCurves => _PerformanceCurves;
 
-        public SimulationOutput Results { get; private set; } = new SimulationOutput();
+        public SimulationOutput Results
+        {
+            get
+            {
+                if (_Results.TryGetTarget(out var value))
+                {
+                    return value;
+                }
+
+                value = ResultsOnDisk.GetOutput();
+                _Results.SetTarget(value);
+                return value;
+            }
+        }
 
         public string ShortDescription => Name;
 
@@ -46,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public SelectableTreatment AddTreatment() => _Treatments.GetAdd(new SelectableTreatment(this));
 
-        public void ClearResults() => Results = new SimulationOutput();
+        public void ClearResults() => ResultsOnDisk.Clear();
 
         public IReadOnlyCollection<SelectableTreatment> GetActiveTreatments()
         {
@@ -115,6 +128,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
             InvestmentPlan = new InvestmentPlan(this);
         }
 
+        internal SimulationOutputOnDisk ResultsOnDisk { get; } = new();
+
         internal BudgetContext[] GetBudgetContextsWithCostAllocationsForCommittedProjects()
         {
             var budgetContexts = InvestmentPlan.Budgets
@@ -146,8 +161,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         private static readonly IComparer<SelectableTreatment> TreatmentComparer = SelectionComparer<SelectableTreatment>.Create(treatment => treatment.Name);
 
-        private readonly List<PerformanceCurve> _PerformanceCurves = new List<PerformanceCurve>();
-
-        private readonly List<SelectableTreatment> _Treatments = new List<SelectableTreatment>();
+        private readonly List<PerformanceCurve> _PerformanceCurves = new();
+        private readonly WeakReference<SimulationOutput> _Results = new(null);
+        private readonly List<SelectableTreatment> _Treatments = new();
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -210,10 +211,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
-        public Task<List<string>> GetAggregationRuleTypes()
+        
+        public Task<List<RuleDefinition>> GetAggregationRules()
         {
             return Task.Factory.StartNew(() =>
-                Attribute.AggregationRules.Select(_ => _.RuleName).Distinct().ToList());
+                Attribute.AggregationRules.ToList());
         }
 
         public Task<List<string>> GetAttributeDataTypes()

@@ -23,6 +23,7 @@ namespace BridgeCareCore.Utils
         public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
         public const string LibraryAccessModificationUnauthorizedMessage = "You are not authorized to modify access to this library.";
         public const string LibraryUserListGetUnauthorizedMessage = "You are not authorized to get the users of this library.";
+        public const string SimulationModifyUnauthorizedMessage = "You are not authorized to modify this simulation's data.";
         public const string CantDeleteNonexistentLibraryMessage = "Cannot delete library. Not in system.";
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
@@ -67,7 +68,7 @@ namespace BridgeCareCore.Utils
                 var simulation = GetSimulationWithUsers(simulationId);
                 if (!simulation.Users.Any(_ => _.UserId == userId && _.CanModify))
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to modify this simulation's data.");
+                    throw new UnauthorizedAccessException(SimulationModifyUnauthorizedMessage);
                 }
             }
         }

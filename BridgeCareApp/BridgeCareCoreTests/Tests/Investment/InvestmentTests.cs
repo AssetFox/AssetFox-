@@ -612,6 +612,88 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task ScenarioPost_UserHasModifyRights_OkAndCallsRepositories()
+        {
+            var user = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, investmentBudgetServiceMock: investmentBudgetServiceMock);
+            var request = new InvestmentPagingSyncModel();
+            request.Investment = new InvestmentPlanDTO();
+            var simulationUserDto = new SimulationUserDTO
+            {
+                UserId = user.Id,
+                Username = user.Username,
+                CanModify = true,
+            };
+            var simulationDto = new SimulationDTO
+            {
+                Id = simulationId,
+                Users = new List<SimulationUserDTO>
+                {
+                    simulationUserDto,
+                }
+            };
+            simulationRepo.Setup(sr => sr.GetSimulation(simulationId)).Returns(simulationDto);
+
+            // Act
+            var result = await controller.UpsertInvestment(simulationId, request);
+
+            // Assert
+            ActionResultAssertions.Ok(result);
+            var budgetInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
+            var investmentPlanInvocation = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
+        }
+
+        [Fact]
+        public async Task ScenarioPost_UserIsNotAuthorized_DoesNotCallRepositories()
+        {
+            var user1 = UserDtos.Dbe();
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var hubService = HubServiceMocks.DefaultMock();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService,  investmentBudgetServiceMock: investmentBudgetServiceMock);
+            var request = new InvestmentPagingSyncModel();
+            request.Investment = new InvestmentPlanDTO();
+            var simulationUserDto = new SimulationUserDTO
+            {
+                UserId = user2.Id,
+                Username = user1.Username,
+                CanModify = true,
+            };
+            var simulationDto = new SimulationDTO
+            {
+                Id = simulationId,
+                Users = new List<SimulationUserDTO>
+                {
+                    simulationUserDto,
+                }
+            };
+            simulationRepo.Setup(sr => sr.GetSimulation(simulationId)).Returns(simulationDto);
+
+            // Act
+            var result = await controller.UpsertInvestment(simulationId, request);
+
+            // Assert
+            ActionResultAssertions.Ok(result);
+            var budgetInvocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
+            var investmentPlanInvocations = investmentPlanRepo.InvocationsWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
+            Assert.Empty(budgetInvocations);
+            Assert.Empty(investmentPlanInvocations);
+            var message = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.SimulationModifyUnauthorizedMessage, message);
+        }
+
+        [Fact]
         public async Task GetBudgetLibraries_AdminUser_CallsGetBudgetLibrariesNoChildrenOnRepo()
         {
             // Arrange
@@ -792,51 +874,6 @@ namespace BridgeCareCoreTests.Tests
             var dto = (InvestmentDTO)Convert.ChangeType(okObjResult.Value, typeof(InvestmentDTO));
             Assert.Equal(investmentPlanId, dto.InvestmentPlan.Id);
             Assert.Equal(budgetDtos, dto.ScenarioBudgets);
-        }
-
-        [Fact]
-        public async Task ShouldModifyInvestmentData()
-        {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            AddScenarioDataToDatabase(simulation.Id);
-
-            var dto = new InvestmentDTO
-            {
-                ScenarioBudgets = new List<BudgetDTO> { _testScenarioBudget.ToDto() },
-                InvestmentPlan = _testInvestmentPlan.ToDto()
-            };
-            dto.ScenarioBudgets[0].Name = "Updated Name";
-            dto.ScenarioBudgets[0].BudgetAmounts[0].Value = 1000000;
-            dto.ScenarioBudgets[0].CriterionLibrary = new CriterionLibraryDTO();
-            dto.InvestmentPlan.MinimumProjectCostLimit = 1000000;
-
-            var request = new InvestmentPagingSyncModel();
-            request.Investment = dto.InvestmentPlan;
-            request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
-            request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0] };
-
-            // Act
-            await controller.UpsertInvestment(simulation.Id, request);
-
-            // Assert
-            var modifiedBudgetDto =
-                TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id)[0];
-            var modifiedInvestmentPlanDto =
-                TestHelper.UnitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulation.Id);
-
-            Assert.Equal(dto.ScenarioBudgets[0].Name, modifiedBudgetDto.Name);
-            Assert.Equal(dto.ScenarioBudgets[0].CriterionLibrary.Id,
-                modifiedBudgetDto.CriterionLibrary.Id);
-
-            Assert.Single(modifiedBudgetDto.BudgetAmounts);
-            Assert.Equal(dto.ScenarioBudgets[0].BudgetAmounts[0].Value,
-                modifiedBudgetDto.BudgetAmounts[0].Value);
-
-            Assert.Equal(dto.InvestmentPlan.MinimumProjectCostLimit,
-                modifiedInvestmentPlanDto.MinimumProjectCostLimit);
         }
 
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/

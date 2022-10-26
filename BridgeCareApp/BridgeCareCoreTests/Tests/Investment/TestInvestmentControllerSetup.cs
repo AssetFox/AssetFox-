@@ -61,10 +61,11 @@ namespace BridgeCareCoreTests.Tests
 
         public static InvestmentController CreateNonAdminController(
             Mock<IUnitOfWork> unitOfWork,
-            Mock<IHubService> hubServiceMock = null)
+            Mock<IHubService> hubServiceMock = null,
+            Mock<IInvestmentBudgetsService> investmentBudgetServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Empty();
-            var controller = CreateController(unitOfWork, claims, hubServiceMock);
+            var controller = CreateController(unitOfWork, claims, hubServiceMock, investmentBudgetServiceMock);
             return controller;
         }
     }

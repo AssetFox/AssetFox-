@@ -13,6 +13,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
             {
                 throw new InvalidOperationException("Can't check access of nonexistent library.");
             }
+            if (accessModel.UserId!=userId)
+            {
+                throw new InvalidOperationException("Checking access for the wrong user!");
+            }
             var access = accessModel.Access;
             var authorized = access != null && access.AccessLevel >= minimumAccessLevel;
             return authorized;

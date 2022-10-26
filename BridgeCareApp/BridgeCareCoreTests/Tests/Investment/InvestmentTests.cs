@@ -1,6 +1,8 @@
 ﻿using System.Data;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
+using AppliedResearchAssociates;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
@@ -27,19 +29,17 @@ using BridgeCareCore.Services.DefaultData;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Investment;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using MoreLinq;
 using OfficeOpenXml;
 using Xunit;
-using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -601,7 +601,6 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();
 
-
             // Act
             var result = await controller.UpsertInvestment(simulation.Id, request);
 
@@ -610,26 +609,144 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetLibraryDataNoChildren()
+        public async Task GetBudgetLibraries_AdminUser_CallsGetBudgetLibrariesNoChildrenOnRepo()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddTestDataToDatabase();
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildren()).Returns(budgetLibraryDtos);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
 
             // Act
             var result = await controller.GetBudgetLibraries();
 
             // Assert
+            var getBudgetLibraryInvocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.GetBudgetLibrariesNoChildren));
+            Assert.Single(getBudgetLibraryInvocations);
             var okObjResult = result as OkObjectResult;
             Assert.NotNull(okObjResult.Value);
-
             var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetLibraryDTO>));
-            Assert.Contains(dtos, b => b.Id == _testBudgetLibrary.Id);
-            var resultBudgetLibrary = dtos.FirstOrDefault(b => b.Id == _testBudgetLibrary.Id);
+            var actualId = dtos.Single().Id;
+            Assert.Equal(budgetLibraryId, actualId);
+        }
+        [Fact]
 
-            Assert.True(resultBudgetLibrary.Budgets.Count == 0);
+        public async Task GetBudgetLibraries_NonAdminUser_CallsGetBudgetLibrariesAccessibleToUserOnRepo()
+        {
+            // Arrange
+            var user = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.Setup(b => b.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id)).Returns(budgetLibraryDtos);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            // Act
+            var result = await controller.GetBudgetLibraries();
+
+            // Assert
+            var getBudgetLibraryInvocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.GetBudgetLibrariesNoChildrenAccessibleToUser));
+            Assert.Single(getBudgetLibraryInvocations);
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+            var dtos = (List<BudgetLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(List<BudgetLibraryDTO>));
+            var actualId = dtos.Single().Id;
+            Assert.Equal(budgetLibraryId, actualId);
+        }
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsOwner_Gets()
+        {
+            var user1 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user1.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Owner);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
+            ActionResultAssertions.OkObject(result);
+            var value = (result as OkObjectResult).Value;
+            Assert.Equal(userDtos, value);
+        }
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsAdmin_Gets()
+        {
+            var user1 = UserDtos.Admin;
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user2.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Read);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
+            ActionResultAssertions.OkObject(result);
+            var value = (result as OkObjectResult).Value;
+            Assert.Equal(userDtos, value);
+        }
+
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsNeitherAdminNorOwner_DoesNotGet()
+        {
+            var user1 = UserDtos.Dbe();
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user2.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Read);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
+            ActionResultAssertions.Ok(result);
+            var message = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.LibraryUserListGetUnauthorizedMessage, message);
         }
 
         [Fact]
@@ -747,30 +864,6 @@ namespace BridgeCareCoreTests.Tests
 
             Assert.Equal(dto.InvestmentPlan.MinimumProjectCostLimit,
                 modifiedInvestmentPlanDto.MinimumProjectCostLimit);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteBudgetData()
-        {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddTestDataToDatabase();
-
-            // Act
-            var result = await controller.DeleteBudgetLibrary(_testBudgetLibrary.Id);
-
-            // Assert
-            ActionResultAssertions.Ok(result);
-
-            Assert.True(!TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == _testBudgetLibrary.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.Budget.Any(_ => _.Id == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ =>
-                    _.BudgetId == _testBudget.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ =>
-                    _.Id == _testBudget.BudgetAmounts.ToList()[0].Id));
         }
 
         /**************************INVESTMENT BUDGETS EXCEL FILE IMPORT/EXPORT TESTS***********************************/
@@ -940,11 +1033,11 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoMimeTypeForLibraryImport()
+        public async Task RequestLibraryImport_InvalidMimeType_Throws()
         {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
@@ -953,28 +1046,36 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoFilesForLibraryImport()
+        public async Task ImportLibrary_FileNotFound_Throws()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
-            var accessor = CreateRequestForExceptionTesting();
-            var controller = CreateDatabaseAuthorizedController(service, accessor);
-
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var claims = SystemSecurityClaimLists.Admin();
+            var contextAccessor = HttpContextAccessorMocks.DefaultMock();
+            contextAccessor.AddClaims(claims);
+            var request = contextAccessor.Object.HttpContext.Request;
+            var formFileCollection = new FormFileCollection();
+            request.Form = new FormCollection(new Dictionary<string, StringValues>(), formFileCollection);
+            var controller = TestInvestmentControllerSetup.CreateController(unitOfWork, contextAccessor.Object);
             // Act + Asset
+
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
                 await controller.ImportLibraryInvestmentBudgetsExcelFile());
+
             Assert.Equal("Investment budgets file not found.", exception.Message);
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoBudgetLibraryIdFoundForImport()
+        public async Task ImportLibraryInvestmentBudgetsExcelFile_BudgetLibraryIdNotFound_Throws()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var controller = CreateDatabaseAuthorizedController(service, accessor);
+            var user = UserDtos.Admin;
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = TestInvestmentControllerSetup.CreateController(unitOfWork, accessor);
 
             // Act + Asset
             var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>

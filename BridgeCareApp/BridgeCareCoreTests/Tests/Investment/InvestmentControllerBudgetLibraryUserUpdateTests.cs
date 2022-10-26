@@ -10,7 +10,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Utils;
 using BridgeCareCoreTests.Helpers;
-using BridgeCareCoreTests.Tests.Investment;
 using NuGet.ContentModel;
 using Xunit;
 
@@ -20,7 +19,7 @@ namespace BridgeCareCoreTests.Tests
     {
 
         [Fact]
-        public async Task ChangeUsersOfBudgetLibrary_RequesterIsNotOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsNotOwner_OkButUnauthorizedHubMessage()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -103,7 +102,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ChangeUsersOfBudgetLibrary_RequestAddsOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequestAddsOwner_BadRequest()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -137,6 +136,8 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
             ActionResultAssertions.BadRequest(result);
+            var invocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
+            Assert.Empty(invocations);
             var hubMessage = hubService.SingleThreeArgumentUserMessage();
             Assert.Contains(ClaimHelper.AddingOwnersIsNotAllowedMessage, hubMessage);
         }
@@ -188,7 +189,7 @@ namespace BridgeCareCoreTests.Tests
 
 
         [Fact]
-        public async Task ChangeUsersOfBudgetLibrary_RequesterIsAdminButRequestRemovesOwner_Throws()
+        public async Task ChangeUsersOfBudgetLibrary_RequesterIsAdminButRequestRemovesOwner_BadRequest()
         {
             var userId1 = Guid.NewGuid();
             var userId2 = Guid.NewGuid();
@@ -223,6 +224,9 @@ namespace BridgeCareCoreTests.Tests
 
             var result = await controller.UpsertOrDeleteBudgetLibraryUsers(libraryId, updatedUserDtos);
 
+            ActionResultAssertions.BadRequest(result);
+            var invocations = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
+            Assert.Empty(invocations);
             var hubMessage = hubService.SingleThreeArgumentUserMessage();
             Assert.Contains(ClaimHelper.RemovingOwnersIsNotAllowedMessage, hubMessage);
         }

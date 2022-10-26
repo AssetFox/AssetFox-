@@ -22,6 +22,7 @@ namespace BridgeCareCore.Utils
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
         public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
         public const string LibraryAccessModificationUnauthorizedMessage = "You are not authorized to modify access to this library.";
+        public const string LibraryUserListGetUnauthorizedMessage = "You are not authorized to get the users of this library.";
         public const string CantDeleteNonexistentLibraryMessage = "Cannot delete library. Not in system.";
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
@@ -164,6 +165,17 @@ namespace BridgeCareCore.Utils
             {
                 var removedOwner = removedOwners.First();
                 throw new InvalidOperationException($"{RemovingOwnersIsNotAllowedMessage} This update removed {removedOwner}");
+            }
+        }
+
+        public void CheckGetLibraryUsersValidity(LibraryUserAccessModel accessModel, Guid userId)
+        {
+            if (RequirePermittedCheck())
+            {
+                if (!accessModel.HasAccess(userId, LibraryAccessLevel.Owner))
+                {
+                    throw new UnauthorizedAccessException(LibraryUserListGetUnauthorizedMessage);
+                }
             }
         }
 

@@ -7,9 +7,9 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
-using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.ScenarioBudget;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.User;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 using Xunit;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
@@ -82,6 +82,47 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Fact]
+        public async Task GetBudgetLibrariesNoChildren_BudgetLibraryInDbWithBudget_GetsWithoutBudget()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildren();
+
+            var libraryAfter = libraries.Single(l => l.Id == library.Id);
+            var budgets = libraryAfter.Budgets;
+            Assert.Empty(budgets);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildrenAccessibleToUser_BudgetLibraryInDbWithAccessForUser_Gets()
+        {
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user.Id);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            var actual = libraries.Single();
+            library.Budgets.Clear();
+            ObjectAssertions.Equivalent(library, actual);
+        }
+
+        [Fact]
+        public async Task GetBudgetLibrariesNoChildrenAccessibleToUser_BudgetLibraryInDbWithoutAccessForUser_DoesNotGet() { 
+            var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var user2 = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            BudgetLibraryUserTestSetup.SetUsersOfBudgetLibrary(TestHelper.UnitOfWork, library.Id, LibraryAccessLevel.Modify, user2.Id);
+            TestHelper.UnitOfWork.Context.ChangeTracker.Clear();
+
+            var libraries = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibrariesNoChildrenAccessibleToUser(user.Id);
+
+            Assert.Empty(libraries);
+        }
+
+        [Fact]
         public async Task Delete_BudgetLibraryInDbWithUser_Deletes()
         {
             var user = await UserTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
@@ -96,6 +137,27 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var libraryUsersAfter = TestHelper.UnitOfWork.Context.BudgetLibraryUser.Where(u => u.UserId == user.Id).ToList();
             Assert.Empty(libraryUsersAfter);
         }
+
+        [Fact]
+        public void Delete_LibraryInDbWithBudget_DeletesBoth()
+        {
+            var library = BudgetLibraryTestSetup.ModelForEntityInDb(TestHelper.UnitOfWork);
+            var criterionLibraryId = Guid.NewGuid();
+            var budgetId = Guid.NewGuid();
+            BudgetTestSetup.AddBudgetToLibrary(TestHelper.UnitOfWork, library.Id, budgetId, criterionLibraryId);
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
+            Assert.True(TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ => _.BudgetId == budgetId));
+            Assert.True(TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ => _.BudgetId == budgetId));
+            TestHelper.UnitOfWork.BudgetRepo.DeleteBudgetLibrary(library.Id);
+
+            // Assert
+            Assert.False(TestHelper.UnitOfWork.Context.BudgetLibrary.Any(_ => _.Id == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.Budget.Any(_ => _.BudgetLibraryId == library.Id));
+            Assert.False(TestHelper.UnitOfWork.Context.CriterionLibraryBudget.Any(_ => _.BudgetId == budgetId));
+            Assert.False(TestHelper.UnitOfWork.Context.BudgetAmount.Any(_ => _.BudgetId == budgetId));
+        }
+
 
         [Fact]
         public void GetScenarioSimpleBudgetDetails_SimulationInDb_EmptyList()

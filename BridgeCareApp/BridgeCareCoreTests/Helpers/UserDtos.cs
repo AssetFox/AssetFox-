@@ -10,7 +10,7 @@ namespace BridgeCareCoreTests.Helpers
 {
     public static class UserDtos
     {
-        public static UserDTO Admin => new UserDTO
+        public static UserDTO Admin() => new UserDTO
         {
             Username = "Admin",
             HasInventoryAccess = true,

@@ -42,7 +42,7 @@ namespace BridgeCareCoreTests.Tests
             _mockUOW = new Mock<IUnitOfWork>();
             // This is the DEFAULT current user (a user in the admin role)
             // It MUST be changed if testing for an unauthorized user.
-            _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin);
+            _mockUOW.Setup(_ => _.CurrentUser).Returns(UserDtos.Admin());
 
             var mockSimulationRepo = new Mock<ISimulationRepository>();
             mockSimulationRepo.Setup(_ => _.GetSimulation(It.Is<Guid>(_ => SimulationInTestData(_))))

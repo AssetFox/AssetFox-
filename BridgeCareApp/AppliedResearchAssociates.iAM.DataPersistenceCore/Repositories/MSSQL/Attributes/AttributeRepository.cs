@@ -211,12 +211,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
-        public Task<List<string>> GetAggregationRuleTypes()
-        {
-            return Task.Factory.StartNew(() =>
-                Attribute.AggregationRules.Select(_ => _.RuleName).Distinct().ToList());
-        }
-
+        
         public Task<List<RuleDefinition>> GetAggregationRules()
         {
             return Task.Factory.StartNew(() =>

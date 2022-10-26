@@ -54,23 +54,6 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetAggregationRuleTypes")]
-        [ClaimAuthorize("AttributesViewAccess")]
-        public async Task<IActionResult> GetAggregationRuleTypes()
-        {
-            try
-            {
-                var result = await UnitOfWork.AttributeRepo.GetAggregationRuleTypes();
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
-                throw;
-            }
-        }
-
-        [HttpGet]
         [Route("GetAggregationRules")]
         [ClaimAuthorize("AttributesViewAccess")]
         public async Task<IActionResult> GetAggregationRules()

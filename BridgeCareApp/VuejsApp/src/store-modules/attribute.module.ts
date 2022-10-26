@@ -12,7 +12,6 @@ const state = {
     stringAttributes: [] as Attribute[],
     numericAttributes: [] as Attribute[],
     attributesSelectValues: [] as AttributeSelectValues[],
-    attributeAggregationRuleTypes: [] as string[],
     attributeDataSourceTypes: [] as string[],
     aggregationRules: [] as RuleDefinition[],
     aggregationRulesForType: [] as string[]
@@ -64,9 +63,6 @@ const mutations = {
     },
     attributesSelectValuesMutator(state: any, attributesSelectValues: AttributeSelectValues[]) {
         state.attributesSelectValues = [...state.attributesSelectValues, ...attributesSelectValues];
-    },
-    attributeAggregationRuleTypesMutator(state: any, attributeAggregationRuleTypes: string[]) {
-        state.attributeAggregationRuleTypes = clone(attributeAggregationRuleTypes);
     },
     attributeAggregationRulesMutator(state: any, aggregationRules: RuleDefinition[]) {
         state.aggregationRules = clone(aggregationRules);
@@ -173,15 +169,7 @@ const actions = {
                 }
             },
         );
-    },
-    async getAttributeAggregationRuleTypes({commit}: any) {
-        await AttributeService.GetAttributeAggregationRuleTypes()
-            .then((response: AxiosResponse<Attribute[]>) => {
-                if (hasValue(response, 'data')) {
-                    commit('attributeAggregationRuleTypesMutator', response.data);
-                }
-            });
-    },
+    },    
     async getAttributeAggregationRules({commit}: any) {
         await AttributeService.GetAttributeAggregationRules()
             .then((response: AxiosResponse) => {

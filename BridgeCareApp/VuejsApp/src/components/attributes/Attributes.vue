@@ -246,15 +246,6 @@ export default class Attributes extends Vue {
             text: datasource.name + ' (' + datasource.type + ')',
             value: datasource.id,
         }));
-    } 
-
-    @Watch('stateAggregationRules')
-    onStateAggregationRulesChanged() {
-        this.getAggregationRulesForTypeAction(this.selectAttributeItemValue)
-        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
-            text: rule,
-            value: rule,
-        }));
     }
 
     @Watch('selectAttributeItemValue')
@@ -263,9 +254,21 @@ export default class Attributes extends Vue {
         this.hasSelectedAttribute = true;
         this.checkedCommand = "";
         this.commandIsValid = false;
-        // this.selectDatasourceItemValue = null;
+        this.getAggregationRulesForTypeAction(this.selectedAttribute.type)
+        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
     }
-
+    
+    @Watch('selectedAttribute.type')
+    onSelectedAttributeTypeChanged() {
+        this.getAggregationRulesForTypeAction(this.selectedAttribute.type)
+        this.aggregationRuleSelectValues = this.stateAggregationRulesForType.map((rule: string) => ({
+            text: rule,
+            value: rule,
+        }));
+    }
     @Watch('selectDatasourceItemValue')
     onSelectDatasourceItemValue(){
         if (any(propEq('id', this.selectDatasourceItemValue), this.stateDataSources)) {

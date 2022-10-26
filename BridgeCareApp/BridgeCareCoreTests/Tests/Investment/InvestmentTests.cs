@@ -668,7 +668,6 @@ namespace BridgeCareCoreTests.Tests
         public async Task GetUsersOfLibrary_RequesterIsOwner_Gets()
         {
             var user1 = UserDtos.Dbe();
-            var user2 = UserDtos.Dbe();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
             var budgetRepo = BudgetRepositoryMocks.New();
             var budgetLibraryId = Guid.NewGuid();
@@ -686,9 +685,68 @@ namespace BridgeCareCoreTests.Tests
             unitOfWork.SetupBudgetRepo(budgetRepo);
 
             var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
             ActionResultAssertions.OkObject(result);
             var value = (result as OkObjectResult).Value;
             Assert.Equal(userDtos, value);
+        }
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsAdmin_Gets()
+        {
+            var user1 = UserDtos.Admin;
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user2.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Read);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
+            ActionResultAssertions.OkObject(result);
+            var value = (result as OkObjectResult).Value;
+            Assert.Equal(userDtos, value);
+        }
+
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsNeitherAdminNorOwner_DoesNotGet()
+        {
+            var user1 = UserDtos.Dbe();
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user2.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Read);
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+
+            ActionResultAssertions.Ok(result);
+            var message = hubService.SingleThreeArgumentUserMessage();
+            Assert.Contains(ClaimHelper.LibraryUserListGetUnauthorizedMessage, message);
         }
 
         [Fact]

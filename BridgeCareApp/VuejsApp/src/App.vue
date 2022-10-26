@@ -511,10 +511,19 @@ export default class AppComponent extends Vue {
     }
 
     onAddErrorNotification(data: any) {
-        this.addErrorNotificationAction({
-            message: 'Server Error',
-            longMessage: data.error,
-        });
+        let errorNotification:string = data.error.toString();
+        let spl = errorNotification.split('::');
+        if (spl.length > 0 ) {
+            this.addErrorNotificationAction( {
+                message: spl[0],
+                longMessage: spl.length>1 ? spl[1] : 'Unknown Error'
+            });
+        } else {
+            this.addErrorNotificationAction( {
+                message: 'Server Error',
+                longMessage: data.error
+            });
+        }
     }
 
     onAddWarningNotification(data: any) {

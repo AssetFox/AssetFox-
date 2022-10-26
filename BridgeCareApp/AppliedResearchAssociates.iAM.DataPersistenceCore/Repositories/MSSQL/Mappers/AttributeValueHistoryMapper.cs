@@ -1,67 +1,83 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using MoreLinq;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
-    public static class AttributeValueHistoryMapper
+    public sealed class AttributeValueHistoryMapper
     {
-        public static void SetNumericAttributeValueHistories(this List<AggregatedResultEntity> entities,
-            AnalysisMaintainableAsset maintainableAsset)
+        public AttributeValueHistoryMapper(Network network)
         {
-            var entitiesPerAttributeName = entities
-                .GroupBy(_ => _.Attribute.Name, _ => _)
-                .ToDictionary(_ => _.Key, _ => _.OrderBy(__ => __.Year).ToList());
-
-            entitiesPerAttributeName.Keys.ForEach(attributeName =>
-            {
-                var numberAttribute = maintainableAsset.Network.Explorer.NumberAttributes
-                    .Single(_ => _.Name == attributeName);
-
-                var history = maintainableAsset.GetHistory(numberAttribute);
-
-                var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
-
-                if (attributeValueHistories.Any())
-                {
-                    attributeValueHistories.ForEach(_ => history.Add(_.Year, _.NumericValue ?? 0));
-                    history.MostRecentValue = attributeValueHistories.Last().NumericValue ?? 0;
-                }
-                else
-                {
-                    history.MostRecentValue = entitiesPerAttributeName[attributeName].FirstOrDefault()?.NumericValue ?? 0;
-                }
-            });
+            NumberAttributePerName = network.Explorer.NumberAttributes.ToDictionary(a => a.Name);
+            TextAttributePerName = network.Explorer.TextAttributes.ToDictionary(a => a.Name);
         }
 
-        public static void SetTextAttributeValueHistories(this List<AggregatedResultEntity> entities,
+        public void SetNumericAttributeValueHistories(
+            List<AggregatedResultEntity> entities,
             AnalysisMaintainableAsset maintainableAsset)
         {
-            var entitiesPerAttributeName = entities
-                .GroupBy(_ => _.Attribute.Name, _ => _)
-                .ToDictionary(_ => _.Key, _ => _.OrderBy(__ => __.Year).ToList());
+            SetAttributeValueHistories(
+                entities,
+                maintainableAsset,
+                NumberAttributePerName,
+                e => e.NumericValue.Value);
+        }
 
-            entitiesPerAttributeName.Keys.ForEach(attributeName =>
+        public void SetTextAttributeValueHistories(
+            List<AggregatedResultEntity> entities,
+            AnalysisMaintainableAsset maintainableAsset)
+        {
+            SetAttributeValueHistories(
+                entities,
+                maintainableAsset,
+                TextAttributePerName,
+                e => e.TextValue);
+        }
+
+        private readonly IReadOnlyDictionary<string, NumberAttribute> NumberAttributePerName;
+
+        private readonly IReadOnlyDictionary<string, TextAttribute> TextAttributePerName;
+
+        private static void SetAttributeValueHistories<TAttribute, TValue>
+            (
+            List<AggregatedResultEntity> entities,
+            AnalysisMaintainableAsset maintainableAsset,
+            IReadOnlyDictionary<string, TAttribute> attributePerName,
+            Func<AggregatedResultEntity, TValue> getValue
+            )
+            where TAttribute : Attribute<TValue>
+        {
+            HashSet<string> attributesWithUnsetHistory = new();
+            var yearsOfHistory = entities
+                .GroupBy(entity =>
+                {
+                    _ = attributesWithUnsetHistory.Add(entity.Attribute.Name);
+                    return entity.Year;
+                })
+                .ToList();
+
+            yearsOfHistory.Sort(static (year1, year2) => Comparer<int>.Default.Compare(year2.Key, year1.Key));
+
+            foreach (var yearOfHistory in yearsOfHistory)
             {
-                var textAttribute = maintainableAsset.Network.Explorer.TextAttributes
-                    .Single(_ => _.Name == attributeName);
-
-                var history = maintainableAsset.GetHistory(textAttribute);
-
-                var attributeValueHistories = entitiesPerAttributeName[attributeName].ToList();
-
-                if (attributeValueHistories.Any())
+                if (attributesWithUnsetHistory.Count is 0)
                 {
-                    attributeValueHistories.ForEach(_ => history.Add(_.Year, _.TextValue));
-                    history.MostRecentValue = attributeValueHistories.Last().TextValue;
+                    break;
                 }
-                else
+
+                foreach (var entity in yearOfHistory)
                 {
-                    history.MostRecentValue = entitiesPerAttributeName[attributeName].FirstOrDefault()?.TextValue;
+                    var attribute = attributePerName[entity.Attribute.Name];
+                    var history = maintainableAsset.GetHistory(attribute);
+                    var value = getValue(entity);
+                    history[yearOfHistory.Key] = value;
+
+                    _ = attributesWithUnsetHistory.Remove(entity.Attribute.Name);
                 }
-            });
+            }
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -43,6 +45,8 @@ namespace BridgeCareCoreTests.Tests
         private record TestWorkItem(int Id, int MsDelay, List<int> WorkTarget) : IWorkItem
         {
             public string WorkId { get; } = Id.ToString();
+
+            public UserInfo UserInfo => new();
 
             public void DoWork(IServiceProvider serviceProvider)
             {

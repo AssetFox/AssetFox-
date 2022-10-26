@@ -63,7 +63,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return aggregatedResults;
         }
 
-        public static List<AggregatedResultEntity> ToEntity<T>(this AttributeValueHistory<T> domain, Guid maintainableAssetId, Guid attributeId)
+        public static List<AggregatedResultEntity> ToEntity<T>(this IAttributeValueHistory<T> domain, Guid maintainableAssetId, Guid attributeId)
         {
             using var historyEnumerator = domain.GetEnumerator();
             historyEnumerator.Reset();

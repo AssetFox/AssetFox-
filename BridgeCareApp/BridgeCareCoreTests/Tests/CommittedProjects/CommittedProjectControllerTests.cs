@@ -54,8 +54,7 @@ namespace BridgeCareCoreTests.Tests
             _mockCommittedProjectRepo = new Mock<ICommittedProjectRepository>();
             _mockUOW.Setup(_ => _.CommittedProjectRepo).Returns(_mockCommittedProjectRepo.Object);
 
-            var mockUserRepo = UserRepositoryMocks.EveryoneExists();
-            _mockUOW.Setup(_ => _.UserRepo).Returns(mockUserRepo.Object);
+            var mockUserRepo = UserRepositoryMocks.EveryoneExists(_mockUOW);
 
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))

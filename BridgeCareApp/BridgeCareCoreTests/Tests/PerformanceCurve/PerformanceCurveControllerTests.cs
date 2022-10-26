@@ -245,8 +245,7 @@ namespace BridgeCareCoreTests.Tests
             var repositoryMock = new Mock<IPerformanceCurveRepository>();
             var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
-            var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
-            unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);
+            var userRepositoryMock = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var esecSecurity = EsecSecurityMocks.Admin;
             var service = new Mock<IPerformanceCurvesService>();
 

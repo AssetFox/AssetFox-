@@ -25,9 +25,11 @@ export default class AttributeService {
             data
         );
     }
-    static GetAttributeAggregationRuleTypes(): AxiosPromise {
-        return coreAxiosInstance.get(`${API.Attribute}/GetAggregationRuleTypes`);
+
+    static GetAttributeAggregationRules(): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Attribute}/GetAggregationRules`);
     }
+
     static GetAttributeDataSourceTypes(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Attribute}/GetAttributeDataSourceTypes`);
     }

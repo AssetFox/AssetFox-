@@ -35,6 +35,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
+using Microsoft.SqlServer.Dac.Model;
 using Moq;
 using MoreLinq;
 using OfficeOpenXml;
@@ -661,6 +662,33 @@ namespace BridgeCareCoreTests.Tests
                 typeof(List<BudgetLibraryDTO>));
             var actualId = dtos.Single().Id;
             Assert.Equal(budgetLibraryId, actualId);
+        }
+
+        [Fact]
+        public async Task GetUsersOfLibrary_RequesterIsOwner_Gets()
+        {
+            var user1 = UserDtos.Dbe();
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New();
+            var budgetLibraryId = Guid.NewGuid();
+            var ownerDto = new LibraryUserDTO
+            {
+                UserId = user1.Id,
+                AccessLevel = LibraryAccessLevel.Owner,
+            };
+            var userDtos = new List<LibraryUserDTO> { ownerDto };
+            budgetRepo.Setup(br => br.GetLibraryUsers(budgetLibraryId)).Returns(userDtos);
+            var budgetLibraryDto = new BudgetLibraryDTO { Id = budgetLibraryId };
+            var budgetLibraryDtos = new List<BudgetLibraryDTO> { budgetLibraryDto };
+            budgetRepo.SetupGetLibraryAccess(budgetLibraryId, user1.Id, LibraryAccessLevel.Owner);
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork);
+            unitOfWork.SetupBudgetRepo(budgetRepo);
+
+            var result = await controller.GetBudgetLibraryUsers(budgetLibraryId);
+            ActionResultAssertions.OkObject(result);
+            var value = (result as OkObjectResult).Value;
+            Assert.Equal(userDtos, value);
         }
 
         [Fact]

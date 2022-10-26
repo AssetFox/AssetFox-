@@ -243,6 +243,7 @@ namespace BridgeCareCore.Controllers
                 {
                     var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibraryId, UserId);
                     _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
+                    users = UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibraryId);
                 });
                 return Ok(users);
             }

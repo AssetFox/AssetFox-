@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             new LibraryUserDTO
             {
                 UserId = entity.UserId,
+                UserName = entity.User?.Username,
                 AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
             };
     }

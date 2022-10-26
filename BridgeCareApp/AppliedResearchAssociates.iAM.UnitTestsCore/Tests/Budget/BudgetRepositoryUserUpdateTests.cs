@@ -47,8 +47,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var actualUser = users.Access;
             var expected = new LibraryUserDTO
             {
-                AccessLevel = DTOs.Enums.LibraryAccessLevel.Read,
+                AccessLevel = LibraryAccessLevel.Read,
                 UserId = user.Id,
+                UserName = user.Username,
             };
             ObjectAssertions.Equivalent(expected, actualUser);
         }

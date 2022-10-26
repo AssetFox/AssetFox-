@@ -149,6 +149,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
         {
             var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Include(u => u.User)
                 .Where(u => u.BudgetLibraryId == budgetLibraryId)
                 .Select(LibraryUserMapper.ToDto)
                 .ToList();

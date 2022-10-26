@@ -64,6 +64,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             {
                 AccessLevel = LibraryAccessLevel.Modify,
                 UserId = user.Id,
+                UserName = user.Username,
             };
             ObjectAssertions.Equivalent(expectedUser, actualUser);
         }

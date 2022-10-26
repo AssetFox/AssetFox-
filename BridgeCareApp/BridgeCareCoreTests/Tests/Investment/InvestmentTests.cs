@@ -285,7 +285,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task RequestUpsertNewBudgetLibrary_ForwardsRequestToService()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
@@ -315,7 +315,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task RequestUpsertExistingBudgetLibrary_ForwardsRequestToService()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, LibraryAccessLevel.Owner);
@@ -345,7 +345,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task RequestUpsertExistingBudgetLibrary_UserIsAdminWithoutExplicitAccess_ForwardsRequestToService()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
@@ -375,7 +375,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task RequestUpsertExistingBudgetLibrary_UserIsNotAdminWithoutExplicitAccess_DoesNotForwardRequestToService()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
@@ -408,7 +408,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task DeleteBudgetLibrary_LibraryDoesNotExistAdminUser_UnauthorizedAndDoesNotCallDeleteOnRepo()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupLibraryAccessLibraryDoesNotExist(libraryId);
@@ -448,7 +448,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task DeleteBudgetLibrary_AdminUser_Ok()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var libraryId = Guid.NewGuid();
             var budgetRepo = BudgetRepositoryMocks.New();
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
@@ -505,7 +505,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task GetBudgetLibraries_UserIsAdmin_CallsGetLibrariesWithoutChildrenOnRepo()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var budgetRepo = BudgetRepositoryMocks.New();
             var libraryId = Guid.NewGuid();
@@ -551,7 +551,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task GetInvestment_UserIsAdmin_BudgetRepoAndInvestmentPlanRepo()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var budgetRepo = BudgetRepositoryMocks.New();
             var simulationId = Guid.NewGuid();
@@ -589,20 +589,19 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
-            // Created a repository-level test for this. Unclear about the service level.
-            // Isolated testing theory would suggest that controller tests should mock the
-            // service. But are we ready to back in our dividing line between controller
-            // and service code?
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var controller = CreateDatabaseAuthorizedController(service);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-
+            var user = UserDtos.Admin();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, investmentBudgetServiceMock: investmentBudgetServiceMock);
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();
 
             // Act
-            var result = await controller.UpsertInvestment(simulation.Id, request);
+            var result = await controller.UpsertInvestment(simulationId, request);
 
             // Assert
             ActionResultAssertions.Ok(result);
@@ -612,7 +611,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task GetBudgetLibraries_AdminUser_CallsGetBudgetLibrariesNoChildrenOnRepo()
         {
             // Arrange
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var budgetRepo = BudgetRepositoryMocks.New();
             var budgetLibraryId = Guid.NewGuid();
@@ -694,7 +693,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task GetUsersOfLibrary_RequesterIsAdmin_Gets()
         {
-            var user1 = UserDtos.Admin;
+            var user1 = UserDtos.Admin();
             var user2 = UserDtos.Dbe();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
             var budgetRepo = BudgetRepositoryMocks.New();
@@ -1035,7 +1034,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task RequestLibraryImport_InvalidMimeType_Throws()
         {
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
 
@@ -1049,7 +1048,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ImportLibrary_FileNotFound_Throws()
         {
             // Arrange
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var claims = SystemSecurityClaimLists.Admin();
             var contextAccessor = HttpContextAccessorMocks.DefaultMock();
@@ -1073,7 +1072,7 @@ namespace BridgeCareCoreTests.Tests
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);
-            var user = UserDtos.Admin;
+            var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             var controller = TestInvestmentControllerSetup.CreateController(unitOfWork, accessor);
 

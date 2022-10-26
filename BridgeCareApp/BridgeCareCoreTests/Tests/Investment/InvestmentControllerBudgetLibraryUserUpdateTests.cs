@@ -149,7 +149,7 @@ namespace BridgeCareCoreTests.Tests
             var userId2 = Guid.NewGuid();
             var user1 = UserDtos.Dbe(userId1);
             var user2 = UserDtos.Dbe(userId2);
-            var adminUser = UserDtos.Admin;
+            var adminUser = UserDtos.Admin();
             var user1Dto = new LibraryUserDTO
             {
                 AccessLevel = LibraryAccessLevel.Owner,
@@ -195,7 +195,7 @@ namespace BridgeCareCoreTests.Tests
             var userId2 = Guid.NewGuid();
             var user1 = UserDtos.Dbe(userId1);
             var user2 = UserDtos.Dbe(userId2);
-            var adminUser = UserDtos.Admin;
+            var adminUser = UserDtos.Admin();
             var user1Dto = new LibraryUserDTO
             {
                 AccessLevel = LibraryAccessLevel.Owner,

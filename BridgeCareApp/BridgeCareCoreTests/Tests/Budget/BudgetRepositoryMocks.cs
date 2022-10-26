@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using Moq;
@@ -13,9 +14,10 @@ namespace BridgeCareCoreTests.Tests
 {
     public static class BudgetRepositoryMocks
     {
-        public static Mock<IBudgetRepository> New()
+        public static Mock<IBudgetRepository> New(Mock<IUnitOfWork> unitOfWork = null)
         {
             var mock = new Mock<IBudgetRepository>();
+            unitOfWork?.Setup(u => u.BudgetRepo).Returns(mock.Object);
             return mock;
         }
 

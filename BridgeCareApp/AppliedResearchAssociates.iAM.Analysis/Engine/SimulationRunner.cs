@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.Validation;
 
@@ -61,7 +62,8 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             }
         }
 
-        public void Run(bool withValidation = true)
+
+        public void Run(bool withValidation = true, CancellationToken cancellationToken = default(CancellationToken))
         {
             // During the execution of this method and its dependencies, the "SimulationException"
             // type is used for errors that are caused by invalid user input. Other types like
@@ -192,12 +194,13 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
 
             foreach (var year in Simulation.InvestmentPlan.YearsOfAnalysis)
             {
+                if (CheckCanceled(cancellationToken)) return;
                 var percentComplete = (double)(year - Simulation.InvestmentPlan.FirstYearOfAnalysisPeriod) / Simulation.InvestmentPlan.NumberOfYearsInAnalysisPeriod * 100;
                 ReportProgress(ProgressStatus.Running, percentComplete, year);
 
-                var unhandledContexts = ApplyRequiredEvents(year);
-                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year);
-                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year);
+                var unhandledContexts = ApplyRequiredEvents(year); if (CheckCanceled(cancellationToken)) return;
+                var treatmentOptions = GetBeneficialTreatmentOptionsInOptimalOrder(unhandledContexts, year); if (CheckCanceled(cancellationToken)) return;
+                ConsiderTreatmentOptions(unhandledContexts, treatmentOptions, year); if (CheckCanceled(cancellationToken)) return;
                 treatmentOptions = null;
 
                 InParallel(AssetContexts, context =>
@@ -205,6 +208,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
                     context.ApplyTreatmentMetadataIfPending(year);
                     context.UnfixCalculatedFieldValues();
                 });
+                if (CheckCanceled(cancellationToken)) return;
 
                 Snapshot(year);
             }
@@ -217,6 +221,18 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
             ReportProgress(ProgressStatus.Completed, 100);
 
             StatusCode = STATUS_CODE_NOT_RUNNING;
+
+
+
+            bool CheckCanceled(CancellationToken cancellationToken)
+            {
+                var canceled = cancellationToken.IsCancellationRequested;
+                if (canceled)
+                {
+                    ReportProgress(ProgressStatus.Canceled);
+                }
+                return canceled;
+            }
         }
 
         public ValidationResultBag RunValidation()

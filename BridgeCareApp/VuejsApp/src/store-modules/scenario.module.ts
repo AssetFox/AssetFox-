@@ -218,12 +218,12 @@ const actions = {
             },
         );
     },
-    async cancelQueuedSimulation({dispatch, state, commit}: any, payload: any) {
-        return await ScenarioService.cancelSimulation(payload.scenarioId)
+    async cancelSimulation({dispatch, state, commit}: any, payload: any) {
+        return await ScenarioService.cancelSimulation(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Canceled simulation analysis',
+                        message: 'Simulation analysis canceled',
                     });
                 }
             },

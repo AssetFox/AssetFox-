@@ -108,7 +108,6 @@ namespace BridgeCareCore.Services
                     break;
 
                 case ProgressStatus.Running:
-                    if (CheckCanceled()) { return; }
                     simulationAnalysisDetail.Status = $"Simulating {eventArgs.Year} - {Math.Round(eventArgs.PercentComplete)}%";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
 
@@ -126,6 +125,10 @@ namespace BridgeCareCore.Services
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
 
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
+                    break;
+
+                case ProgressStatus.Canceled:
+                    ReportCanceled();
                     break;
                 }
                 _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
@@ -163,8 +166,10 @@ namespace BridgeCareCore.Services
             _unitOfWork.SimulationReportDetailRepo.UpsertSimulationReportDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
 
+            if (CheckCanceled()) { return; }
             RunValidation(runner);
-            runner.Run(false);
+
+            runner.Run(false, cancellationToken);
 
             void RunValidation(SimulationRunner runner)
             {
@@ -192,15 +197,21 @@ namespace BridgeCareCore.Services
                 var canceled = cancellationToken.IsCancellationRequested;
                 if (canceled)
                 {
-                    var simulationAnalysisDetail = new SimulationAnalysisDetailDTO
-                    {
-                        SimulationId = simulationId,
-                        Status = "Canceled."
-                    };
-                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
-                    _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
+                    ReportCanceled();
                 }
                 return canceled;
+            }
+
+            void ReportCanceled()
+            {
+                var detail = new SimulationAnalysisDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = "Canceled",
+                    LastRun = StartTime,
+                };
+                UpdateSimulationAnalysisDetail(detail, DateTime.Now);
+                _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, detail);
             }
 
             void UpdateSimulationAnalysisDetailFromString(string message)

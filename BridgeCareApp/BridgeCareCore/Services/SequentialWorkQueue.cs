@@ -41,15 +41,18 @@ namespace BridgeCareCore.Services
 
         public void Cancel(Guid workId)
         {
-            IQueuedWorkHandle queuedWorkHandle = null;
+            IQueuedWorkHandle queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
 
-            if (!queuedWorkHandle.WorkHasStarted)
+            if (queuedWorkHandle != null)
             {
-                queuedWorkHandle.RemoveFromQueue(true);
-            }
-            else
-            {
-                queuedWorkHandle.WorkCancellationTokenSource.Cancel();
+                if (!queuedWorkHandle.WorkHasStarted)
+                {
+                    queuedWorkHandle.RemoveFromQueue(true);
+                }
+                else
+                {
+                    queuedWorkHandle.WorkCancellationTokenSource.Cancel();
+                }
             }
         }
 

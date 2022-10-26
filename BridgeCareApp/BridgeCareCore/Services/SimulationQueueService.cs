@@ -149,6 +149,7 @@ namespace BridgeCareCore.Services
                 Status = simulationDTO.Status,
 
                 QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
+                WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
                 QueueingUser = queuedWorkHandle.UserInfo.Name,
                 QueuePosition = queuedWorkHandle.QueueIndex,
             };

@@ -275,15 +275,28 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> CancelSimulation(Guid simulationId)
         {
-            _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
-            _simulationAnalysis.Cancel(simulationId);
-            await Task.Delay(125);
-            HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+            try
             {
-                SimulationId = simulationId,
-                Status = "Canceling..."
-            });
-            return Ok();
+                _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
+                _simulationAnalysis.Cancel(simulationId);
+                await Task.Delay(125);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                {
+                    SimulationId = simulationId,
+                    Status = "Canceling..."
+                });
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
+                throw;
+            }
         }
     }
 }

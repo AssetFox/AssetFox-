@@ -1,7 +1,7 @@
 import {clone, any, propEq, update, findIndex, append, find, isNil} from 'ramda';
 import AttributeService from '@/services/attribute.service';
 import {AxiosResponse} from 'axios';
-import {Attribute, AttributeSelectValues, AttributeSelectValuesResult, emptyAttribute} from '@/shared/models/iAM/attribute';
+import {Attribute, AttributeSelectValues, AttributeSelectValuesResult, emptyAttribute, RuleDefinition} from '@/shared/models/iAM/attribute';
 import {hasValue} from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import { noneDatasource } from '@/shared/models/iAM/data-source';
@@ -12,8 +12,9 @@ const state = {
     stringAttributes: [] as Attribute[],
     numericAttributes: [] as Attribute[],
     attributesSelectValues: [] as AttributeSelectValues[],
-    attributeAggregationRuleTypes: [] as string[],
-    attributeDataSourceTypes: [] as string[]
+    attributeDataSourceTypes: [] as string[],
+    aggregationRules: [] as RuleDefinition[],
+    aggregationRulesForType: [] as string[]
 };
 
 const mutations = {
@@ -63,8 +64,11 @@ const mutations = {
     attributesSelectValuesMutator(state: any, attributesSelectValues: AttributeSelectValues[]) {
         state.attributesSelectValues = [...state.attributesSelectValues, ...attributesSelectValues];
     },
-    attributeAggregationRuleTypesMutator(state: any, attributeAggregationRuleTypes: string[]) {
-        state.attributeAggregationRuleTypes = clone(attributeAggregationRuleTypes);
+    attributeAggregationRulesMutator(state: any, aggregationRules: RuleDefinition[]) {
+        state.aggregationRules = clone(aggregationRules);
+    },
+    attributeAggregationRulesForTypeMutator(state: any, aggregationRulesForType: RuleDefinition[]) {
+        state.aggregationRulesForType = clone(aggregationRulesForType.map(ar=>ar.ruleName));
     },
     attributeDataSourceTypesMutator(state: any, attributeDataSourceTypes: string[]) {
         state.attributeDataSourceTypes = clone(attributeDataSourceTypes);
@@ -165,14 +169,24 @@ const actions = {
                 }
             },
         );
-    },
-    async getAttributeAggregationRuleTypes({commit}: any) {
-        await AttributeService.GetAttributeAggregationRuleTypes()
-            .then((response: AxiosResponse<Attribute[]>) => {
+    },    
+    async getAttributeAggregationRules({commit}: any) {
+        await AttributeService.GetAttributeAggregationRules()
+            .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
-                    commit('attributeAggregationRuleTypesMutator', response.data);
+                    commit('attributeAggregationRulesMutator', response.data);
                 }
             });
+    },
+    async getAggregationRulesForType({commit}: any, type: String) {        
+        if(type == 'NUMBER')
+        {
+            commit('attributeAggregationRulesForTypeMutator', state.aggregationRules.filter((ruleDefinition: RuleDefinition) => ruleDefinition.isNumeric));
+        }
+        if(type == 'STRING')
+        {
+            commit('attributeAggregationRulesForTypeMutator', state.aggregationRules.filter((ruleDefinition: RuleDefinition) => ruleDefinition.isText));
+        }
     },
     async getAttributeDataSourceTypes({commit}: any) {
         await AttributeService.GetAttributeDataSourceTypes()

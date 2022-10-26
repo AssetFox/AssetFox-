@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using AppliedResearchAssociates.CalculateEvaluate;
 
 namespace BridgeCareCore.Controllers
 {
@@ -39,7 +40,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["Exception"]}");
+                if (e is CalculateEvaluateException)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["CalculateEvaluateException"]}");
+                } else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["Exception"]}");
+                }
                 throw;
             }
         }

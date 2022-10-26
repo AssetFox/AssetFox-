@@ -141,6 +141,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportLibraryTreatmentsExcelFile - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
@@ -408,6 +409,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
@@ -437,6 +439,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentsTemplate - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
@@ -466,6 +469,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadLibraryTreatmentsTemplate - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)

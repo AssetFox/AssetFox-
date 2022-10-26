@@ -378,6 +378,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
@@ -401,6 +402,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
@@ -430,6 +432,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)

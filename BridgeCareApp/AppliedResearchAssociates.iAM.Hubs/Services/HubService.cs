@@ -19,6 +19,9 @@ namespace AppliedResearchAssociates.iAM.Hubs.Services
             {
                 {"Exception", "An exception has occurred." },
                 {"SimulationException", "An error has occurred during the simulation." },
+                {"InvalidAttributeException", "An invalid attribute upsert occurred." },
+                {"InvalidAttributeUpsertException", "An invalid attribute with aggregation rule." },
+                {"CalculateEvaluateException", "Expression could not be compiled." },
                 {"Unauthorized", "Unauthorized to access this component." },
                 {"AnalysisDefaultData", "Configuration read error." },
                 {"InvestmentDefaultData", "Configuration read error." }

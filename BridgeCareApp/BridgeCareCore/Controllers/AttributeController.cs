@@ -19,6 +19,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 using BridgeCareCore.Security;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -124,8 +125,19 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                if (e is InvalidAttributeUpsertException)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["InvalidAttributeUpsertException"]}");
+                }
+                else if (e is InvalidAttributeException)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["InvalidAttributeException"]}");
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["Exception"]}");
+                }
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

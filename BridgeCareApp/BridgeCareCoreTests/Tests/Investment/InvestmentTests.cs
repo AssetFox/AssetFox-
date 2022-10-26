@@ -308,6 +308,8 @@ namespace BridgeCareCoreTests.Tests
             };
             var _ = await controller.UpsertBudgetLibrary(upsertRequest);
             var upsertCalls = budgetRepo.GetUpsertBudgetLibraryCalls();
+            var upsertOrDeleteUsersCalls = budgetRepo.InvocationsWithName(nameof(IBudgetRepository.UpsertOrDeleteUsers));
+            Assert.Single(upsertOrDeleteUsersCalls);
             var actualDto = upsertCalls.Single();
             ObjectAssertions.Equivalent(library, actualDto);
         }
@@ -587,7 +589,7 @@ namespace BridgeCareCoreTests.Tests
 
 
         [Fact]
-        public async Task ShouldReturnOkResultOnScenarioPost()
+        public async Task ScenarioPost_AdminUser_OkAndCallsRepositories()
         {
             var user = UserDtos.Admin();
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
@@ -605,6 +607,8 @@ namespace BridgeCareCoreTests.Tests
 
             // Assert
             ActionResultAssertions.Ok(result);
+            var budgetInvocation = budgetRepo.SingleInvocationWithName(nameof(IBudgetRepository.UpsertOrDeleteScenarioBudgets));
+            var investmentPlanInvocation = investmentPlanRepo.SingleInvocationWithName(nameof(IInvestmentPlanRepository.UpsertInvestmentPlan));
         }
 
         [Fact]
@@ -749,75 +753,45 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetInvestmentData()
+        public async Task GetInvestment_RepositoriesReturnBudgetsAndInvestmentPlan_Expected()
         {
-            var service = SetupDatabaseBasedService();
-            // Arrange
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddScenarioDataToDatabase(simulation.Id);
-
+            var user1 = UserDtos.Dbe();
+            var user2 = UserDtos.Dbe();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var hubService = HubServiceMocks.DefaultMock();
+            var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
+            var simulationRepo = SimulationRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationUser1 = new SimulationUserDTO
+            {
+                UserId = user1.Id,
+                Username = user1.Username,
+                CanModify = true,
+            };
+            var simulationDto = new SimulationDTO
+            {
+                Id = simulationId,
+                Users = new List<SimulationUserDTO> { simulationUser1 },
+            };
+            var budgetDtos = new List<BudgetDTO>();
+            var investmentPlanId = Guid.NewGuid();
+            var investmentPlanDto = new InvestmentPlanDTO
+            {
+                Id = investmentPlanId,
+            };
+            simulationRepo.Setup(s => s.GetSimulation(simulationId)).Returns(simulationDto);
+            budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgetDtos);
+            investmentPlanRepo.Setup(ipr => ipr.GetInvestmentPlan(simulationId)).Returns(investmentPlanDto);
             // Act
-            var result = await controller.GetInvestment(simulation.Id);
+            var result = await controller.GetInvestment(simulationId);
 
             // Assert
             var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
             var dto = (InvestmentDTO)Convert.ChangeType(okObjResult.Value, typeof(InvestmentDTO));
-            Assert.Single(dto.ScenarioBudgets);
-            Assert.Equal(_testInvestmentPlan.FirstYearOfAnalysisPeriod,
-                dto.InvestmentPlan.FirstYearOfAnalysisPeriod);
-            Assert.Equal(_testInvestmentPlan.MinimumProjectCostLimit, dto.InvestmentPlan.MinimumProjectCostLimit);
-            Assert.Equal(_testInvestmentPlan.NumberOfYearsInAnalysisPeriod,
-                dto.InvestmentPlan.NumberOfYearsInAnalysisPeriod);
-
-            Assert.Single(dto.ScenarioBudgets[0].BudgetAmounts);
-            var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
-            var dtoBudgetAmount = dto.ScenarioBudgets[0].BudgetAmounts[0];
-            Assert.Equal(budgetAmount.Id, dtoBudgetAmount.Id);
-            Assert.Equal(budgetAmount.Year, dtoBudgetAmount.Year);
-            Assert.Equal(budgetAmount.Value, dtoBudgetAmount.Value);
-
-            Assert.Equal(_testScenarioBudget.CriterionLibraryScenarioBudgetJoin.CriterionLibraryId,
-                dto.ScenarioBudgets[0].CriterionLibrary.Id);
-        }
-
-        [Fact]
-        public async Task ShouldModifyLibraryData()
-        {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-            AddTestDataToDatabase();
-
-            _testBudgetLibrary.Budgets = new List<BudgetEntity> { _testBudget };
-            var dto = _testBudgetLibrary.ToDto();
-            dto.Description = "Updated Description";
-            dto.Budgets[0].Name = "Updated Name";
-            dto.Budgets[0].BudgetAmounts[0].Value = 1000000;
-            dto.Budgets[0].CriterionLibrary = new CriterionLibraryDTO();
-
-            var request = new InvestmentLibraryUpsertPagingRequestModel();
-
-            request.Library = dto;
-            request.PagingSync.UpdatedBudgets.Add(dto.Budgets[0]);
-
-            // Act
-            await controller.UpsertBudgetLibrary(request);
-
-            // Assert
-            var modifiedDto = TestHelper.UnitOfWork.BudgetRepo.GetBudgetLibraries().Single(lib => lib.Id == dto.Id);
-
-            Assert.Equal(dto.Description, modifiedDto.Description);
-
-            Assert.Equal(dto.Budgets[0].Name, modifiedDto.Budgets[0].Name);
-            Assert.Equal(dto.Budgets[0].CriterionLibrary.Id,
-                modifiedDto.Budgets[0].CriterionLibrary.Id);
-
-            Assert.Single(modifiedDto.Budgets[0].BudgetAmounts);
-            Assert.Equal(dto.Budgets[0].BudgetAmounts[0].Value,
-                modifiedDto.Budgets[0].BudgetAmounts[0].Value);
+            Assert.Equal(investmentPlanId, dto.InvestmentPlan.Id);
+            Assert.Equal(budgetDtos, dto.ScenarioBudgets);
         }
 
         [Fact]

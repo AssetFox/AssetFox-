@@ -15,5 +15,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Extensions
             var invocationsWithName = allInvocations.Where(i => i.Method.Name == methodName).ToList();
             return invocationsWithName;
         }
+
+        public static IInvocation SingleInvocationWithName<T>(
+            this Mock<T> mock, string methodName)
+            where T: class
+        {
+            var invocations = mock.InvocationsWithName(methodName);
+            var invocation = invocations.Single();
+            return invocation;
+        }
     }
 }

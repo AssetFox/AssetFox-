@@ -48,13 +48,17 @@ import Vue from 'vue';
 import {Component, Prop, Watch} from 'vue-property-decorator';
 import {Action, State} from 'vuex-class';
 import {any, find, findIndex, propEq, update, filter} from 'ramda';
-import {BudgetLibraryUser} from '@/shared/models/iAM/investment';
+import { BudgetLibraryUser } from '@/shared/models/iAM/investment';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import {User} from '@/shared/models/iAM/user';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {getUserName} from '@/shared/utils/get-user-info';
 import {setItemPropertyValueInList} from '@/shared/utils/setter-utils';
 import {DataTableHeader} from '@/shared/models/vue/data-table-header';
-import {BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData} from '@/shared/models/modals/share-budget-library-dialog-data';
+import { BudgetLibraryUserGridRow, ShareBudgetLibraryDialogData } from '@/shared/models/modals/share-budget-library-dialog-data';
+import InvestmentService from '@/services/investment.service';
+    import { AxiosResponse } from 'axios';
+    import { http2XX } from '@/shared/utils/http-utils';
 
 @Component
 export default class ShareBudgetLibraryDialog extends Vue {
@@ -92,26 +96,55 @@ export default class ShareBudgetLibraryDialog extends Vue {
         }));
   }
 
-  onSetUsersSharedWith() {
-    const currentUser: string = getUserName();
-    const isCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username === currentUser || budgetLibraryUser.isOwner;
-    const isNotCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username !== currentUser && !budgetLibraryUser.isOwner;
+    onSetUsersSharedWith() {
+        //budget library users
+        let budgetLibraryUsers: BudgetLibraryUser[] = [];
+        InvestmentService.getBudgetLibraryUsers(this.dialogData.budgetLibrary.id).then(response => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString()) && response.data)
+            {
+                let libraryUsers = response.data as LibraryUser[];
+                if (libraryUsers !== null && libraryUsers !== undefined) {
+                    //fill budget library user collection
+                    libraryUsers.forEach((libraryUser, index) => {
+                        //determine access level
+                        let canModify = false; if (libraryUser.accessLevel == 1) { canModify = true; }
+                        let isOwner = false; if (libraryUser.accessLevel == 2) { isOwner = true; }
 
-    this.currentUserAndOwner = filter(isCurrentUserOrOwner, this.dialogData.budgetLibraryUsers) as BudgetLibraryUser[];
-    const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, this.dialogData.budgetLibraryUsers) as BudgetLibraryUser[];
+                        //create library user object
+                        let budgetLibraryUser: BudgetLibraryUser = {
+                            userId: libraryUser.userId,
+                            username: libraryUser.userName,
+                            canModify: canModify,
+                            isOwner: isOwner,
+                        }
 
-    otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
-      if (any(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows)) {
-        const budgetLibraryUserGridRow: BudgetLibraryUserGridRow = find(
-            propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
+                        //add library user to an array
+                        budgetLibraryUsers.push(budgetLibraryUser);
+                    });
+                }
 
-        this.budgetLibraryUserGridRows = update(
-            findIndex(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows),
-            {...budgetLibraryUserGridRow, isShared: true, canModify: budgetLibraryUser.canModify},
-            this.budgetLibraryUserGridRows
-        );
-      }
-    });
+                //fill grid
+                const currentUser: string = getUserName();
+                const isCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username === currentUser || budgetLibraryUser.isOwner;
+                const isNotCurrentUserOrOwner = (budgetLibraryUser: BudgetLibraryUser) => budgetLibraryUser.username !== currentUser && !budgetLibraryUser.isOwner;
+
+                this.currentUserAndOwner = filter(isCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
+                const otherUsers: BudgetLibraryUser[] = filter(isNotCurrentUserOrOwner, budgetLibraryUsers) as BudgetLibraryUser[];
+
+                otherUsers.forEach((budgetLibraryUser: BudgetLibraryUser) => {
+                    if (any(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows)) {
+                        const budgetLibraryUserGridRow: BudgetLibraryUserGridRow = find(
+                            propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows) as BudgetLibraryUserGridRow;
+
+                        this.budgetLibraryUserGridRows = update(
+                            findIndex(propEq('id', budgetLibraryUser.userId), this.budgetLibraryUserGridRows),
+                            { ...budgetLibraryUserGridRow, isShared: true, canModify: budgetLibraryUser.canModify },
+                            this.budgetLibraryUserGridRows
+                        );
+                    }
+                });
+            }
+        });
   }
 
   removeUserModifyAccess(userId: string, isShared: boolean) {

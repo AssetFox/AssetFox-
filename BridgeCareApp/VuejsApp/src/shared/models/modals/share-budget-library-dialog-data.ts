@@ -1,14 +1,14 @@
-import {emptyBudgetLibraryUsers, BudgetLibraryUser} from '@/shared/models/iAM/investment';
+import {emptyBudgetLibrary, BudgetLibrary} from '@/shared/models/iAM/investment';
 import {clone} from 'ramda';
 
 export interface ShareBudgetLibraryDialogData {
     showDialog: boolean;
-    budgetLibraryUsers: BudgetLibraryUser[];
+    budgetLibrary: BudgetLibrary;
 }
 
 export const emptyShareBudgetLibraryDialogData: ShareBudgetLibraryDialogData = {
     showDialog: false,
-    budgetLibraryUsers: clone(emptyBudgetLibraryUsers)
+    budgetLibrary: clone(emptyBudgetLibrary)
 };
 
 export interface BudgetLibraryUserGridRow {

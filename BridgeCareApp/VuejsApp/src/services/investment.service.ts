@@ -46,6 +46,10 @@ export default class InvestmentService {
         );
     }
 
+    static getBudgetLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraryUsers/${libraryId}`)
+    }
+
     static upsertOrDeleteBudgetLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Investment}/UpsertOrDeleteBudgetLibraryUsers/${libraryId}`

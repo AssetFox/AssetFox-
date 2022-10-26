@@ -257,7 +257,6 @@
         BudgetAmount,
         BudgetLibrary,
         BudgetLibraryUser,
-        LibraryUser,
         BudgetYearsGridData,
         emptyBudgetLibrary,
         emptyInvestmentPlan, InvestmentBudgetFileImport,
@@ -308,6 +307,7 @@
     import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
     import { http2XX } from '@/shared/utils/http-utils';
     import { BudgetGridRow } from '@/shared/models/iAM/treatment';
+    import { LibraryUser } from '@/shared/models/iAM/user';
     import {
         mapToIndexSignature
     } from '../../shared/utils/conversion-utils';
@@ -762,16 +762,10 @@
 
         onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary)
         {
-            //get library user
-            let libraryUserData: LibraryUser[] = [];
-
-            //create budget library user
-            let budgetLibraryUsers: BudgetLibraryUser[] = [];
-
             this.shareBudgetLibraryDialogData =
             {
                 showDialog: true,
-                budgetLibraryUsers: clone(budgetLibraryUsers),
+                budgetLibrary: clone(budgetLibrary),
             };
         }
 
@@ -793,17 +787,18 @@
                     //create library user object
                     let libraryUser: LibraryUser = {
                         userId: budgetLibraryUser.userId,
+                        userName: budgetLibraryUser.username,
                         accessLevel: libraryUserAccessLevel
                     }
 
                     //add library user to an array
-                    this.libraryUserData.push(libraryUser);
+                    libraryUserData.push(libraryUser);
                 });
 
-                this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedBudgetLibrary.id, this.libraryUserData);
+                this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedBudgetLibrary.id, libraryUserData);
 
                 //update budget library sharing
-                InvestmentService.upsertOrDeleteBudgetLibraryUsers(this.selectedBudgetLibrary.id, this.libraryUserData).then((response: AxiosResponse) => {
+                InvestmentService.upsertOrDeleteBudgetLibraryUsers(this.selectedBudgetLibrary.id, libraryUserData).then((response: AxiosResponse) => {
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                     {
                         this.addSuccessNotificationAction({ message: 'Shared budget library' })

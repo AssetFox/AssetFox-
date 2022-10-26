@@ -16,6 +16,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CriterionLibraryController : BridgeCareCoreBaseController
     {
+        public const string CriterionLibraryError = "Criterion Library Error";
         public CriterionLibraryController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
@@ -31,7 +32,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::CriterionLibraries - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::CriterionLibraries - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -65,7 +66,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::UpsertCriterionLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -88,7 +89,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::DeleteCriterionLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::DeleteCriterionLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

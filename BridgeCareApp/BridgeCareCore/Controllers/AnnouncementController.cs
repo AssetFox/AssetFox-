@@ -17,6 +17,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AnnouncementController : BridgeCareCoreBaseController
     {
+        public const string AnnouncementError = "Announcement Error";
         public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
@@ -35,7 +36,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var t = e.InnerException;
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::GetAnnouncements - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::GetAnnouncements - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -60,7 +61,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::UpsertAnnouncement - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::UpsertAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -84,7 +85,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::DeleteAnnouncement - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }

@@ -19,7 +19,8 @@ namespace BridgeCareCore.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class AnalysisMethodController : BridgeCareCoreBaseController
-    {       
+    {
+        public const string AnalysisMethodError = "Analysis Method Error";
         public readonly IAnalysisDefaultDataService _analysisDefaultDataService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
@@ -63,12 +64,12 @@ namespace BridgeCareCore.Controllers
             }
             catch(UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method Error::GetAnalysisMethod - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method Error::GetAnalysisMethod - {HubService.errorList["Exception"]}");                
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {HubService.errorList["Exception"]}");                
                 throw;
             }
         }
@@ -90,13 +91,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method Error::UpsertAnalysisMethod - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Analysis Method Error::UpsertAnalysisMethod - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

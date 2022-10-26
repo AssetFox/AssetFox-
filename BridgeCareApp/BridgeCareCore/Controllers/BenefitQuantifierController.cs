@@ -16,6 +16,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class BenefitQuantifierController : BridgeCareCoreBaseController
     {
+        public const string BenefitQuantifierError = "Benefit Quantifier Error";
         public BenefitQuantifierController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
@@ -33,7 +34,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Benefit Quantifier Error::GetBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::GetBenefitQuantifier - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -57,7 +58,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Benefit Quantifier Error::UpsertBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::UpsertBenefitQuantifier - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -81,7 +82,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Benefit Quantifier Error::DeleteBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::DeleteBenefitQuantifier - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

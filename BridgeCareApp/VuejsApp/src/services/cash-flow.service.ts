@@ -15,13 +15,13 @@ export default class CashFlowService {
 
     static getScenarioCashFlowRulePage(scenarioId: string, data:PagingRequest<CashFlowRule>): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.TargetConditionGoal}/GetScenarioCashFlowRulePage/${scenarioId}`, data
+            `${API.CashFlow}/GetScenarioCashFlowRulePage/${scenarioId}`, data
         );
     }
 
     static getLibraryCashFlowRulePage(libraryId: string, data:PagingRequest<CashFlowRule>): AxiosPromise {
         return coreAxiosInstance.post(
-            `${API.TargetConditionGoal}/GetLibraryCashFlowRulePage/${libraryId}`, data
+            `${API.CashFlow}/GetLibraryCashFlowRulePage/${libraryId}`, data
         );
     }
 

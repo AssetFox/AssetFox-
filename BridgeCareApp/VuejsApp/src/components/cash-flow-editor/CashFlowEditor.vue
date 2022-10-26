@@ -450,22 +450,22 @@ export default class CashFlowEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getCashFlowRuleLibrariesAction().then(() => {
-                vm.getHasPermittedAccessAction();
-            }).then(() => {
-                if (to.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
-                    vm.selectedScenarioId = to.query.scenarioId;
+                vm.getHasPermittedAccessAction().then(() => {
+                    if (to.path.indexOf(ScenarioRoutePaths.CashFlow) !== -1) {
+                        vm.selectedScenarioId = to.query.scenarioId;
 
-                    if (vm.selectedScenarioId === vm.uuidNIL) {
-                        vm.addErrorNotificationAction({
-                            message: 'Unable to identify selected scenario.',
-                        });
-                        vm.$router.push('/Scenarios/');
+                        if (vm.selectedScenarioId === vm.uuidNIL) {
+                            vm.addErrorNotificationAction({
+                                message: 'Unable to identify selected scenario.',
+                            });
+                            vm.$router.push('/Scenarios/');
+                        }
+
+                        vm.hasScenario = true;
+                        vm.initializePages();
                     }
-
-                    vm.hasScenario = true;
-                    vm.initializePages();
-                }
-            });  
+                });
+            })  
         });
     }
 
@@ -517,7 +517,7 @@ export default class CashFlowEditor extends Vue {
         console.log('message');
     }
 
-    @Watch('selectedCashFlowRuleLibrary', {deep: true})
+    @Watch('selectedCashFlowRuleLibrary')
     onSelectedCashFlowRuleLibraryChanged() {
         this.hasSelectedLibrary =
             this.selectedCashFlowRuleLibrary.id !== this.uuidNIL;
@@ -557,23 +557,9 @@ export default class CashFlowEditor extends Vue {
         }
     }
 
-    @Watch('cashFlowRuleGridData')//might what to get rid of this
+    @Watch('cashFlowRuleGridData')
     onCashFlowRuleGridDataChanged() {
-        const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore(
-                  '',
-                  this.cashFlowRuleGridData,
-                  this.stateScenarioCashFlowRules,
-              )
-            : hasUnsavedChangesCore(
-                  '',
-                  {
-                      ...clone(this.selectedCashFlowRuleLibrary),
-                      cashFlowRules: clone(this.cashFlowRuleGridData),
-                  },
-                  this.stateSelectedCashRuleFlowLibrary,
-              );
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+
     }
 
     @Watch('selectedCashFlowRule')
@@ -596,7 +582,7 @@ export default class CashFlowEditor extends Vue {
             page: page,
             rowsPerPage: rowsPerPage,
             pagingSync: {
-                libraryId: this.librarySelectItemValue !== null ? this.librarySelectItemValue : null,
+                libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
                 addedRows: this.addedRows,
@@ -830,11 +816,13 @@ export default class CashFlowEditor extends Vue {
     onEditSelectedLibraryListData(data: any, property: string) {
         switch (property) {
             case 'description':
-                this.currentPage = update(
-                    findIndex(propEq('id', data.id), this.currentPage),
-                    data as CashFlowRule,
-                    this.currentPage,
-                );
+                // this.currentPage = update(
+                //     findIndex(propEq('id', data.id), this.currentPage),
+                //     data as CashFlowRule,
+                //     this.currentPage,
+                // );
+                this.onUpdateRow(data.id, clone(data))
+                this.onPaginationChanged();
                 break;
         }
     }
@@ -865,6 +853,7 @@ export default class CashFlowEditor extends Vue {
                 this.librarySelectItemValue = null;
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's cash flow rules"});
+                this.importLibraryDisabled = true;
             }           
         });
     }
@@ -902,6 +891,7 @@ export default class CashFlowEditor extends Vue {
             if (this.hasScenario) {
                 this.clearChanges();
                 this.resetPage();
+                this.importLibraryDisabled = true;
             }
         });
     }

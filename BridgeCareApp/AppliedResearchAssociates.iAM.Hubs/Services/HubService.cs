@@ -18,6 +18,7 @@ namespace AppliedResearchAssociates.iAM.Hubs.Services
             _errorList = new Dictionary<string, string>()
             {
                 {"Exception", "An exception has occurred." },
+                {"SimulationException", "An error has occurred during the simulation." },
                 {"Unauthorized", "Unauthorized to access this component." },
                 {"AnalysisDefaultData", "Configuration read error." },
                 {"InvestmentDefaultData", "Configuration read error." }

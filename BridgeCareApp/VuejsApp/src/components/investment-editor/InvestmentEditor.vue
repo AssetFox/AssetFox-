@@ -257,6 +257,7 @@
         BudgetAmount,
         BudgetLibrary,
         BudgetLibraryUser,
+        LibraryUser,
         BudgetYearsGridData,
         emptyBudgetLibrary,
         emptyInvestmentPlan, InvestmentBudgetFileImport,
@@ -386,6 +387,7 @@
         budgetYearsGridData: BudgetYearsGridData[] = [];
         selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
         selectedBudgetYears: number[] = [];
+
         createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
         shareBudgetLibraryDialogData: ShareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
         editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
@@ -758,34 +760,52 @@
             this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
         }
 
-        onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary) {
-            this.shareBudgetLibraryDialogData = {
+        onShowShareBudgetLibraryDialog(budgetLibrary: BudgetLibrary)
+        {
+            //get library user
+            let libraryUserData: LibraryUser[] = [];
+
+            //create budget library user
+            let budgetLibraryUsers: BudgetLibraryUser[] = [];
+
+            this.shareBudgetLibraryDialogData =
+            {
                 showDialog: true,
-                budgetLibrary: clone(budgetLibrary),
+                budgetLibraryUsers: clone(budgetLibraryUsers),
             };
         }
 
         onShareBudgetLibraryDialogSubmit(budgetLibraryUsers: BudgetLibraryUser[]) {
-            const BudgetLibrary: BudgetLibrary = {
-                ...this.shareBudgetLibraryDialogData.budgetLibrary,
-                users: [],
-            };
-
             this.shareBudgetLibraryDialogData = clone(emptyShareBudgetLibraryDialogData);
 
-            if (!isNil(budgetLibraryUsers) && BudgetLibrary.id !== getBlankGuid()) {
-                this.upsertOrDeleteBudgetLibraryUsersAction(BudgetLibrary.id, budgetLibraryUsers);
+            if (!isNil(budgetLibraryUsers) && this.selectedBudgetLibrary.id !== getBlankGuid())
+            {
+                let libraryUserData: LibraryUser[] = [];
+
+                //create library users
+                budgetLibraryUsers.forEach((budgetLibraryUser, index) =>
+                {   
+                    //determine access level
+                    let libraryUserAccessLevel: number = 0;
+                    if (libraryUserAccessLevel == 0 && budgetLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                    if (libraryUserAccessLevel == 0 && budgetLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                    //create library user object
+                    let libraryUser: LibraryUser = {
+                        userId: budgetLibraryUser.userId,
+                        accessLevel: libraryUserAccessLevel
+                    }
+
+                    //add library user to an array
+                    this.libraryUserData.push(libraryUser);
+                });
+
+                this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedBudgetLibrary.id, this.libraryUserData);
 
                 //update budget library sharing
-                InvestmentService.upsertOrDeleteBudgetLibraryUsers(BudgetLibrary.id, budgetLibraryUsers).then((response: AxiosResponse) => {
+                InvestmentService.upsertOrDeleteBudgetLibraryUsers(this.selectedBudgetLibrary.id, this.libraryUserData).then((response: AxiosResponse) => {
                     if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                     {
-                        if (this.budgetLibrary.users === []) {
-                            this.clearChanges();
-                        }
-
-                        this.budgetLibraryMutator(this.budgetLibrary); // mutation actions
-                        this.selectedBudgetLibraryMutator(this.budgetLibrary.id);
                         this.addSuccessNotificationAction({ message: 'Shared budget library' })
                         this.resetPage();
                     }

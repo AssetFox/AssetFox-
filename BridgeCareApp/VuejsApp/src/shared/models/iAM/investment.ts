@@ -33,6 +33,11 @@ export interface BudgetLibraryUser {
     isOwner: boolean;
 }
 
+export interface LibraryUser {
+    userId: string;
+    accessLevel: number;
+}
+
 export interface BudgetLibrary {
     id: string;
     name: string;

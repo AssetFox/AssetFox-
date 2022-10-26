@@ -232,7 +232,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertOrDeleteBudgetLibraryUsers")]
+        [Route("UpsertOrDeleteBudgetLibraryUsers/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
         public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
         {

@@ -596,7 +596,6 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var investmentPlanRepo = InvestmentPlanRepositoryMocks.NewMock(unitOfWork);
             var investmentBudgetServiceMock = InvestmentBudgetServiceMocks.New();
-            investmentBudgetServiceMock.Setup(ibs => ibs.GetSyncedInvestmentDataset(simulationId, It.IsAny<InvestmentPagingSyncModel>())).Returns(new List<BudgetDTO>()); ;
             var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork, investmentBudgetServiceMock: investmentBudgetServiceMock);
             var request = new InvestmentPagingSyncModel();
             request.Investment = new InvestmentPlanDTO();

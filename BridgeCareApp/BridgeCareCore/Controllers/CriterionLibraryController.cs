@@ -31,7 +31,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::CriterionLibraries - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -65,7 +65,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::UpsertCriterionLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -88,7 +88,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Criterion Library Error::DeleteCriterionLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

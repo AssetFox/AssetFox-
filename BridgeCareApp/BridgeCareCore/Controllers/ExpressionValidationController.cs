@@ -17,6 +17,8 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class ExpressionValidationController : BridgeCareCoreBaseController
     {
+        public const string ExpressionValidationError = "Expression Validation Error";
+
         private readonly IExpressionValidationService _expressionValidationService;
 
         public ExpressionValidationController(IExpressionValidationService expressionValidationService,
@@ -37,7 +39,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -55,7 +57,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResult - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -73,7 +75,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Expression Validation error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResultNoCount - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

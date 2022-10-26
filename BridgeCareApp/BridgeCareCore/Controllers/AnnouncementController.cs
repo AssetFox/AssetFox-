@@ -34,7 +34,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                var t = e.InnerException;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::GetAnnouncements - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -59,7 +60,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::UpsertAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -83,7 +84,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement Error::DeleteAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }

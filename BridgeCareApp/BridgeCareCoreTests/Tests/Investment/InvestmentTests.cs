@@ -53,19 +53,6 @@ namespace BridgeCareCoreTests.Tests
         private readonly Mock<IInvestmentDefaultDataService> _mockInvestmentDefaultDataService = new Mock<IInvestmentDefaultDataService>();
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
-        public InvestmentBudgetsService SetupDatabaseBasedService()
-        {
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            var hubService = HubServiceMocks.Default();
-            var logger = new LogNLog();
-            var service = new InvestmentBudgetsService(
-                TestHelper.UnitOfWork,
-                new ExpressionValidationService(TestHelper.UnitOfWork, logger),
-                hubService,
-                new InvestmentDefaultDataService());
-            return service;
-        }
 
         private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
         {
@@ -881,7 +868,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldImportLibraryBudgetsFromFile()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
@@ -915,7 +902,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
@@ -959,7 +946,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
@@ -1006,7 +993,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldExportLibraryBudgetsFile()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             AddTestDataToDatabase();
             var accessor = CreateRequestWithLibraryFormData();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
@@ -1098,7 +1085,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateDatabaseAuthorizedController(service, accessor);
@@ -1131,7 +1118,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             AddScenarioDataToDatabase(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
@@ -1176,7 +1163,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var year = DateTime.Now.Year;
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             AddScenarioDataToDatabase(simulation.Id);
@@ -1220,11 +1207,24 @@ namespace BridgeCareCoreTests.Tests
             Assert.Contains(budgetAmounts, amount => amount == decimal.Parse("5000000"));
         }
 
+
+        [Fact]
+        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
+        {
+            // Arrange
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var controller = CreateDatabaseAuthorizedController(service);
+
+            // Act + Asset
+            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
+            Assert.Equal("Request MIME type is invalid.", exception.Message);
+        }
         [Fact]
         public async Task ShouldExportScenarioBudgetsFile()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var simulationName = RandomStrings.Length11();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
             AddScenarioDataToDatabase(simulation.Id);
@@ -1261,23 +1261,10 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
-        {
-            // Arrange
-            var service = SetupDatabaseBasedService();
-            var controller = CreateDatabaseAuthorizedController(service);
-
-            // Act + Asset
-            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await controller.ImportScenarioInvestmentBudgetsExcelFile());
-            Assert.Equal("Request MIME type is invalid.", exception.Message);
-        }
-
-        [Fact]
         public async Task ShouldThrowConstraintWhenNoFilesForScenarioImport()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var accessor = CreateRequestForExceptionTesting();
             var controller = CreateDatabaseAuthorizedController(service, accessor);
 
@@ -1287,11 +1274,13 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal("Investment budgets file not found.", exception.Message);
         }
 
+
+
         [Fact]
         public async Task ShouldThrowConstraintWhenNoBudgetSimulationIdFoundForImport()
         {
             // Arrange
-            var service = SetupDatabaseBasedService();
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
             var file = new FormFile(new MemoryStream(Encoding.UTF8.GetBytes("This is a dummy file")), 0, 0, "Data",
                 "dummy.txt");
             var accessor = CreateRequestForExceptionTesting(file);

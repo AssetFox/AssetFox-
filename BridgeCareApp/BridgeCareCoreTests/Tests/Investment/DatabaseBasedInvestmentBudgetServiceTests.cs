@@ -426,20 +426,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
-        {
-            // Arrange
-            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-            var controller = CreateDatabaseAuthorizedController(service);
-
-            // Act + Asset
-            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-                await controller.ImportScenarioInvestmentBudgetsExcelFile());
-            Assert.Equal("Request MIME type is invalid.", exception.Message);
-        }
-
-        [Fact]
-        public void ShouldExportScenarioBudgetsFile()
+        public void ExportScenarioInvestmentBudgetsFile_Does()
         {
             // Arrange
             var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);

@@ -748,5 +748,19 @@ namespace BridgeCareCoreTests.Tests
                 await controller.ImportScenarioInvestmentBudgetsExcelFile());
             Assert.Equal("Request contained no simulation id.", exception.Message);
         }
+        
+        [Fact]
+        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
+        {
+            // Arrange
+            var user = UserDtos.Admin();
+            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
+            var controller = TestInvestmentControllerSetup.CreateAdminController(unitOfWork);
+
+            // Act + Asset
+            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
+            Assert.Equal("Request MIME type is invalid.", exception.Message);
+        }
     }
 }

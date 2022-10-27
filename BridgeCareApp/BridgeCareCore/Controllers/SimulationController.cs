@@ -283,7 +283,7 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
                 {
                     SimulationId = simulationId,
-                    Status = "Canceling..."
+                    Status = "Canceling analysis..."
                 });
                 return Ok();
             }

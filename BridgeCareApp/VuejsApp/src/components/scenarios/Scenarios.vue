@@ -827,7 +827,8 @@ export default class Scenarios extends Vue {
     simulationQueuePagination: Pagination = clone(emptyPagination);
     totalQueuedSimulations: number = 0;
 
-    initializing: boolean = true
+    initializing: boolean = true;
+    initializingSimulationQueue: boolean = true;
     searchMine: string = '';
     currentSearchMine: string = '';
     searchShared: string = '';
@@ -954,7 +955,7 @@ export default class Scenarios extends Vue {
     }
 
     doSimulationQueuePagination() {
-        if(this.initializing)
+        if(this.initializingSimulationQueue)
             return;
         const { sortBy, descending, page, rowsPerPage } = this.simulationQueuePagination;
 
@@ -1110,7 +1111,8 @@ export default class Scenarios extends Vue {
         this.getSharedScenariosPageAction(request).then(() =>
         this.getUserScenariosPageAction(request).then(() =>
         this.getSimulationQueuePageAction(simulationQueueRequest).then(() => {
-            this.initializing = false
+            this.initializing = false;
+            this.initializingSimulationQueue = false;
             this.totalUserScenarios = this.stateTotalUserScenarios;
             this.totalSharedScenarios = this.stateTotalSharedScenarios;
             this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
@@ -1382,7 +1384,7 @@ export default class Scenarios extends Vue {
                 simulationId: this.selectedSimulation.id,
             }).then(() => {
                 this.selectedSimulation = clone(emptySimulation);
-                this.onSimulationQueuePagination();
+                //this.onSimulationQueuePagination();
             });
         }
     }
@@ -1412,9 +1414,9 @@ export default class Scenarios extends Vue {
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
         (async () => { 
-            if ((data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
-                (data.simulationAnalysisDetail.status == "Queued to run.") ||
+            if ((data.simulationAnalysisDetail.status == "Queued to run.") ||
                 (data.simulationAnalysisDetail.status == "Getting simulation analysis network") ||
+                (data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
                 (data.simulationAnalysisDetail.status == "Canceled"))
             {
                 await this.delay(1000);

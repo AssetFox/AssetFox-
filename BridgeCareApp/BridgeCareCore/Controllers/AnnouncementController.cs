@@ -17,6 +17,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AnnouncementController : BridgeCareCoreBaseController
     {
+        public const string AnnouncementError = "Announcement Error";
         public AnnouncementController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
@@ -34,7 +35,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                var t = e.InnerException;
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::GetAnnouncements - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -59,7 +61,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::UpsertAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }
@@ -83,7 +85,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Announcement error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {HubService.errorList["Exception"]}");
                 throw new Exception(e.Message);
             }
         }

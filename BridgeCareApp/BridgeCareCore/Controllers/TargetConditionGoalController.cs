@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Models;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -21,13 +24,16 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class TargetConditionGoalController : BridgeCareCoreBaseController
     {
+        public const string TargetConditionGoalError = "Target Condition Goal Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
+        private readonly ITargetConditionGoalService _targetConditionGoalService;
 
         public TargetConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, ITargetConditionGoalService targetConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {         
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
+            _targetConditionGoalService = targetConditionGoalService ?? throw new ArgumentNullException(nameof(targetConditionGoalService));
         }     
 
         [HttpGet]
@@ -40,7 +46,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TargetConditionGoalLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = GetAllTargetConditionGoalLibrariesWithTargetConditionGoals();
+                    result = UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
@@ -51,7 +57,57 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::TargetConditionGoalLibraries - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryTargetConditionGoalPage/{libraryId}")]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromLibrary)]
+        public async Task<IActionResult> GetLibraryTargetConditionGoalPage(Guid libraryId, PagingRequestModel<TargetConditionGoalDTO> pageRequest)
+        {
+            try
+            {
+                var result = new PagingPageModel<TargetConditionGoalDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = _targetConditionGoalService.GetLibraryTargetConditionGoalPage(libraryId, pageRequest);
+                });
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetLibraryTargetConditionGoalPage - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetScenarioTargetConditionGoalPage/{simulationId}")]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromScenario)]
+        public async Task<IActionResult> GetScenarioTargetConditionGoalPage(Guid simulationId, PagingRequestModel<TargetConditionGoalDTO> pageRequest)
+        {
+            try
+            {
+                var result = new PagingPageModel<TargetConditionGoalDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    result = _targetConditionGoalService.GetTargetConditionGoalPage(simulationId, pageRequest);
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetScenarioTargetConditionGoalPage - {HubService.errorList["Unauthorized"]}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetScenarioTargetConditionGoalPage - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -74,12 +130,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetScenarioTargetConditionGoals - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetScenarioTargetConditionGoals - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -87,19 +143,31 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertTargetConditionGoalLibrary")]
         [Authorize(Policy = Policy.ModifyTargetConditionGoalFromLibrary)]
-        public async Task<IActionResult> UpsertTargetConditionGoalLibrary(TargetConditionGoalLibraryDTO dto)
+        public async Task<IActionResult> UpsertTargetConditionGoalLibrary(LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = UnitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalLibrariesWithTargetConditionGoals()
-                    .FirstOrDefault(_ => _.Id == dto.Id);
-                    // by pass owner check if no record
-                    if (currentRecord != null)
+                    var items = new List<TargetConditionGoalDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        items = _targetConditionGoalService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if (!upsertRequest.IsNewLibrary)
+                        items = _targetConditionGoalService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        items.ForEach(item =>
+                        {
+                            item.Id = Guid.NewGuid();
+                            item.CriterionLibrary.Id = Guid.NewGuid();
+                        });
+                    }                       
+                    var dto = upsertRequest.Library;
+                    if (dto != null)
+                    {
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        dto.TargetConditionGoals = items;
                     }
                     UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteTargetConditionGoals(dto.TargetConditionGoals, dto.Id);
@@ -111,13 +179,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertTargetConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertTargetConditionGoalLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -125,13 +193,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioTargetConditionGoals/{simulationId}")]
         [Authorize(Policy = Policy.ModifyTargetConditionGoalFromScenario)]
-        public async Task<IActionResult> UpsertScenarioTargetConditionGoals(Guid simulationId, List<TargetConditionGoalDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioTargetConditionGoals(Guid simulationId, PagingSyncModel<TargetConditionGoalDTO> pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var dtos = _targetConditionGoalService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.TargetConditionGoalRepo.UpsertOrDeleteScenarioTargetConditionGoals(dtos, simulationId);
                     UnitOfWork.Commit();
@@ -143,13 +212,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertScenarioTargetConditionGoals - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target condition goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::UpsertScenarioTargetConditionGoals - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -178,13 +247,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::DeleteTargetConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Target Condition Goal error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::DeleteTargetConditionGoalLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

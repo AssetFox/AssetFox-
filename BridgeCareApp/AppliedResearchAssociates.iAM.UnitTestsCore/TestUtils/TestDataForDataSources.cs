@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Name = "SQL Server Data Source",
                 Secure = true,
                 Type = DataSourceTypeStrings.SQL.ToString(),
-                Details = "data source=localhost\\SQL2014;initial catalog=maindb;persist security info=True;user id=an_admin;password=a_password;MultipleActiveResultSets=True;App=EntityFramework"
+                Details = "Fj6y4slHYqm2PAw/MyIepQLXxHU87hg87svgP5MaqwxQqLtZBmDi1f5rHyj0s35LNWCELke1cmb2p9iV/GyQxjxsNzbfHKyZdI5m5HlSiMWEihoS1aoFnKoiMUDrb8mD6+B+lXFQ5e/G3SqUvgRTLfQTjBoQ1CvEnklT7SnqWvJBB6sVXdXhcYiBQWjkCzXFHDVMPueOTFn6eiZd/8QE+Uwk6smc7hIihQb+OxcpYiZ7Qoy/NtXowmgI/IkJOjaJklo28B3zAg=="
             });
             repo.Add(new DataSourceEntity
             {
@@ -43,7 +43,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<BaseDataSourceDTO> SourceDTOs() => SimpleRepo()
             .Where(_ => _.Type != "Other")
-            .Select(_ => _.ToDTO())
+            .Select(_ => _.ToDTO(TestHelper.UnitOfWork.EncryptionKey))
             .ToList();
 
         public static List<AttributeEntity> SimpleAttributeRepo()

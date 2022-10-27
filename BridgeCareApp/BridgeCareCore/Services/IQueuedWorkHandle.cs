@@ -1,20 +1,28 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
     public interface IQueuedWorkHandle
     {
-        public DateTime QueueEntryTimestamp { get; }
+        DateTime QueueEntryTimestamp { get; }
 
-        public int QueueIndex { get; }
+        int QueueIndex { get; }
 
-        public Task WorkCompletion { get; }
+        UserInfo UserInfo { get; }
 
-        public bool WorkHasStarted { get; }
+        Task WorkCompletion { get; }
 
-        public string WorkId { get; }
+        bool WorkHasStarted => WorkStartTimestamp.HasValue;
 
-        public void RemoveFromQueue();
+        string WorkId { get; }
+
+        DateTime? WorkStartTimestamp { get; }
+
+        void RemoveFromQueue(bool setCanceled = false);
+
+        CancellationTokenSource WorkCancellationTokenSource { get; }
     }
 }

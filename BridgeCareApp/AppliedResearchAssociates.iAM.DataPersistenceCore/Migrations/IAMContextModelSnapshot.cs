@@ -1155,6 +1155,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("BudgetLibraryId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("BudgetOrder")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
@@ -2788,6 +2791,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("BudgetOrder")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");

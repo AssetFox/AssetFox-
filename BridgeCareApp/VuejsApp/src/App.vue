@@ -444,6 +444,7 @@ export default class AppComponent extends Vue {
             }
             this.setIsBusyAction({ isBusy: false });            
             this.unauthorizedError = hasValue(this.unauthorizedError) ? error.response!.data : "User is not authorized!";
+            if (error.response!.status === 500) return;
             
             this.addErrorNotificationAction({
                 message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",
@@ -511,10 +512,19 @@ export default class AppComponent extends Vue {
     }
 
     onAddErrorNotification(data: any) {
-        this.addErrorNotificationAction({
-            message: 'Server Error',
-            longMessage: data.error,
-        });
+        let errorNotification:string = data.error.toString();
+        let spl = errorNotification.split('::');
+        if (spl.length > 0 ) {
+            this.addErrorNotificationAction( {
+                message: spl[0],
+                longMessage: spl.length>1 ? spl[1] : 'Unknown Error'
+            });
+        } else {
+            this.addErrorNotificationAction( {
+                message: 'Server Error',
+                longMessage: data.error
+            });
+        }
     }
 
     onAddWarningNotification(data: any) {

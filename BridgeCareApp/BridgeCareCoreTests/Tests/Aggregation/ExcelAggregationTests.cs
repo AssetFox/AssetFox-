@@ -32,7 +32,7 @@ namespace BridgeCareCoreTests.Tests
             var spreadsheetService = TestServices.CreateExcelSpreadsheetImportService(TestHelper.UnitOfWork);
             var dataSourceDto = DataSourceTestSetup.DtoForExcelDataSourceInDb(TestHelper.UnitOfWork);
             var districtAttribute = AttributeDtos.District(dataSourceDto);
-            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute);
+            var districtAttributeDomain = AttributeMapper.ToDomain(districtAttribute, TestHelper.UnitOfWork.EncryptionKey);
             UnitTestsCoreAttributeTestSetup.EnsureAttributeExists(districtAttribute);
             var path = SampleAttributeDataPath();
             var stream = File.OpenRead(path);

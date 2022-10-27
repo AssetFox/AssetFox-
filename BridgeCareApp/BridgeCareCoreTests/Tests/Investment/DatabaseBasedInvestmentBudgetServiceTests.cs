@@ -24,6 +24,7 @@ using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Services;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils.Interfaces;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -157,29 +158,15 @@ namespace BridgeCareCoreTests.Tests
             return excelPackage;
         }
 
-        private IHttpContextAccessor CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
+        private ExcelPackage CreateRequestWithScenarioFormData(Guid simulationId, bool overwriteBudgets = false)
         {
-            var httpContext = new DefaultHttpContext();
-            HttpContextSetup.AddAuthorizationHeader(httpContext);
-            httpContext.Request.Headers.Add("Content-Type", "multipart/form-data");
-
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestUtils\\Files",
                 "TestInvestmentBudgets.xlsx");
             using var stream = File.OpenRead(filePath);
             var memStream = new MemoryStream();
             stream.CopyTo(memStream);
-            var formFile = new FormFile(memStream, 0, memStream.Length, null, "TestInvestmentBudgets.xlsx");
-
-            var formData = new Dictionary<string, StringValues>()
-            {
-                {"overwriteBudgets", overwriteBudgets ? new StringValues("1") : new StringValues("0")},
-                {"simulationId", new StringValues(simulationId.ToString())}
-            };
-
-            httpContext.Request.Form = new FormCollection(formData, new FormFileCollection { formFile });
-            var accessor = new Mock<IHttpContextAccessor>();
-            accessor.Setup(_ => _.HttpContext).Returns(httpContext);
-            return accessor.Object;
+            var excelPackage = new ExcelPackage(memStream);
+            return excelPackage;
         }
 
         private InvestmentController CreateDatabaseAuthorizedController(InvestmentBudgetsService service, IHttpContextAccessor accessor = null)
@@ -357,146 +344,144 @@ namespace BridgeCareCoreTests.Tests
         }
 
 
-        //[Fact]
-        //public async Task ShouldImportScenarioBudgetsFromFile()
-        //{
-        //    // Arrange
-        //    var year = DateTime.Now.Year;
-        //    var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-        //    var controller = CreateDatabaseAuthorizedController(service, accessor);
-        //    AddScenarioDataToDatabase(simulation.Id);
+        [Fact]
+        public void ShouldImportScenarioBudgetsFromFile()
+        {
+            // Arrange
+            var year = DateTime.Now.Year;
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var excelPackage = CreateRequestWithScenarioFormData(simulation.Id);
+            AddScenarioDataToDatabase(simulation.Id);
+            var currentUserCriteriaFilter = new UserCriteriaDTO
+            {
+                HasCriteria = false
+            };
 
-        //    // Act
-        //    await controller.ImportScenarioInvestmentBudgetsExcelFile();
+            // Act
+            service.ImportScenarioInvestmentBudgetsFile(simulation.Id, excelPackage, currentUserCriteriaFilter, false);
+            // Assert
 
-        //    // Assert
-        //    var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
-        //        .GetScenarioBudgetAmounts(simulation.Id)
-        //        .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
-        //        .ToList();
+            var budgetAmounts = TestHelper.UnitOfWork.BudgetAmountRepo
+                .GetScenarioBudgetAmounts(simulation.Id)
+                .Where(_ => _.ScenarioBudget.Name.IndexOf("Sample") != -1)
+                .ToList();
 
-        //    Assert.Equal(2, budgetAmounts.Count);
-        //    Assert.True(budgetAmounts.All(_ => _.Year == year));
-        //    Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-        //    var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
-        //    Assert.Equal(3, budgets.Count);
-        //    Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-        //    Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            Assert.Equal(3, budgets.Count);
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
 
-        //    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-        //    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-        //}
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+        }
 
-        //[Fact]
-        //public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
-        //{
-        //    // Arrange
-        //    var year = DateTime.Now.Year;
-        //    var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-        //    AddScenarioDataToDatabase(simulation.Id);
-        //    var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-        //    var controller = CreateDatabaseAuthorizedController(service, accessor);
+        [Fact]
+        public void ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
+        {
+            // Arrange
+            var year = DateTime.Now.Year;
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            AddScenarioDataToDatabase(simulation.Id);
+            var excelPackage = CreateRequestWithScenarioFormData(simulation.Id);
 
-        //    _testScenarioBudget.Name = "Sample Budget 1";
-        //    TestHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
+            _testScenarioBudget.Name = "Sample Budget 1";
+            TestHelper.UnitOfWork.Context.UpdateEntity(_testScenarioBudget, _testScenarioBudget.Id);
 
-        //    var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
-        //    budgetAmount.Year = year;
-        //    budgetAmount.Value = 4000000;
-        //    TestHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
+            var budgetAmount = _testScenarioBudget.ScenarioBudgetAmounts.ToList()[0];
+            budgetAmount.Year = year;
+            budgetAmount.Value = 4000000;
+            TestHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
+            var currentUserCriteriaFilter = new UserCriteriaDTO
+            {
+                HasCriteria = false
+            };
 
-        //    // Act
-        //    await controller.ImportScenarioInvestmentBudgetsExcelFile();
+            // Act
+            service.ImportScenarioInvestmentBudgetsFile(simulation.Id, excelPackage, currentUserCriteriaFilter, false);
 
-        //    // Assert
-        //    var budgetAmounts =
-        //        TestHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
-        //    Assert.Equal(2, budgetAmounts.Count);
-        //    Assert.True(budgetAmounts.All(_ => _.Year == year));
-        //    Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
+            // Assert
+            var budgetAmounts =
+                TestHelper.UnitOfWork.BudgetAmountRepo.GetScenarioBudgetAmounts(simulation.Id);
+            Assert.Equal(2, budgetAmounts.Count);
+            Assert.True(budgetAmounts.All(_ => _.Year == year));
+            Assert.True(budgetAmounts.All(_ => _.Value == decimal.Parse("5000000")));
 
-        //    var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
-        //    Assert.Equal(2, budgets.Count);
-        //    Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
-        //    Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+            var budgets = TestHelper.UnitOfWork.BudgetRepo.GetScenarioBudgets(simulation.Id);
+            Assert.Equal(2, budgets.Count);
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 1");
+            Assert.Contains(budgets, _ => _.Name == "Sample Budget 2");
+            var criteriaPerBudgetName = GetCriteriaPerBudgetName();
+            var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
+            var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
+                .Where(_ => _.IsSingleUse &&
+                            _.CriterionLibraryScenarioBudgetJoins.Any(join =>
+                                budgetNames.Contains(join.ScenarioBudget.Name)))
+                .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .ToList();
+        }
 
-        //    var criteriaPerBudgetName = GetCriteriaPerBudgetName();
-        //    var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
-        //    var criteria = TestHelper.UnitOfWork.Context.CriterionLibrary.AsNoTracking().AsSplitQuery()
-        //        .Where(_ => _.IsSingleUse &&
-        //                    _.CriterionLibraryScenarioBudgetJoins.Any(join =>
-        //                        budgetNames.Contains(join.ScenarioBudget.Name)))
-        //        .Include(_ => _.CriterionLibraryScenarioBudgetJoins)
-        //        .ThenInclude(_ => _.ScenarioBudget)
-        //        .ToList();
-        //}
+        [Fact]
+        public async Task ShouldExportSampleScenarioBudgetsFile()
+        {
+            // Arrange
+            var year = DateTime.Now.Year;
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var simulationName = RandomStrings.Length11();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
+            AddScenarioDataToDatabase(simulation.Id);
 
-        //[Fact]
-        //public async Task ShouldExportSampleScenarioBudgetsFile()
-        //{
-        //    // Arrange
-        //    var year = DateTime.Now.Year;
-        //    var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-        //    var simulationName = RandomStrings.Length11();
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
-        //    AddScenarioDataToDatabase(simulation.Id);
-        //    var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-        //    var controller = CreateDatabaseAuthorizedController(service, accessor);
+            // Act
+            var fileInfo = service.ExportScenarioInvestmentBudgetsFile(simulation.Id);
 
-        //    // Act
-        //    var result =
-        //        await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
+            Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
+            Assert.Equal($"{simulationName}_investment_budgets.xlsx", fileInfo.FileName);
 
-        //    // Assert
-        //    Assert.IsType<OkObjectResult>(result);
+            var file = Convert.FromBase64String(fileInfo.FileData);
+            var memStream = new MemoryStream();
+            memStream.Write(file, 0, file.Length);
+            memStream.Seek(0, SeekOrigin.Begin);
 
-        //    var fileInfo = (FileInfoDTO)Convert.ChangeType((result as OkObjectResult).Value, typeof(FileInfoDTO));
-        //    Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileInfo.MimeType);
-        //    Assert.Equal($"{simulationName}_investment_budgets.xlsx", fileInfo.FileName);
+            var excelPackage = new ExcelPackage(memStream);
+            var worksheet = excelPackage.Workbook.Worksheets[0];
 
-        //    var file = Convert.FromBase64String(fileInfo.FileData);
-        //    var memStream = new MemoryStream();
-        //    memStream.Write(file, 0, file.Length);
-        //    memStream.Seek(0, SeekOrigin.Begin);
+            var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
+                .Select(cell => cell.GetValue<string>()).ToList();
+            Assert.True(worksheetBudgetNames.Count >= 1);
+            Assert.True(worksheetBudgetNames.All(name => name.Contains(BudgetEntityName)));
 
-        //    var excelPackage = new ExcelPackage(memStream);
-        //    var worksheet = excelPackage.Workbook.Worksheets[0];
+            var expetedYear = year;
+            worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
+                .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
+                {
+                    Assert.Equal(expetedYear, year);
+                    year++;
+                });
 
-        //    var worksheetBudgetNames = worksheet.Cells[1, 2, 1, worksheet.Dimension.End.Column]
-        //        .Select(cell => cell.GetValue<string>()).ToList();
-        //    Assert.True(worksheetBudgetNames.Count >= 1);
-        //    Assert.True(worksheetBudgetNames.All(name => name.Contains(BudgetEntityName)));
-
-        //    var expetedYear = year;
-        //    worksheet.Cells[2, 1, worksheet.Dimension.End.Row, 1]
-        //        .Select(cell => cell.GetValue<int>()).ToList().ForEach(year =>
-        //        {
-        //            Assert.Equal(expetedYear, year);
-        //            year++;
-        //        });
-
-        //    var budgetAmounts = worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
-        //        .Select(cell => cell.GetValue<decimal>()).ToList();
-        //    Assert.Contains(budgetAmounts, amount => amount == decimal.Parse("5000000"));
-        //}
+            var budgetAmounts = worksheet.Cells[2, 2, worksheet.Dimension.End.Row, worksheet.Dimension.End.Column]
+                .Select(cell => cell.GetValue<decimal>()).ToList();
+            Assert.Contains(budgetAmounts, amount => amount == decimal.Parse("5000000"));
+        }
 
 
-        //[Fact]
-        //public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
-        //{
-        //    // Arrange
-        //    var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
-        //    var controller = CreateDatabaseAuthorizedController(service);
+        [Fact]
+        public async Task ShouldThrowConstraintWhenNoMimeTypeForScenarioImport()
+        {
+            // Arrange
+            var service = DatabaseBasedInvestmentBudgetServiceTestSetup.SetupDatabaseBasedService(TestHelper.UnitOfWork);
+            var controller = CreateDatabaseAuthorizedController(service);
 
-        //    // Act + Asset
-        //    var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
-        //        await controller.ImportScenarioInvestmentBudgetsExcelFile());
-        //    Assert.Equal("Request MIME type is invalid.", exception.Message);
-        //}
+            // Act + Asset
+            var exception = await Assert.ThrowsAsync<ConstraintException>(async () =>
+                await controller.ImportScenarioInvestmentBudgetsExcelFile());
+            Assert.Equal("Request MIME type is invalid.", exception.Message);
+        }
         //[Fact]
         //public async Task ShouldExportScenarioBudgetsFile()
         //{
@@ -506,10 +491,9 @@ namespace BridgeCareCoreTests.Tests
         //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
         //    AddScenarioDataToDatabase(simulation.Id);
         //    var accessor = CreateRequestWithScenarioFormData(simulation.Id);
-        //    var controller = CreateDatabaseAuthorizedController(service, accessor);
         //    // Act
         //    var result =
-        //        await controller.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
+        //        await service.ExportScenarioInvestmentBudgetsExcelFile(simulation.Id);
 
         //    // Assert
         //    Assert.IsType<OkObjectResult>(result);

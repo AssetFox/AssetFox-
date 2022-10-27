@@ -5,9 +5,9 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IDeficientConditionGoalService
+    public interface IDeficientConditionGoalPagingService
     {
-        PagingPageModel<DeficientConditionGoalDTO> GetDeficientConditionGoalPage(Guid simulationId, PagingRequestModel<DeficientConditionGoalDTO> request);
+        PagingPageModel<DeficientConditionGoalDTO> GetScenarioDeficientConditionGoalPage(Guid simulationId, PagingRequestModel<DeficientConditionGoalDTO> request);
         PagingPageModel<DeficientConditionGoalDTO> GetLibraryDeficientConditionGoalPage(Guid libraryId, PagingRequestModel<DeficientConditionGoalDTO> request);
         List<DeficientConditionGoalDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<DeficientConditionGoalDTO> request);
         List<DeficientConditionGoalDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<DeficientConditionGoalDTO> request);

@@ -8,16 +8,16 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class DeficientConditionGoalService : IDeficientConditionGoalService
+    public class DeficientConditionGoalPagingService : IDeficientConditionGoalPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public DeficientConditionGoalService(IUnitOfWork unitOfWork)
+        public DeficientConditionGoalPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<DeficientConditionGoalDTO> GetDeficientConditionGoalPage(Guid simulationId, PagingRequestModel<DeficientConditionGoalDTO> request)
+        public PagingPageModel<DeficientConditionGoalDTO> GetScenarioDeficientConditionGoalPage(Guid simulationId, PagingRequestModel<DeficientConditionGoalDTO> request)
         {
             var rows = request.PagingSync.LibraryId == null ? _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId) :
                 _unitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalsByLibraryId(request.PagingSync.LibraryId.Value);

@@ -26,11 +26,11 @@ namespace BridgeCareCore.Controllers
     {
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly IDeficientConditionGoalService _deficientConditionGoalService;
+        private readonly IDeficientConditionGoalPagingService _deficientConditionGoalService;
 
         public DeficientConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IDeficientConditionGoalService deficientConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IDeficientConditionGoalPagingService deficientConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _deficientConditionGoalService = deficientConditionGoalService ?? throw new ArgumentNullException(nameof(deficientConditionGoalService));
@@ -101,7 +101,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
-                    result = _deficientConditionGoalService.GetDeficientConditionGoalPage(simulationId, pageRequest);
+                    result = _deficientConditionGoalService.GetScenarioDeficientConditionGoalPage(simulationId, pageRequest);
                 });
 
                 return Ok(result);

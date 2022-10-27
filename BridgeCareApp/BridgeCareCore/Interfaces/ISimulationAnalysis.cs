@@ -10,6 +10,6 @@ namespace BridgeCareCore.Interfaces
 
         IQueuedWorkHandle CreateAndRun(Guid networkId, Guid simulationId, UserInfo userInfo);
 
-        void Cancel(Guid simulationId);
+        bool Cancel(Guid simulationId);
     }
 }

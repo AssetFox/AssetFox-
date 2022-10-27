@@ -39,7 +39,7 @@ namespace BridgeCareCore.Services
             }
         }
 
-        public void Cancel(Guid workId)
+        public bool Cancel(Guid workId)
         {
             IQueuedWorkHandle queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
 
@@ -48,12 +48,15 @@ namespace BridgeCareCore.Services
                 if (!queuedWorkHandle.WorkHasStarted)
                 {
                     queuedWorkHandle.RemoveFromQueue(true);
+                    return true;
                 }
                 else
                 {
                     queuedWorkHandle.WorkCancellationTokenSource.Cancel();
+                    return false;
                 }
             }
+            return true;
         }
 
         private readonly Channel<QueueElement> ElementChannel = Channel.CreateUnbounded<QueueElement>();

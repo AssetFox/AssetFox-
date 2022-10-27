@@ -278,13 +278,26 @@ namespace BridgeCareCore.Controllers
             try
             {
                 _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
-                _simulationAnalysis.Cancel(simulationId);
+                var hasBeenRemovedFromQueue = _simulationAnalysis.Cancel(simulationId);
                 await Task.Delay(125);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+
+                if (hasBeenRemovedFromQueue)
                 {
-                    SimulationId = simulationId,
-                    Status = "Canceling analysis..."
-                });
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Canceled"
+                    });
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Canceling analysis..."
+                    });
+
+                }
                 return Ok();
             }
             catch (UnauthorizedAccessException e)

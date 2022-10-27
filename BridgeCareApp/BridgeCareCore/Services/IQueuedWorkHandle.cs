@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using BridgeCareCore.Models;
 
@@ -20,6 +21,8 @@ namespace BridgeCareCore.Services
 
         DateTime? WorkStartTimestamp { get; }
 
-        void RemoveFromQueue();
+        void RemoveFromQueue(bool setCanceled = false);
+
+        CancellationTokenSource WorkCancellationTokenSource { get; }
     }
 }

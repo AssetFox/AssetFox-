@@ -19,6 +19,9 @@ using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCore.Services;
+using System.Xml.Linq;
 
 namespace BridgeCareCore.Services
 {
@@ -40,7 +43,15 @@ namespace BridgeCareCore.Services
             _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
         }
 
-        public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess)
+        public QueuedSimulationDTO GetQueuedSimulation(Guid simulationId)
+        {
+            var simulation = _simulationRepository.GetSimulation(simulationId);
+            var simulationQueue = _sequentialWorkQueue.Snapshot;
+            return simulation.ToQueuedSimulationDTO(simulationQueue);
+        }
+
+
+        public PagingPageModel<QueuedSimulationDTO> GetSimulationQueuePage(PagingRequestModel<QueuedSimulationDTO> request)
         {
             var skip = 0;
             var take = 0;
@@ -50,27 +61,8 @@ namespace BridgeCareCore.Services
             var simulationQueueIds = simulationQueue.Select(_ => new Guid(_.WorkId)).ToList();
 
             var simulations = _simulationRepository.GetScenariosWithIds(simulationQueueIds)
-                .Select(_ => _.ToQueuedSimulationDTO())
+                .Select(_ => _.ToQueuedSimulationDTO(simulationQueue))
                 .ToList();
-
-            foreach (var simulation in simulations)
-            {
-                var queuedWorkHandle = simulationQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulation.Id);
-                simulation.QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp;
-                simulation.WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp;
-                simulation.QueueingUser = queuedWorkHandle.UserInfo.Name;
-                simulation.QueuePosition = queuedWorkHandle.QueueIndex;
-                if (queuedWorkHandle.WorkHasStarted)
-                {
-                    simulation.CurrentRunTime = DateTime.Now.Subtract(simulation.WorkStartedTimestamp.Value).ToString(@"hh\:mm\:ss", null);
-                }
-                else
-                {
-                    simulation.WorkStartedTimestamp = null;
-                    simulation.CurrentRunTime = null;
-                    simulation.Status = $"Queued to run.";
-                }
-            }
 
             if (request.sortColumn.Trim() == "")
             {
@@ -140,14 +132,40 @@ namespace BridgeCareCore.Services
 
     public static class QueuedSimulationTransform
     {
-        public static QueuedSimulationDTO ToQueuedSimulationDTO(this SimulationDTO simulationDTO) =>
-            new QueuedSimulationDTO
+        public static QueuedSimulationDTO ToQueuedSimulationDTO(this SimulationDTO simulationDTO, IReadOnlyList<IQueuedWorkHandle> simulationQueue)
+        {
+            var queuedWorkHandle = simulationQueue.SingleOrDefault(_ => new Guid(_.WorkId) == simulationDTO.Id);
+
+            if (queuedWorkHandle == null)
+            {
+                throw new RowNotInTableException("No queued simulation was found for the given id.");
+            }
+
+            QueuedSimulationDTO queuedSimulationDTO = new QueuedSimulationDTO()
             {
                 Id = simulationDTO.Id,
                 Name = simulationDTO.Name,
                 PreviousRunTime = simulationDTO.RunTime,
                 Status = simulationDTO.Status,
-            };
-    }
 
+                QueueEntryTimestamp = queuedWorkHandle.QueueEntryTimestamp,
+                WorkStartedTimestamp = queuedWorkHandle.WorkStartTimestamp,
+                QueueingUser = queuedWorkHandle.UserInfo.Name,
+                QueuePosition = queuedWorkHandle.QueueIndex,
+            };
+
+            if (queuedWorkHandle.WorkHasStarted)
+            {
+                queuedSimulationDTO.CurrentRunTime = DateTime.Now.Subtract(queuedSimulationDTO.WorkStartedTimestamp.Value).ToString(@"hh\:mm\:ss", null);
+            }
+            else
+            {
+                queuedSimulationDTO.WorkStartedTimestamp = null;
+                queuedSimulationDTO.CurrentRunTime = null;
+                queuedSimulationDTO.Status = $"Queued to run.";
+            }
+
+            return queuedSimulationDTO;
+        }
+    }
 }

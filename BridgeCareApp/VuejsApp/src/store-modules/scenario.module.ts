@@ -61,7 +61,7 @@ const mutations = {
             );
             
         }
-        else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentUserScenarioPage)) {
+        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentUserScenarioPage)) {
             const updatedScenario: Scenario = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentUserScenarioPage) as Scenario;
             updatedScenario.lastRun = simulationAnalysisDetail.lastRun;
             updatedScenario.status = simulationAnalysisDetail.status;
@@ -73,10 +73,9 @@ const mutations = {
                 state.currentUserScenarioPage
             );         
         }
-        else if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
+        if(any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage)) {
             const updatedSimulation: QueuedSimulation = find(propEq('id', simulationAnalysisDetail.simulationId), state.currentSimulationQueuePage) as QueuedSimulation;
             updatedSimulation.status = simulationAnalysisDetail.status;
-            updatedSimulation.previousRunTime = simulationAnalysisDetail.runTime;
 
             state.currentSimulationQueuePage = update(
                 findIndex(propEq('id', updatedSimulation.id), state.currentSimulationQueuePage),
@@ -96,7 +95,7 @@ const mutations = {
                 state.currentSharedScenariosPage
             );
         }
-        else if (any(propEq('id', simulationReportDetail.simulationId), state.currentUserScenarioPage)) {
+        if (any(propEq('id', simulationReportDetail.simulationId), state.currentUserScenarioPage)) {
             const updatedScenario: Scenario = find(propEq('id', simulationReportDetail.simulationId), state.currentUserScenarioPage) as Scenario;
             updatedScenario.reportStatus = simulationReportDetail.status;
 
@@ -218,12 +217,12 @@ const actions = {
             },
         );
     },
-    async cancelQueuedSimulation({dispatch, state, commit}: any, payload: any) {
-        return await ScenarioService.cancelSimulation(payload.scenarioId)
+    async cancelSimulation({dispatch, state, commit}: any, payload: any) {
+        return await ScenarioService.cancelSimulation(payload.simulationId)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Canceled simulation analysis',
+                        message: 'Simulation analysis canceled',
                     });
                 }
             },

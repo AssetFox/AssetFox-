@@ -409,7 +409,7 @@
                                                 <v-list>
                                                     <v-list-tile v-for="(item,i) in actionItemsForSimulationQueue"
                                                         :key="i"
-                                                        @click="OnSimulationQueueActionTaken(item.action,props.item.users,props.item,false)"
+                                                        @click="OnSimulationQueueActionTaken(item.action,props.item)"
                                                         class="menu-style">
                                                         <v-list-tile-title icon>                                                        
                                                             <img style="padding-right:5px" v-bind:src="item.icon"/>
@@ -456,7 +456,12 @@
             :dialogData="confirmDeleteAlertData"
             @submit="onConfirmDeleteAlertSubmit"
         />
-
+       
+        <ConfirmCancelAlert
+            :dialogData="confirmCancelAlertData"
+            @submit="onConfirmCancelAlertSubmit"
+        />
+        
         <CreateScenarioDialog
             :showDialog="showCreateScenarioDialog"
             @submit="onCreateScenarioDialogSubmit"
@@ -548,6 +553,7 @@ import ScenarioService from '@/services/scenario.service';
         MigrateLegacySimulationDialog,
         ConfirmCloneScenarioAlert: Alert,
         ConfirmDeleteAlert: Alert,
+        ConfirmCancelAlert: Alert,
         ConfirmRollupAlert: Alert,
         ConfirmAnalysisRunAlert: Alert,
         ReportsDownloaderDialog,
@@ -597,6 +603,7 @@ export default class Scenarios extends Vue {
     @Action('cloneScenario') cloneScenarioAction: any;
     @Action('updateScenario') updateScenarioAction: any;
     @Action('deleteScenario') deleteScenarioAction: any;
+    @Action('cancelSimulation') cancelSimulationAction: any;
     @Action('runSimulation') runSimulationAction: any;
     @Action('migrateLegacySimulationData')
     migrateLegacySimulationDataAction: any;
@@ -820,7 +827,8 @@ export default class Scenarios extends Vue {
     simulationQueuePagination: Pagination = clone(emptyPagination);
     totalQueuedSimulations: number = 0;
 
-    initializing: boolean = true
+    initializing: boolean = true;
+    initializingSimulationQueue: boolean = true;
     searchMine: string = '';
     currentSearchMine: string = '';
     searchShared: string = '';
@@ -837,6 +845,7 @@ export default class Scenarios extends Vue {
     confirmCloneScenarioAlertData: AlertData = clone(emptyAlertData);
     cloneScenarioDialogData: CloneScenarioDialogData = clone(emptyCloneScenarioDialogData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
+    confirmCancelAlertData: AlertData = clone(emptyAlertData);
     showCreateScenarioDialog: boolean = false;
     selectedScenario: Scenario = clone(emptyScenario);
     selectedSimulation: QueuedSimulation = clone(emptySimulation);
@@ -946,7 +955,7 @@ export default class Scenarios extends Vue {
     }
 
     doSimulationQueuePagination() {
-        if(this.initializing)
+        if(this.initializingSimulationQueue)
             return;
         const { sortBy, descending, page, rowsPerPage } = this.simulationQueuePagination;
 
@@ -1036,11 +1045,11 @@ export default class Scenarios extends Vue {
         ];
         this.actionItemsForSimulationQueue = [
              {
-                title: 'Cancel',
-                action: this.availableActions.cancel,
-                icon: require("@/assets/icons/check-active.svg"),
+                title: 'Cancel Analysis',
+                action: this.availableSimulationActions.cancel,
+                icon: require("@/assets/icons/x-circle.svg"),
             }             
-        ]
+        ];
         this.actionItems = this.actionItemsForSharedScenario.slice();
         this.actionItems.splice(4, 0, {
             title: 'Share',
@@ -1102,7 +1111,8 @@ export default class Scenarios extends Vue {
         this.getSharedScenariosPageAction(request).then(() =>
         this.getUserScenariosPageAction(request).then(() =>
         this.getSimulationQueuePageAction(simulationQueueRequest).then(() => {
-            this.initializing = false
+            this.initializing = false;
+            this.initializingSimulationQueue = false;
             this.totalUserScenarios = this.stateTotalUserScenarios;
             this.totalSharedScenarios = this.stateTotalSharedScenarios;
             this.totalQueuedSimulations = this.stateTotalQueuedSimulations;
@@ -1340,13 +1350,13 @@ export default class Scenarios extends Vue {
 
 
     onShowConfirmCancelAlert(simulation: QueuedSimulation) {
-        this.selectedScenario = clone(QueuedSimulation);
+        this.selectedSimulation = clone(simulation);
 
-        this.confirmDeleteAlertData = {
+        this.confirmCancelAlertData = {
             showDialog: true,
             heading: 'Warning',
             choice: true,
-            message: 'Are you sure you want to cancel?',
+            message: 'Are you sure you want to cancel the analysis?',
         };
     }
 
@@ -1365,6 +1375,20 @@ export default class Scenarios extends Vue {
             });
         }
     }
+
+    onConfirmCancelAlertSubmit(submit: boolean) {
+        this.confirmCancelAlertData = clone(emptyAlertData);
+
+        if (submit && this.selectedSimulation.id !== getBlankGuid()) {
+            this.cancelSimulationAction({
+                simulationId: this.selectedSimulation.id,
+            }).then(() => {
+                this.selectedSimulation = clone(emptySimulation);
+                //this.onSimulationQueuePagination();
+            });
+        }
+    }
+
 
     getDataMigrationStatus(data: any) {
         const status: any = data.status;
@@ -1390,11 +1414,12 @@ export default class Scenarios extends Vue {
             simulationAnalysisDetail: data.simulationAnalysisDetail,
         });
         (async () => { 
-            if ((data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
-                (data.simulationAnalysisDetail.status == "Queued to run.") ||
-                (data.simulationAnalysisDetail.status == "Getting simulation analysis network"))
+            if ((data.simulationAnalysisDetail.status == "Queued to run.") ||
+                (data.simulationAnalysisDetail.status == "Getting simulation analysis network") ||
+                (data.simulationAnalysisDetail.status == "Simulation complete. 100%") ||
+                (data.simulationAnalysisDetail.status == "Canceled"))
             {
-                await this.delay(500);
+                await this.delay(1000);
                 this.doSimulationQueuePagination();
             }
         })();                            

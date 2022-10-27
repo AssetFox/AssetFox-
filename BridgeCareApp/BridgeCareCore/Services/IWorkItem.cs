@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
@@ -9,6 +10,6 @@ namespace BridgeCareCore.Services
 
         string WorkId { get; }
 
-        void DoWork(IServiceProvider serviceProvider);
+        void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

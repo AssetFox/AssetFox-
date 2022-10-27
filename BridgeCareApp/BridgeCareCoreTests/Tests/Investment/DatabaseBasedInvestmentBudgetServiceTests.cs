@@ -30,6 +30,9 @@ namespace BridgeCareCoreTests.Tests
 {
     public class DatabaseBasedInvestmentBudgetServiceTests
     {
+        // The code under test in these tests accesses the db context, without
+        // going through a repo. Removing real db access from the tests is therefore
+        // difficult.
         private BudgetEntity _testBudget;
         private BudgetLibraryEntity _testBudgetLibrary;
         private InvestmentPlanEntity _testInvestmentPlan;

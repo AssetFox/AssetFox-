@@ -19,6 +19,7 @@ using Microsoft.SqlServer.TransactSql.ScriptDom;
 using BridgeCareCore.Security;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -26,6 +27,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AttributeController : BridgeCareCoreBaseController
     {
+        public const string AttributeError = "Attribute Error";
         private readonly AttributeService _attributeService;
         private readonly AttributeImportService _attributeImportService;
 
@@ -48,7 +50,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -65,7 +67,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAggregationRuleTypes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -82,7 +84,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributeDataSourceTypes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -101,7 +103,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::GetAttributesSelectValues - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -125,8 +127,19 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
+                if (e is InvalidAttributeUpsertException)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["InvalidAttributeUpsertException"]}");
+                }
+                else if (e is InvalidAttributeException)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["InvalidAttributeException"]}");
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttributes - {HubService.errorList["Exception"]}");
+                }
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
                 throw;
             }
         }
@@ -151,7 +164,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CreateAttribute - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -180,7 +193,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AttributeError}::CheckCommand - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

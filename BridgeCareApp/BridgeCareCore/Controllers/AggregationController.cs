@@ -30,6 +30,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class AggregationController : BridgeCareCoreBaseController
     {
+        public const string AggregationError = "Aggregation Error";
         public const bool UpdateAttributes = false;
         private readonly ILog _log;
         private readonly IAggregationService _aggregationService;
@@ -101,7 +102,7 @@ namespace BridgeCareCore.Controllers
                 UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                     new NetworkRollupDetailDTO { NetworkId = networkId, Status = state.Status}, 0.0);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Aggregation error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - {HubService.errorList["Exception"]}");
                 throw;
             }
             finally

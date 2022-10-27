@@ -35,7 +35,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment default data configuration read error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Investment Default Data Error::GetInvestmentDefaultData - {HubService.errorList["InvestmentDefaultData"]}");
                 throw;
             }
         }

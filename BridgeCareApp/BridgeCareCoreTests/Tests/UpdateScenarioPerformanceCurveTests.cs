@@ -1,4 +1,5 @@
 ﻿using System;
+using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -417,6 +418,37 @@ namespace BridgeCareCoreTests.Tests
             var performanceCurveDtoAfter = scenarioCurvesAfter[0];
             var criterionLibraryAfter = performanceCurveDtoAfter.CriterionLibrary;
             Assert.Equal("MergedCriteriaExpression", criterionLibraryAfter.MergedCriteriaExpression);
+        }
+
+        [Fact]
+        public void UpsertOrDeleteScenarioPerformanceCurves_CurveHasInvalidAttribute_Throws()
+        {
+            Setup();
+            var libraryId = Guid.NewGuid();
+            var libraryDto = PerformanceCurveLibraryTestSetup.TestPerformanceCurveLibraryInDb(TestHelper.UnitOfWork, libraryId);
+            var performanceCurveLibraryDto = TestHelper.UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrary(libraryId);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var criterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                MergedCriteriaExpression = "MergedCriteriaExpression",
+                Description = "Description",
+                IsSingleUse = true,
+            };
+            var performanceCurveDto = new PerformanceCurveDTO
+            {
+                Attribute = "Invalid attribute name",
+                Id = Guid.NewGuid(),
+                Name = "Curve",
+                CriterionLibrary = criterionLibrary,
+            };
+            var performanceCurves = new List<PerformanceCurveDTO> { performanceCurveDto };
+
+            var exception = Assert.ThrowsAny<Exception>(() =>
+            TestHelper.UnitOfWork.PerformanceCurveRepo.UpsertOrDeleteScenarioPerformanceCurves(performanceCurves, simulation.Id));
+
+            var message = exception.Message;
+            Assert.Contains(ErrorMessageConstants.NoAttributeFoundHavingName, message);
         }
     }
 }

@@ -73,7 +73,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 })
                 .ToList();
 
-            return assets.Select(_ => _.ToDomain()).ToList();
+            return assets.Select(_ => _.ToDomain(_unitOfWork.EncryptionKey)).ToList();
         }
 
         public List<Data.Networking.MaintainableAsset> GetAllInNetworkWithLocations(Guid networkId)
@@ -100,13 +100,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         asset.MaintainableAssetLocation.LocationIdentifier)                  
                 }).ToList();
 
-            return assets.Select(_ => _.ToDomain()).ToList();
+            return assets.Select(_ => _.ToDomain(_unitOfWork.EncryptionKey)).ToList();
         }
 
         public MaintainableAsset GetAssetAtLocation(Location location)
         {
             var asset = _unitOfWork.Context.MaintainableAsset.FirstOrDefault(_ => location.MatchOn(_.MaintainableAssetLocation.ToDomain()));
-            return asset.ToDomain();
+            return asset.ToDomain(_unitOfWork.EncryptionKey);
         }
 
         public void CreateMaintainableAssets(List<AnalysisMaintainableAsset> maintainableAssets, Guid networkId)
@@ -136,9 +136,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var attributeIdPerName = attributeEntities.ToDictionary(_ => _.Name, _ => _.Id);
 
             var numericAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>();
+                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<double>>();
             var textAttributeValueHistoryPerMaintainableAssetIdAttributeIdTuple =
-                new Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>();
+                new Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<string>>();
 
             var maintainableAssetEntities = maintainableAssets.Select(_ =>
             {
@@ -265,10 +265,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             var asset = attrEntity.DataType == "NUMBER" ? _unitOfWork.Context.MaintainableAsset.AsNoTracking().Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
                     .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue)?.MaintainableAsset.ToDomain() :
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.NumericValue.ToString() == attributeValue)?.MaintainableAsset.ToDomain(_unitOfWork.EncryptionKey) :
                     _unitOfWork.Context.MaintainableAsset.Include(_ => _.AggregatedResults).ThenInclude(_ => _.MaintainableAsset).ThenInclude(_ => _.MaintainableAssetLocation)
                     .Where(_ => _.NetworkId == network.Id).SelectMany(_ => _.AggregatedResults)
-                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue)?.MaintainableAsset.ToDomain();
+                    .FirstOrDefault(_ => _.AttributeId == attrEntity.Id && _.TextValue == attributeValue)?.MaintainableAsset.ToDomain(_unitOfWork.EncryptionKey);
             return asset;
         }
 

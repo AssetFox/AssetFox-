@@ -292,9 +292,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             var exp = _testUOW.AttributeRepo.GetExplorer();
             var testNetwork = exp.AddNetwork();
             testNetwork.Id = TestDataForCommittedProjects.NetworkId;
+            SectionMapper mapper = new(testNetwork);
             foreach (var asset in TestDataForCommittedProjects.MaintainableAssetEntities)
             {
-                asset.CreateMaintainableAsset(testNetwork);
+                mapper.CreateMaintainableAsset(asset);
             }
             var simulation = testNetwork.AddSimulation();
             simulation.Id = simulationId;

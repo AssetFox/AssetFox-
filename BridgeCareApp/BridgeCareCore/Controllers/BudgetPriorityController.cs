@@ -14,22 +14,64 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Models;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class BudgetPriorityController : BridgeCareCoreBaseController
-    { 
+    {
+        public const string BudgetPriorityError = "Budget Priority Error";
         private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
+        private IBudgetPriortyService _budgetPriortyService;
+
         public BudgetPriorityController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
+            IBudgetPriortyService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-        }              
+            _budgetPriortyService = budgetPriortyService;
+        }
+
+        [HttpPost]
+        [Route("GetScenarioBudgetPriorityPage/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetScenarioBudgetPriorityPage(Guid simulationId, PagingRequestModel<BudgetPriorityDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetBudgetPriortyPage(simulationId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorityPage - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryBudgetPriorityPage/{libraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetLibraryBudgetPriortyPage(Guid libraryId, PagingRequestModel<BudgetPriorityDTO> pageRequest)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetLibraryBudgetPriortyPage(libraryId, pageRequest));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetLibraryBudgetPriorityPage - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("GetBudgetPriorityLibraries")]
@@ -41,7 +83,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<BudgetPriorityLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = GetAllBudgetPriorityLibraries();
+                    result = UnitOfWork.BudgetPriorityRepo.GetBudgetPriortyLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
@@ -52,7 +94,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetBudgetPriorityLibraries - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -60,18 +102,25 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertBudgetPriorityLibrary")]
         [Authorize(Policy = Policy.ModifyBudgetPriorityFromLibrary)]
-        public async Task<IActionResult> UpsertBudgetPriorityLibrary(BudgetPriorityLibraryDTO dto)
+        public async Task<IActionResult> UpsertBudgetPriorityLibrary(LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == dto.Id);
-                    // by pass owner check if no record
-                    if (currentRecord != null)
+                    var items = new List<BudgetPriorityDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if (!upsertRequest.IsNewLibrary)
+                        items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                        items.ForEach(item => item.Id = Guid.NewGuid());
+                    var dto = upsertRequest.Library;
+                    if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        dto.BudgetPriorities = items;
                     }
                     UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteBudgetPriorities(dto.BudgetPriorities, dto.Id);
@@ -83,13 +132,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertBudgetPriorityLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertBudgetPriorityLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -118,13 +167,13 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::DeleteBudgetPriorityLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::DeleteBudgetPriorityLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -147,12 +196,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorities - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorities - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -160,13 +209,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioBudgetPriorities/{simulationId}")]
         [Authorize(Policy = Policy.ModifyBudgetPriorityFromScenario)]
-        public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, List<BudgetPriorityDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioBudgetPriorities(Guid simulationId, PagingSyncModel<BudgetPriorityDTO> pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var dtos = _budgetPriortyService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
                     UnitOfWork.Commit();
@@ -177,13 +227,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertScenarioBudgetPriorities - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Budget Priority error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::UpsertScenarioBudgetPriorities - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -199,6 +249,6 @@ namespace BridgeCareCore.Controllers
         private List<BudgetPriorityLibraryDTO> GetAllBudgetPriorityLibraries()
         {
             return UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries();
-        }
+        } 
     }
 }

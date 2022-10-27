@@ -13,6 +13,8 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +41,8 @@ namespace BridgeCareCoreTests.Tests
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
+                hubService, accessor, _mockClaimHelper.Object,
+                new TargetConditionGoalService(TestHelper.UnitOfWork));
             return controller;
         }
         private TargetConditionGoalController CreateTestController(List<string> userClaims)
@@ -54,7 +57,8 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new TargetConditionGoalController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
+                hubService, accessor, _mockClaimHelper.Object,
+                new TargetConditionGoalService(TestHelper.UnitOfWork));
 
             controller.ControllerContext = new ControllerContext()
             {
@@ -131,7 +135,7 @@ namespace BridgeCareCoreTests.Tests
 
         private CriterionLibraryDTO SetupCriterionLibraryForUpsertOrDelete()
         {
-            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibrary();
+            var criterionLibrary = CriterionLibraryTestSetup.TestCriterionLibraryInDb(TestHelper.UnitOfWork);
             return criterionLibrary;
         }
 
@@ -151,6 +155,30 @@ namespace BridgeCareCoreTests.Tests
             return criterionLibrary;
         }
 
+        private void JoinCriterionToLibraryConditionGoal(Guid goalId, Guid criterionId)
+        {
+            var libraryJoin = new CriterionLibraryTargetConditionGoalEntity()
+            {
+                CriterionLibraryId = criterionId,
+                TargetConditionGoalId = goalId
+            };
+
+            TestHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Add(libraryJoin);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+        }
+
+        private void JoinCriterionTosScenarioConditionGoal(Guid goalId, Guid criterionId)
+        {
+            var libraryJoin = new CriterionLibraryScenarioTargetConditionGoalEntity()
+            {
+                CriterionLibraryId = criterionId,
+                ScenarioTargetConditionGoalId = goalId
+            };
+
+            TestHelper.UnitOfWork.Context.CriterionLibraryScenarioTargetConditionGoal.Add(libraryJoin);
+            TestHelper.UnitOfWork.Context.SaveChanges();
+        }
+
         [Fact]
         public async Task ShouldReturnOkResultOnGet()
         {
@@ -167,9 +195,11 @@ namespace BridgeCareCoreTests.Tests
         {
             var controller = SetupController();
             var entity = SetupLibraryForGet();
+            var request = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>();
+            request.Library = entity.ToDto();
             // Act
             var result = await controller
-                .UpsertTargetConditionGoalLibrary(entity.ToDto());
+                .UpsertTargetConditionGoalLibrary(request);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -187,7 +217,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetAllTargetConditionGoalLibrariesWithTargetConditionGoals()
+        public async Task ShouldGetAllTargetConditionGoalLibraries()
         {
             var controller = SetupController();
             // Arrange
@@ -203,9 +233,7 @@ namespace BridgeCareCoreTests.Tests
 
             var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TargetConditionGoalLibraryDTO>));
-            var foundLibrary = dtos.Single(dto => dto.Id == library.Id);
-
-            Assert.Equal(goal.Id, foundLibrary.TargetConditionGoals[0].Id);
+            Assert.NotNull(dtos.SingleOrDefault(dto => dto.Id == library.Id));
         }
 
         [Fact]
@@ -217,9 +245,6 @@ namespace BridgeCareCoreTests.Tests
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var library = SetupLibraryForGet();
             var goal = SetupTargetConditionGoal(library.Id);
-            var getResult = await controller.TargetConditionGoalLibraries();
-            var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<TargetConditionGoalLibraryDTO>));
 
             var libraryDto = library.ToDto();
             var goalDto = goal.ToDto();
@@ -228,8 +253,20 @@ namespace BridgeCareCoreTests.Tests
             goalDto.Name = "Updated Name";
             goalDto.CriterionLibrary = criterionLibrary;
 
+            var sync = new PagingSyncModel<TargetConditionGoalDTO>()
+            {
+                UpdateRows = new List<TargetConditionGoalDTO>() { goalDto }
+            };
+
+            var libraryRequest = new LibraryUpsertPagingRequestModel<TargetConditionGoalLibraryDTO, TargetConditionGoalDTO>()
+            {
+                IsNewLibrary = false,
+                Library = libraryDto,
+                PagingSync = sync
+            };
+
             // Act
-            await controller.UpsertTargetConditionGoalLibrary(libraryDto);
+            await controller.UpsertTargetConditionGoalLibrary(libraryRequest);
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.TargetConditionGoalRepo
@@ -239,7 +276,7 @@ namespace BridgeCareCoreTests.Tests
 
             // below fails on some db weirdness. The name is updated in the db but not in the get result!?!
             // Assert.Equal(dto.TargetConditionGoals[0].Name, modifiedDto.TargetConditionGoals[0].Name);
-            Assert.Equal(libraryDto.TargetConditionGoals[0].Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
+            Assert.Equal(goalDto.Attribute, modifiedDto.TargetConditionGoals[0].Attribute);
         }
 
         [Fact]
@@ -249,26 +286,20 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var criterionLibrary = SetupCriterionLibraryForUpsertOrDelete();
             var targetConditionGoalLibraryEntity = SetupLibraryForGet();
-            var targetConditionGoalEntity = SetupTargetConditionGoal(targetConditionGoalLibraryEntity.Id);
-            var getResult = await controller.TargetConditionGoalLibraries();
-            var dtos = (List<TargetConditionGoalLibraryDTO>)Convert.ChangeType((getResult as OkObjectResult).Value,
-                typeof(List<TargetConditionGoalLibraryDTO>));
+            var libraryId = targetConditionGoalLibraryEntity.Id;
+            var targetConditionGoalEntity = SetupTargetConditionGoal(libraryId);
+            var goalId = targetConditionGoalEntity.Id;
 
-            var targetConditionGoalLibraryDTO = dtos.Single(dto => dto.Id == targetConditionGoalLibraryEntity.Id);
-            targetConditionGoalLibraryDTO.TargetConditionGoals[0].CriterionLibrary =
-                criterionLibrary;
-
-            await controller.UpsertTargetConditionGoalLibrary(
-                targetConditionGoalLibraryDTO);
+            JoinCriterionToLibraryConditionGoal(goalId, criterionLibrary.Id);
 
             // Act
-            var result = await controller.DeleteTargetConditionGoalLibrary(TargetConditionGoalLibraryId);
+            var result = await controller.DeleteTargetConditionGoalLibrary(libraryId);
 
             // Assert
             Assert.IsType<OkResult>(result);
 
-            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == TargetConditionGoalLibraryId));
-            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == TargetConditionGoalId));
+            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoalLibrary.Any(_ => _.Id == libraryId));
+            Assert.True(!TestHelper.UnitOfWork.Context.TargetConditionGoal.Any(_ => _.Id == goalId));
             Assert.True(
                 !TestHelper.UnitOfWork.Context.CriterionLibraryTargetConditionGoal.Any(_ =>
                     _.TargetConditionGoalId == TargetConditionGoalId));
@@ -296,6 +327,52 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task ShouldGetScenarioTargetConditionGoalPageData()
+        {
+            var controller = SetupController();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var goal = SetupForScenarioTargetGet(simulation.Id);
+
+            // Act
+            var request = new PagingRequestModel<TargetConditionGoalDTO>();
+            var result = await controller.GetScenarioTargetConditionGoalPage(simulation.Id, request);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var page = (PagingPageModel<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(PagingPageModel<TargetConditionGoalDTO>));
+            var dtos = page.Items;
+            var dto = dtos.Single();
+            Assert.Equal(goal.Id, dto.Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetLibraryTargetConditionGoalPageData()
+        {
+            var controller = SetupController();
+            // Arrange
+            var library = SetupLibraryForGet();
+            var goal = SetupTargetConditionGoal(library.Id);
+
+            // Act
+            var request = new PagingRequestModel<TargetConditionGoalDTO>();
+            var result = await controller.GetLibraryTargetConditionGoalPage(library.Id, request);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var page = (PagingPageModel<TargetConditionGoalDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(PagingPageModel<TargetConditionGoalDTO>));
+            var dtos = page.Items;
+            var dto = dtos.Single();
+            Assert.Equal(goal.Id, dto.Id);
+        }
+
+        [Fact]
         public async Task ShouldModifyScenarioTargetConditionGoalData()
         {
             var controller = SetupController();
@@ -318,24 +395,30 @@ namespace BridgeCareCoreTests.Tests
             });
             TestHelper.UnitOfWork.Context.SaveChanges();
 
-            var localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo
-                .GetScenarioTargetConditionGoals(simulation.Id);
+            var localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
             var indexToDelete = localScenarioTargetGoals.FindIndex(g => g.Id == deletedTargetConditionId);
-            localScenarioTargetGoals.RemoveAt(indexToDelete);
+            var deleteId = localScenarioTargetGoals[indexToDelete].Id;
             var goalToUpdate = localScenarioTargetGoals.Single(g => g.Id!=deletedTargetConditionId);
             var updatedGoalId = goalToUpdate.Id;
             goalToUpdate.Name = "Updated";  
             goalToUpdate.CriterionLibrary = criterionLibrary;
             var newGoalId = Guid.NewGuid();
-            localScenarioTargetGoals.Add(new TargetConditionGoalDTO
+            var addedGoal = new TargetConditionGoalDTO
             {
                 Id = newGoalId,
                 Attribute = attribute.Name,
                 Name = "New"
-            });
+            };
+
+            var sync = new PagingSyncModel<TargetConditionGoalDTO>()
+            {
+                UpdateRows = new List<TargetConditionGoalDTO>() { goalToUpdate },
+                AddedRows = new List<TargetConditionGoalDTO>() { addedGoal},
+                RowsForDeletion = new List<Guid>() { deleteId}
+            };
 
             // Act
-            await controller.UpsertScenarioTargetConditionGoals(simulation.Id, localScenarioTargetGoals);
+            await controller.UpsertScenarioTargetConditionGoals(simulation.Id, sync);
 
             // Assert
             var serverScenarioTargetConditionGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo
@@ -344,7 +427,7 @@ namespace BridgeCareCoreTests.Tests
 
             Assert.False(
                 TestHelper.UnitOfWork.Context.ScenarioTargetConditionGoals.Any(_ => _.Id == deletedTargetConditionId));
-
+            localScenarioTargetGoals = TestHelper.UnitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulation.Id);
             var localNewTargetGoal = localScenarioTargetGoals.Single(_ => _.Name == "New");
             var serverNewTargetGoal = localScenarioTargetGoals.FirstOrDefault(_ => _.Id == newGoalId);
             Assert.NotNull(serverNewTargetGoal);

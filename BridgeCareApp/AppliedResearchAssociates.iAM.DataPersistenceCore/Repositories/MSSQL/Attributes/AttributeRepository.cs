@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using Attribute = AppliedResearchAssociates.iAM.Data.Attributes.Attribute;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Attributes;
+using AppliedResearchAssociates.iAM.Data.Attributes;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -25,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                          throw new ArgumentNullException(nameof(unitOfWork));
         public void UpsertAttributes(List<Attribute> attributes)
         {
-            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo)).ToList();
+            var upsertAttributeEntities = attributes.Select(_ => _.ToEntity(_unitOfWork.DataSourceRepo, _unitOfWork.EncryptionKey)).ToList();
             var upsertAttributeIds = upsertAttributeEntities.Select(_ => _.Id).ToList();
             var existingAttributes = _unitOfWork.Context.Attribute.AsNoTracking().Where(_ => upsertAttributeIds.Contains(_.Id)).ToList();
             var existingAttributeIds = existingAttributes.Select(_ => _.Id).ToList();
@@ -210,10 +211,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
-        public Task<List<string>> GetAggregationRuleTypes()
+        
+        public Task<List<RuleDefinition>> GetAggregationRules()
         {
             return Task.Factory.StartNew(() =>
-                Attribute.AggregationRules.Select(_ => _.RuleName).Distinct().ToList());
+                Attribute.AggregationRules.ToList());
         }
 
         public Task<List<string>> GetAttributeDataTypes()
@@ -236,7 +238,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("Found no attributes.");
             }
-            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList();
+            return _unitOfWork.Context.Attribute.Include(a => a.DataSource).OrderBy(_ => _.Name).Select(_ => _.ToDto(GetEncryptionKey())).ToList();
         }
 
         public Task<List<AttributeDTO>> GetAttributesAsync()
@@ -253,20 +255,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return Task.Factory.StartNew(() =>
-                _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto()).ToList());
+                _unitOfWork.Context.Attribute.Where(_ => _.IsCalculated).OrderBy(_ => _.Name).Select(_ => _.ToDto(GetEncryptionKey())).ToList());
         }
 
         public AttributeDTO GetSingleById(Guid attributeId)
         {
             var entity = _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId);
-            return AttributeMapper.ToDtoNullPropagating(entity);
+            return AttributeMapper.ToDtoNullPropagating(entity, GetEncryptionKey());
         }
 
         public AttributeDTO GetSingleByName(string attributeName)
         {
             var entity = _unitOfWork.Context.Attribute.AsEnumerable().FirstOrDefault(
                 a => a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase)); // See https://stackoverflow.com/questions/841226/case-insensitive-string-compare-in-linq-to-sql for why we make the .AsEnumerable() call here.
-            return AttributeMapper.ToDtoNullPropagating(entity);
+            return AttributeMapper.ToDtoNullPropagating(entity, GetEncryptionKey());
         }
 
         public void DeleteAttributesShouldNeverBeNeededButSometimesIs(List<Guid> attributeIdsToDelete)
@@ -278,5 +280,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Commit();
             }
         }
+
+        public string GetEncryptionKey() => _unitOfWork.EncryptionKey;
     }
 }

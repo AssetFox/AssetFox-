@@ -25,6 +25,8 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CalculatedAttributesController : BridgeCareCoreBaseController
     {
+        public const string DeteriorationModelError = "Deterioration Model Error";
+        public const string CalculatedAttributeModelError = "Calculated Attribute Model Error";
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
         private readonly ICalculatedAttributeService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
@@ -74,7 +76,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioCalculatedAttributePage - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -91,7 +93,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Deterioration model error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetLibraryCalculatedAttributePage - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -135,7 +137,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertCalculatedAttributeLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -153,7 +155,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertScenarioAttribute - {HubService.errorList["Exception"]}");
                 throw;
             }
             return Ok();
@@ -179,7 +181,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertScenarioAttributes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -196,7 +198,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Calculated Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::DeleteLibrary - {HubService.errorList["Exception"]}");
                 throw;
             } 
             return Ok();

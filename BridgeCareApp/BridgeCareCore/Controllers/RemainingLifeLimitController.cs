@@ -29,7 +29,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private readonly IRemainingLifeLimitService _remainingLIfeLimitService;
 
-        public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public RemainingLifeLimitController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
             IRemainingLifeLimitService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {

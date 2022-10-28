@@ -29,7 +29,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
         private readonly ICashFlowService _cashFlowService;
 
-        public CashFlowController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
+        public CashFlowController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
             ICashFlowService cashFlowService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {

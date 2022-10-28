@@ -50,6 +50,11 @@ export interface Treatment {
     assetType: AssetType;
 }
 
+export interface SimpleTreatment {
+    id: string;
+    name: string;
+}
+
 export interface TreatmentLibrary {
     id: string;
     name: string;

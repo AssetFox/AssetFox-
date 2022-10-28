@@ -1,4 +1,5 @@
 import {getBlankGuid} from '@/shared/utils/uuid-utils';
+import internal from 'stream';
 export interface ScenarioUser {
     userId: string;
     username: string;
@@ -20,6 +21,18 @@ export interface Scenario {
     status?: string;
     reportStatus?: string;
     runTime?: string;
+}
+
+export interface QueuedSimulation {
+    id: string;
+    name: string;
+    status?: string;
+    queueEntryTimestamp: Date;
+    workStartedTimestamp?: Date;
+    queueingUser: string;
+    currentRunTime?: string;
+    previousRunTime?: string;
+    queuePosition: number;
 }
 
 export interface ScenarioActions {
@@ -47,4 +60,13 @@ export const emptyScenario: Scenario = {
     users: [],
     createdDate: new Date(),
     lastModifiedDate: new Date(),
+};
+
+export const emptySimulation: QueuedSimulation = {
+    id: getBlankGuid(),
+    name: '',
+    queueEntryTimestamp: new Date(),
+    workStartedTimestamp: new Date(),
+    queueingUser: '',
+    queuePosition: 0
 };

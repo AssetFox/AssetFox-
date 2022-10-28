@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
-using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -27,7 +26,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 try
                 {
-                    result.Add(source.ToDTO());
+                    result.Add(source.ToDTO(_unitOfWork.EncryptionKey));
                 }
                 catch
                 {
@@ -39,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public BaseDataSourceDTO GetDataSource(Guid id) =>
-            _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO();
+            _unitOfWork.Context.DataSource.FirstOrDefault(_ => _.Id == id)?.ToDTO(_unitOfWork.EncryptionKey);
 
         public void DeleteDataSource(Guid id)
         {
@@ -60,9 +59,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new ArgumentException("An existing data source with the same name already exists");
 
             if (!dataSource.Validate())
-                throw new ArgumentException("The data source could not be validated");
+                throw new ArgumentException("The data source could not be validated");                
 
-            _unitOfWork.Context.Upsert(dataSource.ToEntity(), dataSource.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.Upsert(dataSource.ToEntity(_unitOfWork.EncryptionKey), dataSource.Id, _unitOfWork.UserEntity?.Id);
         }
             
     }

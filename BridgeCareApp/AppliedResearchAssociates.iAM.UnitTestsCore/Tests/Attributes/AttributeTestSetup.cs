@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;

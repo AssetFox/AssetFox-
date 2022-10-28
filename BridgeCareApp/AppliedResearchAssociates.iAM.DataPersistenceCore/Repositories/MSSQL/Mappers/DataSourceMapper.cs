@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Text.Json;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -9,12 +10,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class DataSourceMapper
     {
-        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto)
+        public static DataSourceEntity ToEntity(this BaseDataSourceDTO dto, string encryptionKey)
         {
             var entityDetail = "";
             if (dto is SQLDataSourceDTO)
             {
-                entityDetail = ((SQLDataSourceDTO)dto).ConnectionString;
+                var connectionString = ((SQLDataSourceDTO)dto).ConnectionString;
+
+                // Encrypt
+                var keyBytes = encryptionKey == null ? new byte[32] : Encoding.UTF8.GetBytes(encryptionKey);                
+                var encryptedText = string.IsNullOrEmpty(connectionString) ? string.Empty : AES256GCM.Encrypt(connectionString, keyBytes);
+                entityDetail = encryptedText;
             }
             else if (dto is ExcelDataSourceDTO)
             {
@@ -41,18 +47,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity)
+        public static BaseDataSourceDTO ToDTO(this DataSourceEntity entity, string encryptionKey)
         {
             if (string.IsNullOrEmpty(entity.Type))
                 throw new InvalidOperationException($"Data source {entity.Name} (ID: {entity.Id}) does not have a specified type");
 
             if (entity.Type == DataSourceTypeStrings.SQL.ToString())
             {
+                // Decrypt
+                var keyBytes = encryptionKey == null ? new byte[32] : Encoding.UTF8.GetBytes(encryptionKey);                
+                var decryptedConnetionString = string.IsNullOrEmpty(entity.Details) ? string.Empty: AES256GCM.Decrypt(entity.Details, keyBytes);
                 var source = new SQLDataSourceDTO
                 {
                     Id = entity.Id,
                     Name = entity.Name,
-                    ConnectionString = entity.Details
+                    ConnectionString = decryptedConnetionString
                 };
                 return source;
             }

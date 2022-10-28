@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
@@ -18,6 +19,7 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Attributes.CalculatedAtt
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
@@ -43,6 +45,7 @@ namespace BridgeCareCoreTests.Tests
         private const string SimulationName = "Simulation";
         private static readonly Guid UserId = Guid.Parse("1bcee741-02a5-4375-ac61-2323d45752b4");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
+        private readonly Mock<ISimulationQueueService> _mockSimulationQueueService = new();
 
         private async Task<UserDTO> AddTestUser()
         {
@@ -70,7 +73,8 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(
                 simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork),
+                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
@@ -83,7 +87,8 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork),
+                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
                 hubService,
@@ -105,7 +110,8 @@ namespace BridgeCareCoreTests.Tests
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var service = Setup();
             var controller = new SimulationController(service,
-                new SimulationService(TestHelper.UnitOfWork),
+                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
                 hubService,
@@ -653,8 +659,7 @@ namespace BridgeCareCoreTests.Tests
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
             Assert.NotEmpty(dtos);
             var dtoFromThisTest = dtos.Single(dto => dto.Id == simulation.Id);
-            Assert.True(dtoFromThisTest.Users.All(__ => !__.IsOwner));
-            //var dto = dtos.Single(dto => dto.Id == simulation.Id);
+            Assert.True(dtos.All(_ => _.Owner != TestHelper.UnitOfWork.CurrentUser.Username));
         }
 
         [Fact]

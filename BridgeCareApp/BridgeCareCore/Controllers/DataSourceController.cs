@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Linq;
 using BridgeCareCore.Security;
+using AppliedResearchAssociates.iAM.Hubs.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -24,7 +25,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class DataSourceController : BridgeCareCoreBaseController
     {
-        public const string DataSourceError = "DataSource error";
+        public const string DataSourceError = "DataSource Error";
 
         public DataSourceController(
             IEsecSecurity esecSecurity,
@@ -53,7 +54,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::UpsertSqlDataSource - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -73,7 +74,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::UpsertExcelDataSource - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -93,7 +94,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::DeleteDataSource - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -110,7 +111,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::GetDataSources - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -135,7 +136,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DataSourceError}::GetDataSource - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -155,7 +156,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment Error::GetDataSourceTypes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -186,7 +187,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Attribute Error::CheckSqlConnection - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

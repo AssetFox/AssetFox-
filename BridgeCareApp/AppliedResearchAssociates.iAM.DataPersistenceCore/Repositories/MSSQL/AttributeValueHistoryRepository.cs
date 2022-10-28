@@ -23,7 +23,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
         public void CreateNumericAttributeValueHistories(
-            Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<double>>
+            Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<double>>
                 numericAttributeValueHistoryPerSectionIdAttributeIdTuple)
         {
             var numericAttributeValueHistoryEntities = new List<NumericAttributeValueHistoryEntity>();
@@ -55,7 +55,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public void CreateTextAttributeValueHistories(
-            Dictionary<(Guid sectionId, Guid attributeId), AttributeValueHistory<string>>
+            Dictionary<(Guid sectionId, Guid attributeId), IAttributeValueHistory<string>>
                 textAttributeValueHistoryPerSectionIdAttributeIdTuple)
         {
             var textAttributeValueHistoryEntities = new List<TextAttributeValueHistoryEntity>();

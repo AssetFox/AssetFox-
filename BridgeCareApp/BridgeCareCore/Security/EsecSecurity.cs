@@ -30,7 +30,7 @@ namespace BridgeCareCore.Security
             _revokedTokens = new ConcurrentDictionary<string, long>();
             _config = config ?? throw new ArgumentNullException(nameof(config));
             _securityType = _config.GetSection("SecurityType").Value;
-            _esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
+            //_esecPublicKey = SecurityFunctions.GetPublicKey(_config.GetSection("EsecConfig"));
             _roleClaimsMapper = roleClaimsMapper ?? throw new ArgumentNullException(nameof(roleClaimsMapper));
         }
 
@@ -104,7 +104,7 @@ namespace BridgeCareCore.Security
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, SecurityConstants.Role.Administrator);
+                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, SecurityConstants.Role.Administrator);
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 

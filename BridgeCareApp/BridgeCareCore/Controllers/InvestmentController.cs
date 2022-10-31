@@ -232,18 +232,18 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpGet]
-        [Route("GetBudgetLibraryUsers")]
+        [Route("GetBudgetLibraryUsers/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
-        public async Task<IActionResult> GetBudgetLibraryUsers(Guid budgetLibraryId)
+        public async Task<IActionResult> GetBudgetLibraryUsers(Guid libraryId)
         {
             try
             {
                 List<LibraryUserDTO> users = new List<LibraryUserDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(budgetLibraryId, UserId);
+                    var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
                     _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
-                    users = UnitOfWork.BudgetRepo.GetLibraryUsers(budgetLibraryId);
+                    users = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
                 });
                 return Ok(users);
             }
@@ -260,7 +260,7 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("UpsertOrDeleteBudgetLibraryUsers")]
+        [Route("UpsertOrDeleteBudgetLibraryUsers/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
         public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
         {

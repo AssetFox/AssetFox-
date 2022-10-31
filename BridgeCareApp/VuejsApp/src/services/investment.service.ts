@@ -1,6 +1,6 @@
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { AxiosPromise } from 'axios';
-import { BudgetLibrary, Investment } from '@/shared/models/iAM/investment';
+import { BudgetLibrary, BudgetLibraryUser, Investment, LibraryUser } from '@/shared/models/iAM/investment';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingRequestModel, InvestmentPagingSyncModel } from '@/shared/models/iAM/paging';
 
@@ -43,6 +43,17 @@ export default class InvestmentService {
     static deleteBudgetLibrary(libraryId: string): AxiosPromise {
         return coreAxiosInstance.delete(
             `${API.Investment}/DeleteBudgetLibrary/${libraryId}`,
+        );
+    }
+
+    static getBudgetLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Investment}/GetBudgetLibraryUsers/${libraryId}`)
+    }
+
+    static upsertOrDeleteBudgetLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.Investment}/UpsertOrDeleteBudgetLibraryUsers/${libraryId}`
+            , proposedUsers
         );
     }
 

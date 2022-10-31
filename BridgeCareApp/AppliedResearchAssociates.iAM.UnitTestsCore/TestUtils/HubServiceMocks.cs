@@ -13,10 +13,20 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
     public static class HubServiceMocks
     {
+        private static Dictionary<string, string> _createErrorList()
+        {
+            var dummyHubContext = new Mock<IHubContext<BridgeCareHub>>();
+            var dummy = new HubService(dummyHubContext.Object);
+            var castDummy = dummy as IHubService;
+            var dictionary = castDummy.errorList;
+            return dictionary;
+        }
 
         public static Mock<IHubService> DefaultMock()
         {
             var mock = new Mock<IHubService>();
+            var errorList = _createErrorList();
+            mock.Setup(m => m.errorList).Returns(errorList);
             return mock;
         }
 

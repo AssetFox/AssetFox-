@@ -103,14 +103,14 @@ namespace BridgeCareCore.Utils
         /// <param name="owner"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public void OldWayCheckUserLibraryModifyAuthorization(Guid owner, Guid userId)
-        {
+        {//
             if (RequirePermittedCheck() && owner != userId)
             {
                 throw new UnauthorizedAccessException(LibraryModifyUnauthorizedMessage);
             }
         }
 
-        public void OldWayCheckUserLibraryModifyAuthorization(LibraryUserAccessModel accessModel, Guid userId)
+        public void CheckUserLibraryModifyAuthorization(LibraryUserAccessModel accessModel, Guid userId)
         {
             if (RequirePermittedCheck() && accessModel.LibraryExists)
             {

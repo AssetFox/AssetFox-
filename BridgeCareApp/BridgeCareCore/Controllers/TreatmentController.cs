@@ -268,7 +268,7 @@ namespace BridgeCareCore.Controllers
                     var dto = _treatmentService.GetSyncedLibraryDataset(upsertRequest);
                     if (dto != null)
                     {
-                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);

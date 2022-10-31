@@ -22,6 +22,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using BridgeCareCore.Services;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using BridgeCareCore.Utils;
 
 namespace BridgeCareCore.Controllers
 {
@@ -657,6 +658,15 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetHasViewAccess()
         {
             return Ok(true);
+        }
+        [HttpGet]
+        [Route("GetHasOwnerAccess/{LibraryId}")]
+        [Authorize(Policy=Policy.ModifyOrDeleteTreatmentFromLibrary)]
+        public async Task<IActionResult> GetHasOwnerAccess(Guid LibraryId)
+        {
+            // Check if user is owner of library
+            var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
+            return dto.Owner == UserId ? Ok(true) : Unauthorized();
         }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {

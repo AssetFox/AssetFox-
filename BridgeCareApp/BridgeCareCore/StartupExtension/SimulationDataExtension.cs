@@ -39,6 +39,7 @@ namespace BridgeCareCore.StartupExtension
             services.AddScoped<ICalculatedAttributeService, CalculatedAttributeService>();
             services.AddScoped<IBudgetPriortyService, BudgetPriortyService>();
             services.AddScoped<ITargetConditionGoalService, TargetConditionGoalService>();
+            services.AddScoped<IRemainingLifeLimitService, RemainingLifeLimitService>();
         }
     }
 }

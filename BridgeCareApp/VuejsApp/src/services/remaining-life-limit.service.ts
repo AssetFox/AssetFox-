@@ -4,6 +4,7 @@ import {
     RemainingLifeLimit,
     RemainingLifeLimitLibrary,
 } from '@/shared/models/iAM/remaining-life-limit';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class RemainingLifeLimitService {
     static getRemainingLifeLimitLibraries(): AxiosPromise {
@@ -12,8 +13,20 @@ export default class RemainingLifeLimitService {
         );
     }
 
+    static getScenarioRemainingLifeLimitPage(scenarioId: string, data:PagingRequest<RemainingLifeLimit>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.RemainingLifeLimit}/GetScenarioRemainingLifeLimitPage/${scenarioId}`, data
+        );
+    }
+
+    static getLibraryRemainingLifeLimitPage(libraryId: string, data:PagingRequest<RemainingLifeLimit>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.RemainingLifeLimit}/GetLibraryRemainingLifeLimitPage/${libraryId}`, data
+        );
+    }
+
     static upsertRemainingLifeLimitLibrary(
-        data: RemainingLifeLimitLibrary,
+        data: LibraryUpsertPagingRequest<RemainingLifeLimitLibrary, RemainingLifeLimit>,
     ): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.RemainingLifeLimit}/UpsertRemainingLifeLimitLibrary/`,
@@ -33,7 +46,7 @@ export default class RemainingLifeLimitService {
     }
 
     static upsertScenarioRemainingLifeLimits(
-        data: RemainingLifeLimit[],
+        data: PaginSync<RemainingLifeLimit>,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(

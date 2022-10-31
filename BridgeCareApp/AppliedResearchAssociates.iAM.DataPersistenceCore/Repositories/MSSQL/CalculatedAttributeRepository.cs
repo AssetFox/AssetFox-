@@ -54,6 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfDataPersistanceWork.Context.ScenarioCalculatedAttribute
+                .Include(_ => _.Attribute)
                 .Where(_ => _.SimulationId == scenarioId)
                 .Select(_ => _.ToDto())
                 .ToList();
@@ -67,6 +68,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             return _unitOfDataPersistanceWork.Context.CalculatedAttribute
+                .Include(_ => _.Attribute)
                 .Where(_ => _.CalculatedAttributeLibraryId == libraryid)
                 .Select(_ => _.ToDto())
                 .ToList();

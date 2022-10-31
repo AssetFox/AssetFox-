@@ -28,6 +28,7 @@ const state = {
         emptyCalculatedAttributeLibrary,
     ) as CalculatedAttributeLibrary,
     scenarioCalculatedAttributes: [] as CalculatedAttribute[],
+    selectedLibraryCalculatedAttributes: [] as CalculatedAttribute[],
     calculatedAttributes: [] as Attribute[],
 };
 
@@ -74,6 +75,12 @@ const mutations = {
     ) {
         state.scenarioCalculatedAttributes = clone(calculatedAttributes);
     },
+    selectedLibraryCalculatedAttributeMutator(
+        state: any,
+        calculatedAttributes: CalculatedAttribute[],
+    ) {
+        state.selectedLibraryCalculatedAttributes = clone(calculatedAttributes);
+    },
     calculatedAttributesMutator(state: any, calculatedAtt: Attribute[]) {
         state.calculatedAttributes = clone(calculatedAtt);
     },
@@ -108,7 +115,7 @@ const actions = {
         );
     },
     async getScenarioCalculatedAttribute({ commit }: any, scenarioId: string) {
-        await CalculatedAttributeService.getScenarioCalculatedAttribute(
+        await CalculatedAttributeService.getEmptyCalculatedAttributesByScenarioId(
             scenarioId,
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
@@ -119,53 +126,18 @@ const actions = {
             }
         });
     },
-    // async upsertCalculatedAttributeLibrary(
-    //     { dispatch, commit }: any,
-    //     library: CalculatedAttributeLibrary,
-    // ) {
-    //     await CalculatedAttributeService.upsertCalculatedAttributeLibrary(
-    //         library,
-    //     ).then((response: AxiosResponse) => {
-    //         if (
-    //             hasValue(response, 'status') &&
-    //             http2XX.test(response.status.toString())
-    //         ) {
-    //             const message: string = any(
-    //                 propEq('id', library.id),
-    //                 state.calculatedAttributeLibraries,
-    //             )
-    //                 ? 'Updated calculated attribute library'
-    //                 : 'Added calculated attribute library';
-
-    //             commit('calculatedAttributeLibraryMutator', library);
-    //             commit('selectedCalculatedAttributeLibraryMutator', library.id);
-
-    //             dispatch('addSuccessNotification', { message: message });
-    //         }
-    //     });
-    // },
-    // async upsertScenarioCalculatedAttribute(
-    //     { dispatch, commit }: any,
-    //     payload: any,
-    // ) {
-    //     await CalculatedAttributeService.upsertScenarioCalculatedAttribute(
-    //         payload.scenarioCalculatedAttribute,
-    //         payload.scenarioId,
-    //     ).then((response: AxiosResponse) => {
-    //         if (
-    //             hasValue(response, 'status') &&
-    //             http2XX.test(response.status.toString())
-    //         ) {
-    //             commit(
-    //                 'scenarioCalculatedAttributeMutator',
-    //                 payload.scenarioCalculatedAttribute,
-    //             );
-    //             dispatch('addSuccessNotification', {
-    //                 message: "Modified scenario's calculated attribute",
-    //             });
-    //         }
-    //     });
-    // },
+    async getSelectedLibraryCalculatedAttributes({ commit }: any, libraryId: string) {
+        await CalculatedAttributeService.getEmptyCalculatedAttributesByLibraryId(
+            libraryId,
+        ).then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit(
+                    'selectedLibraryCalculatedAttributeMutator',
+                    response.data as CalculatedAttribute[],
+                );
+            }
+        });
+    },
     async deleteCalculatedAttributeLibrary(
         { dispatch, commit }: any,
         libraryId: string,

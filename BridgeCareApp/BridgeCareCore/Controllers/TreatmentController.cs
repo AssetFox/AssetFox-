@@ -651,7 +651,13 @@ namespace BridgeCareCore.Controllers
         {
             return Ok(true);
         }
-
+        [HttpGet]
+        [Route("GetHasViewAccess")]
+        [Authorize(Policy= Policy.ViewTreatmentFromLibrary)]
+        public async Task<IActionResult> GetHasViewAccess()
+        {
+            return Ok(true);
+        }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {
             return UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();

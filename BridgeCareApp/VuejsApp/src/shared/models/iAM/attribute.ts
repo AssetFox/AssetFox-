@@ -16,6 +16,12 @@ export interface Attribute {
     dataSource: Datasource;
 }
 
+export interface RuleDefinition {
+    ruleName: string
+    isText: boolean;
+    isNumeric: boolean;
+}
+
 export interface NetworkAttributes {
     networkId: number;
     attributes: string[];

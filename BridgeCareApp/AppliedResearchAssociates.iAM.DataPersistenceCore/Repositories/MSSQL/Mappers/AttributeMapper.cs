@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
@@ -13,14 +14,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AttributeMapper
     {
-        public static Attribute ToDomain(this AttributeEntity entity)
+        public static Attribute ToDomain(this AttributeEntity entity, string encryptionKey)
         {
             if (entity == null)
             {
                 throw new NullReferenceException("Cannot map null Attribute entity to Attribute domain");
             }
 
-            var connectionString = GetConnectionString(entity.DataSource);
+            var connectionString = GetConnectionString(entity.DataSource, encryptionKey);
 
             if (entity.DataType == "NUMBER")
             {
@@ -55,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             throw new InvalidOperationException("Cannot determine Attribute entity data type");
         }
 
-        private static TextAttribute ToText(AttributeDTO dto)
+        private static TextAttribute ToText(AttributeDTO dto, string encryptionKey)
         {
             return new TextAttribute(
                 dto.DefaultValue,
@@ -64,16 +65,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 dto.AggregationRuleType,
                 dto.Command,
                 MapDTODataSourceTypes(dto.DataSource?.Type),
-                GetConnectionString(dto.DataSource?.ToEntity()),
+                GetConnectionString(dto.DataSource?.ToEntity(encryptionKey), encryptionKey),
                 dto.IsCalculated,
                 dto.IsAscending,
                 dto.DataSource?.Id);
         }
 
-        private static NumericAttribute ToNumeric(AttributeDTO dto)
+        private static NumericAttribute ToNumeric(AttributeDTO dto, string encryptionKey)
         {
-
-
             return double.TryParse(dto.DefaultValue, out double value)
                 ? new NumericAttribute(
                     value,
@@ -84,36 +83,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     dto.AggregationRuleType,
                     dto.Command,
                     MapDTODataSourceTypes(dto.DataSource?.Type),
-                    GetConnectionString(dto.DataSource?.ToEntity()),
+                    GetConnectionString(dto.DataSource?.ToEntity(encryptionKey), encryptionKey),
                     dto.IsCalculated,
                     dto.IsAscending,
                     dto.DataSource?.Id)
                 : null;
         }
 
-        public static Attribute ToDomain(AttributeDTO dto)
+        public static Attribute ToDomain(AttributeDTO dto, string encryptionKey)
         {
             switch (dto.Type.ToLowerInvariant())
             {
             case "string":
-                return ToText(dto);
+                return ToText(dto, encryptionKey);
             case "number":
-                return ToNumeric(dto);
+                return ToNumeric(dto, encryptionKey);
             }
             return null;
         }
 
        
-        public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs)
+        public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs, string encryptionKey)
         {
             var returnValue = attributeDTOs
-                .Select(dto => ToDomain(dto))
+                .Select(dto => ToDomain(dto, encryptionKey))
                 .Where(r => r != null)
                 .ToList();
             return returnValue;
         }
 
-        public static AttributeEntity ToEntity(this Attribute domain, IDataSourceRepository dataSources = null)
+        public static AttributeEntity ToEntity(this Attribute domain, IDataSourceRepository dataSources, string encryptionKey)
         {
             if (domain == null)
             {
@@ -129,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (domain.DataSourceId != null && domain.DataSourceId != Guid.Empty)
             {
                 var dataSourceFromDb = dataSources?.GetDataSource(domain.DataSourceId.Value);
-                var possibleDataSource = dataSourceFromDb.ToEntity();
+                var possibleDataSource = dataSourceFromDb.ToEntity(encryptionKey);
                 if (possibleDataSource != null) dataSource = possibleDataSource;
             }
 
@@ -210,7 +209,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return dto;
         }
 
-        public static AttributeDTO ToDto(this AttributeEntity entity) =>
+        public static AttributeDTO ToDto(this AttributeEntity entity, string encryptionKey) =>
             new()
             {
                 Name = entity.Name,
@@ -223,17 +222,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 DefaultValue = entity.DefaultValue,
                 Maximum = entity.Maximum,
                 Minimum = entity.Minimum,
-                DataSource = entity.DataSource?.ToDTO()
+                DataSource = entity.DataSource?.ToDTO(encryptionKey)
             };
         /// <summary>Safe to call if the entity might be null. If it is
         /// in fact null, the returned DTO will also be null.</summary>
-        public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity)
+        public static AttributeDTO ToDtoNullPropagating(this AttributeEntity entity, string encryptionKey)
         {
             if (entity == null)
             {
                 return null;
             }
-            return ToDto(entity);
+            return ToDto(entity, encryptionKey);
         }
 
         private static ConnectionType MapDTODataSourceTypes(string dtoType)
@@ -252,15 +251,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        private static string GetConnectionString(DataSourceEntity entity)
+        private static string GetConnectionString(DataSourceEntity entity, string encryptionKey)
         {
             string connectionString = "";
-            if (entity == null) return connectionString;
+            if (entity == null)
+            {
+                return connectionString;
+            }
+
             if (entity.Type == "SQL")
             {
-                var dsDto = (SQLDataSourceDTO)entity.ToDTO();
+                // ToDTO decrypts the connection
+                var dsDto = (SQLDataSourceDTO)entity.ToDTO(encryptionKey);
                 connectionString = dsDto.ConnectionString;
             }
+
             return connectionString;
         }
     }

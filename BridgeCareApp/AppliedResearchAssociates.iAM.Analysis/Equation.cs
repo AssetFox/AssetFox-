@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.Analysis.Engine;
 using MathNet.Numerics.Interpolation;
 
 namespace AppliedResearchAssociates.iAM.Analysis

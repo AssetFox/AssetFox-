@@ -26,6 +26,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class NetworkController : BridgeCareCoreBaseController
     {
+        public const string NetworkError = "Network Error";
         public NetworkController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor) { }
 
@@ -41,7 +42,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::AllNetworks - {HubService.errorList["Exception"]}");
                 throw;
             }
 
@@ -71,7 +72,7 @@ namespace BridgeCareCore.Controllers
             {
                 var idAttribute = AttributeService.ConvertAllAttribute(parameters.NetworkDefinitionAttribute);
 
-                var attribute = AttributeMapper.ToDomain(idAttribute);
+                var attribute = AttributeMapper.ToDomain(idAttribute, UnitOfWork.EncryptionKey);
                 var result = await Task.Factory.StartNew(() =>
                 {
                     // throw an exception if not network definition attribute is present
@@ -100,7 +101,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::CreateNetwork - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -143,7 +144,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::GetCompatibleNetworks - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -167,7 +168,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Network error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::UpsertBenefitQuantifier - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

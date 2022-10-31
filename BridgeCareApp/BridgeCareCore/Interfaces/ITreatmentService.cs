@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DTOs;
+using BridgeCareCore.Models;
 using OfficeOpenXml;
 
 namespace BridgeCareCore.Interfaces
@@ -17,5 +19,9 @@ namespace BridgeCareCore.Interfaces
             ExcelPackage excelPackage);
 
         FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId);
+
+        TreatmentLibraryDTO GetSyncedLibraryDataset(LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO> upsertRequest);
+
+        List<TreatmentDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<TreatmentDTO> request);
     }
 }

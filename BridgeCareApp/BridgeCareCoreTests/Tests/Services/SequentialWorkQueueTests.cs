@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BridgeCareCore.Models;
 using BridgeCareCore.Services;
+using Moq;
 using Xunit;
 
 namespace BridgeCareCoreTests.Tests
@@ -44,7 +46,9 @@ namespace BridgeCareCoreTests.Tests
         {
             public string WorkId { get; } = Id.ToString();
 
-            public void DoWork(IServiceProvider serviceProvider)
+            public UserInfo UserInfo => new();
+
+            public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
             {
                 WorkTarget.Add(Id);
                 Task.Delay(MsDelay).Wait();

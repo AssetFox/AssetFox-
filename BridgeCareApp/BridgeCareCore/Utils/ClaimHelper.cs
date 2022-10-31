@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.DTOs.Enums;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -16,7 +15,8 @@ namespace BridgeCareCore.Utils
     public class ClaimHelper: IClaimHelper
     {
         private readonly IUnitOfWork UnitOfWork;
-        private readonly IHttpContextAccessor ContextAccessor;
+        private readonly IHttpContextAccessor ContextAccessor;
+        private readonly ISimulationQueueService _simulationQueueService;
 
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
@@ -29,9 +29,11 @@ namespace BridgeCareCore.Utils
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
 
         public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
+        public ClaimHelper(IUnitOfWork unitOfWork, ISimulationQueueService simulationQueueService, IHttpContextAccessor contextAccessor)
         {
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));          
+            ContextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+            _simulationQueueService = simulationQueueService ?? throw new ArgumentNullException(nameof(simulationQueueService));
         }
 
         /// <summary>
@@ -72,6 +74,27 @@ namespace BridgeCareCore.Utils
                 }
             }
         }
+
+
+        /// <summary>
+        /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
+        /// </summary>
+        /// <param name="simulationId"></param>
+        /// <param name="userName"></param>
+        /// <param name="checkSimulationAccess"></param>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        public void CheckUserSimulationCancelAnalysisAuthorization(Guid simulationId, string userName, bool checkSimulationAccess)
+        {
+            if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
+            {
+                var simulation = GetQueuedSimulation(simulationId);
+                if (simulation.QueueingUser == userName)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to cancel this simulation analysis.");
+                }
+            }
+        }
+
 
         /// <summary>
         /// Checks if user need permitted check, if so checks further if it is authorized to perform action.
@@ -183,6 +206,20 @@ namespace BridgeCareCore.Utils
         public bool RequirePermittedCheck()
         {
             return !HasAdminAccess();
+        }
+
+        private QueuedSimulationDTO GetQueuedSimulation(Guid simulationId)
+        {
+            QueuedSimulationDTO simulation;
+            try
+            {
+                simulation = _simulationQueueService.GetQueuedSimulation(simulationId);
+            }
+            catch
+            {
+                throw new RowNotInTableException($"No simulation analysis found in queue having id {simulationId}");
+            }
+            return simulation;
         }
 
         private SimulationDTO GetSimulationWithUsers(Guid simulationId)

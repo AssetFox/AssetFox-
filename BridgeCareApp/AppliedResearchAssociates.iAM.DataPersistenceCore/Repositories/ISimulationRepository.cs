@@ -16,6 +16,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<SimulationDTO> GetAllScenario();
 
+        List<SimulationDTO> GetUserScenarios();
+
+        List<SimulationDTO> GetSharedScenarios(bool hasAdminAccess, bool hasSimulationAccess);
+
+        List<SimulationDTO> GetScenariosWithIds(List<Guid> simulationIds);
+
         void CreateSimulation(Guid networkId, SimulationDTO dto);
 
         SimulationDTO GetSimulation(Guid simulationId);

@@ -1,30 +1,69 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
     public class SequentialWorkQueue
     {
-        public async Task<IWorkItem> Dequeue(CancellationToken cancellationToken) => await Elements.Reader.ReadAsync(cancellationToken);
+        public IReadOnlyList<IQueuedWorkHandle> Snapshot => IncompleteElements.Values.ToList();
+
+        public async Task<IWorkItem> Dequeue(CancellationToken cancellationToken)
+        {
+            var workItem = await ElementChannel.Reader.ReadAsync(cancellationToken);
+            while (workItem != null && workItem.WorkCompletion.IsCanceled)
+            {
+                workItem = await ElementChannel.Reader.ReadAsync(cancellationToken);
+            }
+            return workItem;
+        }
 
         public Task Enqueue(IWorkItem workItem, out IQueuedWorkHandle workHandle)
         {
-            if (!EntryTimestampPerId.TryAdd(workItem.WorkId, DateTime.Now))
+            lock (ElementChannel)
             {
-                throw new ArgumentException($"Work with ID \"{workItem.WorkId}\" is already queued or running.", nameof(workItem));
-            }
+                if (!EntryTimestampPerId.TryAdd(workItem.WorkId, DateTime.Now))
+                {
+                    throw new ArgumentException($"Work with ID \"{workItem.WorkId}\" is already queued or running.", nameof(workItem));
+                }
 
-            var queueElement = new QueueElement(workItem, this);
-            workHandle = queueElement;
-            return Elements.Writer.WriteAsync(queueElement).AsTask();
+                var queueElement = new QueueElement(workItem, this);
+                workHandle = queueElement;
+                return ElementChannel.Writer.WriteAsync(queueElement).AsTask();
+            }
         }
 
-        private readonly Channel<QueueElement> Elements = Channel.CreateUnbounded<QueueElement>();
+        public bool Cancel(Guid workId)
+        {
+            IQueuedWorkHandle queuedWorkHandle = IncompleteElements.Values.SingleOrDefault(_ => Guid.Parse(_.WorkId) == workId);
+
+            if (queuedWorkHandle != null)
+            {
+                if (!queuedWorkHandle.WorkHasStarted)
+                {
+                    queuedWorkHandle.RemoveFromQueue(true);
+                    return true;
+                }
+                else
+                {
+                    queuedWorkHandle.WorkCancellationTokenSource.Cancel();
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private readonly Channel<QueueElement> ElementChannel = Channel.CreateUnbounded<QueueElement>();
 
         private readonly ConcurrentDictionary<string, DateTime> EntryTimestampPerId = new();
+
+        private readonly ConcurrentDictionary<string, QueueElement> IncompleteElements = new();
 
         private class QueueElement : IWorkItem, IQueuedWorkHandle
         {
@@ -33,7 +72,9 @@ namespace BridgeCareCore.Services
                 WorkItem = workItem ?? throw new ArgumentNullException(nameof(workItem));
                 WorkQueue = workQueue ?? throw new ArgumentNullException(nameof(workQueue));
 
-                QueueEntryTimestamp = WorkQueue.EntryTimestampPerId[WorkItem.WorkId];
+                QueueEntryTimestamp = WorkQueue.EntryTimestampPerId[WorkId];
+
+                _ = WorkQueue.IncompleteElements.TryAdd(WorkId, this);
             }
 
             public DateTime QueueEntryTimestamp { get; }
@@ -49,25 +90,34 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            public Task WorkCompletion => WorkCompletionSource.Task;
+            public UserInfo UserInfo => WorkItem.UserInfo;
 
-            public bool WorkHasStarted { get; private set; }
+            public Task WorkCompletion => WorkCompletionSource.Task;
 
             public string WorkId => WorkItem.WorkId;
 
-            public void DoWork(IServiceProvider serviceProvider)
+            public DateTime? WorkStartTimestamp { get; private set; }
+
+            public CancellationTokenSource WorkCancellationTokenSource { get; private set; }
+
+            public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
             {
                 if (WorkQueue.EntryTimestampPerId.ContainsKey(WorkId))
                 {
-                    WorkHasStarted = true;
+                    WorkStartTimestamp = DateTime.Now;
+                    WorkCancellationTokenSource = new CancellationTokenSource();
 
                     try
                     {
-                        WorkItem.DoWork(serviceProvider);
+                        WorkItem.DoWork(serviceProvider, WorkCancellationTokenSource.Token);
                     }
                     catch (Exception e)
                     {
                         WorkCompletionSource.SetException(e);
+                    }
+                    finally
+                    {
+                        WorkCancellationTokenSource.Dispose();
                     }
 
                     if (!WorkCompletion.IsFaulted)
@@ -83,7 +133,15 @@ namespace BridgeCareCore.Services
                 }
             }
 
-            public void RemoveFromQueue() => _ = WorkQueue.EntryTimestampPerId.TryRemove(WorkId, out _);
+            public void RemoveFromQueue(bool setCanceled = false)
+            {
+                _ = WorkQueue.IncompleteElements.TryRemove(WorkId, out _);
+                _ = WorkQueue.EntryTimestampPerId.TryRemove(WorkId, out _);
+                if (setCanceled)
+                {
+                    WorkCompletionSource.SetCanceled();
+                }
+            }
 
             private readonly TaskCompletionSource WorkCompletionSource = new();
 

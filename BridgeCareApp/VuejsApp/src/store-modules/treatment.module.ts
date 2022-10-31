@@ -1,5 +1,6 @@
 import {
     emptyTreatmentLibrary,
+    SimpleTreatment,
     Treatment,
     TreatmentLibrary,
 } from '@/shared/models/iAM/treatment';
@@ -22,6 +23,8 @@ const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
     selectedTreatmentLibrary: clone(emptyTreatmentLibrary) as TreatmentLibrary,
     scenarioSelectableTreatments: [] as Treatment[],
+    simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
+    simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
 };
 
@@ -67,6 +70,18 @@ const mutations = {
         selectableTreatments: Treatment[],
     ) {
         state.scenarioSelectableTreatments = clone(selectableTreatments);
+    },
+    simpleScenarioSelectableTreatmentsMutator(
+        state: any,
+        selectableTreatments: SimpleTreatment[],
+    ) {
+        state.simpleScenarioSelectableTreatments = clone(selectableTreatments);
+    },
+    simpleSelectableTreatmentsMutator(
+        state: any,
+        selectableTreatments: SimpleTreatment[],
+    ) {
+        state.simpleSelectableTreatments = clone(selectableTreatments);
     },
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
@@ -122,6 +137,30 @@ const actions = {
                     commit(
                         'scenarioSelectableTreatmentsMutator',
                         response.data as Treatment[],
+                    );
+                }
+            },
+        );
+    },
+    async getSimpleScenarioSelectableTreatments({ commit }: any, scenarioId: string) {
+        await TreatmentService.getSimpleTreatmentsByScenarioId(scenarioId).then(
+            (response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'simpleScenarioSelectableTreatmentsMutator',
+                        response.data as SimpleTreatment[],
+                    );
+                }
+            },
+        );
+    },
+    async getSimpleSelectableTreatments({ commit }: any, libraryId: string) {
+        await TreatmentService.getSimpleTreatmentsByLibraryId(libraryId).then(
+            (response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit(
+                        'simpleSelectableTreatmentsMutator',
+                        response.data as SimpleTreatment[],
                     );
                 }
             },
@@ -215,8 +254,7 @@ const actions = {
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                    const treatmentLibrary: TreatmentLibrary[] = [payload.treatmentLibrary];
-                    commit('treatmentLibrariesMutator', treatmentLibrary);
+                    commit('simpleSelectableTreatmentsMutator', payload.treatments);
                     commit('selectedTreatmentLibraryMutator', payload.libraryId);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted treatment',
@@ -235,7 +273,7 @@ const actions = {
                     hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                    commit('scenarioSelectableTreatmentsMutator', payload.treatments);
+                    commit('simpleScenarioSelectableTreatmentsMutator', payload.treatments);
                     dispatch('addSuccessNotification', {
                         message: 'Deleted scenario treatment',
                     });

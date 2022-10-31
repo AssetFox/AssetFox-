@@ -11,6 +11,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Information;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -68,6 +69,55 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             return simulationEntities.Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
                 .ToList();
         }
+
+        public List<SimulationDTO> GetUserScenarios()
+        {
+            var users = _unitOfWork.Context.User.ToList();
+            var simulations = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationReportDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
+                .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username).ToList();
+
+            return simulations;
+        }
+
+        public List<SimulationDTO> GetSharedScenarios(bool hasAdminAccess, bool hasSimulationAccess)
+        {
+            var users = _unitOfWork.Context.User.ToList();
+            var simulations = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationReportDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
+                .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
+                    hasAdminAccess ||
+                    hasSimulationAccess ||
+                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
+                    ).ToList();
+            return simulations;
+        }
+
+        public List<SimulationDTO> GetScenariosWithIds(List<Guid> simulationIds)
+        {
+            var users = _unitOfWork.Context.User.ToList();
+            var simulations = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
+                .ToList()
+                .Where(_ => simulationIds.Contains(_.Id))
+                .Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                .ToList();
+            return simulations;
+        }
+
 
         public void GetSimulationInNetwork(Guid simulationId, Network network)
         {

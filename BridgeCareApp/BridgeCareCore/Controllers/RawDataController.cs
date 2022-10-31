@@ -26,7 +26,7 @@ namespace BridgeCareCore.Controllers
     [Route("api/[controller]")]
     public class RawDataController : BridgeCareCoreBaseController
     {
-        public const string RawDataError = "Raw data error::";
+        public const string RawDataError = "Raw Data Error";
 
         private readonly IExcelRawDataImportService _excelSpreadsheetImportService;
 
@@ -75,7 +75,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::ImportExcelSpreadsheet - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -130,7 +130,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::GetExcelSpreadsheetColumnHeaders - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

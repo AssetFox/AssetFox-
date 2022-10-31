@@ -7,14 +7,17 @@ using System.Collections.Generic;
 using BridgeCareCore.Security;
 using System;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
-
+using BridgeCareCore.Interfaces;
+using Moq;
+
 namespace BridgeCareCoreTests.Tests
 {
     public class ClaimHelperTests
     {
         private ClaimHelper _claimHelper;
         private Guid ownerId = Guid.NewGuid();
-        private Guid userId = Guid.NewGuid();
+        private Guid userId = Guid.NewGuid();
+        private ISimulationQueueService _simulationQueueService = new Mock<ISimulationQueueService>().Object;
 
         [Fact]
         public void ShouldReturnFalseRequirePermittedCheck()
@@ -22,7 +25,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.AdminAccess) };
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             var result = _claimHelper.RequirePermittedCheck();
 
             // Assert
@@ -36,7 +39,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityAddPermittedFromLibraryAccess) };
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             var result = _claimHelper.RequirePermittedCheck();
 
             // Assert
@@ -51,7 +54,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.SimulationAccess) };
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             _claimHelper.CheckUserSimulationReadAuthorization(Guid.NewGuid(), userId, true);
         }        
 
@@ -61,7 +64,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = SystemSecurityClaimLists.Admin();
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             _claimHelper.CheckUserSimulationModifyAuthorization(Guid.NewGuid(), userId, false);
         }
 
@@ -71,7 +74,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess) };
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
 
             var ex = Assert.Throws<UnauthorizedAccessException>(() => _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId));
             Assert.Equal("You are not authorized to modify this library's data.", ex.Message);
@@ -83,7 +86,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = new List<Claim> { new Claim(ClaimTypes.Name, SecurityConstants.Claim.BudgetPriorityViewPermittedFromLibraryAccess) };
 
             // Act
-            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, HttpContextAccessorMocks.WithClaims(claims));
+            _claimHelper = new ClaimHelper(TestHelper.UnitOfWork, _simulationQueueService, HttpContextAccessorMocks.WithClaims(claims));
             userId = ownerId;
             _claimHelper.OldWayCheckUserLibraryModifyAuthorization(ownerId, userId);
             

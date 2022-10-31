@@ -6,23 +6,21 @@ namespace AppliedResearchAssociates.iAM.Analysis
 {
     public sealed class AnalysisMaintainableAsset : WeakEntity, IValidator
     {
-        internal AnalysisMaintainableAsset(Network network)
-        {
-            Network = network ?? throw new ArgumentNullException(nameof(network));
-            SpatialWeighting = new Equation(Network.Explorer);
-        }
-
-        public Network Network { get; }
-
-        public IEnumerable<Attribute> HistoricalAttributes => HistoryPerAttribute.Keys;
+        public static Func<AttributeValueHistoryProvider> GetHistoryProvider { get; set; } = () => new AttributeValueHistoryProvider();
 
         public string AssetName { get; set; }
 
+        public IEnumerable<Attribute> HistoricalAttributes => HistoryProvider.HistoricalAttributes;
+
+        public AttributeValueHistoryProvider HistoryProvider { get; }
+
+        public Network Network { get; }
+
+        public string ShortDescription => AssetName;
+
         public Equation SpatialWeighting { get; }
 
-        public ValidatorBag Subvalidators => new ValidatorBag { SpatialWeighting };
-
-        public void ClearHistory() => HistoryPerAttribute.Clear();
+        public ValidatorBag Subvalidators => new() { SpatialWeighting };
 
         public ValidationResultBag GetDirectValidationResults()
         {
@@ -36,21 +34,14 @@ namespace AppliedResearchAssociates.iAM.Analysis
             return results;
         }
 
-        public AttributeValueHistory<T> GetHistory<T>(Attribute<T> attribute)
+        public IAttributeValueHistory<T> GetHistory<T>(Attribute<T> attribute) => HistoryProvider.GetHistory(attribute);
+
+        internal AnalysisMaintainableAsset(Network network)
         {
-            if (!HistoryPerAttribute.TryGetValue(attribute, out var history))
-            {
-                history = new AttributeValueHistory<T>(attribute);
-                HistoryPerAttribute.Add(attribute, history);
-            }
+            Network = network ?? throw new ArgumentNullException(nameof(network));
+            SpatialWeighting = new Equation(Network.Explorer);
 
-            return (AttributeValueHistory<T>)history;
+            HistoryProvider = GetHistoryProvider();
         }
-
-        public bool Remove(Attribute attribute) => HistoryPerAttribute.Remove(attribute);
-
-        private readonly Dictionary<Attribute, object> HistoryPerAttribute = new Dictionary<Attribute, object>();
-
-        public string ShortDescription => AssetName;
     }
 }

@@ -475,7 +475,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Empty(budgetInvocations);
             Assert.Empty(investmentPlanInvocations);
             var message = hubService.SingleThreeArgumentUserMessage();
-            Assert.Contains(ClaimHelper.SimulationModifyUnauthorizedMessage, message);
+            Assert.Contains(hubService.Object.errorList["Unauthorized"], message);
         }
 
         [Fact]

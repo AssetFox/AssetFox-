@@ -24,7 +24,8 @@ namespace BridgeCareCoreTests.Tests
             var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
             var security = EsecSecurityMocks.Dbe;
             var mockDataService = new Mock<IInvestmentDefaultDataService>();
-            var claimHelper = new ClaimHelper(unitOfWork.Object, contextAccessor);
+            var simulationQueueService = new Mock<ISimulationQueueService>();
+            var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
             var resolveInvestmentBudgetServiceMock = investmentBudgetServiceMock ?? InvestmentBudgetServiceMocks.New();
             var controller = new InvestmentController(
                 resolveInvestmentBudgetServiceMock.Object,

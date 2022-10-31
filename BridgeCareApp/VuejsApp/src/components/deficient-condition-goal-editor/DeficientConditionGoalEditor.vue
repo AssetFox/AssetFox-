@@ -741,9 +741,9 @@ export default class DeficientConditionGoalEditor extends Vue {
         if (!isNil(criterionExpression) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
             if(this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
                 this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
-            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id, { ...this.selectedDeficientConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary })
-                { ...this.selectedDeficientConditionGoalForCriteriaEdit, 
-                criterionLibrary: {... this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}},
+            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id,
+             { ...this.selectedDeficientConditionGoalForCriteriaEdit, 
+                criterionLibrary: {... this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
             this.onPaginationChanged();
         }
 

@@ -668,11 +668,11 @@ export default class RemainingLifeLimitEditor extends Vue {
             //     this.currentPage,
             // );
             this.onUpdateRow(this.selectedRemainingLifeLimit.id, 
-            { ...this.selectedRemainingLifeLimit, criterionLibrary: criterionLibrary })
-                {
-                    ...this.selectedRemainingLifeLimit,
-                    criterionLibrary: {...this.selectedRemainingLifeLimit.criterionLibrary, mergedCriteriaExpression: criteriaExpression},
-                },
+            {
+                ...this.selectedRemainingLifeLimit,
+                criterionLibrary: {...this.selectedRemainingLifeLimit.criterionLibrary, mergedCriteriaExpression: criteriaExpression}
+            })
+                
             this.onPaginationChanged();
         }
 

@@ -790,11 +790,12 @@ export default class CashFlowEditor extends Vue {
             emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionLibrary) &&
-            this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
+        if (!isNil(criterionExpression) && this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
             // this.currentPage = update(
             //     findIndex(
-            if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+            //         propEq('id', this.selectedCashFlowRuleForCriteriaEdit.id),
             //         this.currentPage,
             //     ),
             //     {
@@ -803,13 +804,12 @@ export default class CashFlowEditor extends Vue {
             //     },
             //     this.currentPage,
             // );
-                {
-                    ...this.selectedCashFlowRuleForCriteriaEdit,
-                    criterionLibrary: {...this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
-                },
 
             this.onUpdateRow(this.selectedCashFlowRuleForCriteriaEdit.id, 
-                { ...this.selectedCashFlowRuleForCriteriaEdit, criterionLibrary: criterionLibrary })
+            {
+                ...this.selectedCashFlowRuleForCriteriaEdit,
+                criterionLibrary: {...this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
+            })
             this.onPaginationChanged();
 
             this.selectedCashFlowRuleForCriteriaEdit = clone(emptyCashFlowRule);

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using Xunit;
 
-namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Aes256Gcm
+namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
 {
     public class Aes256GcmTests
     {

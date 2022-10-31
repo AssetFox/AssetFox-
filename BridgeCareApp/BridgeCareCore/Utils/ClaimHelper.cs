@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.Analysis;using AppliedResearchAssociates.iAM.DataPersistenceCore;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Utils.Interfaces;
@@ -28,7 +30,6 @@ namespace BridgeCareCore.Utils
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";
         public const string RemovingOwnersIsNotAllowedMessage = "Removing owners of a library is not allowed.";
 
-        public ClaimHelper(IUnitOfWork unitOfWork, IHttpContextAccessor contextAccessor)
         public ClaimHelper(IUnitOfWork unitOfWork, ISimulationQueueService simulationQueueService, IHttpContextAccessor contextAccessor)
         {
             UnitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -109,7 +110,7 @@ namespace BridgeCareCore.Utils
             }
         }
 
-        public void CheckUserLibraryModifyAuthorization(LibraryUserAccessModel accessModel, Guid userId)
+        public void OldWayCheckUserLibraryModifyAuthorization(LibraryUserAccessModel accessModel, Guid userId)
         {
             if (RequirePermittedCheck() && accessModel.LibraryExists)
             {

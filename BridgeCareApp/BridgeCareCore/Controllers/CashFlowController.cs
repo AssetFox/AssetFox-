@@ -168,7 +168,7 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                         dto.CashFlowRules = items;
                     }
                     UnitOfWork.CashFlowRuleRepo.UpsertCashFlowRuleLibrary(dto);

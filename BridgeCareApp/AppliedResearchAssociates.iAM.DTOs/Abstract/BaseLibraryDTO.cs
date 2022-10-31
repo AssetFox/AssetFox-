@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
@@ -11,8 +12,10 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 
         public List<Guid> AppliedScenarioIds { get; set; } = new List<Guid>();
 
+        [Obsolete("This should go away. Instead, we will have a LibraryUserDto with an AccessLevel of Owner.")]
         public Guid Owner { get; set; }
 
-        public bool IsShared { get; set; }
+        [Obsolete("This should go away. Instead, we have user-by-user sharing.")]
+        public bool IsShared { get; set; } 
     }
 }

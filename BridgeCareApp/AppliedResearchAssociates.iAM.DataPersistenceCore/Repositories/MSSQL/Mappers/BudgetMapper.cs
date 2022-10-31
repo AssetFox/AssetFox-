@@ -69,7 +69,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 IsShared = entity.IsShared,
                 Budgets = entity.Budgets.Any()
                     ? entity.Budgets.Select(_ => _.ToDto()).ToList()
-                    : new List<BudgetDTO>()
+                    : new List<BudgetDTO>(),
             };
     }
 }

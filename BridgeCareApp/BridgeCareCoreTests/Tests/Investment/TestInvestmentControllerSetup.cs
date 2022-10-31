@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
+using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Interfaces.DefaultData;
@@ -21,7 +22,7 @@ namespace BridgeCareCoreTests.Tests
             Mock<IInvestmentBudgetsService> investmentBudgetServiceMock = null
             )
         {
-            var resolveHubService = hubServiceMock ?? new Mock<IHubService>();
+            var resolveHubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
             var security = EsecSecurityMocks.Dbe;
             var mockDataService = new Mock<IInvestmentDefaultDataService>();
             var simulationQueueService = new Mock<ISimulationQueueService>();

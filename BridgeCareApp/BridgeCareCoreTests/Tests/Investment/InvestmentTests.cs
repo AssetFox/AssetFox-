@@ -168,7 +168,7 @@ namespace BridgeCareCoreTests.Tests
             budgetRepo.SetupGetLibraryAccess(libraryId, user.Id, null);
             var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user);
             unitOfWork.SetupBudgetRepo(budgetRepo);
-            var hubService = new Mock<IHubService>();
+            var hubService = HubServiceMocks.DefaultMock();
             var controller = TestInvestmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
             var library = new BudgetLibraryDTO
             {

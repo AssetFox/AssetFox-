@@ -35,7 +35,7 @@ namespace BridgeCareCore.Controllers
         private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
-        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _treatmentService = treatmentService;
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));

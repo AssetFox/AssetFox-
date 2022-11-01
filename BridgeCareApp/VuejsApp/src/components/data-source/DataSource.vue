@@ -33,44 +33,44 @@
         </v-layout>
         <v-layout column class="cs-style">
             <div v-show="!isNewDataSource">
-            <div style="margin-top:6px;" class="ghd-control-label ghd-md-gray"
-            > 
-                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-            </div>
-            <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
-            <v-layout class="txt-style" row>
-                <v-text-field
-                    v-show="showExcel"
-                    class="ghd-control-text ghd-control-border Montserrat-font-family"
-                    v-model="fileName"
-                    outline
-                    outlined
-                ></v-text-field>
-                <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
-                <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
-            </v-layout>
-            <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
-            <v-select
-              :items="locColumns"
-              append-icon=$vuetify.icons.ghd-down
-              v-model="currentExcelLocationColumn"
-              v-show="showExcel"
-              class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-              outline
-              outlined
-            >
-            </v-select>
-            <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
-            <v-select
-              :items="datColumns"
-              append-icon=$vuetify.icons.ghd-down
-              v-show="showExcel"
-              v-model="currentExcelDateColumn"
-              class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
-              outline
-              outlined
-            >
-            </v-select>
+                <div v-show="showMssql" style="margin-top:6px;" class="ghd-control-label ghd-md-gray"
+                > 
+                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                </div>
+                <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
+                <v-layout class="txt-style" row>
+                    <v-text-field
+                        v-show="showExcel"
+                        class="ghd-control-text ghd-control-border Montserrat-font-family"
+                        v-model="fileName"
+                        outline
+                        outlined
+                    ></v-text-field>
+                    <v-btn v-show="showExcel" class="ghd-white-bg ghd-blue Montserrat-font-family" @click="chooseFiles()">Add File</v-btn>
+                    <input @change="onSelect($event.target.files)" id="file-select" type="file" hidden />
+                </v-layout>
+                <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Location Column</v-subheader>
+                <v-select
+                :items="locColumns"
+                append-icon=$vuetify.icons.ghd-down
+                v-model="currentExcelLocationColumn"
+                v-show="showExcel"
+                class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
+                outline
+                outlined
+                >
+                </v-select>
+                <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Date Column</v-subheader>
+                <v-select
+                :items="datColumns"
+                append-icon=$vuetify.icons.ghd-down
+                v-show="showExcel"
+                v-model="currentExcelDateColumn"
+                class="ghd-select ghd-text-field ghd-text-field-border Montserrat-font-family col-style"
+                outline
+                outlined
+                >
+                </v-select>
             </div>
         </v-layout>
         <v-layout column>
@@ -114,7 +114,7 @@ import Vue from 'vue';
 import { clone, prop } from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
-import { Action, State } from 'vuex-class';
+import { Action, State, Getter, Mutation } from 'vuex-class';
 import {
     Datasource, 
     emptyDatasource, 
@@ -407,11 +407,12 @@ export default class DataSource extends Vue {
             });
         }
     }
-
     getOwnerUserName(): string {
-        return this.getUserNameByIdGetter(this.currentDatasource.CreatedBy);
+        if(this.currentDatasource.createdBy != undefined)
+        {
+            return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
+        }
     }
-
     isOwner(): boolean {
         return this.currentDatasource.createdBy == getIdByUserNameGetter(getUserName());
     }

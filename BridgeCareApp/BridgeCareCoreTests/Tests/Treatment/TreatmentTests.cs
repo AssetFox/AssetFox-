@@ -175,28 +175,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldGetSimpleTreatmentsByLibraryId()
-        {
-            // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-            CreateLibraryTestData();
-
-            // Act
-            var result = await controller.GetSimpleTreatmentsByLibraryId(_testTreatmentLibrary.Id);
-
-            // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<SimpleTreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimpleTreatmentDTO>));
-            Assert.Single(dtos);
-
-            Assert.Equal(_testTreatment.Id, dtos[0].Id);
-            Assert.Equal(_testTreatment.Name, dtos[0].Name);
-        }
-        [Fact]
-        public async Task ShouldGetSelectedTreatmentByIdWithData()
+        public async Task ShouldGetSelectedTreatmentByIdWithDataUnfixable()
         {
             // Arrange
             Setup();
@@ -221,7 +200,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
         }
         [Fact]
-        public async Task ShouldGetScenarioSelectedTreatmentByIdWithData()
+        public async Task ShouldGetScenarioSelectedTreatmentByIdWithDataUnfixable()
         {
             Setup();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
@@ -245,28 +224,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testScenarioTreatmentConsequence.Id, dto.Consequences[0].Id);
             Assert.Equal(_testScenarioTreatmentCost.Id, dto.Costs[0].Id);
             Assert.Contains(budget.Id, dto.BudgetIds);
-        }
-        [Fact]
-        public async Task ShouldGetSimpleTreatmentsByScenarioId()
-        {
-            // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
-            var budget = CreateScenarioTestData(simulation.Id);
-
-            // Act
-            var result = await controller.GetSimpleTreatmentsByScenarioId(simulation.Id);
-
-            // Assert
-            var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<SimpleTreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimpleTreatmentDTO>));
-            Assert.Single(dtos);
-
-            Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
-
         }
 
 

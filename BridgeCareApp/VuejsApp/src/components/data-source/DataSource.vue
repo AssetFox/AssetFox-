@@ -33,6 +33,10 @@
         </v-layout>
         <v-layout column class="cs-style">
             <div v-show="!isNewDataSource">
+            <div style="margin-top:6px;" class="ghd-control-label ghd-md-gray"
+            > 
+                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+            </div>
             <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
             <v-layout class="txt-style" row>
                 <v-text-field
@@ -128,6 +132,7 @@ import {
     emptyCreateDataSourceDialogData
 } from '@/shared/models/modals/data-source-dialog-data';
 import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs/CreateDataSourceDialog.vue';
+import { getUserName } from '@/shared/utils/get-user-info';
 
 @Component({
     components: {
@@ -149,6 +154,9 @@ export default class DataSource extends Vue {
     @Action('importExcelSpreadsheetFile') importExcelSpreadsheetFileAction: any;
     @Action('getExcelSpreadsheetColumnHeaders') getExcelSpreadsheetColumnHeadersAction: any;
     @Action('checkSqlCommand') checkSqlCommandAction: any;
+
+    @Getter('getUserNameById') getUserNameByIdGetter: any;
+    @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
     dsTypeItems: string[] = [];
     dsItems: any = [];
@@ -250,7 +258,7 @@ export default class DataSource extends Vue {
             this.dataSourceTypeItem = this.currentDatasource.type;
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-            this.selectedConnection = '';     
+            this.selectedConnection = isOwner() ? this.currentDatasource.connectionString : '';
             this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
             this.showSqlMessage = false; this.showSaveMessage = false;
         }
@@ -296,7 +304,7 @@ export default class DataSource extends Vue {
             this.upsertSqlDataSourceAction(sqldat).then(() => {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
-                this.selectedConnection = '';
+                this.selectedConnection = isOwner() ? this.currentDatasource.connectionString : '';
                 this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
             });
@@ -398,6 +406,14 @@ export default class DataSource extends Vue {
                 this.showSqlMessage = true;
             });
         }
+    }
+
+    getOwnerUserName(): string {
+        return this.getUserNameByIdGetter(this.currentDatasource.CreatedBy);
+    }
+
+    isOwner(): boolean {
+        return this.currentDatasource.createdBy == getIdByUserNameGetter(getUserName());
     }
 }
 </script>

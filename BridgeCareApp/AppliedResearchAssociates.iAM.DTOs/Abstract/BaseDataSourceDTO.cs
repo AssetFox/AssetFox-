@@ -8,6 +8,8 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
     public abstract class BaseDataSourceDTO : BaseDTO
     {
+        // TODO Add owner id here, in UI later match with userId to decide on action
+
         private string _type;
 
         public BaseDataSourceDTO(string typeName)
@@ -35,6 +37,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// A connection string that contains passwords should be secured
         /// </example>
         public bool Secure { get; protected set; }
+
+        /// <summary>
+        /// Owner
+        /// </summary>
+        public Guid CreatedBy { get; set;}
 
         /// <summary>
         /// Validates the details on the datasource

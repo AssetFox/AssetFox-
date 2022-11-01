@@ -8,13 +8,15 @@ export interface Datasource {
     dateColumn: string;
     secure: boolean;
     type: string;
+    createdBy: string;
 }
 export interface SqlDataSource {
     id: string;
     name: string;
     connectionString: string;
     secure: boolean;
-    type: string
+    type: string;
+    createdBy: string;
 }
 export interface ExcelDataSource {
     id: string;
@@ -23,6 +25,7 @@ export interface ExcelDataSource {
     dateColumn: string;
     type: string;
     secure: boolean;
+    createdBy: string;
 }
 export interface DataSourceType {
     type: string;
@@ -51,7 +54,8 @@ export const emptyDatasource: Datasource = {
     locationColumn: '',
     dateColumn: '',
     secure: false,
-    type: ''
+    type: '',
+    createdBy: getNewGuid()
 }
 export const noneDatasource: Datasource = {
     id: getNewGuid(),
@@ -60,7 +64,8 @@ export const noneDatasource: Datasource = {
     locationColumn: '',
     dateColumn: '',
     secure: false,
-    type: 'None'
+    type: 'None',
+    createdBy: getNewGuid()
 }
 export const DSSQL: string = 'SQL';
 export const DSEXCEL: string = 'Excel';

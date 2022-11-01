@@ -546,7 +546,7 @@ export default class TreatmentEditor extends Vue {
         // }
         this.getHasOwnerAccessAction(this.selectedTreatment);
         this.clearChanges();
-        if(this.treatmentSelectItemValue !== null)
+        if(this.treatmentSelectItemValue !== null && !this.hasScenario)
             this.treatmentCache.push(clone(this.selectedTreatment))
         this.checkHasUnsavedChanges();
     }
@@ -771,6 +771,11 @@ export default class TreatmentEditor extends Vue {
                 this.treatmentCache.push(this.selectedTreatment);
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
+                if(this.hasSelectedLibrary)
+                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
+                        this.treatmentSelectItemValue = null;
+                    })
+                this.checkHasUnsavedChanges();
             }           
         });
     }

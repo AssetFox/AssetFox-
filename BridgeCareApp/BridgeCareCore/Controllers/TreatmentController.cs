@@ -78,7 +78,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<SimpleTreatmentDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(libraryId);                   
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId);                   
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         if(library.Owner == UserId || library.IsShared == true)

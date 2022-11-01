@@ -139,4 +139,14 @@ export default class TreatmentService {
             `${API.Treatment}/GetHasPermittedAccess`,
         );
     }
+    static getHasOwnerAccess(treatment: Treatment) {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetHasOwnerAccess/${treatment.id}`
+        );
+    }
+    static getHasViewAccess() {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetHasViewAccess`
+        );
+    }
 }

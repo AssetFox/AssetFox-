@@ -666,6 +666,8 @@ namespace BridgeCareCore.Controllers
         {
             // Check if user is owner of library
             var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
+            if (dto == null) return NotFound();
+
             return dto.Owner == UserId ? Ok(true) : Unauthorized();
         }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()

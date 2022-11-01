@@ -365,6 +365,8 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
     @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
+    @Action('getHasViewAccess') getHasViewAccessAction: any;
+    @Action('getHasOwnerAccess') getHasOwnerAccessAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -389,7 +391,6 @@ export default class TreatmentEditor extends Vue {
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
-
     @Mutation('addedOrUpdatedTreatmentLibraryMutator') addedOrUpdatedTreatmentLibraryMutator: any;
     @Mutation('selectedTreatmentLibraryMutator') selectedTreatmentLibraryMutator: any;
 
@@ -446,7 +447,7 @@ export default class TreatmentEditor extends Vue {
             vm.librarySelectItemValue = null;
             vm.getTreatmentLibrariesAction();
             vm.getHasPermittedAccessAction();
-
+            vm.getHasViewAccessAction();
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
@@ -543,7 +544,7 @@ export default class TreatmentEditor extends Vue {
         // } else {
         //     this.treatments = clone(this.selectedTreatmentLibrary.treatments);
         // }
-
+        this.getHasOwnerAccessAction(this.selectedTreatment);
         this.clearChanges();
         if(this.treatmentSelectItemValue !== null)
             this.treatmentCache.push(clone(this.selectedTreatment))

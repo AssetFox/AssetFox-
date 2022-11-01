@@ -18,6 +18,7 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
+import { stat } from 'fs';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
@@ -26,6 +27,8 @@ const state = {
     simpleScenarioSelectableTreatments: [] as SimpleTreatment[],
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
+    hasOwnerAccess: false,
+    hasViewAccess: false
 };
 
 const mutations = {
@@ -86,6 +89,12 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    ViewAccessMutator(state: any, status: boolean) {
+        state.hasPermittedAccess = status;
+    },
+    OwnerAccessMutator(state: any, status: boolean) {
+        state.hasOwnerAccess = status;
+    }
 };
 
 const actions = {
@@ -294,6 +303,35 @@ const actions = {
             }
         });
     },
+    async getHasViewAccess( {dispatch, commit}: any) {
+        await TreatmentService.getHasViewAccess()
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+            ) {
+                commit('ViewAccessMutator', response.data as boolean);
+                dispatch('addSuccessNotification', {
+                    message: 'User has view access of this library.'
+                });
+            }
+        });
+    },
+    async getHasOwnerAccess({ dispatch, commit }: any, payload: Treatment) {
+        await TreatmentService.getHasOwnerAccess(payload).then(
+            (response: AxiosResponse) => {
+                if (
+                    hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                    commit('OwnerAccessMutator', response.data as boolean);
+                    dispatch('addSuccessNotification', {
+                        message: 'User is owner of this library.'
+                    });
+                }
+            }
+        );
+    }
 };
 
 const getters = {};

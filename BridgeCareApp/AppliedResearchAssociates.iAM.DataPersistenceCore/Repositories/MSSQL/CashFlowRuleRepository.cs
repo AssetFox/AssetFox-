@@ -91,6 +91,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.CashFlowRules)
                 .ThenInclude(_ => _.CashFlowDistributionRules)
+                .AsNoTracking()
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -150,7 +151,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (cashFlowRules.Any(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
                                        !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
-                var criterionJoins = new List<CriterionLibraryScenarioCashFlowRuleEntity>();
+                var criterionJoins = new List<CriterionLibraryCashFlowRuleEntity>();
 
                 var criteria = cashFlowRules
                     .Where(_ => _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
@@ -164,9 +165,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                             Name = $"{cashFlowRule.Name} Criterion",
                             IsSingleUse = true
                         };
-                        criterionJoins.Add(new CriterionLibraryScenarioCashFlowRuleEntity
+                        criterionJoins.Add(new CriterionLibraryCashFlowRuleEntity
                         {
-                            CriterionLibraryId = criterion.Id, ScenarioCashFlowRuleId = cashFlowRule.Id
+                            CriterionLibraryId = criterion.Id, CashFlowRuleId = cashFlowRule.Id
                         });
                         return criterion;
                     }).ToList();

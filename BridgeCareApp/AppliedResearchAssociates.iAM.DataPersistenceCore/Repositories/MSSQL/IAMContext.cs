@@ -195,6 +195,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TreatmentLibraryEntity> TreatmentLibrary { get; set; }
 
+        public virtual DbSet<TreatmentLibraryUserEntity> TreatmentLibraryUser { get; set; }
+
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
         public virtual DbSet<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentScheduling { get; set; }
@@ -2001,7 +2003,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
+            modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.TreatmentId, e.UserId });
 
+                entity.ToTable("TreatmentLibrary_User");
+
+                entity.HasIndex(e => e.TreatmentId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.TreatmentLibrary)
+                    .WithMany(p => p.TreatmentLibraryUserJoins)
+                    .HasForeignKey(d => d.TreatmentId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TreatmentLibraryUserJoins)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
             modelBuilder.Entity<TreatmentSchedulingEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);

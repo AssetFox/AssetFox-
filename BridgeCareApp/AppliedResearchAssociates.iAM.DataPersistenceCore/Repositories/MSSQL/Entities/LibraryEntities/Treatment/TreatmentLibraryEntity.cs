@@ -11,5 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         }
 
         public virtual ICollection<SelectableTreatmentEntity> Treatments { get; set; }
+        public virtual ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUserJoins { get; set; }
     }
 }

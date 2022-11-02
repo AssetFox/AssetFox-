@@ -8,8 +8,6 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
 {
     public abstract class BaseDataSourceDTO : BaseDTO
     {
-        // TODO Add owner id here, in UI later match with userId to decide on action
-
         private string _type;
 
         public BaseDataSourceDTO(string typeName)

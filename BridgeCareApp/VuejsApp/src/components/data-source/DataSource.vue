@@ -296,17 +296,23 @@ export default class DataSource extends Vue {
         }
     }
     onSaveDatasource() {
-        if (this.dataSourceTypeItem ===DSSQL) {
+        if (this.dataSourceTypeItem === DSSQL) {
             let sqldat : SqlDataSource = {
                     id: this.currentDatasource.id,
                     name: this.currentDatasource.name,
                     connectionString: this.currentDatasource.connectionString,
                     type: this.currentDatasource.type,
-                    secure: this.currentDatasource.secure
+                    secure: this.currentDatasource.secure,
+                    createdBy: this.currentDatasource.createdBy
             };
             this.upsertSqlDataSourceAction(sqldat).then(() => {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
+                if(this.isNewDataSource)
+                {
+                    this.currentDatasource.createdBy = this.getIdByUserNameGetter(getUserName());
+                    this.isNewDataSource = false;
+                }
                 this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
                 this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
@@ -342,7 +348,7 @@ export default class DataSource extends Vue {
         this.currentDatasource = datasource;
         this.sourceTypeItem = datasource.name;
         this.dataSourceTypeItem = datasource.type;
-        this.selectedConnection = datasource.connectionString;
+        this.selectedConnection = datasource.connectionString;        
         this.connectionStringPlaceHolderMessage = 'New connection string';
         this.datColumns = [];
         this.locColumns = [];
@@ -411,7 +417,7 @@ export default class DataSource extends Vue {
         }
     }
     getOwnerUserName(): string {
-        if(this.currentDatasource.createdBy != NIL)
+        if(this.currentDatasource.createdBy != NIL && this.currentDatasource.createdBy != undefined)
         {
             return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
         }

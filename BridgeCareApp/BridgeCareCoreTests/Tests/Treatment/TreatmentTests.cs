@@ -461,68 +461,45 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldModifyScenarioTreatmentData()
         {
-            // Arrange
-            Setup();
-            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedControllerWithTreatmService();
-            CreateScenarioTestData(simulation.Id);
-
-            var scenarioBudget = new ScenarioBudgetEntity
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatmentService = TreatmentServiceMocks.EmptyMock;
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var libraryId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var treatmentId = Guid.NewGuid();
+            var treatmentBefore = new TreatmentDTO
             {
-                Id = Guid.NewGuid(),
-                Name = "",
-                SimulationId = simulation.Id
+                Id = treatmentId,
             };
-            TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
-            TestHelper.UnitOfWork.Context.SaveChanges();
-
-            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
-                .GetScenarioSelectableTreatments(simulation.Id);
-
-            dto[0].Description = "Updated Description";
-            dto[0].Name = "Updated Name";
-            dto[0].CriterionLibrary = new CriterionLibraryDTO
+            var treatmentAfter = new TreatmentDTO
             {
-                Id = Guid.NewGuid(),
-                Name = "",
-                MergedCriteriaExpression = "",
-                IsSingleUse = true
+                Id = treatmentId,
+                Description = "Updated description",
             };
-            dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            var treatmentsBefore = new List<TreatmentDTO> { treatmentBefore };
+            var treatmentsAfter = new List<TreatmentDTO> { treatmentAfter };
+            var libraryBefore = new TreatmentLibraryDTO
             {
-                Id = Guid.NewGuid(),
-                Name = "",
-                MergedCriteriaExpression = "",
-                IsSingleUse = true
+                Id = libraryId,
+                Treatments = treatmentsBefore,
             };
-            dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            var libraryAfter = new TreatmentLibraryDTO
             {
-                Id = Guid.NewGuid(),
-                Name = "",
-                MergedCriteriaExpression = "",
-                IsSingleUse = true
-            };
-            dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            dto[0].BudgetIds.Add(scenarioBudget.Id);
-
-            var pageSync = new PagingSyncModel<TreatmentDTO>()
-            {
-                UpdateRows = new List<TreatmentDTO>() { dto[0] }
+                Id = libraryId,
+                Treatments = treatmentsAfter,
             };
 
-            // Act
-            await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
+            var sync = new PagingSyncModel<TreatmentDTO>()
+            {
+                UpdateRows = new List<TreatmentDTO>() { treatmentAfter },
+                LibraryId = libraryId,
+            };
+            treatmentService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, sync)).Returns(treatmentsAfter);
 
-            // Assert
-            var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
-                .GetScenarioSelectableTreatments(simulation.Id);
-            Assert.Equal(dto[0].Description, modifiedDto[0].Description);
-            Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-            Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
+            var result = await controller.UpsertScenarioSelectedTreatments(simulationId, sync);
+            // TODO when I get back onto this -- assertions on the result.
         }
 
         [Fact]

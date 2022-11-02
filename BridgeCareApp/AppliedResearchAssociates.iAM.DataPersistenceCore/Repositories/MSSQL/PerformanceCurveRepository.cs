@@ -488,7 +488,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var equationEntitiesToMaybeUpdate = _unitOfWork.Context.Equation
                 .Where(e => equationIdsToMaybeUpdate.Contains(e.Id)).ToList();
             var criterionLibraryJoinsToMaybeUpdate =
-                _unitOfWork.Context.CriterionLibraryPerformanceCurve
+                _unitOfWork.Context.CriterionLibraryScenarioPerformanceCurve
                 .Include(clpc => clpc.CriterionLibrary)
                 .Where(cl => criterionLibraryIdsToUpdate.Contains(cl.CriterionLibraryId))
                 .ToList();

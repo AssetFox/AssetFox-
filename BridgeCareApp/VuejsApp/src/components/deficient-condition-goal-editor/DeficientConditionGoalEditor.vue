@@ -267,8 +267,8 @@
             @submit="onAddDeficientConditionGoal"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
     </v-layout>
@@ -297,11 +297,6 @@ import {
     propEq,
     update,
 } from 'ramda';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateDeficientConditionGoalDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalDialog.vue';
 import {
     CreateDeficientConditionGoalLibraryDialogData,
@@ -327,6 +322,8 @@ import {
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import DeficientConditionGoalService from '@/services/deficient-condition-goal.service';
@@ -339,7 +336,7 @@ import deficientConditionGoalModule from '@/store-modules/deficient-condition-go
     components: {
         CreateDeficientConditionGoalLibraryDialog,
         CreateDeficientConditionGoalDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmBeforeDeleteAlert: Alert,
     },
 })
@@ -454,8 +451,8 @@ export default class DeficientConditionGoalEditor extends Vue {
         emptyDeficientConditionGoal,
     );
     showCreateDeficientConditionGoalDialog: boolean = false;
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     createDeficientConditionGoalLibraryDialogData: CreateDeficientConditionGoalLibraryDialogData = clone(
         emptyCreateDeficientConditionGoalLibraryDialogData,
@@ -732,24 +729,21 @@ export default class DeficientConditionGoalEditor extends Vue {
             deficientConditionGoal,
         );
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: deficientConditionGoal.criterionLibrary.id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: deficientConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onEditDeficientConditionGoalCriterionLibrary(criterionLibrary: CriterionLibrary,) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onEditDeficientConditionGoalCriterionLibrary(criterionExpression: string,) {
+        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
-            // this.currentPage = update(
-            //     findIndex(propEq('id', this.selectedDeficientConditionGoalForCriteriaEdit.id), this.currentPage),
-            //     { ...this.selectedDeficientConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary},
-            //     this.currentPage,
-            // );
-            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id, { ...this.selectedDeficientConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary })
+        if (!isNil(criterionExpression) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id,
+             { ...this.selectedDeficientConditionGoalForCriteriaEdit, 
+                criterionLibrary: {... this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
             this.onPaginationChanged();
         }
 

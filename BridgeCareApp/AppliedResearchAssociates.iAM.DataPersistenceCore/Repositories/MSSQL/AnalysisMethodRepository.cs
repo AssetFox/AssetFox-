@@ -202,21 +202,36 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var simulationEntity = _unitOfWork.Context.Simulation.Where(_ => _.Id == simulationId).FirstOrDefault();
             _unitOfWork.SimulationRepo.UpdateLastModifiedDate(simulationEntity);
 
-            _unitOfWork.BenefitRepo.UpsertBenefit(dto.Benefit, dto.Id);
+            _unitOfWork.BenefitRepo.UpsertBenefit(dto.Benefit, dto.Id);          
 
             _unitOfWork.Context.DeleteEntity<CriterionLibraryAnalysisMethodEntity>(_ => _.AnalysisMethodId == dto.Id);
+
+            var oldCriterionEntity = _unitOfWork.Context.CriterionLibrary.SingleOrDefault(_ => _.Id == dto.CriterionLibrary.Id);
 
             if (dto.CriterionLibrary?.Id != null && dto.CriterionLibrary?.Id != Guid.Empty &&
                 !string.IsNullOrEmpty(dto.CriterionLibrary.MergedCriteriaExpression))
             {
+
                 var criterionJoinEntity = new CriterionLibraryAnalysisMethodEntity
                 {
                     CriterionLibraryId = dto.CriterionLibrary.Id,
                     AnalysisMethodId = dto.Id
                 };
 
+                if (oldCriterionEntity == null)
+                {
+                    var criterionEntity = dto.CriterionLibrary.ToEntity();
+                    criterionEntity.Name = criterionEntity.Name ?? "";
+                    _unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto.CriterionLibrary);
+                }
+                else if (oldCriterionEntity.MergedCriteriaExpression != dto.CriterionLibrary.MergedCriteriaExpression)
+                    _unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto.CriterionLibrary);
+
+
                 _unitOfWork.Context.AddEntity(criterionJoinEntity, _unitOfWork.UserEntity?.Id);
             }
+            else if (oldCriterionEntity != null)
+                _unitOfWork.CriterionLibraryRepo.DeleteCriterionLibrary(oldCriterionEntity.Id);
         }
     }
 }

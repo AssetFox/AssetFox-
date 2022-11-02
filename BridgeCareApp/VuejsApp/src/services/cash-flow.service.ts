@@ -4,6 +4,7 @@ import {
     CashFlowRule,
     CashFlowRuleLibrary,
 } from '@/shared/models/iAM/cash-flow';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class CashFlowService {
     static getCashFlowRuleLibraries(): AxiosPromise {
@@ -12,7 +13,19 @@ export default class CashFlowService {
         );
     }
 
-    static upsertCashFlowRuleLibrary(data: CashFlowRuleLibrary): AxiosPromise {
+    static getScenarioCashFlowRulePage(scenarioId: string, data:PagingRequest<CashFlowRule>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.CashFlow}/GetScenarioCashFlowRulePage/${scenarioId}`, data
+        );
+    }
+
+    static getLibraryCashFlowRulePage(libraryId: string, data:PagingRequest<CashFlowRule>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.CashFlow}/GetLibraryCashFlowRulePage/${libraryId}`, data
+        );
+    }
+
+    static upsertCashFlowRuleLibrary(data: LibraryUpsertPagingRequest<CashFlowRuleLibrary, CashFlowRule>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.CashFlow}/UpsertCashFlowRuleLibrary`,
             data,
@@ -32,7 +45,7 @@ export default class CashFlowService {
     }
 
     static upsertScenarioCashFlowRules(
-        data: CashFlowRule[],
+        data: PaginSync<CashFlowRule>,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(

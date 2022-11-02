@@ -287,7 +287,6 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
             };
             treatmentService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(dto);
-            var wtf = treatmentService.Object.GetSyncedLibraryDataset(libraryRequest);
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -299,19 +298,36 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnScenarioPost()
         {
-        //    // Arrange
-        //    Setup();
-        //    var controller = CreateAuthorizedControllerWithTreatmService();
-        //    var dtos = new List<TreatmentDTO>();
-        //    var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var treatmentId = Guid.NewGuid();
+            var treatmentService = TreatmentServiceMocks.EmptyMock;
+            var dto = new TreatmentLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                Treatments = new List<TreatmentDTO>()
+            };
 
-        //    var pageSync = new PagingSyncModel<TreatmentDTO>();
+            var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
+            {
+                IsNewLibrary = true,
+                Library = dto,
+            };
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var dtos = new List<TreatmentDTO>();
+            var simulation = new SimulationDTO { Id = simulationId };
 
-        //    // Act
-        //    var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
+            var pageSync = new PagingSyncModel<TreatmentDTO>();
+            treatmentService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, pageSync)).Returns(dtos);
 
-        //    // Assert
-        //    Assert.IsType<OkResult>(result);
+            // Act
+            var result = await controller.UpsertScenarioSelectedTreatments(simulationId, pageSync);
+
+            // Assert
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]

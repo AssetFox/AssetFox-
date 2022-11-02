@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -16,19 +17,20 @@ namespace BridgeCareCoreTests.Tests
     {
         public static TreatmentController Create(
             Mock<IUnitOfWork> unitOfWork,
-            IHttpContextAccessor contextAccessor,
-            Mock<IHubService> hubServiceMock = null
+            Mock<ITreatmentService> treatmentService = null
             )
         {
+            var contextAccessor = HttpContextAccessorMocks.DefaultMock();
+            var hubService = HubServiceMocks.DefaultMock();
             var esecSecurity = EsecSecurityMocks.AdminMock;
             var claimHelper = ClaimHelperMocks.New();
-            var treatmentService = TreatmentServiceMocks.EmptyMock;
+            treatmentService ??= TreatmentServiceMocks.EmptyMock;
             var controller = new TreatmentController(
                 treatmentService.Object,
                 esecSecurity.Object,
                 unitOfWork.Object,
-                hubServiceMock.Object,
-                contextAccessor,
+                hubService.Object,
+                contextAccessor.Object,
                 claimHelper.Object
                 );
             return controller;

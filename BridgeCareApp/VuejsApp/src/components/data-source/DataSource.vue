@@ -19,7 +19,7 @@
             </v-layout>
             <v-divider v-show="showMssql || showExcel"></v-divider>
             <v-layout column>
-                <div v-show="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:10px;" class="ghd-control-label ghd-md-gray"
+                <div v-show="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:12px;" class="ghd-control-label ghd-md-gray"
                 > 
                     Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
                 </div>
@@ -261,7 +261,7 @@ export default class DataSource extends Vue {
             this.dataSourceTypeItem = this.currentDatasource.type;
             this.currentExcelDateColumn = this.currentDatasource.dateColumn;
             this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
-            this.selectedConnection = isOwner() ? this.currentDatasource.connectionString : '';
+            this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
             this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString != ''? "Replacement connection string" : 'New connection string';
             this.showSqlMessage = false; this.showSaveMessage = false;
         }
@@ -307,7 +307,7 @@ export default class DataSource extends Vue {
             this.upsertSqlDataSourceAction(sqldat).then(() => {
                 this.showSqlMessage = false;
                 this.showSaveMessage = true;
-                this.selectedConnection = isOwner() ? this.currentDatasource.connectionString : '';
+                this.selectedConnection = this.isOwner() ? this.currentDatasource.connectionString : '';
                 this.connectionStringPlaceHolderMessage = this.currentDatasource.connectionString!='' ? 'Replacement connection string' : 'New connection string';
                 this.getDataSourcesAction();
             });
@@ -416,8 +416,8 @@ export default class DataSource extends Vue {
             return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
         }
     }
-    isOwner(): boolean {
-        return this.currentDatasource.createdBy == getIdByUserNameGetter(getUserName());
+    isOwner() {
+        return this.currentDatasource.createdBy == this.getIdByUserNameGetter(getUserName());
     }
 }
 </script>

@@ -171,8 +171,9 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    UnitOfWork.BeginTransaction();
                     var dto = _calulatedAttributeService.GetSyncedScenarioDataset(simulationId, syncModel);
+                    UnitOfWork.BeginTransaction();
+                    
                     calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);
                     UnitOfWork.Commit();
                 });

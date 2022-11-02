@@ -29,6 +29,9 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Interfaces;
 using BridgeCareCoreTests.Helpers;
 using BridgeCareCoreTests.Tests.Treatment;
+using NuGet.LibraryModel;
+using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -333,64 +336,67 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryDelete()
         {
-            //// Arrange
-            //Setup();
-            //var controller = CreateAuthorizedController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
 
-            //// Act
-            //var result = await controller.DeleteTreatmentLibrary(Guid.Empty);
+            // Act
+            var result = await controller.DeleteTreatmentLibrary(Guid.Empty);
 
-            //// Assert
-            //Assert.IsType<OkResult>(result);
+            // Assert
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]
         public async Task ShouldGetLibraryTreatmentData()
         {
-            //// Arrange
-            //Setup();
-            //var controller = CreateAuthorizedController();
-            //CreateLibraryTestData();
+            // Arrange
 
-            //// Act
-            //var result = await controller.GetTreatmentLibraries();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+            var libraryId = Guid.NewGuid();
+            var dto = new TreatmentLibraryDTO
+            {
+                Id = libraryId,
+            };
+            var dtos = new List<TreatmentLibraryDTO> { dto };
+            treatmentRepo.Setup(tr => tr.GetAllTreatmentLibrariesNoChildren()).Returns(dtos);
 
-            //// Assert
-            //var okObjResult = result as OkObjectResult;
-            //Assert.NotNull(okObjResult.Value);
+            // Act
+            var result = await controller.GetTreatmentLibraries();
 
-            //var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
-            //    typeof(List<TreatmentLibraryDTO>));
-            //Assert.Contains(dtos, t => t.Id == _testTreatmentLibrary.Id);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+            var actualDtos = okObjResult.Value;
+            Assert.Equal(dtos, actualDtos);
         }
 
         [Fact]
         public async Task ShouldGetScenarioTreatmentData()
         {
-            //// Arrange
-            //Setup();
-            //var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            //var controller = CreateAuthorizedController();
-            //var budget = CreateScenarioTestData(simulation.Id);
+            // Arrange
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork);
+            var treatment = new TreatmentDTO
+            {
+                Id = Guid.NewGuid(),
+            };
+            var expectedResult = new List<TreatmentDTO> { treatment };
+            var simulationId = Guid.NewGuid();
+            treatmentRepo.Setup(tr => tr.GetScenarioSelectableTreatments(simulationId)).Returns(expectedResult);
 
-            //// Act
-            //var result = await controller.GetScenarioSelectedTreatments(simulation.Id);
+            // Act
+            var result = await controller.GetScenarioSelectedTreatments(simulationId);
 
-            //// Assert
-            //var okObjResult = result as OkObjectResult;
-            //Assert.NotNull(okObjResult.Value);
-
-            //var dtos = (List<TreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<TreatmentDTO>));
-            //Assert.Single(dtos);
-
-            //Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
-            //Assert.Single(dtos[0].Consequences);
-            //Assert.Single(dtos[0].Costs);
-            //Assert.Single(dtos[0].BudgetIds);
-
-            //Assert.Equal(_testScenarioTreatmentConsequence.Id, dtos[0].Consequences[0].Id);
-            //Assert.Equal(_testScenarioTreatmentCost.Id, dtos[0].Costs[0].Id);
-            //Assert.Contains(budget.Id, dtos[0].BudgetIds);
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.Equal(expectedResult, okObjResult.Value);
         }
 
         [Fact]

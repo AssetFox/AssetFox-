@@ -71,7 +71,7 @@
         }
 
         onRedirect() { 
-            let href: string = `${this.$config.authorizationEndpoint}?response_type=code&scope=openid BAMS`;
+            let href: string = `${this.$config.authorizationEndpoint}?response_type=code&scope=openid&scope=BAMS`;
             href += `&client_id=${this.$config.clientId}`;
             href += `&redirect_uri=${this.$config.redirectUri}`;
 

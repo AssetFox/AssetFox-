@@ -18,6 +18,12 @@
                 <v-btn class="ghd-white-bg ghd-blue Montserrat-font-family" @click="onShowCreateDataSourceDialog" outline>Add Data Source</v-btn>
             </v-layout>
             <v-divider v-show="showMssql || showExcel"></v-divider>
+            <v-layout column>
+                <div v-show="showMssql && !isNewDataSource" style="margin-top:5px;margin-bottom:10px;" class="ghd-control-label ghd-md-gray"
+                > 
+                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                </div>
+            </v-layout>
         <v-layout column>
             <v-subheader v-show="showMssql || showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">Source Type</v-subheader>
             <v-select
@@ -32,11 +38,7 @@
             </v-select>
         </v-layout>
         <v-layout column class="cs-style">
-            <div v-show="!isNewDataSource">
-                <div v-show="showMssql" style="margin-top:6px;" class="ghd-control-label ghd-md-gray"
-                > 
-                    Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
-                </div>
+            <div v-show="!isNewDataSource">                
                 <v-subheader v-show="showExcel" class="ghd-control-label ghd-md-gray Montserrat-font-family">FileName</v-subheader>
                 <v-layout class="txt-style" row>
                     <v-text-field
@@ -133,6 +135,7 @@ import {
 } from '@/shared/models/modals/data-source-dialog-data';
 import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs/CreateDataSourceDialog.vue';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { NIL } from 'uuid';
 
 @Component({
     components: {
@@ -408,7 +411,7 @@ export default class DataSource extends Vue {
         }
     }
     getOwnerUserName(): string {
-        if(this.currentDatasource.createdBy != undefined)
+        if(this.currentDatasource.createdBy != NIL)
         {
             return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
         }

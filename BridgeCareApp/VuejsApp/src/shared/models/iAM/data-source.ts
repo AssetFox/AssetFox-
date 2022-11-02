@@ -1,4 +1,5 @@
 import { getNewGuid } from "@/shared/utils/uuid-utils";
+import { getBlankGuid } from "@/shared/utils/uuid-utils";
 
 export interface Datasource {
     id: string;
@@ -55,7 +56,7 @@ export const emptyDatasource: Datasource = {
     dateColumn: '',
     secure: false,
     type: '',
-    createdBy: getNewGuid()
+    createdBy: getBlankGuid()
 }
 export const noneDatasource: Datasource = {
     id: getNewGuid(),
@@ -65,7 +66,7 @@ export const noneDatasource: Datasource = {
     dateColumn: '',
     secure: false,
     type: 'None',
-    createdBy: getNewGuid()
+    createdBy: getBlankGuid()
 }
 export const DSSQL: string = 'SQL';
 export const DSEXCEL: string = 'Excel';

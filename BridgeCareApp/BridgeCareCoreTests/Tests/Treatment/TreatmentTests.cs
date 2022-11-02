@@ -32,6 +32,8 @@ using BridgeCareCoreTests.Tests.Treatment;
 using NuGet.LibraryModel;
 using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -402,127 +404,125 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public async Task ShouldModifyLibraryTreatmentData()
         {
-            //// Arrange
-            //Setup();
-            //var controller = CreateAuthorizedControllerWithTreatmService();
-            //CreateLibraryTestData();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
+            var treatmentService = TreatmentServiceMocks.EmptyMock;
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var libraryId = Guid.NewGuid();
+            var treatmentId = Guid.NewGuid();
+            var treatmentBefore = new TreatmentDTO
+            {
+                Id = treatmentId,
+            };
+            var treatmentAfter = new TreatmentDTO
+            {
+                Id = treatmentId,
+                Description = "Updated description",
+            };
+            var treatmentsBefore = new List<TreatmentDTO> { treatmentBefore };
+            var treatmentsAfter = new List<TreatmentDTO> { treatmentAfter };
+            var libraryBefore = new TreatmentLibraryDTO
+            {
+                Id = libraryId,
+                Treatments = treatmentsBefore,
+            };
+            var libraryAfter = new TreatmentLibraryDTO
+            {
+                Id = libraryId,
+                Treatments = treatmentsAfter,
+            };
+ 
+            var sync = new PagingSyncModel<TreatmentDTO>()
+            {
+                UpdateRows = new List<TreatmentDTO>() { treatmentAfter },
+                LibraryId = libraryId,
+            };
 
-            //var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();            
-            //var dtoLibrary = dto.Where(t => t.Name == "Test Name").FirstOrDefault();
-            //var treatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(dtoLibrary.Id);
-            //dtoLibrary.Description = "Updated Description";
-            //treatments[0].Name = "Updated Name";
-            //treatments[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //treatments[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //treatments[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            //treatments[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
+            {
+                IsNewLibrary = false,
+                Library = libraryBefore,
+                PagingSync = sync
+            };
+            treatmentService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(libraryAfter);
 
-            //var sync = new PagingSyncModel<TreatmentDTO>()
-            //{
-            //    UpdateRows = new List<TreatmentDTO>() { treatments[0] },
-            //    LibraryId = dtoLibrary.Id
-            //};
+            // Act
+            var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 
-            //var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
-            //{
-            //    IsNewLibrary = false,
-            //    Library = dtoLibrary,
-            //    PagingSync = sync
-            //};
-
-            //// Act
-            //await controller.UpsertTreatmentLibrary(libraryRequest);
-
-            //// Assert
-            //var modifiedDto =
-            //    TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries().Single(lib => lib.Id == dtoLibrary.Id);
-            //Assert.Equal(dtoLibrary.Description, modifiedDto.Description);
+            // Assert
+            var treatmentInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.UpsertOrDeleteTreatments));
+            var libraryInvocation = treatmentRepo.SingleInvocationWithName(nameof(ISelectableTreatmentRepository.UpsertTreatmentLibrary));
+            Assert.Equal(libraryAfter, libraryInvocation.Arguments.Single());
+            Assert.Equal(treatmentsAfter, treatmentInvocation.Arguments[0]);
+            Assert.Equal(libraryId, treatmentInvocation.Arguments[1]);
         }
 
         [Fact]
         public async Task ShouldModifyScenarioTreatmentData()
         {
-            //// Arrange
-            //Setup();
-            //NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
-            //AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
-            //var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            //var controller = CreateAuthorizedControllerWithTreatmService();
-            //CreateScenarioTestData(simulation.Id);
+            // Arrange
+            Setup();
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var controller = CreateAuthorizedControllerWithTreatmService();
+            CreateScenarioTestData(simulation.Id);
 
-            //var scenarioBudget = new ScenarioBudgetEntity
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    SimulationId = simulation.Id
-            //};
-            //TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
-            //TestHelper.UnitOfWork.Context.SaveChanges();
+            var scenarioBudget = new ScenarioBudgetEntity
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                SimulationId = simulation.Id
+            };
+            TestHelper.UnitOfWork.Context.AddEntity(scenarioBudget);
+            TestHelper.UnitOfWork.Context.SaveChanges();
 
-            //var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
-            //    .GetScenarioSelectableTreatments(simulation.Id);
+            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
 
-            //dto[0].Description = "Updated Description";
-            //dto[0].Name = "Updated Name";
-            //dto[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            //dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
-            //{
-            //    Id = Guid.NewGuid(),
-            //    Name = "",
-            //    MergedCriteriaExpression = "",
-            //    IsSingleUse = true
-            //};
-            //dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            //dto[0].BudgetIds.Add(scenarioBudget.Id);
+            dto[0].Description = "Updated Description";
+            dto[0].Name = "Updated Name";
+            dto[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                MergedCriteriaExpression = "",
+                IsSingleUse = true
+            };
+            dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            dto[0].BudgetIds.Add(scenarioBudget.Id);
 
-            //var pageSync = new PagingSyncModel<TreatmentDTO>()
-            //{
-            //    UpdateRows = new List<TreatmentDTO>() { dto[0] }
-            //};
+            var pageSync = new PagingSyncModel<TreatmentDTO>()
+            {
+                UpdateRows = new List<TreatmentDTO>() { dto[0] }
+            };
 
-            //// Act
-            //await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
+            // Act
+            await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
 
-            //// Assert
-            //var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
-            //    .GetScenarioSelectableTreatments(simulation.Id);
-            //Assert.Equal(dto[0].Description, modifiedDto[0].Description);
-            //Assert.Equal(dto[0].Name, modifiedDto[0].Name);
-            //Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
-            //Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
+            // Assert
+            var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
+                .GetScenarioSelectableTreatments(simulation.Id);
+            Assert.Equal(dto[0].Description, modifiedDto[0].Description);
+            Assert.Equal(dto[0].Name, modifiedDto[0].Name);
+            Assert.Equal(dto[0].BudgetIds.Count, modifiedDto[0].BudgetIds.Count);
+            Assert.Contains(scenarioBudget.Id, modifiedDto[0].BudgetIds);
         }
 
         [Fact]

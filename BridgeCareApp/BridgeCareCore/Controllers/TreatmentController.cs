@@ -23,6 +23,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Utils;
+using Humanizer;
 
 namespace BridgeCareCore.Controllers
 {
@@ -252,6 +253,25 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+        [HttpPost]
+        [Route("SetSharedStatus")]
+        [Authorize(Policy.ModifyTreatmentFromLibrary)]
+        public async Task<IActionResult> SetSharedStatus(TreatmentLibraryDTO treatmentLibrary, Guid userId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.TreatmentLibraryUserRepo.UpsertTreatmentLibraryUser(treatmentLibrary, userId);
+                    UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(treatmentLibrary);
+                    UnitOfWork.Commit();
+                });
+                return Ok();
+            } catch (Exception e)
+            {
                 throw;
             }
         }
@@ -653,11 +673,21 @@ namespace BridgeCareCore.Controllers
             return Ok(true);
         }
         [HttpGet]
+        [Route("GetHasSharedAccess")]
+        [Authorize(Policy = Policy.ViewTreatmentFromLibrary)]
+        public async Task<IActionResult> GetHasSharedAccess(Guid treatmentLibraryId)
+        {
+            var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == treatmentLibraryId);
+            
+            return Ok(dto.IsShared);
+        }
+        [HttpGet]
         [Route("GetHasViewAccess")]
         [Authorize(Policy= Policy.ViewTreatmentFromLibrary)]
         public async Task<IActionResult> GetHasViewAccess()
         {
-            return Ok(true);
+            var dto = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers().FirstOrDefault(_ => _.UserId == UserId);
+            return dto == null ? NotFound() : Ok(true);
         }
         [HttpGet]
         [Route("GetHasOwnerAccess/{LibraryId}")]

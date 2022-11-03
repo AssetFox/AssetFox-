@@ -149,4 +149,12 @@ export default class TreatmentService {
             `${API.Treatment}/GetHasViewAccess`
         );
     }
+    static getHasSharedAccess(treatment: Treatment) {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetHasSharedAccess/${treatment.id}`
+        );
+    }
+    static setSharedStatus(treatmentLibrary: TreatmentLibrary, userId: string) {
+        return coreAxiosInstance.post(`${API.Treatment}/SetSharedStatus/${treatmentLibrary}, ${userId}`);
+    }
 }

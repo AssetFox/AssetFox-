@@ -41,14 +41,19 @@
                         <div class="ghd-control-label" style="padding-top: 12px !important">
                         Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
                         </div>  
-                        <div style="margin-top: -8px !important">                     
+                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedTreatmentLibrary.isShared' />
+                        <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
+                               v-show='!hasScenario'>
+                            Share Library
+                        </v-btn>
+                        <!-- <div style="margin-top: -8px !important">                     
                         <v-checkbox
                             class='sharing ghd-control-text ghd-padding'
                             label='Shared'                            
                             v-model='selectedTreatmentLibrary.isShared'
                             @change="checkHasUnsavedChanges()" 
                         /> 
-                        </div>                                              
+                        </div> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs2>
@@ -256,6 +261,8 @@
             @submit='onSubmitCreateTreatmentLibraryDialogResult'
         />
 
+        <ShareTreatmentLibraryDialog :dialogData='shareTreatmentLibraryDialogData' @submit='onShareTreatmentLibraryDialogSubmit' />
+
         <CreateTreatmentDialog
             :showDialog='showCreateTreatmentDialog'
             @submit='onAddTreatment'
@@ -283,6 +290,12 @@ import {
     emptyCreateTreatmentLibraryDialogData,
 } from '@/shared/models/modals/create-treatment-library-dialog-data';
 import {
+    ShareTreatmentLibraryDialogData,
+    emptyShareTreatmentLibraryDialogData,
+} from '@/shared/models/modals/share-treatment-library-dialog-data';
+import ShareTreatmentLibraryDialog from '@/components/treatment-editor/treatment-editor-dialogs/ShareTreatmentLibraryDialog.vue';
+import { LibraryUser } from '@/shared/models/iAM/user';
+import {
     emptyConsequence,
     emptyTreatment,
     emptyTreatmentDetails,
@@ -293,6 +306,7 @@ import {
     TreatmentCost,
     TreatmentDetails,
     TreatmentLibrary,
+    TreatmentLibraryUser,
     TreatmentsFileImport
 } from '@/shared/models/iAM/treatment';
 import CreateTreatmentDialog from '@/components/treatment-editor/treatment-editor-dialogs/CreateTreatmentDialog.vue';
@@ -340,6 +354,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 @Component({
     components: {
         ImportExportTreatmentsDialog,
+        ShareTreatmentLibraryDialog,
         BudgetsTab,
         ConsequencesTab,
         CostsTab,
@@ -384,6 +399,7 @@ export default class TreatmentEditor extends Vue {
     getScenarioSelectableTreatmentsAction: any;
     @Action('upsertScenarioSelectableTreatments')
     upsertScenarioSelectableTreatmentsAction: any;
+    @Action('upsertOrDeleteTreatmentLibraryUsers') upsertOrDeleteTreatmentLibraryUsersAction: any;
     @Action('importScenarioTreatmentsFile')
     importScenarioTreatmentsFileAction: any;
     @Action('importLibraryTreatmentsFile')
@@ -441,6 +457,8 @@ export default class TreatmentEditor extends Vue {
     trueLibrarySelectItemValue: string | null = ''
     librarySelectItemValueAllowedChanged: boolean = true;
     librarySelectItemValue: string | null = null;
+
+    shareTreatmentLibraryDialogData: ShareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -691,6 +709,48 @@ export default class TreatmentEditor extends Vue {
             choice: true,
             message: 'Are you sure you want to delete?',
         };
+    }
+
+    onShowTreatmentLibraryDialog(treatmentLibrary: TreatmentLibrary) {
+        this.shareTreatmentLibraryDialogData = {
+            showDialog: true,
+            treatmentLibrary: clone(treatmentLibrary)
+        };
+    }
+
+    onShareTreatmentLibraryDialogSubmit(treatmentLibraryUsers: TreatmentLibraryUser[]) {
+        this.shareTreatmentLibraryDialogData = clone(emptyShareTreatmentLibraryDialogData);
+        if (!isNil(treatmentLibraryUsers) && this.selectedTreatmentLibrary.id !== getBlankGuid()) {
+            let libraryUserData: LibraryUser[] = [];
+                treatmentLibraryUsers.forEach((treatmentLibraryUser, index) =>
+                {   
+                    //determine access level
+                    let libraryUserAccessLevel: number = 0;
+                    if (libraryUserAccessLevel == 0 && treatmentLibraryUser.isOwner == true) { libraryUserAccessLevel = 2; }
+                    if (libraryUserAccessLevel == 0 && treatmentLibraryUser.canModify == true) { libraryUserAccessLevel = 1; }
+
+                    //create library user object
+                    let libraryUser: LibraryUser = {
+                        userId: treatmentLibraryUser.userId,
+                        userName: treatmentLibraryUser.username,
+                        accessLevel: libraryUserAccessLevel
+                    }
+
+                    //add library user to an array
+                    libraryUserData.push(libraryUser);
+                });
+
+                this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedTreatmentLibrary.id, libraryUserData);
+
+                //update budget library sharing
+                TreatmentService.upsertOrDeleteTreatmentLibraryUsers(this.selectedTreatmentLibrary.id, libraryUserData).then((response: AxiosResponse) => {
+                    if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
+                    {
+                        this.addSuccessNotificationAction({ message: 'Shared treatment library' })
+                        this.resetPage();
+                    }
+                });
+        }
     }
 
     onSubmitConfirmDeleteTreatmentAlertResult(submit: boolean) {

@@ -18,6 +18,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public bool IsOwner { get; set; }
 
+        public int AccessLevel { get; set; }
+
         public virtual TreatmentLibraryEntity TreatmentLibrary { get; set; }
 
         public virtual UserEntity User { get; set; }

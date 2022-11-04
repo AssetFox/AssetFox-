@@ -55,6 +55,12 @@ export interface SimpleTreatment {
     name: string;
 }
 
+export interface TreatmentLibraryUser {
+    userId: string;
+    username: string;
+    canModify: boolean;
+    isOwner: boolean;
+}
 export interface TreatmentLibrary {
     id: string;
     name: string;
@@ -62,6 +68,7 @@ export interface TreatmentLibrary {
     treatments: Treatment[];
     owner?: string;
     isShared: boolean;
+    users: TreatmentLibraryUser[];
 }
 
 export interface TreatmentDetails {
@@ -111,8 +118,16 @@ export const emptyTreatmentLibrary: TreatmentLibrary = {
     name: '',
     description: '',
     treatments: [],
-    isShared: false
+    isShared: false,
+    users: []
 };
+
+export const emptyTreatmentLibraryUser: TreatmentLibraryUser = {
+    userId: '',
+    username: '',
+    canModify: false,
+    isOwner: false
+}
 
 export const emptyTreatmentDetails: TreatmentDetails = {
     description: '',

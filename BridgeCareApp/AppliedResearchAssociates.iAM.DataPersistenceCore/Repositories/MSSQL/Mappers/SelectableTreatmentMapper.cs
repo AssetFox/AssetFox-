@@ -120,13 +120,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 Category = (TreatmentDTOEnum.TreatmentCategory)entity.Category,
                 AssetType = (TreatmentDTOEnum.AssetType)entity.AssetType
             };
-        public static TreatmentLibraryUserDTO ToDto(this TreatmentLibraryUserEntity entity) =>
-            new TreatmentLibraryUserDTO
-            {
-                CanModify = entity.CanModify,
-                IsOwner = entity.IsOwner,
-                UserId = entity.UserId,
-            };
         public static TreatmentLibraryDTO ToDto(this TreatmentLibraryEntity entity) =>
             new TreatmentLibraryDTO
             {

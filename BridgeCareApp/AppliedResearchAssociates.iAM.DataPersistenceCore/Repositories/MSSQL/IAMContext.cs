@@ -2006,17 +2006,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             });
             modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
             {
-                entity.HasKey(e => new { e.TreatmentId, e.UserId });
+                entity.HasKey(e => new { e.TreatmentLibraryId, e.UserId });
 
                 entity.ToTable("TreatmentLibrary_User");
 
-                entity.HasIndex(e => e.TreatmentId);
+                entity.HasIndex(e => e.TreatmentLibraryId);
 
                 entity.HasIndex(e => e.UserId);
 
                 entity.HasOne(d => d.TreatmentLibrary)
                     .WithMany(p => p.TreatmentLibraryUserJoins)
-                    .HasForeignKey(d => d.TreatmentId)
+                    .HasForeignKey(d => d.TreatmentLibraryId)
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.TreatmentLibraryUserJoins)

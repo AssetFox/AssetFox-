@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Reflection.Metadata;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment
@@ -8,8 +9,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public TreatmentLibraryEntity()
         {
             Treatments = new HashSet<SelectableTreatmentEntity>();
+            Users = new HashSet<TreatmentLibraryUserEntity>();
         }
-
+        public virtual ICollection<TreatmentLibraryUserEntity> Users { get; set; }
         public virtual ICollection<SelectableTreatmentEntity> Treatments { get; set; }
         public virtual ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUserJoins { get; set; }
     }

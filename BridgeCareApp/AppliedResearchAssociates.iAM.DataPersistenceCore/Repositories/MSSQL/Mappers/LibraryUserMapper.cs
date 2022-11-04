@@ -16,7 +16,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 AccessLevel = (int)dto.AccessLevel,
             };
 
+        public static TreatmentLibraryUserEntity ToTreatmentLibraryUserEntity(this LibraryUserDTO dto, Guid treatmentLibraryId) =>
+            new TreatmentLibraryUserEntity
+            {
+                TreatmentLibraryId = treatmentLibraryId,
+                UserId = dto.UserId,
+                AccessLevel = (int)dto.AccessLevel
+            };
         public static LibraryUserDTO ToDto(this BudgetLibraryUserEntity entity) =>
+            new LibraryUserDTO
+            {
+                UserId = entity.UserId,
+                UserName = entity.User?.Username,
+                AccessLevel = (LibraryAccessLevel)entity.AccessLevel,
+            };
+        public static LibraryUserDTO ToDto(this TreatmentLibraryUserEntity entity) =>
             new LibraryUserDTO
             {
                 UserId = entity.UserId,

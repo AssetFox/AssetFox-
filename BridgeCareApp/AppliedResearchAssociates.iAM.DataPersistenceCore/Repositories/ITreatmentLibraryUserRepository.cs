@@ -12,8 +12,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpsertTreatmentLibraryUser(TreatmentLibraryDTO dto, Guid userId);
 
         LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
-        List<TreatmentLibraryUserDTO> GetAllTreatmentLibraryUsers();
-        void UpsertOrDeleteUsers(Guid treatmentLibraryId, IList<TreatmentLibraryUserDTO> libraryUsers);
-        List<TreatmentLibraryUserDTO> GetLibararyUsers(Guid treatmentLibraryId);
+        //List<TreatmentLibraryUserDTO> GetAllTreatmentLibraryUsers();
+        void UpsertOrDeleteUsers(Guid treatmentLibraryId, IList<LibraryUserDTO> libraryUsers);
+        List<LibraryUserDTO> GetLibraryUsers(Guid treatmentLibraryId);
     }
 }

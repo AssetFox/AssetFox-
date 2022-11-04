@@ -283,14 +283,12 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                List<TreatmentLibraryUserDTO> users = new List<TreatmentLibraryUserDTO>();
+                List<LibraryUserDTO> users = new List<LibraryUserDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers();
-                    //var accessModel = UnitOfWork.BudgetRepo.GetLibraryAccess(libraryId, UserId);
+                    var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
                     _claimHelper.CheckGetLibraryUsersValidity(accessModel, UserId);
-                    //users = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
-                    users = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers().FirstOrDefault(_ => _.UserId)
+                    users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(libraryId);
                 });
                 return Ok(users);
             }
@@ -748,8 +746,9 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy= Policy.ViewTreatmentFromLibrary)]
         public async Task<IActionResult> GetHasViewAccess()
         {
-            var dto = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers().FirstOrDefault(_ => _.UserId == UserId);
-            return dto == null ? NotFound() : Ok(true);
+            return Ok(true);
+            //var dto = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers().FirstOrDefault(_ => _.UserId == UserId);
+            //return dto == null ? NotFound() : Ok(true);
         }
         [HttpGet]
         [Route("GetHasOwnerAccess/{LibraryId}")]

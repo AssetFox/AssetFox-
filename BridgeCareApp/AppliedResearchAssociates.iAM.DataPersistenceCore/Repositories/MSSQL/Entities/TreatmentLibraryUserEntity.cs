@@ -10,13 +10,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 {
     public class TreatmentLibraryUserEntity: BaseEntity
     {
-        public Guid TreatmentId { get; set; }
+        public Guid TreatmentLibraryId { get; set; }
 
         public Guid UserId { get; set; }
-
-        public bool CanModify { get; set; }
-
-        public bool IsOwner { get; set; }
 
         public int AccessLevel { get; set; }
 

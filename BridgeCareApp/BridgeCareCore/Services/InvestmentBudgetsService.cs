@@ -26,12 +26,12 @@ namespace BridgeCareCore.Services
 {
     public class InvestmentBudgetsService : IInvestmentBudgetsService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
         private static IExpressionValidationService _expressionValidationService;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         protected readonly IHubService HubService;
 
-        public InvestmentBudgetsService(UnitOfDataPersistenceWork unitOfWork,
+        public InvestmentBudgetsService(IUnitOfWork unitOfWork,
             IExpressionValidationService expressionValidationService, IHubService hubService,
             IInvestmentDefaultDataService investmentDefaultDataService)
         {

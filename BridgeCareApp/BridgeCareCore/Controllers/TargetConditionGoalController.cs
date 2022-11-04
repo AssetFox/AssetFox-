@@ -166,7 +166,7 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                         dto.TargetConditionGoals = items;
                     }
                     UnitOfWork.TargetConditionGoalRepo.UpsertTargetConditionGoalLibrary(dto);
@@ -237,7 +237,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllTargetConditionGoalLibrariesWithTargetConditionGoals().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.TargetConditionGoalRepo.DeleteTargetConditionGoalLibrary(libraryId);
                     UnitOfWork.Commit();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Budget;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
@@ -9,6 +10,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public UserEntity()
         {
             SimulationUserJoins = new HashSet<SimulationUserEntity>();
+            BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }
@@ -25,5 +27,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
         public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUserJoins { get; set; }
+        public ICollection<BudgetLibraryUserEntity> BudgetLibraryUsers { get; set; }
     }
 }

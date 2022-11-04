@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="testConnections..json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="6.7.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="xunit.assert" Version="2.4.1" />
@@ -19,6 +15,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="testConnections.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -20,7 +20,6 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         [Fact]
         public void GetLibrarySyncedDataSet_NoCurvesInLibrary_ReturnsEmptyListOfCurves()
         {
-            // wjwjwj also this test
             var unitOfWork = UnitOfWorkMocks.New();
             var hubService = HubServiceMocks.Default();
             var expressionValidationService = ExpressionValidationServiceMocks.New();
@@ -42,7 +41,6 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         [Fact]
         public void GetLibrarySyncedDataSet_OneCurveInLibrary_ReturnsTheCurve()
         {
-            // wjwjwj also this test
             var unitOfWork = UnitOfWorkMocks.New();
             var hubService = HubServiceMocks.Default();
             var expressionValidationService = ExpressionValidationServiceMocks.New();
@@ -60,6 +58,61 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             };
             var curves = new List<PerformanceCurveDTO> { curve};
             repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+
+            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            var returnedCurve = dataset.Single();
+            ObjectAssertions.Equivalent(curve, returnedCurve);
+        }
+
+        [Fact]
+        public void GetLibrarySyncedDataSet_OneCurveInLibraryButMarkedForDeletion_DoesNotReturnTheCurve()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var curve = new PerformanceCurveDTO
+            {
+                Id = curveId,
+            };
+            var curves = new List<PerformanceCurveDTO> { curve };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+                RowsForDeletion = new List<Guid> { curveId },
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(curves);
+
+            var dataset = service.GetSyncedLibraryDataset(libraryId, request);
+            Assert.Empty(dataset);
+        }
+
+        [Fact]
+        public void GetLibrarySyncedDataSet_NoCurvesInLibraryButOneMarkedForAdd_ReturnsTheCurve()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var hubService = HubServiceMocks.Default();
+            var expressionValidationService = ExpressionValidationServiceMocks.New();
+            var repository = new Mock<IPerformanceCurveRepository>();
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
+            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var libraryId = Guid.NewGuid();
+            var curveId = Guid.NewGuid();
+            var curve = new PerformanceCurveDTO
+            {
+                Id = curveId,
+            };
+            var curves = new List<PerformanceCurveDTO> { curve };
+            var request = new PagingSyncModel<PerformanceCurveDTO>
+            {
+                LibraryId = libraryId,
+                AddedRows = curves,
+            };
+            repository.Setup(r => r.GetPerformanceCurvesForLibrary(libraryId)).Returns(new List<PerformanceCurveDTO>());
 
             var dataset = service.GetSyncedLibraryDataset(libraryId, request);
             var returnedCurve = dataset.Single();

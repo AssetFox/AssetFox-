@@ -119,7 +119,7 @@ namespace BridgeCareCore.Controllers
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                         dto.BudgetPriorities = items;
                     }
                     UnitOfWork.BudgetPriorityRepo.UpsertBudgetPriorityLibrary(dto);
@@ -157,7 +157,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var dto = GetAllBudgetPriorityLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (dto == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.BudgetPriorityRepo.DeleteBudgetPriorityLibrary(libraryId);
                     UnitOfWork.Commit();

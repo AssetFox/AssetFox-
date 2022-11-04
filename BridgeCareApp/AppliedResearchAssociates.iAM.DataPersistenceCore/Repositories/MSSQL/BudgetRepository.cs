@@ -66,8 +66,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Select(_ => new SimpleBudgetDetailDTO {Id = _.Id, Name = _.Name})
                 .OrderBy(_ => _.Name)
                 .ToList();
-
         }
+
+
 
         public List<BudgetLibraryDTO> GetBudgetLibraries()
         {
@@ -98,8 +99,69 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) =>
+        public List<BudgetLibraryDTO> GetBudgetLibrariesNoChildrenAccessibleToUser(Guid userId)
+        {
+            return _unitOfWork.Context.BudgetLibraryUser
+                .AsNoTracking()
+                .Include(u => u.BudgetLibrary)
+                .Where(u => u.UserId == userId)
+                .Select(u => u.BudgetLibrary.ToDto())
+                .ToList();
+        }
+
+        public void UpsertOrDeleteUsers(Guid budgetLibraryId, IList<LibraryUserDTO> libraryUsers)
+        {
+            var existingEntities = _unitOfWork.Context.BudgetLibraryUser.Where(u => u.BudgetLibraryId == budgetLibraryId).ToList();
+            var existingUserIds = existingEntities.Select(u => u.UserId).ToList();
+            var desiredUserIDs = libraryUsers.Select(lu => lu.UserId).ToList();
+            var userIdsToDelete = existingUserIds.Except(desiredUserIDs).ToList();
+            var userIdsToUpdate = existingUserIds.Intersect(desiredUserIDs).ToList();
+            var userIdsToAdd = desiredUserIDs.Except(existingUserIds).ToList();
+            var entitiesToAdd = libraryUsers.Where(u => userIdsToAdd.Contains(u.UserId)).Select(u => LibraryUserMapper.ToBudgetLibraryUserEntity(u, budgetLibraryId)).ToList();
+            var dtosToUpdate = libraryUsers.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToMaybeUpdate = existingEntities.Where(u => userIdsToUpdate.Contains(u.UserId)).ToList();
+            var entitiesToUpdate = new List<BudgetLibraryUserEntity>();
+            foreach (var dto in dtosToUpdate)
+            {
+                var entityToUpdate = entitiesToMaybeUpdate.FirstOrDefault(e => e.UserId == dto.UserId);
+                if (entityToUpdate!=null && entityToUpdate.AccessLevel != (int)dto.AccessLevel)
+                {
+                    entityToUpdate.AccessLevel = (int)dto.AccessLevel;
+                    entitiesToUpdate.Add(entityToUpdate);
+                }
+            }
+            _unitOfWork.Context.AddRange(entitiesToAdd);
+            _unitOfWork.Context.UpdateRange(entitiesToUpdate);
+            var entitiesToDelete = existingEntities.Where(u => userIdsToDelete.Contains(u.UserId)).ToList();
+            _unitOfWork.Context.RemoveRange(entitiesToDelete);
+            _unitOfWork.Context.SaveChanges();
+        }
+
+        private List<LibraryUserDTO> GetAccessForUser(Guid budgetLibraryId, Guid userId)
+        {
+            var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Where(u => u.BudgetLibraryId == budgetLibraryId && u.UserId == userId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+        public List<LibraryUserDTO> GetLibraryUsers(Guid budgetLibraryId)
+        {
+            var dtos = _unitOfWork.Context.BudgetLibraryUser
+                .Include(u => u.User)
+                .Where(u => u.BudgetLibraryId == budgetLibraryId)
+                .Select(LibraryUserMapper.ToDto)
+                .ToList();
+            return dtos;
+        }
+
+
+        public void UpsertBudgetLibrary(BudgetLibraryDTO dto) {
+            var libraryExists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == dto.Id);
             _unitOfWork.Context.Upsert(dto.ToEntity(), dto.Id, _unitOfWork.UserEntity?.Id);
+            _unitOfWork.Context.SaveChanges();
+        }
 
         public void UpsertOrDeleteBudgets(List<BudgetDTO> budgets, Guid libraryId)
         {
@@ -183,20 +245,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public ScenarioBudgetEntity EnsureExistenceOfUnknownBudgetForSimulation(Guid simulationId)
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId)
         {
-            var r = _unitOfWork.Context.ScenarioBudget.AsNoTracking().SingleOrDefault(b => b.SimulationId == simulationId && b.Name == "Unknown");
-            if (r == null)
+            var exists = _unitOfWork.Context.BudgetLibrary.Any(bl => bl.Id == libraryId);
+            if (!exists)
             {
-                r = new ScenarioBudgetEntity
-                {
-                    Name = "Unknown",
-                    Id = Guid.NewGuid(),
-                    SimulationId = simulationId,
-                };
-                _unitOfWork.Context.ScenarioBudget.Add(r);
+                return LibraryAccessModels.LibraryDoesNotExist();
             }
-            return r;
+            var users = GetAccessForUser(libraryId, userId);
+            var user = users.FirstOrDefault();
+            return LibraryAccessModels.LibraryExistsWithUsers(userId, user);
         }
 
         public BudgetLibraryDTO GetBudgetLibrary(Guid libraryId)
@@ -212,6 +270,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Budgets)
                 .ThenInclude(_ => _.CriterionLibraryBudgetJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.Users)
                 .Single(_ => _.Id == libraryId)
                 .ToDto();
         }

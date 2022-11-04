@@ -20,6 +20,8 @@ namespace BridgeCareCoreTests.Helpers
         {
             var unitOfWork = New();
             unitOfWork.Setup(u => u.CurrentUser).Returns(user);
+            var userRepository = UserRepositoryMocks.UserExists(user.Username);
+            unitOfWork.Setup(u => u.UserRepo).Returns(userRepository.Object);
             return unitOfWork;
         }
     }

@@ -154,12 +154,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowNo + 6, currentCell.Column].Value = "Closed";
             worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
             worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
-
-            //[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
+                        
             worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
             worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
             worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
-            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
+            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // Posted
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);

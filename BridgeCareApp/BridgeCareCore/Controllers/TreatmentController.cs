@@ -307,15 +307,15 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertOrDeleteTreatmentLibraryUsers/{libraryId}")]
         [Authorize(Policy = Policy.ModifyInvestmentFromLibrary)]
-        public async Task<IActionResult> UpsertOrDeleteBudgetLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
+        public async Task<IActionResult> UpsertOrDeleteTreatmentLibraryUsers(Guid libraryId, List<LibraryUserDTO> proposedUsers)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var libraryUsers = UnitOfWork.BudgetRepo.GetLibraryUsers(libraryId);
+                    var libraryUsers = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(libraryId);
                     _claimHelper.CheckAccessModifyValidity(libraryUsers, proposedUsers, UserId);
-                    UnitOfWork.BudgetRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
+                    UnitOfWork.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(libraryId, proposedUsers);
                 });
                 return Ok();
             }

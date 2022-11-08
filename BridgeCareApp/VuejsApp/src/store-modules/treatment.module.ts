@@ -19,6 +19,8 @@ import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
 import { stat } from 'fs';
+import { stringify } from 'querystring';
+import { LibraryUser } from '@/shared/models/iAM/user';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
@@ -28,7 +30,8 @@ const state = {
     simpleSelectableTreatments: [] as SimpleTreatment[],
     hasPermittedAccess: false,
     hasOwnerAccess: false,
-    hasViewAccess: false
+    hasViewAccess: false,
+    hasSharedAccess: false
 };
 
 const mutations = {
@@ -94,6 +97,9 @@ const mutations = {
     },
     OwnerAccessMutator(state: any, status: boolean) {
         state.hasOwnerAccess = status;
+    },
+    SharedAccessMutator(state: any, status: boolean) {
+        state.hasSharedAccess = status;
     }
 };
 
@@ -290,6 +296,20 @@ const actions = {
             },
         );
     },
+    async upsertOrDeleteTreatmentLibraryUsers({dispatch, commit}: any, payload: any) 
+    {
+        await TreatmentService.upsertOrDeleteTreatmentLibraryUsers(payload.libraryId, payload.proposedUsers)
+        .then((response: AxiosResponse) => {
+            if (
+                hasValue(response, 'status') &&
+                http2XX.test(response.status.toString())
+                ) {
+                    dispatch('addSuccessNotification', {
+                        message: 'Treatment Library Users Changed.',
+                    });
+                }
+        });
+    },
     async getHasPermittedAccess({ commit }: any)
     {
         await TreatmentService.getHasPermittedAccess()
@@ -331,7 +351,21 @@ const actions = {
                 }
             }
         );
-    }
+    },
+    async getHasSharedAccess({ dispatch, commit }: any, payload: any) {
+        await TreatmentService.getHasSharedAccess(payload).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('SharedAccessMutator', response.data as boolean);
+                dispatch('addSuccessNotification', {
+                message: 'User is sharing this library.'
+                });
+                }
+            });
+        }
 };
 
 const getters = {};

@@ -341,13 +341,12 @@ import { hasUnsavedChangesCore, isEqual } from '@/shared/utils/has-unsaved-chang
 import { getUserName } from '@/shared/utils/get-user-info';
 import ImportExportTreatmentsDialog from '@/components/treatment-editor/treatment-editor-dialogs/ImportExportTreatmentsDialog.vue';
 import { ImportExportTreatmentsDialogResult } from '@/shared/models/modals/import-export-treatments-dialog-result';
-import Treatmentservice from '@/services/treatment.service';
+import TreatmentService from '@/services/treatment.service';
 import { AxiosResponse } from 'axios';
 import { FileInfo } from '@/shared/models/iAM/file-info';
 import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
-import TreatmentService from '@/services/treatment.service';
 import { LibraryUpsertPagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
 
@@ -379,9 +378,7 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
-    @Action('getHasPermittedAccess') getHasPermittedAccessAction: any;
-    @Action('getHasViewAccess') getHasViewAccessAction: any;
-    @Action('getHasOwnerAccess') getHasOwnerAccessAction: any;
+    @State(state => state.getHasSharedAccess) hasSharedAccess: boolean;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -406,7 +403,10 @@ export default class TreatmentEditor extends Vue {
     importLibraryTreatmentsFileAction: any;
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
+    @Action('getHasSharedAccess') getHasSharedAccessAction: any;
+
     @Getter('getUserNameById') getUserNameByIdGetter: any;
+    
     @Mutation('addedOrUpdatedTreatmentLibraryMutator') addedOrUpdatedTreatmentLibraryMutator: any;
     @Mutation('selectedTreatmentLibraryMutator') selectedTreatmentLibraryMutator: any;
 
@@ -464,8 +464,6 @@ export default class TreatmentEditor extends Vue {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getTreatmentLibrariesAction();
-            vm.getHasPermittedAccessAction();
-            vm.getHasViewAccessAction();
             if (to.path.indexOf(ScenarioRoutePaths.Treatment) !== -1) {
                 vm.selectedScenarioId = to.query.scenarioId;
                 if (vm.selectedScenarioId === vm.uuidNIL) {
@@ -537,7 +535,7 @@ export default class TreatmentEditor extends Vue {
     @Watch('selectedTreatmentLibrary')
     onSelectedTreatmentLibraryChanged() {
         this.hasSelectedLibrary = this.selectedTreatmentLibrary.id !== this.uuidNIL;
-
+        this.getHasSharedAccessAction(this.selectedTreatmentLibrary);
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -562,7 +560,6 @@ export default class TreatmentEditor extends Vue {
         // } else {
         //     this.treatments = clone(this.selectedTreatmentLibrary.treatments);
         // }
-        this.getHasOwnerAccessAction(this.selectedTreatment);
         this.clearChanges();
         if(this.treatmentSelectItemValue !== null && !this.hasScenario)
             this.treatmentCache.push(clone(this.selectedTreatment))
@@ -628,7 +625,7 @@ export default class TreatmentEditor extends Vue {
                 this.selectedTreatment = clone(addedRow);
             }               
             else if(this.hasSelectedLibrary)
-                Treatmentservice.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
+                TreatmentService.getSelectedTreatmentById(this.treatmentSelectItemValue).then((response: AxiosResponse) => {
                     if(hasValue(response, 'data')) {
                         var data = response.data as Treatment;
                         this.selectedTreatment = data;
@@ -739,17 +736,11 @@ export default class TreatmentEditor extends Vue {
                     //add library user to an array
                     libraryUserData.push(libraryUser);
                 });
-
-                this.upsertOrDeleteBudgetLibraryUsersAction(this.selectedTreatmentLibrary.id, libraryUserData);
-
                 //update budget library sharing
-                TreatmentService.upsertOrDeleteTreatmentLibraryUsers(this.selectedTreatmentLibrary.id, libraryUserData).then((response: AxiosResponse) => {
-                    if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
-                    {
-                        this.addSuccessNotificationAction({ message: 'Shared treatment library' })
-                        this.resetPage();
-                    }
-                });
+                this.upsertOrDeleteTreatmentLibraryUsersAction({libraryId: this.selectedTreatmentLibrary.id, proposedUsers: libraryUserData});
+                this.selectedTreatmentLibrary.isShared = this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared;
+                console.log(this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared);
+                this.onUpsertTreatmentLibrary();
         }
     }
 
@@ -802,7 +793,7 @@ export default class TreatmentEditor extends Vue {
                     addedRows: library.treatments === [] ? [] : this.addedRows,
                  }
             }
-            Treatmentservice.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
+            TreatmentService.upsertTreatmentLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.hasCreatedLibrary = true;
                     this.librarySelectItemValue = library.id;
@@ -1047,7 +1038,7 @@ export default class TreatmentEditor extends Vue {
 
      OnExportTreamentsClick(){
         const id: string = this.hasScenario ? this.selectedScenarioId : this.selectedTreatmentLibrary.id;
-        Treatmentservice.exportTreatments(id, this.hasScenario)
+        TreatmentService.exportTreatments(id, this.hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;
@@ -1058,7 +1049,7 @@ export default class TreatmentEditor extends Vue {
 
      OnDownloadTemplateClick()
     {
-        Treatmentservice.downloadTreatmentsTemplate(this.hasScenario)
+        TreatmentService.downloadTreatmentsTemplate(this.hasScenario)
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     const fileInfo: FileInfo = response.data as FileInfo;

@@ -5,6 +5,9 @@
         <v-layout justify-center>
           <h3>Treatment Library Sharing</h3>
         </v-layout>
+          <v-btn @click="onSubmit(false)" flat class="ghd-close-button">
+            X
+          </v-btn>
       </v-card-title>
       <v-card-text>
         <v-data-table :headers="treatmentLibraryUserGridHeaders"
@@ -32,11 +35,11 @@
         </v-data-table>
       </v-card-text>
       <v-card-actions>
-        <v-layout justify-space-between row>
-          <v-btn @click="onSubmit(true)" class="ara-blue-bg white--text">
+        <v-layout row justify-center>
+          <v-btn @click="onSubmit(false)" class="ghd-white-bg ghd-blue ghd-button-text" depressed>Cancel</v-btn>
+          <v-btn @click="onSubmit(true)" class="ghd-white-bg ghd-blue ghd-button-text ghd-blue-border ghd-text-padding">
             Save
           </v-btn>
-          <v-btn @click="onSubmit(false)" class="ara-orange-bg white--text">Cancel</v-btn>
         </v-layout>
       </v-card-actions>
     </v-card>

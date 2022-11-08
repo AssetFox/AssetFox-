@@ -208,6 +208,11 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
+            catch (RowNotInTableException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["RowNotInTable"]}");
+                throw;
+            }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();

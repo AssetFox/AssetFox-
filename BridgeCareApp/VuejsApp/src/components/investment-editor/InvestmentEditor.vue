@@ -770,7 +770,12 @@ export default class InvestmentEditor extends Vue {
                     addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 }
             }
-
+            // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
+            const parsedMinimumProjectCostLimit: number = parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
+            let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.pagingSync.Investment;
+            tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
+            libraryUpsertRequest.pagingSync.Investment = tempInvesmentPlan;
+            
             InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
                     if(budgetLibrary.budgets === []){
@@ -782,7 +787,7 @@ export default class InvestmentEditor extends Vue {
                     this.addSuccessNotificationAction({message:'Added budget library'})
                     this.resetPage();
                 }
-            })
+            });
         }
     }
 

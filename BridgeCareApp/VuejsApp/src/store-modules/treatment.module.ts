@@ -353,7 +353,7 @@ const actions = {
         );
     },
     async getHasSharedAccess({ dispatch, commit }: any, payload: any) {
-        await TreatmentService.getHasSharedAccess(payload).then(
+        await TreatmentService.getHasSharedAccess(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&

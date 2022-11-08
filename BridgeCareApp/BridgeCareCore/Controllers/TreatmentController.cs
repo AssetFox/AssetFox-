@@ -733,12 +733,11 @@ namespace BridgeCareCore.Controllers
             return Ok(true);
         }
         [HttpGet]
-        [Route("GetHasSharedAccess")]
-        [Authorize(Policy = Policy.ViewTreatmentFromLibrary)]
+        [Route("GetHasSharedAccess/{treatmentLibraryId}")]
+        [Authorize]
         public async Task<IActionResult> GetHasSharedAccess(Guid treatmentLibraryId)
         {
             var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == treatmentLibraryId);
-            
             return Ok(dto.IsShared);
         }
         [HttpGet]

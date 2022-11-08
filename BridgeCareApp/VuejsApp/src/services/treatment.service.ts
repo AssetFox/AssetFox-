@@ -150,7 +150,7 @@ export default class TreatmentService {
             `${API.Treatment}/GetHasViewAccess`
         );
     }
-    static getHasSharedAccess(treatmentId: string) {
+    static getHasSharedAccess(treatmentId: string): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.Treatment}/GetHasSharedAccess/${treatmentId}`
         );

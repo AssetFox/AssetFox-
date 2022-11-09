@@ -26,9 +26,12 @@ namespace BridgeCareCore.Security
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
                 // Obtain the role(s) from the claims principal
-                var roleClaim = principal.Claims.Single(_ => _.Type == ClaimTypes.Role).Value;
+                var roleClaim = principal.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Role).Value;
                 var rolesParsed = new List<string>();
-                rolesParsed = SecurityFunctions.ParseLdap(roleClaim);
+                if (roleClaim != null)
+                {
+                    rolesParsed = SecurityFunctions.ParseLdap(roleClaim);
+                }
                 if (rolesParsed.Count == 0)
                 {
                     rolesParsed.Add(SecurityConstants.Role.ReadOnly);

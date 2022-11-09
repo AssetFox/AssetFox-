@@ -635,8 +635,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = _.Id,
                     Name = _.Name
                 })
+                .OrderBy(_ => _.Name)
                 .ToList();
         }
+
         public List<SimpleTreatmentDTO> GetSimpleTreatmentsByLibraryId(Guid libraryId)
         {
             if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
@@ -651,8 +653,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Id = _.Id,
                     Name = _.Name
                 })
+                .OrderBy(_ => _.Name)
                 .ToList();
         }
+
         public TreatmentDTO GetScenarioSelectableTreatmentById(Guid id)
         {
             return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
@@ -676,6 +680,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.Id == id).ToDto();
         }
+
         public TreatmentDTO GetSelectableTreatmentById(Guid id)
         {
             return _unitOfWork.Context.SelectableTreatment.AsNoTracking()

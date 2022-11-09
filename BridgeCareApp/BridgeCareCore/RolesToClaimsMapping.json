@@ -243,6 +243,35 @@
             "AnalysisMethodViewPermittedAccess",
             "CommittedProjectViewPermittedAccess"
           ]
+        },
+        {
+          "IPRoles": [ "Default" ],
+          "InternalRole": "Default",
+          "Claims": [
+            "AttributesViewAccess",
+            "NetworkViewAccess",
+            "SimulationViewPermittedAccess",
+            "AnnouncementViewAccess",
+            "BudgetPriorityViewPermittedFromLibraryAccess",
+            "BudgetPriorityViewPermittedFromScenarioAccess",
+            "CashFlowViewPermittedFromLibraryAccess",
+            "CashFlowViewPermittedFromScenarioAccess",
+            "DeficientConditionGoalViewPermittedFromLibraryAccess",
+            "DeficientConditionGoalViewPermittedFromScenarioAccess",
+            "InvestmentViewPermittedFromLibraryAccess",
+            "InvestmentViewPermittedFromScenarioAccess",
+            "PerformanceCurveViewPermittedFromLibraryAccess",
+            "PerformanceCurveViewPermittedFromScenarioAccess",
+            "RemainingLifeLimitViewPermittedFromLibraryAccess",
+            "RemainingLifeLimitViewPermittedFromScenarioAccess",
+            "TargetConditionGoalViewPermittedFromLibraryAccess",
+            "TargetConditionGoalViewPermittedFromScenarioAccess",
+            "TreatmentViewPermittedFromLibraryAccess",
+            "TreatmentViewPermittedFromScenarioAccess",
+            "UserCriteriaViewAccess",
+            "AnalysisMethodViewPermittedAccess",
+            "CommittedProjectViewPermittedAccess"
+          ]
         }
       ]      
     },
@@ -464,6 +493,35 @@
         {
           "IPRoles": [ "ReadOnly" ],
           "InternalRole": "ReadOnly",
+          "Claims": [
+            "AttributesViewAccess",
+            "NetworkViewAccess",
+            "SimulationViewPermittedAccess",
+            "AnnouncementViewAccess",
+            "BudgetPriorityViewPermittedFromLibraryAccess",
+            "BudgetPriorityViewPermittedFromScenarioAccess",
+            "CashFlowViewPermittedFromLibraryAccess",
+            "CashFlowViewPermittedFromScenarioAccess",
+            "DeficientConditionGoalViewPermittedFromLibraryAccess",
+            "DeficientConditionGoalViewPermittedFromScenarioAccess",
+            "InvestmentViewPermittedFromLibraryAccess",
+            "InvestmentViewPermittedFromScenarioAccess",
+            "PerformanceCurveViewPermittedFromLibraryAccess",
+            "PerformanceCurveViewPermittedFromScenarioAccess",
+            "RemainingLifeLimitViewPermittedFromLibraryAccess",
+            "RemainingLifeLimitViewPermittedFromScenarioAccess",
+            "TargetConditionGoalViewPermittedFromLibraryAccess",
+            "TargetConditionGoalViewPermittedFromScenarioAccess",
+            "TreatmentViewPermittedFromLibraryAccess",
+            "TreatmentViewPermittedFromScenarioAccess",
+            "UserCriteriaViewAccess",
+            "AnalysisMethodViewPermittedAccess",
+            "CommittedProjectViewPermittedAccess"
+          ]
+        },
+        {
+          "IPRoles": [ "Default" ],
+          "InternalRole": "Default",
           "Claims": [
             "AttributesViewAccess",
             "NetworkViewAccess",

@@ -82,13 +82,14 @@ namespace BridgeCareCore.Security
 
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
-                var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
+                var roleStrings = new List<string>();
+                roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
                 if (roleStrings.Count == 0)
                 {
-                    throw new UnauthorizedAccessException("User has no security roles assigned.");
+                    roleStrings.Add(SecurityConstants.Role.Default);
                 }
 
-                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleStrings[0]);
+                var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, roleStrings);
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
@@ -98,13 +99,14 @@ namespace BridgeCareCore.Security
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminAccess = HasAdminAccess,
                     HasSimulationAccess = HasSimulationAccess,
-                    InternalRole = internalRole,
+                    InternalRoles = internalRoles,
                 };
             }
 
             if (_securityType == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRole = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, SecurityConstants.Role.Administrator);
+                var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
+                { SecurityConstants.Role.Administrator });
                 var HasAdminAccess = _roleClaimsMapper.HasAdminAccess(claimsPrincipal);
                 var HasSimulationAccess = _roleClaimsMapper.HasSimulationAccess(claimsPrincipal);
 
@@ -114,7 +116,7 @@ namespace BridgeCareCore.Security
                     Email = decodedToken.GetClaimValue("email"),
                     HasAdminAccess = HasAdminAccess, 
                     HasSimulationAccess = HasSimulationAccess, 
-                    InternalRole = internalRole,
+                    InternalRoles = internalRoles,
                 };
             }
 

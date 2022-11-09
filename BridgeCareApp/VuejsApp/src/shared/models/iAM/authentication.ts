@@ -10,6 +10,6 @@ export interface UserInfo {
     sub: string;    
     hasAdminAccess: boolean;
     hasSimulationAccess: boolean;
-    internalRole: string;
+    internalRoles: string[];
     email: string;
 }

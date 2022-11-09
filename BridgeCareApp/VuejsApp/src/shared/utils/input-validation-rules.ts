@@ -18,6 +18,9 @@ const generalRules = {
     },
     'valueIsNotNegative': (value: number) => {
         return (value >= 0) || 'Value cannot be less than zero';
+    },
+    'nameIsNotUnique': (name: string, names: string[]) => {
+        return !contains(name, names) || 'Name must be unique';
     }
 };
 /***********************************************CASH FLOW RULES********************************************************/

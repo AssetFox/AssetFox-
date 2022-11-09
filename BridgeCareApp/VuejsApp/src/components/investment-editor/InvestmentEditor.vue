@@ -220,7 +220,7 @@
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
-                                   :budgetLibraries='budgetLibraries'
+                                   :libraryNames='librarySelectItemNames'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
 
         <SetRangeForAddingBudgetYearsDialog :showDialog='showSetRangeForAddingBudgetYearsDialog'
@@ -364,6 +364,7 @@ export default class InvestmentEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
     librarySelectItemValue: string | null = '';
+    librarySelectItemNames: string[] = [];
     actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     budgetYearsGridHeaders: DataTableHeader[] = [
         { text: 'Year', value: 'year', sortable: true, align: 'left', class: '', width: '' },
@@ -519,6 +520,11 @@ export default class InvestmentEditor extends Vue {
                 text: library.name,
                 value: library.id,
             }));
+            // Send names to new library dialog to prevent
+            // duplicate names
+            this.librarySelectItems.forEach(element => {
+                this.librarySelectItemNames.push(element.text);                
+            });
     }
 
     @Watch('selectedBudgetYearsGridData')
@@ -753,9 +759,6 @@ export default class InvestmentEditor extends Vue {
     onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {//needs a few things
         this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
 
-        this.stateBudgetLibraries.forEach(bl => {
-        
-        });
         if (!isNil(budgetLibrary)) {
             this.upsertBudgetLibraryAction(budgetLibrary);
             this.hasCreatedLibrary = true;

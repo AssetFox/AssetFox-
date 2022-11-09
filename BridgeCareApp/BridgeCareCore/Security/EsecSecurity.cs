@@ -82,10 +82,11 @@ namespace BridgeCareCore.Security
 
             if (_securityType == SecurityConstants.SecurityTypes.Esec)
             {
-                var roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
+                var roleStrings = new List<string>();
+                roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
                 if (roleStrings.Count == 0)
                 {
-                    throw new UnauthorizedAccessException("User has no security roles assigned.");
+                    roleStrings.Add(SecurityConstants.Role.ReadOnly); ;
                 }
 
                 var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, roleStrings);

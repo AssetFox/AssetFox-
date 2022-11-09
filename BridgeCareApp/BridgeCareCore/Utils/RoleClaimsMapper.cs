@@ -12,38 +12,44 @@ namespace BridgeCareCore.Utils
 {
     public class RoleClaimsMapper : IRoleClaimsMapper
     {        
-        public string GetInternalRole(string securityType, string IPRole)
+        public List<string> GetInternalRoles(string securityType, List<string> IPRoles)
         {
-            var internalRole = string.Empty;
-
+            var internalRoles = new List<string>();
             var rolesClaimsToken = GetRolesClaimsToken(securityType);
-            var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("IPRoles").Children().Contains(IPRole) == true);
-            if(roleClaimsToken == null)
+            
+            foreach (var IPRole in IPRoles)
             {
-                throw new UnauthorizedAccessException("Unauthorized: Invalid role present in request.");
+                var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("IPRoles").Children().Contains(IPRole) == true);
+                if (roleClaimsToken != null)
+                {
+                    internalRoles.Add(roleClaimsToken.SelectToken("InternalRole").ToString());                    
+                }
+                else
+                {
+                    // TODO: Do we want to add any more IP roles values in mapping json?
+                    // TODO: Should we not throw exception here? ex. we have not listed all roles that comes via idToken/Role value in request
+                    // throw new UnauthorizedAccessException("Unauthorized: Invalid role present in request.");
+                }
             }
-            internalRole = roleClaimsToken.SelectToken("InternalRole").ToString();
+            return internalRoles;
+        }
 
-            return internalRole;
-        }        
-
-        public List<string> GetClaims(string securityType, string internalRole)
+        public List<string> GetClaims(string securityType, List<string> internalRoles)
         {
             var claims = new List<string>();
-
             var rolesClaimsToken = GetRolesClaimsToken(securityType);
-            var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("InternalRole").ToString() == internalRole);
-            var claimsToken = roleClaimsToken?.SelectToken("Claims").ToString();
-            claims = JsonConvert.DeserializeObject<List<string>>(claimsToken);
-
+            foreach (var internalRole in internalRoles)
+            {
+                var roleClaimsToken = rolesClaimsToken.FirstOrDefault(s => s.SelectToken("InternalRole").ToString() == internalRole);
+                var claimsToken = roleClaimsToken?.SelectToken("Claims").ToString();
+                claims.AddRange(JsonConvert.DeserializeObject<List<string>>(claimsToken));
+            }
             return claims;
         }
         
         private static JToken GetRolesClaimsToken(string securityType)
         {            
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
-               "Security", "rolesToClaimsMapping.json");
-
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty, "rolesToClaimsMapping.json");
             if (!File.Exists(filePath))
             {
                 throw new FileNotFoundException($"{filePath} does not exist");
@@ -60,12 +66,19 @@ namespace BridgeCareCore.Utils
             return rolesToken;
         }
 
-        public ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper)
+        public ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, List<string> internalRolesFromMapper, List<string> claimsFromMapper)
         {
-            var roleClaim = new Claim(ClaimTypes.Role, internalRoleFromMapper);
-            var roleClaims = new List<Claim> { roleClaim };
-
+            var roleClaims = new List<Claim>();
+            foreach (var role in internalRolesFromMapper)
+            {                
+                var roleClaim = new Claim(ClaimTypes.Role, role);
+                if (!roleClaims.Contains(roleClaim))
+                {
+                    roleClaims.Add(roleClaim);
+                }
+            }
             ClaimsIdentity claimsIdentity = new ClaimsIdentity(roleClaims);
+
             claimsFromMapper.ForEach(claim =>
             {
                 if (!claimsPrincipal.HasClaim(pclaim => pclaim.Value == claim))

@@ -6,6 +6,7 @@ using BridgeCareCore.Utils.Interfaces;
 using System;
 using Microsoft.AspNetCore.Http;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace BridgeCareCore.Security
 {
@@ -24,25 +25,25 @@ namespace BridgeCareCore.Security
         {
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.Esec)
             {
-                // Obtain the role from the claims principal                
-                var roleClaim = principal.Claims
-                        .Single(_ => _.Type == ClaimTypes.Role)?.Value;
-                var roleParsed = SecurityFunctions.ParseLdap(roleClaim)?.FirstOrDefault();
-                if (roleParsed == null)
+                // Obtain the role(s) from the claims principal
+                var roleClaim = principal.Claims.Single(_ => _.Type == ClaimTypes.Role).Value;               
+                var rolesParsed = SecurityFunctions.ParseLdap(roleClaim);
+                if (rolesParsed == null)
                 {
                     throw new UnauthorizedAccessException("No role found.");
                 }
 
-                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, roleParsed);
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRoleFromMapper);                
-                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
+                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, rolesParsed);
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, internalRolesFromMapper);                
+                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper));
             }
 
             if (_config.GetSection("SecurityType").Value == SecurityConstants.SecurityTypes.B2C)
             {
-                var internalRoleFromMapper = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.B2C, SecurityConstants.Role.Administrator);
-                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRoleFromMapper);
-                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRoleFromMapper, claimsFromMapper));
+                var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.B2C, new List<string>
+                { SecurityConstants.Role.Administrator });
+                var claimsFromMapper = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.B2C, internalRolesFromMapper);
+                principal.AddIdentity(_roleClaimsMapper.AddClaimsToUserIdentity(principal, internalRolesFromMapper, claimsFromMapper));
 
             }
 

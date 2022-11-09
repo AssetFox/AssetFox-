@@ -34,7 +34,7 @@ namespace BridgeCareCore.Security
                 }
                 if (rolesParsed.Count == 0)
                 {
-                    rolesParsed.Add(SecurityConstants.Role.ReadOnly);
+                    rolesParsed.Add(SecurityConstants.Role.Default);
                 }
 
                 var internalRolesFromMapper = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, rolesParsed);

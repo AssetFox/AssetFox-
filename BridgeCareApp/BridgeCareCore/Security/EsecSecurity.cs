@@ -86,7 +86,7 @@ namespace BridgeCareCore.Security
                 roleStrings = SecurityFunctions.ParseLdap(decodedToken.GetClaimValue("roles"));
                 if (roleStrings.Count == 0)
                 {
-                    roleStrings.Add(SecurityConstants.Role.ReadOnly); ;
+                    roleStrings.Add(SecurityConstants.Role.Default);
                 }
 
                 var internalRoles = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, roleStrings);

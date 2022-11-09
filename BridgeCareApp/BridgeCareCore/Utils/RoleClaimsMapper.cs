@@ -24,12 +24,6 @@ namespace BridgeCareCore.Utils
                 {
                     internalRoles.Add(roleClaimsToken.SelectToken("InternalRole").ToString());                    
                 }
-                else
-                {
-                    // TODO: Do we want to add any more IP roles values in mapping json?
-                    // TODO: Should we not throw exception here? ex. we have not listed all roles that comes via idToken/Role value in request
-                    // throw new UnauthorizedAccessException("Unauthorized: Invalid role present in request.");
-                }
             }
             return internalRoles;
         }

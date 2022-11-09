@@ -15,7 +15,7 @@
           <v-text-field outline v-model="newBudgetLibrary.name"
                         :rules="[rules['generalRules'].valueIsNotEmpty]"
                         class="ghd-text-field-border ghd-text-field"/>
-
+<!-- , rules['investmentRules'].budgetNameIsUnique(newBudgetLibrary.name,budgetLibraries) -->
           <v-subheader class="ghd-md-gray ghd-control-label">Description</v-subheader>
           <v-textarea no-resize outline rows="3"
                       v-model="newBudgetLibrary.description"
@@ -49,7 +49,7 @@ import { getUserName } from '@/shared/utils/get-user-info';
 @Component
 export default class CreateBudgetLibraryDialog extends Vue {
   @Prop() dialogData: CreateBudgetLibraryDialogData;
-
+  @Prop() budgetLibraries: BudgetLibrary[];
   @Getter('getIdByUserName') getIdByUserNameGetter: any;
 
   newBudgetLibrary: BudgetLibrary = {...emptyBudgetLibrary, id: getNewGuid()};
@@ -58,7 +58,7 @@ export default class CreateBudgetLibraryDialog extends Vue {
   @Watch('dialogData')
   onDialogDataChanged() {
     let currentUser: string = getUserName();
-
+    console.log("budgetLibraries: " + this.budgetLibraries.length);
     this.newBudgetLibrary = {
       ...this.newBudgetLibrary,
       budgets: this.dialogData.budgets.map((budget: Budget) => ({

@@ -183,7 +183,7 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
 
                     var budgets = new List<BudgetDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null)
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);

@@ -220,6 +220,7 @@
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
+                                   :budgetLibraries='budgetLibraries'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
 
         <SetRangeForAddingBudgetYearsDialog :showDialog='showSetRangeForAddingBudgetYearsDialog'
@@ -752,6 +753,9 @@ export default class InvestmentEditor extends Vue {
     onSubmitCreateCreateBudgetLibraryDialogResult(budgetLibrary: BudgetLibrary) {//needs a few things
         this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
 
+        this.stateBudgetLibraries.forEach(bl => {
+        
+        });
         if (!isNil(budgetLibrary)) {
             this.upsertBudgetLibraryAction(budgetLibrary);
             this.hasCreatedLibrary = true;

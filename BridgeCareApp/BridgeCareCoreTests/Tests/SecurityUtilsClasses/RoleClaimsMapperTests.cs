@@ -15,10 +15,10 @@ namespace BridgeCareCoreTests.Tests
         public void ShouldReturnRoleGetInternalRole()
         {
             _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
+            var result = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, new List<string> { "PD-BAMS-Administrator" });
 
             // Assert
-            Assert.IsType<string>(result);
+            Assert.IsType<List<string>>(result);
             Assert.Equal(result.First(), SecurityConstants.Role.Administrator);
         }
 

@@ -145,18 +145,10 @@ export default class TreatmentService {
             `${API.Treatment}/GetHasOwnerAccess/${treatment.id}`
         );
     }
-    static getHasViewAccess() {
+    static getIsSharedLibrary(treatmentId: string): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.Treatment}/GetHasViewAccess`
+            `${API.Treatment}/GetIsSharedLibrary/${treatmentId}`
         );
-    }
-    static getHasSharedAccess(treatmentId: string): AxiosPromise {
-        return coreAxiosInstance.get(
-            `${API.Treatment}/GetHasSharedAccess/${treatmentId}`
-        );
-    }
-    static setSharedStatus(treatmentLibrary: TreatmentLibrary, userId: string) {
-        return coreAxiosInstance.post(`${API.Treatment}/SetSharedStatus/${treatmentLibrary}, ${userId}`);
     }
     static getTreatmentLibraryUsers(libraryId: string): AxiosPromise {
         return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraryUsers/${libraryId}`);

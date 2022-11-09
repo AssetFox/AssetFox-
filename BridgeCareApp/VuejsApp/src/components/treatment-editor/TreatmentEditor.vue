@@ -39,13 +39,18 @@
                 <v-flex xs4>
                     <v-layout v-if='hasSelectedLibrary && !hasScenario' style="padding-top: 40px !important">
                         <div class="ghd-control-label" style="padding-top: 12px !important">
-                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |                         
-                        </div>  
-                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedTreatmentLibrary.isShared' />
+                        Owner: <v-label>{{ getOwnerUserName() || '[ No Owner ]' }}</v-label> |    
+                        <v-badge v-show="isShared">
+                            <template v-slot: badge>
+                                <span>Shared</span>
+                            </template>
+                        </v-badge>
                         <v-btn @click='onShowTreatmentLibraryDialog(selectedTreatmentLibrary)' class='ghd-blue ghd-button-text ghd-outline-button-padding ghd-button' outline
                                v-show='!hasScenario'>
                             Share Library
                         </v-btn>
+
+                        </div>  
                         <!-- <div style="margin-top: -8px !important">                     
                         <v-checkbox
                             class='sharing ghd-control-text ghd-padding'
@@ -378,7 +383,7 @@ export default class TreatmentEditor extends Vue {
     @State(state => state.treatmentModule.hasPermittedAccess) hasPermittedAccess: boolean;
     @State(state => state.treatmentModule.simpleScenarioSelectableTreatments) stateSimpleScenarioSelectableTreatments: SimpleTreatment[];
     @State(state => state.treatmentModule.simpleSelectableTreatments) stateSimpleSelectableTreatments: SimpleTreatment[];
-    @State(state => state.getHasSharedAccess) hasSharedAccess: boolean;
+    @State(state => state.treatmentModule.isSharedLibrary) isSharedLibrary: boolean;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
@@ -403,7 +408,7 @@ export default class TreatmentEditor extends Vue {
     importLibraryTreatmentsFileAction: any;
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
-    @Action('getHasSharedAccess') getHasSharedAccessAction: any;
+    @Action('getIsSharedLibrary') getIsSharedLibraryAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     
@@ -450,7 +455,7 @@ export default class TreatmentEditor extends Vue {
     initializing: boolean = true;
 
     simpleTreatments: SimpleTreatment[] = [];
-
+    isShared: boolean = false;
     treatmentCache: Treatment[] = [];
 
     unsavedDialogAllowed: boolean = true;
@@ -531,11 +536,15 @@ export default class TreatmentEditor extends Vue {
             this.stateSelectedTreatmentLibrary,
         );
     }
+    @Watch('isSharedLibrary')
+    onStateSharedAccessChanged() {
+        this.isShared = this.isSharedLibrary;
+    }
 
     @Watch('selectedTreatmentLibrary')
     onSelectedTreatmentLibraryChanged() {
         this.hasSelectedLibrary = this.selectedTreatmentLibrary.id !== this.uuidNIL;
-        this.getHasSharedAccessAction(this.selectedTreatmentLibrary);
+        this.getIsSharedLibraryAction(this.selectedTreatmentLibrary).then(this.isShared = this.isSharedLibrary);
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -739,7 +748,6 @@ export default class TreatmentEditor extends Vue {
                 //update budget library sharing
                 this.upsertOrDeleteTreatmentLibraryUsersAction({libraryId: this.selectedTreatmentLibrary.id, proposedUsers: libraryUserData});
                 this.selectedTreatmentLibrary.isShared = this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared;
-                console.log(this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared);
                 this.onUpsertTreatmentLibrary();
         }
     }

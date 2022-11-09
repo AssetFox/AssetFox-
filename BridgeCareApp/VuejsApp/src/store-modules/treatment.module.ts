@@ -31,7 +31,7 @@ const state = {
     hasPermittedAccess: false,
     hasOwnerAccess: false,
     hasViewAccess: false,
-    hasSharedAccess: false
+    isSharedLibrary: false
 };
 
 const mutations = {
@@ -98,8 +98,8 @@ const mutations = {
     OwnerAccessMutator(state: any, status: boolean) {
         state.hasOwnerAccess = status;
     },
-    SharedAccessMutator(state: any, status: boolean) {
-        state.hasSharedAccess = status;
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
     }
 };
 
@@ -323,20 +323,6 @@ const actions = {
             }
         });
     },
-    async getHasViewAccess( {dispatch, commit}: any) {
-        await TreatmentService.getHasViewAccess()
-        .then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit('ViewAccessMutator', response.data as boolean);
-                dispatch('addSuccessNotification', {
-                    message: 'User has view access of this library.'
-                });
-            }
-        });
-    },
     async getHasOwnerAccess({ dispatch, commit }: any, payload: Treatment) {
         await TreatmentService.getHasOwnerAccess(payload).then(
             (response: AxiosResponse) => {
@@ -352,18 +338,15 @@ const actions = {
             }
         );
     },
-    async getHasSharedAccess({ dispatch, commit }: any, payload: any) {
-        await TreatmentService.getHasSharedAccess(payload.id).then(
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await TreatmentService.getIsSharedLibrary(payload.id).then(
             (response: AxiosResponse) => {
                 if (
                 hasValue(response, 'status') &&
                     http2XX.test(response.status.toString())
                 ) {
-                commit('SharedAccessMutator', response.data as boolean);
-                dispatch('addSuccessNotification', {
-                message: 'User is sharing this library.'
-                });
-                }
+                commit('IsSharedLibraryMutator', response.data as boolean);
+            }
             });
         }
 };

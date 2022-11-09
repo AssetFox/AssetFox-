@@ -256,25 +256,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-        [HttpPost]
-        [Route("SetSharedStatus")]
-        [Authorize(Policy.ModifyTreatmentFromLibrary)]
-        public async Task<IActionResult> SetSharedStatus(TreatmentLibraryDTO treatmentLibrary, Guid userId)
-        {
-            try
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.TreatmentLibraryUserRepo.UpsertTreatmentLibraryUser(treatmentLibrary, userId);
-                    UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(treatmentLibrary);
-                    UnitOfWork.Commit();
-                });
-                return Ok();
-            } catch (Exception e)
-            {
-                throw;
-            }
-        }
 
         [HttpGet]
         [Route("GetTreatmentLibraryUsers/{libraryId}")]
@@ -733,21 +714,19 @@ namespace BridgeCareCore.Controllers
             return Ok(true);
         }
         [HttpGet]
-        [Route("GetHasSharedAccess/{treatmentLibraryId}")]
+        [Route("GetIsSharedLibrary/{treatmentLibraryId}")]
         [Authorize]
-        public async Task<IActionResult> GetHasSharedAccess(Guid treatmentLibraryId)
+        public async Task<IActionResult> GetIsSharedLibrary(Guid treatmentLibraryId)
         {
-            var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == treatmentLibraryId);
-            return Ok(dto.IsShared);
-        }
-        [HttpGet]
-        [Route("GetHasViewAccess")]
-        [Authorize(Policy= Policy.ViewTreatmentFromLibrary)]
-        public async Task<IActionResult> GetHasViewAccess()
-        {
-            return Ok(true);
-            //var dto = UnitOfWork.TreatmentLibraryUserRepo.GetAllTreatmentLibraryUsers().FirstOrDefault(_ => _.UserId == UserId);
-            //return dto == null ? NotFound() : Ok(true);
+            var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
+            if (users.Count > 0)
+            {
+                return new JsonResult(true);
+            }
+            else
+            {
+                return new JsonResult(false);
+            }
         }
         [HttpGet]
         [Route("GetHasOwnerAccess/{LibraryId}")]

@@ -5,11 +5,11 @@ namespace BridgeCareCore.Utils.Interfaces
 {
     public interface IRoleClaimsMapper
     {
-        string GetInternalRole(string securityType, string IPRole);
+        List<string> GetInternalRoles(string securityType, List<string> IPRoles);
 
-        List<string> GetClaims(string securityType, string internalRole);
+        List<string> GetClaims(string securityType, List<string> internalRole);
 
-        ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, string internalRoleFromMapper, List<string> claimsFromMapper);
+        ClaimsIdentity AddClaimsToUserIdentity(ClaimsPrincipal claimsPrincipal, List<string> internalRoleFromMapper, List<string> claimsFromMapper);
 
         bool HasAdminAccess(ClaimsPrincipal claimsPrincipal);
 

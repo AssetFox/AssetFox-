@@ -707,7 +707,6 @@ namespace BridgeCareCore.Controllers
 
         [HttpGet]
         [Route("GetHasPermittedAccess")]
-        [Authorize]
         [Authorize(Policy = Policy.ModifyOrDeleteTreatmentFromLibrary)]
         public async Task<IActionResult> GetHasPermittedAccess()
         {
@@ -718,14 +717,26 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetIsSharedLibrary(Guid treatmentLibraryId)
         {
-            var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
-            if (users.Count > 0)
+            try
             {
-                return new JsonResult(true);
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
+                    if (users.Count > 0)
+                    {
+                        return new JsonResult(true);
+                    }
+                    else
+                    {
+                        return new JsonResult(false);
+                    }
+                });
+                return Ok();
             }
-            else
+            catch (Exception)
             {
-                return new JsonResult(false);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                throw;
             }
         }
         [HttpGet]
@@ -733,11 +744,23 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy=Policy.ModifyOrDeleteTreatmentFromLibrary)]
         public async Task<IActionResult> GetHasOwnerAccess(Guid LibraryId)
         {
-            // Check if user is owner of library
-            var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
-            if (dto == null) return NotFound();
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    // Check if user is owner of library
+                    var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == LibraryId);
+                    if (dto == null) throw new Exception();
+                    if (dto.Owner != UserId) throw new UnauthorizedAccessException();
+                });
+                return Ok();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetHasOwnerAccess - {HubService.errorList["Exception"]}");
+                throw;
+            }
 
-            return dto.Owner == UserId ? Ok(true) : Unauthorized();
         }
         private List<TreatmentLibraryDTO> GetAllTreatmentLibraries()
         {

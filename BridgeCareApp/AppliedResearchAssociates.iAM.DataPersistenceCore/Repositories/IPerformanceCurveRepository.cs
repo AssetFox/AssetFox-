@@ -31,5 +31,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         public List<PerformanceCurveDTO> GetScenarioPerformanceCurvesOrderedById(Guid simulationId);
 
         public List<PerformanceCurveDTO> GetPerformanceCurvesForLibraryOrderedById(Guid performanceCurveLibraryId);
+
+        public List<PerformanceCurveLibraryDTO> GetPerformanceCurveLibrariesNoChildrenAccessibleToUser(Guid guid);
+
+        public LibraryUserAccessModel GetLibraryAccess(Guid libraryId, Guid userId);
+
+        void UpsertOrDeleteUsers(Guid performanceCurveLibraryId, IList<LibraryUserDTO> libraryUsers);
+
+        List<LibraryUserDTO> GetLibraryUsers(Guid performanceCurveLibraryId);
+
+        List<LibraryUserDTO> GetAccessForUser(Guid performanceCurveLibraryId, Guid userId);
     }
 }

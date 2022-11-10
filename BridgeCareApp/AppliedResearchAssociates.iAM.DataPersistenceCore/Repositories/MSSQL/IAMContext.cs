@@ -198,6 +198,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TreatmentLibraryUserEntity> TreatmentLibraryUser { get; set; }
 
+        public virtual DbSet<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUser { get; set; }
+
         public virtual DbSet<TreatmentSchedulingEntity> TreatmentScheduling { get; set; }
 
         public virtual DbSet<ScenarioTreatmentSchedulingEntity> ScenarioTreatmentScheduling { get; set; }
@@ -2020,6 +2022,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.TreatmentLibraryUserJoins)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            modelBuilder.Entity<PerformanceCurveLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.PerformanceCurveLibraryId, e.UserId });
+
+                entity.ToTable("PerformanceCurveLibrary_User");
+
+                entity.HasIndex(e => e.PerformanceCurveLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.PerformanceCurveLibrary)
+                    .WithMany(p => p.PerformanceCurveLibraryUserJoins)
+                    .HasForeignKey(d => d.PerformanceCurveLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.PerformanceCurveLibraryUserJoins)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

@@ -124,6 +124,7 @@ import CommittedProjectSvg from '@/shared/icons/CommittedProjectSvg.vue';
 export default class EditScenario extends Vue {
     @State(state => state.networkModule.networks) stateNetworks: Network[];
     @State(state => state.authenticationModule.hasAdminAccess) hasAdminAccess: boolean;
+    @State(state => state.authenticationModule.hasSimulationAccess) hasSimulationAccess: boolean;
     @State(state => state.scenarioModule.selectedScenario)
     stateSelectedScenario: Scenario;
     @State(state => state.scenarioModule.currentSharedScenariosPage) stateSharedScenariosPage: Scenario[];
@@ -135,6 +136,7 @@ export default class EditScenario extends Vue {
     @Action('selectScenario') selectScenarioAction: any;
     @Action('runSimulation') runSimulationAction: any;
     @Action('runNewSimulation') runNewSimulationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
 
     selectedScenarioId: string = getBlankGuid();
     showImportExportCommittedProjectsDialog: boolean = false;
@@ -277,6 +279,8 @@ export default class EditScenario extends Vue {
                 if (!hasChildPath) {
                     vm.$router.push(vm.navigationTabs[0].navigation);
                 }
+
+                this.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId, hasAdminAccess: this.hasAdminAccess, hasSimulationAccess: this.hasSimulationAccess});
             }
         });
     }

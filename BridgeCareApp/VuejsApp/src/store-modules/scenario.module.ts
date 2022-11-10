@@ -18,7 +18,8 @@ const state = {
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
     totalQueuedSimulations: 0 as number,
-    selectedScenario: clone(emptyScenario) as Scenario
+    selectedScenario: clone(emptyScenario) as Scenario,
+    currentUserOrSharedScenario: clone(emptyScenario) as Scenario,
 };
 
 const mutations = {
@@ -33,6 +34,9 @@ const mutations = {
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
     },
+    UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
+        state.getCurrentUserOrSharedScenario = clone(scenario);        
+    },
     SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
         state.currentSimulationQueuePage = clone(queuedSimulations.items);
         state.totalQueuedSimulations = queuedSimulations.totalItems;
@@ -41,11 +45,15 @@ const mutations = {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
             state.selectedScenario = find(propEq('id', id), state.currentSharedScenariosPage) as Scenario;
         } 
-        else if(any(propEq('id', id), state.currentUserScenarioPage))
+        else if(any(propEq('id', id), state.currentUserScenarioPage)) {
             state.selectedScenario = find(propEq('id', id), state.currentUserScenarioPage) as Scenario;
-        else {
-            state.selectedScenario = clone(emptyScenario);
         }
+        else {
+            state.selectedScenario = state.currentUserOrSharedScenario;
+        }            
+        //else {
+          //  state.selectedScenario = clone(emptyScenario);
+        //}
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
         if (any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSharedScenariosPage)) {
@@ -227,7 +235,15 @@ const actions = {
                 }
             },
         );
-    },    
+    },
+   async getCurrentUserOrSharedScenario(({commit}: any, payload: any) {
+    await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId, payload.hasAdminAccess, payload.hasSimulationAccess)
+        .then((response: AxiosResponse) => {
+            if (hasValue(response, 'data')) {
+                commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+            }
+        });
+   }
 };
 
 const getters = {};

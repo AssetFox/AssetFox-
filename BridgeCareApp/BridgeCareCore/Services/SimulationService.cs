@@ -104,6 +104,12 @@ namespace BridgeCareCore.Services
             };
         }
 
+        public SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess)
+        {
+            var simulation = _simulationRepository.GetUserOrSharedScenario(simulationId, hasAdminAccess, hasSimulationAccess);
+            return simulation;
+        }
+
         private List<SimulationDTO> SearchSimulations(List<SimulationDTO> simulations, string search)
         {
             return simulations
@@ -147,6 +153,6 @@ namespace BridgeCareCore.Services
                     return simulations.OrderBy(_ => _.CreatedDate).ToList();
             }
             return simulations;
-        }
+        }        
     }
 }

@@ -227,6 +227,7 @@ export default class EditAnalysisMethod extends Vue {
     @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
 
     selectedScenarioId: string = getBlankGuid();
     analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
@@ -287,7 +288,7 @@ export default class EditAnalysisMethod extends Vue {
             }
 
             // get the selected scenario's analysisMethod data
-            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId });
+            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId });            
         });
     }
 

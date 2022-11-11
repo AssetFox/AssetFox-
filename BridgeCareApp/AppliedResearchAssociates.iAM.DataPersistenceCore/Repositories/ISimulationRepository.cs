@@ -35,5 +35,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void UpdateLastModifiedDate(SimulationEntity entity);
 
         string GetSimulationName(Guid simulationId);
+
+        SimulationDTO GetUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess);
     }
 }

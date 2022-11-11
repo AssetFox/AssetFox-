@@ -4,7 +4,6 @@ import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import ReportsService from '@/services/reports.service';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-detail';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
@@ -35,7 +34,7 @@ const mutations = {
         state.totalSharedScenarios = scenarios.totalItems;
     },
     UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
-        state.getCurrentUserOrSharedScenario = clone(scenario);        
+        state.currentUserOrSharedScenario = clone(scenario);        
     },
     SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
         state.currentSimulationQueuePage = clone(queuedSimulations.items);
@@ -236,14 +235,15 @@ const actions = {
             },
         );
     },
-   async getCurrentUserOrSharedScenario(({commit}: any, payload: any) { // TODO add getCurrentUserOrSharedScenario to service.ts and then to backend and test out the fix
-    await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId, payload.hasAdminAccess, payload.hasSimulationAccess)
-        .then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+    async getCurrentUserOrSharedScenario({commit}: any, payload: any) {   
+        await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId)
+            .then((response: AxiosResponse) => {
+                if (hasValue(response, 'data')) {
+                    commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+                }
             }
-        });
-   }
+        );
+   },
 };
 
 const getters = {};

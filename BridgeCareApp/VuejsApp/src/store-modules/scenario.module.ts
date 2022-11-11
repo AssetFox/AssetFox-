@@ -236,7 +236,7 @@ const actions = {
             },
         );
     },
-   async getCurrentUserOrSharedScenario(({commit}: any, payload: any) {
+   async getCurrentUserOrSharedScenario(({commit}: any, payload: any) { // TODO add getCurrentUserOrSharedScenario to service.ts and then to backend and test out the fix
     await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId, payload.hasAdminAccess, payload.hasSimulationAccess)
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {

@@ -1,13 +1,14 @@
 import { AxiosPromise } from 'axios';
 import { Treatment, TreatmentLibrary } from '@/shared/models/iAM/treatment';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
+import { LibraryUpsertPagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class TreatmentService {
     static getTreatmentLibraries(): AxiosPromise {
         return coreAxiosInstance.get(`${API.Treatment}/GetTreatmentLibraries`);
     }
 
-    static upsertTreatmentLibrary(data: TreatmentLibrary): AxiosPromise {
+    static upsertTreatmentLibrary(data: LibraryUpsertPagingRequest<TreatmentLibrary, Treatment>): AxiosPromise {
         return coreAxiosInstance.post(
             `${API.Treatment}/UpsertTreatmentLibrary/`,
             data,
@@ -26,8 +27,32 @@ export default class TreatmentService {
         );
     }
 
+    static getSimpleTreatmentsByLibraryId(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetSimpleTreatmentsByLibraryId/${libraryId}`,
+        );
+    }
+
+    static getSelectedTreatmentById(treatmentId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetSelectedTreatmentById/${treatmentId}`,
+        );
+    }
+
+    static getScenarioSelectedTreatmentById(treatmentId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetScenarioSelectedTreatmentById/${treatmentId}`,
+        );
+    }
+
+    static getSimpleTreatmentsByScenarioId(scenarioId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetSimpleTreatmentsByScenarioId/${scenarioId}`,
+        );
+    }
+
     static upsertScenarioSelectedTreatments(
-        data: Treatment[],
+        data: PaginSync<Treatment>,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(

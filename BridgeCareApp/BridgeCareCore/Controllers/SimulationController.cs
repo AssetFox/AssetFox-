@@ -101,7 +101,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {                
-                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request, UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess));
+                var result = await Task.Factory.StartNew(() => _simulationQueueService.GetSimulationQueuePage(request));
                 return Ok(result);
             }
             catch (Exception e)
@@ -281,9 +281,41 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> CancelSimulation(Guid simulationId)
         {
-            // TODO: Implement cancel
-            await Task.Delay(300);
-            return Ok();
+            try
+            {
+                _claimHelper.CheckUserSimulationCancelAnalysisAuthorization(simulationId, UserInfo.Name, false);
+                var hasBeenRemovedFromQueue = _simulationAnalysis.Cancel(simulationId);
+                await Task.Delay(125);
+
+                if (hasBeenRemovedFromQueue)
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Canceled"
+                    });
+                }
+                else
+                {
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastSimulationAnalysisDetail, new SimulationAnalysisDetailDTO
+                    {
+                        SimulationId = simulationId,
+                        Status = "Canceling analysis..."
+                    });
+
+                }
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
+                throw;
+            }
         }
     }
 }

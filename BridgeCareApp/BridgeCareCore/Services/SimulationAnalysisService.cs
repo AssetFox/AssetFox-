@@ -43,9 +43,9 @@ namespace BridgeCareCore.Services
             return workHandle;
         }
 
-        public void CancelSimulation(Guid simulationId, UserInfo userInfo)
+        public bool Cancel(Guid simulationId)
         {
-            // TODO: Implement
+            return _sequentialWorkQueue.Cancel(simulationId);
         }
     }
 }

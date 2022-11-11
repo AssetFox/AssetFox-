@@ -20,6 +20,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteTreatmentLibrary(Guid libraryId);
 
         List<TreatmentDTO> GetScenarioSelectableTreatments(Guid simulationId);
+        List<TreatmentDTO> GetSelectableTreatments(Guid libraryId);
 
         void UpsertOrDeleteScenarioSelectableTreatment(List<TreatmentDTO> scenarioSelectableTreatments, Guid simulationId);
         TreatmentLibraryDTO GetSingleTreatmentLibary(Guid libraryId);
@@ -35,6 +36,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
 
         List<TreatmentLibraryDTO> GetAllTreatmentLibrariesNoChildren();
 
-        List<TreatmentDTO> GetScenarioSelectableTreatmentsNoChildren(Guid simulationId);
+        List<SimpleTreatmentDTO> GetSimpleTreatmentsBySimulationId(Guid simulationId);
+        List<SimpleTreatmentDTO> GetSimpleTreatmentsByLibraryId(Guid simulationId);
+        TreatmentDTO GetScenarioSelectableTreatmentById(Guid id);
+        TreatmentDTO GetSelectableTreatmentById(Guid id);
     }
 }

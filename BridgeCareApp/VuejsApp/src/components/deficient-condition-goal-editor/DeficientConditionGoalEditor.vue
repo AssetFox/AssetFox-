@@ -33,7 +33,8 @@
                         v-if='hasSelectedLibrary && selectedScenarioId === uuidNIL'>
                     </v-divider>
                     <v-checkbox class='sharing header-text-content' label="Shared"
-                        v-model="selectedDeficientConditionGoalLibrary.isShared"/>      
+                        v-model="selectedDeficientConditionGoalLibrary.isShared"
+                        @change="checkHasUnsavedChanges()"/>      
                 </v-layout>
             </v-flex>
             <v-flex xs4 class="ghd-constant-header">
@@ -61,7 +62,11 @@
             <div class="deficients-data-table">
                 <v-data-table
                     :headers="deficientConditionGoalGridHeaders"
-                    :items="deficientConditionGoalGridData"
+                    :items="currentPage"  
+                    :pagination.sync="pagination"
+                    :must-sort='true'
+                    :total-items="totalItems"
+                    :rows-per-page-items=[5,10,25]
                     sort-icon=$vuetify.icons.ghd-table-sort
                     class=" ghd-table v-table__overflow"
                     item-key="id"
@@ -194,7 +199,7 @@
                         outline
                         rows="4"
                         v-model="selectedDeficientConditionGoalLibrary.description"
-                        @input='selectedDeficientConditionGoalLibrary = {...selectedDeficientConditionGoalLibrary, description: $event}'
+                        @input='checkHasUnsavedChanges()'
                     >
                     </v-textarea>
                 </v-flex>
@@ -262,8 +267,8 @@
             @submit="onAddDeficientConditionGoal"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
             @submit="onEditDeficientConditionGoalCriterionLibrary"
         />
     </v-layout>
@@ -273,7 +278,7 @@
 import Vue from 'vue';
 import Component from 'vue-class-component';
 import { Watch } from 'vue-property-decorator';
-import { Action, Getter, State } from 'vuex-class';
+import { Action, Getter, Mutation, State } from 'vuex-class';
 import {
     DeficientConditionGoal,
     DeficientConditionGoalLibrary,
@@ -282,19 +287,16 @@ import {
 } from '@/shared/models/iAM/deficient-condition-goal';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import {
+  any,
     clone,
     contains,
+    find,
     findIndex,
     isNil,
     prepend,
     propEq,
     update,
 } from 'ramda';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateDeficientConditionGoalDialog from '@/components/deficient-condition-goal-editor/deficient-condition-goal-editor-dialogs/CreateDeficientConditionGoalDialog.vue';
 import {
     CreateDeficientConditionGoalLibraryDialogData,
@@ -320,12 +322,21 @@ import {
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
+import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
+import DeficientConditionGoalService from '@/services/deficient-condition-goal.service';
+import { AxiosResponse } from 'axios';
+import { hasValue } from '@/shared/utils/has-value-util';
+import { http2XX } from '@/shared/utils/http-utils';
+import deficientConditionGoalModule from '@/store-modules/deficient-condition-goal.module';
 
 @Component({
     components: {
         CreateDeficientConditionGoalLibraryDialog,
         CreateDeficientConditionGoalDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmBeforeDeleteAlert: Alert,
     },
 })
@@ -368,13 +379,17 @@ export default class DeficientConditionGoalEditor extends Vue {
     getScenarioDeficientConditionGoalsAction: any;
     @Action('upsertScenarioDeficientConditionGoals')
     upsertScenarioDeficientConditionGoalsAction: any;
+    @Action('addSuccessNotification') addSuccessNotificationAction: any;
+
+    @Mutation('addedOrUpdatedDeficientConditionGoalLibraryMutator') addedOrUpdatedDeficientConditionGoalLibraryMutator: any;
+    @Mutation('selectedDeficientConditionGoalLibraryMutator') selectedDeficientConditionGoalLibraryMutator: any;
+
 
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     selectedScenarioId: string = getBlankGuid();
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = null;
     selectedDeficientConditionGoalLibrary: DeficientConditionGoalLibrary = clone(
         emptyDeficientConditionGoalLibrary,
     );
@@ -429,7 +444,6 @@ export default class DeficientConditionGoalEditor extends Vue {
             width: '10%',
         }
     ];
-    deficientConditionGoalGridData: DeficientConditionGoal[] = [];
     numericAttributeNames: string[] = [];
     selectedGridRows: DeficientConditionGoal[] = [];
     selectedDeficientConditionGoalIds: string[] = [];
@@ -437,8 +451,8 @@ export default class DeficientConditionGoalEditor extends Vue {
         emptyDeficientConditionGoal,
     );
     showCreateDeficientConditionGoalDialog: boolean = false;
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     createDeficientConditionGoalLibraryDialogData: CreateDeficientConditionGoalLibraryDialogData = clone(
         emptyCreateDeficientConditionGoalLibraryDialogData,
@@ -453,25 +467,45 @@ export default class DeficientConditionGoalEditor extends Vue {
     hasLibraryEditPermission: boolean = false;
     importLibraryDisabled: boolean = true;
 
+    addedRows: DeficientConditionGoal[] = [];
+    updatedRowsMap:Map<string, [DeficientConditionGoal, DeficientConditionGoal]> = new Map<string, [DeficientConditionGoal, DeficientConditionGoal]>();//0: original value | 1: updated value
+    deletionIds: string[] = [];
+    rowCache: DeficientConditionGoal[] = [];
+    gridSearchTerm = '';
+    currentSearch = '';
+    pagination: Pagination = clone(emptyPagination);
+    isPageInit = false;
+    totalItems = 0;
+    currentPage: DeficientConditionGoal[] = [];
+    initializing: boolean = true;
+
+    unsavedDialogAllowed: boolean = true;
+    trueLibrarySelectItemValue: string | null = ''
+    librarySelectItemValueAllowedChanged: boolean = true;
+    librarySelectItemValue: string | null = null;
+
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
             vm.getDeficientConditionGoalLibrariesAction();
-            vm.getHasPermittedAccessAction();
+            vm.numericAttributeNames = getPropertyValues('name', vm.getNumericAttributesGetter);
+            vm.getHasPermittedAccessAction().then(() => {
+                if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
+                    vm.selectedScenarioId = to.query.scenarioId;
 
-            if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
-                vm.selectedScenarioId = to.query.scenarioId;
+                    if (vm.selectedScenarioId === vm.uuidNIL) {
+                        vm.addErrorNotificationAction({
+                            message: 'Found no selected scenario for edit',
+                        });
+                        vm.$router.push('/Scenarios/');
+                    }
 
-                if (vm.selectedScenarioId === vm.uuidNIL) {
-                    vm.addErrorNotificationAction({
-                        message: 'Found no selected scenario for edit',
-                    });
-                    vm.$router.push('/Scenarios/');
+                    vm.hasScenario = true;
+                    vm.initializePages();
                 }
+            });
 
-                vm.hasScenario = true;
-                vm.getScenarioDeficientConditionGoalsAction(vm.selectedScenarioId);
-            }
+            
         });
     }
 
@@ -489,8 +523,23 @@ export default class DeficientConditionGoalEditor extends Vue {
         );
     }
 
+   //this is so that a user is asked wether or not to continue when switching libraries after they have made changes
+    //but only when in libraries
     @Watch('librarySelectItemValue')
+    onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(this.hasScenario){
+            this.onSelectItemValueChanged();
+            this.unsavedDialogAllowed = false;
+        }           
+        else if(this.librarySelectItemValueAllowedChanged)
+            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
+                this.librarySelectItemValueAllowedChanged = false;
+                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+            })
+        this.librarySelectItemValueAllowedChanged = true;
+    }
     onSelectItemValueChanged() {
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue
         if(!this.hasScenario || isNil(this.librarySelectItemValue))
             this.selectDeficientConditionGoalLibraryAction({
                 libraryId: this.librarySelectItemValue,
@@ -508,7 +557,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         );
     }
 
-    @Watch('selectedDeficientConditionGoalLibrary', {deep: true})
+    @Watch('selectedDeficientConditionGoalLibrary')
     onSelectedDeficientConditionGoalLibraryChanged() {
         this.hasSelectedLibrary = this.selectedDeficientConditionGoalLibrary.id !== this.uuidNIL;
 
@@ -517,21 +566,10 @@ export default class DeficientConditionGoalEditor extends Vue {
             this.hasCreatedLibrary = false;
         }
 
-        if (this.hasScenario) {
-            this.deficientConditionGoalGridData = this.selectedDeficientConditionGoalLibrary.deficientConditionGoals
-                .map((deficientGoal: DeficientConditionGoal) => ({
-                    ...deficientGoal,
-                    id: getNewGuid(),
-                }));
-        } else {
-            this.deficientConditionGoalGridData = clone(this.selectedDeficientConditionGoalLibrary.deficientConditionGoals);
-        }
-        /*if (this.numericAttributeNames.length === 0) {
-            this.numericAttributeNames = getPropertyValues(
-                'name',
-                this.getNumericAttributesGetter,
-            );
-        }*/
+        this.clearChanges();
+        this.initializing = false;
+        if(this.hasSelectedLibrary)
+            this.onPaginationChanged();
     }
 
     @Watch('selectedGridRows')
@@ -547,18 +585,53 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Watch('stateScenarioDeficientConditionGoals')
     onStateScenarioDeficientConditionGoalsChanged() {
         if (this.hasScenario) {
-            this.deficientConditionGoalGridData = clone(this.stateScenarioDeficientConditionGoals);
+            this.currentPage = clone(this.stateScenarioDeficientConditionGoals);
         }
     }
 
-    @Watch('deficientConditionGoalGridData')
-    onDeficientConditionGoalGridDataChanged() {
-        const hasUnsavedChanges: boolean = this.hasScenario
-            ? hasUnsavedChangesCore('', this.deficientConditionGoalGridData, this.stateScenarioDeficientConditionGoals)
-            : hasUnsavedChangesCore('',
-                {...clone(this.selectedDeficientConditionGoalLibrary), deficientConditionGoals: clone(this.deficientConditionGoalGridData)},
-                this.stateSelectedDeficientConditionGoalLibrary);
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    @Watch('currentPage')
+    onCurrentPageChanged() {
+
+    }
+
+    @Watch('pagination')
+    onPaginationChanged() {
+        if(this.initializing)
+            return;
+        this.checkHasUnsavedChanges();
+        const { sortBy, descending, page, rowsPerPage } = this.pagination;
+
+        const request: PagingRequest<DeficientConditionGoal>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: this.librarySelectItemValue !== null && this.importLibraryDisabled ? this.librarySelectItemValue : null,
+                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                rowsForDeletion: this.deletionIds,
+                addedRows: this.addedRows,
+            },           
+            sortColumn: sortBy,
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearch
+        };
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
+            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<DeficientConditionGoal>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });
+        else if(this.hasSelectedLibrary)
+             DeficientConditionGoalService.getLibraryDeficientConditionGoalPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+                if(response.data){
+                    let data = response.data as PagingPage<DeficientConditionGoal>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });     
     }
 
     importLibrary() {
@@ -589,7 +662,7 @@ export default class DeficientConditionGoalEditor extends Vue {
         this.createDeficientConditionGoalLibraryDialogData = {
             showDialog: true,
             deficientConditionGoals: createExistingLibraryAsNew
-                ? this.deficientConditionGoalGridData
+                ? this.currentPage
                 : [],
         };
     }
@@ -598,9 +671,30 @@ export default class DeficientConditionGoalEditor extends Vue {
         this.createDeficientConditionGoalLibraryDialogData = clone(emptyCreateDeficientConditionGoalLibraryDialogData,);
 
         if (!isNil(library)) {
-            this.upsertDeficientConditionGoalLibraryAction({ library: library});
-            this.hasCreatedLibrary = true;
-            this.librarySelectItemValue = library.name;
+            const upsertRequest: LibraryUpsertPagingRequest<DeficientConditionGoalLibrary, DeficientConditionGoal> = {
+                library: library,    
+                isNewLibrary: true,           
+                 pagingSync: {
+                    libraryId: library.deficientConditionGoals.length == 0 ? null : this.selectedDeficientConditionGoalLibrary.id,
+                    rowsForDeletion: library.deficientConditionGoals === [] ? [] : this.deletionIds,
+                    updateRows: library.deficientConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                    addedRows: library.deficientConditionGoals === [] ? [] : this.addedRows,
+                 }
+            }
+            DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
+                if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                    this.hasCreatedLibrary = true;
+                    this.librarySelectItemValue = library.id;
+                    
+                    if(library.deficientConditionGoals === []){
+                        this.clearChanges();
+                    }
+
+                    this.addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
+                    this.selectedDeficientConditionGoalLibraryMutator(library.id);
+                    this.addSuccessNotificationAction({message:'Added deficient condition goal library'})
+                }               
+            })
         }
     }
 
@@ -608,26 +702,26 @@ export default class DeficientConditionGoalEditor extends Vue {
         this.showCreateDeficientConditionGoalDialog = false;
 
         if (!isNil(newDeficientConditionGoal)) {
-            this.deficientConditionGoalGridData = prepend(
-                newDeficientConditionGoal,
-                this.deficientConditionGoalGridData,
-            );
+            this.addedRows.push(newDeficientConditionGoal);
+            this.onPaginationChanged()
         }
     }
 
     onEditDeficientConditionGoalProperty(deficientConditionGoal: DeficientConditionGoal, property: string, value: any) {
-        this.deficientConditionGoalGridData = update(
-            findIndex(
-                propEq('id', deficientConditionGoal.id),
-                this.deficientConditionGoalGridData,
-            ),
-            setItemPropertyValue(
-                property,
-                value,
-                deficientConditionGoal,
-            ) as DeficientConditionGoal,
-            this.deficientConditionGoalGridData,
-        );
+        // this.currentPage = update(
+        //     findIndex(
+        //         propEq('id', deficientConditionGoal.id),
+        //         this.currentPage,
+        //     ),
+        //     setItemPropertyValue(
+        //         property,
+        //         value,
+        //         deficientConditionGoal,
+        //     ) as DeficientConditionGoal,
+        //     this.currentPage,
+        // );
+        this.onUpdateRow(deficientConditionGoal.id, clone(deficientConditionGoal))
+        this.onPaginationChanged();
     }
 
     onShowCriterionLibraryEditorDialog(deficientConditionGoal: DeficientConditionGoal,) {
@@ -635,23 +729,22 @@ export default class DeficientConditionGoalEditor extends Vue {
             deficientConditionGoal,
         );
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: deficientConditionGoal.criterionLibrary.id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: deficientConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onEditDeficientConditionGoalCriterionLibrary(criterionLibrary: CriterionLibrary,) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onEditDeficientConditionGoalCriterionLibrary(criterionExpression: string,) {
+        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
-            this.deficientConditionGoalGridData = update(
-                findIndex(propEq('id', this.selectedDeficientConditionGoalForCriteriaEdit.id), this.deficientConditionGoalGridData),
-                { ...this.selectedDeficientConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary},
-                this.deficientConditionGoalGridData,
-            );
+        if (!isNil(criterionExpression) && this.selectedDeficientConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            this.onUpdateRow(this.selectedDeficientConditionGoalForCriteriaEdit.id,
+             { ...this.selectedDeficientConditionGoalForCriteriaEdit, 
+                criterionLibrary: {... this.selectedDeficientConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression}})                
+            this.onPaginationChanged();
         }
 
         this.selectedDeficientConditionGoalForCriteriaEdit = clone(
@@ -660,36 +753,77 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     onUpsertDeficientConditionGoalLibrary() {
-        const library: DeficientConditionGoalLibrary = {
-            ...clone(this.selectedDeficientConditionGoalLibrary),
-            deficientConditionGoals: clone(this.deficientConditionGoalGridData)
-        };
-        this.upsertDeficientConditionGoalLibraryAction({library: library});
+        const upsertRequest: LibraryUpsertPagingRequest<DeficientConditionGoalLibrary, DeficientConditionGoal> = {
+                library: this.selectedDeficientConditionGoalLibrary,
+                isNewLibrary: false,
+                pagingSync: {
+                libraryId: this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedDeficientConditionGoalLibrary.id,
+                rowsForDeletion: this.deletionIds,
+                updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+                addedRows: this.addedRows
+                }
+        }
+        DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges()
+                this.resetPage();
+                this.addedOrUpdatedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary);
+                this.selectedDeficientConditionGoalLibraryMutator(this.selectedDeficientConditionGoalLibrary.id);
+                this.addSuccessNotificationAction({message: "Updated deficient condition goal library",});
+            }
+        });
     }
 
     onUpsertScenarioDeficientConditionGoals() {
-        this.upsertScenarioDeficientConditionGoalsAction({
-            scenarioDeficientConditionGoals: this.deficientConditionGoalGridData,
-            scenarioId: this.selectedScenarioId,
-        }).then(() => this.librarySelectItemValue = null);
+        DeficientConditionGoalService.upsertScenarioDeficientConditionGoals({
+            libraryId: this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedDeficientConditionGoalLibrary.id,
+            rowsForDeletion: this.deletionIds,
+            updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
+            addedRows: this.addedRows           
+        }, this.selectedScenarioId).then((response: AxiosResponse) => {
+            if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                this.clearChanges();
+                this.librarySelectItemValue = null;
+                this.resetPage();
+                this.addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
+            }           
+        });
     }
 
     onDiscardChanges() {
         this.librarySelectItemValue = null;
         setTimeout(() => {
             if (this.hasScenario) {
-                this.deficientConditionGoalGridData = clone(this.stateScenarioDeficientConditionGoals);
+                this.clearChanges();
+                this.resetPage();
+                this.importLibraryDisabled = true;
             }
         });
     }
 
     onRemoveSelectedDeficientConditionGoals() {
-        this.deficientConditionGoalGridData = this.deficientConditionGoalGridData
-            .filter((goal: DeficientConditionGoal) => !contains(goal.id, this.selectedDeficientConditionGoalIds));
+        this.selectedDeficientConditionGoalIds.forEach(_ => {
+            this.removeRowLogic(_);
+        });
+
+        this.selectedDeficientConditionGoalIds = [];
+        this.onPaginationChanged();
     }
 
     onRemoveSelectedDeficientConditionGoal(id: string){
-        this.deficientConditionGoalGridData = this.deficientConditionGoalGridData.filter((goal: DeficientConditionGoal) => goal.id !== id)
+        this.removeRowLogic(id);
+        this.onPaginationChanged();
+    }
+
+    removeRowLogic(id: string){
+        if(isNil(find(propEq('id', id), this.addedRows))){
+            this.deletionIds.push(id);
+            if(!isNil(this.updatedRowsMap.get(id)))
+                this.updatedRowsMap.delete(id)
+        }           
+        else{          
+            this.addedRows = this.addedRows.filter((row) => row.id !== id)
+        }  
     }
 
     onShowConfirmDeleteAlert() {
@@ -713,7 +847,8 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     disableCrudButtons() {
-        const dataIsValid: boolean = this.deficientConditionGoalGridData.every(
+        const rows = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
+        const dataIsValid: boolean = rows.every(
             (deficientGoal: DeficientConditionGoal) => {
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
@@ -736,6 +871,95 @@ export default class DeficientConditionGoalEditor extends Vue {
         }
         this.disableCrudButtonsResult = !dataIsValid;
         return !dataIsValid;
+    }
+
+    //paging
+
+    onUpdateRow(rowId: string, updatedRow: DeficientConditionGoal){
+        if(any(propEq('id', rowId), this.addedRows)){
+            const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
+            this.addedRows[index] = updatedRow;
+            return;
+        }
+
+        let mapEntry = this.updatedRowsMap.get(rowId)
+
+        if(isNil(mapEntry)){
+            const row = this.rowCache.find(r => r.id === rowId);
+            if(!isNil(row) && hasUnsavedChangesCore('', updatedRow, row))
+                this.updatedRowsMap.set(rowId, [row , updatedRow])
+        }
+        else if(hasUnsavedChangesCore('', updatedRow, mapEntry[0])){
+            mapEntry[1] = updatedRow;
+        }
+        else
+            this.updatedRowsMap.delete(rowId)
+
+        this.checkHasUnsavedChanges();
+    }
+
+    clearChanges(){
+        this.updatedRowsMap.clear();
+        this.addedRows = [];
+        this.deletionIds = [];
+    }
+
+    resetPage(){
+        this.pagination.page = 1;
+        this.onPaginationChanged();
+    }
+
+    checkHasUnsavedChanges(){
+        const hasUnsavedChanges: boolean = 
+            this.deletionIds.length > 0 || 
+            this.addedRows.length > 0 ||
+            this.updatedRowsMap.size > 0 || 
+            (this.hasScenario && this.hasSelectedLibrary) ||
+            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.stateSelectedDeficientConditionGoalLibrary, this.selectedDeficientConditionGoalLibrary))
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    CheckUnsavedDialog(next: any, otherwise: any) {
+        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+            // @ts-ignore
+            Vue.dialog
+                .confirm(
+                    'You have unsaved changes. Are you sure you wish to continue?',
+                    { reverse: true },
+                )
+                .then(() => next())
+                .catch(() => otherwise())
+        } 
+        else {
+            this.unsavedDialogAllowed = true;
+            next();
+        }
+    };
+
+    initializePages(){
+        const request: PagingRequest<DeficientConditionGoal>= {
+            page: 1,
+            rowsPerPage: 5,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: '',
+            isDescending: false,
+            search: ''
+        };
+        if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
+            DeficientConditionGoalService.getScenarioDeficientConditionGoalPage(this.selectedScenarioId, request).then(response => {
+                this.initializing = false
+                if(response.data){
+                    let data = response.data as PagingPage<DeficientConditionGoal>;
+                    this.currentPage = data.items;
+                    this.rowCache = clone(this.currentPage)
+                    this.totalItems = data.totalItems;
+                }
+            });
     }
 }
 </script>

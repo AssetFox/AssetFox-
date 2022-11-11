@@ -116,35 +116,6 @@ const actions = {
             },
         );
     },
-    async upsertDeficientConditionGoalLibrary(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(
-            payload.library,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                const message: string = any(
-                    propEq('id', payload.library.id),
-                    state.deficientConditionGoalLibraries,
-                )
-                    ? 'Updated deficient condition goal library'
-                    : 'Added deficient condition goal library';
-                commit(
-                    'addedOrUpdatedDeficientConditionGoalLibraryMutator',
-                    payload.library,
-                );
-                commit(
-                    'selectedDeficientConditionGoalLibraryMutator',
-                    payload.library.id,
-                );
-                dispatch('addSuccessNotification', { message: message });
-            }
-        });
-    },
     async getScenarioDeficientConditionGoals(
         { commit }: any,
         scenarioId: string,
@@ -157,28 +128,6 @@ const actions = {
                     'scenarioDeficientConditionGoalsMutator',
                     response.data as DeficientConditionGoal[],
                 );
-            }
-        });
-    },
-    async upsertScenarioDeficientConditionGoals(
-        { dispatch, commit }: any,
-        payload: any,
-    ) {
-        await DeficientConditionGoalService.upsertScenarioDeficientConditionGoals(
-            payload.scenarioDeficientConditionGoals,
-            payload.scenarioId,
-        ).then((response: AxiosResponse) => {
-            if (
-                hasValue(response, 'status') &&
-                http2XX.test(response.status.toString())
-            ) {
-                commit(
-                    'scenarioDeficientConditionGoalsMutator',
-                    payload.scenarioDeficientConditionGoals,
-                );
-                dispatch('addSuccessNotification', {
-                    message: 'Modified deficient condition goals',
-                });
             }
         });
     },

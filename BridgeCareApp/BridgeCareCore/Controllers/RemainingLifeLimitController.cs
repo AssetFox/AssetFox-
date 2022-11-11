@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Models;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,12 +28,66 @@ namespace BridgeCareCore.Controllers
         public const string RemainingLifeLimitError = "Remaining Life Limit Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
+        private readonly IRemainingLifeLimitService _remainingLIfeLimitService;
 
-        public RemainingLifeLimitController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public RemainingLifeLimitController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
+            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
+            IRemainingLifeLimitService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-        }        
+            _remainingLIfeLimitService = remainingLifeService ?? throw new ArgumentNullException(nameof(remainingLifeService));
+        }
+
+
+        [HttpPost]
+        [Route("GetScenarioRemainingLifeLimitPage/{simulationId}")]
+        [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromScenario)]
+        public async Task<IActionResult> GetScenarioRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> pageRequest)
+        {
+            try
+            {
+                var result = new PagingPageModel<RemainingLifeLimitDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    result = _remainingLIfeLimitService.GetRemainingLifeLimitPage(simulationId, pageRequest);
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining life limit error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining life limit error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [Route("GetLibraryRemainingLifeLimitPage/{libraryId}")]
+        [Authorize(Policy = Policy.ViewRemainingLifeLimitFromLibrary)]
+        public async Task<IActionResult> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> pageRequest)
+        {
+            try
+            {
+                var result = new PagingPageModel<RemainingLifeLimitDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    result = _remainingLIfeLimitService.GetLibraryRemainingLifeLimitPage(libraryId, pageRequest);
+                });
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Remaining life limit error::{e.Message}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("GetRemainingLifeLimitLibraries")]
@@ -42,7 +99,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<RemainingLifeLimitLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits();
+                    result = UnitOfWork.RemainingLifeLimitRepo.GetAllRemainingLifeLimitLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
@@ -89,19 +146,31 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertRemainingLifeLimitLibrary/")]
         [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromLibrary)]
-        public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(RemainingLifeLimitLibraryDTO dto)
+        public async Task<IActionResult> UpsertRemainingLifeLimitLibrary(LibraryUpsertPagingRequestModel<RemainingLifeLimitLibraryDTO, RemainingLifeLimitDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = UnitOfWork.RemainingLifeLimitRepo
-                   .GetAllRemainingLifeLimitLibrariesWithRemainingLifeLimits().FirstOrDefault(_ => _.Id == dto.Id);
-                    // by pass owner check if no record
-                    if (currentRecord != null)
+                    var items = new List<RemainingLifeLimitDTO>();
+                    if (upsertRequest.PagingSync.LibraryId != null)
+                        items = _remainingLIfeLimitService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                    else if (!upsertRequest.IsNewLibrary)
+                        items = _remainingLIfeLimitService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        items.ForEach(item =>
+                        {
+                            item.Id = Guid.NewGuid();
+                            item.CriterionLibrary.Id = Guid.NewGuid();
+                        });
+                    }
+                    var dto = upsertRequest.Library;
+                    if (dto != null)
+                    {
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
+                        dto.RemainingLifeLimits = items;
                     }
                     UnitOfWork.RemainingLifeLimitRepo.UpsertRemainingLifeLimitLibrary(dto);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteRemainingLifeLimits(dto.RemainingLifeLimits, dto.Id);
@@ -126,13 +195,14 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioRemainingLifeLimits/{simulationId}")]
         [Authorize(Policy = Policy.ModifyRemainingLifeLimitFromScenario)]
-        public async Task<IActionResult> UpsertScenarioRemainingLifeLimits(Guid simulationId, List<RemainingLifeLimitDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioRemainingLifeLimits(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> pagingSync)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var dtos = _remainingLIfeLimitService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                     UnitOfWork.Commit();

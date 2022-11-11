@@ -239,7 +239,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             if (!_unitOfWork.Context.DeficientConditionGoalLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException($"No simulation found for the given scenario.");
+                throw new RowNotInTableException($"The given deficient condition library was not found.");
             }
 
             var res = _unitOfWork.Context.DeficientConditionGoal.Where(_ => _.DeficientConditionGoalLibraryId == libraryId)

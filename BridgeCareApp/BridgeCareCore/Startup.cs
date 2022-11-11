@@ -66,6 +66,7 @@ namespace BridgeCareCore
             services.AddControllers().AddNewtonsoftJson();
 
             services.AddSimulationData();
+            services.AddPagingData();
             services.AddDefaultData();
 
             services.AddSingleton<ILog, LogNLog>();

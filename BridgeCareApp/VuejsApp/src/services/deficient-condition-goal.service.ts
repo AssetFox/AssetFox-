@@ -1,13 +1,26 @@
 import {AxiosPromise} from 'axios';
 import {API, coreAxiosInstance} from '@/shared/utils/axios-instance';
 import {DeficientConditionGoal, DeficientConditionGoalLibrary} from '@/shared/models/iAM/deficient-condition-goal';
+import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
 export default class DeficientConditionGoalService {
     static getDeficientConditionGoalLibraries(): AxiosPromise {
         return coreAxiosInstance.get(`${API.DeficientConditionGoal}/GetDeficientConditionGoalLibraries`);
     }
 
-    static upsertDeficientConditionGoalLibrary(data: DeficientConditionGoalLibrary): AxiosPromise {
+    static getScenarioDeficientConditionGoalPage(scenarioId: string, data:PagingRequest<DeficientConditionGoal>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.DeficientConditionGoal}/GetScenarioDeficientConditionGoalPage/${scenarioId}`, data
+        );
+    }
+
+    static getLibraryDeficientConditionGoalPage(libraryId: string, data:PagingRequest<DeficientConditionGoal>): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.DeficientConditionGoal}/GetLibraryDeficientConditionGoalPage/${libraryId}`, data
+        );
+    }
+
+    static upsertDeficientConditionGoalLibrary( data: LibraryUpsertPagingRequest<DeficientConditionGoalLibrary, DeficientConditionGoal>): AxiosPromise {
         return coreAxiosInstance.post(`${API.DeficientConditionGoal}/UpsertDeficientConditionGoalLibrary/`, data);
     }
 
@@ -22,7 +35,7 @@ export default class DeficientConditionGoalService {
     }
 
     static upsertScenarioDeficientConditionGoals(
-        data: DeficientConditionGoal[],
+        data: PaginSync<DeficientConditionGoal>,
         scenarioId: string,
     ): AxiosPromise {
         return coreAxiosInstance.post(

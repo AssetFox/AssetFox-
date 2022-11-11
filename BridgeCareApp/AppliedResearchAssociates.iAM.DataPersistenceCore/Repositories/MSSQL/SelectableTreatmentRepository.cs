@@ -413,15 +413,31 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ToList();
         }
 
-        public List<TreatmentDTO> GetScenarioSelectableTreatmentsNoChildren(Guid simulationId)
+        public List<TreatmentDTO> GetSelectableTreatments(Guid libraryId)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
             {
-                throw new RowNotInTableException("No simulation was found for the given scenario");
+                throw new RowNotInTableException("The provided treatment library was not found");
             }
 
-            return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                .Where(_ => _.SimulationId == simulationId)
+            return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Where(_ => _.TreatmentLibraryId == libraryId)
                 .Select(_ => _.ToDto())
                 .ToList();
         }
@@ -551,7 +567,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.TreatmentLibraryId == libraryId && entityId == _.Id);
                       
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||                                _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
+                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
+                    _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
                     .TreatmentLibraryId == libraryId);
 
             _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
@@ -602,6 +619,88 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             // Update last modified date
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == simulationId);
             _unitOfWork.Context.Upsert(simulationEntity, simulationId, _unitOfWork.UserEntity?.Id);
+        }
+
+        public List<SimpleTreatmentDTO> GetSimpleTreatmentsBySimulationId(Guid simulationId)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation was found for the given scenario");
+            }
+
+            return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Where(_ => _.SimulationId == simulationId)
+                .Select(_ => new SimpleTreatmentDTO()
+                {
+                    Id = _.Id,
+                    Name = _.Name
+                })
+                .OrderBy(_ => _.Name)
+                .ToList();
+        }
+
+        public List<SimpleTreatmentDTO> GetSimpleTreatmentsByLibraryId(Guid libraryId)
+        {
+            if (!_unitOfWork.Context.TreatmentLibrary.Any(_ => _.Id == libraryId))
+            {
+                throw new RowNotInTableException("The provided treatment library was not found");
+            }
+
+            return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Where(_ => _.TreatmentLibraryId == libraryId)
+                .Select(_ => new SimpleTreatmentDTO()
+                {
+                    Id = _.Id,
+                    Name = _.Name
+                })
+                .OrderBy(_ => _.Name)
+                .ToList();
+        }
+
+        public TreatmentDTO GetScenarioSelectableTreatmentById(Guid id)
+        {
+            return _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                .Include(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.ScenarioTreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.ScenarioTreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Single(_ => _.Id == id).ToDto();
+        }
+
+        public TreatmentDTO GetSelectableTreatmentById(Guid id)
+        {
+            return _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.Attribute)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
+                .Single(_ => _.Id == id).ToDto();
         }
     }
 }

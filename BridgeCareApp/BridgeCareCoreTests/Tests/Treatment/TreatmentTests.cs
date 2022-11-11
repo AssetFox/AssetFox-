@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -13,6 +13,9 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services.Treatment;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +26,7 @@ using Moq;
 using Xunit;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCore.Interfaces;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -51,6 +55,17 @@ namespace BridgeCareCoreTests.Tests
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
+
+        private TreatmentController CreateAuthorizedControllerWithTreatmService()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var treatmentService = new TreatmentService(TestHelper.UnitOfWork, new ExcelTreatmentLoader(new Mock<IExpressionValidationService>().Object));
+            var controller = new TreatmentController(treatmentService, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
+            return controller;
+        }
+
 
         private TreatmentController CreateUnauthorizedController()
         {
@@ -159,6 +174,101 @@ namespace BridgeCareCoreTests.Tests
             return budget;
         }
 
+        [Fact]
+        public async Task ShouldGetSimpleTreatmentsByLibraryId()
+        {
+            // Arrange
+            Setup();
+            var controller = CreateAuthorizedController();
+            CreateLibraryTestData();
+
+            // Act
+            var result = await controller.GetSimpleTreatmentsByLibraryId(_testTreatmentLibrary.Id);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dtos = (List<SimpleTreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimpleTreatmentDTO>));
+            Assert.Single(dtos);
+
+            Assert.Equal(_testTreatment.Id, dtos[0].Id);
+            Assert.Equal(_testTreatment.Name, dtos[0].Name);
+        }
+        [Fact]
+        public async Task ShouldGetSelectedTreatmentByIdWithData()
+        {
+            // Arrange
+            Setup();
+            var controller = CreateAuthorizedController();
+            CreateLibraryTestData();
+
+            // Act
+            var result = await controller.GetSelectedTreatmentById(_testTreatment.Id);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dto = (TreatmentDTO)Convert.ChangeType(okObjResult.Value,
+                typeof(TreatmentDTO));        
+
+            Assert.Equal(_testTreatment.Id, dto.Id);
+            Assert.Single(dto.Consequences);
+            Assert.Single(dto.Costs);
+
+            Assert.Equal(_testTreatmentConsequence.Id, dto.Consequences[0].Id);
+            Assert.Equal(_testTreatmentCost.Id, dto.Costs[0].Id);
+        }
+        [Fact]
+        public async Task ShouldGetScenarioSelectedTreatmentByIdWithData()
+        {
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var controller = CreateAuthorizedController();
+            var budget = CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var result = await controller.GetScenarioSelectedTreatmentById(_testScenarioTreatment.Id);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dto = (TreatmentDTO)Convert.ChangeType(okObjResult.Value, typeof(TreatmentDTO));
+
+            Assert.Equal(_testScenarioTreatment.Id, dto.Id);
+            Assert.Single(dto.Consequences);
+            Assert.Single(dto.Costs);
+            Assert.Single(dto.BudgetIds);
+
+            Assert.Equal(_testScenarioTreatmentConsequence.Id, dto.Consequences[0].Id);
+            Assert.Equal(_testScenarioTreatmentCost.Id, dto.Costs[0].Id);
+            Assert.Contains(budget.Id, dto.BudgetIds);
+        }
+        [Fact]
+        public async Task ShouldGetSimpleTreatmentsByScenarioId()
+        {
+            // Arrange
+            Setup();
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            var controller = CreateAuthorizedController();
+            var budget = CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var result = await controller.GetSimpleTreatmentsByScenarioId(simulation.Id);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var dtos = (List<SimpleTreatmentDTO>)Convert.ChangeType(okObjResult.Value, typeof(List<SimpleTreatmentDTO>));
+            Assert.Single(dtos);
+
+            Assert.Equal(_testScenarioTreatment.Id, dtos[0].Id);
+
+        }
+
 
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryGet()
@@ -190,7 +300,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             Setup();
-            var controller = CreateAuthorizedController();
+            var controller = CreateAuthorizedControllerWithTreatmService();
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -198,8 +308,14 @@ namespace BridgeCareCoreTests.Tests
                 Treatments = new List<TreatmentDTO>()
             };
 
+            var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
+            {
+                IsNewLibrary = true,
+                Library = dto,
+            };
+
             // Act
-            var result = await controller.UpsertTreatmentLibrary(dto);
+            var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -210,12 +326,14 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             Setup();
-            var controller = CreateAuthorizedController();
+            var controller = CreateAuthorizedControllerWithTreatmService();
             var dtos = new List<TreatmentDTO>();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
+            var pageSync = new PagingSyncModel<TreatmentDTO>();
+
             // Act
-            var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, dtos);
+            var result = await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -239,6 +357,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldGetLibraryTreatmentData()
         {
             // Arrange
+            Setup();
             var controller = CreateAuthorizedController();
             CreateLibraryTestData();
 
@@ -252,16 +371,6 @@ namespace BridgeCareCoreTests.Tests
             var dtos = (List<TreatmentLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<TreatmentLibraryDTO>));
             Assert.Contains(dtos, t => t.Id == _testTreatmentLibrary.Id);
-            var resultTreatmentLibrary = dtos.FirstOrDefault(t => t.Id == _testTreatmentLibrary.Id);
-            Assert.Equal(_testTreatmentLibrary.Id, resultTreatmentLibrary.Id);
-            Assert.Single(resultTreatmentLibrary.Treatments);
-
-            Assert.Equal(_testTreatment.Id, resultTreatmentLibrary.Treatments[0].Id);
-            Assert.Single(resultTreatmentLibrary.Treatments[0].Consequences);
-            Assert.Single(resultTreatmentLibrary.Treatments[0].Costs);
-
-            Assert.Equal(_testTreatmentConsequence.Id, resultTreatmentLibrary.Treatments[0].Consequences[0].Id);
-            Assert.Equal(_testTreatmentCost.Id, resultTreatmentLibrary.Treatments[0].Costs[0].Id);
         }
 
         [Fact]
@@ -298,39 +407,53 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             Setup();
-            var controller = CreateAuthorizedController();
+            var controller = CreateAuthorizedControllerWithTreatmService();
             CreateLibraryTestData();
 
-            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibraries();
+            var dto = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();            
             var dtoLibrary = dto.Where(t => t.Name == "Test Name").FirstOrDefault();
+            var treatments = TestHelper.UnitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(dtoLibrary.Id);
             dtoLibrary.Description = "Updated Description";
-            dtoLibrary.Treatments[0].Name = "Updated Name";
-            dtoLibrary.Treatments[0].CriterionLibrary = new CriterionLibraryDTO
+            treatments[0].Name = "Updated Name";
+            treatments[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dtoLibrary.Treatments[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
+            treatments[0].Costs[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dtoLibrary.Treatments[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
-            dtoLibrary.Treatments[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
+            treatments[0].Costs[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            treatments[0].Consequences[0].CriterionLibrary = new CriterionLibraryDTO
             {
                 Id = Guid.NewGuid(),
                 Name = "",
                 MergedCriteriaExpression = "",
                 IsSingleUse = true
             };
-            dtoLibrary.Treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+            treatments[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
+
+            var sync = new PagingSyncModel<TreatmentDTO>()
+            {
+                UpdateRows = new List<TreatmentDTO>() { treatments[0] },
+                LibraryId = dtoLibrary.Id
+            };
+
+            var libraryRequest = new LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>()
+            {
+                IsNewLibrary = false,
+                Library = dtoLibrary,
+                PagingSync = sync
+            };
 
             // Act
-            await controller.UpsertTreatmentLibrary(dtoLibrary);
+            await controller.UpsertTreatmentLibrary(libraryRequest);
 
             // Assert
             var modifiedDto =
@@ -342,10 +465,11 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldModifyScenarioTreatmentData()
         {
             // Arrange
+            Setup();
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             AttributeTestSetup.CreateAttributes(TestHelper.UnitOfWork);
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
+            var controller = CreateAuthorizedControllerWithTreatmService();
             CreateScenarioTestData(simulation.Id);
 
             var scenarioBudget = new ScenarioBudgetEntity
@@ -387,8 +511,13 @@ namespace BridgeCareCoreTests.Tests
             dto[0].Consequences[0].Equation = new EquationDTO { Id = Guid.NewGuid(), Expression = "" };
             dto[0].BudgetIds.Add(scenarioBudget.Id);
 
+            var pageSync = new PagingSyncModel<TreatmentDTO>()
+            {
+                UpdateRows = new List<TreatmentDTO>() { dto[0] }
+            };
+
             // Act
-            await controller.UpsertScenarioSelectedTreatments(simulation.Id, dto);
+            await controller.UpsertScenarioSelectedTreatments(simulation.Id, pageSync);
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.SelectableTreatmentRepo
@@ -436,7 +565,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTreatmentFromLibrary);
             // Assert
@@ -458,7 +587,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyTreatmentFromScenario);
             // Assert
@@ -480,7 +609,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteTreatmentFromLibrary);
             // Assert
@@ -500,7 +629,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewTreatmentFromLibrary);
             // Assert

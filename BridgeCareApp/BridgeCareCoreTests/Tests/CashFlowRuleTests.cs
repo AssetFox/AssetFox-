@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography.Xml;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.CashFlow;
@@ -13,6 +14,8 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Models;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -55,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -67,7 +70,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                    hubService, accessor, _mockClaimHelper.Object);
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
         }
 
         private void CreateUnauthorizedController()
@@ -75,7 +78,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
         }
 
         private void CreateLibraryTestData()
@@ -168,6 +171,53 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        public async Task ShouldGetLibraryTargetConditionGoalPageData()
+        {
+            Setup();
+            CreateAuthorizedController();
+            // Arrange
+            CreateLibraryTestData();
+
+            // Act
+            var request = new PagingRequestModel<CashFlowRuleDTO>();
+            var result = await _controller.GetLibraryCashFlowRulePage(_testCashFlowRuleLibrary.Id, request);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var page = (PagingPageModel<CashFlowRuleDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(PagingPageModel<CashFlowRuleDTO>));
+            var dtos = page.Items;
+            var dto = dtos.Single();
+            Assert.Equal(_testCashFlowRule.Id, dto.Id);
+        }
+
+        [Fact]
+        public async Task ShouldGetScenarioTargetConditionGoalPageData()
+        {
+            Setup();
+            CreateAuthorizedController();
+            // Arrange
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
+            CreateScenarioTestData(simulation.Id);
+
+            // Act
+            var request = new PagingRequestModel<CashFlowRuleDTO>();
+            var result = await _controller.GetScenarioCashFlowRulePage(simulation.Id, request);
+
+            // Assert
+            var okObjResult = result as OkObjectResult;
+            Assert.NotNull(okObjResult.Value);
+
+            var page = (PagingPageModel<CashFlowRuleDTO>)Convert.ChangeType(okObjResult.Value,
+                typeof(PagingPageModel<CashFlowRuleDTO>));
+            var dtos = page.Items;
+            var dto = dtos.Single();
+            Assert.Equal(_testScenarioCashFlowRule.Id, dto.Id);
+        }
+
+        [Fact]
         public async Task ShouldReturnOkResultOnScenarioGet()
         {
             // Arrange
@@ -195,8 +245,14 @@ namespace BridgeCareCoreTests.Tests
                 CashFlowRules = new List<CashFlowRuleDTO>()
             };
 
+            var libraryRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>()
+            {
+                IsNewLibrary = true,
+                Library = dto,
+            };
+
             // Act
-            var result = await _controller.UpsertCashFlowRuleLibrary(dto);
+            var result = await _controller.UpsertCashFlowRuleLibrary(libraryRequest);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -210,9 +266,9 @@ namespace BridgeCareCoreTests.Tests
             CreateAuthorizedController();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
             var dtos = new List<CashFlowRuleDTO>();
-
+            var sync = new PagingSyncModel<CashFlowRuleDTO>();
             // Act
-            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
+            var result = await _controller.UpsertScenarioCashFlowRules(simulation.Id, sync);
 
             // Assert
             Assert.IsType<OkResult>(result);
@@ -234,7 +290,7 @@ namespace BridgeCareCoreTests.Tests
 
 
         [Fact]
-        public async Task ShouldGetLibraryData()
+        public async Task ShouldGetLibraryNoChildData()
         {
             // Arrange
             Setup();
@@ -253,15 +309,7 @@ namespace BridgeCareCoreTests.Tests
             var relevantDto = dtos.Single(dto => dto.Id == _testCashFlowRuleLibrary.Id);
 
             Assert.NotNull(relevantDto);
-            Assert.Single(relevantDto.CashFlowRules);
-
-            Assert.Equal(_testCashFlowRule.Id, relevantDto.CashFlowRules[0].Id);
-            Assert.Equal(_testCashFlowRule.CriterionLibraryCashFlowRuleJoin.CriterionLibrary.Id,
-                relevantDto.CashFlowRules[0].CriterionLibrary.Id);
-            Assert.Single(relevantDto.CashFlowRules[0].CashFlowDistributionRules);
-
-            Assert.Equal(_testCashFlowDistributionRule.Id,
-                relevantDto.CashFlowRules[0].CashFlowDistributionRules[0].Id);
+            Assert.Empty(relevantDto.CashFlowRules);
         }
 
         [Fact]
@@ -310,8 +358,20 @@ namespace BridgeCareCoreTests.Tests
             dto.CashFlowRules[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
             dto.CashFlowRules[0].CashFlowDistributionRules[0].DurationInYears = 2;
 
+            var sync = new PagingSyncModel<CashFlowRuleDTO>()
+            {
+                UpdateRows = new List<CashFlowRuleDTO>() { dto.CashFlowRules[0] }
+            };
+
+            var libraryRequest = new LibraryUpsertPagingRequestModel<CashFlowRuleLibraryDTO, CashFlowRuleDTO>()
+            {
+                IsNewLibrary = false,
+                Library = dto,
+                PagingSync = sync
+            };
+
             // Act
-            await _controller.UpsertCashFlowRuleLibrary(dto);
+            await _controller.UpsertCashFlowRuleLibrary(libraryRequest);
 
             // Assert
             var modifiedDto = TestHelper.UnitOfWork.CashFlowRuleRepo.GetCashFlowRuleLibraries().Single(lib => lib.Id == dto.Id);
@@ -333,8 +393,13 @@ namespace BridgeCareCoreTests.Tests
             dtos[0].CriterionLibrary.MergedCriteriaExpression = "Updated Expression";
             dtos[0].CashFlowDistributionRules[0].DurationInYears = 2;
 
+            var sync = new PagingSyncModel<CashFlowRuleDTO>()
+            {
+                UpdateRows = new List<CashFlowRuleDTO>() { dtos[0] }
+            };
+
             // Act
-            await _controller.UpsertScenarioCashFlowRules(simulation.Id, dtos);
+            await _controller.UpsertScenarioCashFlowRules(simulation.Id, sync);
 
             // Assert
             var modifiedDtos = TestHelper.UnitOfWork.CashFlowRuleRepo
@@ -390,7 +455,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
             // Assert
@@ -412,7 +477,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromScenario);
             // Assert
@@ -433,7 +498,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ModifyCashFlowFromLibrary);
             // Assert
@@ -454,7 +519,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewCashFlowFromLibrary);
             // Assert

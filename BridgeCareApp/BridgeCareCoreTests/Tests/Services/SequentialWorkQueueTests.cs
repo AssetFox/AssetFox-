@@ -48,7 +48,7 @@ namespace BridgeCareCoreTests.Tests
 
             public UserInfo UserInfo => new();
 
-            public void DoWork(IServiceProvider serviceProvider)
+            public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
             {
                 WorkTarget.Add(Id);
                 Task.Delay(MsDelay).Wait();

@@ -15,8 +15,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using BridgeCareCore.Services;
+using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 
 namespace BridgeCareCore.Controllers
@@ -47,7 +51,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TreatmentLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = GetAllTreatmentLibraries();
+                    result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
@@ -59,6 +63,89 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetTreatmentLibraries - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetSimpleTreatmentsByLibraryId/{libraryId}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromLibrary)]
+        public async Task<IActionResult> GetSimpleTreatmentsByLibraryId(Guid libraryId)
+        {
+            try
+            {
+                var result = new List<SimpleTreatmentDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId);                   
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        if(library.Owner == UserId || library.IsShared == true)
+                            result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
+                    }
+                    else
+                        result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
+                });
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetSelectedTreatmentById/{id}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromScenario)]
+        public async Task<IActionResult> GetSelectedTreatmentById(Guid id)
+        {
+            try
+            {
+
+                var result = new TreatmentDTO();
+                await Task.Factory.StartNew(() =>
+                {
+                    var entity = UnitOfWork.Context.SelectableTreatment.AsNoTracking()
+                    .Include(_ => _.TreatmentCosts)
+                    .ThenInclude(_ => _.TreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.TreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.TreatmentConsequences)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.TreatmentConsequences)
+                    .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.TreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.TreatmentLibrary)
+                    .Single(_ => _.Id == id);
+                    var library = entity.TreatmentLibrary.ToDto();                   
+                    if (_claimHelper.RequirePermittedCheck())
+                    {
+                        if (library.Owner == UserId || library.IsShared == true)
+                            result = entity.ToDto();
+                    }
+                    else
+                        result = entity.ToDto();
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
                 throw;
             }
         }
@@ -91,21 +178,97 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetScenarioSelectedTreatmentById/{id}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromScenario)]
+        public async Task<IActionResult> GetScenarioSelectedTreatmentById(Guid id)
+        {
+            try
+            {
+                
+                var result = new TreatmentDTO();
+                await Task.Factory.StartNew(() =>
+                {
+                    var entity = UnitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
+                    .Include(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.ScenarioTreatmentCosts)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.Attribute)
+                    .Include(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
+                    .ThenInclude(_ => _.Equation)
+                    .Include(_ => _.ScenarioTreatmentConsequences)
+                    .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
+                    .ThenInclude(_ => _.ScenarioBudget)
+                    .Include(_ => _.CriterionLibraryScenarioSelectableTreatmentJoin)
+                    .ThenInclude(_ => _.CriterionLibrary)
+                    .Single(_ => _.Id == id);
+                    _claimHelper.CheckUserSimulationReadAuthorization(entity.SimulationId, UserId);
+                    result = entity.ToDto();
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetSimpleTreatmentsByScenarioId/{simulationId}")]
+        [Authorize(Policy = Policy.ViewTreatmentFromScenario)]
+        public async Task<IActionResult> GetSimpleTreatmentsByScenarioId(Guid simulationId)
+        {
+            try
+            {
+                var result = new List<SimpleTreatmentDTO>();
+                await Task.Factory.StartNew(() =>
+                {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsBySimulationId(simulationId);
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                throw;
+            }
+        }
+
         [HttpPost]
         [Route("UpsertTreatmentLibrary")]
         [Authorize(Policy = Policy.ModifyTreatmentFromLibrary)]
-        public async Task<IActionResult> UpsertTreatmentLibrary(TreatmentLibraryDTO dto)
+        public async Task<IActionResult> UpsertTreatmentLibrary(LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO> upsertRequest)
         {
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var currentRecord = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == dto.Id);
-                    // by pass owner check if no record
-                    if (currentRecord != null)
+                    var dto = _treatmentService.GetSyncedLibraryDataset(upsertRequest);
+                    if (dto != null)
                     {
-                        _claimHelper.CheckUserLibraryModifyAuthorization(currentRecord.Owner, UserId);
+                        _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
@@ -154,7 +317,7 @@ namespace BridgeCareCore.Controllers
         [HttpPost]
         [Route("UpsertScenarioSelectedTreatments/{simulationId}")]
         [Authorize(Policy = Policy.ModifyTreatmentFromScenario)]
-        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid simulationId, List<TreatmentDTO> dtos)
+        public async Task<IActionResult> UpsertScenarioSelectedTreatments(Guid simulationId, PagingSyncModel<TreatmentDTO> pagingSync)
         {
             try
             {
@@ -162,6 +325,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    var dtos = _treatmentService.GetSyncedScenarioDataset(simulationId, pagingSync);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                     UnitOfWork.Commit();
                 });

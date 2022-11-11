@@ -1,4 +1,6 @@
-﻿namespace AppliedResearchAssociates.iAM.DTOs
+﻿using System.Collections.Generic;
+
+namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class UserInfoDTO
     {
@@ -12,6 +14,6 @@
 
         public bool HasSimulationAccess { get; set; }
 
-        public string InternalRole { get; set; }
+        public List<string> InternalRoles { get; set; }
     }
 }

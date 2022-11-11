@@ -40,8 +40,8 @@ export default class ScenarioService {
         return coreAxiosInstance.post(`${API.Scenario}/RunSimulation/${networkId}/${scenarioId}`);
     }
 
-    static cancelSimulation(scenarioId: string): AxiosPromise {
-        return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${scenarioId}`);
+    static cancelSimulation(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.delete(`${API.Scenario}/CancelSimulation/${simulationId}`);
     }    
 
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {

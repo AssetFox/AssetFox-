@@ -659,8 +659,7 @@ namespace BridgeCareCoreTests.Tests
             var dtos = ((PagingPageModel<SimulationDTO>)Convert.ChangeType(okObjResult.Value, typeof(PagingPageModel<SimulationDTO>))).Items;
             Assert.NotEmpty(dtos);
             var dtoFromThisTest = dtos.Single(dto => dto.Id == simulation.Id);
-            Assert.True(dtoFromThisTest.Users.All(__ => !__.IsOwner));
-            //var dto = dtos.Single(dto => dto.Id == simulation.Id);
+            Assert.True(dtos.All(_ => _.Owner != TestHelper.UnitOfWork.CurrentUser.Username));
         }
 
         [Fact]
@@ -964,7 +963,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Editor));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewSimulation);
             // Assert
@@ -985,7 +984,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.ReadOnly));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.ReadOnly }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.DeleteSimulation);
             // Assert
@@ -1006,7 +1005,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.RunSimulation);
             // Assert
@@ -1026,7 +1025,7 @@ namespace BridgeCareCoreTests.Tests
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();
-            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, BridgeCareCore.Security.SecurityConstants.Role.Administrator));
+            var controller = CreateTestController(roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator }));
             // Act
             var allowed = await authorizationService.AuthorizeAsync(controller.User, Policy.ViewSimulation);
             // Assert

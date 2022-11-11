@@ -138,9 +138,11 @@ namespace BridgeCareCore.Services
                         var message = new SimulationAnalysisDetailDTO()
                         {
                             SimulationId = Guid.Parse(WorkItem.WorkId),
-                            Status = $"Run Failed. {WorkCompletion.Exception.InnerException.Message}"
+                            Status = $"Run Failed. {WorkCompletion.Exception.InnerException.Message}",
+                            LastRun = DateTime.Now
                         };
                         _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, message);
+                        _unitOfWork.SimulationAnalysisDetailRepo.UpsertSimulationAnalysisDetail(message);
                     }
 
                     RemoveFromQueue();

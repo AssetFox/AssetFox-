@@ -10,6 +10,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters
 {
@@ -21,7 +22,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
         {
             _summaryReportHelper = new SummaryReportHelper();
         }
-        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation)
+
+        internal void Fill(ExcelWorksheet worksheet, int simulationYearsCount, ParametersModel parametersModel, Simulation simulation, SimulationOutput reportOutputData)
         {
             var currentCell = new CurrentCell{Row = 1, Column = 1 };
             // Simulation Name format
@@ -46,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
             ExcelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 10]);
 
-            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate, simulation.AnalysisMethod.Filter.Expression);
+            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate, reportOutputData.InitialAssetSummaries);
 
             currentCell = FillSimulationDetails(worksheet, simulationYearsCount, simulation, currentCell);
             currentCell = FillAnalysisDetails(worksheet, simulation, currentCell);
@@ -59,8 +61,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 
         #region
 
-        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate,
-            string jurisdictionExpression)
+        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate, List<AssetSummaryDetail> initialAssetSummaries)
         {
             var bpnValueCellTracker = new Dictionary<string, (int row, int col)>();
             var statusValueCellTracker = new Dictionary<string, (int row, int col)>();
@@ -155,11 +156,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowNo + 7, currentCell.Column].Value = "P3";
             worksheet.Cells[rowNo + 8, currentCell.Column].Value = "Posted";
 
-            //[TODO]: setting up value based on a substring is a bad idea. It can slow down the app. Jake and PennDot has decided to this way
-            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'OPEN'") ? "N" : "Y"; // open
-            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'CLOSED'") ? "N" : "Y"; // closed
-            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[P3]='0'") ? "N" : "Y"; // P3
-            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = jurisdictionExpression.Contains("[POST_STATUS]<>'POSTED'") ? "N" : "Y"; // P3
+            // open
+            worksheet.Cells[rowNo + 5, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "OPEN") ? BAMSConstants.Yes : BAMSConstants.No;
+            // closed
+            worksheet.Cells[rowNo + 6, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "CLOSED") ? BAMSConstants.Yes : BAMSConstants.No;
+            // P3
+            worksheet.Cells[rowNo + 7, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "P3") > 0) ? BAMSConstants.Yes : BAMSConstants.No;
+            // Posted
+            worksheet.Cells[rowNo + 8, currentCell.Column + 1].Value = initialAssetSummaries.Any(_ => _summaryReportHelper.checkAndGetValue<string>(_.ValuePerTextAttribute, "POST_STATUS") == "POSTED") ? BAMSConstants.Yes : BAMSConstants.No;
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 5, currentCell.Column + 1, rowNo + 8, currentCell.Column + 1]);
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);

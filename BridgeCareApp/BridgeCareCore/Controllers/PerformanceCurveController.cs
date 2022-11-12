@@ -512,7 +512,33 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
+        [HttpGet]
+        [Route("GetIsSharedLibrary/{performanceCurveLibraryId}")]
+        [Authorize]
+        public async Task<IActionResult> GetIsSharedLibrary(Guid performanceCurveLibraryId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(performanceCurveLibraryId);
+                    if (users.Count > 0)
+                    {
+                        return new JsonResult(true);
+                    }
+                    else
+                    {
+                        return new JsonResult(false);
+                    }
+                });
+                return Ok();
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
         [HttpGet]
         [Route("GetHasPermittedAccess")]
         [Authorize]

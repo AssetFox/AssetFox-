@@ -3,6 +3,7 @@ import {
     PerformanceCurve,
     PerformanceCurveLibrary,
 } from '@/shared/models/iAM/performance';
+import { LibraryUser } from '@/shared/models/iAM/user';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { LibraryUpsertPagingRequest, PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
@@ -93,7 +94,21 @@ export default class PerformanceCurveService {
             `${API.PerformanceCurve}/DownloadPerformanceCurvesTemplate`,
         );
     }
+    static  GetPerformanceCurveLibraryUsers(libraryId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.PerformanceCurve}/GetPerformanceCurveLibraryUsers/${libraryId}`);
+    }
+    static getIsSharedLibrary(performanceCurveId: string): AxiosPromise {
+        return coreAxiosInstance.get(
+            `${API.Treatment}/GetIsSharedLibrary/${performanceCurveId}`
+        );
+    }
 
+    static upsertOrDeletePerformanceCurveLibraryUsers(libraryId: string, proposedUsers: LibraryUser[]): AxiosPromise {
+        return coreAxiosInstance.post(
+            `${API.PerformanceCurve}/UpsertOrDeletePerformanceCurveLibraryUsers/${libraryId}`, 
+            proposedUsers
+        );
+    }
     static getHasPermittedAccess(): AxiosPromise {
         return coreAxiosInstance.get(
             `${API.PerformanceCurve}/GetHasPermittedAccess`,

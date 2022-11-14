@@ -355,8 +355,9 @@ export default class CalculatedAttributeEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
-
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('selectedCalculatedAttributeLibraryMutator') selectedCalculatedAttributeLibraryMutation: any;
     @Mutation('calculatedAttributeLibraryMutator') calculatedAttributeLibraryMutateActions: any;
@@ -478,7 +479,11 @@ export default class CalculatedAttributeEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId);
+                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId).then(()=> {
+                            vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                                vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            });
+                        });
                     }
                     //vm.initializePages();
                 });                

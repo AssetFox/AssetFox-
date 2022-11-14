@@ -255,6 +255,9 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
     @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
@@ -323,6 +326,9 @@ export default class BudgetPriorityEditor extends Vue {
                 vm.hasScenario = true;
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
                     vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 });
                 
             }

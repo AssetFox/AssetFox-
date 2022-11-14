@@ -380,10 +380,11 @@ export default class DeficientConditionGoalEditor extends Vue {
     @Action('upsertScenarioDeficientConditionGoals')
     upsertScenarioDeficientConditionGoalsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('addedOrUpdatedDeficientConditionGoalLibraryMutator') addedOrUpdatedDeficientConditionGoalLibraryMutator: any;
     @Mutation('selectedDeficientConditionGoalLibraryMutator') selectedDeficientConditionGoalLibraryMutator: any;
-
 
     @Getter('getNumericAttributes') getNumericAttributesGetter: any;
     @Getter('getUserNameById') getUserNameByIdGetter: any;
@@ -487,25 +488,27 @@ export default class DeficientConditionGoalEditor extends Vue {
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
             vm.librarySelectItemValue = null;
-            vm.getDeficientConditionGoalLibrariesAction();
-            vm.numericAttributeNames = getPropertyValues('name', vm.getNumericAttributesGetter);
-            vm.getHasPermittedAccessAction().then(() => {
-                if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
-                    vm.selectedScenarioId = to.query.scenarioId;
+            vm.getDeficientConditionGoalLibrariesAction().then(() => {
+                vm.numericAttributeNames = getPropertyValues('name', vm.getNumericAttributesGetter);
+                vm.getHasPermittedAccessAction().then(() => {
+                    if (to.path.indexOf(ScenarioRoutePaths.DeficientConditionGoal) !== -1) {
+                        vm.selectedScenarioId = to.query.scenarioId;
 
-                    if (vm.selectedScenarioId === vm.uuidNIL) {
-                        vm.addErrorNotificationAction({
-                            message: 'Found no selected scenario for edit',
+                        if (vm.selectedScenarioId === vm.uuidNIL) {
+                            vm.addErrorNotificationAction({
+                                message: 'Found no selected scenario for edit',
+                            });
+                            vm.$router.push('/Scenarios/');
+                        }
+
+                        vm.hasScenario = true;
+                        vm.initializePages();
+                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
                         });
-                        vm.$router.push('/Scenarios/');
                     }
-
-                    vm.hasScenario = true;
-                    vm.initializePages();
-                }
-            });
-
-            
+                });     
+            });       
         });
     }
 

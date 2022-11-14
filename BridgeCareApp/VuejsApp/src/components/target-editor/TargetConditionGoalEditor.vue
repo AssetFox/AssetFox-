@@ -407,6 +407,8 @@ export default class TargetConditionGoalEditor extends Vue {
     @Action('getScenarioTargetConditionGoals') getScenarioTargetConditionGoalsAction: any;
     @Action('upsertScenarioTargetConditionGoals') upsertScenarioTargetConditionGoalsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('addedOrUpdatedTargetConditionGoalLibraryMutator') addedOrUpdatedTargetConditionGoalLibraryMutator: any;
     @Mutation('selectedTargetConditionGoalLibraryMutator') selectedTargetConditionGoalLibraryMutator: any;
@@ -527,6 +529,9 @@ export default class TargetConditionGoalEditor extends Vue {
 
                     vm.hasScenario = true;
                     vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 }
             });
 

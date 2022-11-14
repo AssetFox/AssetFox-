@@ -134,8 +134,7 @@ export default class EditScenario extends Vue {
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('selectScenario') selectScenarioAction: any;
     @Action('runSimulation') runSimulationAction: any;
-    @Action('runNewSimulation') runNewSimulationAction: any;
-    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('runNewSimulation') runNewSimulationAction: any;    
 
     selectedScenarioId: string = getBlankGuid();
     showImportExportCommittedProjectsDialog: boolean = false;
@@ -239,7 +238,7 @@ export default class EditScenario extends Vue {
                     message: 'Found no selected scenario for edit',
                 });
                 vm.$router.push('/Scenarios/');
-            } else {
+            } else {                
                 vm.navigationTabs = vm.navigationTabs.map(
                     (navTab: NavigationTab) => {
                         const navigationTab = {
@@ -264,7 +263,7 @@ export default class EditScenario extends Vue {
 
                         return navigationTab;
                     },
-                );                
+                );          
 
                 // get the window href
                 const href = window.location.href;
@@ -306,13 +305,10 @@ export default class EditScenario extends Vue {
     }
 
     mounted() {
-        if (this.selectedScenarioId !== getBlankGuid()) {
-            this.getCurrentUserOrSharedScenarioAction({simulationId: this.selectedScenarioId}).then((response: AxiosResponse) => {                    
-                    this.selectScenarioAction({
-                        scenarioId: this.selectedScenarioId,
-                    });
-                }
-            );            
+        if (this.selectedScenarioId !== getBlankGuid()) {            
+            this.selectScenarioAction({
+                scenarioId: this.selectedScenarioId,
+            });
         }
     }
 

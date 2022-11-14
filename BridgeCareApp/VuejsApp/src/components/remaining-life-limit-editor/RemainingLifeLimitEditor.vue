@@ -275,7 +275,9 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Action('upsertScenarioRemainingLifeLimits')
     upsertScenarioRemainingLifeLimitsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Mutation('addedOrUpdatedRemainingLifeLimitLibraryMutator') addedOrUpdatedRemainingLifeLimitLibraryMutator: any;
     @Mutation('selectedRemainingLifeLimitLibraryMutator') selectedRemainingLifeLimitLibraryMutator: any;
 
@@ -388,6 +390,9 @@ export default class RemainingLifeLimitEditor extends Vue {
                     }
                     vm.hasScenario = true;
                     vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 }
             });
             

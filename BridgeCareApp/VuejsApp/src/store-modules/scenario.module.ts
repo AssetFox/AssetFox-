@@ -49,10 +49,7 @@ const mutations = {
         }
         else {
             state.selectedScenario = state.currentUserOrSharedScenario;
-        }            
-        //else {
-          //  state.selectedScenario = clone(emptyScenario);
-        //}
+        }
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
         if (any(propEq('id', simulationAnalysisDetail.simulationId), state.currentSharedScenariosPage)) {
@@ -235,14 +232,17 @@ const actions = {
             },
         );
     },
-    async getCurrentUserOrSharedScenario({commit}: any, payload: any) {   
-        await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId)
-            .then((response: AxiosResponse) => {
-                if (hasValue(response, 'data')) {
-                    commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+    async getCurrentUserOrSharedScenario({commit}: any, payload: any) {
+        if(state.currentUserOrSharedScenario.id == emptyScenario.id)
+        {
+            await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId)
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+                    }
                 }
-            }
-        );
+            );
+        }
    },
 };
 

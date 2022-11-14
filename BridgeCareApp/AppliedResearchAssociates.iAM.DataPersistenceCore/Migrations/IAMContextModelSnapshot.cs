@@ -4231,12 +4231,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
                     b.Property<DateTime>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("TreatmentLibraryEntityId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("TreatmentLibraryId", "UserId");
-
-                    b.HasIndex("TreatmentLibraryEntityId");
 
                     b.HasIndex("TreatmentLibraryId");
 
@@ -6145,18 +6140,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.TreatmentLibraryUserEntity", b =>
                 {
-                    b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", null)
-                        .WithMany("Users")
-                        .HasForeignKey("TreatmentLibraryEntityId");
-
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", "TreatmentLibrary")
-                        .WithMany("TreatmentLibraryUserJoins")
+                        .WithMany("Users")
                         .HasForeignKey("TreatmentLibraryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.UserEntity", "User")
-                        .WithMany("TreatmentLibraryUserJoins")
+                        .WithMany("TreatmentLibraryUsers")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -6512,8 +6503,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
             modelBuilder.Entity("AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment.TreatmentLibraryEntity", b =>
                 {
-                    b.Navigation("TreatmentLibraryUserJoins");
-
                     b.Navigation("Treatments");
 
                     b.Navigation("Users");
@@ -6725,7 +6714,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations
 
                     b.Navigation("SimulationUserJoins");
 
-                    b.Navigation("TreatmentLibraryUserJoins");
+                    b.Navigation("TreatmentLibraryUsers");
 
                     b.Navigation("UserCriteriaFilterJoin");
                 });

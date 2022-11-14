@@ -11,6 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             SimulationUserJoins = new HashSet<SimulationUserEntity>();
             BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
+            TreatmentLibraryUsers = new HashSet<TreatmentLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }
@@ -26,7 +27,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual UserCriteriaFilterEntity UserCriteriaFilterJoin { get; set; }
 
         public ICollection<SimulationUserEntity> SimulationUserJoins { get; set; }
-        public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUserJoins { get; set; }
+        public ICollection<TreatmentLibraryUserEntity> TreatmentLibraryUsers { get; set; }
         public ICollection<BudgetLibraryUserEntity> BudgetLibraryUsers { get; set; }
     }
 }

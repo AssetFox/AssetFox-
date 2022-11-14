@@ -2004,25 +2004,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.Property(e => e.Id).ValueGeneratedOnAdd();
             });
-            modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
-            {
-                entity.HasKey(e => new { e.TreatmentLibraryId, e.UserId });
-
-                entity.ToTable("TreatmentLibrary_User");
-
-                entity.HasIndex(e => e.TreatmentLibraryId);
-
-                entity.HasIndex(e => e.UserId);
-
-                entity.HasOne(d => d.TreatmentLibrary)
-                    .WithMany(p => p.TreatmentLibraryUserJoins)
-                    .HasForeignKey(d => d.TreatmentLibraryId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.TreatmentLibraryUserJoins)
-                    .HasForeignKey(d => d.UserId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+            
             modelBuilder.Entity<TreatmentSchedulingEntity>(entity =>
             {
                 entity.HasIndex(e => e.TreatmentId);
@@ -2514,6 +2496,26 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.BudgetLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TreatmentLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.TreatmentLibraryId, e.UserId });
+
+                entity.ToTable("TreatmentLibrary_User");
+
+                entity.HasIndex(e => e.TreatmentLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.TreatmentLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.TreatmentLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TreatmentLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

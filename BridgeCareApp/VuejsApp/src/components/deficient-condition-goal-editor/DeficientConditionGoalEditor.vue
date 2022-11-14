@@ -502,10 +502,10 @@ export default class DeficientConditionGoalEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.initializePages();
                         vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                             vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                        });
+                            vm.initializePages();
+                        });                                               
                     }
                 });     
             });       

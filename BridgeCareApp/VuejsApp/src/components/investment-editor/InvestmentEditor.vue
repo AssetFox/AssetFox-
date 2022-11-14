@@ -419,11 +419,11 @@ export default class InvestmentEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
 
-                    vm.hasScenario = true;    
-                    vm.initializePages();
+                    vm.hasScenario = true;
                     vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
                         vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                    });
+                        vm.initializePages();
+                    });                                        
                 }
                 else
                     vm.initializing = false;

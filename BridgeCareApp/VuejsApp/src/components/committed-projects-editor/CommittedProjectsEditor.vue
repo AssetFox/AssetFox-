@@ -519,10 +519,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
                         vm.getAttributesAction().then(() => {                       
                             vm.getTreatmentLibrariesAction().then(() => {
-                                vm.initializePages();
-                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                                });
+                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
+                                    vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
+                                    vm.initializePages();
+                                });                                                                
                             });   
                         });
                     })                                          

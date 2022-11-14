@@ -15,7 +15,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<PerformanceCurveEntity> PerformanceCurves { get; set; }
 
         public virtual ICollection<PerformanceCurveLibraryUserEntity> Users { get; set; }
-
-        public virtual ICollection<PerformanceCurveLibraryUserEntity> PerformanceCurveLibraryUserJoins { get; set; }
     }
 }

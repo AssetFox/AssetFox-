@@ -535,7 +535,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }

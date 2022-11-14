@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         {
             SimulationUserJoins = new HashSet<SimulationUserEntity>();
             BudgetLibraryUsers = new HashSet<BudgetLibraryUserEntity>();
+            PerformanceCurveLibraryUsers = new HashSet<PerformanceCurveLibraryUserEntity>();
         }
 
         public Guid Id { get; set; }

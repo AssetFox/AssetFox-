@@ -403,7 +403,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             else
             {
                 worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "DECK_SEEDED");
-                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_SEEDED");
+                worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUP_SEEDED");
                 worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_SEEDED");
                 ExcelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
@@ -789,7 +789,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             var minValue = Math.Min(_summaryReportHelper.checkAndGetValue<double>(numericAttribute, "DECK_SEEDED"),
                            Math.Min(_summaryReportHelper.checkAndGetValue<double>(numericAttribute, "SUP_SEEDED")
-                                    , _summaryReportHelper.checkAndGetValue<double>(numericAttribute, "SUP_SEEDED")));
+                                    , _summaryReportHelper.checkAndGetValue<double>(numericAttribute, "SUB_SEEDED")));
             worksheet.Cells[row, ++column].Value = minValue;
             numericAttribute["MINCOND"] = minValue;
             return column;

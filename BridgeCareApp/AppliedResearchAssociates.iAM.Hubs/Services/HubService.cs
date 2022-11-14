@@ -24,7 +24,8 @@ namespace AppliedResearchAssociates.iAM.Hubs.Services
                 {"CalculateEvaluateException", "Expression could not be compiled." },
                 {"Unauthorized", "Unauthorized to access this component." },
                 {"AnalysisDefaultData", "Configuration read error." },
-                {"InvestmentDefaultData", "Configuration read error." }
+                {"InvestmentDefaultData", "Configuration read error." },
+                {"RowNotInTable", "Invalid entry into the database." }
             };
         }
 

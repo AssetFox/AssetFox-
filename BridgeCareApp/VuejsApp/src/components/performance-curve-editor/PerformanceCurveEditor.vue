@@ -75,7 +75,7 @@
                                 v-if='hasSelectedLibrary && !hasScenario'
                                 class="ghd-control-label ghd-md-gray"
                             > 
-                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }}
+                                Owner: {{ getOwnerUserName() || '[ No Owner ]' }} |
                             <v-badge v-show="isShared">
                             <template v-slot: badge>
                                 <span>Shared</span>
@@ -783,7 +783,7 @@ export default class PerformanceCurveEditor extends Vue {
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
 
         this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
-
+        console.log("isShared: " + this.isShared);
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -822,6 +822,7 @@ export default class PerformanceCurveEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
+        console.log("share change: " + this.isShared);
     }
     checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 

@@ -97,9 +97,9 @@ export default class PerformanceCurveService {
     static  GetPerformanceCurveLibraryUsers(libraryId: string): AxiosPromise {
         return coreAxiosInstance.get(`${API.PerformanceCurve}/GetPerformanceCurveLibraryUsers/${libraryId}`);
     }
-    static getIsSharedLibrary(performanceCurveId: string): AxiosPromise {
+    static getIsSharedLibrary(performanceCurveLibraryId: string): AxiosPromise {
         return coreAxiosInstance.get(
-            `${API.Treatment}/GetIsSharedLibrary/${performanceCurveId}`
+            `${API.PerformanceCurve}/GetIsSharedLibrary/${performanceCurveLibraryId}`
         );
     }
 

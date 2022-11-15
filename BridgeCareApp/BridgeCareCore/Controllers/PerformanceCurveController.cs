@@ -517,21 +517,21 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetIsSharedLibrary(Guid performanceCurveLibraryId)
         {
+            bool result = false;
             try
             {
                 await Task.Factory.StartNew(() =>
                 {
                     var users = UnitOfWork.PerformanceCurveRepo.GetLibraryUsers(performanceCurveLibraryId);
-                    if (users.Count > 0)
+                    if (users.Count<=0)
                     {
-                        return new JsonResult(true);
-                    }
-                    else
+                        result = false;
+                    } else
                     {
-                        return new JsonResult(false);
+                        result = true;
                     }
                 });
-                return Ok();
+                return Ok(result);
             }
             catch (Exception)
             {

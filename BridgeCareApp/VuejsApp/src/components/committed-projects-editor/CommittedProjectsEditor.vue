@@ -386,6 +386,8 @@ export default class CommittedProjectsEditor extends Vue  {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @State(state => state.userModule.currentUserCriteriaFilter) currentUserCriteriaFilter: UserCriteriaFilter;
@@ -517,7 +519,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
                         vm.getAttributesAction().then(() => {                       
                             vm.getTreatmentLibrariesAction().then(() => {
-                                vm.initializePages();                            
+                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
+                                    vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
+                                    vm.initializePages();
+                                });                                                                
                             });   
                         });
                     })                                          

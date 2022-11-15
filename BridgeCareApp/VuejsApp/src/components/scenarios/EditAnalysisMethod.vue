@@ -227,6 +227,8 @@ export default class EditAnalysisMethod extends Vue {
     @Action('upsertAnalysisMethod') upsertAnalysisMethodAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     selectedScenarioId: string = getBlankGuid();
     analysisMethod: AnalysisMethod = clone(emptyAnalysisMethod);
@@ -287,7 +289,11 @@ export default class EditAnalysisMethod extends Vue {
             }
 
             // get the selected scenario's analysisMethod data
-            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId });
+            vm.getAnalysisMethodAction({ scenarioId: vm.selectedScenarioId }).then(() => {                       
+                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                    vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                });
+            });
         });
     }
 
@@ -323,7 +329,7 @@ export default class EditAnalysisMethod extends Vue {
                 !equals(this.analysisMethod, this.stateAnalysisMethod),
         });
 
-        this.setBenefitAttributeIfEmpty();
+        this.setBenefitAttributeIfEmpty();        
     }
 
     @Watch('stateNumericAttributes')

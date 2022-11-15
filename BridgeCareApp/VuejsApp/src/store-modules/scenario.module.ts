@@ -4,7 +4,6 @@ import {AxiosResponse} from 'axios';
 import {any, clone, find, findIndex, prepend, propEq, reject, update} from 'ramda';
 import {hasValue} from '@/shared/utils/has-value-util';
 import {http2XX} from '@/shared/utils/http-utils';
-import ReportsService from '@/services/reports.service';
 import {SimulationAnalysisDetail} from '@/shared/models/iAM/simulation-analysis-detail';
 import {SimulationReportDetail} from '@/shared/models/iAM/simulation-report-detail';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
@@ -18,7 +17,8 @@ const state = {
     totalSharedScenarios: 0 as number,
     totalUserScenarios: 0 as number,
     totalQueuedSimulations: 0 as number,
-    selectedScenario: clone(emptyScenario) as Scenario
+    selectedScenario: clone(emptyScenario) as Scenario,
+    currentUserOrSharedScenario: clone(emptyScenario) as Scenario,
 };
 
 const mutations = {
@@ -33,6 +33,9 @@ const mutations = {
         state.currentSharedScenariosPage = clone(scenarios.items);
         state.totalSharedScenarios = scenarios.totalItems;
     },
+    UserUserOrSharedScenarioMutator(state: any, scenario: Scenario){
+        state.currentUserOrSharedScenario = clone(scenario);        
+    },
     SimulationQueuePageMutator(state: any, queuedSimulations: PagingPage<QueuedSimulation>){
         state.currentSimulationQueuePage = clone(queuedSimulations.items);
         state.totalQueuedSimulations = queuedSimulations.totalItems;
@@ -41,10 +44,11 @@ const mutations = {
         if (any(propEq('id', id), state.currentSharedScenariosPage)) {
             state.selectedScenario = find(propEq('id', id), state.currentSharedScenariosPage) as Scenario;
         } 
-        else if(any(propEq('id', id), state.currentUserScenarioPage))
+        else if(any(propEq('id', id), state.currentUserScenarioPage)) {
             state.selectedScenario = find(propEq('id', id), state.currentUserScenarioPage) as Scenario;
+        }
         else {
-            state.selectedScenario = clone(emptyScenario);
+            state.selectedScenario = state.currentUserOrSharedScenario;
         }
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {
@@ -227,7 +231,19 @@ const actions = {
                 }
             },
         );
-    },    
+    },
+    async getCurrentUserOrSharedScenario({commit}: any, payload: any) {
+        if(state.currentUserOrSharedScenario.id == emptyScenario.id)
+        {
+            await ScenarioService.getCurrentUserOrSharedScenario(payload.simulationId)
+                .then((response: AxiosResponse) => {
+                    if (hasValue(response, 'data')) {
+                        commit('UserUserOrSharedScenarioMutator', response.data as Scenario);
+                    }
+                }
+            );
+        }
+   },
 };
 
 const getters = {};

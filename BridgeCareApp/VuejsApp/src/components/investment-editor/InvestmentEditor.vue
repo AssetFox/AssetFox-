@@ -330,9 +330,10 @@ export default class InvestmentEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
-    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-
+    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;    
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -418,8 +419,11 @@ export default class InvestmentEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
 
-                    vm.hasScenario = true;    
-                    vm.initializePages();             
+                    vm.hasScenario = true;
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();
+                    });                                        
                 }
                 else
                     vm.initializing = false;

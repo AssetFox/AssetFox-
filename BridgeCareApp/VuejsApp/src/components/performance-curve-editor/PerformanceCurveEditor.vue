@@ -531,6 +531,7 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -711,6 +712,9 @@ export default class PerformanceCurveEditor extends Vue {
         this.checkHasUnsavedChanges();
         const { sortBy, descending, page, rowsPerPage } = this.performancePagination;
 
+        if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+        }
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
@@ -782,8 +786,6 @@ export default class PerformanceCurveEditor extends Vue {
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
 
-        this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
-        console.log("isShared: " + this.isShared);
         if (this.hasSelectedLibrary) {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
@@ -792,7 +794,9 @@ export default class PerformanceCurveEditor extends Vue {
         this.updatedRowsMap.clear();
         this.deletionIds = [];
         this.addedRows = [];
-
+        if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+            this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+        }
         this.onPaginationChanged();
     }
 
@@ -822,7 +826,6 @@ export default class PerformanceCurveEditor extends Vue {
     @Watch('isSharedLibrary')
     onStateSharedAccessChanged() {
         this.isShared = this.isSharedLibrary;
-        console.log("share change: " + this.isShared);
     }
     checkHasUnsavedChanges(){
         const hasUnsavedChanges: boolean = 
@@ -1192,11 +1195,13 @@ export default class PerformanceCurveEditor extends Vue {
                 libraryUserData.push(libraryUser);
             });
             this.selectedPerformanceCurveLibrary.isShared = this.sharePerformanceCurveLibraryDialogData.performanceCurveLibrary.isShared;
+            if (!isNullOrUndefined(this.selectedPerformanceCurveLibrary.id) ) {
+                this.getIsSharedLibraryAction(this.selectedPerformanceCurveLibrary).then(this.isShared = this.isSharedLibrary);
+            }
             //update performance curve library sharing
             PerformanceCurveService.upsertOrDeletePerformanceCurveLibraryUsers(this.selectedPerformanceCurveLibrary.id, libraryUserData).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString()))
                 {
-                    this.addSuccessNotificationAction({ message: 'Shared performance curve library' })
                     this.resetPage();
                 }
             });

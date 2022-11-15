@@ -1328,7 +1328,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Upsert(entity, entity.Id, _unitOfWork.UserEntity?.Id);
         }
 
-        public SimulationDTO GetUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess)
+        public SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess)
         {
             var users = _unitOfWork.Context.User.ToList();
             var simulation = _unitOfWork.Context.Simulation

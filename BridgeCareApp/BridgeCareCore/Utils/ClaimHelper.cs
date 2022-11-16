@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis;using AppliedResearchAssociates.iAM.DataPersistenceCore;
@@ -22,9 +23,11 @@ namespace BridgeCareCore.Utils
 
         public const string LibraryModifyUnauthorizedMessage = "You are not authorized to modify this library's data.";
         public const string LibraryDeleteUnauthorizedMessage = "You are not authorized to delete this library.";
+        public const string LibraryDeleteUnauthorizedMessageNew = "Deterioration Model Error::DeletePerformanceCurveLibrary - Unauthorized to access this component.";
         public const string LibraryRecreateUnauthorizedMessage = "You are not authorized to recreate this library.";
         public const string LibraryAccessModificationUnauthorizedMessage = "You are not authorized to modify access to this library.";
         public const string LibraryUserListGetUnauthorizedMessage = "You are not authorized to get the users of this library.";
+        public const string LibraryUserListGetUnauthorizedMessageNew = "Deterioration Model Error::GetPerformanceCurveLibraryUsers - Unauthorized to access this component.";
         public const string SimulationModifyUnauthorizedMessage = "You are not authorized to modify this simulation's data.";
         public const string CantDeleteNonexistentLibraryMessage = "Cannot delete library. Not in system.";
         public const string AddingOwnersIsNotAllowedMessage = "Adding owners to a library is not allowed.";

@@ -514,7 +514,7 @@ namespace BridgeCareCore.Controllers
         }
         [HttpGet]
         [Route("GetIsSharedLibrary/{performanceCurveLibraryId}")]
-        [Authorize]
+        [Authorize(Policy = Policy.ViewPerformanceCurveFromLibrary)]
         public async Task<IActionResult> GetIsSharedLibrary(Guid performanceCurveLibraryId)
         {
             bool result = false;

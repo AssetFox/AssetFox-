@@ -15,12 +15,18 @@ namespace BridgeCareCoreTests.Helpers
         {
             mockUnitOfWork.Setup(u => u.BudgetRepo).Returns(budgetRepository);
         }
-
+        public static void SetupPerformanceCurveRepo(this Mock<IUnitOfWork> mockUnitOfWork, IPerformanceCurveRepository performanceCurveRepository)
+        {
+            mockUnitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(performanceCurveRepository);
+        }
         public static void SetupBudgetRepo(this Mock<IUnitOfWork> mockUnitOfWork, Mock<IBudgetRepository> mockBudgetRepository)
         {
             mockUnitOfWork.SetupBudgetRepo(mockBudgetRepository.Object);
         }
-
+        public static void SetupPerformanceCurveRepo(this Mock<IUnitOfWork> mockUnitOfWork, Mock<IPerformanceCurveRepository> mockPerformanceCurveRepository)
+        {
+            mockUnitOfWork.SetupPerformanceCurveRepo(mockPerformanceCurveRepository.Object);
+        }
         public static void SetupInvestmentPlanRepo(this Mock<IUnitOfWork> mockunitOfWork, Mock<IInvestmentPlanRepository> mockInvestmentPlanRepository)
         {
             mockunitOfWork.Setup(u => u.InvestmentPlanRepo).Returns(mockInvestmentPlanRepository.Object);

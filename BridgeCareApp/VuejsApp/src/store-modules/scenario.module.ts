@@ -48,7 +48,7 @@ const mutations = {
             state.selectedScenario = find(propEq('id', id), state.currentUserScenarioPage) as Scenario;
         }
         else {
-            state.selectedScenario = state.currentUserOrSharedScenario;
+            state.selectedScenario = id == emptyScenario.id ? clone(emptyScenario) : state.currentUserOrSharedScenario;
         }
     },
     simulationAnalysisDetailMutator(state: any, simulationAnalysisDetail: SimulationAnalysisDetail) {

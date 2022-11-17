@@ -178,6 +178,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<TargetConditionGoalEntity> TargetConditionGoal { get; set; }
 
+        public virtual DbSet<TargetConditionGoalLibraryUserEntity> TargetConditionGoalLibraryUser { get; set; }
+
         public virtual DbSet<ScenarioTargetConditionGoalEntity> ScenarioTargetConditionGoals { get; set; }
 
         public virtual DbSet<TargetConditionGoalLibraryEntity> TargetConditionGoalLibrary { get; set; }
@@ -2538,6 +2540,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.TreatmentLibraryUsers)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<TargetConditionGoalLibraryUserEntity>(entity =>
+            {
+                entity.HasKey(e => new { e.TargetConditionGoalLibraryId, e.UserId });
+
+                entity.ToTable("TargetConditionGoalLibrary_User");
+
+                entity.HasIndex(e => e.TargetConditionGoalLibraryId);
+
+                entity.HasIndex(e => e.UserId);
+
+                entity.HasOne(d => d.TargetConditionGoalLibrary)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.TargetConditionGoalLibraryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TargetConditionGoalLibraryUsers)
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });

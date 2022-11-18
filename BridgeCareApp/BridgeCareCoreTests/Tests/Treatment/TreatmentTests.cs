@@ -499,7 +499,10 @@ namespace BridgeCareCoreTests.Tests
             treatmentService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, sync)).Returns(treatmentsAfter);
 
             var result = await controller.UpsertScenarioSelectedTreatments(simulationId, sync);
-            // TODO when I get back onto this -- assertions on the result.
+            ActionResultAssertions.Ok(result);
+            var call = treatmentService.SingleInvocationWithName(nameof(ITreatmentService.GetSyncedScenarioDataset));
+            Assert.Equal(simulationId, call.Arguments[0]);
+            Assert.Equal(sync, call.Arguments[1]);
         }
 
         [Fact]

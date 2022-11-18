@@ -259,11 +259,11 @@ namespace BridgeCareCoreTests.Tests
                 mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
+            await Assert.ThrowsAsync<ArgumentException>(() => controller.ImportCommittedProjects());
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            
         }
 
         [Fact]

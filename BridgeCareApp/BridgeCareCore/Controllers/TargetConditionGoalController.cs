@@ -328,7 +328,34 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-
+        [HttpGet]
+        [Route("GetIsSharedLibrary/{targetConditionGoalLibraryId}")]
+        [Authorize(Policy = Policy.ViewTargetConditionGoalFromLibrary)]
+        public async Task<IActionResult> GetIsSharedLibrary(Guid targetConditionGoalLibraryId)
+        {
+            bool result = false;
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    var users = UnitOfWork.TargetConditionGoalRepo.GetLibraryUsers(targetConditionGoalLibraryId);
+                    if (users.Count <= 0)
+                    {
+                        result = false;
+                    }
+                    else
+                    {
+                        result = true;
+                    }
+                });
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TargetConditionGoalError}::GetIsSharedLibrary - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
 
         [HttpGet]
         [Route("GetHasPermittedAccess")]

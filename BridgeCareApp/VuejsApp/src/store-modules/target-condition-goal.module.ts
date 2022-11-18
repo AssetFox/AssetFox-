@@ -25,6 +25,7 @@ const state = {
     ) as TargetConditionGoalLibrary,
     scenarioTargetConditionGoals: [] as TargetConditionGoal[],
     hasPermittedAccess: false,
+    isSharedLibrary: false
 };
 
 const mutations = {
@@ -90,6 +91,9 @@ const mutations = {
     PermittedAccessMutator(state: any, status: boolean) {
         state.hasPermittedAccess = status;
     },
+    IsSharedLibraryMutator(state: any, status: boolean) {
+        state.isSharedLibrary = status;
+    }
 };
 
 const actions = {
@@ -138,6 +142,17 @@ const actions = {
                 dispatch('addSuccessNotification', {
                     message: 'Deleted target condition goal library',
                 });
+            }
+        });
+    },
+    async getIsSharedLibrary({ dispatch, commit }: any, payload: any) {
+        await TargetConditionGoalService.getIsSharedLibrary(payload.id).then(
+            (response: AxiosResponse) => {
+                if (
+                hasValue(response, 'status') &&
+                    http2XX.test(response.status.toString())
+                ) {
+                commit('IsSharedLibraryMutator', response.data as boolean);
             }
         });
     },

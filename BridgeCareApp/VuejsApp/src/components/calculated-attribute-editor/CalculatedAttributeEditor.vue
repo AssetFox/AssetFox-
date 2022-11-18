@@ -91,7 +91,7 @@
             </v-layout>
         </v-flex>
         <!-- Default Equation -->
-        <v-flex xs12>
+        <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
             <v-layout justify-center>
                 <v-flex xs6>
                     <v-layout column>

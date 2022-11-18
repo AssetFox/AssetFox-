@@ -64,7 +64,9 @@ namespace BridgeCareCore.Services
             var attributes = request.LibraryId == null ?
                     _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationId).ToList() :
                     _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(request.LibraryId.Value).CalculatedAttributes.ToList();
-            if(request.LibraryId != null)
+            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
+            attributes = SyncedDataset(attributes, request);
+            if (request.LibraryId != null)
             {
                 attributes.ForEach(_ =>
                 {
@@ -79,8 +81,8 @@ namespace BridgeCareCore.Services
                     });
                 });
             }
-            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
-            return SyncedDataset(attributes, request);
+
+            return attributes;
         }
 
         public List<CalculatedAttributeDTO> GetSyncedLibraryDataset(Guid libraryId, CalculatedAttributePagingSyncModel request)

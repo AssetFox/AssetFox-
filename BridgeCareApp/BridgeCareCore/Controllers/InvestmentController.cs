@@ -192,7 +192,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var errorMessage = libraryAccess.LibraryExists ? RequestedToCreateExistingLibraryErrorMessage : RequestedToModifyNonexistentLibraryErrorMessage;
                         throw new InvalidOperationException(errorMessage);
-                    }//
+                    }
                     _claimHelper.CheckUserLibraryModifyAuthorization(libraryAccess, UserId);
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)

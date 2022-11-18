@@ -193,10 +193,9 @@ namespace BridgeCareCoreTests.Tests
                 mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
 
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
@@ -214,10 +213,9 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockService.Verify(_ => _.ImportCommittedProjectFiles(It.IsAny<Guid>(), It.IsAny<ExcelPackage>(), It.IsAny<string>(), It.IsAny<bool>()), Times.Never());
         }
 
@@ -235,9 +233,7 @@ namespace BridgeCareCoreTests.Tests
                 accessor, _mockClaimHelper.Object);
 
             // Act + Asset
-            var result = await controller.ImportCommittedProjects();
-            Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Committed Project error::Request MIME type is invalid.", ((BadRequestObjectResult)result).Value);
+            await Assert.ThrowsAsync<ConstraintException>(() => controller.ImportCommittedProjects());
         }
 
         [Fact]
@@ -258,11 +254,11 @@ namespace BridgeCareCoreTests.Tests
                 mockContextAccessor.Object, _mockClaimHelper.Object);
 
             // Act
-            var result = await controller.ImportCommittedProjects();
+            await Assert.ThrowsAsync<ArgumentException>(() => controller.ImportCommittedProjects());
 
             // Assert
-            Assert.IsType<BadRequestObjectResult>(result);
             _mockCommittedProjectRepo.Verify(_ => _.DeleteSimulationCommittedProjects(It.IsAny<Guid>()), Times.Never());
+            
         }
 
         [Fact]

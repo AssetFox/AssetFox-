@@ -180,7 +180,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
+                    _claimHelper.OldWayCheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
 
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
@@ -235,7 +235,7 @@ namespace BridgeCareCore.Controllers
                     {
                         var budgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (budgetLibrary == null) return;
-                        _claimHelper.CheckUserLibraryModifyAuthorization(budgetLibrary.Owner, UserId);
+                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(budgetLibrary.Owner, UserId);
                     }
                     UnitOfWork.BudgetRepo.DeleteBudgetLibrary(libraryId);
                     UnitOfWork.Commit();
@@ -345,7 +345,7 @@ namespace BridgeCareCore.Controllers
                         var existingBudgetLibrary = UnitOfWork.BudgetRepo.GetBudgetLibraries().FirstOrDefault(_ => _.Id == libraryId);
                         if (existingBudgetLibrary != null)
                         {
-                            _claimHelper.CheckUserLibraryModifyAuthorization(existingBudgetLibrary.Owner, UserId);
+                            _claimHelper.OldWayCheckUserLibraryModifyAuthorization(existingBudgetLibrary.Owner, UserId);
                         }
                     }
                     result = _investmentBudgetsService.ImportLibraryInvestmentBudgetsFile(budgetLibraryId, excelPackage, currentUserCriteriaFilter, overwriteBudgets);

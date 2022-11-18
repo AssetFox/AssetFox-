@@ -19,7 +19,8 @@
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical>
                         </v-divider>
-                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />
+                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared'
+                        @change="checkHasUnsavedChanges()" />
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header"> 
@@ -181,7 +182,7 @@
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetLibrary.description'
-                                @input='selectedBudgetLibrary = {...selectedBudgetLibrary, description: $event}'
+                                @input='checkHasUnsavedChanges()'
                                 class="ghd-text-field-border">
                     </v-textarea>
                 </v-flex>
@@ -291,7 +292,7 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { getUserName } from '@/shared/utils/get-user-info';
-import { PagingRequest, PagingPage, InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
+import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
 import { BudgetGridRow } from '@/shared/models/iAM/treatment';
@@ -546,7 +547,7 @@ export default class InvestmentEditor extends Vue {
         this.selectedBudgetLibrary = clone(this.stateSelectedBudgetLibrary);
     }
 
-    @Watch('selectedBudgetLibrary', {deep: true})
+    @Watch('selectedBudgetLibrary')
     onSelectedBudgetLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
 
@@ -1079,9 +1080,9 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
             }
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1093,7 +1094,8 @@ export default class InvestmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
-                this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary);
+                this.budgetLibraryMutator(this.selectedBudgetLibrary);
+                this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget library",});
             }
         });
@@ -1267,7 +1269,8 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary) ||
-            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)
+            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan) ||
+            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

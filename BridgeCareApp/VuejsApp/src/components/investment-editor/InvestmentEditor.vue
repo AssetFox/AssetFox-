@@ -222,6 +222,7 @@
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
+                                   :libraryNames='librarySelectItemNames'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
 
         <ShareBudgetLibraryDialog :dialogData="shareBudgetLibraryDialogData"

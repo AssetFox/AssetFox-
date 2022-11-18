@@ -37,6 +37,11 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         public bool Secure { get; protected set; }
 
         /// <summary>
+        /// Owner
+        /// </summary>
+        public Guid CreatedBy { get; set;}
+
+        /// <summary>
         /// Validates the details on the datasource
         /// </summary>
         /// <returns>

@@ -211,8 +211,9 @@ const actions = {
                     message: 'Investment budgets file imported',
                 });
             }
-            else
+            else {
                 commit('isSuccessfulImportMutator', false);
+            }
         });
     },
     async importLibraryInvestmentBudgetsFile(
@@ -235,8 +236,9 @@ const actions = {
                     message: 'Investment budgets file imported',
                 });
             }
-            else
+            else {
                 commit('isSuccessfulImportMutator', false);
+            }
         });
     },
     async getHasPermittedAccess({ commit }: any)

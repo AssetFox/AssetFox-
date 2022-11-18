@@ -305,8 +305,8 @@
             @submit="onAddTargetConditionGoal"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
             @submit="onEditTargetConditionGoalCriterionLibrary"
         />
     </v-layout>
@@ -335,10 +335,6 @@ import {
     reject,
     update,
 } from 'ramda';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateTargetConditionGoalDialog from '@/components/target-editor/target-editor-dialogs/CreateTargetConditionGoalDialog.vue';
@@ -370,10 +366,12 @@ import TargetConditionGoalService from '@/services/target-condition-goal.service
 import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         CreateTargetConditionGoalLibraryDialog,
         CreateTargetConditionGoalDialog,
         ConfirmDeleteAlert: Alert,
@@ -409,6 +407,8 @@ export default class TargetConditionGoalEditor extends Vue {
     @Action('getScenarioTargetConditionGoals') getScenarioTargetConditionGoalsAction: any;
     @Action('upsertScenarioTargetConditionGoals') upsertScenarioTargetConditionGoalsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('addedOrUpdatedTargetConditionGoalLibraryMutator') addedOrUpdatedTargetConditionGoalLibraryMutator: any;
     @Mutation('selectedTargetConditionGoalLibraryMutator') selectedTargetConditionGoalLibraryMutator: any;
@@ -496,8 +496,8 @@ export default class TargetConditionGoalEditor extends Vue {
         emptyTargetConditionGoal,
     );
     showCreateTargetConditionGoalDialog: boolean = false;
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     createTargetConditionGoalLibraryDialogData: CreateTargetConditionGoalLibraryDialogData = clone(
         emptyCreateTargetConditionGoalLibraryDialogData,
@@ -528,7 +528,10 @@ export default class TargetConditionGoalEditor extends Vue {
                     }
 
                     vm.hasScenario = true;
-                    vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();
+                    });                                        
                 }
             });
 
@@ -760,19 +763,21 @@ export default class TargetConditionGoalEditor extends Vue {
             targetConditionGoal,
         );
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: targetConditionGoal.criterionLibrary.id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: targetConditionGoal.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onEditTargetConditionGoalCriterionLibrary(criterionLibrary: CriterionLibrary,) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onEditTargetConditionGoalCriterionLibrary(criterionExpression: string,) {
+        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedTargetConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
-            this.onUpdateRow(this.selectedTargetConditionGoalForCriteriaEdit.id, { ...this.selectedTargetConditionGoalForCriteriaEdit, criterionLibrary: criterionLibrary })
+        if (!isNil(criterionExpression) && this.selectedTargetConditionGoalForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedTargetConditionGoalForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedTargetConditionGoalForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            this.onUpdateRow(this.selectedTargetConditionGoalForCriteriaEdit.id, 
+            { ...this.selectedTargetConditionGoalForCriteriaEdit, 
+            criterionLibrary: {...this.selectedTargetConditionGoalForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
             this.onPaginationChanged();
         }
 

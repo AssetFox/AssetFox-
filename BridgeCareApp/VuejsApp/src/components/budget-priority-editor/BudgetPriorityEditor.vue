@@ -179,7 +179,7 @@
 
         <CreatePriorityDialog :showDialog='showCreateBudgetPriorityDialog' @submit='onAddBudgetPriority' />
 
-        <CriterionLibraryEditorDialog :dialogData='criterionLibraryEditorDialogData'
+        <GeneralCriterionEditorDialog :dialogData='criterionEditorDialogData'
                                       @submit='onSubmitCriterionLibraryEditorDialogResult' />
     </v-layout>
 </template>
@@ -199,11 +199,6 @@ import {
 } from '@/shared/models/iAM/budget-priority';
 import CreatePriorityDialog
     from '@/components/budget-priority-editor/budget-priority-editor-dialogs/CreateBudgetPriorityDialog.vue';
-import CriterionLibraryEditorDialog from '@/shared/modals/CriterionLibraryEditorDialog.vue';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import { any, clone, contains, find, findIndex, isNil, prepend, propEq, update } from 'ramda';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
 import { hasValue } from '@/shared/utils/has-value-util';
@@ -231,12 +226,14 @@ import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/
 import BudgetPriorityService from '@/services/budget-priority.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 const ObjectID = require('bson-objectid');
 
 @Component({
     components: {
-        CreatePriorityLibraryDialog, CreatePriorityDialog, CriterionLibraryEditorDialog, ConfirmDeleteAlert: Alert,
+        CreatePriorityLibraryDialog, CreatePriorityDialog, GeneralCriterionEditorDialog, ConfirmDeleteAlert: Alert,
     },
 })
 export default class BudgetPriorityEditor extends Vue {
@@ -258,6 +255,9 @@ export default class BudgetPriorityEditor extends Vue {
     @Action('upsertScenarioBudgetPriorities') upsertScenarioBudgetPrioritiesAction: any;
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Mutation('budgetPriorityLibraryMutator') budgetPriorityLibraryMutator: any;
     @Mutation('selectedBudgetPriorityLibraryMutator') selectedBudgetPriorityLibraryMutator: any;
@@ -296,7 +296,7 @@ export default class BudgetPriorityEditor extends Vue {
     selectedBudgetPriorityIds: string[] = [];
     selectedBudgetPriorityForCriteriaEdit: BudgetPriority = clone(emptyBudgetPriority);
     showCreateBudgetPriorityDialog: boolean = false;
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
     createBudgetPriorityLibraryDialogData: CreateBudgetPriorityLibraryDialogData = clone(emptyCreateBudgetPriorityLibraryDialogData);
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     rules: InputValidationRules = rules;
@@ -325,9 +325,11 @@ export default class BudgetPriorityEditor extends Vue {
 
                 vm.hasScenario = true;
                 vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId }).then(() => {
-                    vm.initializePages();
-                });
-                
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();
+                    });                                        
+                });                
             }
         });
     }
@@ -707,19 +709,21 @@ export default class BudgetPriorityEditor extends Vue {
             propEq('id', budgetPriorityGridDatum.id), this.currentPage,
         ) as BudgetPriority;
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario
+            CriteriaExpression: this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(criterionLibrary: CriterionLibrary) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+    onSubmitCriterionLibraryEditorDialogResult(criterionExpression: string) {
+        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedBudgetPriorityForCriteriaEdit.id !== this.uuidNIL) {
-            this.onUpdateRow(this.selectedBudgetPriorityForCriteriaEdit.id, { ...this.selectedBudgetPriorityForCriteriaEdit, criterionLibrary: criterionLibrary })
+        if (!isNil(criterionExpression) && this.selectedBudgetPriorityForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary.id = getNewGuid();
+            this.onUpdateRow(this.selectedBudgetPriorityForCriteriaEdit.id, 
+            { ...this.selectedBudgetPriorityForCriteriaEdit, 
+            criterionLibrary: {...this.selectedBudgetPriorityForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
             // this.currentPage = update(
             //     findIndex(propEq('id', this.selectedBudgetPriorityForCriteriaEdit.id), this.currentPage),
             //     setItemPropertyValue('criterionLibrary', criterionLibrary, this.selectedBudgetPriorityForCriteriaEdit) as BudgetPriority,

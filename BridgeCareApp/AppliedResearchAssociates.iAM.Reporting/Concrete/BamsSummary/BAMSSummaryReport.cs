@@ -286,7 +286,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
 
             // Filling up parameters tab
-            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation);
+            _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
 
 
             // unfunded tab will be uncommented and redone in a future release

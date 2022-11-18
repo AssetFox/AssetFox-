@@ -388,6 +388,9 @@ export default class TreatmentEditor extends Vue {
     importLibraryTreatmentsFileAction: any;
     @Action('deleteTreatment') deleteTreatmentAction: any;
     @Action('deleteScenarioSelectableTreatment') deleteScenarioSelectableTreatmentAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     @Mutation('addedOrUpdatedTreatmentLibraryMutator') addedOrUpdatedTreatmentLibraryMutator: any;
@@ -460,8 +463,10 @@ export default class TreatmentEditor extends Vue {
                 vm.getSimpleScenarioSelectableTreatmentsAction(vm.selectedScenarioId);
 
                 vm.treatmentTabs = [...vm.treatmentTabs, 'Budgets'];
-                vm.getScenarioSimpleBudgetDetailsAction({
-                    scenarioId: vm.selectedScenarioId,
+                vm.getScenarioSimpleBudgetDetailsAction({ scenarioId: vm.selectedScenarioId, }).then(()=> {
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 });
             }
         });
@@ -545,7 +550,7 @@ export default class TreatmentEditor extends Vue {
         // }
 
         this.clearChanges();
-        if(this.treatmentSelectItemValue !== null)
+        if(this.treatmentSelectItemValue !== null && !this.hasScenario)
             this.treatmentCache.push(clone(this.selectedTreatment))
         this.checkHasUnsavedChanges();
     }
@@ -770,6 +775,11 @@ export default class TreatmentEditor extends Vue {
                 this.treatmentCache.push(this.selectedTreatment);
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's treatments"});
+                if(this.hasSelectedLibrary)
+                    this.getSimpleScenarioSelectableTreatmentsAction(this.selectedScenarioId).then(() =>{
+                        this.treatmentSelectItemValue = null;
+                    })
+                this.checkHasUnsavedChanges();
             }           
         });
     }

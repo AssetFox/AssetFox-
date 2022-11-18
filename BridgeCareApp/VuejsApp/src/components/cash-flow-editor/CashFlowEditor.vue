@@ -225,8 +225,8 @@
             @submit="onSubmitCreateCashFlowRuleLibraryDialogResult"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
             @submit="onSubmitCriterionLibraryEditorDialogResult"
         />
 
@@ -296,6 +296,8 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import CashFlowService from '@/services/cash-flow.service';
@@ -305,7 +307,7 @@ import { http2XX } from '@/shared/utils/http-utils';
 @Component({
     components: {
         CreateCashFlowRuleLibraryDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
         CashFlowRuleEditDialog,
         AddCashFlowRuleDialog
@@ -332,6 +334,8 @@ export default class CashFlowEditor extends Vue {
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
     @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
     @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
@@ -432,8 +436,8 @@ export default class CashFlowEditor extends Vue {
     createCashFlowRuleLibraryDialogData: CreateCashFlowRuleLibraryDialogData = clone(
         emptyCreateCashFlowLibraryDialogData,
     );
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
     rules: InputValidationRules = clone(rules);
@@ -462,7 +466,10 @@ export default class CashFlowEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.initializePages();
+                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            vm.initializePages();
+                        });                                                
                     }
                 });
             })  
@@ -775,24 +782,22 @@ export default class CashFlowEditor extends Vue {
     onEditCashFlowRuleCriterionLibrary(cashFlowRule: CashFlowRule) {
         this.selectedCashFlowRuleForCriteriaEdit = clone(cashFlowRule);
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary
-                .id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.mergedCriteriaExpression,
         };
     }
 
     onSubmitCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+        criterionExpression: string,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.criterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionLibrary) &&
-            this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
+        if (!isNil(criterionExpression) && this.selectedCashFlowRuleForCriteriaEdit.id !== this.uuidNIL) {
+            if(this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id === getBlankGuid())
+                this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary.id = getNewGuid();
             // this.currentPage = update(
             //     findIndex(
             //         propEq('id', this.selectedCashFlowRuleForCriteriaEdit.id),
@@ -806,7 +811,10 @@ export default class CashFlowEditor extends Vue {
             // );
 
             this.onUpdateRow(this.selectedCashFlowRuleForCriteriaEdit.id, 
-                { ...this.selectedCashFlowRuleForCriteriaEdit, criterionLibrary: criterionLibrary })
+            {
+                ...this.selectedCashFlowRuleForCriteriaEdit,
+                criterionLibrary: {...this.selectedCashFlowRuleForCriteriaEdit.criterionLibrary, mergedCriteriaExpression: criterionExpression},
+            })
             this.onPaginationChanged();
 
             this.selectedCashFlowRuleForCriteriaEdit = clone(emptyCashFlowRule);

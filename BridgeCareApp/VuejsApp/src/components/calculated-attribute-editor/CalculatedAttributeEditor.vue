@@ -236,9 +236,9 @@
             :dialogData="equationEditorDialogData"
             @submit="onSubmitEquationEditorDialogResult"
         />
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
-            @submit="onSubmitCriterionLibraryEditorDialogResult"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
+            @submit="onSubmitCriterionEditorDialogResult"
         />
     </v-layout>
 </template>
@@ -249,7 +249,6 @@ import { Watch } from 'vue-property-decorator';
 import { Action, State, Getter, Mutation } from 'vuex-class';
 import Alert from '@/shared/modals/Alert.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
-import CriterionLibraryEditorDialog from '../../shared/modals/CriterionLibraryEditorDialog.vue';
 import CreateCalculatedAttributeLibraryDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeLibraryDialog.vue';
 import CreateCalculatedAttributeDialog from './calculated-attribute-editor-dialogs/CreateCalculatedAttributeDialog.vue';
 import {
@@ -294,10 +293,6 @@ import {
 } from '@/shared/models/modals/equation-editor-dialog-data';
 import { emptyEquation, Equation } from '@/shared/models/iAM/equation';
 import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
-import {
     CriterionLibrary,
     emptyCriteria,
     emptyCriterionLibrary,
@@ -314,13 +309,15 @@ import { mapToIndexSignature } from '@/shared/utils/conversion-utils';
 import CalculatedAttributeService from '@/services/calculated-attribute.service';
 import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
         CreateCalculatedAttributeLibraryDialog,
         CreateCalculatedAttributeDialog,
         EquationEditorDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
     },
 })
@@ -358,8 +355,9 @@ export default class CalculatedAttributeEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('getCalculatedAttributes') getCalculatedAttributesAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
-
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('selectedCalculatedAttributeLibraryMutator') selectedCalculatedAttributeLibraryMutation: any;
     @Mutation('calculatedAttributeLibraryMutator') calculatedAttributeLibraryMutateActions: any;
@@ -425,8 +423,8 @@ export default class CalculatedAttributeEditor extends Vue {
     equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     calculatedAttributeGridData: CalculatedAttribute[] = [];
     activeCalculatedAttributeId: string = getBlankGuid();
@@ -481,7 +479,11 @@ export default class CalculatedAttributeEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId);
+                        vm.getScenarioCalculatedAttributeAction(vm.selectedScenarioId).then(()=> {
+                            vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                                vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            });
+                        });
                     }
                     //vm.initializePages();
                 });                
@@ -1015,31 +1017,31 @@ export default class CalculatedAttributeEditor extends Vue {
         if (!isNil(currentCriteria)) {
             this.hasSelectedCalculatedAttribute = true;
 
-            this.criterionLibraryEditorDialogData = {
+            this.criterionEditorDialogData = {
                 showDialog: true,
-                libraryId: currentCriteria.criteriaLibrary.id,
-                isCallFromScenario: this.hasScenario,
-                isCriterionForLibrary: !this.hasScenario,
+                CriteriaExpression: currentCriteria.criteriaLibrary.mergedCriteriaExpression,
             };
         }
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+    onSubmitCriterionEditorDialogResult(
+        criterionExpression: string,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.criterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
         var currItem = this.calculatedAttributeGridData.find(
             _ => _.id == this.activeCalculatedAttributeId,
         )!;
-        if (!isNil(criterionLibrary) && this.hasSelectedCalculatedAttribute) {
+        if (!isNil(criterionExpression) && this.hasSelectedCalculatedAttribute) {
 
             if(!isNil(currItem)){
                 var set = clone(currItem.equations.find(_ => _.id === this.currentCriteriaEquationSetSelectedId));
                 if(!isNil(set)){
-                    set.criteriaLibrary.mergedCriteriaExpression = criterionLibrary.mergedCriteriaExpression;
+                    if(set.criteriaLibrary.id === getBlankGuid())
+                        set.criteriaLibrary.id = getNewGuid();
+                    set.criteriaLibrary.mergedCriteriaExpression = criterionExpression;
                     this.onUpdatePair(set.id, set);
                     this.onPaginationChanged();
                 }

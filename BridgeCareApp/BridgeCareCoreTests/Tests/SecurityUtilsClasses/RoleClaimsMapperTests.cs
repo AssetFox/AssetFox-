@@ -15,11 +15,11 @@ namespace BridgeCareCoreTests.Tests
         public void ShouldReturnRoleGetInternalRole()
         {
             _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.GetInternalRole(SecurityConstants.SecurityTypes.Esec, "PD-BAMS-Administrator");
+            var result = _roleClaimsMapper.GetInternalRoles(SecurityConstants.SecurityTypes.Esec, new List<string> { "PD-BAMS-Administrator" });
 
             // Assert
-            Assert.IsType<string>(result);
-            Assert.Equal(result, SecurityConstants.Role.Administrator);
+            Assert.IsType<List<string>>(result);
+            Assert.Equal(result.First(), SecurityConstants.Role.Administrator);
         }
 
         // TODO add edge cases for GetInternalRole later
@@ -28,7 +28,7 @@ namespace BridgeCareCoreTests.Tests
         public void ShouldReturnClaimsGetClaims()
         {
             _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, "Editor");
+            var result = _roleClaimsMapper.GetClaims(SecurityConstants.SecurityTypes.Esec, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Editor });
 
             // Assert
             Assert.IsType<List<string>>(result);
@@ -103,7 +103,7 @@ namespace BridgeCareCoreTests.Tests
 
             // Act
             _roleClaimsMapper = new RoleClaimsMapper();
-            var result = _roleClaimsMapper.AddClaimsToUserIdentity(claimsPrincipal, "Administrator", claims);
+            var result = _roleClaimsMapper.AddClaimsToUserIdentity(claimsPrincipal, new List<string> { "Administrator" }, claims);
 
             // Assert
             Assert.IsType<ClaimsIdentity>(result);

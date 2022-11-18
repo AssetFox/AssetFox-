@@ -16,7 +16,7 @@
                                 <span class="ghd-control-text">{{ item.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
-                                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                <v-list-item v-on="on" v-bind="attrs">
                                 <v-list-item-content>
                                     <v-list-item-title>
                                     <v-row no-gutters align="center">
@@ -434,9 +434,9 @@
             @submit="onSubmitEquationEditorDialogResult"
         />
 
-        <CriterionLibraryEditorDialog
-            :dialogData="criterionLibraryEditorDialogData"
-            @submit="onSubmitCriterionLibraryEditorDialogResult"
+        <GeneralCriterionEditorDialog
+            :dialogData="criterionEditorDialogData"
+            @submit="onSubmitCriterionEditorDialogResult"
         />
         <ImportExportPerformanceCurvesDialog :showDialog='showImportExportPerformanceCurvesDialog'
             @submit='onSubmitImportExportPerformanceCurvesDialogResult' />
@@ -451,7 +451,6 @@ import { Action, State, Getter, Mutation } from 'vuex-class';
 import CreatePerformanceCurveLibraryDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveLibraryDialog.vue';
 import CreatePerformanceCurveDialog from './performance-curve-editor-dialogs/CreatePerformanceCurveDialog.vue';
 import EquationEditorDialog from '../../shared/modals/EquationEditorDialog.vue';
-import CriterionLibraryEditorDialog from '../../shared/modals/CriterionLibraryEditorDialog.vue';
 import {
     emptyPerformanceCurve,
     emptyPerformanceCurveLibrary,
@@ -478,10 +477,6 @@ import {
     CreatePerformanceCurveLibraryDialogData,
     emptyCreatePerformanceLibraryDialogData,
 } from '@/shared/models/modals/create-performance-curve-library-dialog-data';
-import {
-    CriterionLibraryEditorDialogData,
-    emptyCriterionLibraryEditorDialogData,
-} from '@/shared/models/modals/criterion-library-editor-dialog-data';
 import {
     emptyEquationEditorDialogData,
     EquationEditorDialogData,
@@ -512,6 +507,8 @@ import { getPropertyValues } from '@/shared/utils/getter-utils';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import { http2XX } from '@/shared/utils/http-utils';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 
 @Component({
     components: {
@@ -519,7 +516,7 @@ import { http2XX } from '@/shared/utils/http-utils';
         CreatePerformanceCurveLibraryDialog,
         CreatePerformanceCurveDialog,
         EquationEditorDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
     },
 })
@@ -554,7 +551,9 @@ export default class PerformanceCurveEditor extends Vue {
     @Action('importLibraryPerformanceCurvesFile')
     importLibraryPerformanceCurvesFileAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     @Mutation('performanceCurveLibraryMutator') performanceCurveLibraryMutator: any;
@@ -634,8 +633,8 @@ export default class PerformanceCurveEditor extends Vue {
     equationEditorDialogData: EquationEditorDialogData = clone(
         emptyEquationEditorDialogData,
     );
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     showCreatePerformanceCurveDialog = false;
     confirmDeleteAlertData: AlertData = clone(emptyAlertData);
@@ -664,6 +663,9 @@ export default class PerformanceCurveEditor extends Vue {
 
                     vm.hasScenario = true;
                     vm.onPaginationChanged();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 }
             });          
         });
@@ -934,24 +936,25 @@ export default class PerformanceCurveEditor extends Vue {
         if (!isNil(this.selectedPerformanceCurve)) {
             this.hasSelectedPerformanceCurve = true;
 
-            this.criterionLibraryEditorDialogData = {
+            this.criterionEditorDialogData = {
                 showDialog: true,
-                libraryId: this.selectedPerformanceCurve.criterionLibrary.id,
-                isCallFromScenario: this.hasScenario,
-                isCriterionForLibrary: !this.hasScenario
+                CriteriaExpression: this.selectedPerformanceCurve.criterionLibrary.mergedCriteriaExpression
             };
         }
     }
 
-    onSubmitCriterionLibraryEditorDialogResult(
-        criterionLibrary: CriterionLibrary,
+    onSubmitCriterionEditorDialogResult(
+        criterionExpression: string,
     ) {
-        this.criterionLibraryEditorDialogData = clone(
-            emptyCriterionLibraryEditorDialogData,
+        this.criterionEditorDialogData = clone(
+            emptyGeneralCriterionEditorDialogData,
         );
 
-        if (!isNil(criterionLibrary) && this.hasSelectedPerformanceCurve) {
-            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, criterionLibrary: criterionLibrary })
+        if (!isNil(criterionExpression) && this.hasSelectedPerformanceCurve) {
+            if(this.selectedPerformanceCurve.criterionLibrary.id === getBlankGuid())
+                this.selectedPerformanceCurve.criterionLibrary.id = getNewGuid();
+            this.onUpdateRow(this.selectedPerformanceCurve.id, { ...this.selectedPerformanceCurve, 
+            criterionLibrary: {...this.selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression} })
             this.currentPage = update(
                 findIndex(
                     propEq('id', this.selectedPerformanceCurve.id),
@@ -959,7 +962,7 @@ export default class PerformanceCurveEditor extends Vue {
                 ),
                 {
                     ...this.selectedPerformanceCurve,
-                    criterionLibrary: criterionLibrary,
+                    criterionLibrary: {...this.selectedPerformanceCurve.criterionLibrary, mergedCriteriaExpression: criterionExpression},
                 },
                 this.currentPage,
             );

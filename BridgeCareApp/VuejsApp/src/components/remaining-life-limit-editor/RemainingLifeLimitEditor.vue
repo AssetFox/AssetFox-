@@ -177,8 +177,8 @@
           :dialogData="createRemainingLifeLimitDialogData"
           @submit="onAddRemainingLifeLimit"
         />
-        <CriterionLibraryEditorDialog 
-          :dialogData="criterionLibraryEditorDialogData"
+        <GeneralCriterionEditorDialog 
+          :dialogData="criterionEditorDialogData"
           @submit="onEditRemainingLifeLimitCriterionLibrary"
         />
     </v-layout>
@@ -228,6 +228,8 @@ import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary } from '@/shared/models/iAM/criteria';
 import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { getUserName } from '@/shared/utils/get-user-info';
+import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
+import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { LibraryUpsertPagingRequest, PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import RemainingLifeLimitService from '@/services/remaining-life-limit.service';
@@ -238,7 +240,7 @@ import { http2XX } from '@/shared/utils/http-utils';
     components: {
         CreateRemainingLifeLimitLibraryDialog,
         CreateRemainingLifeLimitDialog,
-        CriterionLibraryEditorDialog,
+        GeneralCriterionEditorDialog,
         ConfirmDeleteAlert: Alert,
     },
 })
@@ -273,7 +275,9 @@ export default class RemainingLifeLimitEditor extends Vue {
     @Action('upsertScenarioRemainingLifeLimits')
     upsertScenarioRemainingLifeLimitsAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Mutation('addedOrUpdatedRemainingLifeLimitLibraryMutator') addedOrUpdatedRemainingLifeLimitLibraryMutator: any;
     @Mutation('selectedRemainingLifeLimitLibraryMutator') selectedRemainingLifeLimitLibraryMutator: any;
 
@@ -359,8 +363,8 @@ export default class RemainingLifeLimitEditor extends Vue {
     selectedRemainingLifeLimit: RemainingLifeLimit = clone(
         emptyRemainingLifeLimit,
     );
-    criterionLibraryEditorDialogData: CriterionLibraryEditorDialogData = clone(
-        emptyCriterionLibraryEditorDialogData,
+    criterionEditorDialogData: GeneralCriterionEditorDialogData = clone(
+        emptyGeneralCriterionEditorDialogData,
     );
     createRemainingLifeLimitLibraryDialogData: CreateRemainingLifeLimitLibraryDialogData = clone(
         emptyCreateRemainingLifeLimitLibraryDialogData,
@@ -385,7 +389,10 @@ export default class RemainingLifeLimitEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
                     vm.hasScenario = true;
-                    vm.initializePages();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();  
+                    });                                      
                 }
             });
             
@@ -620,7 +627,6 @@ export default class RemainingLifeLimitEditor extends Vue {
 
     onAddRemainingLifeLimit(newRemainingLifeLimit: RemainingLifeLimit) {
         this.createRemainingLifeLimitDialogData = clone(emptyCreateRemainingLifeLimitDialogData);
-
         if (!isNil(newRemainingLifeLimit)) {
             // this.currentPage = prepend(newRemainingLifeLimit, this.currentPage);
             this.addedRows.push(newRemainingLifeLimit);
@@ -641,20 +647,20 @@ export default class RemainingLifeLimitEditor extends Vue {
     onShowCriterionLibraryEditorDialog(remainingLifeLimit: RemainingLifeLimit) {
         this.selectedRemainingLifeLimit = remainingLifeLimit;
 
-        this.criterionLibraryEditorDialogData = {
+        this.criterionEditorDialogData = {
             showDialog: true,
-            libraryId: remainingLifeLimit.criterionLibrary.id,
-            isCallFromScenario: this.hasScenario,
-            isCriterionForLibrary: !this.hasScenario,
+            CriteriaExpression: remainingLifeLimit.criterionLibrary.mergedCriteriaExpression,           
         };
     }
 
     onEditRemainingLifeLimitCriterionLibrary(
-        criterionLibrary: CriterionLibrary,
+        criteriaExpression: string | null,
     ) {
-        this.criterionLibraryEditorDialogData = clone(emptyCriterionLibraryEditorDialogData);
+        this.criterionEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
-        if (!isNil(criterionLibrary) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
+        if (!isNil(criteriaExpression) && this.selectedRemainingLifeLimit.id !== this.uuidNIL) {
+            if(this.selectedRemainingLifeLimit.criterionLibrary.id === getBlankGuid())
+                this.selectedRemainingLifeLimit.criterionLibrary.id = getNewGuid();
             // this.currentPage = update(
             //     findIndex(
             //         propEq('id', this.selectedRemainingLifeLimit.id),
@@ -667,7 +673,11 @@ export default class RemainingLifeLimitEditor extends Vue {
             //     this.currentPage,
             // );
             this.onUpdateRow(this.selectedRemainingLifeLimit.id, 
-            { ...this.selectedRemainingLifeLimit, criterionLibrary: criterionLibrary })
+            {
+                ...this.selectedRemainingLifeLimit,
+                criterionLibrary: {...this.selectedRemainingLifeLimit.criterionLibrary, mergedCriteriaExpression: criteriaExpression}
+            })
+                
             this.onPaginationChanged();
         }
 

@@ -61,7 +61,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 {
                     Id = entity.Id,
                     Name = entity.Name,
-                    ConnectionString = decryptedConnetionString
+                    ConnectionString = decryptedConnetionString,
+                    CreatedBy = entity.CreatedBy
                 };
                 return source;
             }
@@ -74,7 +75,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                     Id = entity.Id,
                     Name = entity.Name,
                     LocationColumn = hydratedDetails.LocationColumn,
-                    DateColumn = hydratedDetails.DateColumn
+                    DateColumn = hydratedDetails.DateColumn,
+                    CreatedBy = entity.CreatedBy
                 };
                 return source;
             }

@@ -76,6 +76,7 @@
             public const string Editor = "Editor";
             public const string ReadOnly = "ReadOnly";
             public const string SimulationPowerUser = "SimulationPowerUser";
+            public const string Default = "Default";
         }
 
         public static class Claim

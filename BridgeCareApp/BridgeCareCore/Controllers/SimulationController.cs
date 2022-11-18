@@ -76,6 +76,23 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("GetCurrentUserOrSharedScenario/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetCurrentUserOrSharedScenario(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.SimulationRepo.GetCurrentUserOrSharedScenario(simulationId, UserInfo.HasAdminAccess, UserInfo.HasSimulationAccess));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::GetSharedScenariosPage - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
         [HttpGet]
         [Route("GetScenarios/")]
         [Authorize(Policy = Policy.ViewSimulation)]
@@ -110,6 +127,8 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
+
+
 
         [HttpPost]
         [Route("CreateScenario/{networkId}")]

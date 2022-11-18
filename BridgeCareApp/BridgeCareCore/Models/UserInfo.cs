@@ -11,7 +11,7 @@ namespace BridgeCareCore.Models
         // Below is for SimulationPowerUser
         public bool HasSimulationAccess { get; set; }
 
-        public string InternalRole { get; set; }
+        public List<string> InternalRoles { get; set; }
 
         public string Email { get; set; }
     }

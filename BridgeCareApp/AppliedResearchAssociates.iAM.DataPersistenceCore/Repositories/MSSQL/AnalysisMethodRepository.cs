@@ -221,7 +221,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 if (oldCriterionEntity == null)
                 {
                     var criterionEntity = dto.CriterionLibrary.ToEntity();
-                    criterionEntity.Name = criterionEntity.Name ?? "";
+                    dto.CriterionLibrary.Name = criterionEntity.Name ?? "";
                     _unitOfWork.CriterionLibraryRepo.UpsertCriterionLibrary(dto.CriterionLibrary);
                 }
                 else if (oldCriterionEntity.MergedCriteriaExpression != dto.CriterionLibrary.MergedCriteriaExpression)

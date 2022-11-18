@@ -8,6 +8,7 @@ namespace BridgeCareCore.Interfaces
     public interface ISimulationService
     {
         PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request);
+
         public PagingPageModel<SimulationDTO> GetSharedScenarioPage(PagingRequestModel<SimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess);
     }
 }

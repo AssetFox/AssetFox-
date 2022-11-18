@@ -1327,5 +1327,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             entity.LastModifiedDate = DateTime.Now; // updating the last modified date
             _unitOfWork.Context.Upsert(entity, entity.Id, _unitOfWork.UserEntity?.Id);
         }
+
+        public SimulationDTO GetCurrentUserOrSharedScenario(Guid simulationId, bool hasAdminAccess, bool hasSimulationAccess)
+        {
+            var users = _unitOfWork.Context.User.ToList();
+            var simulation = _unitOfWork.Context.Simulation
+                .Include(_ => _.SimulationAnalysisDetail)
+                .Include(_ => _.SimulationUserJoins)
+                .ThenInclude(_ => _.User)
+                .Include(_ => _.Network)
+                .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
+                .FirstOrDefault(_ => _.Id == simulationId && (_.Owner == _unitOfWork.CurrentUser.Username ||
+                    (_.Owner != _unitOfWork.CurrentUser.Username && hasAdminAccess || hasSimulationAccess ||
+                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))));
+
+            return simulation;
+        }
     }
 }

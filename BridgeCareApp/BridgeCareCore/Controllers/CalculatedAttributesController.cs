@@ -18,6 +18,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Controllers
 {
@@ -25,8 +26,7 @@ namespace BridgeCareCore.Controllers
     [ApiController]
     public class CalculatedAttributesController : BridgeCareCoreBaseController
     {
-        public const string DeteriorationModelError = "Deterioration Model Error";
-        public const string CalculatedAttributeModelError = "Calculated Attribute Model Error";
+        public const string CalculatedAttributeError = "Calculated Attribute Error";
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
         private readonly ICalculatedAttributeService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
@@ -47,7 +47,43 @@ namespace BridgeCareCore.Controllers
             var result = await attributeRepo.CalculatedAttributes();
             return Ok(result);
         }
-            
+
+        [HttpGet]
+        [Route("GetEmptyCalculatedAttributesByLibraryId/{libraryId}")]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
+        public async Task<IActionResult> GetEmptyCalculatedAttributesByLibraryId(Guid libraryId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CalculatedAttributeRepo.GetCalcuatedAttributesByLibraryIdNoChildren(libraryId));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError,
+                    $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByLibraryId)} - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetEmptyCalculatedAttributesByScenarioId/{scenarioId}")]
+        [ClaimAuthorize("CalculatedAttributesViewAccess")]
+        public async Task<IActionResult> GetEmptyCalculatedAttributesByScenarioId(Guid scenarioId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => UnitOfWork.CalculatedAttributeRepo.GetCalcuatedAttributesByScenarioIdNoChildren(scenarioId));
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError,
+                    $"{CalculatedAttributeError}::{nameof(GetEmptyCalculatedAttributesByScenarioId)} - {HubService.errorList["Exception"]}");
+                throw;
+            }
+        }
+
 
         [HttpGet]
         [Route("CalculatedAttrbiuteLibraries")]
@@ -76,7 +112,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioCalculatedAttributePage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetScenarioCalculatedAttributePage - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -93,7 +129,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetLibraryCalculatedAttributePage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::GetLibraryCalculatedAttributePage - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -137,7 +173,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertCalculatedAttributeLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertCalculatedAttributeLibrary - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -155,7 +191,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertScenarioAttribute - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttribute - {HubService.errorList["Exception"]}");
                 throw;
             }
             return Ok();
@@ -182,7 +218,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::UpsertScenarioAttributes - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::UpsertScenarioAttributes - {HubService.errorList["Exception"]}");
                 throw;
             }
         }
@@ -199,7 +235,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeModelError}::DeleteLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CalculatedAttributeError}::DeleteLibrary - {HubService.errorList["Exception"]}");
                 throw;
             } 
             return Ok();

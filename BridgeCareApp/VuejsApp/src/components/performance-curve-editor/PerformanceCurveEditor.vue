@@ -16,7 +16,7 @@
                                 <span class="ghd-control-text">{{ item.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
-                                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                <v-list-item v-on="on" v-bind="attrs">
                                 <v-list-item-content>
                                     <v-list-item-title>
                                     <v-row no-gutters align="center">
@@ -551,7 +551,9 @@ export default class PerformanceCurveEditor extends Vue {
     @Action('importLibraryPerformanceCurvesFile')
     importLibraryPerformanceCurvesFileAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
-
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
+    
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
     @Mutation('performanceCurveLibraryMutator') performanceCurveLibraryMutator: any;
@@ -661,6 +663,9 @@ export default class PerformanceCurveEditor extends Vue {
 
                     vm.hasScenario = true;
                     vm.onPaginationChanged();
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                    });
                 }
             });          
         });

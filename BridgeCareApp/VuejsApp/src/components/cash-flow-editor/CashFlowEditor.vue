@@ -334,6 +334,8 @@ export default class CashFlowEditor extends Vue {
     @Action('getScenarioCashFlowRules') getScenarioCashFlowRulesAction: any;
     @Action('upsertScenarioCashFlowRules') upsertScenarioCashFlowRulesAction: any;
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Mutation('cashFlowRuleLibraryMutator') cashFlowRuleLibraryMutator: any;
     @Mutation('selectedCashFlowRuleLibraryMutator') selectedCashFlowRuleLibraryMutator: any;
@@ -464,7 +466,10 @@ export default class CashFlowEditor extends Vue {
                         }
 
                         vm.hasScenario = true;
-                        vm.initializePages();
+                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                            vm.initializePages();
+                        });                                                
                     }
                 });
             })  

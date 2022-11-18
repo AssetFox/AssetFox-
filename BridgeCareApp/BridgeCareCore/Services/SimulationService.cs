@@ -147,6 +147,6 @@ namespace BridgeCareCore.Services
                     return simulations.OrderBy(_ => _.CreatedDate).ToList();
             }
             return simulations;
-        }
+        }        
     }
 }

@@ -220,6 +220,7 @@
         <ConfirmDeleteAlert :dialogData='confirmDeleteAlertData' @submit='onSubmitConfirmDeleteAlertResult' />
 
         <CreateBudgetLibraryDialog :dialogData='createBudgetLibraryDialogData'
+                                   :libraryNames='librarySelectItemNames'
                                    @submit='onSubmitCreateCreateBudgetLibraryDialogResult' />
 
         <SetRangeForAddingBudgetYearsDialog :showDialog='showSetRangeForAddingBudgetYearsDialog'
@@ -329,9 +330,10 @@ export default class InvestmentEditor extends Vue {
     @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
     @Action('importScenarioInvestmentBudgetsFile') importScenarioInvestmentBudgetsFileAction: any;
     @Action('importLibraryInvestmentBudgetsFile') importLibraryInvestmentBudgetsFileAction: any;
-    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;
-
+    @Action('getCriterionLibraries') getCriterionLibrariesAction: any;    
     @Action('addSuccessNotification') addSuccessNotificationAction: any;
+    @Action('getCurrentUserOrSharedScenario') getCurrentUserOrSharedScenarioAction: any;
+    @Action('selectScenario') selectScenarioAction: any;
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
 
@@ -363,6 +365,7 @@ export default class InvestmentEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
     librarySelectItemValue: string | null = '';
+    librarySelectItemNames: string[] = [];
     actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     budgetYearsGridHeaders: DataTableHeader[] = [
         { text: 'Year', value: 'year', sortable: true, align: 'left', class: '', width: '' },
@@ -416,8 +419,11 @@ export default class InvestmentEditor extends Vue {
                         vm.$router.push('/Scenarios/');
                     }
 
-                    vm.hasScenario = true;    
-                    vm.initializePages();             
+                    vm.hasScenario = true;
+                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        vm.initializePages();
+                    });                                        
                 }
                 else
                     vm.initializing = false;
@@ -518,6 +524,11 @@ export default class InvestmentEditor extends Vue {
                 text: library.name,
                 value: library.id,
             }));
+            // Send names to new library dialog to prevent
+            // duplicate names
+            this.librarySelectItems.forEach(element => {
+                this.librarySelectItemNames.push(element.text);                
+            });
     }
 
     @Watch('selectedBudgetYearsGridData')
@@ -770,7 +781,12 @@ export default class InvestmentEditor extends Vue {
                     addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                 }
             }
-
+            // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
+            const parsedMinimumProjectCostLimit: number = parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
+            let tempInvesmentPlan: InvestmentPlan | null = libraryUpsertRequest.pagingSync.Investment;
+            tempInvesmentPlan? tempInvesmentPlan.minimumProjectCostLimit = parsedMinimumProjectCostLimit : 0;
+            libraryUpsertRequest.pagingSync.Investment = tempInvesmentPlan;
+            
             InvestmentService.upsertBudgetLibrary(libraryUpsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') &&http2XX.test(response.status.toString())){
                     if(budgetLibrary.budgets === []){
@@ -782,7 +798,7 @@ export default class InvestmentEditor extends Vue {
                     this.addSuccessNotificationAction({message:'Added budget library'})
                     this.resetPage();
                 }
-            })
+            });
         }
     }
 

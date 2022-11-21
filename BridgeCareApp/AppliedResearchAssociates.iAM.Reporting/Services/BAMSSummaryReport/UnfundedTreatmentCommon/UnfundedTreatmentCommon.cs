@@ -26,35 +26,59 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var row = currentCell.Row;
             var columnNo = currentCell.Column;
 
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BMSID");
+
+            var lat = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LAT");
+            var @long = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LONG");
+
+            // LAT and LONG appear to be in Degree/Minute/Second form, but concatenated into a single number without delimiters.
+
+            var lat_degrees = Math.Floor(lat / 10_000);
+            var lat_minutes = Math.Floor((lat - 10_000 * lat_degrees) / 100);
+            var lat_seconds = lat - 10_000 * lat_degrees - 100 * lat_minutes;
+
+            var long_degrees = Math.Floor(@long / 10_000);
+            var long_minutes = Math.Floor((@long - 10_000 * long_degrees) / 100);
+            var long_seconds = @long - 10_000 * long_degrees - 100 * long_minutes;
+
+            var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"N";
+            var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"W";
+
+            worksheet.Cells[row, columnNo].Hyperlink = new Uri($"https://www.google.com/maps/place/{lat_string},{long_string}", UriKind.Absolute);
+            worksheet.Cells[row, columnNo].Style.Font.UnderLine = true;
+            worksheet.Cells[row, columnNo].Style.Font.Color.SetColor(Color.Blue); 
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
             var deckArea = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA");
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
+            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N"; // Large Bridge
+
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE"); // TODO text STRUCTURE_TYPE
 
             var functionalClassAbbr = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FUNC_CLASS");
             var functionalClassDescription = _summaryReportHelper.FullFunctionalClassDescription(functionalClassAbbr);
             worksheet.Cells[row, columnNo++].Value = functionalClassDescription;
 
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "INTERSTATE");
 
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.00";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 
-            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N";
 
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding185(section) ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding581(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding183(section) ? "Y" : "N";
 
             worksheet.Cells[row, columnNo++].Value = Year;
@@ -164,6 +188,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             for (int cellColumn = analysisColumn; cellColumn <= worksheet.Dimension.Columns; cellColumn++)
             {
                 ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+
+                // Color condition headers
+                if (headersRow1[cellColumn - 1].Contains("DUR") || headersRow1[cellColumn - 1].Contains("GCR"))
+                {
+                    ExcelHelper.ApplyColor(worksheet.Cells[row, cellColumn], Color.FromArgb(255, 242, 204));
+                }
             }
 
             ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
@@ -193,18 +223,20 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         {
             return new List<string>
             {
+                "BridgeID",
+                "BRKey",
                 "District",
                 "County",
-                "BRKey",
-                "Deck\r\nArea",
-                "Bridge\r\nLength",
-                "BPN",
                 "MPO/RPO",
+                "Bridge\r\nLength",
+                "Deck\r\nArea",
+                "Large\r\nBridge",
+                "Structure\r\nType",
                 "Functional\r\nClass",
+                "BPN",
                 "NHS",
                 "Interstate",
                 "Risk\r\nScore",
-                "Large\r\nBridge",
 
                 BRIDGE_FUNDING, // row 1 header for six sub-sections
                 "",
@@ -214,14 +246,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "",
 
                 "Analysis\r\nYear",
-                "GCR DECK",
-                "GCR SUP",
-                "GCR SUB",
-                "GCR CULV",
-                "DECK DUR",
-                "SUP DUR",
-                "SUB DUR",
-                "CULV DUR",
+                "GCR\r\nDECK",
+                "GCR\r\nSUP",
+                "GCR\r\nSUB",
+                "GCR\r\nCULV",
+                "DECK\r\nDUR",
+                "SUP\r\nDUR",
+                "SUB\r\nDUR",
+                "CULV\r\nDUR",
                 "Unfunded Treatment",
                 "Cost",
             };
@@ -231,11 +263,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         {
             return new List<string>
             {
-                "185", // Six sub-sections for "Bridge Funding"
-                "581",
+                "NHPP", // Six sub-sections for "Bridge Funding"
                 "STP",
-                "NHPP",
                 "BOF",
+                "185", 
+                "581",
                 "183",
             };
         }

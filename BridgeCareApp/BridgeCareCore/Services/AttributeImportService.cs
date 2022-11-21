@@ -35,26 +35,6 @@ namespace BridgeCareCore.Services
             _unitOfWork = unitOfWork;
         }
 
-        [Obsolete("Probably get rid of this once the real attribute import is working.")]
-        public AttributesImportResultDTO ImportExcelAttributes(
-            string keyColumnName,
-            string inspectionDateColumnName,
-            string spatialWeightingValue,
-            Guid excelPackageId
-            )
-        {
-            var excelRepo = _unitOfWork.ExcelWorksheetRepository;
-            var excelWorkbook = excelRepo.GetExcelRawData(excelPackageId);
-            var deserializationResult = ExcelRawDataSpreadsheetSerializer.Deserialize(excelWorkbook.SerializedWorksheetContent);
-            var worksheet = deserializationResult.Worksheet;
-            var returnValue = ImportExcelAttributes(
-                keyColumnName,
-                inspectionDateColumnName,
-                spatialWeightingValue,
-                worksheet);
-            return returnValue;
-        }
-
         public AttributesImportResultDTO ImportExcelAttributes(
             string keyColumnName,
             string inspectionDateColumnName,

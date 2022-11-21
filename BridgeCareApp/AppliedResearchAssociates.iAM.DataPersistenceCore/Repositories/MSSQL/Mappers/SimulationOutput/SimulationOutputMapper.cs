@@ -49,6 +49,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var domain = new SimulationOutput
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
+                LastModifiedDate = entity.LastModifiedDate,
             };
             var years = SimulationYearDetailMapper.ToDomainListWithoutAssets(entity.Years, attributeNameLookup);
             domain.Years.AddRange(years);

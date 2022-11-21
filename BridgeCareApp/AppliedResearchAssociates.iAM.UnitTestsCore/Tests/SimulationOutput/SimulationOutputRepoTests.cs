@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
@@ -75,6 +76,22 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             SimulationOutputAssertions.SameSimulationOutput(simulationOutput, loadedOutput);
+        }
+
+        [Fact]
+        public async Task SaveSimulationOutput_ThenLoad_LastModifiedDate_Expected()
+        {
+            var numberOfYears = 1;
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            await Task.Delay(100);
+            var startDate = DateTime.Now;
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var endDate = DateTime.Now;
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var lastModifiedDate = loadedOutput.LastModifiedDate;
+            DateTimeAssertions.Between(startDate, endDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
         }
     }
 }

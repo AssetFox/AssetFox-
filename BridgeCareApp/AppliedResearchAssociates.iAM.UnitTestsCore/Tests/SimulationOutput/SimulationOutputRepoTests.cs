@@ -36,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
-            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
 
         [Theory]
@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
-            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
 
         [Fact (Skip = "May be slow, depending on the batch size")]

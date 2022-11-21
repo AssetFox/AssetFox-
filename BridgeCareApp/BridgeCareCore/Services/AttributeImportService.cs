@@ -129,8 +129,12 @@ namespace BridgeCareCore.Services
                     {
                         var attribute = columnIndexAttributeDictionary[attributeColumnIndex];
                         var attributeValue = GetCellValueOrNull(worksheet, attributeColumnIndex, assetRowIndex);
-                        var attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
-                        if (attributeDatum == null)
+                        IAttributeDatum attributeDatum = null;
+                        try
+                        {
+                            attributeDatum = CreateAttributeDatum(attribute, attributeValue, maintainableAssetId, location, inspectionDate);
+                        }
+                        catch
                         {
                             var warningMessage = $@"{FailedToCreateAValidAttributeDatum} at row {assetRowIndex} column {attributeColumnIndex}. The spreadsheet value was ""{attributeValue}.""";
                             return new AttributesImportResultDTO
@@ -188,7 +192,6 @@ namespace BridgeCareCore.Services
 
         private IAttributeDatum CreateAttributeDatum(AttributeDTO attribute, object attributeValue, Guid maintainableAssetId, Location location, DateTime inspectionDate)
         {
-            // Currently returns null if we fail. Not sure if that's the right end state.
             var domainAttribute = AttributeMapper.ToDomain(attribute, _unitOfWork.EncryptionKey);
             var attributeId = Guid.NewGuid();
             var attributeType = domainAttribute.DataType;

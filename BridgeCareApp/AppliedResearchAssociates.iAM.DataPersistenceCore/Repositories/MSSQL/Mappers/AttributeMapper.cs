@@ -99,15 +99,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             case "number":
                 return ToNumeric(dto, encryptionKey);
             }
-            return null;
+            throw new InvalidOperationException("Unknown attribute type {dto.Type}");
         }
-
-       
-        public static List<Attribute> ToDomainListButDiscardBad(IList<AttributeDTO> attributeDTOs, string encryptionKey)
+        
+        public static List<Attribute> ToDomainList(IList<AttributeDTO> attributeDTOs, string encryptionKey)
         {
             var returnValue = attributeDTOs
                 .Select(dto => ToDomain(dto, encryptionKey))
-                .Where(r => r != null)
                 .ToList();
             return returnValue;
         }

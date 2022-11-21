@@ -165,6 +165,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
+                .Include(so => so.Simulation)
                 .Where(_ => _.SimulationId == simulationId)
                 .AsNoTracking()
                 .ToList();

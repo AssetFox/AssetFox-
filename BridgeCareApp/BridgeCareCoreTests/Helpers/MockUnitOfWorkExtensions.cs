@@ -25,5 +25,10 @@ namespace BridgeCareCoreTests.Helpers
         {
             mockunitOfWork.Setup(u => u.InvestmentPlanRepo).Returns(mockInvestmentPlanRepository.Object);
         }
+
+        public static void SetupTreatmentRepo(this Mock<IUnitOfWork> mockUnitOfWork, Mock<ITreatmentLibraryUserRepository> mockTreatmentRepository)
+        {
+            mockUnitOfWork.Setup(u => u.TreatmentLibraryUserRepo).Returns(mockTreatmentRepository.Object);
+        }
     }
 }

@@ -445,7 +445,7 @@ export default class BudgetPriorityEditor extends Vue {
             BudgetPriorityService.getScenarioBudgetPriorityPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = sortByProperty("priorityLevel", data.items);
+                    this.currentPage = data.items;
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }
@@ -750,7 +750,6 @@ export default class BudgetPriorityEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();
                 this.librarySelectItemValue = null;
-                this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
             }           
         });

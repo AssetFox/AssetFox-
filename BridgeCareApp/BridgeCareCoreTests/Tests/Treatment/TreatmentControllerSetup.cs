@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -13,6 +14,7 @@ using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils;
 using BridgeCareCoreTests.Tests.SecurityUtilsClasses;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Moq;
 
 namespace BridgeCareCoreTests.Tests.Treatment
@@ -25,7 +27,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Mock<ITreatmentService> treatmentServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Admin();
-            var controller = CreateController(unitOfWork, claims, hubServiceMock, treatmentServiceMock);
+            var controller = CreateController(unitOfWork, claims, new Mock<IHubService>(), treatmentServiceMock);
             return controller;
         }
 
@@ -35,7 +37,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Mock<ITreatmentService> treatmentServiceMock = null)
         {
             var claims = SystemSecurityClaimLists.Empty();
-            var controller = CreateController(unitOfWork, claims, hubServiceMock, treatmentServiceMock);
+            var controller = CreateController(unitOfWork, claims, new Mock<IHubService>(), treatmentServiceMock);
             return controller;
         }
         public static TreatmentController CreateController(
@@ -46,7 +48,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             )
         {
             var accessor = HttpContextAccessorMocks.WithClaims(contextAccessorClaims);
-            return CreateController(unitOfWork, accessor, hubServiceMock, treatmentServiceMock);
+            return CreateController(unitOfWork, accessor, new Mock<IHubService>(), treatmentServiceMock);
         }
         public static TreatmentController CreateController(
             Mock<IUnitOfWork> unitOfWork,
@@ -55,6 +57,8 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Mock<ITreatmentService> treatmentServiceMock = null
             )
         {
+            var mockedContext = new Mock<IAMContext>();
+            var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
             Mock<UnitOfDataPersistenceWork> unitOfPWork= new Mock<UnitOfDataPersistenceWork>();
             var resolveHubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
             var security = EsecSecurityMocks.Dbe;
@@ -64,7 +68,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
             var controller = new TreatmentController(
                 resolveTreatmentServiceMock.Object,
                 security,
-                unitOfPWork.Object,
+                mockedRepo,
                 resolveHubService.Object,
                 contextAccessor,
                 claimHelper);

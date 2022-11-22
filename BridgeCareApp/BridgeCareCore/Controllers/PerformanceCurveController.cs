@@ -81,7 +81,7 @@ namespace BridgeCareCore.Controllers
                 var result = new List<PerformanceCurveLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = GetAllPerformanceCurveLibraries();
+                    result = UnitOfWork.PerformanceCurveRepo.GetPerformanceCurveLibrariesNoPerformanceCurves();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();

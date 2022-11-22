@@ -80,7 +80,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.User)
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username).ToList();
+                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username)
+                .OrderByDescending(s => s.LastModifiedDate)
+                .ToList();
 
             return simulations;
         }
@@ -99,7 +101,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     hasAdminAccess ||
                     hasSimulationAccess ||
                     _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    ).ToList();
+                    )
+                .OrderByDescending(s => s.LastModifiedDate)
+                .ToList();
             return simulations;
         }
 

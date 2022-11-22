@@ -26,19 +26,11 @@ export interface Budget {
     criterionLibrary: CriterionLibrary;
 }
 
-export interface BudgetLibraryUser {
-    userId: string;
-    username: string;
-    canModify: boolean;
-    isOwner: boolean;
-}
-
 export interface BudgetLibrary {
     id: string;
     name: string;
     description: string;
     budgets: Budget[];
-    users: BudgetLibraryUser[];
     appliedScenarioIds: string[];
     owner?: string;
     isShared: boolean;
@@ -83,17 +75,9 @@ export const emptyBudgetLibrary: BudgetLibrary = {
     name: '',
     description: '',
     budgets: [],
-    users: [],
     appliedScenarioIds: [],
     isShared: false
 };
-
-export const emptyBudgetLibraryUsers: BudgetLibraryUser[] = [{
-    userId: '',
-    username: '',
-    canModify: false,
-    isOwner: false
-}];
 
 export const emptyBudget: Budget = {
     id: getBlankGuid(),

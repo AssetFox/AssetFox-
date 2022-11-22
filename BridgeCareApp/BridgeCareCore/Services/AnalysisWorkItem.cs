@@ -116,7 +116,7 @@ namespace BridgeCareCore.Services
                     break;
 
                 case ProgressStatus.Completed:
-                    simulationAnalysisDetail.Status = $"Simulation complete. 100%";
+                    simulationAnalysisDetail.Status = $"Analysis complete. Preparing to save to database.";
                     UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
                     var hubServiceLogger = new HubServiceLogger(_hubService, HubConstant.BroadcastScenarioStatusUpdate, _unitOfWork.CurrentUser?.Username);

@@ -78,8 +78,10 @@ export interface CalculatedAttributePagingSyncModel{
     addedPairs: { [key: string]: CriterionAndEquationSet[]; }
     updatedPairs: { [key: string]: CriterionAndEquationSet[]; }
     deletedPairs: { [key: string]: string[]; }
+    defaultEquations: { [key: string]: CriterionAndEquationSet; }
 }
 
 export interface calculcatedAttributePagingPageModel extends PagingPage<CriterionAndEquationSet>{
     calculationTiming: Timing;
+    defaultEquation: CriterionAndEquationSet
 }

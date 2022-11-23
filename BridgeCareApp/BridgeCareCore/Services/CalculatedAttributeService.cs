@@ -21,6 +21,7 @@ using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 using OfficeOpenXml;
 using BridgeCareCore.Interfaces.DefaultData;
+using NuGet.Versioning;
 
 namespace BridgeCareCore.Services
 {
@@ -63,7 +64,9 @@ namespace BridgeCareCore.Services
             var attributes = request.LibraryId == null ?
                     _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationId).ToList() :
                     _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(request.LibraryId.Value).CalculatedAttributes.ToList();
-            if(request.LibraryId != null)
+            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
+            attributes = SyncedDataset(attributes, request);
+            if (request.LibraryId != null)
             {
                 attributes.ForEach(_ =>
                 {
@@ -78,8 +81,8 @@ namespace BridgeCareCore.Services
                     });
                 });
             }
-            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
-            return SyncedDataset(attributes, request);
+
+            return attributes;
         }
 
         public List<CalculatedAttributeDTO> GetSyncedLibraryDataset(Guid libraryId, CalculatedAttributePagingSyncModel request)
@@ -141,6 +144,19 @@ namespace BridgeCareCore.Services
                     }
                     attribute.Equations = equations;
                 }
+                if(syncModel.DefaultEquations.ContainsKey(attribute.Id))
+                {
+                    var equations = attribute.Equations.ToList();
+                    var defaultEquation = equations.FirstOrDefault(_ => _.Id == syncModel.DefaultEquations[attribute.Id].Id);
+                    if(defaultEquation != null)
+                    {
+                        equations[equations.FindIndex(_ => _.Id == defaultEquation.Id)] = syncModel.DefaultEquations[attribute.Id];
+                    }
+                    else
+                        equations.Add(syncModel.DefaultEquations[attribute.Id]);
+
+                    attribute.Equations = equations;
+                }
                     
             }
 
@@ -152,14 +168,43 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<CalculatedAttributeEquationCriteriaPairDTO>();
+
+            CalculatedAttributeEquationCriteriaPairDTO defaultEquation = null;
             var equations = attribute.Equations.ToList();
+
+            if (request.SyncModel.DefaultEquations.ContainsKey(attribute.Id))
+            {
+                defaultEquation = request.SyncModel.DefaultEquations[attribute.Id];
+            }
+            else
+            {
+                defaultEquation = equations.FirstOrDefault(_ => (_.Equation != null && _.Equation.Expression.Trim() != "") &&
+                (_.CriteriaLibrary == null || _.CriteriaLibrary.MergedCriteriaExpression.Trim() == ""));
+                if (defaultEquation == null)
+                {
+                    defaultEquation.Id = Guid.NewGuid();
+                    defaultEquation.Equation.Id = Guid.NewGuid();
+                }
+                else
+                {
+                    equations.Remove(defaultEquation);
+                    attribute.Equations = equations;
+                }
+            }
+                                                
+            attribute = SyncedDataset(new List<CalculatedAttributeDTO>() { attribute }, request.SyncModel).First();
+
+            equations = attribute.Equations.ToList();
+
+            if(request.SyncModel.DefaultEquations.ContainsKey(attribute.Id))
+                equations.RemoveAt(equations.FindIndex(_ => _.Id == defaultEquation.Id));
+
             if (request.search != null && request.search.Trim() != "")
                 equations = SearchRows(equations, request.search);
             if (request.sortColumn != null && request.sortColumn.Trim() != "")
                 equations = OrderByColumn(equations, request.sortColumn, request.isDescending);
 
             attribute.Equations = equations;
-            attribute = SyncedDataset(new List<CalculatedAttributeDTO>() { attribute }, request.SyncModel).First();
 
             if (request.RowsPerPage > 0)
             {
@@ -174,7 +219,8 @@ namespace BridgeCareCore.Services
                 {
                     CalculationTiming = attribute.CalculationTiming,
                     Items = items,
-                    TotalItems = attribute.Equations.Count
+                    TotalItems = attribute.Equations.Count,
+                    DefaultEquation = defaultEquation
                 };
             }
 
@@ -182,7 +228,8 @@ namespace BridgeCareCore.Services
             {
                 CalculationTiming = attribute.CalculationTiming,
                 Items = items,
-                TotalItems = attribute.Equations.Count
+                TotalItems = attribute.Equations.Count,
+                DefaultEquation = defaultEquation
             };
         }
     }

@@ -57,21 +57,13 @@ namespace BridgeCareCoreTests.Tests.Treatment
             Mock<ITreatmentService> treatmentServiceMock = null
             )
         {
-            var mockedContext = new Mock<IAMContext>();
-            var mockedRepo = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, mockedContext.Object);
-            Mock<UnitOfDataPersistenceWork> unitOfPWork= new Mock<UnitOfDataPersistenceWork>();
-            var resolveHubService = hubServiceMock ?? HubServiceMocks.DefaultMock();
-            var security = EsecSecurityMocks.Dbe;
             var simulationQueueService = new Mock<ISimulationQueueService>();
             var claimHelper = new ClaimHelper(unitOfWork.Object, simulationQueueService.Object, contextAccessor);
-            var resolveTreatmentServiceMock = treatmentServiceMock ?? TreatmentServiceMocks.EmptyMock;
-            var controller = new TreatmentController(
-                resolveTreatmentServiceMock.Object,
-                security,
-                mockedRepo,
-                resolveHubService.Object,
-                contextAccessor,
-                claimHelper);
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, claimHelper);
+
             return controller;
 
         }

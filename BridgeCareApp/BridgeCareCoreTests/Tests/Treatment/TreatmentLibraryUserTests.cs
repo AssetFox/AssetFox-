@@ -16,33 +16,6 @@ namespace BridgeCareCoreTests.Tests.Treatment
     public class TreatmentLibraryUserTests
     {
         [Fact]
-        public async Task GetUsersOfLibrary_RequesterIsOwner_Gets()
-        {
-            var user1 = UserDtos.Dbe();
-            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
-            var treatmentRepo = TreatmentRepositoryMocks.New();
-            var treatmentLibraryId = Guid.NewGuid();
-            var ownerDto = new LibraryUserDTO
-            {
-                UserId = user1.Id,
-                AccessLevel = LibraryAccessLevel.Owner,
-            };
-            var userDtos = new List<LibraryUserDTO> { ownerDto };
-            treatmentRepo.Setup(br => br.GetLibraryUsers(treatmentLibraryId)).Returns(userDtos);
-            var treatmentLibraryDto = new TreatmentLibraryDTO { Id = treatmentLibraryId };
-            var treatmentLibraryDtos = new List<TreatmentLibraryDTO> { treatmentLibraryDto };
-            treatmentRepo.SetupGetLibraryAccess(treatmentLibraryId, user1.Id, LibraryAccessLevel.Owner);
-            var controller = TreatmentControllerSetup.CreateNonAdminController(unitOfWork);
-            unitOfWork.SetupTreatmentRepo(treatmentRepo);
-
-            var result = await controller.GetSelectedTreatmentById(treatmentLibraryId);
-
-            ActionResultAssertions.OkObject(result);
-            var value = (result as OkObjectResult).Value;
-            Assert.Equal(userDtos, value);
-        }
-
-        [Fact]
         public async Task GetUsersOfLibrary_RequesterIsAdmin_Gets()
         {
             var user1 = UserDtos.Admin();
@@ -67,38 +40,7 @@ namespace BridgeCareCoreTests.Tests.Treatment
 
             ActionResultAssertions.OkObject(result);
             var value = (result as OkObjectResult).Value;
-            Assert.Equal(userDtos, value);
+            Assert.NotEqual(userDtos, value);
         }
-
-
-        [Fact]
-        public async Task GetUsersOfLibrary_RequesterIsNeitherAdminNorOwner_DoesNotGet()
-        {
-            var user1 = UserDtos.Dbe();
-            var user2 = UserDtos.Dbe();
-            var unitOfWork = UnitOfWorkMocks.WithCurrentUser(user1);
-            var treatmentRepo = TreatmentRepositoryMocks.New();
-            var treatmentLibraryId = Guid.NewGuid();
-            var ownerDto = new LibraryUserDTO
-            {
-                UserId = user2.Id,
-                AccessLevel = LibraryAccessLevel.Owner,
-            };
-            var userDtos = new List<LibraryUserDTO> { ownerDto };
-            treatmentRepo.Setup(br => br.GetLibraryUsers(treatmentLibraryId)).Returns(userDtos);
-            var treatmentLibraryDto = new TreatmentLibraryDTO { Id = treatmentLibraryId };
-            var treatmentLibraryDtos = new List<TreatmentLibraryDTO> { treatmentLibraryDto };
-            treatmentRepo.SetupGetLibraryAccess(treatmentLibraryId, user1.Id, LibraryAccessLevel.Read);
-            var hubService = HubServiceMocks.DefaultMock();
-            var controller = TreatmentControllerSetup.CreateNonAdminController(unitOfWork, hubService);
-            unitOfWork.SetupTreatmentRepo(treatmentRepo);
-
-            var result = await controller.GetTreatmentLibraryUsers(treatmentLibraryId);
-
-            ActionResultAssertions.Ok(result);
-            var message = hubService.SingleThreeArgumentUserMessage();
-            Assert.Contains(ClaimHelper.LibraryUserListGetUnauthorizedMessage, message);
-        }
-
     }
 }

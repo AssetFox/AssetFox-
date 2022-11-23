@@ -304,9 +304,6 @@ const actions = {
                 hasValue(response, 'status') &&
                 http2XX.test(response.status.toString())
                 ) {
-                    dispatch('addSuccessNotification', {
-                        message: 'Treatment Library Users Changed.',
-                    });
                 }
         });
     },

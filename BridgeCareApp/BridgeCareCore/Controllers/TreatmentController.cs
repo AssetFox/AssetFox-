@@ -25,6 +25,7 @@ using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Utils;
 using Humanizer;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace BridgeCareCore.Controllers
 {
@@ -725,6 +726,7 @@ namespace BridgeCareCore.Controllers
         [Authorize]
         public async Task<IActionResult> GetIsSharedLibrary(Guid treatmentLibraryId)
         {
+            bool result = true;
             try
             {
                 await Task.Factory.StartNew(() =>
@@ -732,14 +734,14 @@ namespace BridgeCareCore.Controllers
                     var users = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryUsers(treatmentLibraryId);
                     if (users.Count > 0)
                     {
-                        return new JsonResult(true);
+                        result = true;
                     }
                     else
                     {
-                        return new JsonResult(false);
+                        result = false;
                     }
                 });
-                return Ok();
+                return Ok(result);
             }
             catch (Exception)
             {

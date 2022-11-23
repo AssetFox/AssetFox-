@@ -77,9 +77,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? "Y" : "N";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding185(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding581(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFunding183(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? "Y" : "N";
 
             worksheet.Cells[row, columnNo++].Value = Year;
 
@@ -266,9 +266,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "NHPP", // Six sub-sections for "Bridge Funding"
                 "STP",
                 "BOF",
-                "185", 
-                "581",
-                "183",
+                "BRIP", 
+                "STATE",
+                "N/A",
             };
         }
     }

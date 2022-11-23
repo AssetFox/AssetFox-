@@ -464,7 +464,8 @@ export default class InvestmentEditor extends Vue {
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 } : this.investmentPlan,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -538,8 +539,6 @@ export default class InvestmentEditor extends Vue {
 
     @Watch('selectedBudgetYearsGridData')
    onSelectedRowsChanged() {
-        // this.selectedBudgetYearsGridDataWithoutShift = clone(this.selectedBudgetYearsGridData);
-        // this.selectedBudgetYearsGridDataWithoutShift.forEach(_ => _.year - this.firstYearOfAnalysisPeriodShift);
         this.selectedBudgetYears = getPropertyValues('year', this.selectedBudgetYearsGridData) as number[];
      }
 
@@ -603,9 +602,6 @@ export default class InvestmentEditor extends Vue {
     @Watch('firstYearOfAnalysisPeriodShift')
     onFirstYearOfAnalysisPeriodShiftChanged(){
         this.setGridData();
-        // this.selectedBudgetYearsGridData = clone(this.selectedBudgetYearsGridDataWithoutShift);
-        // this.selectedBudgetYearsGridData.forEach(_ => _.year = _.year + this.firstYearOfAnalysisPeriodShift);
-        // this.onSelectedRowsChanged();
     }
 
     onRemoveBudgetYears() {
@@ -766,7 +762,7 @@ export default class InvestmentEditor extends Vue {
 
     syncInvestmentPlanWithBudgets() {//this gets call in on pagination now       
         this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
-        this.investmentPlan.firstYearOfAnalysisPeriod = this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
+        this.investmentPlan.firstYearOfAnalysisPeriod = +this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
         this.investmentPlan.firstYearOfAnalysisPeriod += this.firstYearOfAnalysisPeriodShift;
     }
 
@@ -781,7 +777,6 @@ export default class InvestmentEditor extends Vue {
         this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
 
         if (!isNil(budgetLibrary)) {
-            this.upsertBudgetLibraryAction(budgetLibrary);
             this.hasCreatedLibrary = true;
             this.librarySelectItemValue = budgetLibrary.id;
             const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -796,6 +791,7 @@ export default class InvestmentEditor extends Vue {
                     deletionyears: budgetLibrary.budgets === [] ? [] : this.deletionYears,
                     updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
                     addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
+                    firstYearAnalysisBudgetShift: 0
                 }
             }
             // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
@@ -1075,12 +1071,14 @@ export default class InvestmentEditor extends Vue {
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 },
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift 
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.investmentPlanMutator(this.investmentPlan)
-                this.clearChanges()               
+                this.firstYearOfAnalysisPeriodShift = 0;
+                this.investmentPlanMutator(this.investmentPlan)                
+                this.clearChanges();               
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified investment"});
                 this.librarySelectItemValue = null
@@ -1098,7 +1096,8 @@ export default class InvestmentEditor extends Vue {
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: 0 
             }
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1266,6 +1265,7 @@ export default class InvestmentEditor extends Vue {
         const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
         const stateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
+                firstYearOfAnalysisPeriod: +clonedStateInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
@@ -1273,6 +1273,7 @@ export default class InvestmentEditor extends Vue {
         const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
             const investmentPlan: InvestmentPlan = {
                 ...clonedInvestmentPlan,
+                firstYearOfAnalysisPeriod: +clonedInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
@@ -1302,7 +1303,8 @@ export default class InvestmentEditor extends Vue {
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: 0
             },           
             sortColumn: 'year',
             isDescending: false,

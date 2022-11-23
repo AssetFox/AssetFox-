@@ -738,7 +738,19 @@ namespace BridgeCareCore.Services
             var budgets = request.LibraryId == null ?
                     _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                     _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
-            return SyncedDataset(budgets, request);
+            budgets =  SyncedDataset(budgets, request);
+
+            if(request.LibraryId != null)
+            {
+                budgets.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.BudgetAmounts.ForEach(__ => __.Id = Guid.NewGuid());
+                });
+            }
+
+            budgets.ForEach(_ => _.BudgetAmounts.ForEach(__ => __.Year += request.FirstYearAnalysisBudgetShift));
+            return budgets;
         }
 
         public List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request)

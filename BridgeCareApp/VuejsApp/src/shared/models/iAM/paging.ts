@@ -59,6 +59,7 @@ export interface InvestmentPagingSyncModel{
     deletionyears: number[];
     updatedBudgetAmounts: { [key: string]: BudgetAmount[]; }
     addedBudgetAmounts: { [key: string]: BudgetAmount[]; }
+    firstYearAnalysisBudgetShift: number;
 }
 
 //CalculatedAttributes

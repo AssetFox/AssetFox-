@@ -193,11 +193,7 @@
                 class="ghd-text-field-border"
                 rows="4"
                 v-model="selectedCalculatedAttributeLibrary.description"
-                @input="
-                    selectedCalculatedAttributeLibrary = {
-                        ...selectedCalculatedAttributeLibrary,
-                        description: $event,
-                    }"/>
+                @input='checkHasUnsavedChanges()'/>
         </v-flex>
         <!-- buttons -->
         <v-flex xs12 v-show="hasSelectedLibrary || hasScenario">
@@ -585,7 +581,7 @@ export default class CalculatedAttributeEditor extends Vue {
     @Watch('isDefaultBool')
     onIsDefaultBoolChanged(){
         this.selectedCalculatedAttributeLibrary.isDefault = this.isDefaultBool;
-        this.onSelectedCalculatedAttributeLibraryChanged();
+        this.checkHasUnsavedChanges()
     }
     @Watch('stateCalculatedAttributes')
     onStateCalculatedAttributesChanged() {
@@ -883,6 +879,7 @@ export default class CalculatedAttributeEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
+                this.calculatedAttributeLibraryMutateActions(this.selectedCalculatedAttributeLibrary)
                 this.selectedCalculatedAttributeLibraryMutation(this.selectedCalculatedAttributeLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated calculated attribute library",});
             }   
@@ -1388,7 +1385,8 @@ export default class CalculatedAttributeEditor extends Vue {
             this.updatedPairs.size > 0 || 
             this.addedCalcAttr.length > 0 ||
             this.defaultEquations.size > 0 ||
-            (this.hasScenario && this.hasSelectedLibrary) 
+            (this.hasScenario && this.hasSelectedLibrary) ||
+            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedCalculatedAttributeLibrary, this.stateSelectedCalculatedAttributeLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 

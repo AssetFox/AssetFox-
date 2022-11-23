@@ -649,6 +649,10 @@ export default class InvestmentEditor extends Vue {
             })
             if(val.length == 0)
                 this.addedBudgetAmounts.delete(key)
+            else
+            {
+                this.addedBudgetAmounts.set(key, val)
+            }
         }
         if(isyearAdded){
             this.onPaginationChanged();
@@ -732,7 +736,7 @@ export default class InvestmentEditor extends Vue {
 
     setGridData() {
         this.budgetYearsGridData = [];
-        if(this.currentPage.length < 0)
+        if(this.currentPage.length <= 0)
             return;
         for(let i = 0; i < this.currentPage[0].budgetAmounts.length; i++){
             let year = this.currentPage[0].budgetAmounts[i].year
@@ -805,7 +809,7 @@ export default class InvestmentEditor extends Vue {
 
     getNextYear(): number {
         const latestYear: number = this.lastYear;
-        const nextYear = hasValue(latestYear) ? latestYear + 1 : moment().year();
+        const nextYear = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
         return nextYear;
     }
 
@@ -866,7 +870,7 @@ export default class InvestmentEditor extends Vue {
 
         if (this.range > 0) {
             const latestYear: number = this.lastYear;
-            const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
+            const startYear: number = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
             const endYear = moment().year(startYear).add(this.range, 'years').year();
 
             const budgets: Budget[] = clone(this.currentPage);

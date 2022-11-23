@@ -24,6 +24,7 @@ using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.Hubs.Services;
 using BridgeCareCore.Utils;
 using Humanizer;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 
 namespace BridgeCareCore.Controllers
 {
@@ -53,10 +54,13 @@ namespace BridgeCareCore.Controllers
                 var result = new List<TreatmentLibraryDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        result = result.Where(_ => _.Owner == UserId || _.IsShared == true).ToList();
+                        result = UnitOfWork.SelectableTreatmentRepo.GetTreatmentLibrariesNoChildrenAccessibleToUser(UserId);
+                    }
+                    else
+                    {
+                        result = UnitOfWork.SelectableTreatmentRepo.GetAllTreatmentLibrariesNoChildren();
                     }
                 });
 
@@ -327,6 +331,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
+                    var libraryAccess = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(upsertRequest.Library.Id, UserId);
                     var dto = _treatmentService.GetSyncedLibraryDataset(upsertRequest);
                     if (dto != null)
                     {
@@ -334,6 +339,11 @@ namespace BridgeCareCore.Controllers
                     }
                     UnitOfWork.SelectableTreatmentRepo.UpsertTreatmentLibrary(dto);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteTreatments(dto.Treatments, dto.Id);
+                    if (upsertRequest.IsNewLibrary)
+                    {
+                        var users = LibraryUserDtolists.OwnerAccess(UserId);
+                        UnitOfWork.TreatmentLibraryUserRepo.UpsertOrDeleteUsers(dto.Id, users);
+                    }
                     UnitOfWork.Commit();
                 });
 
@@ -418,24 +428,21 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    if (_claimHelper.RequirePermittedCheck())
-                    {
-                        var dto = GetAllTreatmentLibraries().FirstOrDefault(_ => _.Id == libraryId);
-                        if (dto == null) return;
-                        _claimHelper.OldWayCheckUserLibraryModifyAuthorization(dto.Owner, UserId);
-                    }
+                    var access = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(libraryId, UserId);
+                    _claimHelper.CheckUserLibraryDeleteAuthorization(access, UserId);
                     UnitOfWork.SelectableTreatmentRepo.DeleteTreatmentLibrary(libraryId);
                     UnitOfWork.Commit();
                 });
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
+                UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {HubService.errorList["Exception"]}");
@@ -476,7 +483,8 @@ namespace BridgeCareCore.Controllers
                         var existingTreatmentLibrary = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibary(treatmentLibraryId);
                         if (existingTreatmentLibrary != null)
                         {
-                            _claimHelper.OldWayCheckUserLibraryModifyAuthorization(existingTreatmentLibrary.Owner, UserId);
+                            var accessModel = UnitOfWork.TreatmentLibraryUserRepo.GetLibraryAccess(treatmentLibraryId, UserId);
+                            _claimHelper.CheckUserLibraryRecreateAuthorization(accessModel, UserId);
                         }
                     }
                     result = _treatmentService.ImportLibraryTreatmentsFile(treatmentLibraryId, excelPackage);

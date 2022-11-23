@@ -51,14 +51,6 @@
                         </v-btn>
 
                         </div>  
-                        <!-- <div style="margin-top: -8px !important">                     
-                        <v-checkbox
-                            class='sharing ghd-control-text ghd-padding'
-                            label='Shared'                            
-                            v-model='selectedTreatmentLibrary.isShared'
-                            @change="checkHasUnsavedChanges()" 
-                        /> 
-                        </div> -->
                     </v-layout>
                 </v-flex>
                 <v-flex xs2>
@@ -747,7 +739,7 @@ export default class TreatmentEditor extends Vue {
                 });
                 //update budget library sharing
                 this.upsertOrDeleteTreatmentLibraryUsersAction({libraryId: this.selectedTreatmentLibrary.id, proposedUsers: libraryUserData});
-                this.selectedTreatmentLibrary.isShared = this.shareTreatmentLibraryDialogData.treatmentLibrary.isShared;
+                this.getIsSharedLibraryAction(this.selectedTreatmentLibrary).then(this.isShared = this.isSharedLibrary);
                 this.onUpsertTreatmentLibrary();
         }
     }

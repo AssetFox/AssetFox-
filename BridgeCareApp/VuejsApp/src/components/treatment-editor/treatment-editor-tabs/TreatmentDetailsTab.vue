@@ -231,7 +231,7 @@ export default class TreatmentDetailsTab extends Vue {
     onShowTreatmentCriterionEditorDialog() {
         this.treatmentCriterionEditorDialogData = {
             showDialog: true,
-            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.id
+            CriteriaExpression: this.selectedTreatmentDetails.criterionLibrary.mergedCriteriaExpression
         };
     }
 

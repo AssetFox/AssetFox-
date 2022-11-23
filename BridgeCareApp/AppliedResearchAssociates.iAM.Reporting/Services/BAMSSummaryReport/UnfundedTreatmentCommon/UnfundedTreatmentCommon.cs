@@ -58,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var deckArea = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA");
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
-            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? "Y" : "N"; // Large Bridge
+            worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? BAMSConstants.Yes : BAMSConstants.No; // Large Bridge
 
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE"); // TODO text STRUCTURE_TYPE
 
@@ -74,12 +74,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 
 
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? "Y" : "N";
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? "Y" : "N";
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? BAMSConstants.Yes : BAMSConstants.No;
 
             worksheet.Cells[row, columnNo++].Value = Year;
 

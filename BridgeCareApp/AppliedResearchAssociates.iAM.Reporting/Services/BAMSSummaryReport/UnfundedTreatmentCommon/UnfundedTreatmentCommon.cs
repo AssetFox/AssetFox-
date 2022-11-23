@@ -28,18 +28,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
 
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BMSID");
 
-            var lat = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LAT");
-            var @long = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LONG");
+            var latitude = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LAT");
+            var longitude = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LONG");
 
             // LAT and LONG appear to be in Degree/Minute/Second form, but concatenated into a single number without delimiters.
 
-            var lat_degrees = Math.Floor(lat / 10_000);
-            var lat_minutes = Math.Floor((lat - 10_000 * lat_degrees) / 100);
-            var lat_seconds = lat - 10_000 * lat_degrees - 100 * lat_minutes;
+            var lat_degrees = Math.Floor(latitude / 10_000);
+            var lat_minutes = Math.Floor((latitude - 10_000 * lat_degrees) / 100);
+            var lat_seconds = latitude - 10_000 * lat_degrees - 100 * lat_minutes;
 
-            var long_degrees = Math.Floor(@long / 10_000);
-            var long_minutes = Math.Floor((@long - 10_000 * long_degrees) / 100);
-            var long_seconds = @long - 10_000 * long_degrees - 100 * long_minutes;
+            var long_degrees = Math.Floor(longitude / 10_000);
+            var long_minutes = Math.Floor((longitude - 10_000 * long_degrees) / 100);
+            var long_seconds = longitude - 10_000 * long_degrees - 100 * long_minutes;
 
             var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"N";
             var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"W";

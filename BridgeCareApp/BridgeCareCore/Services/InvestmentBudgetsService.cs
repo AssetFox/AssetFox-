@@ -795,12 +795,12 @@ namespace BridgeCareCore.Services
                     budget.Name = item.Name;
                     budget.BudgetOrder = item.BudgetOrder;
                     budget.CriterionLibrary = item.CriterionLibrary;
-                }
-                if(syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))
-                    budget.BudgetAmounts = budget.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[budget.Name]).ToList();
+                }               
                 if(syncModel.Deletionyears.Count != 0)
                     budget.BudgetAmounts = budget.BudgetAmounts.Where(_ => !syncModel.Deletionyears.Contains(_.Year)).ToList();
-                if(syncModel.UpdatedBudgetAmounts.ContainsKey(budget.Name))
+                if (syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))
+                    budget.BudgetAmounts = budget.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[budget.Name]).ToList();
+                if (syncModel.UpdatedBudgetAmounts.ContainsKey(budget.Name))
                     for (var o = 0; o < budget.BudgetAmounts.Count; o++)
                     {
                         var amount = syncModel.UpdatedBudgetAmounts[budget.Name].FirstOrDefault(row => row.Id == budget.BudgetAmounts[o].Id);

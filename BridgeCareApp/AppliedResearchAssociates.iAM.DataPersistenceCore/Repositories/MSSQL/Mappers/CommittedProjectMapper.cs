@@ -160,6 +160,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
             committedProject.Cost = entity.Cost;
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
+            committedProject.LastModifiedDate = entity.LastModifiedDate;
 
             if (entity.CommittedProjectConsequences.Any())
             {

@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells["C2:J2"].Value = simulation.AnalysisMethod.Description;
             ExcelHelper.ApplyBorder(worksheet.Cells[2, 1, 2, 10]);
 
-            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, simulation.LastModifiedDate, reportOutputData.InitialAssetSummaries);
+            currentCell = FillData(worksheet, parametersModel, simulation.LastRun, currentCell, reportOutputData.LastModifiedDate, reportOutputData.InitialAssetSummaries, simulation.CommittedProjects, simulation.Treatments);
 
             currentCell = FillSimulationDetails(worksheet, simulationYearsCount, simulation, currentCell);
             currentCell = FillAnalysisDetails(worksheet, simulation, currentCell);
@@ -61,10 +61,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 
         #region
 
-        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate, List<AssetSummaryDetail> initialAssetSummaries)
+        private CurrentCell FillData(ExcelWorksheet worksheet, ParametersModel parametersModel, DateTime lastRun, CurrentCell currentCell, DateTime lastModifiedDate, List<AssetSummaryDetail> initialAssetSummaries, ICollection<CommittedProject> committedProjects, IReadOnlyCollection<SelectableTreatment> BAMStreatments)
         {
             var bpnValueCellTracker = new Dictionary<string, (int row, int col)>();
             var statusValueCellTracker = new Dictionary<string, (int row, int col)>();
+            var MPMSPullDate = committedProjects.OrderByDescending(c => c.LastModifiedDate).FirstOrDefault()?.LastModifiedDate;
 
             worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = "BridgeCare Rules Creator:";
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 1].Value = "Central Office";
@@ -72,9 +73,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[currentCell.Row + 3, currentCell.Column + 1].Value = lastModifiedDate.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column, currentCell.Row + 3, currentCell.Column + 1]);
 
-            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3].Value = "Simulation Last Run:";
-            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = lastRun.ToShortDateString();
-            ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 3, currentCell.Row + 2, currentCell.Column + 4]);
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = "MPMS Pull Date:";
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 5].Value = MPMSPullDate?.ToShortDateString();
+            ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4, currentCell.Row + 2, currentCell.Column + 5]);
+
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 8].Value = "Simulation Last Run:";
+            worksheet.Cells[currentCell.Row + 2, currentCell.Column + 9].Value = lastRun.ToShortDateString();
+            ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 8, currentCell.Row + 2, currentCell.Column + 9]);
 
             currentCell.Row += 5; // moving on to the "NHS" block
 
@@ -168,6 +173,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
+
+            //// TODO Move below to new private method?
+            // Treatments in Simulations: BAMS MPMS
+            var MPMSTreatments = committedProjects.Select(c => c.Name).ToList().Distinct();
+            // BAMStreatments // MPMSTreatments
+            ///
 
             rowNo = currentCell.Row + 8; // currentCell.Row is equal to 6
             ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5);

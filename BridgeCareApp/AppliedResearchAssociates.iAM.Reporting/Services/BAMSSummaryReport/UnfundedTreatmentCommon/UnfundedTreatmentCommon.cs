@@ -44,87 +44,118 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             var lat_string = $"{lat_degrees}°{lat_minutes}'{lat_seconds}\"N";
             var long_string = $"{long_degrees}°{long_minutes}'{long_seconds}\"W";
 
-            worksheet.Cells[row, columnNo].Hyperlink = new Uri($"https://www.google.com/maps/place/{lat_string},{long_string}", UriKind.Absolute);
+            worksheet.Cells[row, columnNo].Hyperlink = new Uri($"https://www.google.com/maps/place/{lat_string},{long_string}/data=!3m1!1e3", UriKind.Absolute);
             worksheet.Cells[row, columnNo].Style.Font.UnderLine = true;
-            worksheet.Cells[row, columnNo].Style.Font.Color.SetColor(Color.Blue); 
+            worksheet.Cells[row, columnNo].Style.Font.Color.SetColor(Color.Blue);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
+
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "LENGTH");
 
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             var deckArea = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA");
             worksheet.Cells[row, columnNo++].Value = deckArea;
 
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = deckArea >= 28500 ? BAMSConstants.Yes : BAMSConstants.No; // Large Bridge
 
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE"); // TODO text STRUCTURE_TYPE
+            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "STRUCTURE_TYPE");
 
             var functionalClassAbbr = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FUNC_CLASS");
             var functionalClassDescription = _summaryReportHelper.FullFunctionalClassDescription(functionalClassAbbr);
             worksheet.Cells[row, columnNo++].Value = functionalClassDescription;
 
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "INTERSTATE");
 
-            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.00";
+            worksheet.Cells[row, columnNo].Style.Numberformat.Format = "###,###,###,###,##0";
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "RISK_SCORE");
 
 
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingState(section) ? BAMSConstants.Yes : BAMSConstants.No;
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(section) ? BAMSConstants.Yes : BAMSConstants.No;
 
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = Year;
 
             var familyId = int.Parse(_summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FAMILY_ID"));
             if (familyId < 11)
             {
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_SEEDED");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_SEEDED");
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_DURATION_N");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "SUB_DURATION_N");
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // CULV_DURATION_N
             }
             else
             {
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // DECK_SEEDED
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUP_SEEDED
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUB_SEEDED
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_SEEDED"];
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // DECK_DURATION_N
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUP_DURATION_N
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = "N"; // SUB_DURATION_N
 
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0";
                 worksheet.Cells[row, columnNo++].Value = section.ValuePerNumericAttribute["CULV_DURATION_N"];
             }

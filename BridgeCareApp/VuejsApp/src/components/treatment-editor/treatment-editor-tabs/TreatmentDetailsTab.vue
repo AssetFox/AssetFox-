@@ -116,7 +116,7 @@
                                             class="ghd-white-bg ghd-blue ghd-button-text"
                                             icon
                                         >
-                                            Clear
+                                            <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-ban</v-icon>
                                         </v-btn>
                                         <v-btn
                                             @click="
@@ -124,6 +124,7 @@
                                             "
                                             class="edit-icon"
                                             icon
+                                            style="left:25px"
                                         >
                                             <img class='img-general' :src="require('@/assets/icons/edit.svg')"/>
                                         </v-btn>   

@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 TreatmentFundingIgnoresSpendingLimit = entity.TreatmentFundingIgnoresSpendingLimit,
                 TreatmentStatus = (TreatmentStatus)entity.TreatmentStatus,                
             };
-            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValues, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
+            AssetDetailValueMapper.AddToDictionaries(entity.AssetDetailValuesIntId, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
             var treatmentConsiderationDetails = TreatmentConsiderationDetailMapper.ToDomainList(entity.TreatmentConsiderationDetails);
             domain.TreatmentConsiderations.AddRange(treatmentConsiderationDetails);
             var treatmentOptionDetails = TreatmentOptionDetailMapper.ToDomainList(entity.TreatmentOptionDetails);

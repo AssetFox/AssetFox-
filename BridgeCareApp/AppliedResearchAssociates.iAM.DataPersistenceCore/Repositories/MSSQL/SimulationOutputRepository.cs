@@ -191,7 +191,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             domain.InitialAssetSummaries.AddRange(assetSummaryDomainDictionary.Values);
             var assetSummaryDetailValueConfig = new BulkConfig
             {
-                UpdateByProperties = new List<string> { nameof(AssetSummaryDetailValueEntity.AssetSummaryDetailId), nameof(AssetSummaryDetailValueEntity.AttributeId) }
+                UpdateByProperties = new List<string> { nameof(AssetSummaryDetailValueEntityIntId.AssetSummaryDetailId), nameof(AssetSummaryDetailValueEntityIntId.AttributeId) }
             };
             var assetSummaryDetailValueEntities = new List<AssetSummaryDetailValueEntityIntId>();
             foreach (var assetSummaryDetail in assetSummaryDetails)
@@ -255,12 +255,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     memos.Mark("  assetEntities");
                     AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
                     memos.Mark("  toDomainDictionary");
-                    var assetDetailValues = new List<AssetDetailValueEntity>();
+                    var assetDetailValues = new List<AssetDetailValueEntityIntId>();
                     foreach (var assetEntity in assetEntities)
                     {
                         foreach (var attributeId in usedAttributeIds)
                         {
-                            var assetDetail = new AssetDetailValueEntity
+                            var assetDetail = new AssetDetailValueEntityIntId
                             {
                                 AssetDetailId = assetEntity.Id,
                                 AttributeId = attributeId,
@@ -273,8 +273,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     {
                         UpdateByProperties = new List<string>
                         {
-                            nameof(AssetDetailValueEntity.AttributeId),
-                            nameof(AssetDetailValueEntity.AssetDetailId)
+                            nameof(AssetDetailValueEntityIntId.AttributeId),
+                            nameof(AssetDetailValueEntityIntId.AssetDetailId)
                         }
                     };
                     _unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
@@ -324,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Where(a => a.SimulationOutputId == simulationOutputId)
                 .AsNoTracking()
                 .FirstOrDefault();
-            foreach (var assetSummaryDetailValue in randomAssetSummary.AssetSummaryDetailValues)
+            foreach (var assetSummaryDetailValue in randomAssetSummary.AssetSummaryDetailValuesIntId)
             {
                 usedAttributeIds.Add(assetSummaryDetailValue.AttributeId);
             }

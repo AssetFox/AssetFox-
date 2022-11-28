@@ -95,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static void AddToDictionaries(
-            ICollection<AssetDetailValueEntity> entityCollection,
+            ICollection<AssetDetailValueEntityIntId> entityCollection,
             Dictionary<string, string> valuePerTextAttribute,
             Dictionary<string, double> valuePerNumericAttribute,
             Dictionary<Guid, string> attributeNameLookup)
@@ -118,7 +118,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static void AddToDictionary(
-            AssetDetailValueEntity entity,
+            AssetDetailValueEntityIntId entity,
             Dictionary<string, string> valuePerTextAttribute,
             Dictionary<string, double> valuePerNumericAttribute,
             Dictionary<Guid, string> attributeNameLookup)

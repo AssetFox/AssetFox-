@@ -12,6 +12,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public AssetSummaryDetailEntity()
         {
             AssetSummaryDetailValues = new HashSet<AssetSummaryDetailValueEntity>();
+            AssetSummaryDetailValuesIntId = new HashSet<AssetSummaryDetailValueEntityIntId>();
         }
 
         public Guid Id { get; set; }

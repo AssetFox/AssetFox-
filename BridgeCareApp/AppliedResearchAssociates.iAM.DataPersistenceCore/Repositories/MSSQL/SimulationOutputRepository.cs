@@ -193,12 +193,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 UpdateByProperties = new List<string> { nameof(AssetSummaryDetailValueEntity.AssetSummaryDetailId), nameof(AssetSummaryDetailValueEntity.AttributeId) }
             };
-            var assetSummaryDetailValueEntities = new List<AssetSummaryDetailValueEntity>();
+            var assetSummaryDetailValueEntities = new List<AssetSummaryDetailValueEntityIntId>();
             foreach (var assetSummaryDetail in assetSummaryDetails)
             {
                 foreach (var usedAttributeId in usedAttributeIds)
                 {
-                    assetSummaryDetailValueEntities.Add(new AssetSummaryDetailValueEntity
+                    assetSummaryDetailValueEntities.Add(new AssetSummaryDetailValueEntityIntId
                     {
                         AttributeId = usedAttributeId,
                         AssetSummaryDetailId = assetSummaryDetail.Id,
@@ -319,7 +319,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             var usedAttributeIds = new List<Guid>();
             var randomAssetSummary = _unitOfWork.Context.AssetSummaryDetail
-                .Include(a => a.AssetSummaryDetailValues)
+                .Include(a => a.AssetSummaryDetailValuesIntId)
                 .Include(a => a.MaintainableAsset)
                 .Where(a => a.SimulationOutputId == simulationOutputId)
                 .AsNoTracking()

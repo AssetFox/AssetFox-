@@ -702,10 +702,6 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.simulationId = this.scenarioId;
         this.addedRows.push(newRow)
         this.onPaginationChanged();
-        // this.sectionCommittedProjects.push(newRow);
-        // const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
-        // newCpRow.errors = ['BRKEY does not exist']
-        // this.cpItems.push(newCpRow);
      }
      
      OnAddConsequenceClick(){
@@ -763,7 +759,7 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnDeleteClick(id: string){
-        if(!isNil(find(propEq('id', id), this.addedRows)))
+        if(isNil(this.addedRows.find(_ => _.id === id)))
             this.deletionIds.push(id);
         else
             this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)

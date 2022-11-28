@@ -20,7 +20,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var textAttributeName = RandomStrings.WithPrefix("TextAttrbute");
             var numericAttributeNames = new List<string> { numericAttributeName };
             var textAttributeNames = new List<string> { textAttributeName };
-            var context = ContextWithObjectsInDatabase(unitOfWork, assetPairs, numericAttributeNames, textAttributeNames);
+            var context = ContextWithObjectsInDatabase(unitOfWork, assetPairs, numericAttributeNames, textAttributeNames, numberOfYears);
             return context;
         }
 

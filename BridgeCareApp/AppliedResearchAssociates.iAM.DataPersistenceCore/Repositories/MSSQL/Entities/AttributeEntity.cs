@@ -36,6 +36,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             AttributeEquationCriterionLibraryJoins = new HashSet<AttributeEquationCriterionLibraryEntity>();
             AssetDetailValues = new HashSet<AssetDetailValueEntity>();
             AssetSummaryDetailValues = new HashSet<AssetSummaryDetailValueEntity>();
+            AssetDetailValuesIntId = new HashSet<AssetDetailValueEntityIntId>();
+            AssetSummaryDetailValuesIntId = new HashSet<AssetSummaryDetailValueEntityIntId>();
             DeficientConditionGoalDetails = new HashSet<DeficientConditionGoalDetailEntity>();
             TargetConditionGoalDetails = new HashSet<TargetConditionGoalDetailEntity>();
         }
@@ -103,6 +105,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public virtual ICollection<AssetDetailValueEntity> AssetDetailValues { get; set; }
 
         public virtual ICollection<AssetSummaryDetailValueEntity> AssetSummaryDetailValues { get; set; }
+
+        public virtual ICollection<AssetDetailValueEntityIntId> AssetDetailValuesIntId { get; set; }
+
+        public virtual ICollection<AssetSummaryDetailValueEntityIntId> AssetSummaryDetailValuesIntId { get; set; }
 
         public virtual ICollection<DeficientConditionGoalDetailEntity> DeficientConditionGoalDetails { get; set; }
 

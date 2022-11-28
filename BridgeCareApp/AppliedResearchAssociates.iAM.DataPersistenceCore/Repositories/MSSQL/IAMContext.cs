@@ -276,12 +276,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public virtual DbSet<AssetDetailEntity> AssetDetail { get; set; }
 
-        public virtual DbSet<AssetDetailValueEntity> AssetDetailValue { get; set; }
         public virtual DbSet<AssetDetailValueEntityIntId> AssetDetailValueIntId { get; set; }
 
         public virtual DbSet<AssetSummaryDetailEntity> AssetSummaryDetail { get; set; }
-
-        public virtual DbSet<AssetSummaryDetailValueEntity> AssetSummaryDetailValue { get; set; }
 
         public virtual DbSet<AssetSummaryDetailValueEntityIntId> AssetSummaryDetailValueIntId { get; set; }
 
@@ -2261,19 +2258,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .OnDelete(DeleteBehavior.ClientCascade);
             });
 
-            modelBuilder.Entity<AssetDetailValueEntity>(entity =>
-            {
-                entity.Property(e => e.Id).IsRequired();
-                entity.HasIndex(e => e.Id).IsUnique();
-
-                entity.HasIndex(e => e.AttributeId);
-
-                entity.HasOne(e => e.AssetDetail)
-                .WithMany(a => a.AssetDetailValues)
-                .HasForeignKey(e => e.AssetDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
-            });
-
             modelBuilder.Entity<AssetDetailValueEntityIntId>(entity =>
             {
                 entity.Property(e => e.Id).IsRequired();
@@ -2289,18 +2273,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.HasOne(e => e.AssetDetail)
                 .WithMany(a => a.AssetDetailValuesIntId)
                 .HasForeignKey(e => e.AssetDetailId)
-                .OnDelete(DeleteBehavior.Cascade);
-            });
-            modelBuilder.Entity<AssetSummaryDetailValueEntity>(entity =>
-            {
-                entity.Property(e => e.Id).IsRequired();
-                entity.HasIndex(e => e.Id).IsUnique();
-
-                entity.HasIndex(e => e.AttributeId);
-
-                entity.HasOne(e => e.AssetSummaryDetail)
-                .WithMany(a => a.AssetSummaryDetailValues)
-                .HasForeignKey(e => e.AssetSummaryDetailId)
                 .OnDelete(DeleteBehavior.Cascade);
             });
 

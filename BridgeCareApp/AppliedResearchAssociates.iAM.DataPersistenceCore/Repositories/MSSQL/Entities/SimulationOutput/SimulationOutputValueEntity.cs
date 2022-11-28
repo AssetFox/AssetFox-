@@ -21,5 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
         public double? NumericValue { get; set; }
 
         public Guid AttributeId { get; set; }
+
+        public virtual AttributeEntity Attribute { get; set; }
     }
 }

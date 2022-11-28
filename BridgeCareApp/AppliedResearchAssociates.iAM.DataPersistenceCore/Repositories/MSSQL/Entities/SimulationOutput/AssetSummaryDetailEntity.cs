@@ -11,7 +11,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
     {
         public AssetSummaryDetailEntity()
         {
-            AssetSummaryDetailValues = new HashSet<AssetSummaryDetailValueEntity>();
             AssetSummaryDetailValuesIntId = new HashSet<AssetSummaryDetailValueEntityIntId>();
         }
 
@@ -25,7 +24,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public Guid SimulationOutputId { get; set; }
 
-        public virtual ICollection<AssetSummaryDetailValueEntity> AssetSummaryDetailValues { get; set; }
         public virtual ICollection<AssetSummaryDetailValueEntityIntId> AssetSummaryDetailValuesIntId { get; set; }
 
     }

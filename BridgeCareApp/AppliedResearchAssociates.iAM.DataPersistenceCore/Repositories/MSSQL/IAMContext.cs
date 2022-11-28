@@ -2266,11 +2266,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
-                entity.HasOne(a => a.Attribute)
-                .WithMany(a => a.AssetDetailValues)
-                .HasForeignKey(a => a.AttributeId)
-                .OnDelete(DeleteBehavior.ClientCascade)
-                ;
                 entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetDetail)
@@ -2301,11 +2296,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 entity.Property(e => e.Id).IsRequired();
                 entity.HasIndex(e => e.Id).IsUnique();
 
-                entity.HasOne(a => a.Attribute)
-                .WithMany(a => a.AssetSummaryDetailValues)
-                .HasForeignKey(a => a.AttributeId)
-                .OnDelete(DeleteBehavior.ClientCascade)
-                ;
                 entity.HasIndex(e => e.AttributeId);
 
                 entity.HasOne(e => e.AssetSummaryDetail)

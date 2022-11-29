@@ -497,7 +497,7 @@ namespace BridgeCareCore.Services
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
 
                 var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                    .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 var calculator = compiler.GetCalculator(cost.Expression);
                 var scope = new CalculateEvaluateScope();
                 var aggResultAttrDict = new Dictionary<string, AggregatedResultEntity>();

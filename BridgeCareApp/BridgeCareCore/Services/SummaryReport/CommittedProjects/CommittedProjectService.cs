@@ -472,21 +472,18 @@ namespace BridgeCareCore.Services
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
 
-        public double GetTreatmentCost(Guid simulationId, string brkey, string treatment, int year)
+        public double GetTreatmentCost(Guid treatmentLibraryId, string brkey, string treatment, int year, Guid networkId)
         {
-            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
-            if (simulation == null)
-                return 0;
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, brkey);
             
             if (asset == null)
                 return 0;
-            var treatmentCostEquations = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                .Include(_ => _.ScenarioTreatmentCosts)
-                .ThenInclude(_ => _.ScenarioTreatmentCostEquationJoin)
+            var treatmentCostEquations = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
-                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentCosts
-                .Select(_ => _.ScenarioTreatmentCostEquationJoin.Equation).ToList();
+                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
+                .Select(_ => _.TreatmentCostEquationJoin.Equation).ToList();
 
             double totalCost = 0;
             if (treatmentCostEquations == null)
@@ -510,39 +507,36 @@ namespace BridgeCareCore.Services
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string brkey, string treatment, int year)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string brkey, string treatment, int year, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
-            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().FirstOrDefault(_ => _.Id == simulationId);
-            if (simulation == null)
-                return consequencesToReturn;
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(simulation.NetworkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, brkey);
             if (asset == null)
                 return consequencesToReturn;
-            var treatmentConsequences = _unitOfWork.Context.ScenarioSelectableTreatment.AsNoTracking()
-                .Include(_ => _.ScenarioTreatmentConsequences)
-                .ThenInclude(_ => _.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin)
+            var treatmentConsequences = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+                .Include(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.CriterionLibraryConditionalTreatmentConsequenceJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.ScenarioTreatmentConsequences)
+                .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .FirstOrDefault(_ => _.Name == treatment && _.SimulationId == simulationId)?.ScenarioTreatmentConsequences.ToList();
+                .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLIbraryId)?.TreatmentConsequences.ToList();
             if (treatmentConsequences == null)
                 return consequencesToReturn;
             foreach (var consequence in treatmentConsequences)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                if(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin == null)
+                if(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin == null)
                 {
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
 
                 var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                 .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 if (aggResults.Count != attributes.Count)
                     continue;
-                var evaluator = compiler.GetEvaluator(consequence.CriterionLibraryScenarioConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression);
+                var evaluator = compiler.GetEvaluator(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression);
                 var scope = new CalculateEvaluateScope();
                 InstantiateScope(aggResults, scope);
                 if (evaluator.Delegate(scope))

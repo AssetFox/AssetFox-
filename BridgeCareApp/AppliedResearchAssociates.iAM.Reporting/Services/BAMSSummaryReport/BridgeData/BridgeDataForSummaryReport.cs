@@ -9,7 +9,10 @@ using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 using OfficeOpenXml.Style;
+using Org.BouncyCastle.Utilities.Encoders;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData
 {
@@ -40,12 +43,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
         {
             // Add data to excel.
-            var headers = GetHeaders();
+            var sectionHeaders = GetStaticSectionHeaders();
+            var dataHeaders = GetStaticDataHeaders();
             var subHeaders = GetStaticSubHeaders();
 
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
-
-            var currentCell = AddHeadersCells(worksheet, headers, _simulationYears, subHeaders);
+            var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears);
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
@@ -471,72 +474,121 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 rowNo++; columnNo = 1;
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_TYPE");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DECK_AREA");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH");
+                //--------------------- Asset ID ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_TYPE"); //Internet Report
 
-                // Add span type, owner code, functional class, submitting agency
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SPANTYPE") == SpanType.M.ToSpanTypeName() ?
-                    MappingContent.SpanTypeMap[SpanType.M] : MappingContent.SpanTypeMap[SpanType.S];
-                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.OwnerCodeForReport(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "OWNER_CODE"));
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.FullFunctionalClassDescription(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS"));
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY");
-
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // planning partner
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID");
-                worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NHS_IND"),
-                    out var numericValue) && numericValue > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERNET_REPORT"); //Bridge (B/C)
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NBISLEN");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID"); //Bridge ID
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+                //--------------------- Ownership ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY"); //County
+
+                var ownerName = ""; var ownerCode = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "OWNER_CODE"); //Owner Code
+                if (!string.IsNullOrEmpty(ownerCode) && !string.IsNullOrWhiteSpace(ownerCode)) { ownerName = MappingContent.OwnerCodeForReport(ownerCode); }
+                worksheet.Cells[rowNo, columnNo++].Value = ownerName;
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SUBM_AGENCY"); //Submitting Agency
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // Planning Partner
+
+                //--------------------- Structure ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DECK_AREA"); //Deck Area
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LARGE_BRIDGE"); // Large Bridge
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                var spanType = ""; var spanTypeName = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SPANTYPE"); //Span Type
+                if (!string.IsNullOrEmpty(spanTypeName) && !string.IsNullOrWhiteSpace(spanTypeName)) {
+                    spanType = spanTypeName == SpanType.M.ToSpanTypeName() ? MappingContent.SpanTypeMap[SpanType.M] : MappingContent.SpanTypeMap[SpanType.S];
+                }
+                worksheet.Cells[rowNo, columnNo++].Value = spanType;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID"); //Bridge Family
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "STRUCTURE_TYPE"); //Structure Type
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FRACT_CRIT"); //Fractural Critical
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N"; //Parallel Structure
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                //--------------------- Network ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.FullFunctionalClassDescription(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FUNC_CLASS")); //Functional Class
+
+                worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NHS_IND"), out var numericValue) && numericValue > 0 ? "Y" : "N"; //NHS
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NBISLEN"); //NBIS Len
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUS_PLAN_NETWORK"); //BPN
                 // Add Interstate
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERSTATE");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERSTATE"); //Interstate
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "STRUCTURE_TYPE");
+                //--------------------- Asset Attibutes ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.GetDeckSurfaceType(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DECKSURF_TYPE")); //Deck Surface Type
 
-                // Fractural Critical, Deck surface type, Wearing surface cond, Paint cond, paint ext
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FRACT_CRIT");
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                worksheet.Cells[rowNo, columnNo++].Value = MappingContent.GetDeckSurfaceType(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DECKSURF_TYPE"));
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WS_SEEDED"); // Wearing surface cond
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_COND"); 
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_EXTENT");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "WS_SEEDED"); // Wearing Surface Cond
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
-                worksheet.Cells[rowNo, columnNo++].Value = (int)_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_BUILT");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AGE");
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ADTTOTAL");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_COND"); //Paint Cond
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "PAINT_EXTENT"); //Paint Ext
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = (int)_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "YEAR_BUILT"); //Year Built
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "AGE"); //Age
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ADTTOTAL"); //ADT
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], ExcelHelperCellFormat.Number);
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE");
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "P3") > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE"); //Risk Score
+
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DET_LENGTH"); //Detour Length
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "POST_STATUS"); //Posting Status
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                _previousYearInitialMinC.Add(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
 
-                // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SUFF_RATING"); //Suff Rating
+
+
+                //--------------------- Funding ---------------------
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "HBRR_ELIG"); //HBRR Elig
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERNET_REPORT");
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEDAID");
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "P3") > 0 ? "Y" : "N"; //P3
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEDAID"); //Federal Aid
+
+                //_previousYearInitialMinC.Add(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
+
+                // Bridge Funding
                 var columnForStyle = columnNo;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N"; //NHPP
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N"; //STP
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N"; //BOF
+
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N"; //BRIP
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N"; //State
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N"; //NA
+
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
 
                 if (rowNo % 2 == 0)
@@ -554,51 +606,74 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _highlightWorkDoneCells.CheckConditions(parallelBridge, treatment, previousYearTreatment, previousYearCause, treatmentCause, year, index, worksheet, row, column);
         }
 
-        private List<string> GetHeaders()
+
+        private List<string> GetStaticSectionHeaders()
         {
             return new List<string>
             {
-                "BridgeID (5A01)",
-                "BRKey (5A03)",
-                "District (5A04)",
-                "County (5A05)",
-                "Bridge (B/C)",
-                "Deck Area (5B19)",
-                "Structure Length (5B18)",
+                "Asset ID",
+                "Ownership",
+                "Structure",
+                "Network",
+                "Asset Attributes",
+                "Funding",
+            };
+        }
 
-                "Span Type",
-                "Owner Code (5A21)",
-                "Functional Class (5C22)",
-                "Submitting Agency (6A06)",
+        private List<string> GetStaticDataHeaders()
+        {
+            return new List<string>
+            {
+                //--------------------- Asset ID ---------------------
+                "Internet\r\nReport",
+                "Bridge\r\n(B/C)",
+                "BridgeID\r\n(5A01)",
+                "BRKey\r\n(5A03)",
 
-                "Planning Partner (5A13)",
-                "Bridge Family",
-                "NHS (5C29)",
+                //--------------------- Ownership ---------------------
+                "District\r\n(5A04)",
+                "County\r\n(5A05)",
+                "Owner Code\r\n(5A21)",
+                "Submitting\r\nAgency\r\n(6A06)",
+                "Planning Partner\r\n(5A13)",
 
-                "NBIS Len (5E01)",
+                //--------------------- Structure ---------------------
+                "Structure\r\nLength\r\n(5B18)",
+                "Deck Area\r\n(5B19)",
+                "Large\r\nBridge",
+                "Span\r\nType",
+                "Bridge\r\nFamily",
+                "Struct Type\r\n(6A26-29)",
+                "Fractural\r\nCritical",
+                "Parallel\r\nStructure\r\n(5E02)",
 
-                "BPN (6A19)",
+                //--------------------- Network ---------------------
 
+                "Functional Class\r\n(5C22)",
+                "NHS\r\n(5C29)",
+                "NBIS Len\r\n(5E01)",
+                "BPN\r\n(6A19)",
                 "Interstate",
 
-                "Struct Type (6A26-29)",
-
-                "Fractural Critical",
-                "Deck Surface Type (5B02)",
-                "Wearing Surface Cond (6B40)",
-                "Paint Cond (6B36)",
-                "Paint Ext (6B37)",
-
-                "Year Built (5A15)",
+                //--------------------- Asset Attributes ---------------------
+                
+                "Deck Surface\r\nType\r\n(5B02)",
+                "Wearing\r\nSurface\r\nCond\r\n(6B40)",
+                "Paint\r\nCond\r\n(6B36)",
+                "Paint Ext\r\n(6B37)",
+                "Year Built\r\n(5A15)",
                 "Age",
-                "ADTT (5C10)",
+                "ADTT\r\n(5C10)",
                 "Risk Score",
-                "P3",
+                "Detour Length\r\n(5C15)",
+                "Posting Status\r\n(VP02)",
+                "Suff Rating\r\n(4A13)",
 
-                "Parallel Structure",
-                "Internet Report",
-                "Federal Aid (6C06)",
-                "BridgeFunding"
+                //--------------------- Funding ---------------------
+                "HBRR Elig\r\n(6B41)",
+                "P3",
+                "Federal Aid\r\n(6C06)",
+                "Bridge Funding"
             };
         }
 
@@ -606,37 +681,85 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             return new List<string>
             {
-                "185",
-                "581",
-                "STP",
                 "NHPP",
+                "STP",
                 "BOF",
-                "183"
+                "BRIP",
+                "State",
+                "N/A"
             };
         }
 
-        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> headers, List<int> simulationYears, List<string> subHeaders)
+
+        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> sectionHeaders, List<string> dataHeaders, List<string> subHeaders, List<int> simulationYears)
         {
-            int headerRow = 1;
-
-            ExcelHelper.MergeCells(worksheet, 1, headers.Count, 1, headers.Count + 5);
-
-            for (int column = 0; column < headers.Count; column++)
+            //section header
+            int sectionHeaderRow = 1; var totalNumOfColumns = 0; var cellBGColor = ColorTranslator.FromHtml("#FFFFFF"); //White
+            var startColumn = 0; var endColumn = 0;
+            for (int column = 0; column < sectionHeaders.Count; column++)
             {
-                worksheet.Cells[headerRow, column + 1].Value = headers[column];
+                var cellValue = sectionHeaders[column];
+                var cellValueFormatted = cellValue.ToUpper().Replace(" ", "_");                                
+                switch(cellValueFormatted)
+                {
+                    case "ASSET_ID":
+                        totalNumOfColumns = 4; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);                        
+                        break;
+
+                    case "OWNERSHIP":
+                        totalNumOfColumns = 5; cellBGColor = ColorTranslator.FromHtml("#C6E0B4");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
+                        break;
+
+                    case "STRUCTURE":
+                        totalNumOfColumns = 8; cellBGColor = ColorTranslator.FromHtml("#F8CBAD");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
+                        break;
+
+                    case "NETWORK":
+                        totalNumOfColumns = 5; cellBGColor = ColorTranslator.FromHtml("#ACB9CA");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
+                        break;
+
+                    case "ASSET_ATTRIBUTES":
+                        totalNumOfColumns = 11; cellBGColor = ColorTranslator.FromHtml("#FFF2CC");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
+                        break;
+
+                    case "FUNDING":
+                        totalNumOfColumns = 3; cellBGColor = ColorTranslator.FromHtml("#E2EFDA");
+                        startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
+                        break;
+                }
+
+                //Add value
+                ExcelHelper.MergeCells(worksheet, sectionHeaderRow, startColumn, sectionHeaderRow, endColumn);
+                ExcelHelper.ApplyColor(worksheet.Cells[sectionHeaderRow, column - 1], cellBGColor);
+                worksheet.Cells[sectionHeaderRow, column + 1].Value = cellValue;
+            }
+
+            //data header
+            int dataHeaderRow = 2;
+            ExcelHelper.MergeCells(worksheet, dataHeaderRow, dataHeaders.Count, dataHeaderRow, dataHeaders.Count + 5); //Bridge Funding Merge Columns
+            for (int column = 0; column < dataHeaders.Count; column++)
+            {
+                worksheet.Cells[dataHeaderRow, column + 1].Value = dataHeaders[column];
             }
 
             // sub header columns
-            var subHeaderCol = headers.Count;
+            var subHeaderCol = dataHeaders.Count;
             for(int i = 0; i < subHeaders.Count; i++)
             {
-                worksheet.Cells[headerRow + 1, subHeaderCol++].Value = subHeaders[i];
+                worksheet.Cells[dataHeaderRow + 1, subHeaderCol++].Value = subHeaders[i];
             }
 
-            var currentCell = new CurrentCell { Row = headerRow, Column = headers.Count + 5 };
-            ExcelHelper.ApplyBorder(worksheet.Cells[headerRow, 1, headerRow + 1, worksheet.Dimension.Columns]);
+            var currentCell = new CurrentCell { Row = dataHeaderRow, Column = dataHeaders.Count + 5 };
+            ExcelHelper.ApplyBorder(worksheet.Cells[dataHeaderRow, 1, dataHeaderRow + 1, worksheet.Dimension.Columns]);
 
+            //dynamic year headers
             AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
+
             return currentCell;
         }
 

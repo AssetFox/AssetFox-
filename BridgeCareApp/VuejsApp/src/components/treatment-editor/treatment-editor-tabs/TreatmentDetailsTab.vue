@@ -116,7 +116,7 @@
                                             class="ghd-white-bg ghd-blue ghd-button-text"
                                             icon
                                         >
-                                            <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-ban</v-icon>
+                                            <v-icon style="font-size:20px !important" class="ghd-blue">fas fa-eraser</v-icon>
                                         </v-btn>
                                         <v-btn
                                             @click="

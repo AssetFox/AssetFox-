@@ -248,7 +248,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
-            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); // TODO check if simulation gets treatments attached to it so we can use simulation.Treatments
+            _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)

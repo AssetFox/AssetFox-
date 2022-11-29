@@ -19,7 +19,6 @@ using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
-using Humanizer;
 
 namespace BridgeCareCore.Controllers
 {

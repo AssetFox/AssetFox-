@@ -65,7 +65,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
         {
             var bpnValueCellTracker = new Dictionary<string, (int row, int col)>();
             var statusValueCellTracker = new Dictionary<string, (int row, int col)>();
-            var MPMSPullDate = committedProjects.OrderByDescending(c => c.LastModifiedDate).FirstOrDefault()?.LastModifiedDate;
 
             worksheet.Cells[currentCell.Row + 2, currentCell.Column].Value = "BridgeCare Rules Creator:";
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 1].Value = "Central Office";
@@ -74,6 +73,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column, currentCell.Row + 3, currentCell.Column + 1]);
 
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4].Value = "MPMS Pull Date:";
+            var MPMSPullDate = committedProjects.OrderByDescending(c => c.LastModifiedDate).FirstOrDefault()?.LastModifiedDate;
             worksheet.Cells[currentCell.Row + 2, currentCell.Column + 5].Value = MPMSPullDate?.ToShortDateString();
             ExcelHelper.ApplyBorder(worksheet.Cells[currentCell.Row + 2, currentCell.Column + 4, currentCell.Row + 2, currentCell.Column + 5]);
 
@@ -173,12 +173,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 
             ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, rowNo + 8, currentCell.Column + 1]);
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo + 7, currentCell.Column + 1]);
-
-            //// TODO Move below to new private method?
+                        
             // Treatments in Simulations: BAMS MPMS
-            var MPMSTreatments = committedProjects.Select(c => c.Name).ToList().Distinct();
-            // BAMStreatments // MPMSTreatments
-            ///
+            FillTreatmentsInSimulations(worksheet, currentCell, committedProjects, BAMStreatments, rowNo);            
 
             rowNo = currentCell.Row + 8; // currentCell.Row is equal to 6
             ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column + 3, rowNo, currentCell.Column + 5);
@@ -269,6 +266,37 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowForStyle + 17, colForStyle + 6]);
 
             return currentCell;
+        }
+
+        private void FillTreatmentsInSimulations(ExcelWorksheet worksheet, CurrentCell currentCell, ICollection<CommittedProject> committedProjects, IReadOnlyCollection<SelectableTreatment> BAMStreatments, int rowNo)
+        {
+            var MPMSTreatments = committedProjects.Select(c => c.Name).ToList().Distinct();
+
+            rowNo += 10;
+            ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
+            ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.Gray);
+            ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.White);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1]);
+            worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1].Value = "Treatments in Simulations";
+
+            ExcelHelper.ApplyColor(worksheet.Cells[rowNo + 1, currentCell.Column, rowNo + 1, currentCell.Column], Color.DimGray);
+            worksheet.Cells[rowNo + 1, currentCell.Column].Value = "BAMS";
+            worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = "MPMS";
+
+            var BAMSRow = rowNo + 2;
+            foreach (var BAMStreatment in BAMStreatments)
+            {
+                worksheet.Cells[BAMSRow++, currentCell.Column].Value = BAMStreatment.Name;
+            }
+
+            var MPMSRow = rowNo + 2;
+            foreach (var MPMStreatmentName in MPMSTreatments)
+            {
+                worksheet.Cells[MPMSRow++, currentCell.Column + 1].Value = MPMStreatmentName;
+            }
+
+            var maxRow = BAMSRow > MPMSRow ? BAMSRow : MPMSRow;
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 2, currentCell.Column, maxRow, currentCell.Column + 1]);
         }
 
         private CurrentCell FillSimulationDetails(ExcelWorksheet worksheet, int yearCount, Simulation simulation, CurrentCell currentCell)

@@ -289,6 +289,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
 
 
+            reportDetailDto.Status = $"Creating Funded Treatment List TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var fundedTreatmentWorksheet = excelPackage.Workbook.Worksheets.Add("Funded Treatment List");
+            // TODO .Fill call
+
             // unfunded tab will be uncommented and redone in a future release
 
             //// Unfunded Treatment - Final List TAB

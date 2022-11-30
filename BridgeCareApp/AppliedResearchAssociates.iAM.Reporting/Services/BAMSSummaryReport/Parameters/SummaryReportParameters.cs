@@ -270,13 +270,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
 
         private int FillTreatmentsInSimulations(ExcelWorksheet worksheet, CurrentCell currentCell, ICollection<CommittedProject> committedProjects, IReadOnlyCollection<SelectableTreatment> BAMStreatments, int rowNo)
         {
-            var MPMSTreatments = committedProjects.Select(c => c.Name).ToList().Distinct();
+            var MPMSTreatments = committedProjects?.OrderBy(c => c.Name).Select(c => c.Name).Distinct();
 
             rowNo += 10;
             ExcelHelper.MergeCells(worksheet, rowNo, currentCell.Column, rowNo, currentCell.Column + 1);
             ExcelHelper.ApplyColor(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1], Color.Gray);
             ExcelHelper.SetTextColor(worksheet.Cells[rowNo, currentCell.Column, rowNo + 1, currentCell.Column + 1], Color.White);
-            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, currentCell.Column, rowNo + 1, currentCell.Column + 1]);
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1]);
             worksheet.Cells[rowNo, currentCell.Column, rowNo, currentCell.Column + 1].Value = "Treatments in Simulations";
 
             ExcelHelper.ApplyColor(worksheet.Cells[rowNo + 1, currentCell.Column, rowNo + 1, currentCell.Column + 1], Color.DimGray);           
@@ -284,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             worksheet.Cells[rowNo + 1, currentCell.Column + 1].Value = "MPMS";
 
             var BAMSRow = rowNo + 2;
-            foreach (var BAMStreatment in BAMStreatments)
+            foreach (var BAMStreatment in BAMStreatments.OrderBy(t => t.Name))
             {
                 worksheet.Cells[BAMSRow++, currentCell.Column].Value = BAMStreatment.Name;
             }
@@ -296,7 +296,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
             }
 
             var maxDataRow = BAMSRow > MPMSRow ? BAMSRow - 1 : MPMSRow - 1;
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 1, currentCell.Column, maxDataRow, currentCell.Column + 1]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo, currentCell.Column, maxDataRow, currentCell.Column + 1]);
             return maxDataRow;
         }
 

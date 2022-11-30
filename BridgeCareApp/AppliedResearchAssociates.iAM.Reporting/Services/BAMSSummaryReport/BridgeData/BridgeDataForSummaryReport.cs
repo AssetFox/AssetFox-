@@ -50,7 +50,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
             var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears);
 
-            
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
             using (ExcelRange autoFilterCells = worksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
@@ -71,6 +70,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var lastColumn = worksheet.Dimension.Columns + 1;
             worksheet.Column(lastColumn).Width = 3;
 
+            
             var workSummaryModel = new WorkSummaryModel
             {
                 PreviousYearInitialMinC = _previousYearInitialMinC,
@@ -88,8 +88,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
         {
-            var initialRow = 4;
-            var row = 4; // Data starts here
+            var initialRow = 5;
+            var row = initialRow; // Data starts here
             var startingRow = row;
             var column = currentCell.Column;
             var abbreviatedTreatmentNames = ShortNamesForTreatments.GetShortNamesForTreatments();
@@ -271,7 +271,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             // work done information
-            row = 4; // setting row back to start
+            row = initialRow; // setting row back to start
             column++;
             var totalWorkMoreThanOnce = 0;
             foreach (var wdInfo in workDoneData)
@@ -290,22 +290,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             // "Total" column
-            worksheet.Cells[3, column + 1].Value = totalWorkMoreThanOnce;
-            ExcelHelper.ApplyStyle(worksheet.Cells[3, column + 1]);
+            worksheet.Cells[initialRow - 1, column + 1].Value = totalWorkMoreThanOnce;
+            ExcelHelper.ApplyStyle(worksheet.Cells[initialRow - 1, column + 1]);
 
             column = column + outputResults.Years.Count + 2; // this will take us to the empty column after "poor on off"
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
 
-            row = 4; // setting row back to start
+            row = initialRow; // setting row back to start
             var initialColumn = column;
             foreach (var intialsection in outputResults.InitialAssetSummaries)
             {
                 TrackInitialYearDataForParametersTAB(intialsection);
                 column = initialColumn; // This is to reset the column
                 column = AddSimulationYearData(worksheet, row, column, intialsection, null);
-                row++;
-            }
+                row++; column++;
+            }            
+
             currentCell.Column = column++;
             currentCell.Row = initialRow;
             isInitialYear = true;
@@ -334,7 +335,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
                         worksheet.Cells[row, ++column].Value = ""; // TODO: Posted
-                        worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - 17].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
@@ -550,7 +551,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BUS_PLAN_NETWORK"); //BPN
-                // Add Interstate
+
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERSTATE"); //Interstate
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
@@ -573,10 +574,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "ADTTOTAL"); //ADT
-                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], ExcelHelperCellFormat.Number);
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE"); //Risk Score
-
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DET_LENGTH"); //Detour Length
 
@@ -595,7 +595,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEDAID"); //Federal Aid
 
-                //_previousYearInitialMinC.Add(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
+                _previousYearInitialMinC.Add(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
 
                 // Bridge Funding
                 var columnForStyle = columnNo;
@@ -716,9 +716,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var startColumn = 0; var endColumn = 0;
             for (int column = 0; column < sectionHeaders.Count; column++)
             {
-                var cellValue = sectionHeaders[column];
-                var cellValueFormatted = cellValue.ToUpper().Replace(" ", "_");                                
-                switch(cellValueFormatted)
+                var headerName = sectionHeaders[column];
+                var headerNameFormatted = headerName.ToUpper().Replace(" ", "_");                                
+                switch(headerNameFormatted)
                 {
                     case "ASSET_ID":
                         totalNumOfColumns = 4; cellBGColor = ColorTranslator.FromHtml("#BDD7EE");
@@ -746,15 +746,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         break;
 
                     case "FUNDING":
-                        totalNumOfColumns = 3; cellBGColor = ColorTranslator.FromHtml("#E2EFDA");
+                        totalNumOfColumns = 9; cellBGColor = ColorTranslator.FromHtml("#E2EFDA");
                         startColumn = endColumn + 1; endColumn = startColumn + (totalNumOfColumns - 1);
                         break;
                 }
 
                 //Add value
+                worksheet.Cells[sectionHeaderRow, startColumn].Value = headerName;
+                ExcelHelper.ApplyColor(worksheet.Cells[sectionHeaderRow, startColumn], cellBGColor);
                 ExcelHelper.MergeCells(worksheet, sectionHeaderRow, startColumn, sectionHeaderRow, endColumn);
-                ExcelHelper.ApplyColor(worksheet.Cells[sectionHeaderRow, column - 1], cellBGColor);
-                worksheet.Cells[sectionHeaderRow, column + 1].Value = cellValue;
             }
 
             //data header
@@ -850,7 +850,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
 
             var yearHeaderColumn = currentCell.Column;
-            simulationHeaderTexts.RemoveAll(_ => _.Equals("SD") || _.Equals("Posted"));
+            simulationHeaderTexts.RemoveAll(_ => _.Equals("SD"));
             _spacerColumnNumbers = new List<int>();
 
             foreach (var simulationYear in simulationYears)
@@ -903,6 +903,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "Culv\r\nDur",
                 "Min\r\nGCR",
                 "Poor",
+                "Posted",
                 "Project Pick",
                 "Budget",
                 "Recommended Treatment",

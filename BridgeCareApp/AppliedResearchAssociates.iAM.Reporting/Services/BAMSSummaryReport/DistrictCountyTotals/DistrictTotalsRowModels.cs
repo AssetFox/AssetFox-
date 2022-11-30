@@ -6,7 +6,7 @@ using OfficeOpenXml;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     public static class DistrictTotalsRowModels
     {
@@ -29,11 +29,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return returnValue;
         }
 
-        internal static ExcelRowModel DistrictAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
+        internal static ExcelRowModel DistrictCountyAndYearsHeaders(SimulationOutput output, params string[] additionalHeaders)
         {
             var values = new List<IExcelModel>
             {
                 StackedExcelModels.LeftHeader("District"),
+                StackedExcelModels.LeftHeader("County"),
             };
             foreach (var year in output.Years)
             {
@@ -79,6 +80,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         internal static ExcelRowModel TotalsTableTurnpike(SimulationOutput output)
         {
+            // TODO: Turnpike has different formatting now, see example BAMS output A283
             var title = ExcelValueModels.String("Turnpike");
             Func<AssetDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpike;
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
@@ -95,6 +97,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         public static ExcelRowModel MpmsTableTurnpike(SimulationOutput output)
         {
+            // TODO: Turnpike has different formatting now, see example BAMS output A283
             var title = ExcelValueModels.String("Turnpike");
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
                 DistrictTotalsSectionDetailPredicates.IsCommittedTurnpike)
@@ -104,6 +107,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         public static ExcelRowModel BamsTableTurnpike(SimulationOutput output)
         {
+            // TODO: Turnpike has different formatting now, see example BAMS output A283
             var title = ExcelValueModels.String("Turnpike");
             var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
                 DistrictTotalsSectionDetailPredicates.IsTurnpikeButNotCommitted)

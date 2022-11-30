@@ -4,27 +4,52 @@ using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     public static class DistrictTotalsRegions
     {
         public static List<int> NumberedDistricts
             => new List<int> { 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 }; // Seven is indeed skipped.
 
-        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput output)
+        public static RowBasedExcelRegionModel MpmsDistrictTable(SimulationOutput simulationOutput, int districtNumber)
         {
+            // Header for District
             var rows = new List<ExcelRowModel>
             {
-                ExcelRowModels.IndentedHeader(1, "Dollars Spent on MPMS Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal)
+                ExcelRowModels.CenteredHeader(1, $"District: {districtNumber}", simulationOutput.Years.Count + 2, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput, DistrictTotalsStringConstants.DistrictTotal)
             };
+
+            var counties = new List<string> { "ONE", "TWO", "THREE", "FOUR", "FIVE" };
+
+            foreach (var county in counties)
+            {
+                rows.Add(DistrictTotalsRowModels.MpmsTableDistrict(simulationOutput, districtNumber));
+            }
+
+            return RowBasedExcelRegionModels.WithRows(rows);
+        }
+
+        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput simulationOutput)
+        {
+            // MPMS Projects By County global section header
+            var rows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.CenteredHeader(1, "Dollars Spent on MPMS Projects by County", simulationOutput.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
+            };
+
+            // District sub-tables
             foreach (var districtNumber in NumberedDistricts)
             {
-                rows.Add(DistrictTotalsRowModels.MpmsTableDistrict(output, districtNumber));
+                MpmsDistrictTable(simulationOutput, districtNumber);
             }
-            rows.Add(DistrictTotalsRowModels.MpmsTableTurnpike(output));
-            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(output));
+
+            rows.Add(DistrictTotalsRowModels.MpmsTableTurnpike(simulationOutput));
+            rows.Add(DistrictTotalsRowModels.TableBottomSumRow(simulationOutput));
+
             return RowBasedExcelRegionModels.WithRows(rows);
+
         }
 
 
@@ -32,8 +57,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         {
             var rows = new List<ExcelRowModel>
             {
-                ExcelRowModels.IndentedHeader(1, "Dollars Spent on BAMS Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal),
+                ExcelRowModels.CenteredHeader(1, "Dollars Spent on BAMS Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal),
             };
             foreach (var districtNumber in NumberedDistricts)
             {
@@ -48,8 +73,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         {
             var rows = new List<ExcelRowModel>
             {
-                ExcelRowModels.IndentedHeader(1, "Overall Dollars Spent on Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal, "Yearly Average", "% Yearly Average"),
+                ExcelRowModels.CenteredHeader(1, "Overall Dollars Spent on Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(output, DistrictTotalsStringConstants.DistrictTotal, "Yearly Average", "% Yearly Average"),
             };
             var additionalRows = new List<ExcelRowModel>();
             foreach (var districtNumber in NumberedDistricts)
@@ -72,8 +97,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         {
             var rows = new List<ExcelRowModel>
             {
-                ExcelRowModels.IndentedHeader(1, "% of Overall Dollars Spent on Projects by District", output.Years.Count, 1),
-                DistrictTotalsRowModels.DistrictAndYearsHeaders(output)
+                ExcelRowModels.CenteredHeader(1, "% of Overall Dollars Spent on Projects by District", output.Years.Count, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(output)
             };
             var titles = new List<IExcelModel>();
             titles.AddRange(NumberedDistricts.Select(x => ExcelValueModels.Integer(x)));

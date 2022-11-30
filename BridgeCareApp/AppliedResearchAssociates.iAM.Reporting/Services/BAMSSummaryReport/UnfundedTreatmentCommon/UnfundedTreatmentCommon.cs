@@ -51,7 +51,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_");
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
+            var district_string = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "DISTRICT");
+            if (int.TryParse(district_string, out var district_int))
+            {
+                worksheet.Cells[row, columnNo++].Value = district_int;
+            }
+            else
+            {
+                worksheet.Cells[row, columnNo++].Value = district_string;
+            }
+
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "COUNTY");
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "MPO_NAME");
 
@@ -72,7 +81,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             worksheet.Cells[row, columnNo++].Value = functionalClassDescription;
 
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
-            worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+            var bpn_string = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "BUS_PLAN_NETWORK");
+            if (int.TryParse(bpn_string, out var bpn_int))
+            {
+                worksheet.Cells[row, columnNo++].Value = bpn_int;
+            }
+            else
+            {
+                worksheet.Cells[row, columnNo++].Value = bpn_string;
+            }
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
             worksheet.Cells[row, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "NHS_IND") == "0" ? "N" : "Y";
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
@@ -249,6 +266,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
         }
 
         private const string BRIDGE_FUNDING = "Bridge Funding";
+        private const string INTERSTATE = "Interstate";
 
         private List<string> GetHeadersRow1()
         {
@@ -266,7 +284,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "Functional\r\nClass",
                 "BPN",
                 "NHS",
-                "Interstate",
+                INTERSTATE,
                 "Risk\r\nScore",
 
                 BRIDGE_FUNDING, // row 1 header for six sub-sections
@@ -301,6 +319,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                 "STATE",
                 "N/A",
             };
+        }
+
+        public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet)
+        {
+            var columnNumber = GetHeadersRow1().IndexOf(INTERSTATE) + 1;
+            worksheet.Column(columnNumber).SetTrueWidth(9);
         }
     }
 }

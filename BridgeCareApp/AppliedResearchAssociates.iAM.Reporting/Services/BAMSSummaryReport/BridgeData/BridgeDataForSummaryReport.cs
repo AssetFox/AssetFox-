@@ -50,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
             var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears);
 
+            
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
             using (ExcelRange autoFilterCells = worksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
@@ -85,8 +86,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         #region Private Methods
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults,
-            CurrentCell currentCell)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
         {
             var initialRow = 4;
             var row = 4; // Data starts here
@@ -333,10 +333,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
+                        worksheet.Cells[row, ++column].Value = ""; // TODO: Posted
                         worksheet.Cells[row, column - 16].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
+                        worksheet.Cells[row, ++column].Value = ""; // TODO: Posted
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);//Project Pick
                     }
 
@@ -352,12 +354,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
 
                     worksheet.Cells[row, ++column].Value = budgetName; // Budget
-                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Project
+                    worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Recommended Treatment
                     var columnForAppliedTreatment = column;
 
                     var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+
+                    worksheet.Cells[row, ++column].Value = ""; // TODO: FHWA Work Types
+
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)
@@ -382,8 +387,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
         }
 
-        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column,
-            AssetSummaryDetail initialSection, AssetDetail section)
+        private int AddSimulationYearData(ExcelWorksheet worksheet, int row, int column, AssetSummaryDetail initialSection, AssetDetail section)
         {
             var initialColumnForShade = column + 1;
             var selectedSection = initialSection ?? section;
@@ -394,8 +398,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var columnForStyle = column + 1;
                 worksheet.Cells[row, ++column].Value = "N"; // deck cond
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
+
                 worksheet.Cells[row, ++column].Value = "N"; // super cond
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
+
                 worksheet.Cells[row, ++column].Value = "N"; // sub cond
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
 
                 worksheet.Cells[row, column + 2].Value = "N"; // deck dur
                 worksheet.Cells[row, column + 3].Value = "N"; // super dur
@@ -406,8 +415,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             else
             {
                 worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "DECK_SEEDED");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
+
                 worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUP_SEEDED");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
+
                 worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "SUB_SEEDED");
+                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column - 1]);
                 ExcelHelper.SetCustomFormat(worksheet.Cells[row, column - 2, row, column], ExcelHelperCellFormat.DecimalPrecision3);
 
                 worksheet.Cells[row, column + 2].Value = (int)_summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "DECK_DURATION_N");
@@ -461,6 +475,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 ExcelHelper.ApplyColor(worksheet.Cells[row, minCondColumn], Color.FromArgb(112, 48, 160));
                 ExcelHelper.SetTextColor(worksheet.Cells[row, minCondColumn], Color.White);
+            }
+
+            if(initialSection != null) {
+                worksheet.Cells[row, column++].Value = ""; // TODO: Posted for initial year
             }
 
             return column;
@@ -765,7 +783,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
         {
-            const string HeaderConstText = "Work Done in ";
+            const string HeaderConstText = "Work Done\r\n";
             var column = currentCell.Column;
             var row = currentCell.Row;
             var initialColumn = column;
@@ -779,11 +797,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], Color.FromArgb(244, 176, 132));
             }
 
-            worksheet.Cells[row, ++column].Value = "Work Done";
-            worksheet.Cells[row, ++column].Value = "Work Done more than once";
+            worksheet.Cells[row, ++column].Value = "Work Done\r\nY/N";
+            worksheet.Cells[row, ++column].Value = "Work Done\r\n> 1";
             ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1, row, column], Color.FromArgb(244, 176, 132));
 
-            worksheet.Cells[row, ++column].Value = "Total";
+            worksheet.Cells[row, ++column].Value = "Total\r\nWork Done\r\n> 1";
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
             var poorOnOffRateColumn = column;
             foreach (var year in simulationYears)
@@ -813,6 +831,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
             // Merge columns for Poor On/Off Rate
             ExcelHelper.MergeCells(worksheet, row, poorOnOffRateColumn, row + 1, column - 1);
+
+            //TODO: Hide Poor/On Off Columns
+
             currentCell.Column = column;
 
             // Add Years Data headers
@@ -872,20 +893,21 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             return new List<string>
             {
-                "GCR Deck",
-                "GCR Sup",
-                "GCR Sub",
-                "GCR Culv",
-                "Deck Dur",
-                "Super Dur",
-                "Sub Dur",
-                "Culv Dur",
-                "Min GCR",
+                "GCR\r\nDeck",
+                "GCR\r\nSup",
+                "GCR\r\nSub",
+                "GCR\r\nCulv",
+                "Deck\r\nDur",
+                "Super\r\nDur",
+                "Sub\r\nDur",
+                "Culv\r\nDur",
+                "Min\r\nGCR",
                 "Poor",
                 "Project Pick",
                 "Budget",
-                "Project",
+                "Recommended Treatment",
                 "Cost",
+                "FHWA\r\nWork Types",
                 "District Remarks"
             };
         }

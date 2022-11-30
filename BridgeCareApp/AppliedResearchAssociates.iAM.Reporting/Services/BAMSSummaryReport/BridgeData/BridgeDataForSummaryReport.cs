@@ -810,10 +810,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 if (numericValue > 0)
                 {
                     _parametersModel.nHSModel.NHS = "Y";
+                    _parametersModel.nHSModel.NonNHS = "N";
                 }
                 else
                 {
                     _parametersModel.nHSModel.NonNHS = "Y";
+                    _parametersModel.nHSModel.NHS = "N";
                 }
             }
             // Get BPN data for parameter TAB

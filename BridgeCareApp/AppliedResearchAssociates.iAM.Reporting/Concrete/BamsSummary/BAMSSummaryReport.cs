@@ -241,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulationYearsCount = simulationYears.Count;
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
@@ -249,6 +249,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
             _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)

@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = false;
         private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetLoadBatchSize = 2000;
+        public const int AssetLoadBatchSize = 10000;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -90,8 +90,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetails);
                     memos.Mark($" {assetFamily.AssetDetails.Count} assetDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues);
-                    memos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues");
+                    int batchSize = 100000;
+                    _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues, batchSize: batchSize);
+                    memos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues batchSize: {batchSize}");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails);
                     memos.Mark($" {assetFamily.TreatmentOptionDetails.Count} treatmentOptionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails);

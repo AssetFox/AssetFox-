@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace AppliedResearchAssociates.iAM.Analysis.Engine
 {
@@ -12,5 +13,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         public List<AssetSummaryDetail> InitialAssetSummaries { get; } = new List<AssetSummaryDetail>();
 
         public List<SimulationYearDetail> Years { get; } = new List<SimulationYearDetail>();
+
+        public DateTime LastModifiedDate { get; set; }
     }
 }

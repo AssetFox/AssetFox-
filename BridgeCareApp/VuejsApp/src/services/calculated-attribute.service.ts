@@ -37,6 +37,14 @@ export default class CalculatedAttributeService {
         );
     }
 
+    static getEmptyCalculatedAttributesByLibraryId(libraryId: string): AxiosPromise{
+        return coreAxiosInstance.get(`${API.CalculatedAttributes}/GetEmptyCalculatedAttributesByLibraryId/${libraryId}`)
+    }
+
+    static getEmptyCalculatedAttributesByScenarioId(scenarioId: string): AxiosPromise{
+        return coreAxiosInstance.get(`${API.CalculatedAttributes}/GetEmptyCalculatedAttributesByScenarioId/${scenarioId}`)
+    }
+
     static upsertCalculatedAttributeLibrary(
         data: CalculatedAttributeLibraryUpsertPagingRequestModel,
     ): AxiosPromise {

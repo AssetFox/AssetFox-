@@ -16,7 +16,7 @@
                                 <span class="ghd-control-text">{{ item.text }}</span>
                             </template>
                             <template v-slot:item="{ item }">
-                                <v-list-item class="ghd-control-text" v-on="on" v-bind="attrs">
+                                <v-list-item v-on="on" v-bind="attrs">
                                 <v-list-item-content>
                                     <v-list-item-title>
                                     <v-row no-gutters align="center">
@@ -84,6 +84,7 @@
                                 label="Shared"
                                 v-if="hasSelectedLibrary && !hasScenario"
                                 v-model="selectedPerformanceCurveLibrary.isShared"
+                                @change="checkHasUnsavedChanges()"
                             />               
                     </v-layout>
                 </v-flex>
@@ -354,7 +355,7 @@
                         outline
                         rows="4"
                         v-model="selectedPerformanceCurveLibrary.description"
-                        @input='selectedPerformanceCurveLibrary = {...selectedPerformanceCurveLibrary, description: $event}'
+                        @input='checkHasUnsavedChanges()'
                     />
                 </v-flex>
             </v-layout>
@@ -750,7 +751,7 @@ export default class PerformanceCurveEditor extends Vue {
         );
     }
 
-    @Watch('selectedPerformanceCurveLibrary', {deep: true})
+    @Watch('selectedPerformanceCurveLibrary')
     onSelectedPerformanceCurveLibraryChanged() { 
         this.hasSelectedLibrary =
             this.selectedPerformanceCurveLibrary.id !== this.uuidNIL;
@@ -795,7 +796,8 @@ export default class PerformanceCurveEditor extends Vue {
         const hasUnsavedChanges: boolean = 
             this.deletionIds.length > 0 || 
             this.addedRows.length > 0 ||
-            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
+            this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary) ||
+            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedPerformanceCurveLibrary, this.stateSelectedPerformanceCurveLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1008,6 +1010,7 @@ export default class PerformanceCurveEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
+                this.performanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary);
                 this.selectedPerformanceCurveLibraryMutator(this.selectedPerformanceCurveLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated deterioration model library",});
             }

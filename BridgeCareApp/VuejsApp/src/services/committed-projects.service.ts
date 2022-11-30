@@ -1,6 +1,6 @@
 import { AxiosPromise } from 'axios';
 import { API, coreAxiosInstance } from '@/shared/utils/axios-instance';
-import {SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
+import {CommittedProjectFillTreatmentValues, SectionCommittedProject } from '@/shared/models/iAM/committed-projects';
 import { Network } from '@/shared/models/iAM/network';
 import { PagingRequest, PaginSync } from '@/shared/models/iAM/paging';
 
@@ -83,9 +83,9 @@ export default class CommittedProjectsService {
         );
     }
 
-    static FillTreatmentValues(data: SectionCommittedProject, brkeyValue: string){
+    static FillTreatmentValues(data: CommittedProjectFillTreatmentValues){
         return coreAxiosInstance.post(
-            `${API.CommittedProject}/FillTreatmentValues/${brkeyValue}`, data
+            `${API.CommittedProject}/FillTreatmentValues`, data
         );
     }
 }

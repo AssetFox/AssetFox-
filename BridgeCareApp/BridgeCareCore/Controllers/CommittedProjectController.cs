@@ -161,59 +161,26 @@ namespace BridgeCareCore.Controllers
         }
 
         [HttpPost]
-        [Route("GetTreatmetCost/{brkey}")]
+        [Route("FillTreatmentValues")]
         [Authorize]
-        public async Task<IActionResult> GetTreatmetCost(SectionCommittedProjectDTO dto, string brkey)
-        {
-            try
-            {
-                var result = await Task.Factory.StartNew(() => _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year));
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetTreatmentCost - {HubService.errorList["Exception"]}");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        [Route("GetValidConsequences/{brkey}")]
-        [Authorize]
-        public async Task<IActionResult> GetValidConsequences(SectionCommittedProjectDTO dto, string brkey)
+        public async Task<IActionResult> FillTreatmentValues(CommittedProjectFillTreatmentValuesModel treatmentValues)
         {
             try
             {
                 var result = await Task.Factory.StartNew(() =>
                 {
-                    return _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
-                });
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetValidConsequences - {HubService.errorList["Exception"]}");
-                throw;
-            }
-        }
-
-        [HttpPost]
-        [Route("FillTreatmentValues/{brkey}")]
-        [Authorize]
-        public async Task<IActionResult> FillTreatmentValues(SectionCommittedProjectDTO dto, string brkey)
-        {
-            try
-            {
-                var result = await Task.Factory.StartNew(() =>
-                {
-                    dto.Consequences =  _committedProjectService.GetValidConsequences(dto.Id, dto.SimulationId, brkey, dto.Treatment, dto.Year);
-                    dto.Cost = _committedProjectService.GetTreatmentCost(dto.SimulationId, brkey, dto.Treatment, dto.Year);
-                    var treatment = UnitOfWork.Context.ScenarioSelectableTreatment
-                        .FirstOrDefault(_ => _.Name == dto.Treatment && _.SimulationId == dto.SimulationId);
+                    CommittedProjectFillTreatmentReturnValuesModel returnValues = new CommittedProjectFillTreatmentReturnValuesModel();
+                    var treatment = UnitOfWork.Context.SelectableTreatment
+                        .FirstOrDefault(_ => _.Name == treatmentValues.TreatmentName && _.TreatmentLibraryId == treatmentValues.TreatmentLibraryId);
                     if (treatment == null)
-                        return dto;
-                    dto.Category = (TreatmentCategory)treatment.Category;
-                    return dto;
+                        return returnValues;
+                    returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                    returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.TreatmentLibraryId,
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                    
+                    returnValues.TreatmentCategory = (TreatmentCategory)treatment.Category;
+                    return returnValues;
                 });
                 return Ok(result);
             }

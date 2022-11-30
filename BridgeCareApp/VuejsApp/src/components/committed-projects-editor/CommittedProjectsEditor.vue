@@ -289,7 +289,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 import { DataTableHeader } from '@/shared/models/vue/data-table-header';
-import { CommittedProjectConsequence, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
+import { CommittedProjectConsequence, CommittedProjectFillTreatmentReturnValues, emptyCommittedProjectConsequence, emptySectionCommittedProject, SectionCommittedProject, SectionCommittedProjectTableData } from '@/shared/models/iAM/committed-projects';
 import { Action, Getter, State } from 'vuex-class';
 import { Watch } from 'vue-property-decorator';
 import { getBlankGuid, getNewGuid } from '../../shared/utils/uuid-utils';
@@ -702,10 +702,6 @@ export default class CommittedProjectsEditor extends Vue  {
         newRow.simulationId = this.scenarioId;
         this.addedRows.push(newRow)
         this.onPaginationChanged();
-        // this.sectionCommittedProjects.push(newRow);
-        // const newCpRow: SectionCommittedProjectTableData = this.cpItemFactory(newRow)
-        // newCpRow.errors = ['BRKEY does not exist']
-        // this.cpItems.push(newCpRow);
      }
      
      OnAddConsequenceClick(){
@@ -763,7 +759,7 @@ export default class CommittedProjectsEditor extends Vue  {
      }
 
      OnDeleteClick(id: string){
-        if(!isNil(find(propEq('id', id), this.addedRows)))
+        if(isNil(this.addedRows.find(_ => _.id === id)))
             this.deletionIds.push(id);
         else
             this.addedRows = this.addedRows.filter((scp: SectionCommittedProject) => scp.id !== id)
@@ -965,10 +961,20 @@ export default class CommittedProjectsEditor extends Vue  {
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
         row.treatment = treatmentName
         this.updateCommittedProject(row, treatmentName, 'treatment')  
-        CommittedProjectsService.FillTreatmentValues(row, row.locationKeys[this.brkey_])
+        CommittedProjectsService.FillTreatmentValues({
+            committedProjectId: row.id,
+            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
+            treatmentName: treatmentName,
+            brkey_Value: row.locationKeys[this.brkey_],
+            year: row.year,
+            networkId: this.networkId
+        })
         .then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
-                row = response.data
+                var values = response.data as CommittedProjectFillTreatmentReturnValues
+                row.cost = values.treatmentCost;
+                row.consequences = values.validTreatmentConsequences;
+                row.category = values.treatmentCategory;
                 scp.cost = row.cost;
                 let cat = this.reverseCatMap.get(row.category);
                 if(!isNil(cat))

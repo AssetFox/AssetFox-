@@ -400,7 +400,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Par
                 worksheet.Row(startingRow).Height = 33;
                 startingRow++;
             }
-            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 2, colNo, startingRow, worksheet.Dimension.End.Column]);
+            ExcelHelper.ApplyBorder(worksheet.Cells[rowNo + 2, colNo, startingRow - 1, worksheet.Dimension.End.Column]);
 
             currentCell.Row = startingRow;
             return currentCell;

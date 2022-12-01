@@ -50,6 +50,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             unfundedTreatmentTimeWorksheet.Calculate();  // calculation is set to manual, so force calculation of the total now
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
+            _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);
         }
 
         #region Private methods

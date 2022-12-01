@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -133,6 +134,16 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         public static void HorizontalRightAlign(ExcelRange cells)
         {
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+        }
+
+        // Excel changes the width of cells when the sheet is opened.
+        // See https://stackoverflow.com/a/64601164
+        public static void SetTrueWidth(this ExcelColumn column, double width)
+        {
+            var adjustedWidth = width < 1 ?
+                width * 12d / 7d :
+                width + 5d / 7d;
+            column.Width = adjustedWidth;
         }
     }
 }

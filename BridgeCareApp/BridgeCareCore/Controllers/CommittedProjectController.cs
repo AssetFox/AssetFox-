@@ -293,6 +293,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
         [Route("GetSectionCommittedProjectsPage/{simulationId}")]
         [Authorize]
         // TODO New method add claims and policy here

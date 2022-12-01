@@ -116,6 +116,26 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (functionalClass == "09" || functionalClass == "19" || busPlanNetwork == "L");
         }
 
+
+        public bool BridgeFundingBRIP(AssetDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+        public bool BridgeFundingState(AssetDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+        public bool BridgeFundingNA(AssetDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+
         public bool BridgeFunding183(AssetSummaryDetail section)
         {
             if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
@@ -204,6 +224,27 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 fedAid == "2" && bridgeLength >= 20 ||
                 fedAid == "0" && bridgeLength >= 20;
         }
+
+
+        public bool BridgeFundingBRIP(AssetSummaryDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+        public bool BridgeFundingState(AssetSummaryDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+        public bool BridgeFundingNA(AssetSummaryDetail section)
+        {
+            //TODO: Implement BRIP
+            return false;
+        }
+
+
 
         private static readonly Dictionary<string, string> FunctionalClassDescriptions =
             new Dictionary<string, string>()

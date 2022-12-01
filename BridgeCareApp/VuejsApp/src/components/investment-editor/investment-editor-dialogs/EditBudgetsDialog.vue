@@ -55,7 +55,7 @@
                                 </v-text-field>
                             </td>
                             <td>
-                                <v-btn @click="onRemoveBudget(props.item.id)"  class="ghd-blue" icon>
+                                <v-btn @click="onRemoveBudget(props.item.id)" @mousedown="setCurrentOrder(props.item)" class="ghd-blue" icon>
                                     <img class='img-general' :src="require('@/assets/icons/trash-ghd-blue.svg')"/>
                                 </v-btn>
                             </td>
@@ -108,7 +108,7 @@ import { rules, InputValidationRules } from '@/shared/utils/input-validation-rul
 import ObjectID from 'bson-objectid';
 import { getBlankGuid, getNewGuid } from '@/shared/utils/uuid-utils';
 import { CriterionLibrary, emptyCriterionLibrary } from '@/shared/models/iAM/criteria';
-import { isNull } from 'util';
+import { isNull, isNullOrUndefined } from 'util';
 
 @Component({
     components: {
@@ -224,8 +224,8 @@ export default class EditBudgetsDialog extends Vue {
     onRemoveBudget(id: string){
         this.editBudgetsDialogGridData = this.editBudgetsDialogGridData
             .filter((budget: Budget) => budget.id != id);
-
-        this.removeBudget(id)
+        this.removeBudget(id);
+        this.cleanReorderList();
     }
 
     removeBudget(id: string){
@@ -337,7 +337,6 @@ export default class EditBudgetsDialog extends Vue {
         this.currentSelectedBudget = emptyBudget;
     }
     reorderList(item: Budget) {
-        console.log("reordering");
         const original = this.originalOrder;
         const replacement = this.currentSelectedBudget.budgetOrder;
         if (isNil(replacement) || isEmpty(replacement) || original === 0) return;
@@ -363,6 +362,14 @@ export default class EditBudgetsDialog extends Vue {
         this.editBudgetsDialogGridData.sort(this.compareOrder);
         this.originalOrder = 0;
         this.currentSelectedBudget = emptyBudget;
+    }
+    cleanReorderList() {
+        let count: number = 1;
+        this.editBudgetsDialogGridData.forEach(element => {
+            element.budgetOrder = count;
+            this.onEditBudgetOrder(element);
+            count++;
+        });
     }
     setCurrentOrder(item: Budget) {
         this.originalOrder = item.budgetOrder;

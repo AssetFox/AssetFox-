@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.TestHelpers.Assertions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using Xunit;
@@ -35,7 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
-            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
 
         [Theory]
@@ -52,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
-            ObjectAssertions.Equivalent(simulationOutput, loadedOutput);
+            ObjectAssertions.EquivalentExcluding(simulationOutput, loadedOutput, so => so.LastModifiedDate);
         }
 
         [Fact (Skip = "May be slow, depending on the batch size")]
@@ -75,6 +76,42 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             ObjectAssertions.Equivalent(simulationOutput.InitialAssetSummaries, loadedOutput.InitialAssetSummaries);
             SimulationOutputAssertions.SameSimulationOutput(simulationOutput, loadedOutput);
+        }
+
+        [Fact]
+        public void SaveSimulationOutput_ThenLoad_LastModifiedDate_Expected()
+        {
+            var numberOfYears = 1;
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            var startDate = DateTime.Now;
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var endDate = DateTime.Now;
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var lastModifiedDate = loadedOutput.LastModifiedDate;
+            DateTimeAssertions.Between(startDate, endDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
+        }
+
+
+        [Fact]
+        public void SaveSimulationOutput_UpdateSimulation_ThenLoad_LastModifiedDate_MatchesSimulationUpdateDate()
+        {
+            var numberOfYears = 1;
+            NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
+            var context = SimulationOutputCreationContextTestSetup.SimpleContextWithObjectsInDatabase(TestHelper.UnitOfWork, numberOfYears);
+            var simulationOutput = SimulationOutputModels.SimulationOutput(context);
+            var startDate = DateTime.Now;
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            var endDate = DateTime.Now;
+            var oldSimulation = TestHelper.UnitOfWork.SimulationRepo.GetSimulation(context.SimulationId);
+            oldSimulation.Name = RandomStrings.WithPrefix("Modified simulation");
+            var updateStartDate = DateTime.Now;
+            TestHelper.UnitOfWork.SimulationRepo.UpdateSimulation(oldSimulation);
+            var updateEndDate = DateTime.Now;
+            var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
+            var lastModifiedDate = loadedOutput.LastModifiedDate;
+            DateTimeAssertions.Between(updateStartDate, updateEndDate, lastModifiedDate, TimeSpan.FromMilliseconds(1));
         }
     }
 }

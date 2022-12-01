@@ -19,7 +19,8 @@
                         </div>
                         <v-divider class="owner-shared-divider" inset vertical>
                         </v-divider>
-                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared' />
+                        <v-checkbox class='sharing header-text-content' label='Shared' v-model='selectedBudgetLibrary.isShared'
+                        @change="checkHasUnsavedChanges()" />
                     </v-layout>
                 </v-flex>
                 <v-flex xs4 v-if='!hasScenario' class="ghd-constant-header"> 
@@ -37,8 +38,10 @@
                 <!-- text boxes for scenario only -->
                 <v-flex xs2 v-if='hasInvestmentPlanForScenario' class="ghd-constant-header">
                     <v-subheader class="ghd-md-gray ghd-control-subheader"><span>First Year of Analysis Period</span></v-subheader>
-                    <v-text-field readonly outline
+                    <v-text-field  outline
                                     @change='onEditInvestmentPlan("firstYearOfAnalysisPeriod", $event)'
+                                    :rules="[rules['generalRules'].valueIsNotEmpty]"
+                                    :mask="'####'"
                                     v-model='investmentPlan.firstYearOfAnalysisPeriod' 
                                     class="ghd-text-field-border ghd-text-field"/>
                 </v-flex>
@@ -142,7 +145,7 @@
                         </td>
                         <td v-for='header in budgetYearsGridHeaders'>  
                             <div v-if="header.value === 'year'">
-                                <span class='sm-txt'>{{ props.item.year }}</span>
+                                <span class='sm-txt'>{{ props.item.year + firstYearOfAnalysisPeriodShift}}</span>
                             </div>       
                             <div v-if="header.value === 'action'">
                                 <v-btn @click="onRemoveBudgetYear(props.item.year)"  class="ghd-blue" icon>
@@ -181,7 +184,7 @@
                     <v-subheader class="ghd-subheader ">Description</v-subheader>
                     <v-textarea no-resize outline rows='4'
                                 v-model='selectedBudgetLibrary.description'
-                                @input='selectedBudgetLibrary = {...selectedBudgetLibrary, description: $event}'
+                                @input='checkHasUnsavedChanges()'
                                 class="ghd-text-field-border">
                     </v-textarea>
                 </v-flex>
@@ -291,7 +294,7 @@ import { ScenarioRoutePaths } from '@/shared/utils/route-paths';
 import { setItemPropertyValue } from '@/shared/utils/setter-utils';
 import { UserCriteriaFilter } from '@/shared/models/iAM/user-criteria-filter';
 import { getUserName } from '@/shared/utils/get-user-info';
-import { PagingRequest, PagingPage, InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
+import { InvestmentPagingRequestModel, InvestmentLibraryUpsertPagingRequestModel, InvestmentPagingSyncModel, InvestmentPagingPage } from '@/shared/models/iAM/paging';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { http2XX } from '@/shared/utils/http-utils';
 import { BudgetGridRow } from '@/shared/models/iAM/treatment';
@@ -358,6 +361,7 @@ export default class InvestmentEditor extends Vue {
     currentPage: Budget[] = [];
     lastYear: number = 0;
     initializing: boolean = true;
+    firstYearOfAnalysisPeriodShift: number = 0;
 
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
@@ -373,6 +377,7 @@ export default class InvestmentEditor extends Vue {
     ];
     budgetYearsGridData: BudgetYearsGridData[] = []; 
     selectedBudgetYearsGridData: BudgetYearsGridData[] = [];
+    selectedBudgetYearsGridDataWithoutShift: BudgetYearsGridData[] = [];  
     selectedBudgetYears: number[] = [];
     createBudgetLibraryDialogData: CreateBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
     editBudgetsDialogData: EditBudgetsDialogData = clone(emptyEditBudgetsDialogData);
@@ -459,7 +464,8 @@ export default class InvestmentEditor extends Vue {
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 } : this.investmentPlan,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift
             },           
             sortColumn: sortBy === '' ? 'year' : sortBy,
             isDescending: descending != null ? descending : false,
@@ -533,7 +539,7 @@ export default class InvestmentEditor extends Vue {
 
     @Watch('selectedBudgetYearsGridData')
    onSelectedRowsChanged() {
-         this.selectedBudgetYears = getPropertyValues('year', this.selectedBudgetYearsGridData) as number[];
+        this.selectedBudgetYears = getPropertyValues('year', this.selectedBudgetYearsGridData) as number[];
      }
 
     @Watch('librarySelectItemValue')
@@ -546,7 +552,7 @@ export default class InvestmentEditor extends Vue {
         this.selectedBudgetLibrary = clone(this.stateSelectedBudgetLibrary);
     }
 
-    @Watch('selectedBudgetLibrary', {deep: true})
+    @Watch('selectedBudgetLibrary')
     onSelectedBudgetLibraryChanged() {
         this.hasSelectedLibrary = this.selectedBudgetLibrary.id !== this.uuidNIL;
 
@@ -586,9 +592,16 @@ export default class InvestmentEditor extends Vue {
     @Watch('investmentPlan')
     onInvestmentPlanChanged() {
         this.checkHasUnsavedChanges()
+        if(this.hasScenario)
+            this.firstYearOfAnalysisPeriodShift = this.investmentPlan.firstYearOfAnalysisPeriod - this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
         if(this.investmentPlan.id === this.uuidNIL)
             this.investmentPlan.id = getNewGuid();
         this.hasInvestmentPlanForScenario = true;
+    }
+
+    @Watch('firstYearOfAnalysisPeriodShift')
+    onFirstYearOfAnalysisPeriodShiftChanged(){
+        this.setGridData();
     }
 
     onRemoveBudgetYears() {
@@ -648,6 +661,10 @@ export default class InvestmentEditor extends Vue {
             })
             if(val.length == 0)
                 this.addedBudgetAmounts.delete(key)
+            else
+            {
+                this.addedBudgetAmounts.set(key, val)
+            }
         }
         if(isyearAdded){
             this.onPaginationChanged();
@@ -731,7 +748,7 @@ export default class InvestmentEditor extends Vue {
 
     setGridData() {
         this.budgetYearsGridData = [];
-        if(this.currentPage.length < 0)
+        if(this.currentPage.length <= 0)
             return;
         for(let i = 0; i < this.currentPage[0].budgetAmounts.length; i++){
             let year = this.currentPage[0].budgetAmounts[i].year
@@ -743,14 +760,10 @@ export default class InvestmentEditor extends Vue {
         }        
     }
 
-    syncInvestmentPlanWithBudgets() {//this gets call in on pagination now
-        const allBudgetAmounts: BudgetAmount[] = this.currentPage
-            .flatMap((budget: Budget) => budget.budgetAmounts);
-        const allBudgetYears: number[] = sorter(getPropertyValues('year', allBudgetAmounts)) as number[];
-
-        this.investmentPlan.firstYearOfAnalysisPeriod = hasValue(allBudgetYears)
-            ? allBudgetYears[0] : this.investmentPlan.firstYearOfAnalysisPeriod;
+    syncInvestmentPlanWithBudgets() {//this gets call in on pagination now       
         this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
+        this.investmentPlan.firstYearOfAnalysisPeriod = +this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
+        this.investmentPlan.firstYearOfAnalysisPeriod += this.firstYearOfAnalysisPeriodShift;
     }
 
     onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
@@ -764,7 +777,6 @@ export default class InvestmentEditor extends Vue {
         this.createBudgetLibraryDialogData = clone(emptyCreateBudgetLibraryDialogData);
 
         if (!isNil(budgetLibrary)) {
-            this.upsertBudgetLibraryAction(budgetLibrary);
             this.hasCreatedLibrary = true;
             this.librarySelectItemValue = budgetLibrary.id;
             const libraryUpsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -779,6 +791,7 @@ export default class InvestmentEditor extends Vue {
                     deletionyears: budgetLibrary.budgets === [] ? [] : this.deletionYears,
                     updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
                     addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
+                    firstYearAnalysisBudgetShift: 0
                 }
             }
             // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
@@ -804,7 +817,7 @@ export default class InvestmentEditor extends Vue {
 
     getNextYear(): number {
         const latestYear: number = this.lastYear;
-        const nextYear = hasValue(latestYear) ? latestYear + 1 : moment().year();
+        const nextYear = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
         return nextYear;
     }
 
@@ -865,7 +878,7 @@ export default class InvestmentEditor extends Vue {
 
         if (this.range > 0) {
             const latestYear: number = this.lastYear;
-            const startYear: number = hasValue(latestYear) ? latestYear + 1 : moment().year();
+            const startYear: number = hasValue(latestYear) && latestYear !== 0 ? latestYear + 1 : moment().year();
             const endYear = moment().year(startYear).add(this.range, 'years').year();
 
             const budgets: Budget[] = clone(this.currentPage);
@@ -1058,12 +1071,14 @@ export default class InvestmentEditor extends Vue {
                     ? parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
                 },
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: this.firstYearOfAnalysisPeriodShift 
             }
         InvestmentService.upsertInvestment(sync ,this.selectedScenarioId).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
-                this.investmentPlanMutator(this.investmentPlan)
-                this.clearChanges()               
+                this.firstYearOfAnalysisPeriodShift = 0;
+                this.investmentPlanMutator(this.investmentPlan)                
+                this.clearChanges();               
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified investment"});
                 this.librarySelectItemValue = null
@@ -1079,9 +1094,10 @@ export default class InvestmentEditor extends Vue {
                 budgetsForDeletion: this.deletionBudgetIds,
                 addedBudgets: this.addedBudgets,
                 deletionyears: this.deletionYears ,
-                updatedBudgetAmounts: this.mapToIndexSignature( this.updatedBudgetAmounts),
+                updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: this.mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: 0 
             }
 
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
@@ -1093,7 +1109,8 @@ export default class InvestmentEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges()
                 this.resetPage();
-                this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary);
+                this.budgetLibraryMutator(this.selectedBudgetLibrary);
+                this.selectedBudgetLibraryMutator(this.selectedBudgetLibrary.id);
                 this.addSuccessNotificationAction({message: "Updated budget library",});
             }
         });
@@ -1248,6 +1265,7 @@ export default class InvestmentEditor extends Vue {
         const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
         const stateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
+                firstYearOfAnalysisPeriod: +clonedStateInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
@@ -1255,6 +1273,7 @@ export default class InvestmentEditor extends Vue {
         const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
             const investmentPlan: InvestmentPlan = {
                 ...clonedInvestmentPlan,
+                firstYearOfAnalysisPeriod: +clonedInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
                     : 0,
@@ -1267,7 +1286,8 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary) ||
-            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)
+            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan) ||
+            (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
@@ -1283,7 +1303,8 @@ export default class InvestmentEditor extends Vue {
                 deletionyears: this.deletionYears ,
                 updatedBudgetAmounts: mapToIndexSignature( this.updatedBudgetAmounts),
                 Investment: null,
-                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts) 
+                addedBudgetAmounts: mapToIndexSignature(this.addedBudgetAmounts),
+                firstYearAnalysisBudgetShift: 0
             },           
             sortColumn: 'year',
             isDescending: false,

@@ -76,11 +76,11 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
-            var result = service.GetLibraryCalculatedAttributePage(libraryId, request);
+            var result = service.GetLibraryCalculatedAttributePage(libraryId, request) as CalculcatedAttributePagingPageModel;
             var pairIds = _testLIbraryCalcAttributes.First(_ => _.Attribute ==
             TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
 
-            Assert.True(result.Items.Where(_ => pairIds.Contains(_.Id)).Count() == pairIds.Count);
+            Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
         [Fact]
@@ -96,11 +96,11 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
-            var result = service.GetScenarioCalculatedAttributePage(simulationId, request);
+            var result = service.GetScenarioCalculatedAttributePage(simulationId, request) as CalculcatedAttributePagingPageModel;
             var pairIds = _testScenarionCalcAttributes.First(_ => _.Attribute ==
             TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
 
-            Assert.True(result.Items.Where(_ => pairIds.Contains(_.Id)).Count() == pairIds.Count);
+            Assert.True(pairIds.First() == result.DefaultEquation.Id);
         }
 
         [Fact]

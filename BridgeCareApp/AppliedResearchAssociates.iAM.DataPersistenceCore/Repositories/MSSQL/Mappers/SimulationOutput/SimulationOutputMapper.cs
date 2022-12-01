@@ -9,21 +9,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class SimulationOutputMapper
     {
-        public static void FillSimulationResults(this SimulationOutputEntity entity, Simulation simulation)
-        {
-            throw new NotImplementedException();
-            //var simulationOutputObject = JsonConvert.DeserializeObject<SimulationOutput>(entity.Output, new JsonSerializerSettings
-            //{
-            //    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor
-            //});
-
-            //simulation.ClearResults();
-
-            //simulation.Results.InitialConditionOfNetwork = simulationOutputObject.InitialConditionOfNetwork;
-            //simulation.Results.InitialAssetSummaries.AddRange(simulationOutputObject.InitialAssetSummaries);
-            //simulation.Results.Years.AddRange(simulationOutputObject.Years);
-        }
-
         public static SimulationOutputEntity ToEntityWithoutAssetsOrYearDetails(
             this SimulationOutput domain,
             Guid simulationId,
@@ -46,9 +31,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SimulationOutput ToDomainWithoutAssets(SimulationOutputEntity entity,
             Dictionary<Guid, string> attributeNameLookup)
         {
+            var simulationLastModifiedDate = entity.Simulation.LastModifiedDate;
+            var outputLastModifiedDate = entity.LastModifiedDate;
+            var lastModifiedDate = outputLastModifiedDate > simulationLastModifiedDate ? outputLastModifiedDate : simulationLastModifiedDate; 
             var domain = new SimulationOutput
             {
                 InitialConditionOfNetwork = entity.InitialConditionOfNetwork,
+                LastModifiedDate = lastModifiedDate,
             };
             var years = SimulationYearDetailMapper.ToDomainListWithoutAssets(entity.Years, attributeNameLookup);
             domain.Years.AddRange(years);

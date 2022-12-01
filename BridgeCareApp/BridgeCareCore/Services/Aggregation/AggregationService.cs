@@ -44,7 +44,7 @@ namespace BridgeCareCore.Services.Aggregation
                     _unitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);  // DbUpdateException here -- "The wait operation timed out."
 
                     // Get/create configurable attributes
-                    var configurationAttributes = AttributeMapper.ToDomainListButDiscardBad(attributes, _unitOfWork.EncryptionKey);
+                    var configurationAttributes = AttributeMapper.ToDomainList(attributes, _unitOfWork.EncryptionKey);
 
                     var checkForDuplicateIDs = configurationAttributes.Select(_ => _.Id).ToList();
 

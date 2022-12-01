@@ -952,7 +952,9 @@ export default class InvestmentEditor extends Vue {
             })
             let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
+            console.log("addedIds: " + this.addedIds);
             this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
+            console.log("deleted ids: " + this.deletionBudgetIds);
             budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
             this.onPaginationChanged();
         }      

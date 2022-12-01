@@ -233,8 +233,10 @@ export default class EditBudgetsDialog extends Vue {
             this.budgetChanges.addedBudgets = this.budgetChanges.addedBudgets.filter((addBudge: Budget) => addBudge.id != id);
             this.budgetChanges.deletionIds.push(id);
         }              
-        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets))
+        else if(any(propEq('id', id), this.budgetChanges.updatedBudgets)) {
             this.budgetChanges.updatedBudgets = this.budgetChanges.updatedBudgets.filter((upBudge: Budget) => upBudge.id != id);
+            this.budgetChanges.deletionIds.push(id);
+        }
         else
             this.budgetChanges.deletionIds.push(id);
     }
@@ -335,6 +337,7 @@ export default class EditBudgetsDialog extends Vue {
         this.currentSelectedBudget = emptyBudget;
     }
     reorderList(item: Budget) {
+        console.log("reordering");
         const original = this.originalOrder;
         const replacement = this.currentSelectedBudget.budgetOrder;
         if (isNil(replacement) || isEmpty(replacement) || original === 0) return;

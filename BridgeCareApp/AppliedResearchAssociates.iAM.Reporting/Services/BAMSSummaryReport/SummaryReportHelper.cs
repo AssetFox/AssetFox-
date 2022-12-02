@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
@@ -119,20 +120,33 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
         public bool BridgeFundingBRIP(AssetDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var functionalClassArray = new string[] { "01", "02" };
+            return (bridgeLength >= 20 && functionalClassArray.Contains(functionalClass));
         }
 
         public bool BridgeFundingState(AssetDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
+            return (internetReport.ToUpper() == "STATE");
         }
 
         public bool BridgeFundingNA(AssetDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var functionalClassArray = new string[] { "01", "02", "03", "06", "07", "11", "12", "14", "16", "17", "NN" };
+            return fedAid == "0" && (functionalClassArray.Contains(functionalClass));
         }
 
 
@@ -228,20 +242,32 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
 
         public bool BridgeFundingBRIP(AssetSummaryDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2) {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var functionalClassArray = new string[] { "01", "02" };
+            return (bridgeLength >= 20 && functionalClassArray.Contains(functionalClass));
         }
 
         public bool BridgeFundingState(AssetSummaryDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
+            return (internetReport.ToUpper() == "STATE");
         }
 
         public bool BridgeFundingNA(AssetSummaryDetail section)
         {
-            //TODO: Implement BRIP
-            return false;
+            if (string.IsNullOrEmpty(section.ValuePerTextAttribute["FEDAID"])) return false;
+            var fedAid = section.ValuePerTextAttribute["FEDAID"].Substring(0, 1);
+            var functionalClass = "";
+            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
+            {
+                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
+            }
+            var functionalClassArray = new string[] { "01", "02", "03", "06", "07", "11", "12", "14", "16", "17", "NN" };
+            return fedAid == "0" && (functionalClassArray.Contains(functionalClass));
         }
 
 

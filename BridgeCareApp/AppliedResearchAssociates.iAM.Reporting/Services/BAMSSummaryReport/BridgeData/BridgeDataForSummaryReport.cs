@@ -41,7 +41,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _summaryReportHelper = new SummaryReportHelper();
         }
 
-        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData)
+        public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, Dictionary<string, string> treatmentCategoryLookup)
         {
             // Add data to excel.
             var sectionHeaders = GetStaticSectionHeaders();
@@ -49,7 +49,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             var subHeaders = GetStaticSubHeaders();
 
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
-            var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears);
+
+            int poorOnOffColStart = -1; int poorOnOffColEnd = -1;
+            var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears, ref poorOnOffColStart, ref poorOnOffColEnd);
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
@@ -59,11 +61,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             AddBridgeDataModelsCells(worksheet, reportOutputData, currentCell);
-            AddDynamicDataCells(worksheet, reportOutputData, currentCell);
+            AddDynamicDataCells(worksheet, reportOutputData, currentCell, treatmentCategoryLookup);
 
             //autofit columns
             worksheet.Cells.AutoFitColumns();
-            
+
+            //turn off auto fit to hide poor on/off
+            worksheet.Cells[1, poorOnOffColStart, worksheet.Cells.Rows, poorOnOffColEnd].AutoFitColumns(0, 0);
+
             var workSummaryModel = new WorkSummaryModel
             {
                 PreviousYearInitialMinC = _previousYearInitialMinC,
@@ -79,7 +84,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         #region Private Methods
 
-        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell)
+        private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup)
         {
             var initialRow = 5;
             var row = initialRow; // Data starts here
@@ -353,8 +358,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
 
-                    worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<string>(section.ValuePerTextAttribute, "FHWA_WORKTYPE"); ; // TODO: FHWA Work Types
-
+                    worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[section.AppliedTreatment]?.ToString(); // FHWA Work Type
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)
@@ -469,7 +473,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.SetTextColor(worksheet.Cells[row, minCondColumn], Color.White);
             }
 
-            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<string>(selectedSection.ValuePerTextAttribute, "POSTED"); // TODO: Posted
+            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<string>(selectedSection.ValuePerTextAttribute, "POST_STATUS") == "POSTED"? "Y" : "N"; //Posted
+            ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             return column;
         }
@@ -513,7 +518,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DECK_AREA"); //Deck Area
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LARGE_BRIDGE"); //TODO: Large Bridge
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LARGE_BRIDGE"); //Large Bridge
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 
                 var spanType = ""; var spanTypeName = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "SPANTYPE"); //Span Type
@@ -700,7 +705,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
 
-        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> sectionHeaders, List<string> dataHeaders, List<string> subHeaders, List<int> simulationYears)
+        private CurrentCell AddHeadersCells(ExcelWorksheet worksheet, List<string> sectionHeaders
+                                            , List<string> dataHeaders, List<string> subHeaders, List<int> simulationYears
+                                            , ref int poorOnOffColStart, ref int poorOnOffColEnd)
         {
             //section header
             int sectionHeaderRow = 1; var totalNumOfColumns = 0; var cellBGColor = ColorTranslator.FromHtml("#FFFFFF"); //White
@@ -755,33 +762,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var dataHeaderText = dataHeaders[column];
                 worksheet.Cells[dataHeaderRow, column + 1].Value = dataHeaderText;
-
-                //Change header background color
-                var headerNameFormatted = dataHeaderText.ToUpper();
-                headerNameFormatted = headerNameFormatted.Replace("\r\n", " ");
-                headerNameFormatted = headerNameFormatted.Replace(" ", "_");
-                switch (headerNameFormatted.ToUpper())
-                {
-                    case "LARGE_BRIDGE":
-                        ExcelHelper.ApplyColor(worksheet.Cells[dataHeaderRow, column + 1], ColorTranslator.FromHtml("#FFC000"));
-                        break;
-
-                    case "DETOUR_LENGTH_(5C15)":
-                        ExcelHelper.ApplyColor(worksheet.Cells[dataHeaderRow, column + 1], ColorTranslator.FromHtml("#FFC000"));
-                        break;
-
-                    case "POSTING_STATUS_(VP02)":
-                        ExcelHelper.ApplyColor(worksheet.Cells[dataHeaderRow, column + 1], ColorTranslator.FromHtml("#FFC000"));
-                        break;
-
-                    case "SUFF_RATING_(4A13)":
-                        ExcelHelper.ApplyColor(worksheet.Cells[dataHeaderRow, column + 1], ColorTranslator.FromHtml("#FFC000"));
-                        break;
-
-                    case "HBRR_ELIG_(6B41)":
-                        ExcelHelper.ApplyColor(worksheet.Cells[dataHeaderRow, column + 1], ColorTranslator.FromHtml("#FFC000"));
-                        break;
-                }
             }
 
             // sub header columns
@@ -796,12 +776,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyBorder(worksheet.Cells[dataHeaderRow, 1, dataHeaderRow + 1, worksheet.Dimension.Columns]);
 
             //dynamic year headers
-            AddDynamicHeadersCells(worksheet, currentCell, simulationYears);
+            AddDynamicHeadersCells(worksheet, currentCell, simulationYears, ref poorOnOffColStart, ref poorOnOffColEnd);
 
             return currentCell;
         }
 
-        private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears)
+        private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, ref int poorOnOffColStart, ref int poorOnOffColEnd)
         {
             const string HeaderConstText = "Work Done\r\n";
             var column = currentCell.Column;
@@ -827,7 +807,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], ColorTranslator.FromHtml("#B4C6E7"));
 
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
-            var poorOnOffRateColumn = column;
+            var poorOnOffRateColumn = column; 
             foreach (var year in simulationYears)
             {
                 worksheet.Cells[row + 2, column].Value = year;
@@ -835,7 +815,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 column++;
             }
 
-            //worksheet.Row(row).Height = 40;
+            //set poor on/off column start and end index
+            poorOnOffColStart = poorOnOffRateColumn; poorOnOffColEnd = column - 1;
 
             // Merge 2 rows for headers till column before Bridge Funding
             for (int cellColumn = 1; cellColumn < currentCell.Column - 5; cellColumn++)
@@ -853,12 +834,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             for(var cellColumn = poorOnOffRateColumn - 3; cellColumn < poorOnOffRateColumn; cellColumn++)
             {
                 ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
+                ExcelHelper.ApplyColor(worksheet.Cells[row, cellColumn], ColorTranslator.FromHtml("#B4C6E7"));
             }
 
-            //TODO: hide poor on/off columns
-
             // Merge columns for Poor On/Off Rate
-            ExcelHelper.MergeCells(worksheet, row, poorOnOffRateColumn, row + 1, column - 1);
+            ExcelHelper.MergeCells(worksheet, row, poorOnOffRateColumn, row + 1, poorOnOffColEnd);
+
+            //hide poor on/off columns            
+            for (var columnIndex = poorOnOffRateColumn; columnIndex <= poorOnOffColEnd; columnIndex++)
+            {
+                worksheet.Column(columnIndex).Hidden = true;
+            }
 
             //set current column
             currentCell.Column = column;
@@ -875,8 +861,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
-
-            var yearHeaderColumn = currentCell.Column;
 
             var simulationHeaderTexts = GetSimulationHeaderTexts();
             _spacerColumnNumbers = new List<int>();
@@ -922,10 +906,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 {
                     case "POSTED":
                         ExcelHelper.ApplyColor(worksheet.Cells[row + 1, column], ColorTranslator.FromHtml("#FF7C80"));
-                        break;
-
-                    case "FHWA_WORK_TYPES":
-                        ExcelHelper.ApplyColor(worksheet.Cells[row + 1, column], ColorTranslator.FromHtml("#FFC000"));
                         break;
                 }                
             }
@@ -974,7 +954,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "District Remarks"
             };
         }
-
 
         private int EnterDefaultMinCValue(ExcelWorksheet worksheet, int row, int column, Dictionary<string, double> numericAttribute)
         {

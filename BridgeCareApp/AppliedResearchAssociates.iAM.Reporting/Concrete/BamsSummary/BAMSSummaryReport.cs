@@ -33,6 +33,7 @@ using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -273,6 +274,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            //get treatment category lookup
+            var treatmentCategoryLookup = new Dictionary<string, string>();
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (treatmentList?.Any() == true)
+            {
+                foreach (var treatmentObject in treatmentList)
+                {
+                    if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
+                    {
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                    }
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             // Simulation parameters TAB
@@ -283,7 +298,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, treatmentCategoryLookup);
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);

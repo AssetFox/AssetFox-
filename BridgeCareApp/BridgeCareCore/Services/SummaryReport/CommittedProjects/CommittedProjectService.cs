@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -7,17 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using AppliedResearchAssociates.CalculateEvaluate;
-using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
-using BridgeCareCore.Services.CommittedProjects;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -28,15 +24,14 @@ namespace BridgeCareCore.Services
     public class CommittedProjectService : ICommittedProjectService
     {
         private static IUnitOfWork _unitOfWork;
-
         public const string UnknownBudgetName = "Unknown";
 
         // TODO: Determine based on associated network
         private readonly string _networkKeyField = "BRKEY_";
-        private readonly Dictionary<string, List<KeySegmentDatum>> _keyProperties;
-        private readonly List<string> _keyFields;
+        private Dictionary<string, List<KeySegmentDatum>> _keyProperties;
+        private List<string> _keyFields;
 
-        private static readonly List<string> InitialHeaders = new List<string>
+        private static readonly List<string> InitialHeaders = new()
         {
             "TREATMENT",
             "YEAR",
@@ -53,15 +48,13 @@ namespace BridgeCareCore.Services
         public CommittedProjectService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties.ToDictionary();
-            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
         }
 
         /**
          * Adds excel worksheet header row cell values for Committed Project Export
          */
         private void AddHeaderCells(ExcelWorksheet worksheet, List<string> attributeNames)
-        {
+        {            
             var column = 1;
             if (_keyFields.Contains(_networkKeyField))
             {
@@ -101,7 +94,7 @@ namespace BridgeCareCore.Services
                             locationValue = project.LocationKeys[_networkKeyField];
                             worksheet.Cells[row, column++].Value = locationValue;
                         }
-
+                                            
                         // Add other data from key fields based on ID
                         var otherData = _keyFields.Where(_ => _ != _networkKeyField);
                         if (!String.IsNullOrEmpty(locationValue) && otherData.Count() > 0)
@@ -163,7 +156,8 @@ namespace BridgeCareCore.Services
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             if (committedProjectDTOs.Any())
             {
                 var attributeNames = committedProjectDTOs
@@ -196,7 +190,8 @@ namespace BridgeCareCore.Services
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;//.ToDictionary();
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
 
             return new FileInfoDTO
@@ -464,6 +459,8 @@ namespace BridgeCareCore.Services
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;//.ToDictionary();
+            _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
 

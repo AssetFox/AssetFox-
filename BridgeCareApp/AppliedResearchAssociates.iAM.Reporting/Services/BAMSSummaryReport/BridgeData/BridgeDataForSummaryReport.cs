@@ -445,7 +445,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
                 ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
-            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? "Y" : "N"; //poor
+            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? BAMSConstants.Yes : BAMSConstants.No; //poor
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             if (row % 2 == 0)
@@ -489,7 +489,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "MPO_NAME"); // planning partner
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID");
                 worksheet.Cells[rowNo, columnNo++].Value = int.TryParse(_summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NHS_IND"),
-                    out var numericValue) && numericValue > 0 ? "Y" : "N";
+                    out var numericValue) && numericValue > 0 ? BAMSConstants.Yes : BAMSConstants.No;
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "NBISLEN");
@@ -519,24 +519,24 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo], ExcelHelperCellFormat.Number);
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE");
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "P3") > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "P3") > 0 ? BAMSConstants.Yes : BAMSConstants.No;
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 _previousYearInitialMinC.Add(_summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "MINCOND"));
 
                 // Add Parallel Structure, Internet Report, Federal Aid, Bridge Funding
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "PARALLEL") > 0 ? BAMSConstants.Yes : BAMSConstants.No;
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERNET_REPORT");
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FEDAID");
 
                 var columnForStyle = columnNo;
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding185(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding581(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? "Y" : "N";
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFunding183(sectionSummary) ? "Y" : "N";
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNHPP(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingSTP(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBOF(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingState(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(sectionSummary) ? BAMSConstants.Yes : BAMSConstants.No;
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
 
                 if (rowNo % 2 == 0)
@@ -606,12 +606,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         {
             return new List<string>
             {
-                "185",
-                "581",
-                "STP",
                 "NHPP",
+                "STP",
                 "BOF",
-                "183"
+                "BRIP",
+                "State",
+                "N/A"
             };
         }
 
@@ -810,10 +810,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 if (numericValue > 0)
                 {
                     _parametersModel.nHSModel.NHS = "Y";
+                    _parametersModel.nHSModel.NonNHS = "N";
                 }
                 else
                 {
                     _parametersModel.nHSModel.NonNHS = "Y";
+                    _parametersModel.nHSModel.NHS = "N";
                 }
             }
             // Get BPN data for parameter TAB

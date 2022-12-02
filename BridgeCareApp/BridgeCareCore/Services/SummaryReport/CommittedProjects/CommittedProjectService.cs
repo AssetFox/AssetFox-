@@ -190,7 +190,7 @@ namespace BridgeCareCore.Services
             using var excelPackage = new ExcelPackage(new FileInfo(fileName));
 
             var worksheet = excelPackage.Workbook.Worksheets.Add("Committed Projects");
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;//.ToDictionary();
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             AddHeaderCells(worksheet, new List<string> { "Add Consequences Here and in columns to the right" });
 
@@ -459,7 +459,7 @@ namespace BridgeCareCore.Services
 
         public void ImportCommittedProjectFiles(Guid simulationId, ExcelPackage excelPackage, string filename, bool applyNoTreatment)
         {
-            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;//.ToDictionary();
+            _keyProperties = _unitOfWork.AssetDataRepository.KeyProperties;
             _keyFields = _keyProperties.Keys.Where(_ => _ != "ID").ToList();
             var committedProjectDTOs =
                 CreateSectionCommittedProjectsForImport(simulationId, excelPackage, filename, applyNoTreatment);
@@ -469,9 +469,9 @@ namespace BridgeCareCore.Services
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
 
-        public double GetTreatmentCost(Guid treatmentLibraryId, string brkey, string treatment, int year, Guid networkId)
+        public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, int year, Guid networkId)
         {
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             
             if (asset == null)
                 return 0;
@@ -504,10 +504,10 @@ namespace BridgeCareCore.Services
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string brkey, string treatment, int year, Guid networkId)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string assetKeyData, string treatment, int year, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
-            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, brkey);
+            var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             if (asset == null)
                 return consequencesToReturn;
             var treatmentConsequences = _unitOfWork.Context.SelectableTreatment.AsNoTracking()

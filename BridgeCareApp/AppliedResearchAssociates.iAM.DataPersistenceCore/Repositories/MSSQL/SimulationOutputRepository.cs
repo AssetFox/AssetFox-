@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
@@ -255,36 +256,50 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Take(AssetLoadBatchSize)
                    .ToList();
                     memos.Mark("  assetEntities");
-                    AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
-                    memos.Mark("  toDomainDictionary");
-                    var assetDetailValues = new List<AssetDetailValueEntityIntId>();
-                    foreach (var assetEntity in assetEntities)
+                    if (assetEntities.Any())
                     {
-                        foreach (var attributeId in usedAttributeIds)
+                        AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
+                        memos.Mark("  toDomainDictionary");
+                        var assetDetailIds = assetEntities.Select(a => a.Id).ToList();
+                        var assetDetailCommaSeparatedList = GuidsToStringList(assetDetailIds);
+                        var queryStart = "SELECT [AssetDetailId], [Discriminator], [TextValue], [NumericValue], [AttributeId] FROM [IAMv2Test].[dbo].[AssetDetailValueIntId] Where AssetDetailId IN ";
+                        var query = $"{queryStart} {assetDetailCommaSeparatedList};";
+                        using var command = _unitOfWork.Context.Database.GetDbConnection().CreateCommand();
+                        command.CommandText = query;
+                        command.CommandType = CommandType.Text;
+                        _unitOfWork.Context.Database.OpenConnection();
+                        using var result = command.ExecuteReader();
+                        _unitOfWork.Context.Database.CloseConnection();
+                        memos.Mark("  loadedRawSql");
+                        var assetDetailValues = new List<AssetDetailValueEntityIntId>();
+                        foreach (var assetEntity in assetEntities)
                         {
-                            var assetDetail = new AssetDetailValueEntityIntId
+                            foreach (var attributeId in usedAttributeIds)
                             {
-                                AssetDetailId = assetEntity.Id,
-                                AttributeId = attributeId,
-                            };
-                            assetDetailValues.Add(assetDetail);
+                                var assetDetail = new AssetDetailValueEntityIntId
+                                {
+                                    AssetDetailId = assetEntity.Id,
+                                    AttributeId = attributeId,
+                                };
+                                assetDetailValues.Add(assetDetail);
+                            }
                         }
-                    }
-                    memos.Mark("  empty assetDetails");
-                    var assetDetailValueConfig = new BulkConfig
-                    {
-                        UpdateByProperties = new List<string>
+                        memos.Mark("  empty assetDetails");
+                        var assetDetailValueConfig = new BulkConfig
+                        {
+                            UpdateByProperties = new List<string>
                         {
                             nameof(AssetDetailValueEntityIntId.AttributeId),
                             nameof(AssetDetailValueEntityIntId.AssetDetailId)
                         }
-                    };
-                    _unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
-                    memos.Mark("  BulkRead done");
-                    foreach (var assetDetailValue in assetDetailValues)
-                    {
-                        var assetDetail = assets[assetDetailValue.AssetDetailId];
-                        AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
+                        };
+                        _unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
+                        memos.Mark("  BulkRead done");
+                        foreach (var assetDetailValue in assetDetailValues)
+                        {
+                            var assetDetail = assets[assetDetailValue.AssetDetailId];
+                            AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
+                        }
                     }
                     memos.Mark($" batch {batchIndex} done");
                     batchIndex++;
@@ -305,6 +320,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 WriteTimingsToFile(memos, outputFilename);
             }
             return domain;
+        }
+
+        private static string GuidsToStringList(List<Guid> assetDetailIds)
+        {
+            var assetDetailCommaSeparatedListBuilder = new StringBuilder();
+            assetDetailCommaSeparatedListBuilder.Append("(");
+            bool first = true;
+            foreach (var guid in assetDetailIds)
+            {
+                if (!first)
+                {
+                    assetDetailCommaSeparatedListBuilder.Append(',');
+                }
+                first = false;
+                assetDetailCommaSeparatedListBuilder.Append($"'{guid.ToString()}'");
+            }
+            assetDetailCommaSeparatedListBuilder.Append(')');
+            var assetDetailCommaSeparatedList = assetDetailCommaSeparatedListBuilder.ToString();
+            return assetDetailCommaSeparatedList;
         }
 
         private static void WriteTimingsToFile(List<EventMemoModel> memos, string filename)

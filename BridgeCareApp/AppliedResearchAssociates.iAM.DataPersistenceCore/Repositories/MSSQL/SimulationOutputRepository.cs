@@ -140,6 +140,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         {
             loggerForUserInfo ??= new DoNotLog();
             loggerForTechinalInfo ??= new DoNotLog();
+            _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
             var memos = EventMemoModelLists.GetFreshInstance("Load");
             var startMemo = memos.MarkInformation("Starting load", loggerForTechinalInfo);
             loggerForUserInfo.Information("Loading SimulationOutput");

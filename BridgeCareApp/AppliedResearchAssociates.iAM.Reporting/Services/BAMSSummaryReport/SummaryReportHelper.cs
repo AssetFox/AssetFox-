@@ -121,24 +121,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
         }
 
 
-        public bool BridgeFundingBRIP(AssetDetail section)
-        {
-            var bridgeLength = section.ValuePerNumericAttribute["LENGTH"];
-            var functionalClass = "";
-            if (section.ValuePerTextAttribute["FUNC_CLASS"].Length >= 2)
-            {
-                functionalClass = section.ValuePerTextAttribute["FUNC_CLASS"].Substring(0, 2);
-            }
-            var functionalClassArray = new string[] { "01", "02" };
-            return (bridgeLength >= 20 && functionalClassArray.Contains(functionalClass));
-        }
-
-        public bool BridgeFundingState(AssetDetail section)
-        {
-            var internetReport = section.ValuePerTextAttribute["INTERNET_REPORT"];
-            return (internetReport.ToUpper() == "STATE");
-        }
-
         public bool BridgeFundingBOF(AssetSummaryDetail section)
         {
             var functionalClass = "";

@@ -21,11 +21,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
         bool BridgeFundingState(AssetSummaryDetail section);
         bool BridgeFundingNotApplicable(AssetSummaryDetail section);
 
-
-        bool BridgeFundingBRIP(AssetSummaryDetail section);
-        bool BridgeFundingState(AssetSummaryDetail section);
-        bool BridgeFundingNA(AssetSummaryDetail section);
-
         string FullFunctionalClassDescription(string functionalClassAbbreviation);
     }
 }

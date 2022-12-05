@@ -43,6 +43,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         public WorkSummaryModel Fill(ExcelWorksheet worksheet, SimulationOutput reportOutputData, Dictionary<string, string> treatmentCategoryLookup)
         {
+            //set default width
+            worksheet.DefaultColWidth = 13;
+
             // Add data to excel.
             var sectionHeaders = GetStaticSectionHeaders();
             var dataHeaders = GetStaticDataHeaders();
@@ -55,7 +58,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
             // top, left to right, and bottom set of data.
-            using (ExcelRange autoFilterCells = worksheet.Cells[3, 1, currentCell.Row, currentCell.Column - 1])
+            using (ExcelRange autoFilterCells = worksheet.Cells[currentCell.Row, 1, currentCell.Row, currentCell.Column - 1])
             {
                 autoFilterCells.AutoFilter = true;
             }
@@ -86,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
         private void AddDynamicDataCells(ExcelWorksheet worksheet, SimulationOutput outputResults, CurrentCell currentCell, Dictionary<string, string> treatmentCategoryLookup)
         {
-            var initialRow = 5;
+            var initialRow = 6;
             var row = initialRow; // Data starts here
             var startingRow = row;
             var column = currentCell.Column;
@@ -601,7 +604,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingBRIP(sectionSummary) ? "Y" : "N"; //BRIP
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingState(sectionSummary) ? "Y" : "N"; //State
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNA(sectionSummary) ? "Y" : "N"; //NA
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.BridgeFundingNotApplicable(sectionSummary) ? "Y" : "N"; //NA
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnForStyle, rowNo, columnNo - 1]);
 
@@ -640,7 +643,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 //--------------------- Asset ID ---------------------
                 "Internet\r\nReport",
-                "Bridge\r\n(B/C)",
+                "Bridge (B/C)",
                 "BridgeID\r\n(5A01)",
                 "BRKey\r\n(5A03)",
 
@@ -648,18 +651,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 "District\r\n(5A04)",
                 "County\r\n(5A05)",
                 "Owner Code\r\n(5A21)",
-                "Submitting\r\nAgency\r\n(6A06)",
+                "Submitting Agency\r\n(6A06)",
                 "Planning Partner\r\n(5A13)",
 
                 //--------------------- Structure ---------------------
-                "Structure\r\nLength\r\n(5B18)",
-                "Deck Area\r\n(5B19)",
-                "Large\r\nBridge",
-                "Span\r\nType",
-                "Bridge\r\nFamily",
+                "Structure Length\r\n(5B18)",
+                "Deck Area (5B19)",
+                "Large Bridge",
+                "Span Type",
+                "Bridge Family",
                 "Struct Type\r\n(6A26-29)",
-                "Fractural\r\nCritical",
-                "Parallel\r\nStructure\r\n(5E02)",
+                "Fractural Critical",
+                "Parallel Structure\r\n(5E02)",
 
                 //--------------------- Network ---------------------
 
@@ -671,9 +674,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 //--------------------- Asset Attributes ---------------------
                 
-                "Deck Surface\r\nType\r\n(5B02)",
-                "Wearing\r\nSurface\r\nCond\r\n(6B40)",
-                "Paint\r\nCond\r\n(6B36)",
+                "Deck Surface Type\r\n(5B02)",
+                "Wearing Surface Cond\r\n(6B40)",
+                "Paint Cond\r\n(6B36)",
                 "Paint Ext\r\n(6B37)",
                 "Year Built\r\n(5A15)",
                 "Age",
@@ -710,7 +713,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                                             , ref int poorOnOffColStart, ref int poorOnOffColEnd)
         {
             //section header
-            int sectionHeaderRow = 1; var totalNumOfColumns = 0; var cellBGColor = ColorTranslator.FromHtml("#FFFFFF"); //White
+            int sectionHeaderRow = 2; var totalNumOfColumns = 0; var cellBGColor = ColorTranslator.FromHtml("#FFFFFF"); //White
             var startColumn = 0; var endColumn = 0;
             for (int column = 0; column < sectionHeaders.Count; column++)
             {
@@ -756,7 +759,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             //data header
-            int dataHeaderRow = 2;
+            int dataHeaderRow = sectionHeaderRow + 1;
             ExcelHelper.MergeCells(worksheet, dataHeaderRow, dataHeaders.Count, dataHeaderRow, dataHeaders.Count + 5); //Bridge Funding Merge Columns
             for (int column = 0; column < dataHeaders.Count; column++)
             {
@@ -773,6 +776,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             }
 
             var currentCell = new CurrentCell { Row = dataHeaderRow, Column = dataHeaders.Count + 5 };
+            ExcelHelper.ApplyStyle(worksheet.Cells[dataHeaderRow + 1, dataHeaders.Count, dataHeaderRow + 1, dataHeaders.Count + 5]);
             ExcelHelper.ApplyBorder(worksheet.Cells[dataHeaderRow, 1, dataHeaderRow + 1, worksheet.Dimension.Columns]);
 
             //dynamic year headers
@@ -807,7 +811,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[row, column - 1], ColorTranslator.FromHtml("#B4C6E7"));
 
             worksheet.Cells[row, ++column].Value = "Poor On/Off Rate";
-            var poorOnOffRateColumn = column; 
+            var poorOnOffRateColumn = column;
             foreach (var year in simulationYears)
             {
                 worksheet.Cells[row + 2, column].Value = year;
@@ -819,6 +823,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             poorOnOffColStart = poorOnOffRateColumn; poorOnOffColEnd = column - 1;
 
             // Merge 2 rows for headers till column before Bridge Funding
+            worksheet.Row(row).Height = 25;
             for (int cellColumn = 1; cellColumn < currentCell.Column - 5; cellColumn++)
             {
                 ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
@@ -833,8 +838,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             // Merge "Work Done", "Work done more than once", "Total"
             for(var cellColumn = poorOnOffRateColumn - 3; cellColumn < poorOnOffRateColumn; cellColumn++)
             {
-                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
                 ExcelHelper.ApplyColor(worksheet.Cells[row, cellColumn], ColorTranslator.FromHtml("#B4C6E7"));
+                ExcelHelper.MergeCells(worksheet, row, cellColumn, row + 1, cellColumn);
             }
 
             // Merge columns for Poor On/Off Rate
@@ -855,6 +860,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             column = currentCell.Column;
             column = AddSimulationHeaderTexts(worksheet, column, row, initialSimulationHeaderTexts, initialSimulationHeaderTexts.Count);
             ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
+            ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], ColorTranslator.FromHtml("#E2EFDA"));
 
             // Empty column
             currentCell.Column = ++column;
@@ -871,6 +877,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 column = currentCell.Column;
                 column = AddSimulationHeaderTexts(worksheet, column, row, simulationHeaderTexts, simulationHeaderTexts.Count);
                 ExcelHelper.MergeCells(worksheet, row, currentCell.Column + 1, row, column);
+
                 if (simulationYear % 2 != 0)
                 {
                     ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.Gray);
@@ -884,7 +891,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Column(currentCell.Column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
                 _spacerColumnNumbers.Add(currentCell.Column);
 
-                currentCell.Column = ++column;
+                currentCell.Column = ++column; 
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);
             currentCell.Row = currentCell.Row + 2;

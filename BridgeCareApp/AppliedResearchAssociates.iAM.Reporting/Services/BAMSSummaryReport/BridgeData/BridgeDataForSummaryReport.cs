@@ -492,8 +492,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 //--------------------- Asset ID ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "INTERNET_REPORT"); //Internet Report 
-                ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
-
+                
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BRIDGE_TYPE"); //Bridge (B/C)
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
@@ -519,7 +518,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 //--------------------- Structure ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "LENGTH"); //Structure Length
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
+
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DECK_AREA"); //Deck Area
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "LARGE_BRIDGE"); //Large Bridge
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
@@ -576,14 +578,16 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "RISK_SCORE"); //Risk Score
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "DET_LENGTH"); //Detour Length
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "POST_STATUS"); //Posting Status
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "SUFF_RATING"); //Suff Rating
-
+                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
 
                 //--------------------- Funding ---------------------
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "HBRR_ELIG"); //HBRR Elig
@@ -903,18 +907,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             {
                 var simulationHeaderText = simulationHeaderTexts[index];
                 worksheet.Cells[row + 1, ++column].Value = simulationHeaderText;
-                ExcelHelper.ApplyStyle(worksheet.Cells[row + 1, column]);
-
-                //Change header background color
-                var headerNameFormatted = simulationHeaderText.ToUpper();
-                headerNameFormatted = headerNameFormatted.Replace("\r\n", " ");
-                headerNameFormatted = headerNameFormatted.Replace(" ", "_");
-                switch (headerNameFormatted.ToUpper())
-                {
-                    case "POSTED":
-                        ExcelHelper.ApplyColor(worksheet.Cells[row + 1, column], ColorTranslator.FromHtml("#FF7C80"));
-                        break;
-                }                
+                ExcelHelper.ApplyStyle(worksheet.Cells[row + 1, column]);                
             }
 
             return column;

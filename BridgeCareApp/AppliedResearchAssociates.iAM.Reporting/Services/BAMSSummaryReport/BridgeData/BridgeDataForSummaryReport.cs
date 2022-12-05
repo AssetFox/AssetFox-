@@ -458,7 +458,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.ApplyColor(worksheet.Cells[row, column], Color.Yellow);
                 ExcelHelper.SetTextColor(worksheet.Cells[row, column], Color.Black);
             }
-            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? "Y" : "N"; //poor
+            worksheet.Cells[row, ++column].Value = _summaryReportHelper.checkAndGetValue<double>(selectedSection.ValuePerNumericAttribute, "MINCOND") < 5 ? BAMSConstants.Yes : BAMSConstants.No; //poor
             ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, column]);
 
             if (row % 2 == 0)
@@ -998,10 +998,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 if (numericValue > 0)
                 {
                     _parametersModel.nHSModel.NHS = "Y";
+                    _parametersModel.nHSModel.NonNHS = "N";
                 }
                 else
                 {
                     _parametersModel.nHSModel.NonNHS = "Y";
+                    _parametersModel.nHSModel.NHS = "N";
                 }
             }
             // Get BPN data for parameter TAB

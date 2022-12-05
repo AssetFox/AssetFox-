@@ -37,6 +37,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             AddDynamicDataCells(unfundedTreatmentTimeWorksheet, simulationOutput, currentCell);
 
             unfundedTreatmentTimeWorksheet.Cells.AutoFitColumns();
+            _unfundedTreatmentCommon.PerformPostAutofitAdjustments(unfundedTreatmentTimeWorksheet);
         }
 
         #region Private methods

@@ -45,8 +45,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             AddDynamicDataCells(fundedTreatmentWorksheet, simulationOutput, currentCell);
             fundedTreatmentWorksheet.Calculate();
 
-            // TODO: Extra cells
-
             fundedTreatmentWorksheet.Cells.AutoFitColumns();
             _treatmentCommon.PerformPostAutofitAdjustments(fundedTreatmentWorksheet);
         }

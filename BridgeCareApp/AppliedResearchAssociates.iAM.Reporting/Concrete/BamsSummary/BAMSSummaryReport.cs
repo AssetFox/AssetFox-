@@ -33,6 +33,7 @@ using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -41,6 +42,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
+        private readonly IFundedTreatmentList _fundedTreatmentList;
         private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
         private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
@@ -82,6 +84,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
             if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
+
+            _fundedTreatmentList = new FundedTreatmentList();
+            if (_fundedTreatmentList == null) { throw new ArgumentNullException(nameof(_fundedTreatmentList)); }
 
             _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
             if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
@@ -288,12 +293,12 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
 
-
+            // Funded Treatment List TAB
             reportDetailDto.Status = $"Creating Funded Treatment List TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             var fundedTreatmentWorksheet = excelPackage.Workbook.Worksheets.Add("Funded Treatment List");
-            // TODO .Fill call
+            _fundedTreatmentList.Fill(fundedTreatmentWorksheet, reportOutputData);
 
             // unfunded tab will be uncommented and redone in a future release
 

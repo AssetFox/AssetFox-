@@ -11,8 +11,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
 {
     internal interface ITreatmentCommon
     {
-        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment);
+        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year);
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet);
-        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail);
+        public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet);
     }
 }

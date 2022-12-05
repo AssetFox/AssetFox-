@@ -54,6 +54,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     Year = project.Year,
                     CommittedProjectLocation = project.CommittedProjectLocation,
                     ScenarioBudget = project.ScenarioBudget != null ? new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name } : null,
+                    LastModifiedDate = project.LastModifiedDate,
                     CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
                         new CommittedProjectConsequenceEntity
                         {

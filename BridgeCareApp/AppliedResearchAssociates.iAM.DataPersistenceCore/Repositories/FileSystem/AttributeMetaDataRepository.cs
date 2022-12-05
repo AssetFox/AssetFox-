@@ -55,31 +55,5 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.FileSys
 
             return attributes;
         }
-
-        public (Attribute Attribute, string DefaultEquation) GetNetworkDefinitionAttribute(Guid dataSourceId)
-        {
-            // get the network definition rules file path
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory ?? string.Empty,
-                "MetaData//NetworkDefinitionRules", "definitionRules.json");
-
-            // check that the file exists
-            if (!File.Exists(filePath))
-            {
-                throw new FileNotFoundException($"{filePath} does not exist");
-            }
-
-            // get the raw json from the file
-            var rawAttributes = File.ReadAllText(filePath);
-
-            // convert the json string into attribute meta data models
-            var metaData = JsonConvert
-                .DeserializeAnonymousType(rawAttributes, new { AttributeMetaData = default(List<AttributeMetaDatum>), DefaultEquation = default(string) });
-
-            // convert meta data into attribute domain models
-            var attributes = metaData.AttributeMetaData.Select(a => AttributeFactory.Create(a, dataSourceId)).ToList();
-
-            // return only the first attribute from the list, or null if there isn't any
-            return (attributes.FirstOrDefault(), metaData.DefaultEquation);
-        }
     }
 }

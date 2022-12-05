@@ -688,7 +688,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                 //--------------------- Funding ---------------------
                 "HBRR Elig\r\n(6B41)",
-                "P3",
+                "P3\r\n(5E24)",
                 "Federal Aid\r\n(6C06)",
                 "Bridge Funding"
             };

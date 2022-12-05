@@ -216,7 +216,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = "N"; // CULV_SEEDED
+                worksheet.Cells[row, columnNo++].Value = BAMSConstants.No; // CULV_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
@@ -227,15 +227,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             {
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? "N"; // DECK_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // DECK_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? "N"; // SUP_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUP_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";
-                worksheet.Cells[row, columnNo++].Value = empty ?? "N"; // SUB_SEEDED
+                worksheet.Cells[row, columnNo++].Value = empty ?? BAMSConstants.No; // SUB_SEEDED
 
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[row, columnNo]);
                 worksheet.Cells[row, columnNo].Style.Numberformat.Format = "0.000";

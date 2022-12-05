@@ -272,6 +272,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
                         }
                         memos.Mark("  inFileFromRawSql");
+                        _unitOfWork.Context.ChangeTracker.Clear();
                         //var assetDetailValues = new List<AssetDetailValueEntityIntId>();
                         //foreach (var assetEntity in assetEntities)
                         //{

@@ -273,35 +273,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         }
                         memos.Mark("  inFileFromRawSql");
                         _unitOfWork.Context.ChangeTracker.Clear();
-                        //var assetDetailValues = new List<AssetDetailValueEntityIntId>();
-                        //foreach (var assetEntity in assetEntities)
-                        //{
-                        //    foreach (var attributeId in usedAttributeIds)
-                        //    {
-                        //        var assetDetail = new AssetDetailValueEntityIntId
-                        //        {
-                        //            AssetDetailId = assetEntity.Id,
-                        //            AttributeId = attributeId,
-                        //        };
-                        //        assetDetailValues.Add(assetDetail);
-                        //    }
-                        //}
-                        //memos.Mark("  empty assetDetails");
-                        //var assetDetailValueConfig = new BulkConfig
-                        //{
-                        //    UpdateByProperties = new List<string>
-                        //{
-                        //    nameof(AssetDetailValueEntityIntId.AttributeId),
-                        //    nameof(AssetDetailValueEntityIntId.AssetDetailId)
-                        //}
-                        //};
-                        //_unitOfWork.Context.BulkRead(assetDetailValues, assetDetailValueConfig);
-                        //memos.Mark("  BulkRead done");
-                        //foreach (var assetDetailValue in assetDetailValues)
-                        //{
-                        //    var assetDetail = assets[assetDetailValue.AssetDetailId];
-                        //    AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
-                        //}
                     }
                     memos.Mark($" batch {batchIndex} done");
                     batchIndex++;

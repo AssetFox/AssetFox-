@@ -446,7 +446,7 @@ export default class AppComponent extends Vue {
             }
             this.setIsBusyAction({ isBusy: false });            
             this.unauthorizedError = hasValue(this.unauthorizedError) ? error.response!.data : "User is not authorized!";
-            if (error.response!.status === 500) return;
+            if (error.response!.status === 500 || error.response!.status === 502) return;
             
             this.addErrorNotificationAction({
                 message: error.response!.status === 403 ? "Authorization Failed" : "HTTP Error",

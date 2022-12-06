@@ -950,6 +950,32 @@ export default class Scenarios extends Vue {
             this.getSharedScenariosPageAction(request); 
     }
 
+    // Refresh both lists and counts(gets called when clone, delete, create operations are performed)
+    onScenariosPagination() {
+        if(this.initializing)
+            return;
+
+        const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
+        const request: PagingRequest<Scenario>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: sortBy != null ? sortBy : '',
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearchMine
+        };
+
+        if(hasValue(this.networks))
+            this.getUserScenariosPageAction(request).then(() => {
+                this.onSharedScenariosPagination();
+            });
+    }
+
     @Watch('simulationQueuePagination') onSimulationQueuePagination() {
         this.doSimulationQueuePagination();
     }
@@ -1329,10 +1355,7 @@ export default class Scenarios extends Vue {
                 scenarioName: scenario.name
             }).then(() => {
                 this.selectedScenario = clone(emptyScenario)
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.onScenariosPagination();
             });
         }
     }
@@ -1367,11 +1390,8 @@ export default class Scenarios extends Vue {
             this.deleteScenarioAction({
                 scenarioId: this.selectedScenario.id,
             }).then(() => {
-                this.selectedScenario = clone(emptyScenario);
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.selectedScenario = clone(emptyScenario);              
+                this.onScenariosPagination();
             });
         }
     }
@@ -1439,10 +1459,7 @@ export default class Scenarios extends Vue {
                 scenario: scenario,
                 networkId: scenario.networkId,
             }).then(() => {
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.onScenariosPagination();
             });
         }
     }

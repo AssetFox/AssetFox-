@@ -187,13 +187,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, district, stateTotalsRowOffset);
                 districtSubTables.AddRange(districtSubTable);
 
-                var bottomRows = new List<ExcelRowModel>
-                {
-                    DistrictTotalsRowModels.TableBottomSumRow(simulationOutput, district, districtSubTable.Count)
-                };
-                districtSubTables.AddRange(bottomRows);
-
-                tableRowStartIndex += (districtSubTable.Count + 2); // account for header and total lines
+                tableRowStartIndex += (districtSubTable.Count + 1); // account for header and total lines
             }
 
 

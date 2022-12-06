@@ -372,39 +372,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 stateTotalsRowOffset++;
             }
 
+            var totalRow = ExcelRowModels.RightHeader(0, $"District {districtNumber:00} Total", 2, 1);
 
+            var totalDenominatorAddress = ExcelRangeFunctions.StartOffset(0, -stateTotalsRowOffset); // address of State Total row
+            var totalNumeratorAddress = ExcelRangeFunctions.StartOffset(0, -numeratorOffset, false, true);
 
-            //var turnpikeValues = new List<IExcelModel>();
-            //var turnpikeLabel = ExcelValueModels.String("Turnpike");
+            Func<ExcelRange, string> totalQuotient = range =>
+            {
+                var totalNumerator = totalNumeratorAddress(range);
+                var totalDenominator = totalDenominatorAddress(range);
+                return $"IFERROR({totalNumerator}/{totalDenominator}, 0)";
+            };
+            var newTotalCell = StackedExcelModels.Stacked(
+                ExcelFormulaModels.FromFunction(totalQuotient),
+                DistrictTotalsStyleModels.DarkBlueFill,
+                ExcelStyleModels.Right,
+                ExcelStyleModels.MediumBorder,
+                ExcelStyleModels.PercentageFormat(0));
+            totalRow.AddRepeated(output.Years.Count, newTotalCell);
 
-            //turnpikeValues.Add(StackedExcelModels.Stacked(
-            //    turnpikeLabel,
-            //    ExcelStyleModels.Left,
-            //    ExcelStyleModels.ThinBorder
-            //    ));
-            //var excelRowModel = ExcelRowModels.WithEntries(turnpikeValues);
+            rowModels.Add(totalRow);
 
-            //var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -districtNumber, false, true); // GARBAGE FOR NOW
-            //var denominatorAddress = ExcelRangeFunctions.StartOffset(0, -stateTotalsRowOffset); // address of State Total row
-
-            //Func<ExcelRange, string> quotient = range =>
-            //{
-            //    var numerator = numeratorAddress(range);
-            //    var denominator = denominatorAddress(range);
-            //    return $"IFERROR({numerator}/{denominator}, 0)";
-            //};
-            //var newCell = StackedExcelModels.Stacked(
-            //    ExcelFormulaModels.FromFunction(quotient),
-            //    DistrictTotalsStyleModels.LightBlueFill,
-            //    ExcelStyleModels.Right,
-            //    ExcelStyleModels.ThinBorder,
-            //    ExcelStyleModels.PercentageFormat(0));
-            //excelRowModel.AddRepeated(output.Years.Count, newCell);
-
-            //rowModels.Add(excelRowModel);
             //stateTotalsRowOffset++;
-     
-
 
             return rowModels;
         }
@@ -417,7 +406,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var sumEntry = StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(sumFunction),
                 DistrictTotalsStyleModels.DarkBlueFill,
-                ExcelStyleModels.WhiteText,
                 ExcelStyleModels.Right,
                 ExcelStyleModels.MediumBorder,
                 ExcelStyleModels.PercentageFormat(0));

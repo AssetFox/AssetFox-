@@ -20,8 +20,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         public static ExcelFillModel LightBlueFill
             => ExcelStyleModels.BackgroundColor(DistrictTotalsColors.LightBlue);
 
-        public static ExcelFillModel DarkBlueFill
-            => ExcelStyleModels.BackgroundColor(DistrictTotalsColors.DarkBlue);
+        public static StackedExcelModel DarkBlueFill
+            => StackedExcelModels.Stacked(
+                ExcelStyleModels.BackgroundColor(DistrictTotalsColors.DarkBlue),
+                ExcelStyleModels.WhiteText
+                );
+
 
         public static StackedExcelModel DarkGreenTotalsCells
             => StackedExcelModels.Stacked(

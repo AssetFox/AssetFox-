@@ -19,6 +19,9 @@ const generalRules = {
     'valueIsNotNegative': (value: number) => {
         return (value >= 0) || 'Value cannot be less than zero';
     },
+    'valueIsNotUnique': (value: any, values: any[]) => {
+        return values.findIndex((v)=>value === v) < 0 || 'Value must be unique';
+    },
     'nameIsNotUnique': (name: string, names: string[]) => {
         return !contains(name, names) || 'Name must be unique';
     }

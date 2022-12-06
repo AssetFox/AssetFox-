@@ -17,7 +17,9 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using NuGet.ContentModel;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace BridgeCareCore.Services
 {
@@ -475,24 +477,32 @@ namespace BridgeCareCore.Services
             
             if (asset == null)
                 return 0;
-            var treatmentCostEquations = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
+            var treatmentCosts = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.TreatmentCostEquationJoin)
                 .ThenInclude(_ => _.Equation)
+                .Include(_ => _.TreatmentCosts)
+                .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
+                .ThenInclude(_ => _.CriterionLibrary)
                 .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
-                .Select(_ => _.TreatmentCostEquationJoin.Equation).ToList();
+                .Where(_ => _.TreatmentCostEquationJoin != null);
 
             double totalCost = 0;
-            if (treatmentCostEquations == null)
+            if (treatmentCosts == null)
                 return totalCost;
-            foreach(var cost in treatmentCostEquations)
+            foreach(var cost in treatmentCosts)
             {
                 var compiler = new CalculateEvaluateCompiler();
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.Expression, compiler);
+
+                if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id, year))               
+                    continue;
+                
+                compiler = new CalculateEvaluateCompiler();
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
 
                 var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
                     .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                var calculator = compiler.GetCalculator(cost.Expression);
+                var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
                 var aggResultAttrDict = new Dictionary<string, AggregatedResultEntity>();
                 if (aggResults.Count != attributes.Count)
@@ -527,16 +537,7 @@ namespace BridgeCareCore.Services
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
-                var attributes = InstantiateCompilerAndGetExpressionAttributes(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, compiler);
-
-                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-                if (aggResults.Count != attributes.Count)
-                    continue;
-                var evaluator = compiler.GetEvaluator(consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression);
-                var scope = new CalculateEvaluateScope();
-                InstantiateScope(aggResults, scope);
-                if (evaluator.Delegate(scope))
+                if (IsCriteriaValid(compiler, consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id, year))
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
@@ -642,6 +643,20 @@ namespace BridgeCareCore.Services
             return committedProjects;
         }
 
+        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId, int year)
+        {
+            var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
+
+            var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
+            .Where(_ => _.MaintainableAssetId == assetId && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+            if (aggResults.Count != attributes.Count)
+                return false;
+            var evaluator = compiler.GetEvaluator(expression);
+            var scope = new CalculateEvaluateScope();
+            InstantiateScope(aggResults, scope);
+            return evaluator.Delegate(scope);
+        }
+
         private List<SectionCommittedProjectDTO> SearchCurves(List<SectionCommittedProjectDTO> committedProjects,
             string search,
             Dictionary<Guid, string> budgetDict)
@@ -658,7 +673,7 @@ namespace BridgeCareCore.Services
 
         private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
-            committedProjects = committedProjects.Concat(request.AddedRows).ToList();
+            committedProjects = committedProjects.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 
             for (var i = 0; i < committedProjects.Count; i++)
             {

@@ -1116,12 +1116,16 @@ export default class PerformanceCurveEditor extends Vue {
                         ...data,
                         id: this.selectedScenarioId,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    }).then(() => {
+                        this.onDiscardChanges();
                     });
                 } else {
                     this.importLibraryPerformanceCurvesFileAction({
                         ...data,
                         id: this.selectedPerformanceCurveLibrary.id,
                         currentUserCriteriaFilter: this.currentUserCriteriaFilter
+                    }).then(() => {
+                        this.onDiscardChanges();
                     });
                 }
 

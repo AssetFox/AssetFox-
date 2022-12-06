@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
@@ -293,9 +292,9 @@ namespace BridgeCareCore.Controllers
             }
         }
 
+        [HttpPost]
         [Route("GetSectionCommittedProjectsPage/{simulationId}")]
-        [Authorize]
-        // TODO New method add claims and policy here
+        [Authorize(Policy = Policy.ViewCommittedProjects)]
         public async Task<IActionResult> GetCommittedProjectsPage(Guid simulationId, PagingRequestModel<SectionCommittedProjectDTO> request)
         {
             try
@@ -377,7 +376,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
+        private void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
         {
             if (_claimHelper.RequirePermittedCheck())
             {

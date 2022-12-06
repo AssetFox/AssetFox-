@@ -86,32 +86,35 @@ namespace BridgeCareCore.Controllers
             var readTask = Task.Run(() => ReadMessages(channel.Reader));
             try
             {
-                var specificAttributes = AttributeService.ConvertAllAttributeList(attributes);
-                var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, specificAttributes);
-                if (result)
-                {
-                    return Ok();
-                } else
-                {
-                    return StatusCode(500, state.ErrorMessage);
-                }
-            }
-            catch (Exception e)
-            {
-                state.Status = "Aggregation failed";
-                UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
-                    new NetworkRollupDetailDTO { NetworkId = networkId, Status = state.Status}, 0.0);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - {HubService.errorList["Exception"]}");
-                throw;
+                return Ok();
             }
             finally
             {
-                NotifyUserOfState(state);
-                timer.Stop();
-                timer.Close();
-                channel.Writer.Complete();
-                //readTask.Dispose();
+                Response.OnCompleted(async () =>
+                {
+                    try
+                    {
+                        var specificAttributes = AttributeService.ConvertAllAttributeList(attributes);
+                        var result = await _aggregationService.AggregateNetworkData(channel.Writer, networkId, state, specificAttributes);
+                    }
+                    catch (Exception e)
+                    {
+                        state.Status = "Aggregation failed";
+                        UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
+                            new NetworkRollupDetailDTO { NetworkId = networkId, Status = state.Status }, 0.0);
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - {HubService.errorList["Exception"]}");
+                        throw;
+                    }
+                    finally
+                    {
+                        NotifyUserOfState(state);
+                        timer.Stop();
+                        timer.Close();
+                        channel.Writer.Complete();
+                        //readTask.Dispose();
+                    }
+                });
             }
         }
 

@@ -13,11 +13,15 @@ namespace BridgeCareCore.Services.Treatment
                 BudgetsTitleRow(),
                 BudgetsHeaderRow(),
             };
-            foreach (var budget in dto.Budgets)
+            if(dto.Budgets != null)
             {
-                var budgetRow = BudgetsRow(budget);
-                rows.Add(budgetRow);
+                foreach (var budget in dto.Budgets)
+                {
+                    var budgetRow = BudgetsRow(budget);
+                    rows.Add(budgetRow);
+                }
             }
+            
             return RowBasedExcelRegionModels.WithRows(rows);
         }
 

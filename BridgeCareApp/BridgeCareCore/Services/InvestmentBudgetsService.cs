@@ -797,7 +797,6 @@ namespace BridgeCareCore.Services
         private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
         {
             budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
-
             for (var i = 0; i < budgets.Count; i++)
             {
                 var budget = budgets[i];

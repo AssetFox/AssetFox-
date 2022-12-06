@@ -324,7 +324,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var newTotalCell = StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(turnpikeQuotient),
                 DistrictTotalsStyleModels.DarkBlueFill,
-                ExcelStyleModels.Right,
+                ExcelStyleModels.HorizontalCenter,
                 ExcelStyleModels.MediumBorder,
                 ExcelStyleModels.PercentageFormat(0));
             turnpikeRow.AddRepeated(output.Years.Count, newTotalCell);
@@ -394,9 +394,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 var newCell = StackedExcelModels.Stacked(
                     ExcelFormulaModels.FromFunction(quotient),
                     DistrictTotalsStyleModels.LightBlueFill,
-                    ExcelStyleModels.Right,
+                    ExcelStyleModels.HorizontalCenter,
                     ExcelStyleModels.ThinBorder,
-                    ExcelStyleModels.PercentageFormat(0));
+                    ExcelStyleModels.PercentageFormat(2));
                 excelRowModel.AddRepeated(output.Years.Count, newCell);
 
                 rowModels.Add(excelRowModel);
@@ -417,7 +417,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var newTotalCell = StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(totalQuotient),
                 DistrictTotalsStyleModels.DarkBlueFill,
-                ExcelStyleModels.Right,
+                ExcelStyleModels.HorizontalCenter,
                 ExcelStyleModels.MediumBorder,
                 ExcelStyleModels.PercentageFormat(0));
             totalRow.AddRepeated(output.Years.Count, newTotalCell);
@@ -435,7 +435,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var sumEntry = StackedExcelModels.Stacked(
                 ExcelFormulaModels.FromFunction(sumFunction),
                 DistrictTotalsStyleModels.DarkBlueFill,
-                ExcelStyleModels.Right,
+                ExcelStyleModels.HorizontalCenter,
                 ExcelStyleModels.MediumBorder,
                 ExcelStyleModels.PercentageFormat(0));
             returnValue.AddRepeated(output.Years.Count, sumEntry);

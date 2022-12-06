@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
@@ -377,7 +376,7 @@ namespace BridgeCareCore.Controllers
             }
         }
 
-        void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
+        private void CheckUpsertPermit(List<SectionCommittedProjectDTO> projects)
         {
             if (_claimHelper.RequirePermittedCheck())
             {

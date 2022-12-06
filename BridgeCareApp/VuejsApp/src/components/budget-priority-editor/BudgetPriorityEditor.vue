@@ -72,7 +72,7 @@
                                         <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
                                                       v-model.number='props.item[header.value]'
                                                       :mask="'##########'"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(props.item[header.value], currentPriorityList)]" />
                                         <v-text-field v-else label='Edit' single-line :mask="'####'"
                                                       v-model.number='props.item[header.value]' />
                                     </template>
@@ -274,6 +274,7 @@ export default class BudgetPriorityEditor extends Vue {
     totalItems = 0;
     currentPage: BudgetPriority[] = [];
     initializing: boolean = true;
+    currentPriorityList: number[] = [];
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -414,6 +415,9 @@ export default class BudgetPriorityEditor extends Vue {
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();
+        this.currentPage.forEach((item) => {
+            this.currentPriorityList.push(item.priorityLevel);
+        });
     }
 
     @Watch('selectedBudgetPriorityGridRows')
@@ -751,6 +755,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.clearChanges();
                 this.librarySelectItemValue = null;
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+                this.currentPage = sortByProperty("priorityLevel", this.currentPage);
             }           
         });
     }

@@ -18,6 +18,7 @@ import { AxiosResponse } from 'axios';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { http2XX } from '@/shared/utils/http-utils';
 import TreatmentService from '@/services/treatment.service';
+import { name } from 'msal/lib-commonjs/packageMetadata';
 
 const state = {
     treatmentLibraries: [] as TreatmentLibrary[],
@@ -217,7 +218,10 @@ const actions = {
         ).then((response: AxiosResponse) => {
             if (hasValue(response, 'data')) {
                 const treatments: Treatment[] = [response.data];
-                commit('scenarioSelectableTreatmentsMutator', treatments);                
+                commit('simpleScenarioSelectableTreatmentsMutator', treatments.map(_ => {
+                    const treatment: SimpleTreatment = {name: _.name, id: _.name}
+                    return treatment;
+                } ));                
                 dispatch('addSuccessNotification', {
                     message: 'Treatments file imported',
                 });
@@ -233,11 +237,7 @@ const actions = {
             payload.id,
             false
         ).then((response: AxiosResponse) => {
-            if (hasValue(response, 'data')) {
-                const treatmentLibrary: TreatmentLibrary[] = [response.data];
-                commit('treatmentLibrariesMutator', treatmentLibrary);       
-                const library: TreatmentLibrary = response.data as TreatmentLibrary;
-                commit('selectedTreatmentLibraryMutator', library.id);               
+            if (hasValue(response, 'data')) {           
                 dispatch('addSuccessNotification', {
                     message: 'Treatments file imported',
                 });

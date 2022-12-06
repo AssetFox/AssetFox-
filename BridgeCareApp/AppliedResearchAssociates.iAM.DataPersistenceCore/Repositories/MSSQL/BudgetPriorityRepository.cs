@@ -184,6 +184,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibraryScenarioBudgetPriorityJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Where(_ => _.SimulationId == simulationId)
+                .OrderBy(_ => _.PriorityLevel)
                 .Select(_ => _.ToDto())
                 .ToList();
         }

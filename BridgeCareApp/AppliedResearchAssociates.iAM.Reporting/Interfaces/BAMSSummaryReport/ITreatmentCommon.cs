@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
-using AppliedResearchAssociates.iAM.Reporting;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
 using OfficeOpenXml;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
 {
-    public interface IUnfundedTreatmentCommon
+    internal interface ITreatmentCommon
     {
-        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment);
+        void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year);
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet);
-        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail);
         public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet);
     }
 }

@@ -236,6 +236,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public Dictionary<string, bool> CheckIfKeyAttributeValuesExists(Guid networkId, List<string> attributeValues)
         {
+
             var network = _unitOfWork.Context.Network.AsNoTracking().Include(_ => _.Simulations).FirstOrDefault(_ => _.Id == networkId);
             if (network == null)
                 return new Dictionary<string, bool>();
@@ -250,7 +251,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     .Select(_ => attrEntity.DataType == "NUMBER" ? _.NumericValue.ToString() : _.TextValue)
                     .Where(_ => attributeValues.Contains(_)).ToList();
 
-            return attributeValues.ToDictionary(_ => _, _ => aggResults.Contains(_));
+            return attributeValues.Distinct().ToDictionary(_ => _, _ => aggResults.Contains(_));
         }
 
         public MaintainableAsset GetMaintainableAssetByKeyAttribute(Guid networkId, string attributeValue)

@@ -529,26 +529,6 @@ export default class TreatmentEditor extends Vue {
             this.hasCreatedLibrary = false;
         }
 
-        // if (this.hasScenario) {
-        //     this.treatments = this.selectedTreatmentLibrary.treatments
-        //         .map((treatment: Treatment) => ({
-        //             ...treatment,
-        //             id: getNewGuid(),
-        //             consequences: treatment.consequences.map((consequence: TreatmentConsequence) => ({
-        //                 ...consequence,
-        //                 id: getNewGuid(),
-        //             })),
-        //             costs: treatment.costs.map((cost: TreatmentCost) => ({
-        //                 ...cost,
-        //                 id: getNewGuid(),
-        //             })),
-        //             budgetIds: getPropertyValues('id', this.budgets) as string[],                    
-        //             addTreatment: false
-        //         }));               
-        // } else {
-        //     this.treatments = clone(this.selectedTreatmentLibrary.treatments);
-        // }
-
         this.clearChanges();
         if(this.treatmentSelectItemValue !== null && !this.hasScenario)
             this.treatmentCache.push(clone(this.selectedTreatment))
@@ -924,6 +904,13 @@ export default class TreatmentEditor extends Vue {
         });
     }
 
+    reset(){
+        this.treatmentSelectItemValue = null;
+        this.librarySelectItemValue = null;
+        this.clearChanges();        
+        this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);
+    }
+
     onShowConfirmDeleteAlert() {
         this.confirmBeforeDeleteAlertData = {
             showDialog: true,
@@ -979,12 +966,22 @@ export default class TreatmentEditor extends Vue {
                 this.importScenarioTreatmentsFileAction({
                     ...data,
                     id: this.selectedScenarioId
+                }).then(() => {
+                    this.treatmentSelectItemValue = null;
+                    this.librarySelectItemValue = null;
+                    this.clearChanges();        
+                    this.simpleTreatments = clone(this.stateSimpleScenarioSelectableTreatments);                  
                 });
             } else {
                 this.importLibraryTreatmentsFileAction({
                     ...data,
                     id: this.selectedTreatmentLibrary.id
-                });
+                }).then(() => {
+                    this.treatmentSelectItemValue = null;
+                    this.librarySelectItemValue = null;
+                    this.clearChanges();        
+                    this.simpleTreatments = [];                  
+                });;
             }
         }
      }

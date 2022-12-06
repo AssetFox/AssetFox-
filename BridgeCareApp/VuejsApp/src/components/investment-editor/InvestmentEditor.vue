@@ -105,7 +105,7 @@
                 <v-flex xs4>
                     <v-layout row align-end>
                         <v-spacer></v-spacer>
-                        <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true; showReminder = false'
+                        <v-btn :disabled='false' @click='showImportExportInvestmentBudgetsDialog = true;'
                             flat class='ghd-blue ghd-button-text ghd-separated-button ghd-button'>
                             Upload
                         </v-btn>
@@ -238,7 +238,6 @@
         <EditBudgetsDialog :dialogData='editBudgetsDialogData' @submit='onSubmitEditBudgetsDialogResult' />
 
         <ImportExportInvestmentBudgetsDialog :showDialog='showImportExportInvestmentBudgetsDialog'
-                                             :showReminder='showReminder'
                                              @submit='onSubmitImportExportInvestmentBudgetsDialogResult' />
     </v-layout>
 </template>
@@ -393,7 +392,6 @@ export default class InvestmentEditor extends Vue {
     budgets: Budget[] = [];
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
-    showReminder: boolean = false;
     range: number = 1;
    
     get addYearLabel() {
@@ -443,7 +441,7 @@ export default class InvestmentEditor extends Vue {
 
     // Watchers
     @Watch('pagination')
-    onPaginationChanged() {
+    async onPaginationChanged() {
         if(this.initializing)
             return;
         this.checkHasUnsavedChanges();
@@ -473,7 +471,7 @@ export default class InvestmentEditor extends Vue {
         };
         
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL){
-            InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
+            await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
@@ -490,7 +488,7 @@ export default class InvestmentEditor extends Vue {
             });
         }            
         else if(this.hasSelectedLibrary)
-             InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
+            await InvestmentService.getLibraryInvestmentPage(this.librarySelectItemValue !== null ? this.librarySelectItemValue : '', request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
                     this.currentPage = data.items;
@@ -1014,8 +1012,13 @@ export default class InvestmentEditor extends Vue {
                     })
                     .then((response: any) => {
                             this.getCriterionLibrariesAction();
-                            this.showReminder = this.isSuccessfulImport
-                            this.resetPage();
+                            this.firstYearOfAnalysisPeriodShift = 0;
+                                       
+                            this.clearChanges();               
+                            this.pagination.page = 1;
+                            this.onPaginationChanged().then(() => this.investmentPlanMutator(this.investmentPlan)  );
+                              
+                            this.librarySelectItemValue = null
                     });
                 } else {
                     this.importLibraryInvestmentBudgetsFileAction({
@@ -1025,6 +1028,8 @@ export default class InvestmentEditor extends Vue {
                     })
                     .then(() => {
                             this.getCriterionLibrariesAction();
+                            this.librarySelectItemValue = null;
+                            this.clearChanges();
                             this.resetPage();
                     });
                 }
@@ -1240,7 +1245,6 @@ export default class InvestmentEditor extends Vue {
                 amounts.splice(amounts.findIndex(r => r.id == updatedRow.id), 1)
         }
             
-
         this.checkHasUnsavedChanges();
     }
 

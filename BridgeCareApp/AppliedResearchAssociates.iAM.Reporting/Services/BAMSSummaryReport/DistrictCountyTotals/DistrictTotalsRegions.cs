@@ -33,7 +33,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 ExcelRowModels.CenteredHeader(0, $"District: {districtNumber}", simulationOutput.Years.Count + 2, 1),
             };
 
-            //var districtCountyRows = DistrictTotalsRowModels.MpmsTableDistrict(simulationOutput, districtNumber);
             var districtCountyRows = districtCountyFunction(simulationOutput, districtNumber);
 
             var bottomRows = new List<ExcelRowModel>
@@ -163,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return tableModels;
         }
 
-        internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput)
+        internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
         {
             // TODO: Implement properly
             return null;

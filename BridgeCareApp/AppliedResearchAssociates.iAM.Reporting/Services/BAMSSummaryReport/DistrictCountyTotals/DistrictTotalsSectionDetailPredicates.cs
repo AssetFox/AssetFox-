@@ -1,4 +1,5 @@
-﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using System.Diagnostics.Eventing.Reader;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
@@ -25,20 +26,28 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return returnValue;
         }
 
-        public static bool IsNumberedDistrictMpmsTable(AssetDetail section, int districtNumber)
+        public static bool IsNumberedDistrictMpmsTable(AssetDetail section, int districtNumber, string countyName)
         {
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            return district && committed;
+            var county = IsCounty(section, countyName);
+            return district && committed && county;
         }
 
+        public static bool IsCounty(AssetDetail section, string county)
+        {
+            var actualCounty = section.ValuePerTextAttribute["COUNTY"];
+            var returnValue = actualCounty.ToUpper() == county.ToUpper();
+            return returnValue;
+        }
 
-        public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber)
+        public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber, string countyName)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            return district && !committed;
+            var county = IsCounty(section, countyName);
+            return district && !committed && county;
         }
 
         public static bool IsCommittedTurnpike(AssetDetail section)

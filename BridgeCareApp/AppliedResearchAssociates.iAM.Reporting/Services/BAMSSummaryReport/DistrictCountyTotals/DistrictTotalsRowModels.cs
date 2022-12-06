@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             {
                 var values = new List<IExcelModel>();
                 var countyLabel = ExcelValueModels.String(county.ToUpper());
-                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber, county);
                 values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
                     .ToList());
                 var excelRowModel = ExcelRowModels.WithEntries(values);
@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             {
                 var values = new List<IExcelModel>();
                 var countyLabel = ExcelValueModels.String(county.ToUpper());
-                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber, county);
                 values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
                     .ToList());
                 var excelRowModel = ExcelRowModels.WithEntries(values);
@@ -203,7 +203,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             {
                 var values = new List<IExcelModel>();
                 var countyLabel = ExcelValueModels.String(county.ToUpper());
-                Func<AssetDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
+                Func<AssetDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber) && DistrictTotalsSectionDetailPredicates.IsCounty(section, county);
                 values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
                     .ToList());
                 var excelRowModel = ExcelRowModels.WithEntries(values);

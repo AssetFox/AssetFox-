@@ -35,5 +35,31 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
                 Content = (IExcelModel)StackedExcelModels.BoldText(text),
                 Size = new ExcelRangeSize(width, height),
             };
+
+        public static RelativeExcelRangeModel BoldCenteredText(string text, int width = 1, int height = 1)
+            => new RelativeExcelRangeModel
+            {
+                Content = StackedExcelModels.Stacked(
+                    ExcelValueModels.String(text),
+                    ExcelStyleModels.CenteredHeader,
+                    ExcelStyleModels.Bold,
+                    ExcelStyleModels.MediumBorder
+                ),
+                Size = new ExcelRangeSize(width, height),
+            };
+
+        public static RelativeExcelRangeModel BoldRightText(string text, int width = 1, int height = 1)
+            => new RelativeExcelRangeModel
+            {
+                Content = StackedExcelModels.Stacked(
+                    ExcelValueModels.String(text),
+                    ExcelStyleModels.RightHeader,
+                    ExcelStyleModels.Bold,
+                    ExcelStyleModels.MediumBorder
+                ),
+                Size = new ExcelRangeSize(width, height),
+            };
+
+
     }
 }

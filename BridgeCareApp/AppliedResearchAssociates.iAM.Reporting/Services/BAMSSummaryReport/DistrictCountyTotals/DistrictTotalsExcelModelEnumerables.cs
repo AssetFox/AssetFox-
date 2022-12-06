@@ -37,25 +37,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             //);
         }
 
-        internal static IEnumerable<IExcelModel> TableContentTotalsOrTurnpike(SimulationOutput output, IExcelModel title, Func<AssetDetail, bool> inclusionPredicate)
+        internal static IEnumerable<IExcelModel> TableContentTotalsOrTurnpike(SimulationOutput output, Func<AssetDetail, bool> inclusionPredicate)
         {
-            // TODO: This needs to span two columns
-            yield return StackedExcelModels.Stacked(
-                title,
-                ExcelStyleModels.Right,
-                ExcelStyleModels.Bold,
-                ExcelStyleModels.MediumBorder
-                );
             foreach (var year in output.Years)
             {
                 yield return DistrictTotalsExcelModels.DistrictTableContent(year, inclusionPredicate);
             }
-            // TODO: REMOVE THIS COMMENT, JUST HERE FOR REFERENCE DURING CODING
-            // This was total column at end
-            //yield return StackedExcelModels.Stacked(
-            //    ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
-            //    DistrictTotalsStyleModels.DarkGreenTotalsCells
-            //);
         }
     }
 }

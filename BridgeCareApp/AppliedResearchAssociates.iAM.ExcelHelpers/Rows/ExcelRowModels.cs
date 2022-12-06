@@ -46,16 +46,26 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
             return WithCells(values);
         }
 
-        public static ExcelRowModel CenteredHeader(int indentColumns, string headerText, int headerWidth, int headerHeight)
+        public static ExcelRowModel RightHeader(int indentColumns, string headerText, int headerWidth, int headerHeight)
         {
-            // TODO: Implement--Combine cells and center over column span
-            // current functionality is simply a copy of IndentedHeader()
             var values = new List<RelativeExcelRangeModel>();
             for (int i = 0; i < indentColumns; i++)
             {
                 values.Add(RelativeExcelRangeModels.Empty());
             }
-            values.Add(RelativeExcelRangeModels.BoldText(headerText, headerWidth, headerHeight));
+            values.Add(RelativeExcelRangeModels.BoldRightText(headerText, headerWidth, headerHeight));
+            return WithCells(values);
+        }
+
+        public static ExcelRowModel CenteredHeader(int indentColumns, string headerText, int headerWidth, int headerHeight)
+        {
+            // TODO: Center
+            var values = new List<RelativeExcelRangeModel>();
+            for (int i = 0; i < indentColumns; i++)
+            {
+                values.Add(RelativeExcelRangeModels.Empty());
+            }
+            values.Add(RelativeExcelRangeModels.BoldCenteredText(headerText, headerWidth, headerHeight));
             return WithCells(values);
         }
     }

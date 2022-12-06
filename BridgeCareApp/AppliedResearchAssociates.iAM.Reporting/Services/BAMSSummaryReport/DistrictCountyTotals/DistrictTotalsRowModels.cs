@@ -5,6 +5,8 @@ using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Text;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
@@ -50,42 +52,177 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return ExcelRowModels.WithEntries(values, ExcelStyleModels.ThinBorder);
         }
 
-        internal static ExcelRowModel MpmsTableDistrict(SimulationOutput output, int districtNumber)
+        internal static List<string> CountiesForDistrict(int districtNumber)
         {
-            var title = ExcelValueModels.Integer(districtNumber);
-            Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
-                .ToList();
-            return ExcelRowModels.WithEntries(values);
+            switch (districtNumber)
+            {
+                case 1: return new List<string> {
+                    "Crawford",
+                    "Erie",
+                    "Forest",
+                    "Mercer",
+                    "Venango",
+                    "Warren"
+                };
+                case 2: return new List<string> {
+                    "Cameron",
+                    "Centre",
+                    "Clearfield",
+                    "Clinton",
+                    "Elk",
+                    "Juniata",
+                    "McKean",
+                    "Mifflin",
+                    "Potter"
+                };
+                case 3: return new List<string> {
+                    "Bradford",
+                    "Columbia",
+                    "Lycoming",
+                    "Montour",
+                    "Northumberland",
+                    "Snyder",
+                    "Sullivan",
+                    "Tioga",
+                    "Union"
+                };
+                case 4: return new List<string> {
+                    "Lackawanna",
+                    "Luzerne",
+                    "Pike",
+                    "Susquehanna",
+                    "Wayne",
+                    "Wyoming"
+                };
+                case 5: return new List<string> {
+                    "Berks",
+                    "Carbon",
+                    "Lehigh",
+                    "Monroe",
+                    "Northampton",
+                    "Schuylkill"
+                };
+                case 6: return new List<string> {
+                    "Bucks",
+                    "Chester",
+                    "Delaware",
+                    "Montgomery",
+                    "Philadelphia"
+                };
+                case 8: return new List<string> {
+                    "Adams",
+                    "Cumberland",
+                    "Dauphin",
+                    "Franklin",
+                    "Lancaster",
+                    "Lebanon",
+                    "Perry",
+                    "York"
+                };
+                case 9: return new List<string> {
+                    "Bedford",
+                    "Blair",
+                    "Cambria",
+                    "Fulton",
+                    "Huntingdon",
+                    "Somerset"
+                };
+                case 10: return new List<string> {
+                    "Armstrong",
+                    "Butler",
+                    "Clarion",
+                    "Indiana",
+                    "Jefferson"
+                };
+                case 11: return new List<string> {
+                    "Allegheny",
+                    "Beaver",
+                    "Lawrence"
+                 };
+                case 12: return new List<string> {
+                    "Fayette",
+                    "Greene",
+                    "Washington",
+                    "Westmoreland"
+                };
+                default: return new List<string> {
+                    "Undefined"
+                };
+            }
+        }
+
+        internal static List<ExcelRowModel> MpmsTableDistrict(SimulationOutput output, int districtNumber)
+        {
+
+            var district = ExcelValueModels.Integer(districtNumber);
+            var counties = CountiesForDistrict(districtNumber);
+
+            var rowModels = new List<ExcelRowModel>();
+            foreach (var county in counties)
+            {
+                var values = new List<IExcelModel>();
+                var countyLabel = ExcelValueModels.String(county.ToUpper());
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
+                values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
+                    .ToList());
+                var excelRowModel = ExcelRowModels.WithEntries(values);
+                rowModels.Add(excelRowModel);
+            }
+
+            return rowModels;
         }
 
 
-        internal static ExcelRowModel BamsTableDistrict(SimulationOutput output, int districtNumber)
+        internal static List<ExcelRowModel> BamsTableDistrict(SimulationOutput output, int districtNumber)
         {
-            var title = ExcelValueModels.Integer(districtNumber);
-            Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
-                         .ToList();
-            return ExcelRowModels.WithEntries(values);
+            var district = ExcelValueModels.Integer(districtNumber);
+            var counties = CountiesForDistrict(districtNumber);
+
+            var rowModels = new List<ExcelRowModel>();
+            foreach (var county in counties)
+            {
+                var values = new List<IExcelModel>();
+                var countyLabel = ExcelValueModels.String(county.ToUpper());
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber);
+                values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
+                    .ToList());
+                var excelRowModel = ExcelRowModels.WithEntries(values);
+                rowModels.Add(excelRowModel);
+            }
+
+            return rowModels;
         }
 
-        internal static ExcelRowModel TotalsTableDistrict(SimulationOutput output, int districtNumber)
+        internal static List<ExcelRowModel> TotalsTableDistrict(SimulationOutput output, int districtNumber)
         {
-            var title = ExcelValueModels.Integer(districtNumber);
-            Func<AssetDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
-                         .ToList();
-            return ExcelRowModels.WithEntries(values);
+            var district = ExcelValueModels.Integer(districtNumber);
+            var counties = CountiesForDistrict(districtNumber);
+
+            var rowModels = new List<ExcelRowModel>();
+            foreach (var county in counties)
+            {
+                var values = new List<IExcelModel>();
+                var countyLabel = ExcelValueModels.String(county.ToUpper());
+                Func<AssetDetail, bool> predicate = section => DistrictTotalsSectionDetailPredicates.IsDistrictNotTurnpike(section, districtNumber);
+                values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
+                    .ToList());
+                var excelRowModel = ExcelRowModels.WithEntries(values);
+                rowModels.Add(excelRowModel);
+            }
+
+            return rowModels;
         }
 
         internal static ExcelRowModel TotalsTableTurnpike(SimulationOutput output)
         {
-            // TODO: Turnpike has different formatting now, see example BAMS output A283
-            var title = ExcelValueModels.String("Turnpike");
+            var totalRow = ExcelRowModels.RightHeader(0, "Turnpike", 2, 1);
+
             Func<AssetDetail, bool> predicate = DistrictTotalsSectionDetailPredicates.IsTurnpike;
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title, predicate)
+            var values = DistrictTotalsExcelModelEnumerables.TableContentTotalsOrTurnpike(output, predicate)
                 .ToList();
-            return ExcelRowModels.WithEntries(values);
+
+            totalRow.AddCells(values.ToArray());
+            return totalRow;
         }
 
         public static ExcelRowModel FirstYearRow(SimulationOutput output)
@@ -97,47 +234,121 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         public static ExcelRowModel MpmsTableTurnpike(SimulationOutput output)
         {
-            // TODO: Turnpike has different formatting now, see example BAMS output A283
-            var title = ExcelValueModels.String("Turnpike");
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
+            var totalRow = ExcelRowModels.RightHeader(0, "Turnpike", 2, 1);
+
+            var values = DistrictTotalsExcelModelEnumerables.TableContentTotalsOrTurnpike(output, 
                 DistrictTotalsSectionDetailPredicates.IsCommittedTurnpike)
                .ToList();
-            return ExcelRowModels.WithEntries(values);
+
+            totalRow.AddCells(values.ToArray());
+            return totalRow;
         }
+
+
+        public static ExcelFormulaModel TotalSumFormula(int column, List<int> rowIndices)
+        {
+            var columnLetter = ExcelCellAddress.GetColumnLetter(column);
+            var builder = new StringBuilder("SUM(");
+
+            foreach (var rowIndex in rowIndices)
+            {
+                builder.Append(columnLetter);
+                builder.Append(rowIndex.ToString());
+                builder.Append(",");
+            }
+            builder.Remove(builder.Length - 1, 1);
+            builder.Append(")");
+
+            var formula = ExcelFormulaModels.Text(builder.ToString());
+            return formula;
+        }
+            
+
+        public static ExcelRowModel TableStateTotal(SimulationOutput output, List<int> districtTotalRowIndices)
+        {
+            var totalRow = ExcelRowModels.RightHeader(0, "State Total", 2, 1);
+            var entries = new List<IExcelModel>();
+
+            // Cheap & dirty way to get Turnpike row into list
+            var turnpikeRow = districtTotalRowIndices.Last() + 1;
+            districtTotalRowIndices.Add(turnpikeRow);
+
+            for (int i = 0; i < output.Years.Count; i++)
+            {
+                var sumFormula = TotalSumFormula(i + 3, districtTotalRowIndices);
+
+                var styledFormula = StackedExcelModels.Stacked(
+                    sumFormula,
+                    DistrictTotalsStyleModels.DarkGreenTotalsCells
+                    );
+
+                entries.Add(styledFormula);
+            }
+
+            totalRow.AddCells(entries.ToArray());
+
+            return totalRow;
+        }
+
 
         public static ExcelRowModel BamsTableTurnpike(SimulationOutput output)
         {
-            // TODO: Turnpike has different formatting now, see example BAMS output A283
-            var title = ExcelValueModels.String("Turnpike");
-            var values = DistrictTotalsExcelModelEnumerables.TableContent(output, title,
+            var totalRow = ExcelRowModels.RightHeader(0, "Turnpike", 2, 1);
+
+            var values = DistrictTotalsExcelModelEnumerables.TableContentTotalsOrTurnpike(output,
                 DistrictTotalsSectionDetailPredicates.IsTurnpikeButNotCommitted)
                .ToList();
-            return ExcelRowModels.WithEntries(values);
+
+            totalRow.AddCells(values.ToArray());
+            return totalRow;
         }
 
-        public static ExcelRowModel TableBottomSumRow(SimulationOutput output)
+        public static ExcelRowModel TableBottomSumRow(SimulationOutput output, int districtNumber, int numberOfCounties)
         {
-            var totalText = StackedExcelModels.BoldText("Total");
-            var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(0, -12, 0, -1);
-            var styledFormula = StackedExcelModels.Stacked(sumFormula, DistrictTotalsStyleModels.DarkGreenFill);
-            var entries = new List<IExcelModel> { totalText };
+            var totalRow = ExcelRowModels.RightHeader(0, $"District {districtNumber:00} Total", 2, 1);
+
+            var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(1, -numberOfCounties, 1, -1);
+            var styledFormula = StackedExcelModels.Stacked(sumFormula, DistrictTotalsStyleModels.DarkGreenTotalsCells);
+            var entries = new List<IExcelModel>();
+
             for (int i = 0; i < output.Years.Count; i++)
             {
                 entries.Add(styledFormula);
             }
-            entries.Add(
-                StackedExcelModels.Stacked(
-                    ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
-                    ExcelStyleModels.MediumBorder,
-                    ExcelStyleModels.Right,
-                    DistrictTotalsStyleModels.DarkGreenFill
-                ));
-            return ExcelRowModels.WithEntries(entries);
+
+            totalRow.AddCells(entries.ToArray());
+
+            return totalRow;
         }
-        public static ExcelRowModel PercentOverallDollarsContentRow(SimulationOutput output, List<IExcelModel> titles, int initialRowDelta, int i)
+
+
+
+
+        //internal static List<ExcelRowModel> MpmsTableDistrict(SimulationOutput output, int districtNumber)
+        //{
+
+        //    var district = ExcelValueModels.Integer(districtNumber);
+        //    var counties = CountiesForDistrict(districtNumber);
+
+        //    var rowModels = new List<ExcelRowModel>();
+        //    foreach (var county in counties)
+        //    {
+        //        var values = new List<IExcelModel>();
+        //        var countyLabel = ExcelValueModels.String(county);
+        //        Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
+        //        values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
+        //            .ToList());
+        //        var excelRowModel = ExcelRowModels.WithEntries(values);
+        //        rowModels.Add(excelRowModel);
+        //    }
+
+        //    return rowModels;
+        //}
+
+        public static ExcelRowModel PercentOverallDollarsContentRow(SimulationOutput output, List<IExcelModel> titles, int initialRowDelta, int districtNumber)
         {
-            var newRow = ExcelRowModels.WithEntries(titles[i]);
-            var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -initialRowDelta - i, false, true);
+            var newRow = ExcelRowModels.WithEntries(titles[districtNumber]);
+            var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -initialRowDelta - districtNumber, false, true);
             var denominatorAddress = ExcelRangeFunctions.StartOffset(0, -initialRowDelta - titles.Count);
             Func<ExcelRange, string> quotient = range =>
             {

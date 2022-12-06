@@ -302,6 +302,37 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return totalRow;
         }
 
+        public static ExcelRowModel PercentOverallDollarsTurnpike(SimulationOutput output, int stateTotalsRowOffset)
+        {
+            int numeratorOffset = 2; // Table Header + Years Header
+            for (var i = 1; i <= 12; i++)
+            {
+                numeratorOffset += CountiesForDistrict(i).Count + 2; // District Header Row + County Rows + District Total Row
+            }
+
+            var turnpikeRow = ExcelRowModels.RightHeader(0, "Turnpike", 2, 1);
+
+            var turnpikeDenominatorAddress = ExcelRangeFunctions.StartOffset(0, -stateTotalsRowOffset); // address of State Total row
+            var turnpikeNumeratorAddress = ExcelRangeFunctions.StartOffset(0, -numeratorOffset, false, true);
+
+            Func<ExcelRange, string> turnpikeQuotient = range =>
+            {
+                var turnpikeNumerator = turnpikeNumeratorAddress(range);
+                var turnpikeDenominator = turnpikeDenominatorAddress(range);
+                return $"IFERROR({turnpikeNumerator}/{turnpikeDenominator}, 0)";
+            };
+            var newTotalCell = StackedExcelModels.Stacked(
+                ExcelFormulaModels.FromFunction(turnpikeQuotient),
+                DistrictTotalsStyleModels.DarkBlueFill,
+                ExcelStyleModels.Right,
+                ExcelStyleModels.MediumBorder,
+                ExcelStyleModels.PercentageFormat(0));
+            turnpikeRow.AddRepeated(output.Years.Count, newTotalCell);
+
+            return turnpikeRow;
+        }
+
+
         public static ExcelRowModel TableBottomSumRow(SimulationOutput output, int districtNumber, int numberOfCounties)
         {
             var totalRow = ExcelRowModels.RightHeader(0, $"District {districtNumber:00} Total", 2, 1);
@@ -392,8 +423,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             totalRow.AddRepeated(output.Years.Count, newTotalCell);
 
             rowModels.Add(totalRow);
-
-            //stateTotalsRowOffset++;
 
             return rowModels;
         }

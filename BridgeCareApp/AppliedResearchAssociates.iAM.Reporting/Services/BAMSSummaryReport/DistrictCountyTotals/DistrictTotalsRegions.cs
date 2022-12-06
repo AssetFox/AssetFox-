@@ -187,15 +187,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, district, stateTotalsRowOffset);
                 districtSubTables.AddRange(districtSubTable);
 
-                tableRowStartIndex += (districtSubTable.Count + 1); // account for header and total lines
+                tableRowStartIndex += districtSubTable.Count + 1; // account for header and total lines
             }
 
-
+            var bottomRows = new List<ExcelRowModel>
+            {
+                DistrictTotalsRowModels.PercentOverallDollarsTurnpike(simulationOutput, tableRowStartIndex - initialRowIndex + 2)
+            };
 
             var tableModels = RowBasedExcelRegionModels.Concat(
                 RowBasedExcelRegionModels.WithRows(headerRows),
-                RowBasedExcelRegionModels.WithRows(districtSubTables)
-                //RowBasedExcelRegionModels.WithRows(bottomRows)
+                RowBasedExcelRegionModels.WithRows(districtSubTables),
+                RowBasedExcelRegionModels.WithRows(bottomRows)
             );
 
             return tableModels;

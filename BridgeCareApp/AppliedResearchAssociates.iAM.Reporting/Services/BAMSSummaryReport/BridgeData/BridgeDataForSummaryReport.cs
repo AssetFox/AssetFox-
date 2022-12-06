@@ -103,12 +103,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "BMSID"); //Bridge ID
-
+                
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<double>(sectionSummary.ValuePerNumericAttribute, "BRKEY_"); //BRKey
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 //--------------------- Ownership ---------------------
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District 
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "DISTRICT"); //District
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "COUNTY"); //County
@@ -138,8 +138,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 }
                 worksheet.Cells[rowNo, columnNo++].Value = spanType;
 
-                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID"); //Bridge Family 
-                ExcelHelper.SetCustomFormat(worksheet.Cells[rowNo, columnNo - 1], ExcelHelperCellFormat.Number);
+                worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "FAMILY_ID"); //Bridge Family
                 ExcelHelper.HorizontalCenterAlign(worksheet.Cells[rowNo, columnNo - 1]);
 
                 worksheet.Cells[rowNo, columnNo++].Value = _summaryReportHelper.checkAndGetValue<string>(sectionSummary.ValuePerTextAttribute, "STRUCTURE_TYPE"); //Structure Type

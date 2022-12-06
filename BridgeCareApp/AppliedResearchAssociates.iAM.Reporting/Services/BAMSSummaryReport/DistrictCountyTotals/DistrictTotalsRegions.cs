@@ -132,7 +132,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         {
             var headerRows = new List<ExcelRowModel>
             {
-                ExcelRowModels.CenteredHeader(1, "Overall Dollars Spent on Projects by District", simulationOutput.Years.Count, 1),
+                ExcelRowModels.CenteredHeader(0, "Overall Dollars Spent on Projects by District", simulationOutput.Years.Count + 2, 1),
                 DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput),
             };
             int tableRowStartIndex = initialRowIndex + headerRows.Count;
@@ -164,40 +164,47 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
         {
-            // TODO: Implement properly
-            return null;
+            var headerRows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.CenteredHeader(0, "% of Overall Dollars Spent on Projects by District", simulationOutput.Years.Count + 2, 1),
+                DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
+            };
 
-            //var headerRows = new List<ExcelRowModel>
-            //{
-            //    ExcelRowModels.CenteredHeader(1, "% of Overall Dollars Spent on Projects by District", simulationOutput.Years.Count, 1),
-            //    DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
-            //};
+            var districtSubTables = new List<ExcelRowModel>();
+            int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
-            //var districtSubTables = NumberedDistricts.Select(
-            //    district => DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.PercentOverallDollarsContentRow)
-            //).ToList();
+            foreach (var district in NumberedDistricts)
+            {
+                // Subheader for District
+                var subHeaderRows = new List<ExcelRowModel>
+                {
+                    ExcelRowModels.CenteredHeader(0, $"District: {district}", simulationOutput.Years.Count + 2, 1),
+                };
+                districtSubTables.AddRange(subHeaderRows);
 
-            //var bottomRows = new List<ExcelRowModel>
-            //{
-            //    DistrictTotalsRowModels.PercentOverallDollarsTurnpike(simulationOutput),
-            //    DistrictTotalsRowModels.PercentOverallDollarsTotalsRow(simulationOutput)
-            //};
+                var stateTotalsRowOffset = tableRowStartIndex - initialRowIndex + 3;
+
+                var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, district, stateTotalsRowOffset);
+                districtSubTables.AddRange(districtSubTable);
+
+                var bottomRows = new List<ExcelRowModel>
+                {
+                    DistrictTotalsRowModels.TableBottomSumRow(simulationOutput, district, districtSubTable.Count)
+                };
+                districtSubTables.AddRange(bottomRows);
+
+                tableRowStartIndex += (districtSubTable.Count + 2); // account for header and total lines
+            }
 
 
-            //var tableModels = RowBasedExcelRegionModels.Concat(
-            //    RowBasedExcelRegionModels.WithRows(headerRows),
-            //    RowBasedExcelRegionModels.Concat(districtSubTables),
-            //    RowBasedExcelRegionModels.WithRows(bottomRows)
-            //);
 
-            //return tableModels;
+            var tableModels = RowBasedExcelRegionModels.Concat(
+                RowBasedExcelRegionModels.WithRows(headerRows),
+                RowBasedExcelRegionModels.WithRows(districtSubTables)
+                //RowBasedExcelRegionModels.WithRows(bottomRows)
+            );
 
-            ////var initialRowDelta = 4;
-            ////for (int i=0; i<titles.Count; i++)
-            ////{
-            ////    var newRow = DistrictTotalsRowModels.PercentOverallDollarsContentRow(simulationOutput, titles, initialRowDelta, i);
-            ////    rows.Add(newRow);
-            ////}
+            return tableModels;
         }
 
     }

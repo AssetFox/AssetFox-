@@ -22,19 +22,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 );
             yield return StackedExcelModels.Stacked(
                 county,
-                ExcelStyleModels.HorizontalCenter,
+                ExcelStyleModels.Left,
                 ExcelStyleModels.ThinBorder
                 );
             foreach (var year in output.Years)
             {
                 yield return DistrictTotalsExcelModels.DistrictTableContent(year, inclusionPredicate);
             }
-            // TODO: REMOVE THIS COMMENT, JUST HERE FOR REFERENCE DURING CODING
-            // This was total column at end
-            //yield return StackedExcelModels.Stacked(
-            //    ExcelFormulaModels.StartOffsetRangeSum(-output.Years.Count, 0, -1, 0),
-            //    DistrictTotalsStyleModels.DarkGreenTotalsCells
-            //);
         }
 
         internal static IEnumerable<IExcelModel> TableContentTotalsOrTurnpike(SimulationOutput output, Func<AssetDetail, bool> inclusionPredicate)

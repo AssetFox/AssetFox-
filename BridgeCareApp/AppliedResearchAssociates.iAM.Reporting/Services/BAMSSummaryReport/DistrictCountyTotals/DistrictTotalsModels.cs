@@ -30,8 +30,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                     DistrictTotalsRegions.BamsTable(output, ref startingRow),
                     RowBasedExcelRegionModels.BlankLine,
                     DistrictTotalsRegions.OverallDollarsTable(output, ref startingRow),
-                    RowBasedExcelRegionModels.BlankLine
-                    //DistrictTotalsRegions.PercentOverallDollarsTable(output, ref startingRow)
+                    RowBasedExcelRegionModels.BlankLine,
+                    DistrictTotalsRegions.PercentOverallDollarsTable(output, ref startingRow)
                     ),
             };
         }

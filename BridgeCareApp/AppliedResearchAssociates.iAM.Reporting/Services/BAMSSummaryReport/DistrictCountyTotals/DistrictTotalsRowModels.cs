@@ -269,7 +269,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var totalRow = ExcelRowModels.RightHeader(0, "State Total", 2, 1);
             var entries = new List<IExcelModel>();
 
-            // Cheap & dirty way to get Turnpike row into list
             var turnpikeRow = districtTotalRowIndices.Last() + 1;
             districtTotalRowIndices.Add(turnpikeRow);
 
@@ -307,7 +306,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         {
             var totalRow = ExcelRowModels.RightHeader(0, $"District {districtNumber:00} Total", 2, 1);
 
-            var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(1, -numberOfCounties, 1, -1);
+            var sumFormula = ExcelFormulaModels.StartOffsetRangeSum(0, -numberOfCounties, 0, -1);
             var styledFormula = StackedExcelModels.Stacked(sumFormula, DistrictTotalsStyleModels.DarkGreenTotalsCells);
             var entries = new List<IExcelModel>();
 
@@ -322,48 +321,92 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-
-
-        //internal static List<ExcelRowModel> MpmsTableDistrict(SimulationOutput output, int districtNumber)
-        //{
-
-        //    var district = ExcelValueModels.Integer(districtNumber);
-        //    var counties = CountiesForDistrict(districtNumber);
-
-        //    var rowModels = new List<ExcelRowModel>();
-        //    foreach (var county in counties)
-        //    {
-        //        var values = new List<IExcelModel>();
-        //        var countyLabel = ExcelValueModels.String(county);
-        //        Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber);
-        //        values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
-        //            .ToList());
-        //        var excelRowModel = ExcelRowModels.WithEntries(values);
-        //        rowModels.Add(excelRowModel);
-        //    }
-
-        //    return rowModels;
-        //}
-
-        public static ExcelRowModel PercentOverallDollarsContentRow(SimulationOutput output, List<IExcelModel> titles, int initialRowDelta, int districtNumber)
+        public static List<ExcelRowModel> PercentOverallDollarsDistrictSubtable(SimulationOutput output, int districtNumber, int stateTotalsRowOffset)
         {
-            var newRow = ExcelRowModels.WithEntries(titles[districtNumber]);
-            var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -initialRowDelta - districtNumber, false, true);
-            var denominatorAddress = ExcelRangeFunctions.StartOffset(0, -initialRowDelta - titles.Count);
-            Func<ExcelRange, string> quotient = range =>
+            var district = ExcelValueModels.Integer(districtNumber);
+            var counties = CountiesForDistrict(districtNumber);
+
+            int numeratorOffset = 2; // Table Header + Years Header
+            for (var i = 1; i <= 12; i++)
             {
-                var numerator = numeratorAddress(range);
-                var denominator = denominatorAddress(range);
-                return $"IFERROR({numerator}/{denominator}, 0)";
-            };
-            var newCell = StackedExcelModels.Stacked(
-                ExcelFormulaModels.FromFunction(quotient),
-                DistrictTotalsStyleModels.LightBlueFill,
-                ExcelStyleModels.Right,
-                ExcelStyleModels.ThinBorder,
-                ExcelStyleModels.PercentageFormat(0));
-            newRow.AddRepeated(output.Years.Count, newCell);
-            return newRow;
+                numeratorOffset += CountiesForDistrict(i).Count + 2; // District Header Row + County Rows + District Total Row
+            }
+
+            var rowModels = new List<ExcelRowModel>();
+
+            foreach (var county in counties)
+            {
+                var values = new List<IExcelModel>();
+                var countyLabel = ExcelValueModels.String(county.ToUpper());
+
+                values.Add(StackedExcelModels.Stacked(
+                    district,
+                    ExcelStyleModels.HorizontalCenter,
+                    ExcelStyleModels.ThinBorder
+                    ));
+                values.Add(StackedExcelModels.Stacked(
+                    countyLabel,
+                    ExcelStyleModels.Left,
+                    ExcelStyleModels.ThinBorder
+                    ));
+                var excelRowModel = ExcelRowModels.WithEntries(values);
+
+                var denominatorAddress = ExcelRangeFunctions.StartOffset(0, -stateTotalsRowOffset); // address of State Total row
+                var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -numeratorOffset, false, true);
+
+                Func<ExcelRange, string> quotient = range =>
+                {
+                    var numerator = numeratorAddress(range);
+                    var denominator = denominatorAddress(range);
+                    return $"IFERROR({numerator}/{denominator}, 0)";
+                };
+                var newCell = StackedExcelModels.Stacked(
+                    ExcelFormulaModels.FromFunction(quotient),
+                    DistrictTotalsStyleModels.LightBlueFill,
+                    ExcelStyleModels.Right,
+                    ExcelStyleModels.ThinBorder,
+                    ExcelStyleModels.PercentageFormat(0));
+                excelRowModel.AddRepeated(output.Years.Count, newCell);
+
+                rowModels.Add(excelRowModel);
+                stateTotalsRowOffset++;
+            }
+
+
+
+            //var turnpikeValues = new List<IExcelModel>();
+            //var turnpikeLabel = ExcelValueModels.String("Turnpike");
+
+            //turnpikeValues.Add(StackedExcelModels.Stacked(
+            //    turnpikeLabel,
+            //    ExcelStyleModels.Left,
+            //    ExcelStyleModels.ThinBorder
+            //    ));
+            //var excelRowModel = ExcelRowModels.WithEntries(turnpikeValues);
+
+            //var numeratorAddress = ExcelRangeFunctions.StartOffset(0, -districtNumber, false, true); // GARBAGE FOR NOW
+            //var denominatorAddress = ExcelRangeFunctions.StartOffset(0, -stateTotalsRowOffset); // address of State Total row
+
+            //Func<ExcelRange, string> quotient = range =>
+            //{
+            //    var numerator = numeratorAddress(range);
+            //    var denominator = denominatorAddress(range);
+            //    return $"IFERROR({numerator}/{denominator}, 0)";
+            //};
+            //var newCell = StackedExcelModels.Stacked(
+            //    ExcelFormulaModels.FromFunction(quotient),
+            //    DistrictTotalsStyleModels.LightBlueFill,
+            //    ExcelStyleModels.Right,
+            //    ExcelStyleModels.ThinBorder,
+            //    ExcelStyleModels.PercentageFormat(0));
+            //excelRowModel.AddRepeated(output.Years.Count, newCell);
+
+            //rowModels.Add(excelRowModel);
+            //stateTotalsRowOffset++;
+     
+
+
+            return rowModels;
         }
 
         public static ExcelRowModel PercentOverallDollarsTotalsRow(SimulationOutput output)

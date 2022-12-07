@@ -22,10 +22,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private const bool ShouldHackSaveOutputToFile = false;
         private const bool ShouldHackSaveTimingsToFile = true;
-        public const string SimulationOutputLoadKey = "SimulationOutputLoad";
+        public const string SimulationOutputLoadKey = "SimulationOutputSqlBatches";
         public const string AssetLoadBatchSizeOverrideKey = "AssetDetailBatchSizeOverrideForValueLoad";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 2000;
+        public const int AssetDetailSaveBatchSize = 100000;
+        public const string AssetDetailSaveOverrideBatchSizeKey = "AssetDetailBatchSizeOverrideForValueSave";
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -83,6 +85,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
                 memos.Mark("assetSummaryDetailValues");
                 _unitOfWork.Commit();
+                var configuredBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetDetailSaveOverrideBatchSizeKey);
+                var batchSize = configuredBatchSize ?? AssetDetailSaveBatchSize;
                 foreach (var year in simulationOutput.Years)
                 {
                     loggerForUserInfo.Information($"Saving year {year.Year}");
@@ -94,7 +98,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetails);
                     memos.Mark($" {assetFamily.AssetDetails.Count} assetDetails");
-                    int batchSize = 100000;
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues, batchSize: batchSize);
                     memos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues batchSize: {batchSize}");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails);
@@ -140,13 +143,29 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             File.WriteAllText(path, serializedOutput);
         }
 
-        private static int GetAssetLoadBatchSize(IConfiguration config)
+        /// <summary>
+        /// Returns batch size from the configuration. 
+        /// </summary>
+        /// <param name="config">The configuration to look in</param>
+        /// <param name="key">The key to use inside the configuration</param>
+        /// <returns>If no batch size is found in the
+        /// configuration, or if zero or less is found, returns null. Otherwise, returns the integer found.</returns>
+        private static int? GetConfiguredBatchSize(IConfiguration config, string configurationKey)
         {
             var section = config.GetSection(SimulationOutputLoadKey);
-            var @override = section.GetSection(AssetLoadBatchSizeOverrideKey);
-            var bar = section.GetChildren();
-            var idkWut = config.GetSection("meow");
-            return AssetLoadBatchSize;
+            var overrideSection = section.GetSection(configurationKey);
+            var overrideValue = overrideSection.Value;
+            if (overrideValue!=null)
+            {
+                if (int.TryParse(overrideValue, out int overrideInt))
+                {
+                    if (overrideInt > 0)
+                    {
+                        return overrideInt;
+                    }
+                }
+            }
+            return null;
         }
 
         public SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
@@ -155,8 +174,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             loggerForTechinalInfo ??= new DoNotLog();
             _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
             var memos = EventMemoModelLists.GetFreshInstance("Load");
-            var assetLoadBatchSize = GetAssetLoadBatchSize(_unitOfWork.Config);
-            var startMemo = memos.MarkInformation($"Starting load batchSize {AssetLoadBatchSize}", loggerForTechinalInfo);
+            var assetLoadBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetLoadBatchSizeOverrideKey) ?? AssetLoadBatchSize; ;
+            var startMemo = memos.MarkInformation($"Starting load batchSize {assetLoadBatchSize}", loggerForTechinalInfo);
             loggerForUserInfo.Information("Loading SimulationOutput");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -267,8 +286,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Include(a => a.TreatmentSchedulingCollisionDetails)
                    .Include(a => a.AssetDetailValuesIntId)
                    .AsSplitQuery()
-                   .Skip(AssetLoadBatchSize * batchIndex)
-                   .Take(AssetLoadBatchSize)
+                   .Skip(assetLoadBatchSize * batchIndex)
+                   .Take(assetLoadBatchSize)
                    .ToList();
                     memos.Mark("  assetEntities");
                     if (assetEntities.Any())
@@ -278,7 +297,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     }
                     memos.Mark($" batch {batchIndex} done");
                     batchIndex++;
-                    shouldContinueLoadingAssets = assetEntities.Count() == AssetLoadBatchSize;
+                    shouldContinueLoadingAssets = assetEntities.Count() == assetLoadBatchSize;
                 }
                 domainYear.Assets.AddRange(assets.Values);
                 foreach (var asset in domainYear.Assets)

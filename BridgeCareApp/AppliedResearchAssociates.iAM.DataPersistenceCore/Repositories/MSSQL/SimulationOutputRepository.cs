@@ -22,7 +22,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         private const bool ShouldHackSaveOutputToFile = false;
         private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public const int AssetLoadBatchSize = 16000;
+        public const int AssetLoadBatchSize = 2000;
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
 
@@ -143,7 +143,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             loggerForTechinalInfo ??= new DoNotLog();
             _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
             var memos = EventMemoModelLists.GetFreshInstance("Load");
-            var startMemo = memos.MarkInformation("Starting load", loggerForTechinalInfo);
+            var startMemo = memos.MarkInformation($"Starting load batchSize {AssetLoadBatchSize}", loggerForTechinalInfo);
             loggerForUserInfo.Information("Loading SimulationOutput");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
@@ -252,26 +252,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                    .Include(a => a.TreatmentOptionDetails)
                    .Include(a => a.TreatmentRejectionDetails)
                    .Include(a => a.TreatmentSchedulingCollisionDetails)
+                   .Include(a => a.AssetDetailValuesIntId)
+                   .AsSplitQuery()
                    .Skip(AssetLoadBatchSize * batchIndex)
                    .Take(AssetLoadBatchSize)
                    .ToList();
                     memos.Mark("  assetEntities");
                     if (assetEntities.Any())
                     {
-                        AssetDetailMapper.AppendToDomainDictionary(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
-                        memos.Mark("  toDomainDictionary");
-                        var assetDetailIds = assetEntities.Select(a => a.Id).ToList();
-                        var assetDetailCommaSeparatedList = GuidsToStringList(assetDetailIds);
-                        var queryStart = "SELECT [Id], [AssetDetailId], [Discriminator], [TextValue], [NumericValue], [AttributeId] FROM [IAMv2Test].[dbo].[AssetDetailValueIntId] Where AssetDetailId IN ";
-                        var query = $"{queryStart} {assetDetailCommaSeparatedList};";
-                        var results = _unitOfWork.Context.AssetDetailValueIntId.FromSqlRaw(query).ToList();
-                        foreach (var assetDetailValue in results)
-                        {
-                            var assetDetail = assets[assetDetailValue.AssetDetailId];
-                            AssetDetailValueMapper.AddToDictionary(assetDetailValue, assetDetail.ValuePerTextAttribute, assetDetail.ValuePerNumericAttribute, attributeNameLookup);
-
-                        }
-                        memos.Mark("  inFileFromRawSql");
+                        AssetDetailMapper.AppendToDomainDictionaryWithValues(assets, assetEntities, year, attributeNameLookup, assetNameLookup);
                         _unitOfWork.Context.ChangeTracker.Clear();
                     }
                     memos.Mark($" batch {batchIndex} done");

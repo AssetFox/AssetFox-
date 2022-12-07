@@ -83,6 +83,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
+        internal static void AppendToDomainDictionaryWithValues(
+            Dictionary<Guid, AssetDetail> dictionary,
+            ICollection<AssetDetailEntity> entityCollection,
+            int year,
+            Dictionary<Guid, string> attributeNameLookup,
+            Dictionary<Guid, string> assetNameLookup)
+        {
+            foreach (var entity in entityCollection)
+            {
+                var domain = ToDomain(entity, year, attributeNameLookup, assetNameLookup);
+                dictionary[entity.Id] = domain;
+                foreach (var assetDetailValue in entity.AssetDetailValuesIntId)
+                {
+                    AssetDetailValueMapper.AddToDictionary(assetDetailValue, domain.ValuePerTextAttribute, domain.ValuePerNumericAttribute, attributeNameLookup);
+                }
+            }
+        }
+
         internal static AssetDetailEntityFamily ToEntityFamily(
             List<AssetDetail> assets,
             Guid yearDetailId,

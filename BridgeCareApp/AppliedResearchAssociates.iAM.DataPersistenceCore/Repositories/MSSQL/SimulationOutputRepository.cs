@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
@@ -21,6 +22,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     {
         private const bool ShouldHackSaveOutputToFile = false;
         private const bool ShouldHackSaveTimingsToFile = true;
+        public const string SimulationOutputLoadKey = "SimulationOutputLoad";
+        public const string AssetLoadBatchSizeOverrideKey = "AssetDetailBatchSizeOverrideForValueLoad";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 2000;
 
@@ -137,12 +140,22 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             File.WriteAllText(path, serializedOutput);
         }
 
+        private static int GetAssetLoadBatchSize(IConfiguration config)
+        {
+            var section = config.GetSection(SimulationOutputLoadKey);
+            var @override = section.GetSection(AssetLoadBatchSizeOverrideKey);
+            var bar = section.GetChildren();
+            var idkWut = config.GetSection("meow");
+            return AssetLoadBatchSize;
+        }
+
         public SimulationOutput GetSimulationOutput(Guid simulationId, ILog loggerForUserInfo = null, ILog loggerForTechinalInfo = null)
         {
             loggerForUserInfo ??= new DoNotLog();
             loggerForTechinalInfo ??= new DoNotLog();
             _unitOfWork.Context.Database.SetCommandTimeout(TimeSpan.FromSeconds(3600));
             var memos = EventMemoModelLists.GetFreshInstance("Load");
+            var assetLoadBatchSize = GetAssetLoadBatchSize(_unitOfWork.Config);
             var startMemo = memos.MarkInformation($"Starting load batchSize {AssetLoadBatchSize}", loggerForTechinalInfo);
             loggerForUserInfo.Information("Loading SimulationOutput");
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

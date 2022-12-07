@@ -1,4 +1,4 @@
-﻿namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+﻿namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     internal class DistrictTotalsStringConstants
     {

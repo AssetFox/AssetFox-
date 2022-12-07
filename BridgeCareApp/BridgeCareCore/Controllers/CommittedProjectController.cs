@@ -294,8 +294,7 @@ namespace BridgeCareCore.Controllers
 
         [HttpPost]
         [Route("GetSectionCommittedProjectsPage/{simulationId}")]
-        [Authorize]
-        // TODO New method add claims and policy here
+        [Authorize(Policy = Policy.ViewCommittedProjects)]
         public async Task<IActionResult> GetCommittedProjectsPage(Guid simulationId, PagingRequestModel<SectionCommittedProjectDTO> request)
         {
             try

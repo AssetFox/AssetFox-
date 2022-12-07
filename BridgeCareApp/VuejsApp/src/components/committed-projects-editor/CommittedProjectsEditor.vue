@@ -836,7 +836,7 @@ export default class CommittedProjectsEditor extends Vue  {
                             longMessage:
                                 'Successfully uploaded committed projects.',
                         });
-                        this.getCommittedProjects(this.scenarioId);
+                        this.onCancelClick() ;
                     }
                 });
             } else {

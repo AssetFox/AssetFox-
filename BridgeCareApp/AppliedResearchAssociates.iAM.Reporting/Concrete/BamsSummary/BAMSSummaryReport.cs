@@ -12,7 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
@@ -335,8 +335,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
-            var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
-            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
+
+            reportDetailDto.Status = $"Creating District County Totals TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            // District County Totals TAB
+            var districtCountyTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
+            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtCountyTotalsModel);
 
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);

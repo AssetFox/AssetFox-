@@ -3,14 +3,14 @@
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     public static class DistrictTotalsModels
     {
         public static ExcelWorksheetModel DistrictTotals(SimulationOutput output)
             => new ExcelWorksheetModel
             {
-                TabName = "District Totals",
+                TabName = "District County Totals",
                 Content = new List<IExcelWorksheetContentModel>
                 {
                     DistrictTotalsContent(output),
@@ -21,16 +21,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         public static AnchoredExcelRegionModel DistrictTotalsContent(SimulationOutput output)
         {
+            int startingRow = 0;
             return new AnchoredExcelRegionModel
             {
                 Region = RowBasedExcelRegionModels.Concat(
-                    DistrictTotalsRegions.MpmsTable(output),
+                    DistrictTotalsRegions.MpmsTable(output, ref startingRow),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.BamsTable(output),
+                    DistrictTotalsRegions.BamsTable(output, ref startingRow),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.TotalsTable(output),
+                    DistrictTotalsRegions.OverallDollarsTable(output, ref startingRow),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.PercentOverallDollarsByDistrictTable(output)
+                    DistrictTotalsRegions.PercentOverallDollarsTable(output, ref startingRow)
                     ),
             };
         }

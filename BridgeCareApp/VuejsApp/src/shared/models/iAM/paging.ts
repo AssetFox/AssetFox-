@@ -43,6 +43,7 @@ export interface InvestmentLibraryUpsertPagingRequestModel extends BaseLibraryUp
 
 export interface InvestmentPagingPage extends PagingPage<Budget>{
     lastYear: number;
+    firstYear: number;
     investmentPlan: InvestmentPlan
 }
 

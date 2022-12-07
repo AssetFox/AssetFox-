@@ -6,5 +6,6 @@ namespace BridgeCareCore.Models
     {
         public InvestmentPlanDTO InvestmentPlan { get; set; }
         public int LastYear { get; set; }
+        public int FirstYear { get; set; }
     }
 }

@@ -73,7 +73,6 @@ export interface CommittedProjectFillTreatmentValues {
     treatmentLibraryId: string;
     treatmentName: string;
     brkey_Value: string; 
-    year: number;
     networkId: string;
 }
 

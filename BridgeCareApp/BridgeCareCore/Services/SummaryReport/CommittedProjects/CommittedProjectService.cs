@@ -471,7 +471,7 @@ namespace BridgeCareCore.Services
             _unitOfWork.CommittedProjectRepo.UpsertCommittedProjects(committedProjectDTOs);
         }
 
-        public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, int year, Guid networkId)
+        public double GetTreatmentCost(Guid treatmentLibraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
             
@@ -494,17 +494,18 @@ namespace BridgeCareCore.Services
             {
                 var compiler = new CalculateEvaluateCompiler();
 
-                if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id, year))               
+                if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))               
                     continue;
                 
                 compiler = new CalculateEvaluateCompiler();
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
 
                 var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == asset.Id && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                    .Where(_ => _.MaintainableAssetId == asset.Id).ToList();
+                var latestYear = aggResults.Max(_ => _.Year);
+                aggResults = aggResults.Where(_ => _.Year == latestYear && attributes.Any(a => a.Id == _.AttributeId)).ToList();
                 var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
-                var aggResultAttrDict = new Dictionary<string, AggregatedResultEntity>();
                 if (aggResults.Count != attributes.Count)
                     return 0;
                 InstantiateScope(aggResults, scope);
@@ -514,7 +515,7 @@ namespace BridgeCareCore.Services
             return totalCost;
         }
 
-        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string assetKeyData, string treatment, int year, Guid networkId)
+        public List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid treatmentLIbraryId, string assetKeyData, string treatment, Guid networkId)
         {
             var consequencesToReturn = new List<CommittedProjectConsequenceDTO>();
             var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
@@ -537,7 +538,7 @@ namespace BridgeCareCore.Services
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue });
                     continue;
                 }
-                if (IsCriteriaValid(compiler, consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id, year))
+                if (IsCriteriaValid(compiler, consequence.CriterionLibraryConditionalTreatmentConsequenceJoin.CriterionLibrary.MergedCriteriaExpression, asset.Id))
                     consequencesToReturn.Add(new CommittedProjectConsequenceDTO() { Id = Guid.NewGuid(), CommittedProjectId = committedProjectId, Attribute = consequence.Attribute.Name, ChangeValue = consequence.ChangeValue});
             }
             return consequencesToReturn;
@@ -643,12 +644,14 @@ namespace BridgeCareCore.Services
             return committedProjects;
         }
 
-        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId, int year)
+        private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
         {
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
 
             var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-            .Where(_ => _.MaintainableAssetId == assetId && _.Year == year).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+            .Where(_ => _.MaintainableAssetId == assetId).ToList();
+            var latestYear = aggResults.Max(_ => _.Year);
+            aggResults = aggResults.Where(_ => _.Year == latestYear && attributes.Any(a => a.Id == _.AttributeId)).ToList();
             if (aggResults.Count != attributes.Count)
                 return false;
             var evaluator = compiler.GetEvaluator(expression);

@@ -269,6 +269,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            //get treatment category lookup
+            var treatmentCategoryLookup = new Dictionary<string, string>();
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (treatmentList?.Any() == true)
+            {
+                foreach (var treatmentObject in treatmentList)
+                {
+                    if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
+                    {
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                    }
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             // Simulation parameters TAB
@@ -279,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, treatmentCategoryLookup);
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
@@ -313,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);

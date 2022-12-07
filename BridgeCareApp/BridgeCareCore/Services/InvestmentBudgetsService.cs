@@ -639,6 +639,7 @@ namespace BridgeCareCore.Services
             var total = 0;
             var items = new List<BudgetDTO>();
             var lastYear = 0;
+            
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
 
@@ -649,7 +650,9 @@ namespace BridgeCareCore.Services
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
-                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+            {
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);               
+            }               
 
             if (request.RowsPerPage > 0)
             {
@@ -666,7 +669,7 @@ namespace BridgeCareCore.Services
                 {
                     Items = items,
                     TotalItems = total,
-                    LastYear = lastYear
+                    LastYear = lastYear,
                 };
             }
 
@@ -685,6 +688,7 @@ namespace BridgeCareCore.Services
             var items = new List<BudgetDTO>();
             var total = 0;
             var lastYear = 0;
+            var firstYear = 0;
             var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
             if (investmentPlan.Id == Guid.Empty)
             {
@@ -702,7 +706,10 @@ namespace BridgeCareCore.Services
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
 
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
+            {
+                firstYear = budgets[0].BudgetAmounts.Min(_ => _.Year);
                 lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+            }              
 
             if (request.RowsPerPage > 0)
             {
@@ -720,6 +727,7 @@ namespace BridgeCareCore.Services
                     Items = items,
                     TotalItems = total,
                     LastYear = lastYear,
+                    FirstYear = firstYear,
                     InvestmentPlan = investmentPlan
                 };
             }
@@ -729,6 +737,7 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = total,
                 LastYear = lastYear,
+                FirstYear = firstYear,
                 InvestmentPlan = investmentPlan
             };
         }

@@ -75,7 +75,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::ImportExcelSpreadsheet - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::ImportExcelSpreadsheet - {e.Message}");
                 throw;
             }
         }
@@ -130,7 +130,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::GetExcelSpreadsheetColumnHeaders - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{RawDataError}::GetExcelSpreadsheetColumnHeaders - {e.Message}");
                 throw;
             }
         }

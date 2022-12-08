@@ -19,7 +19,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private const bool ShouldHackSaveOutputToFile = false;
-        private const bool ShouldHackSaveTimingsToFile = false;
+        private const bool ShouldHackSaveTimingsToFile = true;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         public const int AssetLoadBatchSize = 2000;
 

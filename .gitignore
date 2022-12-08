@@ -419,3 +419,5 @@ BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
 
 # Intended for large resource files, but really anything the coder wants to ignore
 [gG]it[iI]gnored/
+/BridgeCareApp/BridgeCareCore/SaveTimingsMaster.txt
+/BridgeCareApp/BridgeCareCore/LoadTimingsMaster.txt

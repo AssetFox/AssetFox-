@@ -501,14 +501,22 @@ namespace BridgeCareCore.Services
                 var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
 
                 var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-                    .Where(_ => _.MaintainableAssetId == asset.Id).ToList();
-                var latestYear = aggResults.Max(_ => _.Year);
-                aggResults = aggResults.Where(_ => _.Year == latestYear && attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                    .Where(_ => _.MaintainableAssetId == asset.Id).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                var latestAggResults = new List<AggregatedResultEntity>();
+                foreach(var attr in attributes)
+                {
+                    var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                    if (attrs.Count == 0)
+                        continue;
+                    var latestYear = attrs.Max(_ => _.Year);
+                    var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                    latestAggResults.Add(latestAggResult);
+                }                             
                 var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
                 var scope = new CalculateEvaluateScope();
-                if (aggResults.Count != attributes.Count)
-                    return 0;
-                InstantiateScope(aggResults, scope);
+                if (latestAggResults.Count != attributes.Count)
+                    continue;
+                InstantiateScope(latestAggResults, scope);
                 var currentCost = calculator.Delegate(scope);
                 totalCost += currentCost;
             }
@@ -649,14 +657,22 @@ namespace BridgeCareCore.Services
             var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
 
             var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-            .Where(_ => _.MaintainableAssetId == assetId).ToList();
-            var latestYear = aggResults.Max(_ => _.Year);
-            aggResults = aggResults.Where(_ => _.Year == latestYear && attributes.Any(a => a.Id == _.AttributeId)).ToList();
-            if (aggResults.Count != attributes.Count)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+            var latestAggResults = new List<AggregatedResultEntity>();
+            foreach (var attr in attributes)
+            {
+                var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                if (attrs.Count == 0)
+                    continue;
+                var latestYear = attrs.Max(_ => _.Year);
+                var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                latestAggResults.Add(latestAggResult);
+            }
+            if (latestAggResults.Count != attributes.Count)
                 return false;
             var evaluator = compiler.GetEvaluator(expression);
             var scope = new CalculateEvaluateScope();
-            InstantiateScope(aggResults, scope);
+            InstantiateScope(latestAggResults, scope);
             return evaluator.Delegate(scope);
         }
 

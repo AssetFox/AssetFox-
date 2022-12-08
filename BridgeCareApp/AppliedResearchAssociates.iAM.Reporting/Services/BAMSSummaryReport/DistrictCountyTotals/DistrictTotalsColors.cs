@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     public static class DistrictTotalsColors
     {

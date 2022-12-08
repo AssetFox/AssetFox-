@@ -12,7 +12,7 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
@@ -269,6 +269,20 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            //get treatment category lookup
+            var treatmentCategoryLookup = new Dictionary<string, string>();
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (treatmentList?.Any() == true)
+            {
+                foreach (var treatmentObject in treatmentList)
+                {
+                    if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
+                    {
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                    }
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             // Simulation parameters TAB
@@ -279,7 +293,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
 
             // Bridge Data TAB
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, treatmentCategoryLookup);
 
             // Filling up parameters tab
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
@@ -313,7 +327,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -321,8 +335,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
-            var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
-            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
+
+            reportDetailDto.Status = $"Creating District County Totals TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            // District County Totals TAB
+            var districtCountyTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
+            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtCountyTotalsModel);
 
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);

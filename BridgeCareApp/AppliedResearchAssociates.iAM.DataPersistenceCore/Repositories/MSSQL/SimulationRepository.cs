@@ -277,6 +277,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjects)
+                .ThenInclude(_ => _.CommittedProjectLocation)
                 // performance curves
                 .Include(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
@@ -505,9 +507,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             if (simulationToClone.CommittedProjects.Any())
-            {
+            {                
                 var committedProjectsAffected = simulationToClone.CommittedProjects.Where(_ =>
-                    simulationToClone.Budgets.Any(budget => budget.Name != _.ScenarioBudget.Name)).ToList();
+                    !simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
+                
                 if (committedProjectsAffected.Any())
                 {
                     numberOfCommittedProjectsAffected = committedProjectsAffected.Count();
@@ -515,8 +518,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.ScenarioBudget.Name).Distinct().ToList();
                 }
 
-                simulationToClone.CommittedProjects = simulationToClone.CommittedProjects.Where(_ =>
+                var committedProjects = simulationToClone.CommittedProjects.Where(_ =>
                     simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
+                simulationToClone.CommittedProjects = committedProjects;
                 simulationToClone.CommittedProjects.ForEach(committedProject =>
                 {
                     if (simulationToClone.Budgets.Any(_ => _.Name == committedProject.ScenarioBudget.Name))
@@ -539,6 +543,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(consequence,
                                     _unitOfWork.UserEntity?.Id);
                             });
+                        }
+                                               
+                        if (committedProject.CommittedProjectLocation != null)
+                        {
+                            committedProject.CommittedProjectLocation.Id = Guid.NewGuid();
+                            committedProject.CommittedProjectLocation.CommittedProjectId = committedProject.Id;
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(committedProject.CommittedProjectLocation,
+                                    _unitOfWork.UserEntity?.Id);
                         }
                     }
                 });
@@ -988,6 +1000,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.CommittedProjects.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
+                var committedProjectLocations = simulationToClone.CommittedProjects.Select(_ => _.CommittedProjectLocation).ToList();
+                _unitOfWork.Context.AddAll(committedProjectLocations);
                 // add committed project consequences
                 if (simulationToClone.CommittedProjects.Any(_ => _.CommittedProjectConsequences.Any()))
                 {

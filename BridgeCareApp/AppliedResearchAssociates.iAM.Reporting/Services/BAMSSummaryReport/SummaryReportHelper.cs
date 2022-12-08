@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
@@ -118,6 +119,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport
                 (fedAid is "0" && functionalClass is "01" or "02" or "03" or "06" or "07" or "11" or "12" or "14" or "16" or "17") ||
                 functionalClass is "NN";
         }
+
 
         public bool BridgeFundingBOF(AssetSummaryDetail section)
         {

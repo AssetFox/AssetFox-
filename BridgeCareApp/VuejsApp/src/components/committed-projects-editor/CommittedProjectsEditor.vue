@@ -396,7 +396,6 @@ export default class CommittedProjectsEditor extends Vue  {
     selectedCpItems: SectionCommittedProjectTableData[] = [];
     sectionCommittedProjects: SectionCommittedProject[] = [];
     selectedConsequences: CommittedProjectConsequence[] = [];
-    idsForDeletion: string[] = [];
     committedProjectsCount: number = 0;
     showImportExportCommittedProjectsDialog: boolean = false;
     selectedCommittedProject: string  = '';
@@ -722,7 +721,7 @@ export default class CommittedProjectsEditor extends Vue  {
                 }
 
         if(this.deletionIds.length > 0){
-            CommittedProjectsService.deleteSpecificCommittedProjects(this.idsForDeletion).then((response: AxiosResponse) => {
+            CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.deletionIds = [];
                     this.addSuccessNotificationAction({message:'Deleted committed projects'})              
@@ -868,8 +867,7 @@ export default class CommittedProjectsEditor extends Vue  {
             CommittedProjectsService.deleteSimulationCommittedProjects(this.scenarioId).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.addSuccessNotificationAction({message:'Added deterioration model library'})   
-                    this.clearChanges();
-                    this.projectPagination.page = 1
+                    this.onCancelClick();
                 }
             })
         }
@@ -966,7 +964,6 @@ export default class CommittedProjectsEditor extends Vue  {
             treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
             treatmentName: treatmentName,
             brkey_Value: row.locationKeys[this.brkey_],
-            year: row.year,
             networkId: this.networkId
         })
         .then((response: AxiosResponse) => {

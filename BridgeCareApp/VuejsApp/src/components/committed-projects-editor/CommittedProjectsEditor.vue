@@ -964,7 +964,6 @@ export default class CommittedProjectsEditor extends Vue  {
             treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
             treatmentName: treatmentName,
             brkey_Value: row.locationKeys[this.brkey_],
-            year: row.year,
             networkId: this.networkId
         })
         .then((response: AxiosResponse) => {

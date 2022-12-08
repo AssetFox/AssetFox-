@@ -8,7 +8,6 @@ namespace BridgeCareCore.Models
         public Guid TreatmentLibraryId { get; set; }
         public string TreatmentName { get; set; }
         public string Brkey_Value { get; set; }
-        public int Year { get; set; }
         public Guid NetworkId { get; set; }
     }
 }

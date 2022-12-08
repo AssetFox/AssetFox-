@@ -174,9 +174,9 @@ namespace BridgeCareCore.Controllers
                     if (treatment == null)
                         return returnValues;
                     returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     
                     returnValues.TreatmentCategory = (TreatmentCategory)treatment.Category;
                     return returnValues;

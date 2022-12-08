@@ -209,6 +209,7 @@ namespace BridgeCareCore.Services
             else
             {
                 curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.LibraryId.Value);
+                // Create new performance curves based on provided library
                 foreach (var curve in curves)
                 {
                     curve.Id = Guid.NewGuid();

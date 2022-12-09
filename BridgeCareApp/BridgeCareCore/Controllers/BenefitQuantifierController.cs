@@ -34,7 +34,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::GetBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::GetBenefitQuantifier - {e.Message}");
                 throw;
             }
         }
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::UpsertBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::UpsertBenefitQuantifier - {e.Message}");
                 throw;
             }
         }
@@ -82,7 +82,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::DeleteBenefitQuantifier - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BenefitQuantifierError}::DeleteBenefitQuantifier - {e.Message}");
                 throw;
             }
         }

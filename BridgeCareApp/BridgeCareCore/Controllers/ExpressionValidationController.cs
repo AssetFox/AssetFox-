@@ -42,10 +42,10 @@ namespace BridgeCareCore.Controllers
             {
                 if (e is CalculateEvaluateException)
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["CalculateEvaluateException"]}");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}");
                 } else
                 {
-                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {HubService.errorList["Exception"]}");
+                    HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetEquationValidationResult - {e.Message}");
                 }
                 throw;
             }
@@ -64,7 +64,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResult - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResult - {e.Message}");
                 throw;
             }
         }
@@ -82,7 +82,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResultNoCount - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{ExpressionValidationError}::GetCriterionValidationResultNoCount - {e.Message}");
                 throw;
             }
         }

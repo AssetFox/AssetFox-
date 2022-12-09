@@ -25,10 +25,10 @@ using NuGet.Versioning;
 
 namespace BridgeCareCore.Services
 {
-    public class CalculatedAttributeService : ICalculatedAttributeService
+    public class CalculatedAttributePagingService : ICalculatedAttributePagingService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public CalculatedAttributeService(UnitOfDataPersistenceWork unitOfWork)
+        public CalculatedAttributePagingService(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }

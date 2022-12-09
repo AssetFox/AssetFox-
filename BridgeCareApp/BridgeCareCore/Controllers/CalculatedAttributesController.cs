@@ -28,11 +28,11 @@ namespace BridgeCareCore.Controllers
     {
         public const string CalculatedAttributeError = "Calculated Attribute Error";
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
-        private readonly ICalculatedAttributeService _calulatedAttributeService;
+        private readonly ICalculatedAttributePagingService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
 
         public CalculatedAttributesController(IEsecSecurity esec, IUnitOfWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, ICalculatedAttributeService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ICalculatedAttributePagingService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
         {
             attributeRepo = unitOfWork.AttributeRepo;
             calculatedAttributesRepo = unitOfWork.CalculatedAttributeRepo;

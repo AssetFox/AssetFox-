@@ -5,7 +5,7 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface ICashFlowService
+    public interface ICashFlowPagingService
     {
         PagingPageModel<CashFlowRuleDTO> GetCashFlowPage(Guid simulationId, PagingRequestModel<CashFlowRuleDTO> request);
         PagingPageModel<CashFlowRuleDTO> GetLibraryCashFlowPage(Guid libraryId, PagingRequestModel<CashFlowRuleDTO> request);

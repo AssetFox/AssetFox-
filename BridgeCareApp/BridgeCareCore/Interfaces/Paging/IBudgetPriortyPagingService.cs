@@ -5,7 +5,7 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IBudgetPriortyService
+    public interface IBudgetPriortyPagingService
     {
         PagingPageModel<BudgetPriorityDTO> GetBudgetPriortyPage(Guid simulationId, PagingRequestModel<BudgetPriorityDTO> request);
         PagingPageModel<BudgetPriorityDTO> GetLibraryBudgetPriortyPage(Guid libraryId, PagingRequestModel<BudgetPriorityDTO> request);

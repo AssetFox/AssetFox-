@@ -27,10 +27,10 @@ namespace BridgeCareCore.Controllers
         public const string TargetConditionGoalError = "Target Condition Goal Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly ITargetConditionGoalService _targetConditionGoalService;
+        private readonly ITargetConditionGoalPagingService _targetConditionGoalService;
 
         public TargetConditionGoalController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, ITargetConditionGoalService targetConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper, ITargetConditionGoalPagingService targetConditionGoalService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {         
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _targetConditionGoalService = targetConditionGoalService ?? throw new ArgumentNullException(nameof(targetConditionGoalService));

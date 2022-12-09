@@ -73,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(
                 simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                new SimulationPagingService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
                 _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
@@ -87,7 +87,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new SimulationController(simulationAnalysisService,
-                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                new SimulationPagingService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
                 _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,
@@ -110,7 +110,7 @@ namespace BridgeCareCoreTests.Tests
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var service = Setup();
             var controller = new SimulationController(service,
-                new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
+                new SimulationPagingService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),
                 _mockSimulationQueueService.Object,
                 EsecSecurityMocks.Dbe,
                 TestHelper.UnitOfWork,

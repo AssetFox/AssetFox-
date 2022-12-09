@@ -5,7 +5,7 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface ITargetConditionGoalService
+    public interface ITargetConditionGoalPagingService
     {
         PagingPageModel<TargetConditionGoalDTO> GetTargetConditionGoalPage(Guid simulationId, PagingRequestModel<TargetConditionGoalDTO> request);
         PagingPageModel<TargetConditionGoalDTO> GetLibraryTargetConditionGoalPage(Guid libraryId, PagingRequestModel<TargetConditionGoalDTO> request);

@@ -8,38 +8,38 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class TargetConditionGoalService : ITargetConditionGoalService
+    public class CashFlowPagingService : ICashFlowPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public TargetConditionGoalService(IUnitOfWork unitOfWork)
+        public CashFlowPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<TargetConditionGoalDTO> GetTargetConditionGoalPage(Guid simulationId, PagingRequestModel<TargetConditionGoalDTO> request)
+        public PagingPageModel<CashFlowRuleDTO> GetCashFlowPage(Guid simulationId, PagingRequestModel<CashFlowRuleDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId) :
-                _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
+                _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.PagingSync.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
-        public PagingPageModel<TargetConditionGoalDTO> GetLibraryTargetConditionGoalPage(Guid libraryId, PagingRequestModel<TargetConditionGoalDTO> request)
+        public PagingPageModel<CashFlowRuleDTO> GetLibraryCashFlowPage(Guid libraryId, PagingRequestModel<CashFlowRuleDTO> request)
         {
-            var rows = _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(libraryId);
+            var rows = _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(libraryId);
 
             return HandlePaging(rows, request);
         }
-        public List<TargetConditionGoalDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<TargetConditionGoalDTO> request)
+        public List<CashFlowRuleDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<CashFlowRuleDTO> request)
         {
-            var rows = _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(libraryId);
+            var rows = _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(libraryId);
             return SyncedDataset(rows, request);
         }
-        public List<TargetConditionGoalDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<TargetConditionGoalDTO> request)
+        public List<CashFlowRuleDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<CashFlowRuleDTO> request)
         {
             var rows = request.LibraryId == null ?
-                    _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId) :
-                    _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(request.LibraryId.Value);
+                    _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
+                    _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.LibraryId.Value);
             rows = SyncedDataset(rows, request);
 
             if (request.LibraryId != null)
@@ -47,15 +47,16 @@ namespace BridgeCareCore.Services
                 {
                     _.Id = Guid.NewGuid();
                     _.CriterionLibrary.Id = Guid.NewGuid();
+                    _.CashFlowDistributionRules.ForEach(__ => __.Id = Guid.NewGuid());
                 });
             return rows;
         }
 
-        private PagingPageModel<TargetConditionGoalDTO> HandlePaging(List<TargetConditionGoalDTO> rows, PagingRequestModel<TargetConditionGoalDTO> request)
+        private PagingPageModel<CashFlowRuleDTO> HandlePaging(List<CashFlowRuleDTO> rows, PagingRequestModel<CashFlowRuleDTO> request)
         {
             var skip = 0;
             var take = 0;
-            var items = new List<TargetConditionGoalDTO>();
+            var items = new List<CashFlowRuleDTO>();
 
             rows = SyncedDataset(rows, request.PagingSync);
 
@@ -68,21 +69,21 @@ namespace BridgeCareCore.Services
             else
             {
                 items = rows;
-                return new PagingPageModel<TargetConditionGoalDTO>()
+                return new PagingPageModel<CashFlowRuleDTO>()
                 {
                     Items = items,
                     TotalItems = items.Count
                 };
             }
 
-            return new PagingPageModel<TargetConditionGoalDTO>()
+            return new PagingPageModel<CashFlowRuleDTO>()
             {
                 Items = items,
                 TotalItems = rows.Count()
             };
         }
 
-        private List<TargetConditionGoalDTO> SyncedDataset(List<TargetConditionGoalDTO> rows, PagingSyncModel<TargetConditionGoalDTO> request)
+        private List<CashFlowRuleDTO> SyncedDataset(List<CashFlowRuleDTO> rows, PagingSyncModel<CashFlowRuleDTO> request)
         {
             rows = rows.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 

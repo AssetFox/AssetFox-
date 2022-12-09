@@ -27,14 +27,19 @@ namespace BridgeCareCore.Controllers
     {
         public const string CommittedProjectError = "Committed Project Error";
         private static ICommittedProjectService _committedProjectService;
+        private static ICommittedProjectPagingService _committedProjectPagingService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public CommittedProjectController(ICommittedProjectService committedProjectService,
-            IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public CommittedProjectController(ICommittedProjectService committedProjectService, ICommittedProjectPagingService committedProjectPagingService,
+            IEsecSecurity esecSecurity,
+            IUnitOfWork unitOfWork,
+            IHubService hubService,
+            IHttpContextAccessor httpContextAccessor,
+            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
-            _committedProjectService = committedProjectService ??
-                                       throw new ArgumentNullException(nameof(committedProjectService));
+            _committedProjectService = committedProjectService ?? throw new ArgumentNullException(nameof(committedProjectService));
+            _committedProjectPagingService = committedProjectPagingService ?? throw new ArgumentNullException(nameof(committedProjectPagingService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
 
@@ -304,7 +309,7 @@ namespace BridgeCareCore.Controllers
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
                     var sectionCommittedProjectDTOs = UnitOfWork.CommittedProjectRepo.GetSectionCommittedProjectDTOs(simulationId);
-                    result = _committedProjectService.GetCommittedProjectPage(sectionCommittedProjectDTOs, request);
+                    result = _committedProjectPagingService.GetCommittedProjectPage(sectionCommittedProjectDTOs, request);
                 });
 
                 return Ok(result);
@@ -334,7 +339,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var projects = _committedProjectService.GetSyncedDataset(simulationId, request);
+                    var projects = _committedProjectPagingService.GetSyncedDataset(simulationId, request);
                     CheckUpsertPermit(projects);
                     UnitOfWork.CommittedProjectRepo.UpsertCommittedProjects(projects);
                 });

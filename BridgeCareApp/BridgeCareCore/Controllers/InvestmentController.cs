@@ -31,14 +31,22 @@ namespace BridgeCareCore.Controllers
         public const string DeteriorationModelError = "Deterioration Model Error";
 
         private static IInvestmentBudgetsService _investmentBudgetsService;
+        private static IInvestmentPagingService _investmentPagingService;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
         private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IInvestmentDefaultDataService investmentDefaultDataService, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public InvestmentController(IInvestmentBudgetsService investmentBudgetsService, IInvestmentPagingService investmentPagingService,
+            IEsecSecurity esecSecurity,
+            UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService,
+            IHttpContextAccessor httpContextAccessor,
+            IInvestmentDefaultDataService investmentDefaultDataService,
+            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _investmentBudgetsService = investmentBudgetsService ?? throw new ArgumentNullException(nameof(investmentBudgetsService));
+            _investmentPagingService = investmentPagingService ?? throw new ArgumentNullException(nameof(investmentPagingService));
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
@@ -50,7 +58,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _investmentBudgetsService.GetScenarioInvestmentPage(simulationId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _investmentPagingService.GetScenarioInvestmentPage(simulationId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -67,7 +75,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _investmentBudgetsService.GetLibraryInvestmentPage(libraryId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _investmentPagingService.GetLibraryInvestmentPage(libraryId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -117,7 +125,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
 
-                    var dtos = _investmentBudgetsService.GetSyncedInvestmentDataset(simulationId, pagingSync);
+                    var dtos = _investmentPagingService.GetSyncedInvestmentDataset(simulationId, pagingSync);
                     InvestmentDTO investment = new InvestmentDTO();
                     var investmentPlan = pagingSync.Investment;
                     investment.ScenarioBudgets = dtos;
@@ -184,9 +192,9 @@ namespace BridgeCareCore.Controllers
 
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
-                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                         budgets.ForEach(budget =>
                         {

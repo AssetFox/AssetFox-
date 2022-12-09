@@ -720,7 +720,7 @@ export default class TreatmentEditor extends Vue {
                 library: library,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: this.selectedTreatmentLibrary.id, // library.treatments.length == 0 ? null : this.selectedTreatmentLibrary.id,
+                    libraryId: this.selectedTreatmentLibrary.id, // setting id required for create as new library
                     rowsForDeletion: [],
                     updateRows: library.treatments === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.treatments === [] ? [] : this.addedRows,

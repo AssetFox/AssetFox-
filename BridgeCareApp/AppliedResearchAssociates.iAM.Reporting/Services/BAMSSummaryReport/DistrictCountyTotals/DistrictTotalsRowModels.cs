@@ -7,6 +7,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Text;
+using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
@@ -153,7 +154,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
         internal static List<ExcelRowModel> MpmsTableDistrict(SimulationOutput output, int districtNumber)
         {
-
             var district = ExcelValueModels.Integer(districtNumber);
             var counties = CountiesForDistrict(districtNumber);
 
@@ -162,7 +162,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             {
                 var values = new List<IExcelModel>();
                 var countyLabel = ExcelValueModels.String(county.ToUpper());
-                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber, county);
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictMpmsTable(detail, districtNumber) && DistrictTotalsSectionDetailPredicates.IsCounty(detail, county);
                 values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
                     .ToList());
                 var excelRowModel = ExcelRowModels.WithEntries(values);
@@ -183,7 +183,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             {
                 var values = new List<IExcelModel>();
                 var countyLabel = ExcelValueModels.String(county.ToUpper());
-                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber, county);
+                Func<AssetDetail, bool> predicate = detail => DistrictTotalsSectionDetailPredicates.IsNumberedDistrictBamsTable(detail, districtNumber) && DistrictTotalsSectionDetailPredicates.IsCounty(detail, county);
                 values.AddRange(DistrictTotalsExcelModelEnumerables.TableContent(output, district, countyLabel, predicate)
                     .ToList());
                 var excelRowModel = ExcelRowModels.WithEntries(values);
@@ -302,10 +302,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return totalRow;
         }
 
-        public static ExcelRowModel PercentOverallDollarsTurnpike(SimulationOutput output, int stateTotalsRowOffset)
+        public static ExcelRowModel PercentOverallDollarsTurnpike(SimulationOutput output, List<int> districtList, int stateTotalsRowOffset)
         {
             int numeratorOffset = 2; // Table Header + Years Header
-            for (var i = 1; i <= 12; i++)
+            foreach (var i in districtList)
             {
                 numeratorOffset += CountiesForDistrict(i).Count + 2; // District Header Row + County Rows + District Total Row
             }
@@ -352,15 +352,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-        public static List<ExcelRowModel> PercentOverallDollarsDistrictSubtable(SimulationOutput output, int districtNumber, int stateTotalsRowOffset)
+        public static List<ExcelRowModel> PercentOverallDollarsDistrictSubtable(SimulationOutput output, List<int> districtList, int districtNumber, int stateTotalsRowOffset)
         {
             var district = ExcelValueModels.Integer(districtNumber);
             var counties = CountiesForDistrict(districtNumber);
 
-            int numeratorOffset = 2; // Table Header + Years Header
-            for (var i = 1; i <= 12; i++)
+            int numeratorOffset = 5; // Previous table(Blank Line + State Total + Turnpike); current table (Table Header + Years Header)
+            foreach (var i in districtList)
             {
-                numeratorOffset += CountiesForDistrict(i).Count + 2; // District Header Row + County Rows + District Total Row
+                var districtCountyCount = CountiesForDistrict(i).Count;
+                if (districtCountyCount > 0)
+                { 
+                    numeratorOffset += districtCountyCount + 2; // District Header Row + County Rows + District Total Row
+                }
             }
 
             var rowModels = new List<ExcelRowModel>();
@@ -426,21 +430,5 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
             return rowModels;
         }
-
-        public static ExcelRowModel PercentOverallDollarsTotalsRow(SimulationOutput output)
-        {
-            var totalText = StackedExcelModels.BoldText("Total");
-            var returnValue = ExcelRowModels.WithEntries(totalText);
-            var sumFunction = ExcelRangeFunctions.StartOffsetRangeSum(0, -12, 0, -1);
-            var sumEntry = StackedExcelModels.Stacked(
-                ExcelFormulaModels.FromFunction(sumFunction),
-                DistrictTotalsStyleModels.DarkBlueFill,
-                ExcelStyleModels.HorizontalCenter,
-                ExcelStyleModels.MediumBorder,
-                ExcelStyleModels.PercentageFormat(0));
-            returnValue.AddRepeated(output.Years.Count, sumEntry);
-            return returnValue;
-        }
-
     }
 }

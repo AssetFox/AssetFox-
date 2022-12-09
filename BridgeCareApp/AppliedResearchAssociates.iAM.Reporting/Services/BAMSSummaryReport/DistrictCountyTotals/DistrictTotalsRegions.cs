@@ -9,8 +9,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 {
     public static class DistrictTotalsRegions
     {
-        public static List<int> NumberedDistricts
-            => new List<int> { 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 }; // Seven is indeed skipped.
+        // 20221209 EPN Keeping NumberedDistricts temporarily for reference or re-use
+        // TODO: Remove if not necessary for User Story 21084
+        //public static List<int> NumberedDistricts
+        //    => new List<int> { 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 }; // Seven is indeed skipped.
 
         public class TableWithTotalModel
         {
@@ -57,7 +59,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput simulationOutput, List<int> districtList, ref int initialRowIndex)
         {
             // MPMS Projects By County global section header
             var headerRows = new List<ExcelRowModel>
@@ -68,7 +70,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
             var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            foreach (var district in districtList)
             {
                 var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.MpmsTableDistrict, tableRowStartIndex);
                 districtSubTables.Add(districtSubTable);
@@ -93,7 +95,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         }
 
 
-        public static RowBasedExcelRegionModel BamsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel BamsTable(SimulationOutput simulationOutput, List<int> districtList, ref int initialRowIndex)
         {
             // BAMS Projects By County global section header
             var headerRows = new List<ExcelRowModel>
@@ -104,7 +106,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
             var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            foreach (var district in districtList)
             {
                 var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.BamsTableDistrict, tableRowStartIndex);
                 districtSubTables.Add(districtSubTable);
@@ -128,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return tableModels;
         }
 
-        public static RowBasedExcelRegionModel OverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel OverallDollarsTable(SimulationOutput simulationOutput, List<int> districtList, ref int initialRowIndex)
         {
             var headerRows = new List<ExcelRowModel>
             {
@@ -138,7 +140,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
             var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            foreach (var district in districtList)
             {
                 var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.TotalsTableDistrict, tableRowStartIndex);
                 districtSubTables.Add(districtSubTable);
@@ -162,7 +164,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return tableModels;
         }
 
-        internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput, List<int> districtList, ref int initialRowIndex)
         {
             var headerRows = new List<ExcelRowModel>
             {
@@ -173,7 +175,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             var districtSubTables = new List<ExcelRowModel>();
             int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
-            foreach (var district in NumberedDistricts)
+            foreach (var district in districtList)
             {
                 // Subheader for District
                 var subHeaderRows = new List<ExcelRowModel>
@@ -184,7 +186,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
                 var stateTotalsRowOffset = tableRowStartIndex - initialRowIndex + 3;
 
-                var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, district, stateTotalsRowOffset);
+                var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, districtList, district,stateTotalsRowOffset);
                 districtSubTables.AddRange(districtSubTable);
 
                 tableRowStartIndex += districtSubTable.Count + 1; // account for header and total lines
@@ -192,7 +194,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.PercentOverallDollarsTurnpike(simulationOutput, tableRowStartIndex - initialRowIndex + 2)
+                DistrictTotalsRowModels.PercentOverallDollarsTurnpike(simulationOutput, districtList, tableRowStartIndex - initialRowIndex + 2)
             };
 
             var tableModels = RowBasedExcelRegionModels.Concat(

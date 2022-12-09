@@ -695,7 +695,12 @@ namespace BridgeCareCore.Services
                 var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
                 investmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
                 investmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+                if (investmentPlan.FirstYearOfAnalysisPeriod == 0)
+                    investmentPlan.FirstYearOfAnalysisPeriod = DateTime.Now.Year;
+                investmentPlan.Id = Guid.NewGuid();
             }
+
+            investmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod == 0 ? 1 : investmentPlan.NumberOfYearsInAnalysisPeriod;
 
             var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                 _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;

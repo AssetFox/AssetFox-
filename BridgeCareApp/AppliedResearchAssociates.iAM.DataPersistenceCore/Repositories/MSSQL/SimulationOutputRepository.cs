@@ -77,17 +77,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var entity = SimulationOutputMapper.ToEntityWithoutAssetsOrYearDetails(simulationOutput, simulationId, attributeIdLookup);
                 _unitOfWork.Context.Add(entity);
                 _unitOfWork.Context.SaveChanges();
+                var configuredBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetDetailSaveOverrideBatchSizeKey);
+                var batchSize = configuredBatchSize ?? AssetDetailSaveBatchSize;
                 var assetSummaries = simulationOutput.InitialAssetSummaries;
                 memos.Mark("assetSummaries");
                 var family = AssetSummaryDetailMapper.ToEntityLists(assetSummaries, entity.Id, attributeIdLookup);
-                _unitOfWork.Context.AddAll(family.AssetSummaryDetails);
+                _unitOfWork.Context.AddAll(family.AssetSummaryDetails, batchSize: batchSize);
                 memos.Mark("assetSummaryDetails");
-                _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues);
+                _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues, batchSize: batchSize);
                 memos.Mark("assetSummaryDetailValues");
                 _unitOfWork.Commit();
-                var configuredBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetDetailSaveOverrideBatchSizeKey);
-                var batchSize = configuredBatchSize ?? AssetDetailSaveBatchSize;
-                foreach (var year in simulationOutput.Years)
+                 foreach (var year in simulationOutput.Years)
                 {
                     loggerForUserInfo.Information($"Saving year {year.Year}");
                     _unitOfWork.BeginTransaction();
@@ -96,21 +96,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
                     var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
-                    _unitOfWork.Context.AddAll(assetFamily.AssetDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.AssetDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.AssetDetails.Count} assetDetails");
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues, batchSize: batchSize);
                     memos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues batchSize: {batchSize}");
-                    _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.TreatmentOptionDetails.Count} treatmentOptionDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.TreatmentRejectionDetails.Count} treatmentRejectionDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.TreatmentSchedulingCollisionDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentSchedulingCollisionDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentSchedulingCollisionDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.TreatmentConsiderationDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.TreatmentConsiderationDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentConsiderationDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.BudgetUsageDetails.Count} budgetUsageDetails");
-                    _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails);
+                    _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
                     _unitOfWork.Commit();
                     memos.Mark(" Committed");

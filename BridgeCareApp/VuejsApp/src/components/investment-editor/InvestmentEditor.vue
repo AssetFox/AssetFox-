@@ -359,7 +359,10 @@ export default class InvestmentEditor extends Vue {
     totalItems = 0;
     currentPage: Budget[] = [];
     lastYear: number = 0;
+    firstYear: number = 0;
     initializing: boolean = true;
+
+    originalFirstYear: number = 0
     firstYearOfAnalysisPeriodShift: number = 0;
 
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
@@ -474,6 +477,7 @@ export default class InvestmentEditor extends Vue {
             await InvestmentService.getScenarioInvestmentPage(this.selectedScenarioId, request).then(response => {
                 if(response.data){
                     let data = response.data as InvestmentPagingPage;
+                    this.firstYear = data.firstYear;
                     this.currentPage = data.items.sort((a, b) => a.budgetOrder - b.budgetOrder);
                     this.BudgetCache = clone(this.currentPage);
                     this.BudgetCache.forEach(_ => _.budgetAmounts = []);
@@ -481,9 +485,9 @@ export default class InvestmentEditor extends Vue {
                     this.totalItems = data.totalItems;
                     this.investmentPlan = data.investmentPlan;                   
                     this.lastYear = data.lastYear;
-                    if (page == 1) {
-                        this.syncInvestmentPlanWithBudgets();
-                    }
+                    
+                    this.syncInvestmentPlanWithBudgets();
+                    
                 }
             });
         }            
@@ -590,8 +594,12 @@ export default class InvestmentEditor extends Vue {
     @Watch('investmentPlan')
     onInvestmentPlanChanged() {
         this.checkHasUnsavedChanges()
-        if(this.hasScenario)
-            this.firstYearOfAnalysisPeriodShift = this.investmentPlan.firstYearOfAnalysisPeriod - this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
+        if(this.hasScenario){
+            const firstYear = +this.investmentPlan.firstYearOfAnalysisPeriod;
+            const stateFirstYear = +this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
+            this.firstYearOfAnalysisPeriodShift = (firstYear - this.originalFirstYear) - (this.firstYear === 0 ? 0 : (this.firstYear - this.originalFirstYear));
+        }
+            
         if(this.investmentPlan.id === this.uuidNIL)
             this.investmentPlan.id = getNewGuid();
         this.hasInvestmentPlanForScenario = true;
@@ -760,8 +768,6 @@ export default class InvestmentEditor extends Vue {
 
     syncInvestmentPlanWithBudgets() {//this gets call in on pagination now       
         this.investmentPlan.numberOfYearsInAnalysisPeriod = this.totalItems > 0 ? this.totalItems : 1
-        this.investmentPlan.firstYearOfAnalysisPeriod = +this.stateInvestmentPlan.firstYearOfAnalysisPeriod;
-        this.investmentPlan.firstYearOfAnalysisPeriod += this.firstYearOfAnalysisPeriodShift;
     }
 
     onShowCreateBudgetLibraryDialog(createAsNewLibrary: boolean) {
@@ -1290,7 +1296,7 @@ export default class InvestmentEditor extends Vue {
             this.addedBudgetAmounts.size > 0 ||
             this.updatedBudgetAmounts.size > 0 || 
             (this.hasScenario && this.hasSelectedLibrary) ||
-            hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan) ||
+            (this.hasScenario && hasUnsavedChangesCore('', investmentPlan, stateInvestmentPlan)) || 
             (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
@@ -1328,6 +1334,10 @@ export default class InvestmentEditor extends Vue {
                     this.investmentPlanMutator(this.investmentPlan)
                     this.syncInvestmentPlanWithBudgets();
                     this.lastYear = data.lastYear;
+                    this.firstYear = data.firstYear;
+                    this.originalFirstYear = data.firstYear;
+                    if(data.firstYear === 0)
+                        this.originalFirstYear = moment().year()
                 }
                 this.initializing = false;
             });

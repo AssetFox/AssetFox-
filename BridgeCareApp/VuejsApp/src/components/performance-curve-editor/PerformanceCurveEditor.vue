@@ -577,7 +577,7 @@ export default class PerformanceCurveEditor extends Vue {
     hasSelectedLibrary: boolean = false;
     hasScenario: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = '';
+    
     performanceCurveGridHeaders: DataTableHeader[] = [
         {
             text: 'Name',
@@ -624,6 +624,11 @@ export default class PerformanceCurveEditor extends Vue {
     attributeSelectItems: SelectItem[] = [];
     selectedPerformanceCurve: PerformanceCurve = clone(emptyPerformanceCurve);
     hasSelectedPerformanceCurve: boolean = false;
+
+    unsavedDialogAllowed: boolean = true;
+    trueLibrarySelectItemValue: string | null = ''
+    librarySelectItemValueAllowedChanged: boolean = true;
+    librarySelectItemValue: string | null = '';
 
     selectedPerformanceEquations: PerformanceCurve[] = [];
     selectedPerformanceEquationIds: string[] = [];
@@ -739,8 +744,21 @@ export default class PerformanceCurveEditor extends Vue {
         );
     }
 
-    @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChanged() {
+   @Watch('librarySelectItemValue')
+    onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(this.hasScenario){
+            this.onSelectItemValueChanged();
+            this.unsavedDialogAllowed = false;
+        }           
+        else if(this.librarySelectItemValueAllowedChanged)
+            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
+                this.librarySelectItemValueAllowedChanged = false;
+                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+            })
+        this.librarySelectItemValueAllowedChanged = true;
+    }
+    onSelectItemValueChanged() {
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue
         this.selectPerformanceCurveLibraryAction(this.librarySelectItemValue);
     }
 
@@ -1173,6 +1191,23 @@ export default class PerformanceCurveEditor extends Vue {
         this.performancePagination.page = 1;
         this.onPaginationChanged();
     }
+
+    CheckUnsavedDialog(next: any, otherwise: any) {
+        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+            // @ts-ignore
+            Vue.dialog
+                .confirm(
+                    'You have unsaved changes. Are you sure you wish to continue?',
+                    { reverse: true },
+                )
+                .then(() => next())
+                .catch(() => otherwise())
+        } 
+        else {
+            this.unsavedDialogAllowed = true;
+            next();
+        }
+    };
 }
 </script>
 

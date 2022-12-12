@@ -421,3 +421,5 @@ BridgeCareApp/AppliedResearchAssociates.iAM.TestHelpers/testConnections.json
 [gG]it[iI]gnored/
 /BridgeCareApp/BridgeCareCore/SaveTimingsMaster.txt
 /BridgeCareApp/BridgeCareCore/LoadTimingsMaster.txt
+/BridgeCareApp/BridgeCareCore/SaveTimings.txt
+/BridgeCareApp/BridgeCareCore/LoadTimings.txt

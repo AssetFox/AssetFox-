@@ -365,12 +365,17 @@ export default class InvestmentEditor extends Vue {
     originalFirstYear: number = 0
     firstYearOfAnalysisPeriodShift: number = 0;
 
+    unsavedDialogAllowed: boolean = true;
+    trueLibrarySelectItemValue: string | null = ''
+    librarySelectItemValueAllowedChanged: boolean = true;
+    librarySelectItemValue: string | null = '';
+
     selectedBudgetLibrary: BudgetLibrary = clone(emptyBudgetLibrary);
     investmentPlan: InvestmentPlan = clone(emptyInvestmentPlan);
     selectedScenarioId: string = getBlankGuid();
     hasSelectedLibrary: boolean = false;
     librarySelectItems: SelectItem[] = [];
-    librarySelectItemValue: string | null = '';
+    
     librarySelectItemNames: string[] = [];
     actionHeader: DataTableHeader = { text: 'Action', value: 'action', align: 'left', sortable: false, class: '', width: ''}
     budgetYearsGridHeaders: DataTableHeader[] = [
@@ -545,7 +550,20 @@ export default class InvestmentEditor extends Vue {
      }
 
     @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChanged() {
+    onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(this.hasScenario){
+            this.onSelectItemValueChanged();
+            this.unsavedDialogAllowed = false;
+        }           
+        else if(this.librarySelectItemValueAllowedChanged)
+            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
+                this.librarySelectItemValueAllowedChanged = false;
+                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+            })
+        this.librarySelectItemValueAllowedChanged = true;
+    }
+    onSelectItemValueChanged() {
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue
         this.selectBudgetLibraryAction(this.librarySelectItemValue);
     }
 
@@ -1275,6 +1293,7 @@ export default class InvestmentEditor extends Vue {
         const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
         const stateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
+                inflationRatePercentage: +clonedStateInvestmentPlan.inflationRatePercentage,
                 firstYearOfAnalysisPeriod: +clonedStateInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
@@ -1283,6 +1302,7 @@ export default class InvestmentEditor extends Vue {
         const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
             const investmentPlan: InvestmentPlan = {
                 ...clonedInvestmentPlan,
+                inflationRatePercentage: +clonedInvestmentPlan.inflationRatePercentage,
                 firstYearOfAnalysisPeriod: +clonedInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
@@ -1300,6 +1320,23 @@ export default class InvestmentEditor extends Vue {
             (this.hasSelectedLibrary && hasUnsavedChangesCore('', this.selectedBudgetLibrary, this.stateSelectedBudgetLibrary))
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
+
+    CheckUnsavedDialog(next: any, otherwise: any) {
+        if (this.hasUnsavedChanges && this.unsavedDialogAllowed) {
+            // @ts-ignore
+            Vue.dialog
+                .confirm(
+                    'You have unsaved changes. Are you sure you wish to continue?',
+                    { reverse: true },
+                )
+                .then(() => next())
+                .catch(() => otherwise())
+        } 
+        else {
+            this.unsavedDialogAllowed = true;
+            next();
+        }
+    };
 
     initializePages(){
         const request: InvestmentPagingRequestModel= {

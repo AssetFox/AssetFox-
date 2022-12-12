@@ -240,8 +240,7 @@ namespace BridgeCareCore.Controllers
             }
             finally
             {
-                await Task.Factory.StartNew(() =>
-                {
+                Response.OnCompleted(async () => {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
@@ -249,8 +248,6 @@ namespace BridgeCareCore.Controllers
                 });
             }
         }
-
-
 
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]

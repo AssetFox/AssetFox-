@@ -768,6 +768,12 @@ namespace BridgeCareCore.Services
             return SyncedDataset(budgets, request);
         }
 
+        public List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request)
+        {
+            var budgets = new List<BudgetDTO>();
+            return SyncedDataset(budgets, request);
+        }
+
         private List<BudgetDTO> OrderByColumn(List<BudgetDTO> budgets, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower().Trim();

@@ -110,10 +110,15 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var items = new List<BudgetPriorityDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null)
+                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
+                    {
+                        items = _budgetPriortyService.GetNewLibraryDataset(upsertRequest.PagingSync);
+                    }
+
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                         items.ForEach(item => item.Id = Guid.NewGuid());
                     var dto = upsertRequest.Library;

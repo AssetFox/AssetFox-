@@ -188,6 +188,11 @@ namespace BridgeCareCore.Controllers
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
+                    {
+                        budgets = _investmentBudgetsService.GetNewLibraryDataset(upsertRequest.PagingSync);
+                    }
+
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
                         budgets.ForEach(budget =>
                         {

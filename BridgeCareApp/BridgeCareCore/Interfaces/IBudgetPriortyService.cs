@@ -11,5 +11,7 @@ namespace BridgeCareCore.Interfaces
         PagingPageModel<BudgetPriorityDTO> GetLibraryBudgetPriortyPage(Guid libraryId, PagingRequestModel<BudgetPriorityDTO> request);
         List<BudgetPriorityDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<BudgetPriorityDTO> request);
         List<BudgetPriorityDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<BudgetPriorityDTO> request);
+
+        List<BudgetPriorityDTO> GetNewLibraryDataset(PagingSyncModel<BudgetPriorityDTO> pagingSync);
     }
 }

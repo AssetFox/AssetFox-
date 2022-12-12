@@ -49,7 +49,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioPerformanceCurvePage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioPerformanceCurvePage - {e.Message}");
                 throw;
             }
         }
@@ -92,7 +92,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetPerformanceCurveLibraries - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetPerformanceCurveLibraries - {e.Message}");
                 throw;
             }
         }
@@ -120,7 +120,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioPerformanceCurves - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioPerformanceCurves - {e.Message}");
                 throw;
             }
         }
@@ -164,7 +164,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {e.Message}");
                 throw;
             }
         }
@@ -196,7 +196,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertScenarioPerformanceCurves - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertScenarioPerformanceCurves - {e.Message}");
                 throw;
             }
         }
@@ -231,7 +231,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {e.Message}");
                 throw;
             }
         }
@@ -299,7 +299,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -359,7 +359,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportScenarioPerformanceCurvesExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -383,7 +383,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -407,7 +407,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -437,7 +437,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {e.Message}");
                 throw;
             }
         }

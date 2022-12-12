@@ -41,7 +41,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetUserCriteria - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetUserCriteria - {e.Message}");
                 throw;
             }
         }
@@ -58,7 +58,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetAllUserCriteria - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::GetAllUserCriteria - {e.Message}");
                 throw;
             }
         }
@@ -82,7 +82,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria - {e.Message}");
                 throw;
             }
         }
@@ -106,7 +106,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::RevokeUserAccess - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::RevokeUserAccess - {e.Message}");
                 throw;
             }
         }
@@ -130,7 +130,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeleteUser - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::DeleteUser - {e.Message}");
                 throw;
             }
         }

@@ -26,12 +26,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return returnValue;
         }
 
-        public static bool IsNumberedDistrictMpmsTable(AssetDetail section, int districtNumber, string countyName)
+        public static bool IsNumberedDistrictMpmsTable(AssetDetail section, int districtNumber)
         {
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            var county = IsCounty(section, countyName);
-            return district && committed && county;
+            return district && committed;
         }
 
         public static bool IsCounty(AssetDetail section, string county)
@@ -41,13 +40,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return returnValue;
         }
 
-        public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber, string countyName)
+        public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber)
         {
             var ownerCode = section.ValuePerTextAttribute["OWNER_CODE"];
             var committed = IsCommittedProject(section);
             var district = IsDistrictNotTurnpike(section, districtNumber);
-            var county = IsCounty(section, countyName);
-            return district && !committed && county;
+            return district && !committed;
         }
 
         public static bool IsCommittedTurnpike(AssetDetail section)

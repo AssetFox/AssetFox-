@@ -91,7 +91,11 @@
                                             large
                                             lazy
                                             persistent>
-                                            <v-text-field v-if="header.value !== 'budget' && header.value !== 'year' && header.value !== 'brkey' && header.value !== 'treatment'"
+                                            <v-text-field v-if="header.value !== 'budget' 
+                                                && header.value !== 'year' 
+                                                && header.value !== 'brkey' 
+                                                && header.value !== 'treatment'
+                                                && header.value !== 'cost'"
                                                 readonly
                                                 class="sm-txt"
                                                 :value="props.item[header.value]"
@@ -113,6 +117,10 @@
                                                 :mask="'##########'"
                                                 :rules="[rules['generalRules'].valueIsNotEmpty]"
                                                 :error-messages="props.item.yearErrors"/>
+
+                                            <v-text-field v-if="header.value === 'cost'"
+                                                :value='formatAsCurrency(props.item[header.value])'
+                                                :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             <template slot="input">
                                                 <v-text-field v-if="header.value === 'brkey'"
@@ -145,8 +153,8 @@
                                                 <v-text-field v-if="header.value === 'cost'"
                                                     label="Edit"
                                                     single-line
-                                                    v-model="props.item[header.value]"
-                                                    :mask="'##########'"
+                                                    v-model.number="props.item[header.value]"
+                                                    v-currency="{currency: {prefix: '$', suffix: ''}, locale: 'en-US', distractionFree: false}"
                                                     :rules="[rules['generalRules'].valueIsNotEmpty]"/>
 
                                             </template>
@@ -324,6 +332,7 @@ import { AlertData, emptyAlertData } from '@/shared/models/modals/alert-data';
 import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
+import { formatAsCurrency } from '@/shared/utils/currency-formatter';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -878,7 +887,13 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     //Subroutines
+    formatAsCurrency(value: any) {
+        if (hasValue(value)) {
+            return formatAsCurrency(value);
+        }
 
+        return null;
+    }
     disableCrudButtons() {
         const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
@@ -964,7 +979,6 @@ export default class CommittedProjectsEditor extends Vue  {
             treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
             treatmentName: treatmentName,
             brkey_Value: row.locationKeys[this.brkey_],
-            year: row.year,
             networkId: this.networkId
         })
         .then((response: AxiosResponse) => {
@@ -1115,6 +1129,7 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     onUpdateRow(rowId: string, updatedRow: SectionCommittedProject){
+        updatedRow.cost = +updatedRow.cost.toString().replace(/(\$*)(\,*)/g, '')
         if(any(propEq('id', rowId), this.addedRows)){
             const index = this.addedRows.findIndex(item => item.id == updatedRow.id)
             this.addedRows[index] = updatedRow;

@@ -215,7 +215,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Deleted scenario',
+                        message: 'Deleting scenario',
                     });
                 }
             },

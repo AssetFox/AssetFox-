@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-
+using System.Linq;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 
@@ -22,16 +22,19 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
         public static AnchoredExcelRegionModel DistrictTotalsContent(SimulationOutput output)
         {
             int startingRow = 0;
+
+            var districtList = output.InitialAssetSummaries.Select(_ => _.ValuePerTextAttribute["DISTRICT"]).Distinct().Select(_ => int.Parse(_)).OrderBy(_ => _).Where(_ => _ != 37).ToList();
+
             return new AnchoredExcelRegionModel
             {
                 Region = RowBasedExcelRegionModels.Concat(
-                    DistrictTotalsRegions.MpmsTable(output, ref startingRow),
+                    DistrictTotalsRegions.MpmsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.BamsTable(output, ref startingRow),
+                    DistrictTotalsRegions.BamsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.OverallDollarsTable(output, ref startingRow),
+                    DistrictTotalsRegions.OverallDollarsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.PercentOverallDollarsTable(output, ref startingRow)
+                    DistrictTotalsRegions.PercentageOverallDollarsTable(output, districtList)
                     ),
             };
         }

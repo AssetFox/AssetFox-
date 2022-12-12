@@ -112,7 +112,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects - {e.Message}");
                 throw;
             }
         }
@@ -133,7 +133,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateAssetExistence - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateAssetExistence - {e.Message}");
                 throw;
             }
         }
@@ -154,7 +154,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateExistenceOfAssets - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateExistenceOfAssets - {e.Message}");
                 throw;
             }
         }
@@ -174,9 +174,9 @@ namespace BridgeCareCore.Controllers
                     if (treatment == null)
                         return returnValues;
                     returnValues.ValidTreatmentConsequences =  _committedProjectService.GetValidConsequences(treatmentValues.CommittedProjectId, treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     returnValues.TreatmentCost = _committedProjectService.GetTreatmentCost(treatmentValues.TreatmentLibraryId,
-                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.Year, treatmentValues.NetworkId);
+                        treatmentValues.Brkey_Value, treatmentValues.TreatmentName, treatmentValues.NetworkId);
                     
                     returnValues.TreatmentCategory = (TreatmentCategory)treatment.Category;
                     return returnValues;
@@ -185,7 +185,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::FillTreatmentValues - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::FillTreatmentValues - {e.Message}");
                 throw;
             }
         }
@@ -225,7 +225,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects - {e.Message}");
                 throw;
             }
         }
@@ -256,7 +256,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {e.Message}");
                 throw;
             }            
         }
@@ -287,7 +287,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects - {e.Message}");
                 throw;
             }
         }
@@ -320,7 +320,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage - {e.Message}");
                 throw;
             }
         }
@@ -352,7 +352,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects - {e.Message}");
                 throw;
             }            
         }

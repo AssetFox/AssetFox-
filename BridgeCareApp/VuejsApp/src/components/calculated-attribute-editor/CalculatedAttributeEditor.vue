@@ -1406,7 +1406,8 @@ export default class CalculatedAttributeEditor extends Vue {
             this.addedPairs.size > 0 ||
             this.updatedCalcAttrMap.size > 0 || 
             this.updatedPairs.size > 0 || 
-            this.addedCalcAttr.length > 0 
+            this.addedCalcAttr.length > 0 ||
+            (this.hasSelectedLibrary && !this.hasScenario && hasUnsavedChangesCore('', this.selectedCalculatedAttributeLibrary, this.stateSelectedCalculatedAttributeLibrary))
         if (hasUnsavedChanges && this.unsavedDialogAllowed) {
             // @ts-ignore
             Vue.dialog

@@ -62,7 +62,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetTreatmentLibraries - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetTreatmentLibraries - {e.Message}");
                 throw;
             }
         }
@@ -91,7 +91,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetSimpleTreatmentsByLibraryId - {e.Message}");
                 throw;
             }
         }
@@ -140,12 +140,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetSelectedTreatmentById - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSelectedTreatmentById - {e.Message}");
                 throw;
             }
         }
@@ -173,7 +173,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments - {e.Message}");
                 throw;
             }
         }
@@ -217,12 +217,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetScenarioSelectedTreatmentById - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetScenarioSelectedTreatmentById - {e.Message}");
                 throw;
             }
         }
@@ -245,12 +245,12 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Treatment error::{e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId - {e.Message}");
                 throw;
             }
         }
@@ -286,7 +286,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertTreatmentLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertTreatmentLibrary - {e.Message}");
                 throw;
             }
         }
@@ -309,7 +309,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportLibraryTreatmentsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportLibraryTreatmentsExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -341,7 +341,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments - {e.Message}");
                 throw;
             }
         }
@@ -376,7 +376,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatmentLibrary - {e.Message}");
                 throw;
             }
         }
@@ -435,7 +435,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentsFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportLibraryTreatmentsFile - {e.Message}");
                 throw;
             }
         }
@@ -471,7 +471,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment - {e.Message}");
                 throw;
             }
         }
@@ -502,7 +502,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment - {e.Message}");
                 throw;
             }
         }
@@ -553,7 +553,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentsFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ImportScenarioTreatmentsFile - {e.Message}");
                 throw;
             }
         }
@@ -578,7 +578,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -608,7 +608,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentsTemplate - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadScenarioTreatmentsTemplate - {e.Message}");
                 throw;
             }
         }
@@ -638,7 +638,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadLibraryTreatmentsTemplate - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DownloadLibraryTreatmentsTemplate - {e.Message}");
                 throw;
             }
         }

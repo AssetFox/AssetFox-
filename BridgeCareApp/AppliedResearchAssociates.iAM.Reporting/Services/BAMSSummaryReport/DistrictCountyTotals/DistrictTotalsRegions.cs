@@ -9,55 +9,62 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
 {
     public static class DistrictTotalsRegions
     {
-        public static List<int> NumberedDistricts
-            => new List<int> { 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12 }; // Seven is indeed skipped.
-
-        public class TableWithTotalModel
+        public static RowBasedExcelRegionModel DistrictSubtable(List<DistrictTotalsRowModels.CountyRow> districtCountyValueRows)
         {
-            public RowBasedExcelRegionModel rowBasedExcelRegionModel { get; set; }
-            public int startRowDelta;
-            public int totalRowDelta;
+            var districtNumber = districtCountyValueRows.First().District;
+            var yearColumnCount = districtCountyValueRows.First().rowEntries.Count;
+            
+            // Subheader for District
+            var headerRows = new List<ExcelRowModel>
+            {
+                ExcelRowModels.CenteredHeader(0, $"District: {districtNumber}", yearColumnCount + 2, 1),
+            };
+
+            var districtCountyRows = DistrictTotalsRowModels.DistrictCountyRowsToExcelRowModels(districtCountyValueRows);
+
+            var bottomRows = new List<ExcelRowModel>
+            {
+                DistrictTotalsRowModels.TableSumRowModel(districtCountyValueRows)
+            };
+
+            var tableRows =
+                headerRows
+                .Concat(districtCountyRows)
+                .Concat(bottomRows)
+                .ToList();
+
+            return RowBasedExcelRegionModels.WithRows(tableRows);
         }
 
-        public static TableWithTotalModel DistrictSubtable(
-            SimulationOutput simulationOutput,
-            int districtNumber,
-            Func<SimulationOutput, int, List<ExcelRowModel>> districtCountyFunction,
-            int initialDelta)
+        public static RowBasedExcelRegionModel PercentageDistrictSubtable(List<DistrictTotalsRowModels.CountyRow> districtCountyValueRows)
         {
-            var tableRows = new List<ExcelRowModel>();
+            var districtNumber = districtCountyValueRows.First().District;
+            var yearColumnCount = districtCountyValueRows.First().rowEntries.Count;
 
             // Subheader for District
             var headerRows = new List<ExcelRowModel>
             {
-                ExcelRowModels.CenteredHeader(0, $"District: {districtNumber}", simulationOutput.Years.Count + 2, 1),
+                ExcelRowModels.CenteredHeader(0, $"District: {districtNumber}", yearColumnCount + 2, 1),
             };
 
-            var districtCountyRows = districtCountyFunction(simulationOutput, districtNumber);
+            var districtCountyRows = DistrictTotalsRowModels.DistrictCountyRowsToPercentageExcelRowModels(districtCountyValueRows);
 
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.TableBottomSumRow(simulationOutput, districtNumber, districtCountyRows.Count)
+                DistrictTotalsRowModels.TableSumRowPercentageModel(districtCountyValueRows)
             };
 
-            tableRows.AddRange(headerRows);
-            int startDelta = initialDelta + headerRows.Count;
+            var tableRows =
+                headerRows
+                .Concat(districtCountyRows)
+                .Concat(bottomRows)
+                .ToList();
 
-            tableRows.AddRange(districtCountyRows);
-
-            int totalDelta = startDelta + tableRows.Count;
-            tableRows.AddRange(bottomRows);
-
-            return new TableWithTotalModel
-            {
-                rowBasedExcelRegionModel = RowBasedExcelRegionModels.WithRows(tableRows),
-                startRowDelta = startDelta,
-                totalRowDelta = totalDelta
-            };                
+            return RowBasedExcelRegionModels.WithRows(tableRows);
         }
 
 
-        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel MpmsTable(SimulationOutput simulationOutput, List<int> districtList)
         {
             // MPMS Projects By County global section header
             var headerRows = new List<ExcelRowModel>
@@ -65,35 +72,41 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 ExcelRowModels.CenteredHeader(0, "Dollars Spent on MPMS Projects by County", simulationOutput.Years.Count + 2, 1),
                 DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
             };
-            int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
-            var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            var allRows = new List<DistrictTotalsRowModels.CountyRow>();
+
+            var districtSubTables = new List<RowBasedExcelRegionModel>();
+
+            foreach (var district in districtList)
             {
-                var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.MpmsTableDistrict, tableRowStartIndex);
+                var rows = DistrictTotalsRowModels.MpmsTableDistrictValues(simulationOutput, district);
+                allRows.AddRange(rows);
+
+                var districtSubTable = DistrictSubtable(rows);
                 districtSubTables.Add(districtSubTable);
-                tableRowStartIndex = districtSubTable.totalRowDelta;
             }
+
+            var turnpikeRowValues = DistrictTotalsRowModels.MpmsTurnpikeRowValue(simulationOutput);
+            allRows.Add(turnpikeRowValues);
+            var stateTotalValues = DistrictTotalsRowModels.TableSumRowValue(allRows);
 
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.MpmsTableTurnpike(simulationOutput),
-                DistrictTotalsRowModels.TableStateTotal(simulationOutput, districtSubTables.Select(_ => _.totalRowDelta).ToList())
+                DistrictTotalsRowModels.TurnpikeRowToExcelRowModel(turnpikeRowValues),
+                DistrictTotalsRowModels.TableStateTotal(stateTotalValues)
             };
 
             var tableModels = RowBasedExcelRegionModels.Concat(
                 RowBasedExcelRegionModels.WithRows(headerRows),
-                RowBasedExcelRegionModels.Concat(districtSubTables.Select(_ => _.rowBasedExcelRegionModel).ToList()),
+                RowBasedExcelRegionModels.Concat(districtSubTables),
                 RowBasedExcelRegionModels.WithRows(bottomRows)
             );
-
-            initialRowIndex += tableModels.Rows.Count + 1;
 
             return tableModels;
         }
 
 
-        public static RowBasedExcelRegionModel BamsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel BamsTable(SimulationOutput simulationOutput, List<int> districtList)
         {
             // BAMS Projects By County global section header
             var headerRows = new List<ExcelRowModel>
@@ -101,103 +114,107 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 ExcelRowModels.CenteredHeader(0, "Dollars Spent on BAMS Projects by County", simulationOutput.Years.Count + 2, 1),
                 DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
             };
-            int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
-            var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            var allRows = new List<DistrictTotalsRowModels.CountyRow>();
+
+            var districtSubTables = new List<RowBasedExcelRegionModel>();
+
+            foreach (var district in districtList)
             {
-                var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.BamsTableDistrict, tableRowStartIndex);
+                var rows = DistrictTotalsRowModels.BamsTableDistrictValues(simulationOutput, district);
+                allRows.AddRange(rows);
+
+                var districtSubTable = DistrictSubtable(rows);
                 districtSubTables.Add(districtSubTable);
-                tableRowStartIndex = districtSubTable.totalRowDelta;
             }
+
+            var turnpikeRowValues = DistrictTotalsRowModels.BamsTurnpikeRowValue(simulationOutput);
+            allRows.Add(turnpikeRowValues);
+            var stateTotalValues = DistrictTotalsRowModels.TableSumRowValue(allRows);
 
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.BamsTableTurnpike(simulationOutput),
-                DistrictTotalsRowModels.TableStateTotal(simulationOutput, districtSubTables.Select(_ => _.totalRowDelta).ToList())
+                DistrictTotalsRowModels.TurnpikeRowToExcelRowModel(turnpikeRowValues),
+                DistrictTotalsRowModels.TableStateTotal(stateTotalValues)
             };
 
             var tableModels = RowBasedExcelRegionModels.Concat(
                 RowBasedExcelRegionModels.WithRows(headerRows),
-                RowBasedExcelRegionModels.Concat(districtSubTables.Select(_ => _.rowBasedExcelRegionModel).ToList()),
+                RowBasedExcelRegionModels.Concat(districtSubTables),
                 RowBasedExcelRegionModels.WithRows(bottomRows)
             );
-
-            initialRowIndex += tableModels.Rows.Count + 1;
 
             return tableModels;
         }
 
-        public static RowBasedExcelRegionModel OverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
+        public static RowBasedExcelRegionModel OverallDollarsTable(SimulationOutput simulationOutput, List<int> districtList)
         {
             var headerRows = new List<ExcelRowModel>
             {
                 ExcelRowModels.CenteredHeader(0, "Overall Dollars Spent on Projects by District", simulationOutput.Years.Count + 2, 1),
                 DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput),
             };
-            int tableRowStartIndex = initialRowIndex + headerRows.Count;
 
-            var districtSubTables = new List<TableWithTotalModel>();
-            foreach (var district in NumberedDistricts)
+            var allRows = new List<DistrictTotalsRowModels.CountyRow>();
+
+            var districtSubTables = new List<RowBasedExcelRegionModel>();
+
+            foreach (var district in districtList)
             {
-                var districtSubTable = DistrictSubtable(simulationOutput, district, DistrictTotalsRowModels.TotalsTableDistrict, tableRowStartIndex);
+                var rows = DistrictTotalsRowModels.OverallDollarsTableDistrictValues(simulationOutput, district);
+                allRows.AddRange(rows);
+
+                var districtSubTable = DistrictSubtable(rows);
                 districtSubTables.Add(districtSubTable);
-                tableRowStartIndex = districtSubTable.totalRowDelta;
             }
+
+            var turnpikeRowValues = DistrictTotalsRowModels.OverallDollarsTableTurnpike(simulationOutput);
+            allRows.Add(turnpikeRowValues);
+            var stateTotalValues = DistrictTotalsRowModels.TableSumRowValue(allRows);
 
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.TotalsTableTurnpike(simulationOutput),
-                DistrictTotalsRowModels.TableStateTotal(simulationOutput, districtSubTables.Select(_ => _.totalRowDelta).ToList())
+                DistrictTotalsRowModels.TurnpikeRowToExcelRowModel(turnpikeRowValues),
+                DistrictTotalsRowModels.TableStateTotal(stateTotalValues)
             };
 
             var tableModels = RowBasedExcelRegionModels.Concat(
                 RowBasedExcelRegionModels.WithRows(headerRows),
-                RowBasedExcelRegionModels.Concat(districtSubTables.Select(_ => _.rowBasedExcelRegionModel).ToList()),
+                RowBasedExcelRegionModels.Concat(districtSubTables),
                 RowBasedExcelRegionModels.WithRows(bottomRows)
             );
-
-            initialRowIndex += tableModels.Rows.Count + 1;
 
             return tableModels;
         }
 
-        internal static RowBasedExcelRegionModel PercentOverallDollarsTable(SimulationOutput simulationOutput, ref int initialRowIndex)
-        {
+
+        internal static RowBasedExcelRegionModel PercentageOverallDollarsTable(SimulationOutput simulationOutput, List<int> districtList)
+        { 
             var headerRows = new List<ExcelRowModel>
             {
                 ExcelRowModels.CenteredHeader(0, "% of Overall Dollars Spent on Projects by District", simulationOutput.Years.Count + 2, 1),
                 DistrictTotalsRowModels.DistrictCountyAndYearsHeaders(simulationOutput)
             };
 
-            var districtSubTables = new List<ExcelRowModel>();
-            int tableRowStartIndex = initialRowIndex + headerRows.Count;
+            var allRows = DistrictTotalsRowModels.PercentageOverallDollarsTableValues(simulationOutput, districtList);
 
-            foreach (var district in NumberedDistricts)
+            var districtSubTables = new List<RowBasedExcelRegionModel>();
+            foreach (var district in districtList)
             {
-                // Subheader for District
-                var subHeaderRows = new List<ExcelRowModel>
-                {
-                    ExcelRowModels.CenteredHeader(0, $"District: {district}", simulationOutput.Years.Count + 2, 1),
-                };
-                districtSubTables.AddRange(subHeaderRows);
-
-                var stateTotalsRowOffset = tableRowStartIndex - initialRowIndex + 3;
-
-                var districtSubTable = DistrictTotalsRowModels.PercentOverallDollarsDistrictSubtable(simulationOutput, district, stateTotalsRowOffset);
-                districtSubTables.AddRange(districtSubTable);
-
-                tableRowStartIndex += districtSubTable.Count + 1; // account for header and total lines
+                var districtPercentageRows = allRows.Where(countyRow => countyRow.District == district).ToList();
+                var districtSubTable = PercentageDistrictSubtable(districtPercentageRows);
+                districtSubTables.Add(districtSubTable);
             }
 
+            var percentageTurnpikeRow = allRows.Single(countyRow => countyRow.County.ToUpper() == "TURNPIKE");
             var bottomRows = new List<ExcelRowModel>
             {
-                DistrictTotalsRowModels.PercentOverallDollarsTurnpike(simulationOutput, tableRowStartIndex - initialRowIndex + 2)
+                DistrictTotalsRowModels.TurnpikeRowToPercentageExcelRowModel(percentageTurnpikeRow)
             };
 
             var tableModels = RowBasedExcelRegionModels.Concat(
                 RowBasedExcelRegionModels.WithRows(headerRows),
-                RowBasedExcelRegionModels.WithRows(districtSubTables),
+                RowBasedExcelRegionModels.Concat(districtSubTables),
                 RowBasedExcelRegionModels.WithRows(bottomRows)
             );
 

@@ -47,7 +47,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
                 ExcelRowModels.CenteredHeader(0, $"District: {districtNumber}", yearColumnCount + 2, 1),
             };
 
-            //var districtLabel = ExcelValueModels.Integer(district);
             var districtCountyRows = DistrictTotalsRowModels.DistrictCountyRowsToPercentageExcelRowModels(districtCountyValueRows);
 
             var bottomRows = new List<ExcelRowModel>

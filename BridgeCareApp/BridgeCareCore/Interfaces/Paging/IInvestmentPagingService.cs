@@ -14,5 +14,6 @@ namespace BridgeCareCore.Interfaces
         List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request);
 
         List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request);
+        List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request);
     }
 }

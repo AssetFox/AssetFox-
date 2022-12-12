@@ -260,10 +260,6 @@ namespace BridgeCareCore.Services
             };
         }
 
-        public List<PerformanceCurveDTO> GetNewLibraryDataset(PagingSyncModel<PerformanceCurveDTO> request)
-        {
-            var curves = new List<PerformanceCurveDTO>();
-            return SyncedDataset(curves, request);
-        }
+        
     }
 }

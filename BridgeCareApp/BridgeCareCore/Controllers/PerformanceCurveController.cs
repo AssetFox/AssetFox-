@@ -142,12 +142,12 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     var curves = new List<PerformanceCurveDTO>();
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                        curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
-                        curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                        curves = _performanceCurvePagingService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
                     else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
                     {
-                        curves = _performanceCurvesService.GetNewLibraryDataset(upsertRequest.PagingSync);
+                        curves = _performanceCurvePagingService.GetNewLibraryDataset(upsertRequest.PagingSync);
                     }
 
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)

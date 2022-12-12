@@ -31,7 +31,10 @@ namespace BridgeCareCore.Services.Paging
 
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
+
             budgets = SyncedDataset(budgets, request.PagingSync);
+
+
 
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
@@ -81,7 +84,12 @@ namespace BridgeCareCore.Services.Paging
                 var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
                 investmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
                 investmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+                if (investmentPlan.FirstYearOfAnalysisPeriod == 0)
+                    investmentPlan.FirstYearOfAnalysisPeriod = DateTime.Now.Year;
+                investmentPlan.Id = Guid.NewGuid();
             }
+
+            investmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod == 0 ? 1 : investmentPlan.NumberOfYearsInAnalysisPeriod;
 
             var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                 _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
@@ -151,6 +159,12 @@ namespace BridgeCareCore.Services.Paging
         public List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request)
         {
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        public List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request)
+        {
+            var budgets = new List<BudgetDTO>();
             return SyncedDataset(budgets, request);
         }
 

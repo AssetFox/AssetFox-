@@ -118,6 +118,12 @@ namespace BridgeCareCore.Services
             return SyncedDataset(curves, request);
         }
 
+        public List<PerformanceCurveDTO> GetNewLibraryDataset(PagingSyncModel<PerformanceCurveDTO> request)
+        {
+            var curves = new List<PerformanceCurveDTO>();
+            return SyncedDataset(curves, request);
+        }
+
         private List<PerformanceCurveDTO> OrderByColumn(List<PerformanceCurveDTO> curves, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();

@@ -195,10 +195,10 @@ namespace BridgeCareCore.Controllers
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
-                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
                     else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
                     {
-                        budgets = _investmentBudgetsService.GetNewLibraryDataset(upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetNewLibraryDataset(upsertRequest.PagingSync);
                     }
 
                     if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)

@@ -61,6 +61,7 @@ namespace BridgeCareCoreTests.Tests
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());
+            _mockPagingService = new Mock<ICommittedProjectPagingService>();
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {

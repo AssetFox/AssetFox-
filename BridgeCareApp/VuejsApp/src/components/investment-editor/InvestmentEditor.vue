@@ -1275,6 +1275,7 @@ export default class InvestmentEditor extends Vue {
         const clonedStateInvestmentPlan: InvestmentPlan = clone(this.stateInvestmentPlan);
         const stateInvestmentPlan: InvestmentPlan = {
                 ...clonedStateInvestmentPlan,
+                inflationRatePercentage: +clonedStateInvestmentPlan.inflationRatePercentage,
                 firstYearOfAnalysisPeriod: +clonedStateInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedStateInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedStateInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))
@@ -1283,6 +1284,7 @@ export default class InvestmentEditor extends Vue {
         const clonedInvestmentPlan: InvestmentPlan = clone(this.investmentPlan);
             const investmentPlan: InvestmentPlan = {
                 ...clonedInvestmentPlan,
+                inflationRatePercentage: +clonedInvestmentPlan.inflationRatePercentage,
                 firstYearOfAnalysisPeriod: +clonedInvestmentPlan.firstYearOfAnalysisPeriod,
                 minimumProjectCostLimit: hasValue(clonedInvestmentPlan.minimumProjectCostLimit)
                     ? parseFloat(clonedInvestmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''))

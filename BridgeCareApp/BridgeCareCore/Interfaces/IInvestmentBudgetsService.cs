@@ -18,5 +18,6 @@ namespace BridgeCareCore.Interfaces
 
         BudgetImportResultDTO ImportLibraryInvestmentBudgetsFile(Guid budgetLibraryId, ExcelPackage excelPackage, UserCriteriaDTO currentUserCriteriaFilter,
             bool overwriteBudgets);
+        List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request);
     }
 }

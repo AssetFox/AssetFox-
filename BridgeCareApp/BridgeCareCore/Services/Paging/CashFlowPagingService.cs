@@ -52,6 +52,12 @@ namespace BridgeCareCore.Services
             return rows;
         }
 
+        public List<CashFlowRuleDTO> GetNewLibraryDataset(PagingSyncModel<CashFlowRuleDTO> pagingSync)
+        {
+            var rows = new List<CashFlowRuleDTO>();
+            return SyncedDataset(rows, pagingSync);
+        }
+
         private PagingPageModel<CashFlowRuleDTO> HandlePaging(List<CashFlowRuleDTO> rows, PagingRequestModel<CashFlowRuleDTO> request)
         {
             var skip = 0;

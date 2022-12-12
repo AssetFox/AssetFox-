@@ -11,5 +11,7 @@ namespace BridgeCareCore.Interfaces
         PagingPageModel<CashFlowRuleDTO> GetLibraryCashFlowPage(Guid libraryId, PagingRequestModel<CashFlowRuleDTO> request);
         List<CashFlowRuleDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<CashFlowRuleDTO> request);
         List<CashFlowRuleDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<CashFlowRuleDTO> request);
+
+        List<CashFlowRuleDTO> GetNewLibraryDataset(PagingSyncModel<CashFlowRuleDTO> pagingSync);
     }
 }

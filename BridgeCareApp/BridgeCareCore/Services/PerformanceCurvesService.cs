@@ -259,5 +259,11 @@ namespace BridgeCareCore.Services
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
         }
+
+        public List<PerformanceCurveDTO> GetNewLibraryDataset(PagingSyncModel<PerformanceCurveDTO> request)
+        {
+            var curves = new List<PerformanceCurveDTO>();
+            return SyncedDataset(curves, request);
+        }
     }
 }

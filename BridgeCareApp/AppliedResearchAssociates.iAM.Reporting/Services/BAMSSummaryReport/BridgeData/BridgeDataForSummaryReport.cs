@@ -602,6 +602,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[appliedTreatment]?.ToString(); // FHWA Work Type
                     }
+                    else
+                    {
+                        worksheet.Cells[row, ++column].Value = ""; // FHWA Work Type
+                    }
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)

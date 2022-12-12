@@ -69,7 +69,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {HubService.errorList["Exception"]}");                
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {e.Message}");                
                 throw;
             }
         }
@@ -97,7 +97,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {e.Message}");
                 throw;
             }
         }

@@ -64,7 +64,7 @@ namespace BridgeCareCore.Controllers
             {
                 reportDetailDto.Status = $"Failed to generate";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog - {e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
                 throw;
             }

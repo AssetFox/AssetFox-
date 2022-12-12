@@ -103,7 +103,7 @@ namespace BridgeCareCore.Controllers
                         UnitOfWork.NetworkRepo.UpsertNetworkRollupDetail(networkId, state.Status);
                         HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastAssignDataStatus,
                             new NetworkRollupDetailDTO { NetworkId = networkId, Status = state.Status }, 0.0);
-                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - {HubService.errorList["Exception"]}");
+                        HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AggregationError}::AggregateNetworkData - { e.Message }");
                         throw;
                     }
                     finally

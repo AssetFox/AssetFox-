@@ -224,14 +224,6 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                await Task.Factory.StartNew(() =>
-                {
-                    UnitOfWork.BeginTransaction();
-                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
-                    UnitOfWork.Commit();
-                });
-
                 return Ok();
             }
             catch (UnauthorizedAccessException e)
@@ -246,9 +238,16 @@ namespace BridgeCareCore.Controllers
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation - {e.Message}");
                 throw;
             }
+            finally
+            {
+                Response.OnCompleted(async () => {
+                    UnitOfWork.BeginTransaction();
+                    _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
+                    UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
+                    UnitOfWork.Commit();
+                });
+            }
         }
-
-
 
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]

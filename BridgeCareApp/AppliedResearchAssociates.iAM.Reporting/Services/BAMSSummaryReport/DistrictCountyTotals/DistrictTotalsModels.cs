@@ -31,13 +31,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return new AnchoredExcelRegionModel
             {
                 Region = RowBasedExcelRegionModels.Concat(
-                    DistrictTotalsRegions.MpmsTable(output, districtList, ref startingRow),
+                    DistrictTotalsRegions.MpmsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.BamsTable(output, districtList, ref startingRow),
+                    DistrictTotalsRegions.BamsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.OverallDollarsTable(output, districtList, ref startingRow),
+                    DistrictTotalsRegions.OverallDollarsTable(output, districtList),
                     RowBasedExcelRegionModels.BlankLine,
-                    DistrictTotalsRegions.PercentOverallDollarsTable(output, districtList, ref startingRow)
+                    DistrictTotalsRegions.PercentageOverallDollarsTable(output, districtList)
                     ),
             };
         }

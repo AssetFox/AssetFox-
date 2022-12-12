@@ -13,14 +13,14 @@
                       :search="searchTerm">
           <template slot="items" slot-scope="props">
             <td>
-              {{ props.item.username }}
+              <v-label>{{ props.item.username }}</v-label>
             </td>
             <td>
-              <v-checkbox label="Is Shared" v-model="props.item.isShared"
+              <v-checkbox class="ghd-padding-top" label="Is Shared" v-model="props.item.isShared"
                           @change="removeUserModifyAccess(props.item.id, props.item.isShared)"/>
             </td>
             <td>
-              <v-checkbox :disabled="!props.item.isShared" label="Can Modify" v-model="props.item.canModify"/>
+              <v-checkbox :disabled="!props.item.isShared" class="ghd-padding-top" label="Can Modify" v-model="props.item.canModify"/>
             </td>
           </template>
           <v-alert :value="true"

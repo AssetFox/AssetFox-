@@ -333,6 +333,7 @@ import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
+import { isNullOrUndefined } from 'util';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -898,6 +899,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
+                if (isNullOrUndefined( scp.consequences )) scp.consequences = [];
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
                         scp.simulationId,
@@ -972,11 +974,11 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-        row.treatment = treatmentName
+        row.treatment = treatmentName;
         this.updateCommittedProject(row, treatmentName, 'treatment')  
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
+            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
             treatmentName: treatmentName,
             brkey_Value: row.locationKeys[this.brkey_],
             networkId: this.networkId

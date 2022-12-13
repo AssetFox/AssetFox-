@@ -32,6 +32,7 @@ namespace BridgeCareCore.Services
 
             return HandlePaging(rows, request);
         }
+        
         public List<BudgetPriorityDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<BudgetPriorityDTO> request)
         {
             var rows = _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(libraryId);
@@ -68,6 +69,12 @@ namespace BridgeCareCore.Services
                 });
             });
             return rows;
+        }
+
+        public List<BudgetPriorityDTO> GetNewLibraryDataset(PagingSyncModel<BudgetPriorityDTO> pagingSync)
+        {
+            var rows = new List<BudgetPriorityDTO>();
+            return SyncedDataset(rows, pagingSync);
         }
 
         private PagingPageModel<BudgetPriorityDTO> HandlePaging(List<BudgetPriorityDTO> rows, PagingRequestModel<BudgetPriorityDTO> request)

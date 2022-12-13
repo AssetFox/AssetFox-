@@ -578,7 +578,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);//Project Pick
                     }
 
-                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == section.AppliedTreatment);
+                    var appliedTreatment = section.AppliedTreatment ?? "";
+                    var treatmentConsideration = section.TreatmentConsiderations.FindAll(_ => _.TreatmentName == appliedTreatment);
                     BudgetUsageDetail budgetUsage = null;
 
                     foreach (var item in treatmentConsideration)
@@ -597,7 +598,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
 
-                    worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[section.AppliedTreatment]?.ToString(); // FHWA Work Type
+                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment))
+                    {
+                        worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[appliedTreatment]?.ToString(); // FHWA Work Type
+                    }
+                    else
+                    {
+                        worksheet.Cells[row, ++column].Value = ""; // FHWA Work Type
+                    }
                     worksheet.Cells[row, ++column].Value = ""; // District Remarks
 
                     if (row % 2 == 0)

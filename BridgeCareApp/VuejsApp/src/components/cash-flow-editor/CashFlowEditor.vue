@@ -504,11 +504,19 @@ export default class CashFlowEditor extends Vue {
         this.librarySelectItemValueAllowedChanged = true;
     }
     onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
-        if(!this.hasScenario || isNil(this.librarySelectItemValue))
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
+        
+        if(!this.hasScenario || !isNil(this.librarySelectItemValue))
+        {    
             this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        else if(!isNil(this.librarySelectItemValue))
-            this.importLibraryDisabled = false;
+        }
+        else
+        {
+            if(!isNil(this.librarySelectItemValue))
+            {
+                this.importLibraryDisabled = false;
+            }
+        }
     }
 
     importLibrary() {

@@ -493,7 +493,20 @@ export default class TreatmentEditor extends Vue {
     }
 
     @Watch('librarySelectItemValue')
-    onLibrarySelectItemValueChanged() {
+    onLibrarySelectItemValueChangedCheckUnsaved(){
+        if(this.hasScenario){
+            this.onSelectItemValueChanged();
+            this.unsavedDialogAllowed = false;
+        }           
+        else if(this.librarySelectItemValueAllowedChanged)
+            this.CheckUnsavedDialog(this.onSelectItemValueChanged, () => {
+                this.librarySelectItemValueAllowedChanged = false;
+                this.librarySelectItemValue = this.trueLibrarySelectItemValue;               
+            })
+        this.librarySelectItemValueAllowedChanged = true;
+    }
+    onSelectItemValueChanged() {
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue
         this.selectTreatmentLibraryAction({
             libraryId: this.librarySelectItemValue,
         });
@@ -720,7 +733,7 @@ export default class TreatmentEditor extends Vue {
                 library: library,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: library.treatments.length == 0 ? null : this.selectedTreatmentLibrary.id,
+                    libraryId: this.selectedTreatmentLibrary.id, // setting id required for create as new library
                     rowsForDeletion: [],
                     updateRows: library.treatments === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.treatments === [] ? [] : this.addedRows,

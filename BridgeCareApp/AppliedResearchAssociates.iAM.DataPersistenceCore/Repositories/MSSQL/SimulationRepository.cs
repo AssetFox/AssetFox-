@@ -98,10 +98,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
                 .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
-                    hasAdminAccess ||
+                    (hasAdminAccess ||
                     hasSimulationAccess ||
-                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    )
+                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))
+                 )
                 .OrderByDescending(s => s.LastModifiedDate)
                 .ToList();
             return simulations;

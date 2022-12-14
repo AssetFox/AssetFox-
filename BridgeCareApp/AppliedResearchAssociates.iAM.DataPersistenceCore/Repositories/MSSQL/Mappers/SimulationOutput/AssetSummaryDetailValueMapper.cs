@@ -7,16 +7,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 {
     public static class AssetSummaryDetailValueMapper
     {
-        public static AssetSummaryDetailValueEntity ToNumericEntity(
+        public static AssetSummaryDetailValueEntityIntId ToNumericEntity(
             Guid assetSummaryDetailId,
             KeyValuePair<string, double> assetSummaryDetailValue,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
-            var id = Guid.NewGuid();
             var attributeId = attributeIdLookupDictionary[assetSummaryDetailValue.Key];
-            var entity = new AssetSummaryDetailValueEntity
+            var entity = new AssetSummaryDetailValueEntityIntId
             {
-                Id = id,
                 AssetSummaryDetailId = assetSummaryDetailId,
                 Discriminator = AssetDetailValueDiscriminators.Number,
                 AttributeId = attributeId,
@@ -25,16 +23,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static AssetSummaryDetailValueEntity ToTextEntity(
+        public static AssetSummaryDetailValueEntityIntId ToTextEntity(
             Guid assetSummaryDetailId,
             KeyValuePair<string, string> keyValuePair,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
-            var id = Guid.NewGuid();
             var attributeId = attributeIdLookupDictionary[keyValuePair.Key];
-            var entity = new AssetSummaryDetailValueEntity
+            var entity = new AssetSummaryDetailValueEntityIntId
             {
-                Id = id,
                 AssetSummaryDetailId = assetSummaryDetailId,
                 Discriminator = AssetDetailValueDiscriminators.Text,
                 AttributeId = attributeId,
@@ -44,7 +40,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         internal static void AddToDictionaries(
-            ICollection<AssetSummaryDetailValueEntity> assetSummaryDetailValues,
+            ICollection<AssetSummaryDetailValueEntityIntId> assetSummaryDetailValues,
             Dictionary<string, double> valuePerNumericAttribute,
             Dictionary<string, string> valuePerTextAttribute,
             Dictionary<Guid, string> attributeNameLookup)
@@ -67,14 +63,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static void AddToDictionary(
-            AssetSummaryDetailValueEntity summary,
+            AssetSummaryDetailValueEntityIntId summary,
             Dictionary<string, double> valuePerNumericAttribute,
             Dictionary<string, string> valuePerTextAttribute,
             Dictionary<Guid, string> attributeNameLookup
             )
         {
             var attributeName = attributeNameLookup[summary.AttributeId];
-            // WjJake -- how should we handle unexpected cases, i.e. invalid discriminator, or discriminator is "number" but the numeric value is null?
             switch (summary.Discriminator)
             {
             case AssetDetailValueDiscriminators.Number:
@@ -89,12 +84,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static List<AssetSummaryDetailValueEntity> ToNumericEntityList(
+        public static List<AssetSummaryDetailValueEntityIntId> ToNumericEntityList(
             Guid assetSummaryDetailId,
             Dictionary<string, double> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookup)
         {
-            var entities = new List<AssetSummaryDetailValueEntity>();
+            var entities = new List<AssetSummaryDetailValueEntityIntId>();
             var areaKey = Network.DefaultSpatialWeightingIdentifier;
             var deckAreaKey = AttributeNameConstants.DeckArea;
             var containsAreaKey = assetSummaryDetailValues.ContainsKey(areaKey);
@@ -131,12 +126,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         }
 
-        public static List<AssetSummaryDetailValueEntity> ToTextEntityList(
+        public static List<AssetSummaryDetailValueEntityIntId> ToTextEntityList(
             Guid assetSummaryDetailId,
             Dictionary<string, string> assetSummaryDetailValues,
             Dictionary<string, Guid> attributeIdLookupDictionary)
         {
-            var entities = new List<AssetSummaryDetailValueEntity>();
+            var entities = new List<AssetSummaryDetailValueEntityIntId>();
             foreach (var keyValuePair in assetSummaryDetailValues)
             {
                 var entity = ToTextEntity(assetSummaryDetailId, keyValuePair, attributeIdLookupDictionary);

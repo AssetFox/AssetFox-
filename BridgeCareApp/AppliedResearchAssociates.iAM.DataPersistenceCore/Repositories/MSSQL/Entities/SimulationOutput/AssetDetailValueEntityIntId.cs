@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities
 {
-    public class AssetDetailValueEntity: SimulationOutputValueEntity
+    public class AssetDetailValueEntityIntId: SimulationOutputValueEntityIntId
     {
         public Guid AssetDetailId { get; set; }
 

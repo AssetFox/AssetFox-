@@ -138,6 +138,7 @@
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"
                     :total-items="totalItems"
+                    :rows-per-page-items=[5,10,25]
                     :must-sort='true'>
                     <template slot='items' slot-scope='props'>
                         <td>
@@ -987,8 +988,10 @@ export default class InvestmentEditor extends Vue {
             if(!isNil(budget))
                 this.addedBudgetAmounts.delete(budget.name)
         }              
-        else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1])))
+        else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1]))){
             this.updatedBudgetsMap.delete(id)
+            this.deletionBudgetIds.push(id);
+        }          
         else
             this.deletionBudgetIds.push(id);
     }

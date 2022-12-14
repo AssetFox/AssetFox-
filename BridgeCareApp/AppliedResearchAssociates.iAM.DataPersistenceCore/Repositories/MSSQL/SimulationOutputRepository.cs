@@ -197,12 +197,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
             }
-            var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
-            var attributeNameLookup = new Dictionary<Guid, string>();
-            foreach (var attribute in allAttributes)
-            {
-                attributeNameLookup[attribute.Id] = attribute.Name;
-            }
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
                 .Include(so => so.Simulation)

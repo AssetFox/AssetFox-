@@ -138,6 +138,7 @@
                     v-model='selectedBudgetYearsGridData' 
                     :pagination.sync="pagination"
                     :total-items="totalItems"
+                    :rows-per-page-items=[5,10,25]
                     :must-sort='true'>
                     <template slot='items' slot-scope='props'>
                         <td>

@@ -434,9 +434,23 @@ namespace BridgeCareCore.Services
             }
 
             var warningSb = new StringBuilder();
+            
             if (budgetsWithInvalidCriteria.Any())
             {
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}. ");
+            }
+
+            var budget = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            if (budget != null && budget.Count > 0 && budget.First().BudgetAmounts.Count != 0)
+            {
+                var firstYear = budget.First().BudgetAmounts.Min(_ => _.Year);
+
+                var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+                if (investmentPlan.Id != Guid.Empty && investmentPlan.FirstYearOfAnalysisPeriod != firstYear)
+                {
+                    investmentPlan.FirstYearOfAnalysisPeriod = firstYear;
+                    _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                }
             }
             return new ScenarioBudgetImportResultDTO
             {

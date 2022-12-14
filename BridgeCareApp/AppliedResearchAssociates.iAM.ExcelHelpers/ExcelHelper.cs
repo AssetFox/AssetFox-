@@ -79,9 +79,9 @@ namespace AppliedResearchAssociates.iAM.ExcelHelpers
         ///     Set currency format for given cells
         /// </summary>
         /// <param name="cells"></param>
-        public static void SetCurrencyFormat(ExcelRange cells)
+        public static void SetCurrencyFormat(ExcelRange cells, string currencyFormat = ExcelFormatStrings.Currency)
         {
-            cells.Style.Numberformat.Format = ExcelFormatStrings.Currency;
+            cells.Style.Numberformat.Format = currencyFormat;
         }
 
         /// <summary>

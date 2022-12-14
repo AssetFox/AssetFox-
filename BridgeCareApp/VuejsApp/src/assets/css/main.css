@@ -764,6 +764,9 @@ display: none !important;
     height: 20px !important
 }
 
+.bottom-margin-zero label {
+    margin-bottom: 0 !important;
+} 
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 .ghd-content{

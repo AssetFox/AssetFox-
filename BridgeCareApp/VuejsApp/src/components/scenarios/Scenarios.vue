@@ -1704,8 +1704,9 @@ export default class Scenarios extends Vue {
   border-bottom: 2px solid black;
 }
 
-.v-tabs__item--active .icon-selected-tab{
-    fill:#777777
+.v-tabs__item--active{
+    fill:#002E6C !important;
+    color: #002E6C !important;
 }
 .icon-selected-tab{
     fill:#2A578D

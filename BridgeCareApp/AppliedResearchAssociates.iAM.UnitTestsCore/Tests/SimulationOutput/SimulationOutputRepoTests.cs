@@ -40,11 +40,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests
         }
 
         [Theory]
-        [InlineData(10)]
-        [InlineData(100)]
-      //  [InlineData(1000)] // 2 seconds or so on 8/10 when part of a full run
-      //  [InlineData(10000)] // typically passes. Was 18.5 sec 8/10 on WJ machine.
-      //  [InlineData(100000)] // typically fails on a TimeOutException
+        
+        [InlineData(2)]
+        [InlineData(12)]
         public void SaveMultiYearSimulationOutput_ThenLoad_Same(int numberOfYears)
         {
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);

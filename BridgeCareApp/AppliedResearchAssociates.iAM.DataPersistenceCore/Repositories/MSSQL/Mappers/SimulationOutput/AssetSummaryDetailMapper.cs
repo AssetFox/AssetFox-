@@ -48,7 +48,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var assetName = entity.MaintainableAsset.AssetName;
             var domain = new AssetSummaryDetail(assetName, entity.MaintainableAssetId);
             AssetSummaryDetailValueMapper.AddToDictionaries(
-                entity.AssetSummaryDetailValues,
+                entity.AssetSummaryDetailValuesIntId,
                 domain.ValuePerNumericAttribute,
                 domain.ValuePerTextAttribute,
                 attributeNameLookup);

@@ -440,10 +440,10 @@ namespace BridgeCareCore.Services
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}. ");
             }
 
-            var budget = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
-            if (budget != null && budget.Count > 0 && budget.First().BudgetAmounts.Count != 0)
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            if (budgets != null && budgets.Count > 0 && budgets.First().BudgetAmounts.Count != 0)
             {
-                var firstYear = budget.First().BudgetAmounts.Min(_ => _.Year);
+                var firstYear = budgets.First().BudgetAmounts.Min(_ => _.Year);
 
                 var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
                 if (investmentPlan.Id != Guid.Empty && investmentPlan.FirstYearOfAnalysisPeriod != firstYear)

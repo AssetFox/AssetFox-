@@ -293,7 +293,13 @@ namespace BridgeCareCore.Services
                             join.ScenarioBudget.SimulationId == simulationId &&
                             budgetNames.Contains(join.ScenarioBudget.Name)));
                 }
-
+                var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
+                if(projects.Count > 0)
+                {
+                    projects.ForEach(_ => _.ScenarioBudgetId = null);
+                    _unitOfWork.Context.UpdateAll(projects);
+                }
+                
                 _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
             }
 

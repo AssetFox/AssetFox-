@@ -247,10 +247,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingEntityIds = _unitOfWork.Context.ScenarioBudget.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
 
-            // Delete any committed projects that are not in the provided budget list and are in the simulation
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                _.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId ?? Guid.Empty));
-
+            var committedProjects = _unitOfWork.Context.CommittedProject.Where(_ =>
+                _.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId ?? Guid.Empty)).ToList();
+            if(committedProjects.Count > 0)
+            {
+                committedProjects.ForEach(_ => _.ScenarioBudgetId = null);
+                _unitOfWork.Context.UpdateAll(committedProjects);
+            }
+            
             _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 

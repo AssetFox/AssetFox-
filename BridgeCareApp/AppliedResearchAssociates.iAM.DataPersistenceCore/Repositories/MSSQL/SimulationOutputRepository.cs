@@ -21,7 +21,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class SimulationOutputRepository : ISimulationOutputRepository
     {
         private const bool ShouldHackSaveOutputToFile = false;
-        private const bool ShouldHackSaveTimingsToFile = false;
+        private const bool ShouldHackSaveTimingsToFile = true;
         public const string SimulationOutputLoadKey = "SimulationOutputSqlBatches";
         public const string AssetLoadBatchSizeOverrideKey = "AssetDetailBatchSizeOverrideForValueLoad";
         private readonly UnitOfDataPersistenceWork _unitOfWork;
@@ -42,8 +42,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 HackSaveOutputToFile(simulationOutput);
 #pragma warning restore CS0162 // Unreachable code detected
             }
-            var memos = EventMemoModelLists.GetFreshInstance("Save");
-            var startMemo = memos.MarkInformation("Starting save", loggerForTechnicalInfo);
+            var saveMemos = EventMemoModelLists.GetFreshInstance("Save");
+            var simulationMemos = EventMemoModelLists.GetInstance("Simulation");
+            simulationMemos.Mark("Starting save");
+            var startMemo = saveMemos.MarkInformation("Starting save", loggerForTechnicalInfo);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -80,7 +82,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var configuredBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetDetailSaveOverrideBatchSizeKey);
                 var batchSize = configuredBatchSize ?? AssetDetailSaveBatchSize;
                 var assetSummaries = simulationOutput.InitialAssetSummaries;
-                memos.Mark("assetSummaries");
+                saveMemos.Mark("assetSummaries");
                 var family = AssetSummaryDetailMapper.ToEntityLists(assetSummaries, entity.Id, attributeIdLookup);
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetails, batchSize: batchSize);
                 memos.Mark("assetSummaryDetails");
@@ -91,7 +93,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 {
                     loggerForUserInfo.Information($"Saving year {year.Year}");
                     _unitOfWork.BeginTransaction();
-                    var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
+                    var yearMemo = saveMemos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
@@ -113,21 +115,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails, batchSize: batchSize);
                     memos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
                     _unitOfWork.Commit();
-                    memos.Mark(" Committed");
+                    saveMemos.Mark(" Committed");
                     _unitOfWork.Context.ChangeTracker.Clear();
-                    memos.Mark(" Cleared ChangeTracker");
+                    saveMemos.Mark(" Cleared ChangeTracker");
                 }
-                memos.MarkInformation("Save complete", loggerForTechnicalInfo);
+                saveMemos.MarkInformation("Save complete", loggerForTechnicalInfo);
+                simulationMemos.Mark("Save complete");
                 if (ShouldHackSaveTimingsToFile)
                 {
-                    var outputFilename = "SaveTimings.txt";
-                    WriteTimingsToFile(memos, outputFilename);
+                    var timingsOutputFilename = "SaveTimings.txt";
+                    var simulationOutputFilename = "SimulationTimings.txt";
+                    WriteTimingsToFile(saveMemos, timingsOutputFilename);
+                    WriteTimingsToFile(simulationMemos, simulationOutputFilename);
                 }
                 loggerForUserInfo.Information("Simulation output saved to database");
             }
             catch (Exception ex)
             {
-                var error = memos.Mark($"Save failed with exception {ex.Message}");
+                var error = saveMemos.Mark($"Save failed with exception {ex.Message}");
                 loggerForTechnicalInfo.Error(error);
                 _unitOfWork.Rollback();
                 throw;
@@ -308,6 +313,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
             memos.MarkInformation("Load done", loggerForTechinalInfo);
             loggerForUserInfo.Information($"Simulation output load completed");
+            
             if (ShouldHackSaveTimingsToFile)
             {
                 var outputFilename = "LoadTimings.txt";

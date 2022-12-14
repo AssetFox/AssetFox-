@@ -245,6 +245,7 @@ namespace BridgeCareCore.Controllers
                 });
             }
         }
+
         public async Task<IActionResult> DeleteSimulationOperation(Guid simulationId)
         {
             try
@@ -264,6 +265,7 @@ namespace BridgeCareCore.Controllers
             }
             return Ok();
         }
+
         [HttpPost]
         [Route("RunSimulation/{networkId}/{simulationId}")]
         [Authorize(Policy = Policy.RunSimulation)]

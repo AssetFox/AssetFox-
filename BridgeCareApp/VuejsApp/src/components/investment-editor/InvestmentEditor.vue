@@ -987,8 +987,10 @@ export default class InvestmentEditor extends Vue {
             if(!isNil(budget))
                 this.addedBudgetAmounts.delete(budget.name)
         }              
-        else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1])))
+        else if(any(propEq('id', id), Array.from(this.updatedBudgetsMap.values()).map(r => r[1]))){
             this.updatedBudgetsMap.delete(id)
+            this.deletionBudgetIds.push(id);
+        }          
         else
             this.deletionBudgetIds.push(id);
     }

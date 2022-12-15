@@ -215,6 +215,10 @@ namespace BridgeCareCore.Services
             rows = SyncedDataset(rows, request);
 
             if (request.LibraryId != null)
+            {
+                var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+                var budgetIds = budgets.Select(_ => _.Id).ToList();
+
                 rows.ForEach(_ =>
                 {
                     _.Id = Guid.NewGuid();
@@ -230,8 +234,13 @@ namespace BridgeCareCore.Services
                         __.Id = Guid.NewGuid();
                         __.Equation.Id = Guid.NewGuid();
                         __.CriterionLibrary.Id = Guid.NewGuid();
-                    });                   
+                    });
+                    if (!_.BudgetIds.Any())
+                    {
+                        _.BudgetIds = budgetIds;
+                    }
                 });
+            }
             return rows;
         }
 

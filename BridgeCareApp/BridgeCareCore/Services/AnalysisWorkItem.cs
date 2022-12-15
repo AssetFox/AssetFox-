@@ -85,8 +85,8 @@ namespace BridgeCareCore.Services
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
             memos.Mark("UpdateSimulationAnalysisDetail");
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             memos.Mark("GetScenarioPerformanceCurves");
 
             if (CheckCanceled()) { return; }

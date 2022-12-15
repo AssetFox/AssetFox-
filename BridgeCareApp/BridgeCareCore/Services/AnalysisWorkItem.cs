@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -135,7 +136,8 @@ namespace BridgeCareCore.Services
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
-
+                    simulationAnalysisDetail.Status = SimulationUserMessages.SimulationOutputSavedToDatabase;
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 

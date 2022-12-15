@@ -128,7 +128,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     WriteTimingsToFile(saveMemos, timingsOutputFilename);
                     WriteTimingsToFile(simulationMemos, simulationOutputFilename);
                 }
-                loggerForUserInfo.Information("Simulation output saved to database");
+                loggerForUserInfo.Information(SimulationUserMessages.SimulationOutputSavedToDatabase);
             }
             catch (Exception ex)
             {

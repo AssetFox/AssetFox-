@@ -69,7 +69,8 @@ namespace BridgeCareCore.Services
 
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, _unitOfWork.CurrentUser?.CriterionLibrary?.MergedCriteriaExpression);
+            var userCriteria = _unitOfWork.UserCriteriaRepo.GetUserCriteria(_unitOfWork.CurrentUser.Id);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
 
             if (CheckCanceled()) { return; }
             simulationAnalysisDetail.Status = "Getting performance curve";

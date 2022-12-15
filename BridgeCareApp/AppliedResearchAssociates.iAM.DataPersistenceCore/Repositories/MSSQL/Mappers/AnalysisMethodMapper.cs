@@ -34,9 +34,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             simulation.AnalysisMethod.ShouldUseExtraFundsAcrossBudgets = entity.ShouldUseExtraFundsAcrossBudgets;
 
             var specifiedFilter = entity.CriterionLibraryAnalysisMethodJoin?.CriterionLibrary.MergedCriteriaExpression ?? string.Empty;
+            var combinedCriteria = string.IsNullOrEmpty(specifiedFilter) ? userCriteria : $"({userCriteria}) AND ({specifiedFilter})";
             simulation.AnalysisMethod.Filter.Expression =
                 string.IsNullOrEmpty(userCriteria) ? specifiedFilter :
-                $"({userCriteria}) AND ({specifiedFilter})";
+                combinedCriteria;
 
             if (entity.Attribute != null)
             {

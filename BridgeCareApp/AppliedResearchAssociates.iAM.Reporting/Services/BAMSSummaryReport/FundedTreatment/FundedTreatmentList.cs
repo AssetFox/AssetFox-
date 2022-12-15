@@ -176,14 +176,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             currentCell.Column = columnNo;
 
-            var orderedYears = simulationOutput.Years.OrderBy(y => y.Year);
-            IEnumerable<AssetSummaryDetail> priorYearAssets = (orderedYears.First().Year == year) ?
-                simulationOutput.InitialAssetSummaries : orderedYears.First().Assets;
+            // "Prior GCR" (GCR for Analysis Year(s)/Start) 
+            FillGCRData(worksheet, currentCell, section);
 
-            var sectionPriorYear = priorYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
-
-            FillGCRData(worksheet, currentCell, sectionPriorYear);
-            FillGCRData(worksheet, currentCell, section, treatmentInfo.IsAnalysisLengthExceeded);
+            // "Resulting GCR" (GCR for Analysis Year(s)/End)
+            AssetSummaryDetail resultSection = null;
+            if (!treatmentInfo.IsAnalysisLengthExceeded)
+            {
+                var resultYear = year + treatmentInfo.LengthInYears - 1;
+                var resultYearDetail = simulationOutput.Years.FirstOrDefault(y => y.Year == resultYear);
+                if (resultYearDetail != null)
+                {
+                    IEnumerable<AssetSummaryDetail> resultYearAssets = resultYearDetail.Assets;
+                    resultSection = resultYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
+                }
+            }
+            FillGCRData(worksheet, currentCell, resultSection, treatmentInfo.IsAnalysisLengthExceeded);
 
             if (row % 2 == 0)
             {

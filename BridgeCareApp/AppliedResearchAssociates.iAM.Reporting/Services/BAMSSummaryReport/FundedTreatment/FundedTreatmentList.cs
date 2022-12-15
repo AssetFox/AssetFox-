@@ -2,19 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon;
 using MoreLinq;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -174,14 +167,22 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             currentCell.Column = columnNo;
 
-            var orderedYears = simulationOutput.Years.OrderBy(y => y.Year);
-            IEnumerable<AssetSummaryDetail> priorYearAssets = (orderedYears.First().Year == year) ?
-                simulationOutput.InitialAssetSummaries : orderedYears.First().Assets;
+            // "Prior GCR" (GCR for Analysis Year(s)/Start) 
+            FillGCRData(worksheet, currentCell, section);
 
-            var sectionPriorYear = priorYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
-
-            FillGCRData(worksheet, currentCell, sectionPriorYear);
-            FillGCRData(worksheet, currentCell, section, treatmentInfo.IsAnalysisLengthExceeded);
+            // "Resulting GCR" (GCR for Analysis Year(s)/End)
+            AssetSummaryDetail resultSection = null;
+            if (!treatmentInfo.IsAnalysisLengthExceeded)
+            {
+                var resultYear = year + treatmentInfo.LengthInYears - 1;
+                var resultYearDetail = simulationOutput.Years.FirstOrDefault(y => y.Year == resultYear);
+                if (resultYearDetail != null)
+                {
+                    IEnumerable<AssetSummaryDetail> resultYearAssets = resultYearDetail.Assets;
+                    resultSection = resultYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
+                }
+            }
+            FillGCRData(worksheet, currentCell, resultSection, treatmentInfo.IsAnalysisLengthExceeded);
 
             if (row % 2 == 0)
             {

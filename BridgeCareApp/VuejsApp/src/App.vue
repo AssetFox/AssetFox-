@@ -306,6 +306,7 @@ export default class AppComponent extends Vue {
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('addInfoNotification') addInfoNotificationAction: any;
+    @Action('addTaskCompletedNotification') addTaskCompletedNotificationAction: any;
     @Action('removeNotification') removeNotificationAction: any;
     @Action('clearNotificationCounter') clearNotificationCounterAction: any;
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
@@ -503,6 +504,15 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastWarningEvent,
             this.onAddWarningNotification,
         );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastInfoEvent,
+            this.onAddInfoNotification,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastTaskCompletedEvent,
+            this.onAddTaskCompletedNotification
+        );
+        
         this.currentURL = this.$router.currentRoute.name;
     }
 
@@ -529,12 +539,27 @@ export default class AppComponent extends Vue {
         }
     }
 
+    onAddInfoNotification(data: any) {
+        this.addInfoNotificationAction({
+            message: 'Server Update',
+            longMessage: data.info
+        });
+    }
+
     onAddWarningNotification(data: any) {
         this.addWarningNotificationAction({
             message: 'Server Warning',
-            longMessage: data.warning,
+            longMessage: data.info,
         });
     }
+
+    onAddTaskCompletedNotification(data: any) {
+        this.addTaskCompletedNotificationAction({
+            message: 'Task Completed',
+            longMessage: data.task
+        });
+    }
+
 
     onAlertResult(submit: boolean) {
         this.alertDialogData = clone(emptyAlertData);

@@ -16,7 +16,9 @@ namespace AppliedResearchAssociates.iAM.Hubs
     public static class HubConstant
     {
         public const string BroadcastError = "BroadcastError";
+        public const string BroadcastInfo = "BroadcastInfo";
         public const string BroadcastWarning = "BroadcastWarning";
+        public const string BroadcastTaskCompleted = "BroadcastTaskCompleted";
         public const string BroadcastAssignDataStatus = "BroadcastAssignDataStatus";
         public const string BroadcastReportGenerationStatus = "BroadcastReportGenerationStatus";
         public const string BroadcastScenarioStatusUpdate = "BroadcastScenarioStatusUpdate";

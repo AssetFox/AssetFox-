@@ -503,6 +503,15 @@ export default class AppComponent extends Vue {
             Hub.BroadcastEventType.BroadcastWarningEvent,
             this.onAddWarningNotification,
         );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastInfoEvent,
+            this.onAddInfoNotification,
+        );
+        this.$statusHub.$on(
+            Hub.BroadcastEventType.BroadcastTaskCompletedEvent,
+            this.onAddTaskCompletedNotification
+        );
+        
         this.currentURL = this.$router.currentRoute.name;
     }
 
@@ -529,12 +538,27 @@ export default class AppComponent extends Vue {
         }
     }
 
-    onAddWarningNotification(data: any) {
-        this.addWarningNotificationAction({
-            message: 'Server Warning',
-            longMessage: data.warning,
+    onAddInfoNotification(data: any) {
+        this.addInfoNotificationAction({
+            message: 'Server Update',
+            longMessage: data.info
         });
     }
+
+    onAddWarningNotification(data: any) {
+        this.addWarningNotificationAction({
+            message: 'Server Update',
+            longMessage: data.info,
+        });
+    }
+
+    onAddTaskCompletedNotification(data: any) {
+        this.addInfoNotificationAction({
+            message: 'Task Completed',
+            longMessage: data.task
+        });
+    }
+
 
     onAlertResult(submit: boolean) {
         this.alertDialogData = clone(emptyAlertData);

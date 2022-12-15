@@ -306,6 +306,7 @@ export default class AppComponent extends Vue {
     @Action('addWarningNotification') addWarningNotificationAction: any;
     @Action('addErrorNotification') addErrorNotificationAction: any;
     @Action('addInfoNotification') addInfoNotificationAction: any;
+    @Action('addTaskCompletedNotification') addTaskCompletedNotificationAction: any;
     @Action('removeNotification') removeNotificationAction: any;
     @Action('clearNotificationCounter') clearNotificationCounterAction: any;
     @Action('generatePollingSessionId') generatePollingSessionIdAction: any;
@@ -553,7 +554,7 @@ export default class AppComponent extends Vue {
     }
 
     onAddTaskCompletedNotification(data: any) {
-        this.addInfoNotificationAction({
+        this.addTaskCompletedNotificationAction({
             message: 'Task Completed',
             longMessage: data.task
         });

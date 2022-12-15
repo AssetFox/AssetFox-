@@ -122,5 +122,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             _unitOfWork.Context.DeleteEntity<UserEntity>(_ => _.Id == userId);
         }
+
+        public string GetUserCriteria(Guid userId)
+        {
+            return _unitOfWork.Context.UserCriteria.FirstOrDefault(_ => _.UserId == userId)?.Criteria;
+        }
     }
 }

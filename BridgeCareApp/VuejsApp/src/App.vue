@@ -548,7 +548,7 @@ export default class AppComponent extends Vue {
 
     onAddWarningNotification(data: any) {
         this.addWarningNotificationAction({
-            message: 'Server Update',
+            message: 'Server Warning',
             longMessage: data.info,
         });
     }

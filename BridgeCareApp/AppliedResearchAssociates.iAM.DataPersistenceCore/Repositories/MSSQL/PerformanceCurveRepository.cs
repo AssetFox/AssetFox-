@@ -125,6 +125,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.ScenarioPerformanceCurveEquationJoin)
                 .ThenInclude(_ => _.Equation)
+                .AsSplitQuery()
                 .Where(_ => _.SimulationId == simulation.Id)
                 .ToList()
                 .ForEach(_ => _.CreatePerformanceCurve(simulation));

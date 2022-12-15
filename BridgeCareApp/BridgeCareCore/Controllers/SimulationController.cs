@@ -241,12 +241,29 @@ namespace BridgeCareCore.Controllers
             finally
             {
                 Response.OnCompleted(async () => {
+                    await DeleteSimulationOperation(simulationId);
+                });
+            }
+        }
+
+        public async Task<IActionResult> DeleteSimulationOperation(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.SimulationRepo.DeleteSimulation(simulationId);
                     UnitOfWork.Commit();
                 });
             }
+            catch (Exception e)
+            {
+                UnitOfWork.Rollback();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation - {e.Message}");
+            }
+            return Ok();
         }
 
         [HttpPost]

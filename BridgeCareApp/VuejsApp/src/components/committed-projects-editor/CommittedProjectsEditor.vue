@@ -534,9 +534,12 @@ export default class CommittedProjectsEditor extends Vue  {
                 InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
                     if(response.data)
                         vm.investmentYears = response.data;
-                    ScenarioService.getNotreatmentPlaceholder().then(noTreatmentResponse => {
-                        if(noTreatmentResponse.data)
-                            vm.isNoTreatmentBeforeCache = noTreatmentResponse.data;
+                    ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
+                        if(response.data){
+                            vm.isNoTreatmentBeforeCache = response.data;
+                            vm.isNoTreatmentBefore = response.data;
+                        }
+                            
                         vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
                             vm.getAttributesAction().then(() => {                       
                                 vm.getTreatmentLibrariesAction().then(() => {
@@ -787,14 +790,14 @@ export default class CommittedProjectsEditor extends Vue  {
 
      updateNoTreatment(){
         if(this.isNoTreatmentBefore)
-                ScenarioService.updateNoTreatment().then((response: AxiosResponse) => {
+                ScenarioService.setNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                         this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
                     }
                     this.resetPage()
                 })
             else
-                ScenarioService.removeNoTreatment().then((response: AxiosResponse) => {
+                ScenarioService.removeNoTreatmentBeforeCommitted(this.scenarioId).then((response: AxiosResponse) => {
                     if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                         this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
                     }

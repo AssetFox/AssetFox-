@@ -24,6 +24,10 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static Guid UnauthorizedUser => Guid.Parse("4be6302a-e8c8-484a-a64b-67d66b3e21a8");
 
+        public static Guid SimulationId => Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee");
+
+        public static Guid FourYearSimulationId => Guid.Parse("4cdacfde-02da-4109-b8aa-add932756dee");
+
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
         public static Dictionary<string, List<KeySegmentDatum>> KeyProperties()
         {
@@ -35,20 +39,46 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
+        private static SimulationEntity GoodTestSimulation() =>
+          new SimulationEntity()
+          {
+              Id = SimulationId,
+              Name = "Test",
+              InvestmentPlan = new InvestmentPlanEntity()
+              {
+                  Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                  SimulationId = SimulationId,
+                  FirstYearOfAnalysisPeriod = 2022,
+                  InflationRatePercentage = 3,
+                  MinimumProjectCostLimit = 1000,
+                  NumberOfYearsInAnalysisPeriod = 3
+              },
+              Budgets = ScenarioBudgetEntities,
+              NetworkId = NetworkId,
+              Network = new NetworkEntity()
+              {
+                  Id = NetworkId,
+                  Name = "Primary"
+              },
+              CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
+          };
+
         public static List<SimulationEntity> Simulations => new List<SimulationEntity>()
         {
+            GoodTestSimulation(),
+
             new SimulationEntity()
             {
-                Id = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
-                Name = "Test",
+                Id = FourYearSimulationId,
+                Name = "FourYearTest",
                 InvestmentPlan = new InvestmentPlanEntity()
                 {
-                    Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
-                    SimulationId = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
+                    Id = Guid.Parse("4d1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                    SimulationId = FourYearSimulationId,
                     FirstYearOfAnalysisPeriod = 2022,
                     InflationRatePercentage = 3,
                     MinimumProjectCostLimit = 1000,
-                    NumberOfYearsInAnalysisPeriod = 3
+                    NumberOfYearsInAnalysisPeriod = 4
                 },
                 Budgets = ScenarioBudgetEntities,
                 NetworkId = NetworkId,
@@ -344,7 +374,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 1,
                 Cost = 10000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = SimulationId,
                 ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
                 ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
                 CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
@@ -374,7 +404,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 ShadowForAnyTreatment = 1,
                 ShadowForSameTreatment = 3,
                 Cost = 200000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+                SimulationId = SimulationId,
                 ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
                 ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
                 CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
@@ -395,7 +425,37 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         ChangeValue = "1"
                     }
                 }
-            }
+            },
+            new CommittedProjectEntity
+            {
+                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
+                Year = 2023,
+                Name = "Simple",
+                ShadowForAnyTreatment = 1,
+                ShadowForSameTreatment = 3,
+                Cost = 200000,
+                SimulationId = SimulationId,
+                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
+                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
+                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
+                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                {
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
+                        ChangeValue = "9"
+                    },
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
+                        ChangeValue = "1"
+                    }
+                }
+            },
         };
 
         public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()

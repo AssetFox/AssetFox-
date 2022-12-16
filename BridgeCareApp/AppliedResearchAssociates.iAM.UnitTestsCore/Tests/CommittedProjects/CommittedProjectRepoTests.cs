@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.Analysis;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -71,7 +72,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             repo.GetSimulationCommittedProjects(simulationDomain);
 
             // Assert
-            Assert.Equal(0, simulationDomain.CommittedProjects.Count);
+            var committedProjectNames = simulationDomain.CommittedProjects.Select(cp => cp.Name).ToList();
+            Assert.Equal(4, simulationDomain.CommittedProjects.Count);
             Assert.Equal(0, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
         }
 

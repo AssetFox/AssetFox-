@@ -188,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.ShadowForAnyTreatment = 0;
                         projectToAdd.ShadowForSameTreatment = 0;
                         SelectableTreatment noTreatment = SelectableTreatmentMapper.CreateSelectableTreatment(noTreatmentEntity, simulation);
-                        projectToAdd.Cost = entity.Cost;
+                        projectToAdd.Cost = 12345;
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
                         projectToAdd.TemplateTreatment = noTreatment;

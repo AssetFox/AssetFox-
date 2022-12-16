@@ -354,14 +354,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static List<SectionCommittedProjectDTO> ValidCommittedProjects => new List<SectionCommittedProjectDTO>()
         {
             SomethingSectionCommittedProjectDTO(),
-            SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId),
-            SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId, 2023),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId, 2025),
         };
 
-        private static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId) => new SectionCommittedProjectDTO()
+        private static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId, int year) => new SectionCommittedProjectDTO()
         {
             Id = id,
-            Year = 2023,
+            Year = year,
             Treatment = "Simple",
             ShadowForAnyTreatment = 1,
             ShadowForSameTreatment = 3,
@@ -425,49 +425,24 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 
         public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
         {
-            new CommittedProjectEntity()
-            {
-                Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Year = 2022,
-                Name = "Something",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-                Cost = 10000,
-                SimulationId = SimulationId,
-                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
-                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
-                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                {
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
-                        ChangeValue = "1"
-                    }
-                }
-            },
-            new CommittedProjectEntity()
-            {
-                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
-                Year = 2023,
-                Name = "Simple",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 3,
-                Cost = 200000,
-                SimulationId = SimulationId,
-                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
-                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
-                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+            SomethingEntity(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"), SimulationId, 2022),
+            SomethingEntity(Guid.Parse("4e9e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2025),
+            SimpleEntity(),
+        };
+
+        private static CommittedProjectEntity SimpleEntity() => new CommittedProjectEntity()
+        {
+            Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
+            Year = 2023,
+            Name = "Simple",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 3,
+            Cost = 200000,
+            SimulationId = SimulationId,
+            ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
+            ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
+            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "2"),
+            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
                 {
                     new CommittedProjectConsequenceEntity()
                     {
@@ -484,7 +459,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         ChangeValue = "1"
                     }
                 }
-            },
+        };
+        private static CommittedProjectEntity SomethingEntity(Guid id, Guid simulationId, int year) => new CommittedProjectEntity()
+        {
+            Id = id,
+            Year = year,
+            Name = "Something",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 1,
+            Cost = 10000,
+            SimulationId = simulationId,
+            ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
+            ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
+            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "1"),
+            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                {
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
+                        ChangeValue = "+3"
+                    },
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
+                        ChangeValue = "1"
+                    }
+                }
         };
 
         public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()

@@ -31,6 +31,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static Guid FourYearSimulationId => Guid.Parse("4cdacfde-02da-4109-b8aa-add932756dee");
 
         public static Guid NoTreatmentId => Guid.Parse("00dacfde-02da-4109-b8aa-add932756dee");
+
         public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756dee");
 
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
@@ -129,7 +130,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static ScenarioSelectableTreatmentEntity FourYearScenarioNoTreatment()
         {
 
-            
+
             var equation = new EquationEntity
             {
                 Expression = "100",
@@ -348,57 +349,32 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             }
         };
 
+
+
         public static List<SectionCommittedProjectDTO> ValidCommittedProjects => new List<SectionCommittedProjectDTO>()
         {
-            new SectionCommittedProjectDTO()
-            {
-                Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Year = 2022,
-                Treatment = "Something",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-                Cost = 10000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
-                LocationKeys = new Dictionary<string, string>()
-                {
-                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
-                    { "BRKEY_", "1" },
-                    { "BMSID", "12345678" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
-            },
-            new SectionCommittedProjectDTO()
-            {
-                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
-                Year = 2023,
-                Treatment = "Simple",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 3,
-                Cost = 200000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
-                LocationKeys = new Dictionary<string, string>()
+            SomethingSectionCommittedProjectDTO(),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId),
+        };
+
+        private static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId) => new SectionCommittedProjectDTO()
+        {
+            Id = id,
+            Year = 2023,
+            Treatment = "Simple",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 3,
+            Cost = 200000,
+            SimulationId = simulationId,
+            ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
+            LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
+            Consequences = new List<CommittedProjectConsequenceDTO>()
                 {
                     new CommittedProjectConsequenceDTO()
                     {
@@ -413,7 +389,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         ChangeValue = "1"
                     }
                 }
-            },
+        };
+        private static SectionCommittedProjectDTO SomethingSectionCommittedProjectDTO() => new SectionCommittedProjectDTO()
+        {
+            Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+            Year = 2022,
+            Treatment = "Something",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 1,
+            Cost = 10000,
+            SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+            ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
+            LocationKeys = new Dictionary<string, string>()
+                {
+                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
+                    { "BRKEY_", "1" },
+                    { "BMSID", "12345678" }
+                },
+            Consequences = new List<CommittedProjectConsequenceDTO>()
+                {
+                    new CommittedProjectConsequenceDTO()
+                    {
+                        Id = Guid.NewGuid(),
+                        Attribute = "DECK_SEEDED",
+                        ChangeValue = "+3"
+                    },
+                    new CommittedProjectConsequenceDTO()
+                    {
+                        Id = Guid.NewGuid(),
+                        Attribute = "DECK_DURATION_N",
+                        ChangeValue = "1"
+                    }
+                }
         };
 
         public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
@@ -709,7 +716,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             )
         };
 
-        private static List<KeySegmentDatum> DummyKeySegmentDatum(AttributeDTO attribute) {
+        private static List<KeySegmentDatum> DummyKeySegmentDatum(AttributeDTO attribute)
+        {
             var keySegmentData = new List<KeySegmentDatum>();
             foreach (var asset in CompleteMaintainableAssets)
             {

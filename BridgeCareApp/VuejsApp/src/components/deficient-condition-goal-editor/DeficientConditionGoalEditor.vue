@@ -573,6 +573,8 @@ export default class DeficientConditionGoalEditor extends Vue {
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
+        
+        this.checkHasUnsavedChanges();
     }
 
     @Watch('selectedGridRows')
@@ -789,6 +791,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                 this.librarySelectItemValue = null;
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
+                this.importLibraryDisabled = true;
             }           
         });
     }

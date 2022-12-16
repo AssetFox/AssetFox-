@@ -55,15 +55,68 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return selectedBridges.Sum(_ => _.ValuePerNumericAttribute["DECK_AREA"]);
         }
 
-        internal double CalculateMoneyNeededByBPN(List<AssetDetail> sectionDetails, string bpn)
+
+        internal List<AssetDetail> GetCashflowChainLeft(AssetDetail section, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
+        {
+            // return cash flow chain preceding this section (i.e. related w/ TreatmentCause == TreatmentCause.CashFlowProject or in previous consecutive years)
+            throw new NotImplementedException();
+            var chain = new List<AssetDetail>();
+
+
+            return chain;
+        }
+
+        internal List<AssetDetail> GetCashflowChainRight(AssetDetail section, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
+        {
+            // return cash flow chain following this section (i.e. related w/ TreatmentCause == TreatmentCause.CashFlowProject or TreatmentCause.SelectedTreatment in consecutive years; TreatmentCause.SelectedTreatment is the root)
+            throw new NotImplementedException();
+            var chain = new List<AssetDetail>();
+
+            return chain;
+        }
+
+        internal List<AssetDetail> GetCashflowChain(AssetDetail section, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
+        {
+            var chain = new List<AssetDetail>();
+            if (section.TreatmentCause == TreatmentCause.CashFlowProject)
+            {
+                chain.AddRange(GetCashflowChainLeft(section, simulationOutput, currentYearDetail));
+                chain.Add(section);
+                chain.AddRange(GetCashflowChainRight(section, simulationOutput, currentYearDetail));
+            }
+            else
+            {
+                chain.Add(section);
+                chain.AddRange(GetCashflowChainRight(section, simulationOutput, currentYearDetail));
+            }
+            return chain;
+        }
+
+        internal double CashFlowChainSectionCost(List<AssetDetail> sectionDetails)
+        {
+            var initial = sectionDetails.First();
+            return initial.TreatmentOptions.FirstOrDefault(t => t.TreatmentName == initial.AppliedTreatment).Cost / sectionDetails.Count;
+        }
+
+        internal double CalculateMoneyNeededByBPN(List<AssetDetail> sectionDetails, string bpn, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
         {
             var filteredBPNBridges = sectionDetails.FindAll(b =>
-            b.TreatmentCause != TreatmentCause.NoSelection &&
-            b.TreatmentOptions.Count > 0 &&
-            _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn);
+                b.TreatmentCause != TreatmentCause.NoSelection &&
+                b.TreatmentCause != TreatmentCause.SelectedTreatment &&
+                b.TreatmentCause != TreatmentCause.CashFlowProject &&
+                b.TreatmentOptions.Count > 0 &&
+                _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn);
 
-            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t =>
-            t.TreatmentName == _.AppliedTreatment).Cost);
+            var totalCost = filteredBPNBridges.Sum(_ => _.TreatmentOptions.FirstOrDefault(t => t.TreatmentName == _.AppliedTreatment).Cost);
+
+            var cashFlowBPNBridges = sectionDetails.FindAll(b =>
+                (b.TreatmentCause == TreatmentCause.CashFlowProject || b.TreatmentCause == TreatmentCause.SelectedTreatment &&
+                b.TreatmentOptions.Count > 0) &&
+                _summaryReportHelper.checkAndGetValue<string>(b.ValuePerTextAttribute, "BUS_PLAN_NETWORK") == bpn);
+            var cashFlowChainsTotal = cashFlowBPNBridges.Select(section => GetCashflowChain(section, simulationOutput, currentYearDetail)).Sum(_ => CashFlowChainSectionCost(_));
+
+            totalCost += cashFlowChainsTotal;
+
             return totalCost;
         }
 

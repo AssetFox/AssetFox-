@@ -273,6 +273,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             SimulationOutput reportOutputData)
         {
             int startRow, startColumn, row, column;
+
+            // Left side row labels
             _bridgeWorkSummaryCommon.InitializeBPNLabels(worksheet, currentCell, out startRow, out startColumn, out row, out column);
 
             var bpnNames = EnumExtensions.GetValues<BPNName>();
@@ -280,12 +282,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             worksheet.Cells[startRow + bpnRowCount, column - 1].Value = "Annualized Amount";
             worksheet.Cells[startRow + bpnRowCount, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+
+
+            // TODO: Factor calculation out from display,
+            // TODO: Building (or at least utilizing) CashFlow chaining so cashflowed projects will show up properly.
+
             var totalMoney = 0.0;
+
+            var yearlyAssetsByBPN = new Dictionary<string, List<AssetDetail>>();
+
+            // Dollar amounts
             foreach (var yearlyData in reportOutputData.Years)
             {
                 row = startRow;
                 column = ++column;
-                var totalMoneyPerYear = AddMoneyNeededByBPN(worksheet, row, column, yearlyData.Assets);
+
+                var totalMoneyPerYear = MoneyNeededBPNColumnForAssets(worksheet, row, column, yearlyData.Assets, reportOutputData, yearlyData);
+
                 totalMoney += totalMoneyPerYear;
             }
 
@@ -308,15 +321,14 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             _bridgeWorkSummaryCommon.UpdateCurrentCell(currentCell, row + bpnRowCount, column);
         }
 
-        private double AddMoneyNeededByBPN(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> sectionDetails)
+        private double MoneyNeededBPNColumnForAssets(ExcelWorksheet worksheet, int row, int column, List<AssetDetail> assets, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
         {
             var totalMoney = 0.0;
 
-            var bpnNames = EnumExtensions.GetValues<BPNName>();
-            for (var bpnName = bpnNames[0]; bpnName <= bpnNames.Last(); bpnName++)
+            var bpnKeys = EnumExtensions.GetValues<BPNName>().Select(_ => _.ToMatchInDictionary());
+            foreach (var bpnKey in bpnKeys)
             {
-                var bpnKey = bpnName.ToMatchInDictionary();
-                var moneyForBPN = _bridgeWorkSummaryComputationHelper.CalculateMoneyNeededByBPN(sectionDetails, bpnKey);
+                var moneyForBPN = _bridgeWorkSummaryComputationHelper.CalculateMoneyNeededByBPN(assets, bpnKey, simulationOutput, currentYearDetail);
                 worksheet.Cells[row++, column].Value = moneyForBPN;
                 totalMoney += moneyForBPN;
             }

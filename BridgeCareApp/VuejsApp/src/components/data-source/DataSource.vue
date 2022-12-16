@@ -137,7 +137,6 @@ import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs
 import { getUserName } from '@/shared/utils/get-user-info';
 import { NIL } from 'uuid';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
-import { Console } from 'console';
 
 @Component({
     components: {
@@ -285,7 +284,7 @@ export default class DataSource extends Vue {
         onSelectedConnectionChanged() {
             if(this.selectedConnection != '')
             {
-                //this.currentDatasource.connectionString = this.selectedConnection;
+                this.currentDatasource.connectionString = this.selectedConnection;
             }
         }
         @Watch('sqlCommandResponse')
@@ -320,7 +319,6 @@ export default class DataSource extends Vue {
     }
 
     onLoadExcel() {
-        console.log("???");
         if ( hasValue(this.file)) {
             this.importExcelSpreadsheetFileAction({
             file: this.file,

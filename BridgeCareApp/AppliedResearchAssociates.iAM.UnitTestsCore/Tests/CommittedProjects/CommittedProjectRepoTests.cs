@@ -54,6 +54,26 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             Assert.Equal(210000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
         }
 
+
+        [Fact]
+        public void NoTreatmentBeforeCommittedProjects_IdkWhat()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id);
+            var simulationEntity = _testUOW.Context.Simulation.Single(s => s.Id == simulationDomain.Id);
+            simulationEntity.NoTreatmentBeforeCommittedProjects = true;
+            _testUOW.Context.Simulation.Update(simulationEntity);
+            _testUOW.Context.SaveChanges();
+
+            // Act
+            repo.GetSimulationCommittedProjects(simulationDomain);
+
+            // Assert
+            Assert.Equal(2, simulationDomain.CommittedProjects.Count);
+            Assert.Equal(210000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+        }
+
         [Fact]
         public void GetForSimulationWorksWithoutCommittedProjects()
         {

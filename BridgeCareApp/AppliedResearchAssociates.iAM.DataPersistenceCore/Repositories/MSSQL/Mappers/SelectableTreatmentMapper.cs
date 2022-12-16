@@ -51,7 +51,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static TreatmentLibraryEntity ToEntity(this TreatmentLibraryDTO dto) =>
             new TreatmentLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
-        public static void CreateSelectableTreatment(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
+        public static SelectableTreatment CreateSelectableTreatment(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
         {
             var selectableTreatment = simulation.AddTreatment();
             selectableTreatment.Id = entity.Id;
@@ -96,6 +96,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 selectableTreatment.DesignateAsPassiveForSimulation();
             }
+            return selectableTreatment;
         }
 
         public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>

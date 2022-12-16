@@ -485,36 +485,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                     }
                 }
             },
-            new CommittedProjectEntity
-            {
-                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
-                Year = 2023,
-                Name = "Simple",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 3,
-                Cost = 200000,
-                SimulationId = SimulationId,
-                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
-                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
-                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                {
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
-                        ChangeValue = "1"
-                    }
-                }
-            },
         };
 
         public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()

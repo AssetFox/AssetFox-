@@ -17,6 +17,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
 
         public string Creator { get; set; }
 
+        public bool NoTreatmentBeforeCommittedProjects { get; set; }
+
         public DateTime? CreatedDate { get; set; }
 
         public DateTime? LastModifiedDate { get; set; }

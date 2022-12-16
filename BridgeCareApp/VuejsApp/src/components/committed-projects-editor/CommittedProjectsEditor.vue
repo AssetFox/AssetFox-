@@ -16,7 +16,7 @@
                 </v-flex>
 
                 <v-flex xs12>
-                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' />
+                    <v-checkbox class='ghd-checkbox' label='No Treatments Before Committed Projects' v-model='isNoTreatmentBefore' />
                 </v-flex>
 
                 <v-flex xs12 class="ghd-constant-header">
@@ -421,6 +421,9 @@ export default class CommittedProjectsEditor extends Vue  {
     lastYear: number = 0;
     firstYear: number = 0;
 
+    isNoTreatmentBefore: boolean = true
+    isNoTreatmentBeforeCache: boolean = true
+    
     cpGridHeaders: DataTableHeader[] = [
         {
             text: 'BRKEY',
@@ -531,16 +534,20 @@ export default class CommittedProjectsEditor extends Vue  {
                 InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
                     if(response.data)
                         vm.investmentYears = response.data;
-                    vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
-                        vm.getAttributesAction().then(() => {                       
-                            vm.getTreatmentLibrariesAction().then(() => {
-                                vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
-                                    vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
-                                    vm.initializePages();
-                                });                                                                
-                            });   
-                        });
-                    })                                          
+                    ScenarioService.getNotreatmentPlaceholder().then(noTreatmentResponse => {
+                        if(noTreatmentResponse.data)
+                            vm.isNoTreatmentBeforeCache = noTreatmentResponse.data;
+                        vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
+                            vm.getAttributesAction().then(() => {                       
+                                vm.getTreatmentLibrariesAction().then(() => {
+                                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.scenarioId}).then(() => {         
+                                        vm.selectScenarioAction({ scenarioId: vm.scenarioId });        
+                                        vm.initializePages();
+                                    });                                                                
+                                });   
+                            });
+                        }) 
+                    })                                                           
                 })
             });                     
         });
@@ -741,7 +748,10 @@ export default class CommittedProjectsEditor extends Vue  {
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: this.addedRows           
                 }
-
+        if(!this.committedProjectsAreChanged())
+        {
+            this.updateNoTreatment();
+        }
         if(this.deletionIds.length > 0){
             CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -754,7 +764,10 @@ export default class CommittedProjectsEditor extends Vue  {
                         this.addedRows = [];
                         this.updatedRowsMap.clear();
                     }
-                    this.resetPage()
+                    if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
+                        this.updateNoTreatment()
+                    else
+                        this.resetPage()
                 })
             })         
         }
@@ -765,8 +778,28 @@ export default class CommittedProjectsEditor extends Vue  {
                     this.addedRows = [];
                     this.updatedRowsMap.clear();
                 }
-                this.resetPage()
+                if(this.isNoTreatmentBefore != this.isNoTreatmentBeforeCache)
+                        this.updateNoTreatment()
+                else
+                    this.resetPage()
             })   
+     }
+
+     updateNoTreatment(){
+        if(this.isNoTreatmentBefore)
+                ScenarioService.updateNoTreatment().then((response: AxiosResponse) => {
+                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                    }
+                    this.resetPage()
+                })
+            else
+                ScenarioService.removeNoTreatment().then((response: AxiosResponse) => {
+                    if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
+                        this.isNoTreatmentBeforeCache = this.isNoTreatmentBefore
+                    }
+                    this.resetPage()
+                })
      }
 
      OnDeleteAllClick(){
@@ -1176,11 +1209,14 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     checkHasUnsavedChanges(){
-        const hasUnsavedChanges: boolean = 
-            this.deletionIds.length > 0 || 
+        const hasUnsavedChanges: boolean = this.committedProjectsAreChanged() || this.isNoTreatmentBeforeCache != this.isNoTreatmentBefore
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    committedProjectsAreChanged() : boolean{
+        return  this.deletionIds.length > 0 || 
             this.addedRows.length > 0 ||
             this.updatedRowsMap.size > 0 || (this.hasScenario && this.hasSelectedLibrary)
-        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }
 
     initializePages(){

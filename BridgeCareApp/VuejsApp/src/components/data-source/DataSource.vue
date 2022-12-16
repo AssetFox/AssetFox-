@@ -101,7 +101,7 @@
             <v-flex xs6>
                 <v-btn v-show="showMssql || showExcel" @click="resetDataSource" class="ghd-white-bg ghd-blue" flat>Cancel</v-btn>
                 <v-btn v-show="showMssql" @click="checkSQLConnection" class="ghd-blue-bg ghd-white ghd-button-text">Test</v-btn>
-                <v-btn v-show="showMssql || showExcel" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
+                <v-btn v-show="showMssql || showExcel" :disabled="disableCrudButtons() || !hasUnsavedChanges" class="ghd-blue-bg ghd-white ghd-button-text" @click="onSaveDatasource">Save</v-btn>
                 <v-btn v-show="showExcel" :disabled="isNewDataSource" class="ghd-blue-bg ghd-white ghd-button-text" @click="onLoadExcel">Load</v-btn>
             </v-flex>
         </v-layout>
@@ -113,7 +113,7 @@
 
 <script lang='ts'>
 import Vue from 'vue';
-import { clone, prop } from 'ramda';
+import { clone, isNil, prop } from 'ramda';
 import { Watch } from 'vue-property-decorator';
 import Component from 'vue-class-component';
 import { Action, State, Getter, Mutation } from 'vuex-class';
@@ -136,6 +136,8 @@ import {
 import CreateDataSourceDialog from '@/components/data-source/data-source-dialogs/CreateDataSourceDialog.vue';
 import { getUserName } from '@/shared/utils/get-user-info';
 import { NIL } from 'uuid';
+import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
+import { Console } from 'console';
 
 @Component({
     components: {
@@ -148,6 +150,7 @@ export default class DataSource extends Vue {
     @State(state => state.datasourceModule.dataSourceTypes) dataSourceTypes: string[];
     @State(state => state.datasourceModule.excelColumns) excelColumns: RawDataColumns;
     @State(state => state.datasourceModule.sqlCommandResponse) sqlCommandResponse: SqlCommandResponse;
+    @State(state => state.unsavedChangesFlagModule.hasUnsavedChanges) hasUnsavedChanges: boolean;
 
     @Action('getDataSources') getDataSourcesAction: any;
     @Action('getDataSourceTypes') getDataSourceTypesAction: any;
@@ -160,6 +163,7 @@ export default class DataSource extends Vue {
 
     @Getter('getUserNameById') getUserNameByIdGetter: any;
     @Getter('getIdByUserName') getIdByUserNameGetter: any;
+    @Action('setHasUnsavedChanges') setHasUnsavedChangesAction: any;
 
     dsTypeItems: string[] = [];
     dsItems: any = [];
@@ -176,7 +180,8 @@ export default class DataSource extends Vue {
 
     currentExcelLocationColumn: string = '';
     currentExcelDateColumn: string = '';
-    currentDatasource: Datasource = emptyDatasource;
+    currentDatasource: Datasource = clone(emptyDatasource);
+    unmodifiedDatasource: Datasource = clone(emptyDatasource)
     createDataSourceDialogData: CreateDataSourceDialogData = clone(emptyCreateDataSourceDialogData);
 
     selectedConnection: string = '';
@@ -241,21 +246,32 @@ export default class DataSource extends Vue {
             if (this.dataSourceTypeItem===DSSQL) {
                 this.showMssql = true;
                 this.showExcel = false;
+                this.currentDatasource.type = "SQL";
             }
             if (this.dataSourceTypeItem===DSEXCEL) {
                 this.showExcel = true;
                 this.showMssql = false;
+                this.currentDatasource.type = "Excel";
                 
-                this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
-                this.currentExcelDateColumn = this.currentDatasource.dateColumn;
-                this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
+                if(!this.isNewDataSource) {
+                    this.getExcelSpreadsheetColumnHeadersAction(this.currentDatasource.id);
+                    this.currentExcelDateColumn = this.currentDatasource.dateColumn;
+                    this.currentExcelLocationColumn = this.currentDatasource.locationColumn;
+                }
+                
             }
         }
         @Watch('sourceTypeItem') 
         onsourceTypeItemChanged() {
             // get the current data source object
-            let currentDatasource = this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource;
-            currentDatasource ? this.currentDatasource = currentDatasource : this.currentDatasource = emptyDatasource;
+            let currentDatasource = clone(this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : clone(emptyDatasource));
+            currentDatasource ? this.currentDatasource = clone(currentDatasource) : this.currentDatasource = clone(emptyDatasource);
+
+            if(isNil(this.currentDatasource.connectionString)) {
+                this.currentDatasource.connectionString = '';
+            }
+
+            this.unmodifiedDatasource = clone(this.currentDatasource);
 
             // update the source type droplist
             this.dataSourceTypeItem = this.currentDatasource.type;
@@ -269,13 +285,14 @@ export default class DataSource extends Vue {
         onSelectedConnectionChanged() {
             if(this.selectedConnection != '')
             {
-                this.currentDatasource.connectionString = this.selectedConnection;
+                //this.currentDatasource.connectionString = this.selectedConnection;
             }
         }
         @Watch('sqlCommandResponse')
         onSqlCommandResponseChanged() {
             this.sqlCommandResponse ? this.sqlResponse = this.sqlCommandResponse.validationMessage : '';
         }
+
     @Watch('file')
     onFileChanged() {
         this.files = hasValue(this.file) ? [this.file as File] : [];                                   
@@ -284,7 +301,26 @@ export default class DataSource extends Vue {
 
         (<HTMLInputElement>document.getElementById('file-select')!).value = '';
     }
+
+    @Watch('currentDatasource', {deep: true})
+    onCurrentDataSourceChanged() {
+        let stateSource = clone(this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource);
+        const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
+        this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
+    }
+
+    @Watch('currentExcelDateColumn')
+    onCurrentExcelDateColumnChanged() {
+        this.currentDatasource.dateColumn = this.currentExcelDateColumn;
+    }
+
+    @Watch('currentExcelLocationColumn')
+    onCurrentExcelLocationColumnChanged() {
+        this.currentDatasource.locationColumn = this.currentExcelLocationColumn;
+    }
+
     onLoadExcel() {
+        console.log("???");
         if ( hasValue(this.file)) {
             this.importExcelSpreadsheetFileAction({
             file: this.file,
@@ -324,7 +360,8 @@ export default class DataSource extends Vue {
             locationColumn: this.currentExcelLocationColumn,
             dateColumn: this.currentExcelDateColumn,
             type: this.currentDatasource.type,
-            secure: this.currentDatasource.secure
+            secure: this.currentDatasource.secure,
+            createdBy: this.currentDatasource.createdBy
             }
             this.upsertExcelDataSourceAction(exldat).then(() => {
                 if (!this.isNewDataSource) {
@@ -421,9 +458,18 @@ export default class DataSource extends Vue {
         {
             return this.getUserNameByIdGetter(this.currentDatasource.createdBy);
         }
+        return "Unknown";
     }
     isOwner() {
         return this.currentDatasource.createdBy == this.getIdByUserNameGetter(getUserName());
+    }
+    disableCrudButtons(): boolean {
+        if(this.currentDatasource.type == "SQL")
+        {
+            return !this.sqlValid;
+        }
+
+        return false;
     }
 }
 </script>

@@ -38,7 +38,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
             if (noTreatment)
             {
-                // get the entity from Amruta's code.
+                var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
+                noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
             }
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)

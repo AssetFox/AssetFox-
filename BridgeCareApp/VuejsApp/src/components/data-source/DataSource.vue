@@ -303,7 +303,6 @@ export default class DataSource extends Vue {
 
     @Watch('currentDatasource', {deep: true})
     onCurrentDataSourceChanged() {
-        let stateSource = clone(this.dataSources.length>0 ? this.dataSources.find(f => f.name === this.sourceTypeItem) : emptyDatasource);
         const hasUnsavedChanges: boolean = hasUnsavedChangesCore('', this.currentDatasource, this.unmodifiedDatasource);
         this.setHasUnsavedChangesAction({ value: hasUnsavedChanges });
     }

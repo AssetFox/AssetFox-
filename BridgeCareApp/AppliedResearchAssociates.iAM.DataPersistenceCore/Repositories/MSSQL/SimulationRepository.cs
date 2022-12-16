@@ -1361,5 +1361,27 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return simulation;
         }
+        
+        public bool GetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            return GetSimulation(simulationId).NoTreatmentBeforeCommittedProjects;
+        }
+
+        public void SetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, true);
+        }
+
+        public void RemoveNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, false);
+        }
+
+        private void UpdateSimulationNoTreatmentBeforeCommitted(Guid simulationId, bool noTreatmentBeforeCommitted)
+        {
+            var simulationDto = GetSimulation(simulationId);
+            simulationDto.NoTreatmentBeforeCommittedProjects = noTreatmentBeforeCommitted;
+            UpdateSimulation(simulationDto);
+        }
     }
 }

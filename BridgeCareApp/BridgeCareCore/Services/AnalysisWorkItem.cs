@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
@@ -75,7 +76,8 @@ namespace BridgeCareCore.Services
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             memos.Mark("GetSimulationInvestmentPlan");
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, _unitOfWork.CurrentUser?.CriterionLibrary?.MergedCriteriaExpression);
+            var userCriteria = _unitOfWork.UserCriteriaRepo.GetUserCriteria(_unitOfWork.CurrentUser.Id);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
             memos.Mark("GetSimulationAnalysisMethod");
 
             if (CheckCanceled()) { return; }
@@ -83,8 +85,8 @@ namespace BridgeCareCore.Services
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
             memos.Mark("UpdateSimulationAnalysisDetail");
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             memos.Mark("GetScenarioPerformanceCurves");
 
             if (CheckCanceled()) { return; }
@@ -134,7 +136,8 @@ namespace BridgeCareCore.Services
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
-
+                    simulationAnalysisDetail.Status = SimulationUserMessages.SimulationOutputSavedToDatabase;
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 

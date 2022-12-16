@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.Hubs;
@@ -195,7 +196,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation); 
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();

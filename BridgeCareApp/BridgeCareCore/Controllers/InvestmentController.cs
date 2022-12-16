@@ -530,6 +530,26 @@ namespace BridgeCareCore.Controllers
             return Ok(true);
         }
 
+        [HttpGet]
+        [Route("GetScenarioBudgetYears/{simulationId}")]
+        [Authorize(Policy = Policy.ViewInvestmentFromScenario)]
+        public async Task<IActionResult> GetScenarioBudgetYears(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    return UnitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetScenarioBudgetYears - {e.Message}");
+                throw;
+            }
+        }
+
         private InvestmentDTO GetForScenario(Guid scenarioId)
         {
             var budgets = UnitOfWork.BudgetRepo.GetScenarioBudgets(scenarioId);

@@ -44,12 +44,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static PerformanceCurveLibraryEntity ToEntity(this PerformanceCurveLibraryDTO dto) =>
             new PerformanceCurveLibraryEntity { Id = dto.Id, Name = dto.Name, Description = dto.Description, IsShared = dto.IsShared };
 
-        public static void CreatePerformanceCurve(this ScenarioPerformanceCurveEntity entity, Simulation simulation)
+        public static void CreatePerformanceCurve(this ScenarioPerformanceCurveEntity entity, Simulation simulation, Dictionary<Guid, string> attributeNameLookupDictionary)
         {
             var performanceCurve = simulation.AddPerformanceCurve();
             performanceCurve.Id = entity.Id;
             performanceCurve.Attribute = simulation.Network.Explorer.NumberAttributes
-                .Single(_ => _.Name == entity.Attribute.Name);
+                .Single(_ => _.Name == attributeNameLookupDictionary[entity.AttributeId]);
             performanceCurve.Name = entity.Name;
             performanceCurve.Shift = entity.Shift;
             performanceCurve.Equation.Expression = entity.ScenarioPerformanceCurveEquationJoin?.Equation.Expression ?? string.Empty;

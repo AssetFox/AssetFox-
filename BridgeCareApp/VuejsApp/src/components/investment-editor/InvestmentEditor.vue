@@ -593,15 +593,6 @@ export default class InvestmentEditor extends Vue {
         this.checkHasUnsavedChanges();
     }
 
-    @Watch('stateScenarioBudgets')
-    onStateScenarioBudgetsChanged() {
-        if (
-            this.hasScenario
-        ) {
-            this.onPaginationChanged();
-        }
-    }
-
     @Watch('currentPage')
     onScenarioBudgetsChanged() {
         this.setGridHeaders();
@@ -1043,7 +1034,7 @@ export default class InvestmentEditor extends Vue {
                                        
                             this.clearChanges();               
                             this.pagination.page = 1;
-                            this.onPaginationChanged().then(() => this.investmentPlanMutator(this.investmentPlan)  );
+                            this.initializePages();
                               
                             this.librarySelectItemValue = null
                     });

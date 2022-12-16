@@ -24,6 +24,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTa
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -252,7 +253,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 

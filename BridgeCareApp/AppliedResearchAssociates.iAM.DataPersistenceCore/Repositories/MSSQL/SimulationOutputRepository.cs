@@ -42,8 +42,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 HackSaveOutputToFile(simulationOutput);
 #pragma warning restore CS0162 // Unreachable code detected
             }
-            var memos = EventMemoModelLists.GetFreshInstance("Save");
-            var startMemo = memos.MarkInformation("Starting save", loggerForTechnicalInfo);
+            var saveMemos = EventMemoModelLists.GetFreshInstance("Save");
+            var simulationMemos = EventMemoModelLists.GetInstance("Simulation");
+            simulationMemos.Mark("Starting save");
+            var startMemo = saveMemos.MarkInformation("Starting save", loggerForTechnicalInfo);
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
             {
                 throw new RowNotInTableException("No simulation found for given scenario.");
@@ -80,54 +82,57 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 var configuredBatchSize = GetConfiguredBatchSize(_unitOfWork.Config, AssetDetailSaveOverrideBatchSizeKey);
                 var batchSize = configuredBatchSize ?? AssetDetailSaveBatchSize;
                 var assetSummaries = simulationOutput.InitialAssetSummaries;
-                memos.Mark("assetSummaries");
+                saveMemos.Mark("assetSummaries");
                 var family = AssetSummaryDetailMapper.ToEntityLists(assetSummaries, entity.Id, attributeIdLookup);
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetails, batchSize: batchSize);
-                memos.Mark("assetSummaryDetails");
+                simulationMemos.Mark("assetSummaryDetails");
                 _unitOfWork.Context.AddAll(family.AssetSummaryDetailValues, batchSize: batchSize);
-                memos.Mark("assetSummaryDetailValues");
+                saveMemos.Mark("assetSummaryDetailValues");
                 _unitOfWork.Commit();
                  foreach (var year in simulationOutput.Years)
                 {
                     loggerForUserInfo.Information($"Saving year {year.Year}");
                     _unitOfWork.BeginTransaction();
-                    var yearMemo = memos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
+                    var yearMemo = saveMemos.MarkInformation($"Y{year.Year}", loggerForTechnicalInfo);
                     var yearDetail = SimulationYearDetailMapper.ToEntityWithoutAssets(year, entity.Id, attributeIdLookup);
                     _unitOfWork.Context.Add(yearDetail);
                     var assets = year.Assets;
                     var assetFamily = AssetDetailMapper.ToEntityFamily(assets, yearDetail.Id, attributeIdLookup);
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.AssetDetails.Count} assetDetails");
+                    saveMemos.Mark($" {assetFamily.AssetDetails.Count} assetDetails");
                     _unitOfWork.Context.AddAll(assetFamily.AssetDetailValues, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues batchSize: {batchSize}");
+                    saveMemos.Mark($" {assetFamily.AssetDetailValues.Count} assetDetailValues batchSize: {batchSize}");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentOptionDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.TreatmentOptionDetails.Count} treatmentOptionDetails");
+                    saveMemos.Mark($" {assetFamily.TreatmentOptionDetails.Count} treatmentOptionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentRejectionDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.TreatmentRejectionDetails.Count} treatmentRejectionDetails");
+                    saveMemos.Mark($" {assetFamily.TreatmentRejectionDetails.Count} treatmentRejectionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentSchedulingCollisionDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentSchedulingCollisionDetails");
+                    saveMemos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentSchedulingCollisionDetails");
                     _unitOfWork.Context.AddAll(assetFamily.TreatmentConsiderationDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentConsiderationDetails");
+                    saveMemos.Mark($" {assetFamily.TreatmentSchedulingCollisionDetails.Count} treatmentConsiderationDetails");
                     _unitOfWork.Context.AddAll(assetFamily.BudgetUsageDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.BudgetUsageDetails.Count} budgetUsageDetails");
+                    saveMemos.Mark($" {assetFamily.BudgetUsageDetails.Count} budgetUsageDetails");
                     _unitOfWork.Context.AddAll(assetFamily.CashFlowConsiderationDetails, batchSize: batchSize);
-                    memos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
+                    saveMemos.Mark($" {assetFamily.CashFlowConsiderationDetails.Count} cashFlowConsiderationDetails");
                     _unitOfWork.Commit();
-                    memos.Mark(" Committed");
+                    saveMemos.Mark(" Committed");
                     _unitOfWork.Context.ChangeTracker.Clear();
-                    memos.Mark(" Cleared ChangeTracker");
+                    saveMemos.Mark(" Cleared ChangeTracker");
                 }
-                memos.MarkInformation("Save complete", loggerForTechnicalInfo);
+                saveMemos.MarkInformation("Save complete", loggerForTechnicalInfo);
+                simulationMemos.Mark("Save complete");
                 if (ShouldHackSaveTimingsToFile)
                 {
-                    var outputFilename = "SaveTimings.txt";
-                    WriteTimingsToFile(memos, outputFilename);
+                    var timingsOutputFilename = "SaveTimings.txt";
+                    var simulationOutputFilename = "SimulationTimings.txt";
+                    WriteTimingsToFile(saveMemos, timingsOutputFilename);
+                    WriteTimingsToFile(simulationMemos, simulationOutputFilename);
                 }
-                loggerForUserInfo.Information("Simulation output saved to database");
+                loggerForUserInfo.Information(SimulationUserMessages.SimulationOutputSavedToDatabase);
             }
             catch (Exception ex)
             {
-                var error = memos.Mark($"Save failed with exception {ex.Message}");
+                var error = saveMemos.Mark($"Save failed with exception {ex.Message}");
                 loggerForTechnicalInfo.Error(error);
                 _unitOfWork.Rollback();
                 throw;
@@ -192,12 +197,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new Exception($"Expected to find one output for the simulation. Found {simulationOutputObjectCount}."); ;
             }
-            var allAttributes = _unitOfWork.AttributeRepo.GetAttributes();
-            var attributeNameLookup = new Dictionary<Guid, string>();
-            foreach (var attribute in allAttributes)
-            {
-                attributeNameLookup[attribute.Id] = attribute.Name;
-            }
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
             var entitiesWithoutAssetSummariesOrYearContents = _unitOfWork.Context.SimulationOutput
                 .Include(so => so.Years)
                 .Include(so => so.Simulation)
@@ -308,6 +308,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             domain.Years.Sort((y1, y2) => y1.Year.CompareTo(y2.Year));
             memos.MarkInformation("Load done", loggerForTechinalInfo);
             loggerForUserInfo.Information($"Simulation output load completed");
+            
             if (ShouldHackSaveTimingsToFile)
             {
                 var outputFilename = "LoadTimings.txt";

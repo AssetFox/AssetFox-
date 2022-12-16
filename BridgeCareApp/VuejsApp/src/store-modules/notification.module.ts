@@ -73,6 +73,17 @@ const actions = {
         };
         commit('addNotificationMutator', notification);
     },
+    addTaskCompletedNotification({ commit }: any, payload: any) {
+        let notification: Notification = {
+            id: state.totalNotifications + 1,
+            icon: 'fas fa-exclamation-circle',
+            iconColor: 'green',
+            active: false,
+            shortMessage: payload.message,
+            longMessage: payload.longMessage || 'No further information provided',
+        };
+        commit('addNotificationMutator', notification);
+    },
     removeNotification({ commit }: any, id: number) {
         commit('removeNotificationMutator', id);
     },

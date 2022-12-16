@@ -173,6 +173,7 @@
                                             <v-card-text class='card-tab-content'>
                                                 <BudgetsTab :selectedTreatmentBudgets='selectedTreatment.budgetIds'
                                                             :addTreatment='selectedTreatment.addTreatment'
+                                                            :fromLibrary='hasSelectedLibrary'
                                                             @onModifyBudgets='modifySelectedTreatmentBudgets' />
                                             </v-card-text>
                                         </v-card>

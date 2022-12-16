@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
+using AppliedResearchAssociates.iAM.Common;
+using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -28,6 +30,8 @@ namespace BridgeCareCore.Services
 
         public void DoWork(IServiceProvider serviceProvider, CancellationToken cancellationToken)
         {
+            var memos = EventMemoModelLists.GetFreshInstance("Simulation");
+            memos.Mark("start");
             HashSet<string> LoggedMessages = new();
 
             using var scope = serviceProvider.CreateScope();
@@ -45,6 +49,7 @@ namespace BridgeCareCore.Services
             var _hubService = scope.ServiceProvider.GetRequiredService<IHubService>();
 
             var status = "Creating input...";
+            memos.Mark("CreatingInput");
             StartTime = DateTime.Now;
             var simulationAnalysisDetail = CreateSimulationAnalysisDetailDto(status, StartTime);
 
@@ -60,6 +65,7 @@ namespace BridgeCareCore.Services
 
             if (CheckCanceled()) { return; }
             var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
+            memos.Mark("GetSimulationAnalysisNetwork");
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             if (CheckCanceled()) { return; }
@@ -69,14 +75,19 @@ namespace BridgeCareCore.Services
 
             var simulation = network.Simulations.Single(_ => _.Id == simulationId);
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
-            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, _unitOfWork.CurrentUser?.CriterionLibrary?.MergedCriteriaExpression);
+            memos.Mark("GetSimulationInvestmentPlan");
+            var userCriteria = _unitOfWork.UserCriteriaRepo.GetUserCriteria(_unitOfWork.CurrentUser.Id);
+            _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, userCriteria);
+            memos.Mark("GetSimulationAnalysisMethod");
 
             if (CheckCanceled()) { return; }
             simulationAnalysisDetail.Status = "Getting performance curve";
             UpdateSimulationAnalysisDetail(simulationAnalysisDetail, null);
+            memos.Mark("UpdateSimulationAnalysisDetail");
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
-
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
+            memos.Mark("GetScenarioPerformanceCurves");
 
             if (CheckCanceled()) { return; }
             simulationAnalysisDetail.Status = "Getting selectable treatments";
@@ -84,7 +95,9 @@ namespace BridgeCareCore.Services
             _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastSimulationAnalysisDetail, simulationAnalysisDetail);
 
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            memos.Mark("GetScenarioSelectableTreatments");
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
+            memos.Mark("GetSimulationCommittedProjects");
 
             if (CheckCanceled()) { return; }
             simulationAnalysisDetail.Status = "Populating calculated fields";
@@ -123,7 +136,8 @@ namespace BridgeCareCore.Services
                     var updateSimulationAnalysisDetailLogger = new CallbackLogger(message => UpdateSimulationAnalysisDetailFromString(message));
 
                     _unitOfWork.SimulationOutputRepo.CreateSimulationOutput(simulationId, simulation.Results, updateSimulationAnalysisDetailLogger);
-
+                    simulationAnalysisDetail.Status = SimulationUserMessages.SimulationOutputSavedToDatabase;
+                    UpdateSimulationAnalysisDetail(simulationAnalysisDetail, DateTime.Now);
                     _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastScenarioStatusUpdate, simulationAnalysisDetail, simulationId);
                     break;
 
@@ -169,7 +183,9 @@ namespace BridgeCareCore.Services
             if (CheckCanceled()) { return; }
             RunValidation(runner);
 
+            memos.Mark("RunValidation");
             runner.Run(false, cancellationToken);
+            memos.Mark("Run complete");
 
             void RunValidation(SimulationRunner runner)
             {

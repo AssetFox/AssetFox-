@@ -243,6 +243,7 @@ namespace BridgeCareCore.Controllers
                 Response.OnCompleted(async () => {
                     await DeleteSimulationOperation(simulationId);
                 });
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastTaskCompleted, $"{UnitOfWork.SimulationRepo.GetSimulationName(simulationId)} deleted");
             }
         }
 

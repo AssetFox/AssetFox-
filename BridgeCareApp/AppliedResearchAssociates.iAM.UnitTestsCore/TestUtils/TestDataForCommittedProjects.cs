@@ -8,11 +8,13 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -27,6 +29,9 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static Guid SimulationId => Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee");
 
         public static Guid FourYearSimulationId => Guid.Parse("4cdacfde-02da-4109-b8aa-add932756dee");
+
+        public static Guid NoTreatmentId => Guid.Parse("00dacfde-02da-4109-b8aa-add932756dee");
+        public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756dee");
 
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
         public static Dictionary<string, List<KeySegmentDatum>> KeyProperties()
@@ -113,6 +118,53 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             }
         };
+
+        public static List<ScenarioSelectableTreatmentEntity> FourYearScenarioNoTreatmentEntities()
+        {
+            var entity = FourYearScenarioNoTreatment();
+            var list = new List<ScenarioSelectableTreatmentEntity> { entity };
+            return list;
+        }
+
+        public static ScenarioSelectableTreatmentEntity FourYearScenarioNoTreatment()
+        {
+
+            
+            var equation = new EquationEntity
+            {
+                Expression = "100",
+            };
+            var equationJoin = new ScenarioTreatmentCostEquationEntity
+            {
+                Equation = equation,
+                ScenarioTreatmentCostId = NoTreatmentId,
+            };
+            var scenarioTreatmentCost = new ScenarioTreatmentCostEntity
+            {
+                Id = CostId,
+                ScenarioTreatmentCostEquationJoin = equationJoin,
+                ScenarioSelectableTreatmentId = NoTreatmentId,
+            };
+            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };
+            var consequences = new List<ScenarioConditionalTreatmentConsequenceEntity>();
+            var budgets = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
+            var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity
+            {
+
+            };
+            var entity = new ScenarioSelectableTreatmentEntity
+            {
+                Id = NoTreatmentId,
+                ScenarioTreatmentCosts = costs,
+                Description = "No Treatment",
+                Name = "No Treatment",
+                SimulationId = FourYearSimulationId,
+                ScenarioTreatmentConsequences = consequences,
+                ScenarioSelectableTreatmentScenarioBudgetJoins = budgets,
+                CriterionLibraryScenarioSelectableTreatmentJoin = null,
+            };
+            return entity;
+        }
 
         public static List<SimulationDTO> AuthorizedSimulationDTOs()
         {

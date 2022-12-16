@@ -535,7 +535,7 @@ export default class CommittedProjectsEditor extends Vue  {
                     if(response.data)
                         vm.investmentYears = response.data;
                     ScenarioService.getNoTreatmentBeforeCommitted(vm.scenarioId).then(response => {
-                        if(response.data){
+                        if(!isNil(response.data)){
                             vm.isNoTreatmentBeforeCache = response.data;
                             vm.isNoTreatmentBefore = response.data;
                         }
@@ -557,6 +557,11 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     //Watch
+    @Watch('isNoTreatmentBefore')
+    onIsNoTreatmentBeforeChanged(){
+        this.checkHasUnsavedChanges();
+    }
+
     @Watch('investmentYears')
     onInvestmentYearsChanged(){
         this.lastYear = Math.max(...this.investmentYears);
@@ -702,6 +707,7 @@ export default class CommittedProjectsEditor extends Vue  {
         this.resetPage();
         this.selectedCommittedProject = '';
         this.selectedCpItems = [];
+        this.isNoTreatmentBefore = this.isNoTreatmentBeforeCache
     }
 
     OnExportProjectsClick(){
@@ -755,7 +761,7 @@ export default class CommittedProjectsEditor extends Vue  {
         {
             this.updateNoTreatment();
         }
-        if(this.deletionIds.length > 0){
+        else if(this.deletionIds.length > 0){
             CommittedProjectsService.deleteSpecificCommittedProjects(this.deletionIds).then((response: AxiosResponse) => {
                 if(hasValue(response, 'status') && http2XX.test(response.status.toString())){
                     this.deletionIds = [];

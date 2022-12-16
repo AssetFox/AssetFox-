@@ -56,7 +56,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 
 
         [Fact]
-        public void NoTreatmentBeforeCommittedProjects_IdkWhat()
+        public void NoTreatmentBeforeCommittedProjects_GetSimulationCommittedProjects_Expected()
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);

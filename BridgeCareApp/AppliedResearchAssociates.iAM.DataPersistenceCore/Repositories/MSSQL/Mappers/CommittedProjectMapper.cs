@@ -7,6 +7,9 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -148,7 +151,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation, Guid maintainableAssetId)
+        public static void CreateCommittedProject(
+            this CommittedProjectEntity entity,
+            Simulation simulation,
+            Guid maintainableAssetId,
+            bool noTreatmentForCommittedProjects,
+            ScenarioSelectableTreatmentEntity noTreatmentEntity)
         {
             var asset = simulation.Network.Assets.Single(_ =>
                 _.Id == maintainableAssetId);
@@ -166,6 +174,42 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
             }
+            if (noTreatmentForCommittedProjects)
+            {
+                int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                for (int year = startYear; year < committedProject.Year; year++)
+                {
+                    CommittedProject existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(cp => cp.Year == year);
+                    if (existingCommittedProject == null)
+                    {
+                        var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject (asset, year));
+                        projectToAdd.Id = Guid.NewGuid();
+                        projectToAdd.Name = noTreatmentEntity.Name;
+                        projectToAdd.ShadowForAnyTreatment = 0;
+                        projectToAdd.ShadowForSameTreatment = 0;
+                        SelectableTreatment noTreatment = SelectableTreatmentMapper.CreateSelectableTreatment(noTreatmentEntity, simulation);
+                        projectToAdd.Cost = entity.Cost;
+                        projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
+                        projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
+                        projectToAdd.TemplateTreatment = noTreatment;
+                        // was working on this with Jake but now thinking it's not needed because the setter for TemplateTreatment deals with consequences.
+                        //foreach (var treatmentConsequence in noTreatmentEntity.TreatmentConsequences)
+                        //{
+
+                        //    var consequence = new TreatmentConsequence { Attribute = templateConsequence.Attribute };
+                        //    consequence.Change.Expression = templateConsequence.Change.Expression;
+                        //    projectToAdd.Consequences.GetAdd(consequence);
+                        //}
+                    }
+                }
+                
+            }
+        }
+
+        private static SelectableTreatment MapNoTreatmentToDomain(Simulation simulation, SelectableTreatmentEntity noTreatmentEntity)
+        {
+            var domain = simulation.AddTreatment();
+            throw new NotImplementedException();
         }
     }
 }

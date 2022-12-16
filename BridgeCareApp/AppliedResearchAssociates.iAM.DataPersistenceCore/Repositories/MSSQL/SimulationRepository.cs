@@ -1292,9 +1292,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);
-            if (simulationEntity.Name != dto.Name)
+            if (simulationEntity.Name != dto.Name || simulationEntity.NoTreatmentBeforeCommittedProjects != dto.NoTreatmentBeforeCommittedProjects)
             {
                 simulationEntity.Name = dto.Name;
+                simulationEntity.NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects;
 
                 _unitOfWork.Context.UpdateEntity(simulationEntity, dto.Id, _unitOfWork.UserEntity?.Id);
             }

@@ -52,4 +52,16 @@ export default class ScenarioService {
     static migrateLegacySimulationData(simulationId: number): AxiosPromise {
         return coreAxiosInstance.post(`/api/LegacySimulationSynchronization/SynchronizeLegacySimulation/${simulationId}`);
     }
+
+    static setNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/setNoTreatmentBeforeCommitted/${simulationId}`);
+    }
+
+    static removeNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.post(`${API.Scenario}/RemoveNoTreatmentBeforeCommitted/${simulationId}`);
+    }
+    
+    static getNoTreatmentBeforeCommitted(simulationId: string): AxiosPromise {
+        return coreAxiosInstance.get(`${API.Scenario}/GetNoTreatmentBeforeCommitted/${simulationId}`);
+    }
 }

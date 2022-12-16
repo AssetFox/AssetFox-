@@ -179,7 +179,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
                 for (int year = startYear; year < committedProject.Year; year++)
                 {
-                    CommittedProjectEntity existingCommittedProject = null;// figure out if year already has a project for that asset.
+                    CommittedProject existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(cp => cp.Year == year);
                     if (existingCommittedProject == null)
                     {
                         var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject (asset, year));
@@ -192,7 +192,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
                         projectToAdd.TemplateTreatment = noTreatment;
-                        // was working on this with Jake but now thinking it's not needed
+                        // was working on this with Jake but now thinking it's not needed because the setter for TemplateTreatment deals with consequences.
                         //foreach (var treatmentConsequence in noTreatmentEntity.TreatmentConsequences)
                         //{
 

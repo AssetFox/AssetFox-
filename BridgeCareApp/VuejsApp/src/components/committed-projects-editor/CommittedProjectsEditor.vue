@@ -310,7 +310,7 @@ import FileDownload from 'js-file-download';
 import { convertBase64ToArrayBuffer } from '@/shared/utils/file-utils';
 import { hasValue } from '@/shared/utils/has-value-util';
 import { AxiosPromise, AxiosResponse } from 'axios';
-import { any, clone, find, findIndex, isEmpty, isNil, map, propEq, update } from 'ramda';
+import { any, clone, find, findIndex, isEmpty, isNil, map, mathMod, propEq, update } from 'ramda';
 import { hasUnsavedChangesCore } from '@/shared/utils/has-unsaved-changes-helper';
 import { http2XX } from '@/shared/utils/http-utils';
 import { ImportExportCommittedProjectsDialogResult } from '@/shared/models/modals/import-export-committed-projects-dialog-result';
@@ -333,6 +333,7 @@ import { emptyPagination, Pagination } from '@/shared/models/vue/pagination';
 import { PagingPage, PagingRequest } from '@/shared/models/iAM/paging';
 import InvestmentService from '@/services/investment.service';
 import { formatAsCurrency } from '@/shared/utils/currency-formatter';
+import { isNullOrUndefined } from 'util';
 @Component({
     components: {
         CommittedProjectsFileUploaderDialog: ImportExportCommittedProjectsDialog,
@@ -415,6 +416,10 @@ export default class CommittedProjectsEditor extends Vue  {
     catMap = clone(treatmentCategoryMap);
     
     brkey_: string = 'BRKEY_'
+
+    investmentYears: number[] = [];
+    lastYear: number = 0;
+    firstYear: number = 0;
 
     cpGridHeaders: DataTableHeader[] = [
         {
@@ -523,7 +528,9 @@ export default class CommittedProjectsEditor extends Vue  {
             }
      
             vm.getNetworksAction().then(() => {
-                vm.getInvestmentPlanAction({scenarioId: vm.scenarioId}).then(() => {   
+                InvestmentService.getScenarioBudgetYears(vm.scenarioId).then(response => {  
+                    if(response.data)
+                        vm.investmentYears = response.data;
                     vm.getScenarioSimpleBudgetDetailsAction({scenarioId: vm.scenarioId}).then(() =>{
                         vm.getAttributesAction().then(() => {                       
                             vm.getTreatmentLibrariesAction().then(() => {
@@ -540,6 +547,12 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     //Watch
+    @Watch('investmentYears')
+    onInvestmentYearsChanged(){
+        this.lastYear = Math.max(...this.investmentYears);
+        this.firstYear = Math.min(...this.investmentYears);
+    }
+
     @Watch('networks')
     onStateNetworksChanged(){
         const network = this.networks.find(o => o.id == this.networkId)
@@ -898,6 +911,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const rowChanges = this.addedRows.concat(Array.from(this.updatedRowsMap.values()).map(r => r[1]));
         const dataIsValid: boolean = rowChanges.every(
             (scp: SectionCommittedProject) => {
+                if (isNullOrUndefined( scp.consequences )) scp.consequences = [];
                 return (
                     this.rules['generalRules'].valueIsNotEmpty(
                         scp.simulationId,
@@ -972,11 +986,11 @@ export default class CommittedProjectsEditor extends Vue  {
     }
 
     handleTreatmentChange(scp: SectionCommittedProjectTableData, treatmentName: string, row: SectionCommittedProject){
-        row.treatment = treatmentName
+        row.treatment = treatmentName;
         this.updateCommittedProject(row, treatmentName, 'treatment')  
         CommittedProjectsService.FillTreatmentValues({
             committedProjectId: row.id,
-            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : '',
+            treatmentLibraryId: this.librarySelectItemValue ? this.librarySelectItemValue : getBlankGuid(),
             treatmentName: treatmentName,
             brkey_Value: row.locationKeys[this.brkey_],
             networkId: this.networkId
@@ -1062,9 +1076,7 @@ export default class CommittedProjectsEditor extends Vue  {
     checkYear(scp:SectionCommittedProjectTableData){
         if(!hasValue(scp.year))
             scp.yearErrors = ['Value cannot be empty'];
-        else if(!isNil(this.stateInvestmentPlan) &&(
-            scp.year < this.stateInvestmentPlan.firstYearOfAnalysisPeriod 
-            || scp.year >= this.stateInvestmentPlan.firstYearOfAnalysisPeriod + this.stateInvestmentPlan.numberOfYearsInAnalysisPeriod))
+        else if(scp.year < this.firstYear || scp.year > this.lastYear)
             scp.yearErrors = ['Year is outside of Analysis period'];
         else
             scp.yearErrors = [];

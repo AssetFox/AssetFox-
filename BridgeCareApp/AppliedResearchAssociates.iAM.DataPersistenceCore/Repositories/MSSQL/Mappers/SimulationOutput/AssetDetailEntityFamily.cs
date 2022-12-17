@@ -6,7 +6,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
     public class AssetDetailEntityFamily
     {
         public List<AssetDetailEntity> AssetDetails { get; set; } = new List<AssetDetailEntity>();
-        public List<AssetDetailValueEntity> AssetDetailValues { get; set; } = new List<AssetDetailValueEntity>();
+        public List<AssetDetailValueEntityIntId> AssetDetailValues { get; set; } = new List<AssetDetailValueEntityIntId>();
         public List<TreatmentOptionDetailEntity> TreatmentOptionDetails { get; set; } = new List<TreatmentOptionDetailEntity>();
         public List<TreatmentRejectionDetailEntity> TreatmentRejectionDetails { get; set; } = new List<TreatmentRejectionDetailEntity>();
         public List<TreatmentSchedulingCollisionDetailEntity> TreatmentSchedulingCollisionDetails { get; set; } = new List<TreatmentSchedulingCollisionDetailEntity>();

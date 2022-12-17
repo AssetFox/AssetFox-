@@ -293,7 +293,13 @@ namespace BridgeCareCore.Services
                             join.ScenarioBudget.SimulationId == simulationId &&
                             budgetNames.Contains(join.ScenarioBudget.Name)));
                 }
-
+                var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
+                if(projects.Count > 0)
+                {
+                    projects.ForEach(_ => _.ScenarioBudgetId = null);
+                    _unitOfWork.Context.UpdateAll(projects);
+                }
+                
                 _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
             }
 
@@ -434,9 +440,23 @@ namespace BridgeCareCore.Services
             }
 
             var warningSb = new StringBuilder();
+            
             if (budgetsWithInvalidCriteria.Any())
             {
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}. ");
+            }
+
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            if (budgets != null && budgets.Count > 0 && budgets.First().BudgetAmounts.Count != 0)
+            {
+                var firstYear = budgets.First().BudgetAmounts.Min(_ => _.Year);
+
+                var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+                if (investmentPlan.Id != Guid.Empty && investmentPlan.FirstYearOfAnalysisPeriod != firstYear)
+                {
+                    investmentPlan.FirstYearOfAnalysisPeriod = firstYear;
+                    _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                }
             }
             return new ScenarioBudgetImportResultDTO
             {

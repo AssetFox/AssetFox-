@@ -100,6 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 networkEntity.MaintainableAssets = _unitOfWork.Context.MaintainableAsset
                     .Include(a => a.MaintainableAssetLocation)
                     .Include(a => a.AggregatedResults)
+                    .AsSplitQuery()
                     .Where(_ => _.NetworkId == networkId)
                     .Select(asset => new MaintainableAssetEntity
                     {

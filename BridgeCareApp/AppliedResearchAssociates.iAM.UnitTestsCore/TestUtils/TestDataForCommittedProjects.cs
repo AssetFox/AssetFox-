@@ -119,15 +119,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Network = new NetworkEntity()
                 {
                     Id = NetworkId,
-                    Name = "Primary"
+                    Name = "Primary",
+                    MaintainableAssets = MaintainableAssetEntities
                 },
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),
                 CommittedProjects = new List<CommittedProjectEntity>
                 {
-             //       SomethingFourYear2023(),
+                    SomethingFourYear2023(),
                     SomethingFourYear2025(),
                 }
             };
+            entity.InvestmentPlan.Simulation = entity;
             return entity;
         }
 
@@ -332,31 +334,36 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Id = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"3"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"4"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"5"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             }
         };
 

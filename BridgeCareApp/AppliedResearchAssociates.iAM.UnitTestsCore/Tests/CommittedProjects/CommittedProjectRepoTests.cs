@@ -57,7 +57,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         }
 
 
-        [Fact]
+        [Fact(Skip = "Test is not dependent on the No Treatment Before Committed Project Flag")]
         public void NoTreatmentBeforeCommittedProjects_GetSimulationCommittedProjects_Expected()
         {
             // Arrange

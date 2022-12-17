@@ -71,11 +71,11 @@ namespace BridgeCareCore.Utils
         /// <param name="checkSimulationAccess"></param>
         /// <exception cref="UnauthorizedAccessException"></exception>
         public void CheckUserSimulationCancelAnalysisAuthorization(Guid simulationId, string userName, bool checkSimulationAccess)
-        {
+        {            
             if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
-                var simulation = GetQueuedSimulation(simulationId);
-                if (simulation.QueueingUser == userName)
+                var simulationOwner = UnitOfWork.SimulationRepo.GetSimulation(simulationId).Owner;
+                if (userName != simulationOwner)
                 {
                     throw new UnauthorizedAccessException("You are not authorized to cancel this simulation analysis.");
                 }

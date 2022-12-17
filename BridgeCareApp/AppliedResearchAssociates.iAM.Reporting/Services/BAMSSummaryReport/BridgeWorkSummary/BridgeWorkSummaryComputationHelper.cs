@@ -56,21 +56,54 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         }
 
 
-        internal List<AssetDetail> GetCashflowChainLeft(AssetDetail section, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
+        internal List<AssetDetail> GetCashflowChainLeft(AssetDetail asset, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
         {
             // return cash flow chain preceding this section (i.e. related w/ TreatmentCause == TreatmentCause.CashFlowProject or in previous consecutive years)
-            throw new NotImplementedException();
-            var chain = new List<AssetDetail>();
 
+            var id = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
+            var chainStack = new Stack<AssetDetail>();
 
+            var assetIndex = simulationOutput.Years.IndexOf(currentYearDetail);
+            if (assetIndex > 0)
+            {
+                var done = false;
+                for (var currentIndex = assetIndex - 1; currentIndex > 0 && !done; currentIndex--)
+                {
+                    var currentYear = simulationOutput.Years[currentIndex];
+                    var currentAsset = currentYear.Assets.Single(chainAsset => chainAsset.AppliedTreatment == asset.AppliedTreatment && Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(chainAsset.ValuePerNumericAttribute, "BRKEY_")) == id);
+                    done = currentAsset.TreatmentCause == TreatmentCause.SelectedTreatment;
+                    chainStack.Push(currentAsset);
+                }
+            }
+
+            var chain = chainStack.ToList();
             return chain;
         }
 
-        internal List<AssetDetail> GetCashflowChainRight(AssetDetail section, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
+        internal List<AssetDetail> GetCashflowChainRight(AssetDetail asset, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)
         {
             // return cash flow chain following this section (i.e. related w/ TreatmentCause == TreatmentCause.CashFlowProject or TreatmentCause.SelectedTreatment in consecutive years; TreatmentCause.SelectedTreatment is the root)
-            throw new NotImplementedException();
+            var id = Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(asset.ValuePerNumericAttribute, "BRKEY_"));
             var chain = new List<AssetDetail>();
+
+            var assetIndex = simulationOutput.Years.IndexOf(currentYearDetail);
+            if (assetIndex > -1)
+            {
+                var done = false;
+                for (var currentIndex = assetIndex + 1; currentIndex < (simulationOutput.Years.Count) && !done; currentIndex++)
+                {
+                    var currentYear = simulationOutput.Years[currentIndex];
+                    var currentAsset = currentYear.Assets.FirstOrDefault(chainAsset => chainAsset.AppliedTreatment == asset.AppliedTreatment && Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(chainAsset.ValuePerNumericAttribute, "BRKEY_")) == id);
+                    if (currentAsset != null)
+                    {
+                        chain.Add(currentAsset);
+                    }
+                    else
+                    {
+                        done = true;
+                    }
+                }
+            }
 
             return chain;
         }

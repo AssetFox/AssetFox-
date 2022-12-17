@@ -506,7 +506,7 @@ export default class CashFlowEditor extends Vue {
     onLibrarySelectItemValueChanged() {
         this.trueLibrarySelectItemValue = this.librarySelectItemValue;
         
-        if(!this.hasScenario || !isNil(this.librarySelectItemValue))
+        if(!this.hasScenario || isNil(this.librarySelectItemValue))
         {    
             this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
         }

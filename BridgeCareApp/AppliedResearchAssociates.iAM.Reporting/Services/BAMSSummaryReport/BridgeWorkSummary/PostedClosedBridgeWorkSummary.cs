@@ -283,10 +283,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             worksheet.Cells[startRow + bpnRowCount, column - 1].Value = "Annualized Amount";
             worksheet.Cells[startRow + bpnRowCount, column - 1].Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
 
-
-            // TODO: Factor calculation out from display,
-            // TODO: Building (or at least utilizing) CashFlow chaining so cashflowed projects will show up properly.
-
             var totalMoney = 0.0;
 
             var yearlyAssetsByBPN = new Dictionary<string, List<AssetDetail>>();

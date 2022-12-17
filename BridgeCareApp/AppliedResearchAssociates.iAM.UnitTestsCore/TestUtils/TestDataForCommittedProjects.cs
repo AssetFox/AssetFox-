@@ -73,28 +73,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         {
             GoodTestSimulation(),
 
-            new SimulationEntity()
-            {
-                Id = FourYearSimulationId,
-                Name = "FourYearTest",
-                InvestmentPlan = new InvestmentPlanEntity()
-                {
-                    Id = Guid.Parse("4d1e1f67-486f-409a-b532-b03d7eb4b1c7"),
-                    SimulationId = FourYearSimulationId,
-                    FirstYearOfAnalysisPeriod = 2022,
-                    InflationRatePercentage = 3,
-                    MinimumProjectCostLimit = 1000,
-                    NumberOfYearsInAnalysisPeriod = 4
-                },
-                Budgets = ScenarioBudgetEntities,
-                NetworkId = NetworkId,
-                Network = new NetworkEntity()
-                {
-                    Id = NetworkId,
-                    Name = "Primary"
-                },
-                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
-            },
+            FourYearTestSimulation(),
 
             new SimulationEntity()
             {
@@ -119,6 +98,38 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             }
         };
+
+        private static SimulationEntity FourYearTestSimulation()
+        {
+            var entity = new SimulationEntity
+            {
+                Id = FourYearSimulationId,
+                Name = "FourYearTest",
+                InvestmentPlan = new InvestmentPlanEntity()
+                {
+                    Id = Guid.Parse("4d1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                    SimulationId = FourYearSimulationId,
+                    FirstYearOfAnalysisPeriod = 2022,
+                    InflationRatePercentage = 3,
+                    MinimumProjectCostLimit = 1000,
+                    NumberOfYearsInAnalysisPeriod = 4
+                },
+                Budgets = ScenarioBudgetEntities,
+                NetworkId = NetworkId,
+                Network = new NetworkEntity()
+                {
+                    Id = NetworkId,
+                    Name = "Primary"
+                },
+                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),
+                CommittedProjects = new List<CommittedProjectEntity>
+                {
+             //       SomethingFourYear2023(),
+                    SomethingFourYear2025(),
+                }
+            };
+            return entity;
+        }
 
         public static List<ScenarioSelectableTreatmentEntity> FourYearScenarioNoTreatmentEntities()
         {
@@ -423,10 +434,17 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 }
         };
 
+        private static CommittedProjectEntity SomethingFourYear2023() =>
+            SomethingEntity(Guid.Parse("444e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2023);
+
+        private static CommittedProjectEntity SomethingFourYear2025() =>
+            SomethingEntity(Guid.Parse("4e9e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2025);
+
         public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
         {
             SomethingEntity(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"), SimulationId, 2022),
-            SomethingEntity(Guid.Parse("4e9e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2025),
+            SomethingFourYear2025(),
+            SomethingFourYear2023(),
             SimpleEntity(),
         };
 

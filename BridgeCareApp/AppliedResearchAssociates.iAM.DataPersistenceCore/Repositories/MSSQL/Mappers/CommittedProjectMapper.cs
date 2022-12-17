@@ -166,7 +166,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.Name = entity.Name;
             committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
-            committedProject.Cost = entity.Cost;
+            committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
 
@@ -188,7 +188,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.ShadowForAnyTreatment = 0;
                         projectToAdd.ShadowForSameTreatment = 0;
                         SelectableTreatment noTreatment = SelectableTreatmentMapper.CreateSelectableTreatment(noTreatmentEntity, simulation);
-                        projectToAdd.Cost = 12345;
+                        projectToAdd.Cost = 0; // TODO -- this is wrong. See CommittedProjectService.GetTreatmentCost for what we may need to do here. But it's not simple.
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
                         projectToAdd.TemplateTreatment = noTreatment;

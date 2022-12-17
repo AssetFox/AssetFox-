@@ -62,7 +62,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
         {
             // Arrange
             var repo = new CommittedProjectRepository(_testUOW);
-            var simulationDomain = CreateSimulation(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest").Id);
+            var inputSimulationEntity = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
+            var simulationDomain = CreateSimulation(inputSimulationEntity.Id);
             var simulationEntity = _testUOW.Context.Simulation.Single(s => s.Id == simulationDomain.Id);
             simulationEntity.NoTreatmentBeforeCommittedProjects = true;
             _testUOW.Context.Simulation.Update(simulationEntity);
@@ -74,7 +75,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             var committedProjectNames = simulationDomain.CommittedProjects.Select(cp => cp.Name).ToList();
             Assert.Equal(4, simulationDomain.CommittedProjects.Count);
-            Assert.Equal(0, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+            Assert.Equal(10000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+            Assert.Equal(3, simulationDomain.CommittedProjects.Count(_ => _.Name != "Something"));
         }
 
         [Fact]

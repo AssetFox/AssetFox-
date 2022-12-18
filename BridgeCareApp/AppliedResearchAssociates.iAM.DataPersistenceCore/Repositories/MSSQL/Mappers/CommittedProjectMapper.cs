@@ -10,6 +10,8 @@ using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -187,19 +189,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         projectToAdd.Name = noTreatmentEntity.Name;
                         projectToAdd.ShadowForAnyTreatment = 0;
                         projectToAdd.ShadowForSameTreatment = 0;
-                        SelectableTreatment noTreatment = SelectableTreatmentMapper.CreateSelectableTreatment(noTreatmentEntity, simulation);
                         projectToAdd.Cost = 0; // TODO -- this is wrong. See CommittedProjectService.GetTreatmentCost for what we may need to do here. But it's not simple.
                         projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
+                        //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
-                        projectToAdd.TemplateTreatment = noTreatment;
-                        // was working on this with Jake but now thinking it's not needed because the setter for TemplateTreatment deals with consequences.
-                        //foreach (var treatmentConsequence in noTreatmentEntity.TreatmentConsequences)
-                        //{
-
-                        //    var consequence = new TreatmentConsequence { Attribute = templateConsequence.Attribute };
-                        //    consequence.Change.Expression = templateConsequence.Change.Expression;
-                        //    projectToAdd.Consequences.GetAdd(consequence);
-                        //}
+                        projectToAdd.TemplateTreatment = noTreatmentEntity.ToDomain(simulation);
                     }
                 }
                 

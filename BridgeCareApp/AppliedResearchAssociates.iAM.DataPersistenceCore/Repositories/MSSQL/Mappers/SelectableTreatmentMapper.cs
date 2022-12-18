@@ -54,6 +54,24 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static SelectableTreatment CreateSelectableTreatment(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
         {
             var selectableTreatment = simulation.AddTreatment();
+            PopulateSelectableTreatment(entity, selectableTreatment, simulation);
+
+            if (selectableTreatment.Name == "No Treatment")
+            {
+                selectableTreatment.DesignateAsPassiveForSimulation();
+            }
+            return selectableTreatment;
+        }
+
+        public static SelectableTreatment ToDomain(this ScenarioSelectableTreatmentEntity entity, Simulation simulation)
+        {
+            var selectableTreatment = new SelectableTreatment(simulation);
+            PopulateSelectableTreatment(entity, selectableTreatment, simulation);
+            return selectableTreatment;
+        }
+
+        private static void PopulateSelectableTreatment(ScenarioSelectableTreatmentEntity entity, SelectableTreatment selectableTreatment, Simulation simulation)
+        {
             selectableTreatment.Id = entity.Id;
             selectableTreatment.Name = entity.Name;
             selectableTreatment.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
@@ -91,12 +109,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.ScenarioTreatmentSupersessions.ForEach(_ => _.CreateTreatmentSupersession(selectableTreatment));
             }
-
-            if (selectableTreatment.Name == "No Treatment")
-            {
-                selectableTreatment.DesignateAsPassiveForSimulation();
-            }
-            return selectableTreatment;
         }
 
         public static TreatmentDTO ToDto(this SelectableTreatmentEntity entity) =>

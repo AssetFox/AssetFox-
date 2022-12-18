@@ -128,7 +128,15 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
         internal double CashFlowChainSectionCost(List<AssetDetail> sectionDetails)
         {
             var initial = sectionDetails.First();
-            return initial.TreatmentOptions.FirstOrDefault(t => t.TreatmentName == initial.AppliedTreatment).Cost / sectionDetails.Count;
+            var firstOption = initial.TreatmentOptions.FirstOrDefault(t => t.TreatmentName == initial.AppliedTreatment);
+            if (firstOption == null)
+            {
+                return 0;
+            }
+            else
+            {
+                return firstOption.Cost / sectionDetails.Count;
+            }
         }
 
         internal double CalculateMoneyNeededByBPN(List<AssetDetail> sectionDetails, string bpn, SimulationOutput simulationOutput, SimulationYearDetail currentYearDetail)

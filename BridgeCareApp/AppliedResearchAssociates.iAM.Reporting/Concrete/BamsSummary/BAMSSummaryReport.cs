@@ -285,6 +285,10 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            // TODO:  Pull best guess on committed project treatment categories here
+            var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             // Simulation parameters TAB

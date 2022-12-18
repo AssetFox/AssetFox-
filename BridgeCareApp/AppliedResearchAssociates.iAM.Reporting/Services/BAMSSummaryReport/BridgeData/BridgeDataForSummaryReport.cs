@@ -602,7 +602,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[row, ++column].Value = cost; // cost
                     ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
-                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment))
+                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment) && treatmentCategoryLookup.ContainsKey(appliedTreatment))
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[appliedTreatment]?.ToString(); // FHWA Work Type
                     }

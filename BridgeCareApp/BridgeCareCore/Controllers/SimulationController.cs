@@ -9,7 +9,6 @@ using BridgeCareCore.Controllers.BaseController;
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Services;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -127,8 +126,6 @@ namespace BridgeCareCore.Controllers
                 throw;
             }
         }
-
-
 
         [HttpPost]
         [Route("CreateScenario/{networkId}")]
@@ -350,6 +347,91 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
+                throw;
+            }
+        }
+                
+        [HttpPost]
+        [Route("SetNoTreatmentBeforeCommitted/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> SetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.SimulationRepo.SetNoTreatmentBeforeCommitted(simulationId);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}");
+                throw;
+            }
+        }
+                
+        [HttpPost]
+        [Route("RemoveNoTreatmentBeforeCommitted/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> RemoveNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            try
+            {
+                await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    UnitOfWork.SimulationRepo.RemoveNoTreatmentBeforeCommitted(simulationId);
+                    UnitOfWork.Commit();
+                });
+
+                return Ok();
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
+                throw;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetNoTreatmentBeforeCommitted/{simulationId}")]
+        [Authorize]
+        public async Task<IActionResult> GetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() =>
+                {
+                    UnitOfWork.BeginTransaction();
+                    var noTreatmentBeforeCommitted = UnitOfWork.SimulationRepo.GetNoTreatmentBeforeCommitted(simulationId);
+                    UnitOfWork.Commit();
+                    return noTreatmentBeforeCommitted;
+                });
+
+                return Ok(result);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted::{e.Message}");
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted::{e.Message}");
                 throw;
             }
         }

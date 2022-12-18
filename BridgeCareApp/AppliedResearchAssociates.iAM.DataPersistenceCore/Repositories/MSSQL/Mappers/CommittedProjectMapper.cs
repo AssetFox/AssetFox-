@@ -7,6 +7,11 @@ using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
+using AppliedResearchAssociates.iAM.Data.Attributes;
+using OfficeOpenXml.FormulaParsing.Utilities;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -148,7 +153,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static void CreateCommittedProject(this CommittedProjectEntity entity, Simulation simulation, Guid maintainableAssetId)
+        public static void CreateCommittedProject(
+            this CommittedProjectEntity entity,
+            Simulation simulation,
+            Guid maintainableAssetId,
+            bool noTreatmentForCommittedProjects,
+            ScenarioSelectableTreatmentEntity noTreatmentEntity)
         {
             var asset = simulation.Network.Assets.Single(_ =>
                 _.Id == maintainableAssetId);
@@ -158,7 +168,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             committedProject.Name = entity.Name;
             committedProject.ShadowForAnyTreatment = entity.ShadowForAnyTreatment;
             committedProject.ShadowForSameTreatment = entity.ShadowForSameTreatment;
-            committedProject.Cost = entity.Cost;
+            committedProject.Cost = entity.Cost; 
             committedProject.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null;
             committedProject.LastModifiedDate = entity.LastModifiedDate;
 
@@ -166,6 +176,34 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 entity.CommittedProjectConsequences.ForEach(_ => _.CreateCommittedProjectConsequence(committedProject));
             }
+            if (noTreatmentForCommittedProjects)
+            {
+                int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
+                for (int year = startYear; year < committedProject.Year; year++)
+                {
+                    CommittedProject existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(cp => cp.Year == year);
+                    if (existingCommittedProject == null)
+                    {
+                        var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject (asset, year));
+                        projectToAdd.Id = Guid.NewGuid();
+                        projectToAdd.Name = noTreatmentEntity.Name;
+                        projectToAdd.ShadowForAnyTreatment = 0;
+                        projectToAdd.ShadowForSameTreatment = 0;
+                        projectToAdd.Cost = 0; // TODO -- this is wrong. See CommittedProjectService.GetTreatmentCost for what we may need to do here. But it's not simple.
+                        projectToAdd.Budget = entity.ScenarioBudget != null ? simulation.InvestmentPlan.Budgets.Single(_ => _.Name == entity.ScenarioBudget.Name) : null; ; // TODO: fix
+                        //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
+                        projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
+                        projectToAdd.TemplateTreatment = noTreatmentEntity.ToDomain(simulation);
+                    }
+                }
+                
+            }
+        }
+
+        private static SelectableTreatment MapNoTreatmentToDomain(Simulation simulation, SelectableTreatmentEntity noTreatmentEntity)
+        {
+            var domain = simulation.AddTreatment();
+            throw new NotImplementedException();
         }
     }
 }

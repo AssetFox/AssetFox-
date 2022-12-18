@@ -28,6 +28,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
 
         public string Name { get; set; }
 
+        public bool NoTreatmentBeforeCommittedProjects { get; set; }
+
         public int NumberOfYearsOfTreatmentOutlook { get; set; }
 
         public virtual NetworkEntity Network { get; set; }

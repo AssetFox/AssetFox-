@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -27,14 +29,25 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
-            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id))
+            var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
+            if (simulationEntity == null)
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
+            }
+            var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
+            ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
+            if (noTreatment)
+            {
+                var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
+                noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
             }
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
                 .Include(_ => _.MaintainableAssetLocation)
                 .ToList();
+
+            var wtf = _unitOfWork.Context.CommittedProject.ToList();
+            var simulationIds = wtf.Select(p => p.SimulationId).ToList();
 
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
@@ -89,7 +102,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
                     if (asset != null)
                     {
-                        _.CreateCommittedProject(simulation, asset.Id);
+                        _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentEntity);
                     }
                 });
             }

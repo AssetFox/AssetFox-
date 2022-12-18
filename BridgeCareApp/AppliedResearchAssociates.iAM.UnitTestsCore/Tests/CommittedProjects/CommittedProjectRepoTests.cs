@@ -15,6 +15,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.Analysis;
+using Newtonsoft.Json;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
 {
@@ -35,6 +36,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.Attribute, TestDataForCommittedProjects.AttribureEntities.AsQueryable());
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.InvestmentPlan, TestDataForCommittedProjects.InvestmentPlanEntities().AsQueryable());
             MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioBudget, TestDataForCommittedProjects.ScenarioBudgetEntities.AsQueryable());
+            MockedContextBuilder.AddDataSet(_mockedContext, _ => _.ScenarioSelectableTreatment, TestDataForCommittedProjects.FourYearScenarioNoTreatmentEntities().AsQueryable());
 
             _testUOW = new UnitOfDataPersistenceWork((new Mock<IConfiguration>()).Object, _mockedContext.Object);
         }
@@ -52,6 +54,29 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Tests.CommittedProjects
             // Assert
             Assert.Equal(2, simulationDomain.CommittedProjects.Count);
             Assert.Equal(210000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+        }
+
+
+        [Fact(Skip = "Test is not dependent on the No Treatment Before Committed Project Flag")]
+        public void NoTreatmentBeforeCommittedProjects_GetSimulationCommittedProjects_Expected()
+        {
+            // Arrange
+            var repo = new CommittedProjectRepository(_testUOW);
+            var inputSimulationEntity = TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "FourYearTest");
+            var simulationDomain = CreateSimulation(inputSimulationEntity.Id);
+            var simulationEntity = _testUOW.Context.Simulation.Single(s => s.Id == simulationDomain.Id);
+            simulationEntity.NoTreatmentBeforeCommittedProjects = true;
+            _testUOW.Context.Simulation.Update(simulationEntity);
+            _testUOW.Context.SaveChanges();
+
+            // Act
+            repo.GetSimulationCommittedProjects(simulationDomain);
+
+            // Assert
+            var committedProjectNames = simulationDomain.CommittedProjects.Select(cp => cp.Name).ToList();
+            Assert.Equal(4, simulationDomain.CommittedProjects.Count);
+            Assert.Equal(10000, simulationDomain.CommittedProjects.Sum(_ => _.Cost));
+            Assert.Equal(3, simulationDomain.CommittedProjects.Count(_ => _.Name != "Something"));
         }
 
         [Fact]

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DTOs;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
@@ -40,5 +41,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         List<SimpleTreatmentDTO> GetSimpleTreatmentsByLibraryId(Guid simulationId);
         TreatmentDTO GetScenarioSelectableTreatmentById(Guid id);
         TreatmentDTO GetSelectableTreatmentById(Guid id);
+
+        ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId);
     }
 }

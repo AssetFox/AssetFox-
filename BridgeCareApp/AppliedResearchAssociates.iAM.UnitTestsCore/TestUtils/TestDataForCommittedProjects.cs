@@ -8,11 +8,13 @@ using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.Generics;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using OfficeOpenXml;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
 
 namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
 {
@@ -23,6 +25,14 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
         public static Guid AuthorizedUser => Guid.Parse("b047f934-2a40-4cbb-b3cd-0a17c8a5af21");
 
         public static Guid UnauthorizedUser => Guid.Parse("4be6302a-e8c8-484a-a64b-67d66b3e21a8");
+
+        public static Guid SimulationId => Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee");
+
+        public static Guid FourYearSimulationId => Guid.Parse("4cdacfde-02da-4109-b8aa-add932756dee");
+
+        public static Guid NoTreatmentId => Guid.Parse("00dacfde-02da-4109-b8aa-add932756dee");
+
+        public static Guid CostId => Guid.Parse("100dacfe-02da-4109-b8aa-add932756dee");
 
         //public static List<string> KeyProperties => new List<string> { "ID", "BRKEY_", "BMSID" };
         public static Dictionary<string, List<KeySegmentDatum>> KeyProperties()
@@ -35,30 +45,35 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             return result;
         }
 
+        private static SimulationEntity GoodTestSimulation() =>
+          new SimulationEntity()
+          {
+              Id = SimulationId,
+              Name = "Test",
+              InvestmentPlan = new InvestmentPlanEntity()
+              {
+                  Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                  SimulationId = SimulationId,
+                  FirstYearOfAnalysisPeriod = 2022,
+                  InflationRatePercentage = 3,
+                  MinimumProjectCostLimit = 1000,
+                  NumberOfYearsInAnalysisPeriod = 3
+              },
+              Budgets = ScenarioBudgetEntities,
+              NetworkId = NetworkId,
+              Network = new NetworkEntity()
+              {
+                  Id = NetworkId,
+                  Name = "Primary"
+              },
+              CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
+          };
+
         public static List<SimulationEntity> Simulations => new List<SimulationEntity>()
         {
-            new SimulationEntity()
-            {
-                Id = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
-                Name = "Test",
-                InvestmentPlan = new InvestmentPlanEntity()
-                {
-                    Id = Guid.Parse("ad1e1f67-486f-409a-b532-b03d7eb4b1c7"),
-                    SimulationId = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"),
-                    FirstYearOfAnalysisPeriod = 2022,
-                    InflationRatePercentage = 3,
-                    MinimumProjectCostLimit = 1000,
-                    NumberOfYearsInAnalysisPeriod = 3
-                },
-                Budgets = ScenarioBudgetEntities,
-                NetworkId = NetworkId,
-                Network = new NetworkEntity()
-                {
-                    Id = NetworkId,
-                    Name = "Primary"
-                },
-                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
-            },
+            GoodTestSimulation(),
+
+            FourYearTestSimulation(),
 
             new SimulationEntity()
             {
@@ -83,6 +98,87 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
             }
         };
+
+        private static SimulationEntity FourYearTestSimulation()
+        {
+            var entity = new SimulationEntity
+            {
+                Id = FourYearSimulationId,
+                Name = "FourYearTest",
+                InvestmentPlan = new InvestmentPlanEntity()
+                {
+                    Id = Guid.Parse("4d1e1f67-486f-409a-b532-b03d7eb4b1c7"),
+                    SimulationId = FourYearSimulationId,
+                    FirstYearOfAnalysisPeriod = 2022,
+                    InflationRatePercentage = 3,
+                    MinimumProjectCostLimit = 1000,
+                    NumberOfYearsInAnalysisPeriod = 4
+                },
+                Budgets = ScenarioBudgetEntities,
+                NetworkId = NetworkId,
+                Network = new NetworkEntity()
+                {
+                    Id = NetworkId,
+                    Name = "Primary",
+                    MaintainableAssets = MaintainableAssetEntities
+                },
+                CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>(),
+                CommittedProjects = new List<CommittedProjectEntity>
+                {
+                    SomethingFourYear2023(),
+                    SomethingFourYear2025(),
+                }
+            };
+            entity.InvestmentPlan.Simulation = entity;
+            return entity;
+        }
+
+        public static List<ScenarioSelectableTreatmentEntity> FourYearScenarioNoTreatmentEntities()
+        {
+            var entity = FourYearScenarioNoTreatment();
+            var list = new List<ScenarioSelectableTreatmentEntity> { entity };
+            return list;
+        }
+
+        public static ScenarioSelectableTreatmentEntity FourYearScenarioNoTreatment()
+        {
+
+
+            var equation = new EquationEntity
+            {
+                Expression = "100",
+            };
+            var equationJoin = new ScenarioTreatmentCostEquationEntity
+            {
+                Equation = equation,
+                ScenarioTreatmentCostId = NoTreatmentId,
+            };
+            var scenarioTreatmentCost = new ScenarioTreatmentCostEntity
+            {
+                Id = CostId,
+                ScenarioTreatmentCostEquationJoin = equationJoin,
+                ScenarioSelectableTreatmentId = NoTreatmentId,
+            };
+            var costs = new List<ScenarioTreatmentCostEntity> { scenarioTreatmentCost };
+            var consequences = new List<ScenarioConditionalTreatmentConsequenceEntity>();
+            var budgets = new List<ScenarioSelectableTreatmentScenarioBudgetEntity>();
+            var treatmentJoin = new CriterionLibraryScenarioSelectableTreatmentEntity
+            {
+
+            };
+            var entity = new ScenarioSelectableTreatmentEntity
+            {
+                Id = NoTreatmentId,
+                ScenarioTreatmentCosts = costs,
+                Description = "No Treatment",
+                Name = "No Treatment",
+                SimulationId = FourYearSimulationId,
+                ScenarioTreatmentConsequences = consequences,
+                ScenarioSelectableTreatmentScenarioBudgetJoins = budgets,
+                CriterionLibraryScenarioSelectableTreatmentJoin = null,
+            };
+            return entity;
+        }
 
         public static List<SimulationDTO> AuthorizedSimulationDTOs()
         {
@@ -238,85 +334,65 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                 Id = Guid.Parse("f286b7cf-445d-4291-9167-0f225b170cae"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("46f5da89-5e65-4b8a-9b36-03d9af0302f7"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("cf28e62e-0a02-4195-8d28-5cdb9646dd58"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"3"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("75b07f98-e168-438f-84b6-fcc57b3e3d8f"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"4"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             },
             new MaintainableAssetEntity() {
                 Id = Guid.Parse("dd10baa8-142d-41ec-a8f6-5410d8d1a141"),
                 NetworkId = NetworkId,
                 MaintainableAssetLocation = new MaintainableAssetLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"5"),
-                SpatialWeighting = "[DECK_AREA]"
+                SpatialWeighting = "[DECK_AREA]",
+                AggregatedResults = new List<AggregatedResultEntity>()
             }
         };
 
+
+
         public static List<SectionCommittedProjectDTO> ValidCommittedProjects => new List<SectionCommittedProjectDTO>()
         {
-            new SectionCommittedProjectDTO()
-            {
-                Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Year = 2022,
-                Treatment = "Something",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-                Cost = 10000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
-                LocationKeys = new Dictionary<string, string>()
-                {
-                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
-                    { "BRKEY_", "1" },
-                    { "BMSID", "12345678" }
-                },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
-                {
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_SEEDED",
-                        ChangeValue = "+3"
-                    },
-                    new CommittedProjectConsequenceDTO()
-                    {
-                        Id = Guid.NewGuid(),
-                        Attribute = "DECK_DURATION_N",
-                        ChangeValue = "1"
-                    }
-                }
-            },
-            new SectionCommittedProjectDTO()
-            {
-                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
-                Year = 2023,
-                Treatment = "Simple",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 3,
-                Cost = 200000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
-                LocationKeys = new Dictionary<string, string>()
+            SomethingSectionCommittedProjectDTO(),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"), SimulationId, 2023),
+            SimpleSectionCommittedProjectDTO(Guid.Parse("491001e2-c1f0-4af6-90e7-e998bbea5d00"), FourYearSimulationId, 2025),
+        };
+
+        private static SectionCommittedProjectDTO SimpleSectionCommittedProjectDTO(Guid id, Guid simulationId, int year) => new SectionCommittedProjectDTO()
+        {
+            Id = id,
+            Year = year,
+            Treatment = "Simple",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 3,
+            Cost = 200000,
+            SimulationId = simulationId,
+            ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Interstate").Id,
+            LocationKeys = new Dictionary<string, string>()
                 {
                     { "ID", "46f5da89-5e65-4b8a-9b36-03d9af0302f7" },
                     { "BRKEY_", "2" },
                     { "BMSID", "9876543" }
                 },
-                Consequences = new List<CommittedProjectConsequenceDTO>()
+            Consequences = new List<CommittedProjectConsequenceDTO>()
                 {
                     new CommittedProjectConsequenceDTO()
                     {
@@ -331,24 +407,97 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         ChangeValue = "1"
                     }
                 }
-            },
         };
+        private static SectionCommittedProjectDTO SomethingSectionCommittedProjectDTO() => new SectionCommittedProjectDTO()
+        {
+            Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
+            Year = 2022,
+            Treatment = "Something",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 1,
+            Cost = 10000,
+            SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
+            ScenarioBudgetId = ScenarioBudgetDTOs().Single(_ => _.Name == "Local").Id,
+            LocationKeys = new Dictionary<string, string>()
+                {
+                    { "ID", "f286b7cf-445d-4291-9167-0f225b170cae" },
+                    { "BRKEY_", "1" },
+                    { "BMSID", "12345678" }
+                },
+            Consequences = new List<CommittedProjectConsequenceDTO>()
+                {
+                    new CommittedProjectConsequenceDTO()
+                    {
+                        Id = Guid.NewGuid(),
+                        Attribute = "DECK_SEEDED",
+                        ChangeValue = "+3"
+                    },
+                    new CommittedProjectConsequenceDTO()
+                    {
+                        Id = Guid.NewGuid(),
+                        Attribute = "DECK_DURATION_N",
+                        ChangeValue = "1"
+                    }
+                }
+        };
+
+        private static CommittedProjectEntity SomethingFourYear2023() =>
+            SomethingEntity(Guid.Parse("444e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2023);
+
+        private static CommittedProjectEntity SomethingFourYear2025() =>
+            SomethingEntity(Guid.Parse("4e9e66df-4436-49b1-ae68-9f5c10656b1b"), FourYearSimulationId, 2025);
 
         public static List<CommittedProjectEntity> CommittedProjectEntities => new List<CommittedProjectEntity>()
         {
-            new CommittedProjectEntity()
-            {
-                Id = Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"),
-                Year = 2022,
-                Name = "Something",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 1,
-                Cost = 10000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
-                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
-                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"1"),
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+            SomethingEntity(Guid.Parse("2e9e66df-4436-49b1-ae68-9f5c10656b1b"), SimulationId, 2022),
+            SomethingFourYear2025(),
+     //       SomethingFourYear2023(),
+            SimpleEntity(),
+        };
+
+        private static CommittedProjectEntity SimpleEntity() => new CommittedProjectEntity()
+        {
+            Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
+            Year = 2023,
+            Name = "Simple",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 3,
+            Cost = 200000,
+            SimulationId = SimulationId,
+            ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
+            ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
+            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "2"),
+            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
+                {
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
+                        ChangeValue = "9"
+                    },
+                    new CommittedProjectConsequenceEntity()
+                    {
+                        Id = Guid.NewGuid(),
+                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
+                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
+                        ChangeValue = "1"
+                    }
+                }
+        };
+        private static CommittedProjectEntity SomethingEntity(Guid id, Guid simulationId, int year) => new CommittedProjectEntity()
+        {
+            Id = id,
+            Year = year,
+            Name = "Something",
+            ShadowForAnyTreatment = 1,
+            ShadowForSameTreatment = 1,
+            Cost = 10000,
+            SimulationId = simulationId,
+            ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Local").Id,
+            ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Local"),
+            CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation, "1"),
+            CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
                 {
                     new CommittedProjectConsequenceEntity()
                     {
@@ -365,37 +514,6 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
                         ChangeValue = "1"
                     }
                 }
-            },
-            new CommittedProjectEntity()
-            {
-                Id = Guid.Parse("091001e2-c1f0-4af6-90e7-e998bbea5d00"),
-                Year = 2023,
-                Name = "Simple",
-                ShadowForAnyTreatment = 1,
-                ShadowForSameTreatment = 3,
-                Cost = 200000,
-                SimulationId = Simulations.Single(_ => _.Name == "Test").Id,
-                ScenarioBudgetId = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate").Id,
-                ScenarioBudget = ScenarioBudgetEntities.Single(_ => _.Name == "Interstate"),
-                CommittedProjectLocation = new CommittedProjectLocationEntity(Guid.NewGuid(), DataPersistenceCore.DataPersistenceConstants.SectionLocation ,"2"),
-                CommittedProjectConsequences = new List<CommittedProjectConsequenceEntity>()
-                {
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_SEEDED"),
-                        ChangeValue = "9"
-                    },
-                    new CommittedProjectConsequenceEntity()
-                    {
-                        Id = Guid.NewGuid(),
-                        AttributeId = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N").Id,
-                        Attribute = AttribureEntities.Single(_ => _.Name == "DECK_DURATION_N"),
-                        ChangeValue = "1"
-                    }
-                }
-            }
         };
 
         public static List<CommittedProjectEntity> CommittedProjectsWithoutBudgets()
@@ -597,7 +715,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
             )
         };
 
-        private static List<KeySegmentDatum> DummyKeySegmentDatum(AttributeDTO attribute) {
+        private static List<KeySegmentDatum> DummyKeySegmentDatum(AttributeDTO attribute)
+        {
             var keySegmentData = new List<KeySegmentDatum>();
             foreach (var asset in CompleteMaintainableAssets)
             {

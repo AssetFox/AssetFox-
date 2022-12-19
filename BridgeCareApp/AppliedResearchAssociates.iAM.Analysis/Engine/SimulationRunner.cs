@@ -981,7 +981,7 @@ namespace AppliedResearchAssociates.iAM.Analysis.Engine
         {
             int processorCount = Environment.ProcessorCount;
 
-            if(processorCount >= 16)
+            if(processorCount >= 8)
             {
                 return processorCount - 2;
             }

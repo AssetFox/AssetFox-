@@ -193,7 +193,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     dispatch('addSuccessNotification', {
-                        message: 'Cloned scenario',
+                        message: 'Cloned scenario ' + cloneScenarioData.scenarioName,
                     });
                 }
             },
@@ -204,7 +204,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     dispatch('addSuccessNotification', {
-                        message: 'Updated scenario',
+                        message: 'Updated scenario ' + payload.scenario.name,
                     });
                 }
             },
@@ -215,7 +215,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())) {
                     dispatch('addSuccessNotification', {
-                        message: 'Deleting scenario',
+                        message: 'Deleting scenario ' + payload.scenarioName,
                     });
                 }
             },

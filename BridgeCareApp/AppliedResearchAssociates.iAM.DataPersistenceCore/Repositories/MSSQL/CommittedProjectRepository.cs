@@ -46,9 +46,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.MaintainableAssetLocation)
                 .ToList();
 
-            var wtf = _unitOfWork.Context.CommittedProject.ToList();
-            var simulationIds = wtf.Select(p => p.SimulationId).ToList();
-
             var projects = _unitOfWork.Context.CommittedProject
                 .Include(_ => _.CommittedProjectLocation)
                 .Include(_ => _.ScenarioBudget)

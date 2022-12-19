@@ -450,13 +450,24 @@ namespace BridgeCareCore.Services
             if (budgets != null && budgets.Count > 0 && budgets.First().BudgetAmounts.Count != 0)
             {
                 var firstYear = budgets.First().BudgetAmounts.Min(_ => _.Year);
+                var numberOfYears = budgets.First().BudgetAmounts.Count;
 
                 var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
-                if (investmentPlan.Id != Guid.Empty && investmentPlan.FirstYearOfAnalysisPeriod != firstYear)
-                {
+                if (investmentPlan.FirstYearOfAnalysisPeriod != firstYear || investmentPlan.NumberOfYearsInAnalysisPeriod != numberOfYears)
+                {                
+                    if(investmentPlan.Id == Guid.Empty)
+                    {
+                        var planData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                        investmentPlan.InflationRatePercentage = planData.InflationRatePercentage;
+                        investmentPlan.MinimumProjectCostLimit = planData.MinimumProjectCostLimit;
+                        investmentPlan.Id = Guid.NewGuid();
+                    }
                     investmentPlan.FirstYearOfAnalysisPeriod = firstYear;
+                    investmentPlan.NumberOfYearsInAnalysisPeriod = numberOfYears;
                     _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
                 }
+
+
             }
             return new ScenarioBudgetImportResultDTO
             {

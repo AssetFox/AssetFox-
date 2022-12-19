@@ -426,7 +426,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.IsType<OkObjectResult>(result);
             var okResult = result as OkObjectResult;
             var contents = okResult.Value as List<SectionCommittedProjectDTO>;
-            Assert.Equal(2, contents.Count);
+            Assert.Equal(3, contents.Count);
         }
 
         [Fact(Skip ="Authorization handled via claims, can we delete?")]

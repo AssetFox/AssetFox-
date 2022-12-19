@@ -177,7 +177,7 @@ const actions = {
             .then((response: AxiosResponse) => {
                 if (hasValue(response, 'data')) {
                     dispatch('addSuccessNotification', {
-                    message: 'Created scenario',
+                    message: 'Created scenario ' + payload.scenario.name,
                     });
                 }
             });

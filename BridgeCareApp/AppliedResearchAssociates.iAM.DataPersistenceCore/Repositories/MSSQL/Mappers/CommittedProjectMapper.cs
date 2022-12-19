@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using OfficeOpenXml.FormulaParsing.Utilities;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -163,6 +164,32 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             var asset = simulation.Network.Assets.Single(_ =>
                 _.Id == maintainableAssetId);
 
+            // Ensure a no treatment committed project does not already exist
+            try
+            {
+                var existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(_ => _.Asset.Id == asset.Id && _.Year == entity.Year);
+                if (existingCommittedProject != null)
+                {
+                    if (existingCommittedProject.Name == noTreatmentEntity.Name)
+                    {
+                        simulation.CommittedProjects.Remove(existingCommittedProject);
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                throw new InvalidOperationException($"{asset.Id} has multiple committed projects in year {entity.Year}");
+            }
+            catch (ArgumentException)
+            {
+                throw new InvalidOperationException($"{asset.Id} has a project type that was automatically added but is not the default treatment");
+            }
+            
+
             var committedProject = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, entity.Year));
             committedProject.Id = entity.Id;
             committedProject.Name = entity.Name;
@@ -181,10 +208,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 int startYear = simulation.InvestmentPlan.FirstYearOfAnalysisPeriod;
                 for (int year = startYear; year < committedProject.Year; year++)
                 {
-                    CommittedProject existingCommittedProject = simulation.CommittedProjects.SingleOrDefault(cp => cp.Year == year);
-                    if (existingCommittedProject == null)
+                    var existingCommittedProject = simulation.CommittedProjects
+                        .Where(_ => _.Year == year && _.Asset.Id == committedProject.Asset.Id);
+                    if (!existingCommittedProject.Any())
                     {
-                        var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject (asset, year));
+                        var projectToAdd = simulation.CommittedProjects.GetAdd(new CommittedProject(asset, year));
                         projectToAdd.Id = Guid.NewGuid();
                         projectToAdd.Name = noTreatmentEntity.Name;
                         projectToAdd.ShadowForAnyTreatment = 0;
@@ -194,6 +222,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         //projectToAdd.Budget = null;  // This would be the better way, but it fails vaildation
                         projectToAdd.LastModifiedDate = noTreatmentEntity.LastModifiedDate;
                         projectToAdd.TemplateTreatment = noTreatmentEntity.ToDomain(simulation);
+                    }
+                    else
+                    {
+                        if (existingCommittedProject.Count() > 1)
+                        {
+                            throw new InvalidOperationException("Should not see more than one project per committed project query");
+                        }
                     }
                 }
                 

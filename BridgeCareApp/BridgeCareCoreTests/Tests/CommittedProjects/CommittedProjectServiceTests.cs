@@ -78,9 +78,10 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var service = new CommittedProjectService(_testUOW);
+            var simulationId = Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee");
 
             // Act
-            var result = service.ExportCommittedProjectsFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = service.ExportCommittedProjectsFile(simulationId);
 
             // Asset
             Assert.False(string.IsNullOrEmpty(result.FileName));
@@ -89,7 +90,10 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(excel.Workbook.Worksheets.Count > 0);
             var cells = excel.Workbook.Worksheets[0].Cells.Value;
             Assert.NotNull(cells);
-            Assert.Equal(TestDataForCommittedProjects.ValidCommittedProjects.Count + 1, ((Array)cells).GetLength(0));
+            var cellArray = (Array)cells;
+            var cellArrayLength = cellArray.GetLength(0);
+            var committedProjectsForThisSimulation = TestDataForCommittedProjects.ValidCommittedProjects.Where(cp => cp.SimulationId == simulationId);
+            Assert.Equal(TestDataForCommittedProjects.ValidCommittedProjects.Count + 1, cellArrayLength);
         }
 
         [Fact]

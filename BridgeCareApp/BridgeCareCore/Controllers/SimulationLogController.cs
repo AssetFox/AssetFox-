@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -63,11 +63,26 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 reportDetailDto.Status = $"Failed to generate";
+                var simulationName = GetSimulationNameCatchExceptions(simulationId);
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog for {simulationName} - {e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
                 throw;
             }
+        }
+
+        private string GetSimulationNameCatchExceptions(Guid simulationId)
+        {
+            string simulationName;
+            try
+            {
+                simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
+            }
+            catch
+            {
+                simulationName = $"simulationId.ToString(); failed to get name";
+            }
+            return simulationName;
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) =>

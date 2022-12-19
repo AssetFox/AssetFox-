@@ -89,7 +89,10 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(excel.Workbook.Worksheets.Count > 0);
             var cells = excel.Workbook.Worksheets[0].Cells.Value;
             Assert.NotNull(cells);
-            Assert.Equal(TestDataForCommittedProjects.ValidCommittedProjects.Count + 1, ((Array)cells).GetLength(0));
+            var cellArray = (Array)cells;
+            var cellArrayLength = cellArray.GetLength(0);
+            var committedProjectsForThisSimulation = TestDataForCommittedProjects.ValidCommittedProjects.Where(cp => cp.SimulationId == TestDataForCommittedProjects.SimulationId).ToList();
+            Assert.Equal(committedProjectsForThisSimulation.Count + 1, cellArrayLength);
         }
 
         [Fact]

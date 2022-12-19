@@ -190,8 +190,9 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                     IEnumerable<AssetSummaryDetail> resultYearAssets = resultYearDetail.Assets;
                     resultSection = resultYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
                 }
+
+                FillGCRData(worksheet, currentCell, resultSection, treatmentInfo.IsAnalysisLengthExceeded);
             }
-            FillGCRData(worksheet, currentCell, resultSection, treatmentInfo.IsAnalysisLengthExceeded);
 
             if (row % 2 == 0)
             {

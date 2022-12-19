@@ -74,10 +74,11 @@ namespace BridgeCareCore.Utils
         {            
             if (RequirePermittedCheck() && !(checkSimulationAccess && HasSimulationAccess()))
             {
-                var simulationOwner = UnitOfWork.SimulationRepo.GetSimulation(simulationId).Owner;
+                var simulation = UnitOfWork.SimulationRepo.GetSimulation(simulationId);
+                var simulationOwner = simulation.Owner;
                 if (userName != simulationOwner)
                 {
-                    throw new UnauthorizedAccessException("You are not authorized to cancel this simulation analysis.");
+                    throw new UnauthorizedAccessException(userName + " is not authorized to cancel analysis for simulation - " + simulation.Name + ".");
                 }
             }
         }

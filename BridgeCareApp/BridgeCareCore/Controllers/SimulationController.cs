@@ -341,8 +341,9 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error canceling simulation analysis::{e.Message}");
-                return Ok();
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel analysis::{e.Message}");
+                // Note: Return Ok result is required(we might investigate more on this later), sending "UnauthorizedAccess" here to handle this case correctly in front end.
+                return Ok("UnauthorizedAccess");
             }
             catch (Exception e)
             {

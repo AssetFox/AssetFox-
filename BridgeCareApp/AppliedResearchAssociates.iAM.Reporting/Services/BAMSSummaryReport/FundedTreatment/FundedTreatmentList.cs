@@ -306,7 +306,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                             treatment.Asset.AppliedTreatment == asset.AppliedTreatment))
                         {
                             // Continuation of a cash flow project; do not include in report but increment length of existing treatment
-                            var candidateTreatments = treatmentsPerSection[id].Where(t => t.TreatmentOption.TreatmentName == asset.AppliedTreatment).ToList();
+                            var candidateTreatments = treatmentsPerSection[id]
+                                .Where(t => t.TreatmentOption != null)
+                                .Where(t => t.TreatmentOption.TreatmentName == asset.AppliedTreatment)
+                                .ToList();
 
                             var initialTreatment =
                                 candidateTreatments.Count == 1 ? candidateTreatments.Single() :

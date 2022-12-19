@@ -285,6 +285,23 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            // Pull best guess on committed project treatment categories here
+            var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
+            foreach (var newTreatment in treatmentsToAdd)
+            {
+                var bestTreatmentEntry = committedProjectList.Where(_ => _.Treatment == newTreatment)
+                    .GroupBy(_ => _.Category)
+                    .Select(_ => new { Category = _.Key, Count = _.Count() })
+                    .OrderByDescending(_ => _.Count)
+                    .Select(_ => _.Category)
+                    .FirstOrDefault();
+                if (!treatmentCategoryLookup.ContainsKey(newTreatment))
+                {
+                    treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
             // Simulation parameters TAB

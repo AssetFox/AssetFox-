@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -36,6 +37,7 @@ namespace BridgeCareCore.Controllers
         {
 
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating" };
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
 
             try
             {
@@ -63,26 +65,11 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 reportDetailDto.Status = $"Failed to generate";
-                var simulationName = GetSimulationNameCatchExceptions(simulationId);
                 UpdateSimulationAnalysisDetail(reportDetailDto);
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog for {simulationName} - {e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
                 throw;
             }
-        }
-
-        private string GetSimulationNameCatchExceptions(Guid simulationId)
-        {
-            string simulationName;
-            try
-            {
-                simulationName = UnitOfWork.SimulationRepo.GetSimulationName(simulationId);
-            }
-            catch
-            {
-                simulationName = $"simulationId.ToString(); failed to get name";
-            }
-            return simulationName;
         }
 
         private void UpdateSimulationAnalysisDetail(SimulationReportDetailDTO dto) =>

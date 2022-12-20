@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Data.Networking;
 using AppliedResearchAssociates.iAM.Data;
@@ -13,7 +12,6 @@ using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Security.Interfaces;
 using BridgeCareCore.Services;
 using BridgeCareCore.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;

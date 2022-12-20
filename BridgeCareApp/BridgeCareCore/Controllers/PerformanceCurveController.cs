@@ -113,10 +113,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioPerformanceCurves - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -160,11 +160,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertPerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -192,11 +192,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::UpsertScenarioPerformanceCurves - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -228,10 +228,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DeletePerformanceCurveLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -297,10 +297,10 @@ namespace BridgeCareCore.Controllers
                 }
                 return Ok(result.PerformanceCurveLibraryDTO);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -357,10 +357,10 @@ namespace BridgeCareCore.Controllers
                 }
                 return Ok(result.PerformanceCurves);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ImportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -384,7 +384,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportScenarioPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {
@@ -408,7 +408,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::ExportLibraryPerformanceCurvesExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {
@@ -438,7 +438,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::DownloadPerformanceCurvesTemplate - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {

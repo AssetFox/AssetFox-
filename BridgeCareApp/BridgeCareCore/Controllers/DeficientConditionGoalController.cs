@@ -12,11 +12,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
-using BridgeCareCore.Services;
 
 namespace BridgeCareCore.Controllers
 {
@@ -79,10 +77,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoals - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -110,7 +108,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::GetScenarioDeficientConditionGoalPage - {e.Message}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -137,7 +135,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError} ::GetLibraryDeficientConditionGoalPage - {e.Message}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -182,11 +180,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -215,11 +213,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::UpsertDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -252,10 +250,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeficientConditionGoalError}::DeleteDeficientConditionGoalLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {

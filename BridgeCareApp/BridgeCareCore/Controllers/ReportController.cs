@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using BridgeCareCore.Controllers.BaseController;
-using BridgeCareCore.Logging;
 using BridgeCareCore.Security.Interfaces;
 using Microsoft.AspNetCore.Http;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;

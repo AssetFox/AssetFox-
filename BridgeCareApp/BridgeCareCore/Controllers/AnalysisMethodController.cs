@@ -62,10 +62,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch(UnauthorizedAccessException e)
+            catch(UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -89,10 +89,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {

@@ -200,11 +200,11 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::UpdateSimulation - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -223,11 +223,11 @@ namespace BridgeCareCore.Controllers
             {
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::DeleteSimulation - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -288,10 +288,10 @@ namespace BridgeCareCore.Controllers
                 //await analysisHandle.WorkCompletion;
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{SimulationError}::RunSimulation - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -342,8 +342,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Current user role does not have permission to cancel analysis::{e.Message}");
-                // Note: Return Ok result is required(we might investigate more on this later), sending "UnauthorizedAccess" here to handle this case correctly in front end.
-                return Ok("UnauthorizedAccess");
+                throw;
             }
             catch (Exception e)
             {
@@ -371,7 +370,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Setting NoTreatmentBeforeCommitted::{e.Message}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -399,7 +398,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Removing NoTreatmentBeforeCommitted::{e.Message}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -428,7 +427,7 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Error Getting NoTreatmentBeforeCommitted::{e.Message}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {

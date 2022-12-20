@@ -78,10 +78,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ImportCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -105,10 +105,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
@@ -214,10 +214,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException)
             {
@@ -245,10 +245,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSpecificCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException)
             {
@@ -276,10 +276,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException)
             {
@@ -309,10 +309,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException)
             {
@@ -341,10 +341,10 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException)
             {

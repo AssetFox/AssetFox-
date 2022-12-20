@@ -102,11 +102,11 @@ export default class ReportsDownloaderDialog extends Vue {
                     }
 
                     this.addSuccessNotificationAction({
-                        message: 'Summary report generation started.',
+                        message: 'Summary report generation started for ' + this.dialogData.name + '.',
                     });
                 } else {
                     this.addErrorNotificationAction({
-                        message: 'Failed to generate report.',
+                        message: 'Failed to generate apricot for ' + this.dialogData.name + '.',
                         longMessage:
                             'Failed to generate the summary report. Make sure the scenario has been run',
                     });

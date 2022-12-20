@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -36,6 +37,7 @@ namespace BridgeCareCore.Controllers
         {
 
             var reportDetailDto = new SimulationReportDetailDTO { SimulationId = simulationId, Status = "Generating" };
+            var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
 
             try
             {
@@ -64,7 +66,7 @@ namespace BridgeCareCore.Controllers
             {
                 reportDetailDto.Status = $"Failed to generate";
                 UpdateSimulationAnalysisDetail(reportDetailDto);
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"Summary Report Error::GetSimulationLog for {simulationName} - {e.Message}");
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastReportGenerationStatus, reportDetailDto);
                 throw;
             }

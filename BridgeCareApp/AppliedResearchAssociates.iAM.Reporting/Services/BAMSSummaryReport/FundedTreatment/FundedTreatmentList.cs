@@ -279,7 +279,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var treatedSections = year.Assets
-                    .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection)
+                    .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection
+                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment.ToLower()))
                     .ToList();
 
                 var facilityIds = treatedSections.Select(section => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));

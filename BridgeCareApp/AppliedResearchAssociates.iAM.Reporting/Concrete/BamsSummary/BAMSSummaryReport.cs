@@ -24,6 +24,7 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTa
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -252,7 +253,8 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
             _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
@@ -280,6 +282,23 @@ namespace AppliedResearchAssociates.iAM.Reporting
                     {
                         treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
                     }
+                }
+            }
+
+            // Pull best guess on committed project treatment categories here
+            var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
+            foreach (var newTreatment in treatmentsToAdd)
+            {
+                var bestTreatmentEntry = committedProjectList.Where(_ => _.Treatment == newTreatment)
+                    .GroupBy(_ => _.Category)
+                    .Select(_ => new { Category = _.Key, Count = _.Count() })
+                    .OrderByDescending(_ => _.Count)
+                    .Select(_ => _.Category)
+                    .FirstOrDefault();
+                if (!treatmentCategoryLookup.ContainsKey(newTreatment))
+                {
+                    treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
                 }
             }
 

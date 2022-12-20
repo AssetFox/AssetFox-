@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Migrations;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -247,10 +248,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             var existingEntityIds = _unitOfWork.Context.ScenarioBudget.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId && entityIds.Contains(_.Id)).Select(_ => _.Id).ToList();
 
-            // Delete any committed projects that are not in the provided budget list and are in the simulation
-            _unitOfWork.Context.DeleteAll<CommittedProjectEntity>(_ =>
-                _.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId ?? Guid.Empty));
-
+            var committedProjects = _unitOfWork.Context.CommittedProject.Where(_ =>
+                _.SimulationId == simulationId && !entityIds.Contains(_.ScenarioBudgetId ?? Guid.Empty)).ToList();
+            if(committedProjects.Count > 0)
+            {
+                committedProjects.ForEach(_ => _.ScenarioBudgetId = null);
+                _unitOfWork.Context.UpdateAll(committedProjects);
+            }
+            
             _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ =>
                 _.SimulationId == simulationId && !entityIds.Contains(_.Id));
 
@@ -295,6 +300,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _unitOfWork.Context.AddAll(criteria, _unitOfWork.UserEntity?.Id);
                 _unitOfWork.Context.AddAll(criterionJoins, _unitOfWork.UserEntity?.Id);
             }
+        }
+
+        public List<int> GetBudgetYearsBySimulationId(Guid simulationId)
+        {
+            var years = new List<int>();
+            var budget = _unitOfWork.Context.ScenarioBudget.Include(_ => _.ScenarioBudgetAmounts).FirstOrDefault(_ => _.SimulationId == simulationId);
+
+            if (budget != null)
+            {
+                years = budget.ScenarioBudgetAmounts.Select(_ => _.Year).ToList();
+            }
+
+            return years;
         }
     }
 }

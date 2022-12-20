@@ -182,8 +182,11 @@ namespace BridgeCareCore.Services
                 (_.CriteriaLibrary == null || _.CriteriaLibrary.MergedCriteriaExpression.Trim() == ""));
                 if (defaultEquation == null)
                 {
+                    defaultEquation = new CalculatedAttributeEquationCriteriaPairDTO();
                     defaultEquation.Id = Guid.NewGuid();
+                    defaultEquation.Equation = new EquationDTO();
                     defaultEquation.Equation.Id = Guid.NewGuid();
+                    defaultEquation.Equation.Expression = "";
                 }
                 else
                 {

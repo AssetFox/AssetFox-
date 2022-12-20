@@ -511,8 +511,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
 
             // Act
-            await _controller.DeleteSimulation(simulation.Id);
-
+            await _controller.DeleteSimulationOperation(simulation.Id);
             // Assert
             Assert.True(!TestHelper.UnitOfWork.Context.Simulation.Any(_ => _.Id == simulation.Id));
         }
@@ -598,7 +597,7 @@ namespace BridgeCareCoreTests.Tests
             CreateAuthorizedController(service);
 
             // Act
-            var result = await _controller.DeleteSimulation(Guid.Empty);
+            var result = await _controller.DeleteSimulationOperation(Guid.Empty);
 
             // Assert
             Assert.IsType<OkResult>(result);

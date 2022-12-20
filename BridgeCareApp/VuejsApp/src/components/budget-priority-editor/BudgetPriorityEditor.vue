@@ -620,12 +620,13 @@ export default class BudgetPriorityEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
-                 pagingSync: {
-                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 ? null : this.selectedBudgetPriorityLibrary.id,
+                pagingSync: {
+                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
                     rowsForDeletion: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.deletionIds,
                     updateRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.addedRows,
-                 }
+                },
+                scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
@@ -776,6 +777,7 @@ export default class BudgetPriorityEditor extends Vue {
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: this.addedRows
                  }
+                 , scenarioId: null
         }
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

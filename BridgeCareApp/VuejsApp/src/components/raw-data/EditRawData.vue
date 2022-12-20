@@ -118,10 +118,6 @@ export default class EditRawData extends Vue {
                         href.indexOf(navigationTab.navigation.path) !== -1,
                     vm.navigationTabs,
                 );
-                // if no matching navigation path was found in the href, then route with path of first navigationTabs entry
-                if (!hasChildPath) {
-                    vm.$router.push(vm.navigationTabs[0].navigation);
-                }
         });
     }
 

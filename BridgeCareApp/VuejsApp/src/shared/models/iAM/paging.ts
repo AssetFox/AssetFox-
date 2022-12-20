@@ -5,6 +5,7 @@ import { Budget, BudgetAmount, BudgetLibrary, Investment, InvestmentPlan } from 
 export abstract class BaseLibraryUpsertPagingRequest<T>{
     public library: T;
     public isNewLibrary: boolean;
+    scenarioId: string | null;
 }
 
 export abstract class BasePagingRequest{
@@ -17,7 +18,7 @@ export abstract class BasePagingRequest{
 
 //General
 export interface LibraryUpsertPagingRequest<T,Y> extends BaseLibraryUpsertPagingRequest<T>{
-    pagingSync: PaginSync<Y>;
+    pagingSync: PaginSync<Y>; 
 }
 
 export interface PagingRequest<T> extends BasePagingRequest{

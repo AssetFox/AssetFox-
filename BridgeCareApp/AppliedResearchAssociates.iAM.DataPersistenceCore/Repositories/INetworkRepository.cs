@@ -25,5 +25,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         void DeleteNetworkData();
 
         void UpsertNetworkRollupDetail(Guid networkId, string status);
+
+        string GetNetworkName(Guid networkId);
     }
 }

@@ -927,7 +927,7 @@ namespace BridgeCareCoreTests.Tests
             var year = DateTime.Now.Year;
             var service = Setup();
             var simulationName = RandomStrings.Length11();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, null, simulationName);
+            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork, name: simulationName);
             CreateScenarioTestData(simulation.Id);
             var accessor = CreateRequestWithScenarioFormData(simulation.Id);
             var controller = CreateAuthorizedController(service, accessor);

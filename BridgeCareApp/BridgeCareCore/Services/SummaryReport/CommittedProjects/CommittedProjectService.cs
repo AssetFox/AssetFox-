@@ -369,8 +369,15 @@ namespace BridgeCareCore.Services
                 }
 
                 // This to convert the incoming string to a TreatmentCategory
-                var convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(worksheet.GetCellValue<string>(row, _keyFields.Count + 8));// Assumes that InitialHeaders stays constant
-
+                var convertedCategory = new TreatmentCategory();
+                try
+                {
+                    convertedCategory = EnumDeserializer.Deserialize<TreatmentCategory>(worksheet.GetCellValue<string>(row, _keyFields.Count + 8));// Assumes that InitialHeaders stays constant
+                }
+                catch
+                {
+                    convertedCategory = TreatmentCategory.Other;
+                }
 
                 // Build the committed project object
                 var project = new SectionCommittedProjectDTO

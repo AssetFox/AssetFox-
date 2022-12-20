@@ -91,7 +91,7 @@ namespace BridgeCareCoreTests.Tests
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
 
-            Assert.True(page.TotalItems == 2);
+            Assert.Equal(3, page.TotalItems);
             Assert.Equal(page.Items.Count ,request.RowsPerPage);
             Assert.True(TestDataForCommittedProjects.ValidCommittedProjects.FirstOrDefault(_ => _.Id == page.Items[0].Id) != null);
         }
@@ -114,7 +114,7 @@ namespace BridgeCareCoreTests.Tests
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
             var sorted = TestDataForCommittedProjects.ValidCommittedProjects.OrderBy(_ => _.Treatment).ToList();
-            Assert.True(page.TotalItems == 2);
+            Assert.Equal(3, page.TotalItems);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
             Assert.True(page.Items[0].Id == sorted[0].Id);
             Assert.True(page.Items[1].Id == sorted[1].Id);
@@ -138,8 +138,8 @@ namespace BridgeCareCoreTests.Tests
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
 
-            Assert.True(page.TotalItems == 2);
-            Assert.True(page.Items.Count == 1);
+            Assert.Equal(3, page.TotalItems);
+            Assert.Equal(2, page.Items.Count);
             Assert.True(page.Items.All(_ => _.Treatment == "Simple"));
         }
 
@@ -183,7 +183,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
                 Page = 1,
-                RowsPerPage = 3,
+                RowsPerPage = 4,
                 isDescending = false,
                 PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
@@ -195,7 +195,7 @@ namespace BridgeCareCoreTests.Tests
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
 
-            Assert.True(page.TotalItems == 3);
+            Assert.Equal(4, page.TotalItems);
             Assert.Equal(page.Items.Count, request.RowsPerPage);
             Assert.True(page.Items.SingleOrDefault(_ => _.Id == addrow.Id) != null);
         }
@@ -224,7 +224,7 @@ namespace BridgeCareCoreTests.Tests
 
             var page = service.GetCommittedProjectPage(TestDataForCommittedProjects.ValidCommittedProjects, request);
 
-            Assert.True(page.TotalItems == 2);
+            Assert.Equal(3, page.TotalItems);
             Assert.True(page.Items.Count == request.RowsPerPage);
             Assert.True(page.Items.FirstOrDefault(_ => updateRow.Id == _.Id).Treatment == newTreament);
         }

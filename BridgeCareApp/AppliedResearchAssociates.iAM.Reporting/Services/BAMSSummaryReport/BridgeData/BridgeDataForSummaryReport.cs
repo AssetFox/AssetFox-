@@ -53,7 +53,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             reportOutputData.Years.ForEach(_ => _simulationYears.Add(_.Year));
 
-            int poorOnOffColStart = -1; int poorOnOffColEnd = -1;
+            int poorOnOffColStart = -1; int poorOnOffColEnd = -1; 
             var currentCell = AddHeadersCells(worksheet, sectionHeaders, dataHeaders, subHeaders, _simulationYears, ref poorOnOffColStart, ref poorOnOffColEnd);
 
             // Add row next to headers for filters and year numbers for dynamic data. Cover from
@@ -71,6 +71,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
             //turn off auto fit to hide poor on/off
             worksheet.Cells[1, poorOnOffColStart, worksheet.Cells.Rows, poorOnOffColEnd].AutoFitColumns(0, 0);
+
+            //set default width for years seperator columns
+            foreach(var spacerColumn in _spacerColumnNumbers) {
+                worksheet.Cells[1, spacerColumn, worksheet.Cells.Rows, spacerColumn].AutoFitColumns(0, 0);
+                worksheet.Column(spacerColumn).SetTrueWidth(3);
+            }
 
             var workSummaryModel = new WorkSummaryModel
             {
@@ -421,14 +427,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     setColor((int)_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "PARALLEL"), section.AppliedTreatment, previousYearTreatment, previousYearCause, section.TreatmentCause,
                         yearlySectionData.Year, index, worksheet, row, column);
 
-                    // Work done in a year
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    // Work done in a year                    
+                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
                     var range = worksheet.Cells[row, column];
                     if (abbreviatedTreatmentNames.ContainsKey(section.AppliedTreatment))
                     {
                         range.Value = abbreviatedTreatmentNames[section.AppliedTreatment];
                         worksheet.Cells[row, column + 1].Value = cost;
-
 
                         if (!isInitialYear && section.TreatmentCause == TreatmentCause.CashFlowProject)
                         {
@@ -444,7 +449,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             }
                         }
                         worksheet.Cells[row, column + 1].Value = cost;
-                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
 
                     }
                     else
@@ -453,7 +458,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                             section.AppliedTreatment.ToLower();
 
                         worksheet.Cells[row, column + 1].Value = cost;
-                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1]);
+                        ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column + 1], ExcelFormatStrings.CurrencyWithoutCents);
                     }
                     if (!range.Value.Equals("--"))
                     {
@@ -571,11 +576,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     {
                         var cashFlowMap = MappingContent.GetCashFlowProjectPick(section.TreatmentCause, prevYearSection);
                         worksheet.Cells[row, ++column].Value = cashFlowMap.currentPick; //Project Pick
-                        worksheet.Cells[row, column - 17].Value = cashFlowMap.previousPick; //Project Pick previous year
+                        worksheet.Cells[row, column - 18].Value = cashFlowMap.previousPick; //Project Pick previous year
                     }
                     else
                     {
-                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause);//Project Pick
+                        worksheet.Cells[row, ++column].Value = MappingContent.GetNonCashFlowProjectPick(section.TreatmentCause); //Project Pick
                     }
 
                     var appliedTreatment = section.AppliedTreatment ?? "";
@@ -584,8 +589,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
 
                     foreach (var item in treatmentConsideration)
                     {
-                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull ||
-                    _.Status == BudgetUsageStatus.CostCoveredInPart);
+                        budgetUsage = item.BudgetUsages.Find(_ => _.Status == BudgetUsageStatus.CostCoveredInFull || _.Status == BudgetUsageStatus.CostCoveredInPart);
                     }
 
                     var budgetName = budgetUsage == null ? "" : budgetUsage.BudgetName;
@@ -594,11 +598,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     worksheet.Cells[row, ++column].Value = section.AppliedTreatment; // Recommended Treatment
                     var columnForAppliedTreatment = column;
 
-                    var cost = section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost));
+                    var cost = Math.Round(section.TreatmentConsiderations.Sum(_ => _.BudgetUsages.Sum(b => b.CoveredCost)), 0); // Rounded cost to whole number based on comments from Jeff Davis 
                     worksheet.Cells[row, ++column].Value = cost; // cost
-                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column]);
+                    ExcelHelper.SetCurrencyFormat(worksheet.Cells[row, column], ExcelFormatStrings.CurrencyWithoutCents);
 
-                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment))
+                    if (!string.IsNullOrEmpty(appliedTreatment) && !string.IsNullOrWhiteSpace(appliedTreatment) && treatmentCategoryLookup.ContainsKey(appliedTreatment))
                     {
                         worksheet.Cells[row, ++column].Value = treatmentCategoryLookup[appliedTreatment]?.ToString(); // FHWA Work Type
                     }
@@ -619,8 +623,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                         ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment], Color.FromArgb(255, 0, 0));
 
                         // Color the previous year project also
-                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(0, 255, 0));
-                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 16], Color.FromArgb(255, 0, 0));
+                        ExcelHelper.ApplyColor(worksheet.Cells[row, columnForAppliedTreatment - 18], Color.FromArgb(0, 255, 0));
+                        ExcelHelper.SetTextColor(worksheet.Cells[row, columnForAppliedTreatment - 18], Color.FromArgb(255, 0, 0));
                     }
 
                     column = column + 1;
@@ -799,7 +803,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             return currentCell;
         }
 
-        private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears, ref int poorOnOffColStart, ref int poorOnOffColEnd)
+        private void AddDynamicHeadersCells(ExcelWorksheet worksheet, CurrentCell currentCell, List<int> simulationYears
+                                            , ref int poorOnOffColStart, ref int poorOnOffColEnd)
         {
             const string HeaderConstText = "Work Done\r\n";
             var column = currentCell.Column;
@@ -866,8 +871,13 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                 worksheet.Column(columnIndex).Hidden = true;
             }
 
+            _spacerColumnNumbers = new List<int>();
+
             //set current column
             currentCell.Column = column;
+            worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
+            worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
+            _spacerColumnNumbers.Add(currentCell.Column);
 
             // Add Years Data headers
             var initialSimulationHeaderTexts = GetInitialSimulationHeaderTexts();
@@ -878,14 +888,11 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
             ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], ColorTranslator.FromHtml("#E2EFDA"));
 
             // Empty column
-            currentCell.Column = ++column;
-
+            currentCell.Column = ++column; 
             worksheet.Column(column).Style.Fill.PatternType = ExcelFillStyle.Solid;
             worksheet.Column(column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
-
+                        
             var simulationHeaderTexts = GetSimulationHeaderTexts();
-            _spacerColumnNumbers = new List<int>();
-
             foreach (var simulationYear in simulationYears)
             {
                 worksheet.Cells[row, ++column].Value = simulationYear;
@@ -902,10 +909,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Bri
                     ExcelHelper.ApplyColor(worksheet.Cells[row, currentCell.Column + 1, row, column], Color.LightGray);
                 }
 
+                //sperator column                
                 worksheet.Column(currentCell.Column).Style.Fill.PatternType = ExcelFillStyle.Solid;
                 worksheet.Column(currentCell.Column).Style.Fill.BackgroundColor.SetColor(Color.Gray);
                 _spacerColumnNumbers.Add(currentCell.Column);
-
                 currentCell.Column = ++column; 
             }
             ExcelHelper.ApplyBorder(worksheet.Cells[row, initialColumn, row + 1, worksheet.Dimension.Columns]);

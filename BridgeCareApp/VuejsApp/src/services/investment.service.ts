@@ -58,6 +58,12 @@ export default class InvestmentService {
         );
     }
 
+    static getScenarioBudgetYears(scenarioId: string){
+        return coreAxiosInstance.get(
+            `${API.Investment}/GetScenarioBudgetYears/${scenarioId}`,
+        );
+    }
+
     static exportInvestmentBudgets(
         id: string,
         forScenario: boolean = false,

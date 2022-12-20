@@ -98,10 +98,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
                 .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
-                    hasAdminAccess ||
+                    (hasAdminAccess ||
                     hasSimulationAccess ||
-                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    )
+                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))
+                 )
                 .OrderByDescending(s => s.LastModifiedDate)
                 .ToList();
             return simulations;
@@ -1292,9 +1292,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);
-            if (simulationEntity.Name != dto.Name)
+            if (simulationEntity.Name != dto.Name || simulationEntity.NoTreatmentBeforeCommittedProjects != dto.NoTreatmentBeforeCommittedProjects)
             {
                 simulationEntity.Name = dto.Name;
+                simulationEntity.NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects;
 
                 _unitOfWork.Context.UpdateEntity(simulationEntity, dto.Id, _unitOfWork.UserEntity?.Id);
             }
@@ -1360,6 +1361,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))));
 
             return simulation;
+        }
+        
+        public bool GetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            return GetSimulation(simulationId).NoTreatmentBeforeCommittedProjects;
+        }
+
+        public void SetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, true);
+        }
+
+        public void RemoveNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, false);
+        }
+
+        private void UpdateSimulationNoTreatmentBeforeCommitted(Guid simulationId, bool noTreatmentBeforeCommitted)
+        {
+            var simulationDto = GetSimulation(simulationId);
+            simulationDto.NoTreatmentBeforeCommittedProjects = noTreatmentBeforeCommitted;
+            UpdateSimulation(simulationDto);
         }
     }
 }

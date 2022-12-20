@@ -89,7 +89,7 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public void RemoveFeasibilityCriterion(Criterion criterion) => _FeasibilityCriteria.Remove(criterion);
 
-        internal SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
+        public SelectableTreatment(Simulation simulation) => Simulation = simulation ?? throw new ArgumentNullException(nameof(simulation));
 
         internal override bool CanUseBudget(Budget budget) => Budgets.Contains(budget);
 

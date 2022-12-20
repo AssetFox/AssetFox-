@@ -31,7 +31,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
             context.SaveChanges();
         }
 
-        public static void AddAll<T>(this IAMContext context, List<T> entities, Guid? userId = null) where T : class
+        public static void AddAll<T>(this IAMContext context, List<T> entities, Guid? userId = null, int batchSize = 100000) where T : class
         {
             if (!entities.Any())
             {
@@ -48,20 +48,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.E
                 });
             }
 
-            var batches = entities.Count() / 100000;
-            var rem = entities.Count() % 100000;
+            var batches = entities.Count() / batchSize;
+            var rem = entities.Count() % batchSize;
             var i = 0;
 
             while (i < batches)
             {
-                context.BulkInsert(entities.Skip(i * 100000).Take(100000).ToList(), new BulkConfig { BatchSize = 100000, BulkCopyTimeout = 1800 });
+                context.BulkInsert(entities.Skip(i * batchSize).Take(batchSize).ToList(), new BulkConfig { BatchSize = batchSize, BulkCopyTimeout = 1800 });
                 context.SaveChanges();
                 i++;
             }
 
             if(rem > 0)
             {
-                context.BulkInsert(entities.Skip(i * 100000).Take(rem).ToList(), new BulkConfig { BatchSize = rem, BulkCopyTimeout = 1800 });
+                context.BulkInsert(entities.Skip(i * batchSize).Take(rem).ToList(), new BulkConfig { BatchSize = rem, BulkCopyTimeout = 1800 });
                 context.SaveChanges();
             }
         }

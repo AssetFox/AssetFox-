@@ -2,19 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Models.BAMSSummaryReport;
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.UnfundedTreatmentCommon;
 using MoreLinq;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using static System.Collections.Specialized.BitVector32;
 
 namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment
 {
@@ -125,8 +118,10 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             var (row, columnNo) = (currentCell.Row, currentCell.Column);
 
+            // Analysis year Start
             worksheet.Cells[row, columnNo++].Value = year;
 
+            // Analysis year End
             if (treatmentInfo.IsAnalysisLengthExceeded)
             {
                 ++columnNo;
@@ -136,6 +131,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                 worksheet.Cells[row, columnNo++].Value = year + treatmentInfo.LengthInYears - 1;
             }
 
+            // Project Pick
             worksheet.Cells[row, columnNo++].Value = treatmentInfo.IsCashFlowed
                 ? "BAMS Pick CFB"
                 : (object)(section.TreatmentCause switch
@@ -157,11 +153,17 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             var budgetName = budget?.BudgetName ?? string.Empty;
 
+            // Budget
             worksheet.Cells[row, columnNo++].Value = budgetName;
+
+            // Treatment
             worksheet.Cells[row, columnNo++].Value = treatmentName;
 
+            // Yearly Cost
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = CostFormat;
             worksheet.Cells[row, columnNo++].Value = treatmentCost / treatmentInfo.LengthInYears;
+
+            // Total Project Cost
             worksheet.Cells[row, columnNo].Style.Numberformat.Format = CostFormat;
             if (treatmentInfo.IsAnalysisLengthExceeded)
             {
@@ -174,14 +176,23 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             currentCell.Column = columnNo;
 
-            var orderedYears = simulationOutput.Years.OrderBy(y => y.Year);
-            IEnumerable<AssetSummaryDetail> priorYearAssets = (orderedYears.First().Year == year) ?
-                simulationOutput.InitialAssetSummaries : orderedYears.First().Assets;
+            // "Prior GCR" (GCR for Analysis Year(s)/Start) 
+            FillGCRData(worksheet, currentCell, section);
 
-            var sectionPriorYear = priorYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
+            // "Resulting GCR" (GCR for Analysis Year(s)/End)
+            AssetSummaryDetail resultSection = null;
+            if (!treatmentInfo.IsAnalysisLengthExceeded)
+            {
+                var resultYear = year + treatmentInfo.LengthInYears - 1;
+                var resultYearDetail = simulationOutput.Years.FirstOrDefault(y => y.Year == resultYear);
+                if (resultYearDetail != null)
+                {
+                    IEnumerable<AssetSummaryDetail> resultYearAssets = resultYearDetail.Assets;
+                    resultSection = resultYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
+                }
 
-            FillGCRData(worksheet, currentCell, sectionPriorYear);
-            FillGCRData(worksheet, currentCell, section, treatmentInfo.IsAnalysisLengthExceeded);
+                FillGCRData(worksheet, currentCell, resultSection, treatmentInfo.IsAnalysisLengthExceeded);
+            }
 
             if (row % 2 == 0)
             {
@@ -268,7 +279,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
             foreach (var year in simulationOutput.Years.OrderBy(yr => yr.Year))
             {
                 var treatedSections = year.Assets
-                    .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection)
+                    .Where(section => section.TreatmentCause is not TreatmentCause.Undefined and not TreatmentCause.NoSelection
+                        && !(section.TreatmentCause is TreatmentCause.CommittedProject && section.AppliedTreatment.ToLower() == BAMSConstants.NoTreatment.ToLower()))
                     .ToList();
 
                 var facilityIds = treatedSections.Select(section => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "BRKEY_")));
@@ -295,13 +307,18 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
                             && treatmentsPerSection[id].Any(treatment =>
                             treatment.Asset.AppliedTreatment == asset.AppliedTreatment))
                         {
-                            // Continuation of a cash flow project; do not include in report
-                            treatmentsPerSection[id].Where(t => t.TreatmentOption.TreatmentName == asset.AppliedTreatment)
-                                .ForEach(t =>
-                                {
-                                    t.LengthInYears++;
-                                    t.IsAnalysisLengthExceeded = t.IsAnalysisLengthExceeded || exceedsLastYear;
-                                });
+                            // Continuation of a cash flow project; do not include in report but increment length of existing treatment
+                            var candidateTreatments = treatmentsPerSection[id]
+                                .Where(t => t.TreatmentOption != null)
+                                .Where(t => t.TreatmentOption.TreatmentName == asset.AppliedTreatment)
+                                .ToList();
+
+                            var initialTreatment =
+                                candidateTreatments.Count == 1 ? candidateTreatments.Single() :
+                                Enumerable.MinBy(candidateTreatments, t => year.Year - t.Year.Year);
+
+                            initialTreatment.LengthInYears++;
+                            initialTreatment.IsAnalysisLengthExceeded = initialTreatment.IsAnalysisLengthExceeded || exceedsLastYear;
                         }
                         else
                         {

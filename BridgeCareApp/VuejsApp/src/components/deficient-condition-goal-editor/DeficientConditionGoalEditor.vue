@@ -467,6 +467,7 @@ export default class DeficientConditionGoalEditor extends Vue {
     disableCrudButtonsResult: boolean = false;
     hasLibraryEditPermission: boolean = false;
     importLibraryDisabled: boolean = true;
+    scenarioHasCreatedNew: boolean = false;
 
     addedRows: DeficientConditionGoal[] = [];
     updatedRowsMap:Map<string, [DeficientConditionGoal, DeficientConditionGoal]> = new Map<string, [DeficientConditionGoal, DeficientConditionGoal]>();//0: original value | 1: updated value
@@ -547,10 +548,12 @@ export default class DeficientConditionGoalEditor extends Vue {
             this.selectDeficientConditionGoalLibraryAction({
                 libraryId: this.librarySelectItemValue,
             });
-        else if(!isNil(this.librarySelectItemValue))
+        else if(!isNil(this.librarySelectItemValue) && !this.scenarioHasCreatedNew)
         {
             this.importLibraryDisabled = false;
         }
+
+        this.scenarioHasCreatedNew = false;
     }
 
     @Watch('stateSelectedDeficientConditionGoalLibrary')
@@ -573,6 +576,8 @@ export default class DeficientConditionGoalEditor extends Vue {
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
+        
+        this.checkHasUnsavedChanges();
     }
 
     @Watch('selectedGridRows')
@@ -678,11 +683,12 @@ export default class DeficientConditionGoalEditor extends Vue {
                 library: library,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: library.deficientConditionGoals.length == 0 ? null : this.selectedDeficientConditionGoalLibrary.id,
+                    libraryId: library.deficientConditionGoals.length == 0 || !this.hasSelectedLibrary? null : this.selectedDeficientConditionGoalLibrary.id,
                     rowsForDeletion: library.deficientConditionGoals === [] ? [] : this.deletionIds,
                     updateRows: library.deficientConditionGoals === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.deficientConditionGoals === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -693,6 +699,11 @@ export default class DeficientConditionGoalEditor extends Vue {
                         this.clearChanges();
                     }
 
+                    if(this.hasScenario){
+                        this.scenarioHasCreatedNew = true;
+                        this.importLibraryDisabled = true;
+                    }
+                    
                     this.addedOrUpdatedDeficientConditionGoalLibraryMutator(library);
                     this.selectedDeficientConditionGoalLibraryMutator(library.id);
                     this.addSuccessNotificationAction({message:'Added deficient condition goal library'})
@@ -711,18 +722,6 @@ export default class DeficientConditionGoalEditor extends Vue {
     }
 
     onEditDeficientConditionGoalProperty(deficientConditionGoal: DeficientConditionGoal, property: string, value: any) {
-        // this.currentPage = update(
-        //     findIndex(
-        //         propEq('id', deficientConditionGoal.id),
-        //         this.currentPage,
-        //     ),
-        //     setItemPropertyValue(
-        //         property,
-        //         value,
-        //         deficientConditionGoal,
-        //     ) as DeficientConditionGoal,
-        //     this.currentPage,
-        // );
         this.onUpdateRow(deficientConditionGoal.id, clone(deficientConditionGoal))
         this.onPaginationChanged();
     }
@@ -763,8 +762,9 @@ export default class DeficientConditionGoalEditor extends Vue {
                 libraryId: this.selectedDeficientConditionGoalLibrary.id === this.uuidNIL ? null : this.selectedDeficientConditionGoalLibrary.id,
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
-                addedRows: this.addedRows
-                }
+                addedRows: this.addedRows,
+                },
+                scenarioId: null
         }
         DeficientConditionGoalService.upsertDeficientConditionGoalLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -789,6 +789,7 @@ export default class DeficientConditionGoalEditor extends Vue {
                 this.librarySelectItemValue = null;
                 this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's deficient condition goals"});
+                this.importLibraryDisabled = true;
             }           
         });
     }

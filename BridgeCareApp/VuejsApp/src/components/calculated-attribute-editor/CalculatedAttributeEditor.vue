@@ -499,7 +499,6 @@ export default class CalculatedAttributeEditor extends Vue {
                             });
                         });
                     }
-                    //vm.initializePages();
                 });                
             });
         });
@@ -540,7 +539,6 @@ export default class CalculatedAttributeEditor extends Vue {
                     let data = response.data as calculcatedAttributePagingPageModel;
                     this.currentPage.equations = data.items;
                     this.currentPage.calculationTiming = data.calculationTiming
-                    // this.CalcAttrCache = this.currentPage
                     this.pairsCache = this.currentPage.equations;
                     this.totalItems = data.totalItems;
                     this.defaultEquation = data.defaultEquation;
@@ -873,7 +871,8 @@ export default class CalculatedAttributeEditor extends Vue {
         const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
             syncModel: syncModel,
             isNewLibrary: false,
-            library: this.selectedCalculatedAttributeLibrary
+            library: this.selectedCalculatedAttributeLibrary,
+            scenarioId: null
         }
         CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -919,7 +918,7 @@ export default class CalculatedAttributeEditor extends Vue {
 
         if (!isNil(calculatedAttributeLibrary)) {
             const syncModel: CalculatedAttributePagingSyncModel = {
-                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? null : this.selectedCalculatedAttributeLibrary.id,
+                libraryId: calculatedAttributeLibrary.calculatedAttributes.length === 0 || !this.hasSelectedLibrary ? null : this.selectedCalculatedAttributeLibrary.id,
                 updatedCalculatedAttributes: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? [] : Array.from(this.updatedCalcAttrMap.values()).map(r => r[1]),
                 deletedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature(this.deletionPairsIds),
                 updatedPairs: calculatedAttributeLibrary.calculatedAttributes.length === 0 ? {} : mapToIndexSignature( this.updatedPairs),
@@ -930,7 +929,8 @@ export default class CalculatedAttributeEditor extends Vue {
             const request: CalculatedAttributeLibraryUpsertPagingRequestModel = {
                 syncModel: syncModel,
                 isNewLibrary: true,
-                library: calculatedAttributeLibrary
+                library: calculatedAttributeLibrary,
+                scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             CalculatedAttributeService.upsertCalculatedAttributeLibrary(request).then(((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

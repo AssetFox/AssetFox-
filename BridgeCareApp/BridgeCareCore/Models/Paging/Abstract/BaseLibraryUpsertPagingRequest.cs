@@ -6,5 +6,6 @@ namespace BridgeCareCore.Models
     {
         public T Library { get; set; }
         public bool IsNewLibrary { get; set; }
+        public Guid? ScenarioId { get; set; }
     }
 }

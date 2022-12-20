@@ -671,12 +671,14 @@ export default class PerformanceCurveEditor extends Vue {
 
                         vm.hasScenario = true;
                         vm.initializePages();
+
+                        vm.hasScenario = true;
+                        vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
+                            vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
+                        });
                     }
 
-                    vm.hasScenario = true;
-                    vm.getCurrentUserOrSharedScenarioAction({simulationId: vm.selectedScenarioId}).then(() => {         
-                        vm.selectScenarioAction({ scenarioId: vm.selectedScenarioId });        
-                    });
+                    
                 });
             });          
         });
@@ -879,11 +881,12 @@ export default class PerformanceCurveEditor extends Vue {
                 library: performanceCurveLibrary,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 ? null : this.selectedPerformanceCurveLibrary.id,
+                    libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !this.hasSelectedLibrary ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
                     updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: performanceCurveLibrary.performanceCurves === [] ? [] : this.addedRows,
-                 }
+                 },
+                scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
@@ -1035,7 +1038,8 @@ export default class PerformanceCurveEditor extends Vue {
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: this.addedRows
-                 }
+                 },
+                 scenarioId: null
         }
         PerformanceCurveService.UpsertPerformanceCurveLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

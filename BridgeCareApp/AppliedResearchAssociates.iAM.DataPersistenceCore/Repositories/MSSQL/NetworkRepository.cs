@@ -168,5 +168,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.Context.Upsert(networkRollupDetailEntity, _ => _.NetworkId == networkId,
                 _unitOfWork.UserEntity?.Id);
         }
+
+        public string GetNetworkName(Guid networkId)
+        {
+            var entity = _unitOfWork.Context.Network.SingleOrDefault(n => n.Id == networkId);
+            return entity.Name;
+        }
     }
 }

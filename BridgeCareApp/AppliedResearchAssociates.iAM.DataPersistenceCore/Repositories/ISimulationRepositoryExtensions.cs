@@ -13,14 +13,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         /// so external code will never see this throw.</summary> 
         public static string GetSimulationNameOrId(this ISimulationRepository simulationRepository, Guid simulationId)
         {
-            string simulationName;
+            string simulationName = null;
             try
             {
                 simulationName = simulationRepository.GetSimulationName(simulationId);
             }
             catch
             {
-                simulationName = $"simulationId.ToString(); failed to get name";
+            }
+            if (simulationName == null)
+            {
+                simulationName = $"{simulationId}; failed to get name";
             }
             return simulationName;
         }

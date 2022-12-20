@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CriterionLibraryError}::UpsertCriterionLibrary {dto.MergedCriteriaExpression} - {e.Message}");
                 throw;
             }
         }

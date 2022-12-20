@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Utils.Interfaces;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -107,12 +108,14 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ExportCommittedProjects for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -133,7 +136,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateAssetExistence - {e.Message}");
+                var networkName = network.Name ?? "null";
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateAssetExistence for {networkName} - {e.Message}");
                 throw;
             }
         }
@@ -154,7 +158,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateExistenceOfAssets - {e.Message}");
+                var networkName = UnitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::ValidateExistenceOfAssets for {networkName} - {e.Message}");
                 throw;
             }
         }
@@ -216,7 +221,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (RowNotInTableException)
@@ -225,7 +231,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::DeleteSimulationCommittedProjects for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -287,7 +294,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjects for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -320,7 +328,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::GetCommittedProjectsPage for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -352,7 +361,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{CommittedProjectError}::UpsertCommittedProjects for {simulationName} - {e.Message}");
                 throw;
             }            
         }

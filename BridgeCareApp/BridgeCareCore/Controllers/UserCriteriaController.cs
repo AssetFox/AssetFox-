@@ -82,7 +82,8 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria - {e.Message}");
+                var username = userCriteria?.UserName ?? "null";
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{UserCriteriaError}::UpsertUserCriteria for {username} - {e.Message}");
                 throw;
             }
         }

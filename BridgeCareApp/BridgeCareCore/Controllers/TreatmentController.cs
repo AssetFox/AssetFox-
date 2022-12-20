@@ -22,6 +22,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using BridgeCareCore.Services;
 using BridgeCareCore.Models;
 using AppliedResearchAssociates.iAM.Hubs.Services;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -39,7 +40,7 @@ namespace BridgeCareCore.Controllers
         {
             _treatmentService = treatmentService;
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
-        }       
+        }
 
         [HttpGet]
         [Route("GetTreatmentLibraries")]
@@ -77,10 +78,10 @@ namespace BridgeCareCore.Controllers
                 var result = new List<SimpleTreatmentDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId);                   
+                    var library = UnitOfWork.SelectableTreatmentRepo.GetSingleTreatmentLibaryNoChildren(libraryId);
                     if (_claimHelper.RequirePermittedCheck())
                     {
-                        if(library.Owner == UserId || library.IsShared == true)
+                        if (library.Owner == UserId || library.IsShared == true)
                             result = UnitOfWork.SelectableTreatmentRepo.GetSimpleTreatmentsByLibraryId(libraryId);
                     }
                     else
@@ -126,7 +127,7 @@ namespace BridgeCareCore.Controllers
                     .ThenInclude(_ => _.CriterionLibrary)
                     .Include(_ => _.TreatmentLibrary)
                     .Single(_ => _.Id == id);
-                    var library = entity.TreatmentLibrary.ToDto();                   
+                    var library = entity.TreatmentLibrary.ToDto();
                     if (_claimHelper.RequirePermittedCheck())
                     {
                         if (library.Owner == UserId || library.IsShared == true)
@@ -168,12 +169,14 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::GetScenarioSelectedTreatments for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -185,7 +188,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                
+
                 var result = new TreatmentDTO();
                 await Task.Factory.StartNew(() =>
                 {
@@ -245,12 +248,14 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError} ::GetSimpleTreatmentsByScenarioId for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -335,13 +340,15 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::UpsertScenarioSelectedTreatments for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -405,7 +412,7 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var treatmentLibraryId = Guid.Parse(libraryId.ToString());
-                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());               
+                var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
                 var result = new TreatmentImportResultDTO();
                 await Task.Factory.StartNew(() =>
                 {
@@ -445,6 +452,7 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.DeleteTreatmentFromLibrary)]
         public async Task<IActionResult> DeleteTreatment(TreatmentDTO treatment, Guid libraryId)
         {
+            var treatmentName = treatment?.Name ?? "null";
             try
             {
                 await Task.Factory.StartNew(() =>
@@ -465,13 +473,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment {treatmentName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteTreatment {treatmentName}- {e.Message}");
                 throw;
             }
         }
@@ -481,6 +489,7 @@ namespace BridgeCareCore.Controllers
         [Authorize(Policy = Policy.ModifyTreatmentFromScenario)]
         public async Task<IActionResult> DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment, Guid simulationId)
         {
+            var treatmentName = scenarioSelectableTreatment?.Name ?? "null";
             try
             {
                 await Task.Factory.StartNew(() =>
@@ -496,13 +505,13 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment - {HubService.errorList["Unauthorized"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment {treatmentName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::DeleteScenarioSelectableTreatment {treatmentName} - {e.Message}");
                 throw;
             }
         }
@@ -530,7 +539,7 @@ namespace BridgeCareCore.Controllers
                 }
 
                 var excelPackage = new ExcelPackage(ContextAccessor.HttpContext.Request.Form.Files[0].OpenReadStream());
-                var simulationId = Guid.Parse(id.ToString());              
+                var simulationId = Guid.Parse(id.ToString());
                 var result = new ScenarioTreatmentImportResultDTO();
                 await Task.Factory.StartNew(() =>
                 {
@@ -573,12 +582,14 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Unauthorized();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{TreatmentError}::ExportScenarioTreatmentsExcelFile for {simulationName} - {e.Message}");
                 throw;
             }
         }

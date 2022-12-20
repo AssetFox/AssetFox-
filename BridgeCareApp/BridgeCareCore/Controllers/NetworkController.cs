@@ -101,7 +101,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::CreateNetwork - {e.Message}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{NetworkError}::CreateNetwork {networkName} - {e.Message}");
                 throw;
             }
         }

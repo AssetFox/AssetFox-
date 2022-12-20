@@ -17,6 +17,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Models;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using AppliedResearchAssociates.iAM.Analysis;
 
 namespace BridgeCareCore.Controllers
 {
@@ -51,7 +53,8 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorityPage - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{BudgetPriorityError}::GetScenarioBudgetPriorityPage for {simulationName} - {e.Message}");
                 throw;
             }
         }

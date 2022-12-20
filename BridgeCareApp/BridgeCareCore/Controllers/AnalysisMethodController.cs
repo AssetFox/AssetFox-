@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using BridgeCareCore.Utils.Interfaces;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -64,12 +65,14 @@ namespace BridgeCareCore.Controllers
             }
             catch(UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod - {e.Message}");                
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::GetAnalysisMethod for {simulationName} - {e.Message}");                
                 throw;
             }
         }
@@ -91,13 +94,15 @@ namespace BridgeCareCore.Controllers
             }
             catch (UnauthorizedAccessException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {HubService.errorList["Unauthorized"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod for {simulationName} - {HubService.errorList["Unauthorized"]}");
                 return Ok();
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod - {e.Message}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnalysisMethodError}::UpsertAnalysisMethod for {simulationName} - {e.Message}");
                 throw;
             }
         }

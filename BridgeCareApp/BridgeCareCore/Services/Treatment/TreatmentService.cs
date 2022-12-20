@@ -173,16 +173,21 @@ namespace BridgeCareCore.Services
             Guid? libraryId = null;
 
             var rows = new List<TreatmentDTO>();
-            if (upsertRequest.PagingSync.LibraryId != null)
-                libraryId = upsertRequest.PagingSync.LibraryId.Value;
-            else if (!upsertRequest.IsNewLibrary)
-                libraryId = upsertRequest.Library.Id;
+            if (upsertRequest.ScenarioId != null)
+                rows = GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+            else
+            {
+                if (upsertRequest.PagingSync.LibraryId != null)
+                    libraryId = upsertRequest.PagingSync.LibraryId.Value;
+                else if (!upsertRequest.IsNewLibrary)
+                    libraryId = upsertRequest.Library.Id;
 
-            if(libraryId != null)
-                rows = _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId.Value);
-            rows = SyncedDataset(rows, upsertRequest.PagingSync);
+                if (libraryId != null)
+                    rows = _unitOfWork.SelectableTreatmentRepo.GetSelectableTreatments(libraryId.Value);
+                rows = SyncedDataset(rows, upsertRequest.PagingSync);
+            }           
 
-            if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+            if (upsertRequest.IsNewLibrary)
             {
                 rows.ForEach(_ =>
                 {

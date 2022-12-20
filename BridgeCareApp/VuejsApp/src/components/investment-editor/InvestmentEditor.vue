@@ -797,7 +797,7 @@ export default class InvestmentEditor extends Vue {
                 library: budgetLibrary,
                 isNewLibrary: true,
                 pagingSync: {
-                    libraryId: budgetLibrary.budgets.length === 0 ? null : this.selectedBudgetLibrary.id,
+                    libraryId: budgetLibrary.budgets.length === 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetLibrary.id,
                     Investment: this.investmentPlan,
                     budgetsForDeletion: budgetLibrary.budgets === [] ? [] : this.deletionBudgetIds,
                     updatedBudgets: budgetLibrary.budgets === [] ? [] : Array.from(this.updatedBudgetsMap.values()).map(r => r[1]),
@@ -806,7 +806,8 @@ export default class InvestmentEditor extends Vue {
                     updatedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.updatedBudgetAmounts),
                     addedBudgetAmounts: budgetLibrary.budgets === [] ? {} : mapToIndexSignature(this.addedBudgetAmounts),
                     firstYearAnalysisBudgetShift: 0
-                }
+                },
+                scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             // value in v-currency is not parsed back to a number throwing an silent exception between UI and backend.
             const parsedMinimumProjectCostLimit: number = parseFloat(this.investmentPlan.minimumProjectCostLimit.toString().replace(/(\$*)(\,*)/g, ''));
@@ -1126,7 +1127,8 @@ export default class InvestmentEditor extends Vue {
          const upsertRequest: InvestmentLibraryUpsertPagingRequestModel = {
                 library: this.selectedBudgetLibrary,
                 isNewLibrary: false,
-                pagingSync: sync
+                pagingSync: sync,
+                scenarioId: null
         }
         InvestmentService.upsertBudgetLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

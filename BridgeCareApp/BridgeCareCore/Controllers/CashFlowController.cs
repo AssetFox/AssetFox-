@@ -157,7 +157,9 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var items = new List<CashFlowRuleDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
+                    if (upsertRequest.ScenarioId != null)
+                        items = _cashFlowService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         items = _cashFlowService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
@@ -166,7 +168,7 @@ namespace BridgeCareCore.Controllers
                         items = _cashFlowService.GetNewLibraryDataset(upsertRequest.PagingSync);
                     }
 
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                    if (upsertRequest.IsNewLibrary)
                     {
                         items.ForEach(item =>
                         {

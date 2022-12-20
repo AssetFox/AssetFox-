@@ -12,11 +12,13 @@ using BridgeCareCore.Controllers.BaseController;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
+using Org.BouncyCastle.Utilities;
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 
 namespace BridgeCareCore.Controllers
@@ -140,7 +142,9 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var curves = new List<PerformanceCurveDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
+                    if (upsertRequest.ScenarioId != null)
+                        curves = _performanceCurvesService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         curves = _performanceCurvesService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
@@ -149,8 +153,11 @@ namespace BridgeCareCore.Controllers
                         curves = _performanceCurvesService.GetNewLibraryDataset(upsertRequest.PagingSync);
                     }
 
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
-                        curves.ForEach(curve => curve.Id = Guid.NewGuid());
+                    if (upsertRequest.IsNewLibrary)
+                        curves.ForEach(curve => {
+                            curve.Id = Guid.NewGuid();
+                            curve.CriterionLibrary.Id = Guid.NewGuid();
+                        });
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {

@@ -145,11 +145,13 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var attributes = new List<CalculatedAttributeDTO>();
-                    if (upsertRequest.SyncModel.LibraryId != null)
+                    if (upsertRequest.ScenarioId != null)
+                        attributes = _calulatedAttributeService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.SyncModel);
+                    else if (upsertRequest.SyncModel.LibraryId != null)
                         attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.SyncModel.LibraryId.Value, upsertRequest.SyncModel);
                     else if (!upsertRequest.IsNewLibrary)
                         attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.SyncModel);
-                    if (upsertRequest.SyncModel.LibraryId != null && upsertRequest.SyncModel.LibraryId != upsertRequest.Library.Id)
+                    if (upsertRequest.IsNewLibrary)
                         attributes.ForEach(attribute =>
                         {
                             attribute.Id = Guid.NewGuid();

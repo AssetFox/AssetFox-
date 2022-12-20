@@ -16,7 +16,7 @@
                 </v-flex>
                 <div>
                 <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitDialog" v-show="librarySelectItemValue != null || hasScenario" outline>Add Remaining Life Limit</v-btn>
-                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(true)" v-show="!hasScenario" outline>Create New Library</v-btn>
+                <v-btn class="ghd-white-bg ghd-blue ghd-button" @click="onShowCreateRemainingLifeLimitLibraryDialog(false)" v-show="!hasScenario" outline>Create New Library</v-btn>
                 </div>
             </v-layout>
         </v-flex>
@@ -595,11 +595,12 @@ export default class RemainingLifeLimitEditor extends Vue {
                 library: library,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: library.remainingLifeLimits.length == 0 ? null : this.selectedRemainingLifeLimitLibrary.id,
+                    libraryId: library.remainingLifeLimits.length == 0 || !this.hasSelectedLibrary ? null : this.selectedRemainingLifeLimitLibrary.id,
                     rowsForDeletion: library.remainingLifeLimits === [] ? [] : this.deletionIds,
                     updateRows: library.remainingLifeLimits === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: library.remainingLifeLimits === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -697,7 +698,8 @@ export default class RemainingLifeLimitEditor extends Vue {
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 addedRows: this.addedRows
-                }
+                },
+                scenarioId: null
         }
         RemainingLifeLimitService.upsertRemainingLifeLimitLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

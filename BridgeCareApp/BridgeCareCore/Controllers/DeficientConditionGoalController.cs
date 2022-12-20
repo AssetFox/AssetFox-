@@ -162,11 +162,15 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     var items = new List<DeficientConditionGoalDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null)
+                    if (upsertRequest.ScenarioId != null)
+                        items = _deficientConditionGoalService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.ScenarioId != null)
+                        items = _deficientConditionGoalService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.PagingSync.LibraryId != null)
                         items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                    if (upsertRequest.IsNewLibrary)
                     {
                         items.ForEach(item =>
                         {

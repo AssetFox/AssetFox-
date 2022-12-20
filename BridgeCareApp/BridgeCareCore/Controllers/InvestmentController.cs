@@ -189,7 +189,9 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.CheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
 
                     var budgets = new List<BudgetDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
+                    if (upsertRequest.ScenarioId != null)
+                        budgets = _investmentBudgetsService.GetSyncedInvestmentDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
@@ -198,7 +200,7 @@ namespace BridgeCareCore.Controllers
                         budgets = _investmentBudgetsService.GetNewLibraryDataset(upsertRequest.PagingSync);
                     }
 
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                    if (upsertRequest.IsNewLibrary)
                         budgets.ForEach(budget =>
                         {
                             budget.Id = Guid.NewGuid();

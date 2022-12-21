@@ -196,9 +196,9 @@ namespace BridgeCareCore.Controllers
 
                     var budgets = new List<BudgetDTO>();
                     if (upsertRequest.ScenarioId != null)
-                        budgets = _investmentBudgetsService.GetSyncedInvestmentDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetSyncedInvestmentDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
                     else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
+                        budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         budgets = _investmentPagingService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
                     else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)

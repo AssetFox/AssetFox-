@@ -371,7 +371,7 @@
                     @click="onDiscardChanges"
                     class="ghd-white-bg ghd-blue ghd-button-text"
                     depressed
-                    v-show="hasSelectedLibrary || hasScenario"
+                    v-show="hasScenario"
                 >
                     Cancel
                 </v-btn>

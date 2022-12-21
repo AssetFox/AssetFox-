@@ -246,11 +246,12 @@ namespace BridgeCareCore.Services
 
         private List<PerformanceCurveDTO> SearchCurves(List<PerformanceCurveDTO> curves, string search)
         {
+            var lowerCaseSearch = search.ToLower();
             return curves
-                .Where(_ => _.Name.ToLower().Contains(search) ||
-                    _.Attribute.ToLower().Contains(search) ||
-                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(search)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
+                .Where(_ => _.Name.ToLower().Contains(lowerCaseSearch) ||
+                    _.Attribute.ToLower().Contains(lowerCaseSearch) ||
+                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
+                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
         }
 
         private List<PerformanceCurveDTO> SyncedDataset(List<PerformanceCurveDTO> curves, PagingSyncModel<PerformanceCurveDTO> request)

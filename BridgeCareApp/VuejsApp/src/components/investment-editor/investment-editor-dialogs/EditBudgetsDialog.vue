@@ -251,9 +251,6 @@ export default class EditBudgetsDialog extends Vue {
         this.criterionLibraryEditorDialogData = clone(emptyGeneralCriterionEditorDialogData);
 
         if (!isNil(criterionExpression) && this.selectedBudgetForCriteriaEdit.id !== this.uuidNIL) {
-            //if(this.selectedBudgetForCriteriaEdit.criterionLibrary.id === getBlankGuid())
-            //    this.selectedBudgetForCriteriaEdit.criterionLibrary.id = getNewGuid();            
-        
             this.selectedBudgetForCriteriaEdit.criterionLibrary.mergedCriteriaExpression = criterionExpression;           
 
             this.editBudgetsDialogGridData = update(
@@ -266,16 +263,17 @@ export default class EditBudgetsDialog extends Vue {
             const origBudget = this.dialogData.budgets.find((b) => b.id == budget.id);
 
             if(!isNil(origBudget)){
-                if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                        
-                    alert(this.budgetChanges.addedBudgets.length);
-                    alert(this.budgetChanges.updatedBudgets.length);
-                    
-                    if(this.budgetChanges.addedBudgets.length !== 0)
+                if(origBudget.criterionLibrary.mergedCriteriaExpression !== budget.criterionLibrary.mergedCriteriaExpression){                                                            
+                    if(this.budgetChanges.addedBudgets.length !== 0){
                         this.budgetChanges.addedBudgets[this.budgetChanges.addedBudgets.findIndex((b => b.id == budget.id))] = budget;
-                    else if(this.budgetChanges.updatedBudgets.length !== 0)
+                    }
+                    else if(this.budgetChanges.updatedBudgets.length !== 0){                        
                         this.budgetChanges.updatedBudgets[this.budgetChanges.updatedBudgets.findIndex((b => b.id == budget.id))] = budget;
+                    }
                     else
+                    {
                         this.budgetChanges.updatedBudgets.push(budget);
+                    }
                 }
             }
             else{
@@ -285,6 +283,7 @@ export default class EditBudgetsDialog extends Vue {
             this.selectedBudgetForCriteriaEdit = clone(emptyBudget);
         }
     }
+
     onSubmit(submit: boolean) {
         if (submit) {
             this.$emit('submit', this.budgetChanges);

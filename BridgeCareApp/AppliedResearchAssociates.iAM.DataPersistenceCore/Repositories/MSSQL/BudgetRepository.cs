@@ -273,14 +273,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.ScenarioBudget.SimulationId == simulationId);
 
             if (budgets.Any(_ =>
-                _.CriterionLibrary?.Id != null && _.CriterionLibrary?.Id != Guid.Empty &&
-                !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
+                _.CriterionLibrary?.Id != null && !string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression)))
             {
                 var criterionJoins = new List<CriterionLibraryScenarioBudgetEntity>();
 
                 var criteria = budgets
-                    .Where(budget => budget.CriterionLibrary?.Id != null && budget.CriterionLibrary?.Id != Guid.Empty &&
-                                     !string.IsNullOrEmpty(budget.CriterionLibrary.MergedCriteriaExpression))
+                    .Where(budget => budget.CriterionLibrary?.Id != null && !string.IsNullOrEmpty(budget.CriterionLibrary.MergedCriteriaExpression))
                     .Select(budget =>
                     {
                         var criterion = new CriterionLibraryEntity

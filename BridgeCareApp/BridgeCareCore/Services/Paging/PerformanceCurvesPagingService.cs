@@ -34,7 +34,7 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<PerformanceCurveDTO>();
-            var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(libraryId);           
+            var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(libraryId);
 
             curves = SyncedDataset(curves, request.PagingSync);
 
@@ -106,9 +106,21 @@ namespace BridgeCareCore.Services
 
         public List<PerformanceCurveDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> request)
         {
-            var curves = request.LibraryId == null ?
-                    _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId) :
-                    _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.LibraryId.Value);
+            var curves = new List<PerformanceCurveDTO>();
+            if (request.LibraryId == null)
+            {
+                curves = _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            }
+            else
+            {
+                curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.LibraryId.Value);
+                // Create new performance curves based on provided library
+                foreach (var curve in curves)
+                {
+                    curve.Id = Guid.NewGuid();
+                }
+            }
+
             return SyncedDataset(curves, request);
         }
 
@@ -129,40 +141,41 @@ namespace BridgeCareCore.Services
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)
             {
-                case "name":
-                    if (isDescending)
-                        return curves.OrderByDescending(_ => _.Name.ToLower()).ToList();
-                    else
-                        return curves.OrderBy(_ => _.Name.ToLower()).ToList();
-                case "attribute":
-                    if (isDescending)
-                        return curves.OrderByDescending(_ => _.Attribute.ToLower()).ToList();
-                    else
-                        return curves.OrderBy(_ => _.Attribute.ToLower()).ToList();
+            case "name":
+                if (isDescending)
+                    return curves.OrderByDescending(_ => _.Name.ToLower()).ToList();
+                else
+                    return curves.OrderBy(_ => _.Name.ToLower()).ToList();
+            case "attribute":
+                if (isDescending)
+                    return curves.OrderByDescending(_ => _.Attribute.ToLower()).ToList();
+                else
+                    return curves.OrderBy(_ => _.Attribute.ToLower()).ToList();
             }
             return curves;
         }
 
         private List<PerformanceCurveDTO> SearchCurves(List<PerformanceCurveDTO> curves, string search)
         {
+            var lowerCaseSearch = search.ToLower();
             return curves
-                .Where(_ => _.Name.ToLower().Contains(search) ||
-                    _.Attribute.ToLower().Contains(search) ||
-                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(search)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
+                .Where(_ => _.Name.ToLower().Contains(lowerCaseSearch) ||
+                    _.Attribute.ToLower().Contains(lowerCaseSearch) ||
+                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
+                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
         }
 
         private List<PerformanceCurveDTO> SyncedDataset(List<PerformanceCurveDTO> curves, PagingSyncModel<PerformanceCurveDTO> request)
         {
             curves = curves.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 
-            for(var i = 0; i < curves.Count; i++)
+            for (var i = 0; i < curves.Count; i++)
             {
                 var item = request.UpdateRows.FirstOrDefault(row => row.Id == curves[i].Id);
                 if (item != null)
                     curves[i] = item;
             }
-            
+
             return curves;
         }
     }

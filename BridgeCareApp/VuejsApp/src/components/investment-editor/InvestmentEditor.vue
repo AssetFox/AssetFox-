@@ -947,10 +947,10 @@ export default class InvestmentEditor extends Vue {
         };
     }
 
-    onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {
+    onSubmitEditBudgetsDialogResult(budgetChanges: EmitedBudgetChanges) {        
         this.editBudgetsDialogData = clone(emptyEditBudgetsDialogData);
         if(!isNil(budgetChanges)){
-            this.addedBudgets = this.addedBudgets.concat(budgetChanges.addedBudgets)
+            this.addedBudgets = this.addedBudgets.concat(budgetChanges.addedBudgets);
             budgetChanges.addedBudgets.forEach(budget => {
                 let amounts: BudgetAmount[] = [];
                 if(this.currentPage.length > 0){
@@ -964,11 +964,12 @@ export default class InvestmentEditor extends Vue {
                     })
                 }
                 this.addedBudgetAmounts.set(budget.name, amounts);
-            })
+            });          
             let addedIds = this.addedBudgets.map(b => b.id);            
             budgetChanges.deletionIds.forEach(id => this.removeBudget(id));
             this.deletionBudgetIds = this.deletionBudgetIds.filter(b => !addedIds.includes(b));
-            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));
+            budgetChanges.updatedBudgets.forEach(budget => this.onUpdateBudget(budget.id, budget));                       
+            
             this.onPaginationChanged();
         }      
     }
@@ -1214,9 +1215,12 @@ export default class InvestmentEditor extends Vue {
         this.resetPage();
     }
 
-    onUpdateBudget(rowId: string, updatedRow: Budget){
+    onUpdateBudget(rowId: string, updatedRow: Budget){        
         if(any(propEq('id', rowId), this.addedBudgets))
+        {            
+            this.addedBudgets[this.addedBudgets.findIndex((b => b.id == rowId))] = updatedRow;
             return;
+        }
         let mapEntry = this.updatedBudgetsMap.get(rowId)
         if(isNil(mapEntry)){
             const row = this.BudgetCache.find(r => r.id === rowId);

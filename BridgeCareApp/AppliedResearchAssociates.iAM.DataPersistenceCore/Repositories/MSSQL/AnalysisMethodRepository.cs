@@ -100,7 +100,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            _unitOfWork.Context.AnalysisMethod
+           var analysisMethodEntity = _unitOfWork.Context.AnalysisMethod
                 .Include(_ => _.Attribute)
                 .Include(_ => _.Benefit)
                 .ThenInclude(_ => _.Attribute)
@@ -139,8 +139,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibrary)
 
                 .AsNoTracking()
-                .Single(_ => _.Simulation.Id == simulation.Id)
-                .FillSimulationAnalysisMethod(simulation, userCriteria);
+                .Single(_ => _.Simulation.Id == simulation.Id);
+
+            // Atleast one budget priority should exist
+            if(!analysisMethodEntity.Simulation.BudgetPriorities.Any())
+            {
+                throw new RowNotInTableException("No budget priority was found for the given scenario.");
+            }
+
+            analysisMethodEntity.FillSimulationAnalysisMethod(simulation, userCriteria);
+            
         }
 
         public AnalysisMethodDTO GetAnalysisMethod(Guid simulationId)

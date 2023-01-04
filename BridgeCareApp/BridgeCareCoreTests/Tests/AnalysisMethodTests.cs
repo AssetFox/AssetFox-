@@ -118,16 +118,7 @@ namespace BridgeCareCoreTests.Tests
         {
             var analysisMethodId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
-            var benefit = new BenefitDTO();
-            var criterionLibrary = new CriterionLibraryDTO();
-            var dto = new AnalysisMethodDTO
-            {
-                Benefit = benefit,
-                CriterionLibrary = criterionLibrary,
-                Id = analysisMethodId,
-                OptimizationStrategy = OptimizationStrategy.Benefit,
-                SpendingStrategy = SpendingStrategy.NoSpending,
-            };
+            var dto = AnalysisMethodDtos.Default(analysisMethodId);
             var unitOfWork = UnitOfWorkMocks.New();
             var analysisMethodRepository = AnalysisMethodRepositoryMocks.DefaultMock(unitOfWork);
             analysisMethodRepository.Setup(a => a.GetAnalysisMethod(simulationId)).Returns(dto);
@@ -144,7 +135,7 @@ namespace BridgeCareCoreTests.Tests
             // Arrange
             var controller = SetupController();
             var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var analysisEntity = TestAnalysis(simulation.Id);
+            var analysisEntity = AnalysisMethodEntities.TestAnalysis(simulation.Id);
             var attributeEntity = TestHelper.UnitOfWork.Context.Attribute.First();
             var dto = analysisEntity.ToDto();
             var benefit = TestBenefit(analysisEntity.Id);
@@ -210,6 +201,20 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
+        // WjTodo wip
+        public async Task UpsertAnalysisMethod_RepositoryDoesNotThrow_Ok()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var repository = AnalysisMethodRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var dto = AnalysisMethodDtos.Default(Guid.NewGuid());
+
+            var result = await controller.UpsertAnalysisMethod(Guid.NewGuid(), dto);
+
+            ActionResultAssertions.Ok(result);
+        }
+
+        [Fact]
         public async Task ShouldUpdateAnalysisMethod()
         {
             // Arrange
@@ -222,7 +227,7 @@ namespace BridgeCareCoreTests.Tests
             var attributeEntity = TestHelper.UnitOfWork.Context.Attribute.First();
             dto.Attribute = attributeEntity.Name;
             dto.CriterionLibrary = criterionLibrary;
-            var analysisMethod = TestAnalysis(simulation.Id);
+            var analysisMethod = AnalysisMethodEntities.TestAnalysis(simulation.Id);
             var benefit = TestBenefit(analysisMethod.Id);
             benefit.Attribute = attributeEntity;
             dto.Benefit = benefit.ToDto();

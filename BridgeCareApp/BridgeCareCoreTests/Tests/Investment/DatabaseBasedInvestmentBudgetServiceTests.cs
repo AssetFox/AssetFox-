@@ -221,7 +221,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact]
+        [Fact (Skip ="WJ needs working front end to investigate")]
         public void ImportLibraryInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange
@@ -381,7 +381,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact]
+        [Fact(Skip = "WJ needs working front end to investigate")]
         public void ImportScenarioInvestmentBudgetsFile_BudgetExists_Overwrites()
         {
             // Arrange

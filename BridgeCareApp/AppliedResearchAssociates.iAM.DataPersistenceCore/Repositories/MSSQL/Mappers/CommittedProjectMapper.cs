@@ -8,11 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.iAM.Data.Attributes;
-using OfficeOpenXml.FormulaParsing.Utilities;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -64,8 +60,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
-                        // Add and assign NetworkKeyAttribute and use that in VerifyLocation()
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(),
+                        NetworkKeyAttribute = "" // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -98,17 +94,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
 
             if (dto is SectionCommittedProjectDTO)
-            {
-                // TODO:  Switch to looking up key field in network object
-                // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
-                string keyField = "BRKEY_"; // TODO this will be newly added property NetworkKeyAttribute
-
-                if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID")) // TODO should we call VerifyLocation() here??
+            {                
+                if (dto.VerifyLocation())
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
                         Guid.Parse(dto.LocationKeys["ID"]),
                         DataPersistenceConstants.SectionLocation,
-                        dto.LocationKeys[keyField]
+                        dto.LocationKeys[dto.NetworkKeyAttribute]
                         )
                     {
                         CommittedProjectId = result.Id,
@@ -140,16 +132,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         }
 
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
-        {
-            // TODO:  Switch to looking up key field in datasource object
-            // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
-            string keyField = "BRKEY_"; // TODO this will be newly added property NetworkKeyAttribute
-
+        {            
+            string keyField = ""; // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
+            const string idKey = "ID";
             switch (entity.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
                     var result = new Dictionary<string, string>();
-                    result.Add("ID", entity.Id.ToString());
+                    result.Add(idKey, entity.Id.ToString());
                     result.Add(keyField, entity.LocationIdentifier);
                     return result;
                 default:

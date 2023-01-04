@@ -4,9 +4,12 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class SectionCommittedProjectDTO : BaseCommittedProjectDTO
     {
-        // TODO:  Change this once the data source for section-based networks has been added
-        //        to ensure the key field is being added.  Also verify budget versus scenario
-        public override bool VerifyLocation() => LocationKeys.Count == 3 ? true : false;
+        // TODO:  Also verify budget versus scenario - how to test this??
+        public override bool VerifyLocation()
+        {            
+            const string idKey = "ID";
+            return LocationKeys.ContainsKey(NetworkKeyAttribute) && LocationKeys.ContainsKey(idKey);
+        }
 
     }
 }

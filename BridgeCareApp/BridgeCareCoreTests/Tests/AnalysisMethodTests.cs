@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
+using AppliedResearchAssociates.iAM.UnitTestsCore;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -16,6 +17,8 @@ using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Models.DefaultData;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.AnalysisMethod;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -38,7 +41,7 @@ namespace BridgeCareCoreTests.Tests
             var unitOfWork = TestHelper.UnitOfWork;
             AttributeTestSetup.CreateAttributes(unitOfWork);
             NetworkTestSetup.CreateNetwork(unitOfWork);
-
+            
             _mockAnalysisDefaultDataService.Setup(m => m.GetAnalysisDefaultData()).ReturnsAsync(new AnalysisDefaultData());
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
@@ -66,21 +69,6 @@ namespace BridgeCareCoreTests.Tests
             };
             return controller;
         }
-        public AnalysisMethodEntity TestAnalysis(Guid simulationId, Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var returnValue = new AnalysisMethodEntity
-            {
-                Id = resolveId,
-                SimulationId = simulationId,
-                OptimizationStrategy = OptimizationStrategy.Benefit,
-                SpendingStrategy = SpendingStrategy.NoSpending,
-                ShouldApplyMultipleFeasibleCosts = false,
-                ShouldDeteriorateDuringCashFlow = false,
-                ShouldUseExtraFundsAcrossBudgets = false
-            };
-            return returnValue;
-        }
 
         public BenefitEntity TestBenefit(Guid analysisMethodId, Guid? benefitId = null)
         {
@@ -96,7 +84,7 @@ namespace BridgeCareCoreTests.Tests
 
         private AnalysisMethodEntity SetupForGet(Guid simulationId)
         {
-            var entity = TestAnalysis(simulationId);
+            var entity = AnalysisMethodEntities.TestAnalysis(simulationId);
 
             TestHelper.UnitOfWork.Context.AnalysisMethod.Add(entity);
             TestHelper.UnitOfWork.Context.SaveChanges();
@@ -110,13 +98,41 @@ namespace BridgeCareCoreTests.Tests
             return criterionLibrary;
         }
 
-        [Fact]
-        public async Task ShouldReturnOkResultOnGet()
+        private AnalysisMethodController CreateController(Mock<IUnitOfWork> mockUnitOfWork)
         {
-            var controller = SetupController();
-            // Act
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var result = await controller.AnalysisMethod(simulation.Id);
+            var claimHelper = ClaimHelperMocks.New();
+            var _ = UserRepositoryMocks.EveryoneExists(mockUnitOfWork);
+            var analysisDefaultDataServiceMock = AnalysisDefaultDataServiceMocks.DefaultMock();
+            var controller = new AnalysisMethodController(
+                EsecSecurityMocks.Admin,
+                mockUnitOfWork.Object,
+                HubServiceMocks.Default(),
+                HttpContextAccessorMocks.Default(),
+                analysisDefaultDataServiceMock.Object,
+                claimHelper.Object);
+            return controller;
+        }
+
+        [Fact]
+        public async Task Get_RepositoryReturnsAnalysisMethodDto_ControllerReturnsOneToo()
+        {
+            var analysisMethodId = Guid.NewGuid();
+            var simulationId = Guid.NewGuid();
+            var benefit = new BenefitDTO();
+            var criterionLibrary = new CriterionLibraryDTO();
+            var dto = new AnalysisMethodDTO
+            {
+                Benefit = benefit,
+                CriterionLibrary = criterionLibrary,
+                Id = analysisMethodId,
+                OptimizationStrategy = OptimizationStrategy.Benefit,
+                SpendingStrategy = SpendingStrategy.NoSpending,
+            };
+            var unitOfWork = UnitOfWorkMocks.New();
+            var analysisMethodRepository = AnalysisMethodRepositoryMocks.DefaultMock(unitOfWork);
+            analysisMethodRepository.Setup(a => a.GetAnalysisMethod(simulationId)).Returns(dto);
+            var controller = CreateController(unitOfWork);
+            var result = await controller.AnalysisMethod(simulationId);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);

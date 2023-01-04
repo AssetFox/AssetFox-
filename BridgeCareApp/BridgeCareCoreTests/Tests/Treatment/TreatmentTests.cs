@@ -63,26 +63,6 @@ namespace BridgeCareCoreTests.Tests
             return controller;
         }
 
-        private TreatmentController CreateAuthorizedControllerWithTreatmService()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var treatmentService = new TreatmentService(TestHelper.UnitOfWork, new ExcelTreatmentLoader(new Mock<IExpressionValidationService>().Object));
-            var controller = new TreatmentController(treatmentService, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
-
-        private TreatmentController CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object);
-            return controller;
-        }
-
         private TreatmentController CreateTestController(List<string> userClaims)
         {
             List<Claim> claims = new List<Claim>();
@@ -231,19 +211,6 @@ namespace BridgeCareCoreTests.Tests
             Assert.Equal(_testScenarioTreatmentConsequence.Id, dto.Consequences[0].Id);
             Assert.Equal(_testScenarioTreatmentCost.Id, dto.Costs[0].Id);
             Assert.Contains(budget.Id, dto.BudgetIds);
-        }
-
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
-        {
-            //Setup();
-            //// Act
-            //var controller = CreateAuthorizedController();
-            //var result = await controller.GetTreatmentLibraries();
-
-            //// Assert
-            //Assert.IsType<OkObjectResult>(result);
         }
 
         [Fact]

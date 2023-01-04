@@ -39,6 +39,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 Id = budgetId,
                 Name = budgetName,
+                BudgetAmounts = new List<BudgetAmountDTO>(),
             };
             var budgets = new List<BudgetDTO> { budget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);
@@ -87,6 +88,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 Id = budgetId,
                 Name = budgetName,
+                BudgetAmounts = new List<BudgetAmountDTO>(),
             };
             var emptyBudgets = new List<BudgetDTO>();
             var addedBudgets = new List<BudgetDTO> { budget };
@@ -115,12 +117,14 @@ namespace BridgeCareCoreTests.Tests
             {
                 Id = budgetId,
                 Name = budgetName,
+                BudgetAmounts = new List<BudgetAmountDTO>(),
             };
             var budgets = new List<BudgetDTO> { budget };
             var modifiedBudget = new BudgetDTO
             {
                 Id = budgetId,
                 Name = "Updated budget",
+                BudgetAmounts = new List<BudgetAmountDTO>(),
             };
             var modifiedBudgets = new List<BudgetDTO> { modifiedBudget };
             budgetRepo.Setup(br => br.GetScenarioBudgets(simulationId)).Returns(budgets);

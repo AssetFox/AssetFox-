@@ -80,7 +80,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act
-            var result = service.ExportCommittedProjectsFile(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"));
+            var result = service.ExportCommittedProjectsFile(TestDataForCommittedProjects.SimulationId);
 
             // Asset
             Assert.False(string.IsNullOrEmpty(result.FileName));
@@ -89,7 +89,10 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(excel.Workbook.Worksheets.Count > 0);
             var cells = excel.Workbook.Worksheets[0].Cells.Value;
             Assert.NotNull(cells);
-            Assert.Equal(TestDataForCommittedProjects.ValidCommittedProjects.Count + 1, ((Array)cells).GetLength(0));
+            var cellArray = (Array)cells;
+            var cellArrayLength = cellArray.GetLength(0);
+            var committedProjectsForThisSimulation = TestDataForCommittedProjects.ValidCommittedProjects.Where(cp => cp.SimulationId == TestDataForCommittedProjects.SimulationId).ToList();
+            Assert.Equal(committedProjectsForThisSimulation.Count + 1, cellArrayLength);
         }
 
         [Fact]
@@ -144,7 +147,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act - The result is delivered through the callback
-            service.ImportCommittedProjectFiles(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), _excelData, "GoodFile", false);
+            service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFile", false);
 
             // Assert
             Assert.True(testInput.Count == 2, "Number of comitted projects is wrong");
@@ -167,7 +170,7 @@ namespace BridgeCareCoreTests.Tests
             var service = new CommittedProjectService(_testUOW);
 
             // Act - The result is delivered through the callback
-            service.ImportCommittedProjectFiles(Guid.Parse("dcdacfde-02da-4109-b8aa-add932756dee"), _excelData, "GoodFileWithNoTreatment", true);
+            service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFileWithNoTreatment", true);
 
             // Assert
             Assert.True(testInput.Count == 3, "Number of comitted projects is wrong");

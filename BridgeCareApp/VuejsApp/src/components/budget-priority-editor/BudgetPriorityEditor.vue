@@ -72,7 +72,7 @@
                                         <v-text-field v-if="header.value === 'priorityLevel'" label='Edit' single-line
                                                       v-model.number='props.item[header.value]'
                                                       :mask="'##########'"
-                                                      :rules="[rules['generalRules'].valueIsNotEmpty]" />
+                                                      :rules="[rules['generalRules'].valueIsNotEmpty, rules['generalRules'].valueIsNotUnique(props.item[header.value], currentPriorityList)]" />
                                         <v-text-field v-else label='Edit' single-line :mask="'####'"
                                                       v-model.number='props.item[header.value]' />
                                     </template>
@@ -228,6 +228,7 @@ import { AxiosResponse } from 'axios';
 import { http2XX } from '@/shared/utils/http-utils';
 import GeneralCriterionEditorDialog from '@/shared/modals/GeneralCriterionEditorDialog.vue';
 import { emptyGeneralCriterionEditorDialogData, GeneralCriterionEditorDialogData } from '@/shared/models/modals/general-criterion-editor-dialog-data';
+import { sortByProperty } from '../../shared/utils/sorter-utils';
 
 const ObjectID = require('bson-objectid');
 
@@ -273,6 +274,7 @@ export default class BudgetPriorityEditor extends Vue {
     totalItems = 0;
     currentPage: BudgetPriority[] = [];
     initializing: boolean = true;
+    currentPriorityList: number[] = [];
 
     unsavedDialogAllowed: boolean = true;
     trueLibrarySelectItemValue: string | null = ''
@@ -413,6 +415,9 @@ export default class BudgetPriorityEditor extends Vue {
         this.setGridCriteriaColumnWidth();
         this.setGridHeaders();
         this.setGridData();
+        this.currentPage.forEach((item) => {
+            this.currentPriorityList.push(item.priorityLevel);
+        });
     }
 
     @Watch('selectedBudgetPriorityGridRows')
@@ -615,12 +620,13 @@ export default class BudgetPriorityEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<BudgetPriorityLibrary, BudgetPriority> = {
                 library: budgetPriorityLibrary,    
                 isNewLibrary: true,           
-                 pagingSync: {
-                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 ? null : this.selectedBudgetPriorityLibrary.id,
+                pagingSync: {
+                    libraryId: budgetPriorityLibrary.budgetPriorities.length == 0 || !this.hasSelectedLibrary ? null : this.selectedBudgetPriorityLibrary.id,
                     rowsForDeletion: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.deletionIds,
                     updateRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: budgetPriorityLibrary.budgetPriorities === [] ? [] : this.addedRows,
-                 }
+                },
+                scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then(() => {
                 this.hasCreatedLibrary = true;
@@ -749,8 +755,8 @@ export default class BudgetPriorityEditor extends Vue {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
                 this.clearChanges();
                 this.librarySelectItemValue = null;
-                this.resetPage();
                 this.addSuccessNotificationAction({message: "Modified scenario's budget priorities"});
+                this.currentPage = sortByProperty("priorityLevel", this.currentPage);
             }           
         });
     }
@@ -771,6 +777,7 @@ export default class BudgetPriorityEditor extends Vue {
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: this.addedRows
                  }
+                 , scenarioId: null
         }
         BudgetPriorityService.upsertBudgetPriorityLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -921,17 +928,18 @@ export default class BudgetPriorityEditor extends Vue {
     };
 
     initializePages(){
+        const { sortBy, descending, page, rowsPerPage } = this.pagination;
         const request: PagingRequest<BudgetPriority>= {
-            page: 1,
-            rowsPerPage: 5,
+            page: page,
+            rowsPerPage: rowsPerPage,
             pagingSync: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
                 addedRows: [],
             },           
-            sortColumn: '',
-            isDescending: false,
+            sortColumn: sortBy,
+            isDescending: descending != null ? descending : false,
             search: ''
         };
         if((!this.hasSelectedLibrary || this.hasScenario) && this.selectedScenarioId !== this.uuidNIL)
@@ -939,7 +947,7 @@ export default class BudgetPriorityEditor extends Vue {
                 this.initializing = false
                 if(response.data){
                     let data = response.data as PagingPage<BudgetPriority>;
-                    this.currentPage = data.items;
+                    this.currentPage = sortByProperty("priorityLevel", data.items);
                     this.rowCache = clone(this.currentPage)
                     this.totalItems = data.totalItems;
                 }

@@ -6,6 +6,7 @@ using AppliedResearchAssociates.iAM.Data;
 using AppliedResearchAssociates.iAM.Data.Aggregation;
 using AppliedResearchAssociates.iAM.Data.Attributes;
 using AppliedResearchAssociates.iAM.Data.Networking;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -50,7 +51,8 @@ namespace BridgeCareCore.Services.Aggregation
 
                     if (checkForDuplicateIDs.Count != checkForDuplicateIDs.Distinct().ToList().Count)
                     {
-                        var broadcastError = $"Error : Duplicate attribute ids.";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error : Duplicate attribute ids for {networkName}.";
                         WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }
@@ -58,7 +60,8 @@ namespace BridgeCareCore.Services.Aggregation
                     var checkForDuplicateNames = configurationAttributes.Select(_ => _.Name).ToList();
                     if (checkForDuplicateNames.Count != checkForDuplicateNames.Distinct().ToList().Count)
                     {
-                        var broadcastError = $"Error : Duplicate attribute names";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error : Duplicate attribute names for {networkName}";
                         WriteError(writer, broadcastError);
                         throw new InvalidOperationException();
                     }
@@ -95,7 +98,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     catch (Exception e)
                     {
-                        var broadcastError = $"Error: Fetching data for the attributes ::{e.Message}";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error: Fetching data for the attributes for {networkName}::{e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
                         state.ErrorMessage = e.Message;
@@ -155,7 +159,8 @@ namespace BridgeCareCore.Services.Aggregation
                         }
                         catch (Exception e)
                         {
-                            var broadcastError = $"Error: Creating aggregation rule(s) for the attributes :: {e.Message}";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                            var broadcastError = $"Error: Creating aggregation rule(s) for the attributes for {networkName}:: {e.Message}";
                             WriteError(writer, broadcastError);
                             throw;
                         }
@@ -169,7 +174,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     catch (Exception e)
                     {
-                        var broadcastError = $"Error while filling Assigned Data -  {e.Message}";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error while filling Assigned Data for {networkName} -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
                         state.ErrorMessage = e.Message;
@@ -181,7 +187,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     catch (Exception e)
                     {
-                        var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting -  {e.Message}";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error while Updating MaintainableAssets SpatialWeighting for {networkName} -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
                         state.ErrorMessage = e.Message;
@@ -193,7 +200,8 @@ namespace BridgeCareCore.Services.Aggregation
                     }
                     catch (Exception e)
                     {
-                        var broadcastError = $"Error while adding Aggregated results -  {e.Message}";
+                        var networkName = _unitOfWork.NetworkRepo.GetNetworkNameOrId(networkId);
+                        var broadcastError = $"Error while adding Aggregated results for {networkName} -  {e.Message}";
                         WriteError(writer, broadcastError);
                         isError = true;
                         state.ErrorMessage = e.Message;

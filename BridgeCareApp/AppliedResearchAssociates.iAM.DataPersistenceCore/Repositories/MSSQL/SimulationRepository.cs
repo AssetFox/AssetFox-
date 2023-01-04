@@ -80,7 +80,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.User)
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
-                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username).ToList();
+                .Where(_ => _.Owner == _unitOfWork.CurrentUser.Username)
+                .OrderByDescending(s => s.LastModifiedDate)
+                .ToList();
 
             return simulations;
         }
@@ -96,10 +98,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.Network)
                 .ToList().Select(_ => _.ToDto(users.FirstOrDefault(__ => __.Id == _.CreatedBy)))
                 .Where(_ => _.Owner != _unitOfWork.CurrentUser.Username &&
-                    hasAdminAccess ||
+                    (hasAdminAccess ||
                     hasSimulationAccess ||
-                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username)
-                    ).ToList();
+                    _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))
+                 )
+                .OrderByDescending(s => s.LastModifiedDate)
+                .ToList();
             return simulations;
         }
 
@@ -272,6 +276,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CommittedProjectConsequences)
                 .Include(_ => _.CommittedProjects)
                 .ThenInclude(_ => _.ScenarioBudget)
+                .Include(_ => _.CommittedProjects)
+                .ThenInclude(_ => _.CommittedProjectLocation)
                 // performance curves
                 .Include(_ => _.PerformanceCurves)
                 .ThenInclude(_ => _.ScenarioPerformanceCurveEquationJoin)
@@ -500,9 +506,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             if (simulationToClone.CommittedProjects.Any())
-            {
+            {                
                 var committedProjectsAffected = simulationToClone.CommittedProjects.Where(_ =>
-                    simulationToClone.Budgets.Any(budget => budget.Name != _.ScenarioBudget.Name)).ToList();
+                    !simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
+                
                 if (committedProjectsAffected.Any())
                 {
                     numberOfCommittedProjectsAffected = committedProjectsAffected.Count();
@@ -510,8 +517,9 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                         .Select(_ => _.ScenarioBudget.Name).Distinct().ToList();
                 }
 
-                simulationToClone.CommittedProjects = simulationToClone.CommittedProjects.Where(_ =>
+                var committedProjects = simulationToClone.CommittedProjects.Where(_ =>
                     simulationToClone.Budgets.Any(budget => budget.Name == _.ScenarioBudget.Name)).ToList();
+                simulationToClone.CommittedProjects = committedProjects;
                 simulationToClone.CommittedProjects.ForEach(committedProject =>
                 {
                     if (simulationToClone.Budgets.Any(_ => _.Name == committedProject.ScenarioBudget.Name))
@@ -534,6 +542,14 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                                 _unitOfWork.Context.ReInitializeAllEntityBaseProperties(consequence,
                                     _unitOfWork.UserEntity?.Id);
                             });
+                        }
+                                               
+                        if (committedProject.CommittedProjectLocation != null)
+                        {
+                            committedProject.CommittedProjectLocation.Id = Guid.NewGuid();
+                            committedProject.CommittedProjectLocation.CommittedProjectId = committedProject.Id;
+                            _unitOfWork.Context.ReInitializeAllEntityBaseProperties(committedProject.CommittedProjectLocation,
+                                    _unitOfWork.UserEntity?.Id);
                         }
                     }
                 });
@@ -983,6 +999,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (simulationToClone.CommittedProjects.Any())
             {
                 _unitOfWork.Context.AddAll(simulationToClone.CommittedProjects.ToList());
+                var committedProjectLocations = simulationToClone.CommittedProjects.Select(_ => _.CommittedProjectLocation).ToList();
+                _unitOfWork.Context.AddAll(committedProjectLocations);
                 // add committed project consequences
                 if (simulationToClone.CommittedProjects.Any(_ => _.CommittedProjectConsequences.Any()))
                 {
@@ -1273,9 +1291,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var simulationEntity = _unitOfWork.Context.Simulation.Single(_ => _.Id == dto.Id);
-            if (simulationEntity.Name != dto.Name)
+            if (simulationEntity.Name != dto.Name || simulationEntity.NoTreatmentBeforeCommittedProjects != dto.NoTreatmentBeforeCommittedProjects)
             {
                 simulationEntity.Name = dto.Name;
+                simulationEntity.NoTreatmentBeforeCommittedProjects = dto.NoTreatmentBeforeCommittedProjects;
 
                 _unitOfWork.Context.UpdateEntity(simulationEntity, dto.Id, _unitOfWork.UserEntity?.Id);
             }
@@ -1341,6 +1360,28 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                     _.Users.Any(__ => __.Username == _unitOfWork.CurrentUser.Username))));
 
             return simulation;
+        }
+        
+        public bool GetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            return GetSimulation(simulationId).NoTreatmentBeforeCommittedProjects;
+        }
+
+        public void SetNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, true);
+        }
+
+        public void RemoveNoTreatmentBeforeCommitted(Guid simulationId)
+        {
+            UpdateSimulationNoTreatmentBeforeCommitted(simulationId, false);
+        }
+
+        private void UpdateSimulationNoTreatmentBeforeCommitted(Guid simulationId, bool noTreatmentBeforeCommitted)
+        {
+            var simulationDto = GetSimulation(simulationId);
+            simulationDto.NoTreatmentBeforeCommittedProjects = noTreatmentBeforeCommitted;
+            UpdateSimulation(simulationDto);
         }
     }
 }

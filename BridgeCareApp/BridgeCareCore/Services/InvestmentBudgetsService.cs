@@ -293,7 +293,13 @@ namespace BridgeCareCore.Services
                             join.ScenarioBudget.SimulationId == simulationId &&
                             budgetNames.Contains(join.ScenarioBudget.Name)));
                 }
-
+                var projects = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId && _.ScenarioBudgetId != null).ToList();
+                if(projects.Count > 0)
+                {
+                    projects.ForEach(_ => _.ScenarioBudgetId = null);
+                    _unitOfWork.Context.UpdateAll(projects);
+                }
+                
                 _unitOfWork.Context.DeleteAll<ScenarioBudgetEntity>(_ => _.SimulationId == simulationId);
             }
 
@@ -434,9 +440,34 @@ namespace BridgeCareCore.Services
             }
 
             var warningSb = new StringBuilder();
+            
             if (budgetsWithInvalidCriteria.Any())
             {
                 warningSb.Append($"The following budgets had invalid criteria: {string.Join(", ", budgetsWithInvalidCriteria)}. ");
+            }
+
+            var budgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
+            if (budgets != null && budgets.Count > 0 && budgets.First().BudgetAmounts.Count != 0)
+            {
+                var firstYear = budgets.First().BudgetAmounts.Min(_ => _.Year);
+                var numberOfYears = budgets.First().BudgetAmounts.Count;
+
+                var investmentPlan = _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId);
+                if (investmentPlan.FirstYearOfAnalysisPeriod != firstYear || investmentPlan.NumberOfYearsInAnalysisPeriod != numberOfYears)
+                {                
+                    if(investmentPlan.Id == Guid.Empty)
+                    {
+                        var planData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
+                        investmentPlan.InflationRatePercentage = planData.InflationRatePercentage;
+                        investmentPlan.MinimumProjectCostLimit = planData.MinimumProjectCostLimit;
+                        investmentPlan.Id = Guid.NewGuid();
+                    }
+                    investmentPlan.FirstYearOfAnalysisPeriod = firstYear;
+                    investmentPlan.NumberOfYearsInAnalysisPeriod = numberOfYears;
+                    _unitOfWork.InvestmentPlanRepo.UpsertInvestmentPlan(investmentPlan, simulationId);
+                }
+
+
             }
             return new ScenarioBudgetImportResultDTO
             {
@@ -639,6 +670,7 @@ namespace BridgeCareCore.Services
             var total = 0;
             var items = new List<BudgetDTO>();
             var lastYear = 0;
+            
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
 
@@ -649,7 +681,9 @@ namespace BridgeCareCore.Services
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
-                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+            {
+                lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);               
+            }               
 
             if (request.RowsPerPage > 0)
             {
@@ -666,7 +700,7 @@ namespace BridgeCareCore.Services
                 {
                     Items = items,
                     TotalItems = total,
-                    LastYear = lastYear
+                    LastYear = lastYear,
                 };
             }
 
@@ -685,13 +719,19 @@ namespace BridgeCareCore.Services
             var items = new List<BudgetDTO>();
             var total = 0;
             var lastYear = 0;
+            var firstYear = 0;
             var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
             if (investmentPlan.Id == Guid.Empty)
             {
                 var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
                 investmentPlan.MinimumProjectCostLimit = investmentDefaultData.MinimumProjectCostLimit;
                 investmentPlan.InflationRatePercentage = investmentDefaultData.InflationRatePercentage;
+                if (investmentPlan.FirstYearOfAnalysisPeriod == 0)
+                    investmentPlan.FirstYearOfAnalysisPeriod = DateTime.Now.Year;
+                investmentPlan.Id = Guid.NewGuid();
             }
+
+            investmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod == 0 ? 1 : investmentPlan.NumberOfYearsInAnalysisPeriod;
 
             var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                 _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
@@ -702,7 +742,10 @@ namespace BridgeCareCore.Services
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
 
             if (budgets.Count > 0 && budgets[0].BudgetAmounts.Count > 0)
+            {
+                firstYear = budgets[0].BudgetAmounts.Min(_ => _.Year);
                 lastYear = budgets[0].BudgetAmounts.Max(_ => _.Year);
+            }              
 
             if (request.RowsPerPage > 0)
             {
@@ -720,6 +763,7 @@ namespace BridgeCareCore.Services
                     Items = items,
                     TotalItems = total,
                     LastYear = lastYear,
+                    FirstYear = firstYear,
                     InvestmentPlan = investmentPlan
                 };
             }
@@ -729,6 +773,7 @@ namespace BridgeCareCore.Services
                 Items = items,
                 TotalItems = total,
                 LastYear = lastYear,
+                FirstYear = firstYear,
                 InvestmentPlan = investmentPlan
             };
         }
@@ -738,12 +783,30 @@ namespace BridgeCareCore.Services
             var budgets = request.LibraryId == null ?
                     _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
                     _unitOfWork.BudgetRepo.GetBudgetLibrary(request.LibraryId.Value).Budgets;
-            return SyncedDataset(budgets, request);
+            budgets =  SyncedDataset(budgets, request);
+
+            if(request.LibraryId != null)
+            {
+                budgets.ForEach(_ =>
+                {
+                    _.Id = Guid.NewGuid();
+                    _.BudgetAmounts.ForEach(__ => __.Id = Guid.NewGuid());
+                });
+            }
+
+            budgets.ForEach(_ => _.BudgetAmounts.ForEach(__ => __.Year += request.FirstYearAnalysisBudgetShift));
+            return budgets;
         }
 
         public List<BudgetDTO> GetSyncedLibraryDataset(Guid libraryId, InvestmentPagingSyncModel request)
         {
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
+            return SyncedDataset(budgets, request);
+        }
+
+        public List<BudgetDTO> GetNewLibraryDataset(InvestmentPagingSyncModel request)
+        {
+            var budgets = new List<BudgetDTO>();
             return SyncedDataset(budgets, request);
         }
 
@@ -785,7 +848,6 @@ namespace BridgeCareCore.Services
         private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
         {
             budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
-
             for (var i = 0; i < budgets.Count; i++)
             {
                 var budget = budgets[i];
@@ -795,12 +857,12 @@ namespace BridgeCareCore.Services
                     budget.Name = item.Name;
                     budget.BudgetOrder = item.BudgetOrder;
                     budget.CriterionLibrary = item.CriterionLibrary;
-                }
-                if(syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))
-                    budget.BudgetAmounts = budget.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[budget.Name]).ToList();
+                }               
                 if(syncModel.Deletionyears.Count != 0)
                     budget.BudgetAmounts = budget.BudgetAmounts.Where(_ => !syncModel.Deletionyears.Contains(_.Year)).ToList();
-                if(syncModel.UpdatedBudgetAmounts.ContainsKey(budget.Name))
+                if (syncModel.AddedBudgetAmounts.ContainsKey(budget.Name))
+                    budget.BudgetAmounts = budget.BudgetAmounts.Concat(syncModel.AddedBudgetAmounts[budget.Name]).ToList();
+                if (syncModel.UpdatedBudgetAmounts.ContainsKey(budget.Name))
                     for (var o = 0; o < budget.BudgetAmounts.Count; o++)
                     {
                         var amount = syncModel.UpdatedBudgetAmounts[budget.Name].FirstOrDefault(row => row.Id == budget.BudgetAmounts[o].Id);

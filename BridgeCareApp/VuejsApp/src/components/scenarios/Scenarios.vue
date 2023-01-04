@@ -950,6 +950,32 @@ export default class Scenarios extends Vue {
             this.getSharedScenariosPageAction(request); 
     }
 
+    // Refresh both lists and counts(gets called when clone, delete, create operations are performed)
+    onScenariosPagination() {
+        if(this.initializing)
+            return;
+
+        const { sortBy, descending, page, rowsPerPage } = this.userScenariosPagination;
+        const request: PagingRequest<Scenario>= {
+            page: page,
+            rowsPerPage: rowsPerPage,
+            pagingSync: {
+                libraryId: null,
+                updateRows: [],
+                rowsForDeletion: [],
+                addedRows: [],
+            },           
+            sortColumn: sortBy != null ? sortBy : '',
+            isDescending: descending != null ? descending : false,
+            search: this.currentSearchMine
+        };
+
+        if(hasValue(this.networks))
+            this.getUserScenariosPageAction(request).then(() => {
+                this.onSharedScenariosPagination();
+            });
+    }
+
     @Watch('simulationQueuePagination') onSimulationQueuePagination() {
         this.doSimulationQueuePagination();
     }
@@ -1329,10 +1355,7 @@ export default class Scenarios extends Vue {
                 scenarioName: scenario.name
             }).then(() => {
                 this.selectedScenario = clone(emptyScenario)
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.onScenariosPagination();
             });
         }
     }
@@ -1366,12 +1389,10 @@ export default class Scenarios extends Vue {
         if (submit && this.selectedScenario.id !== getBlankGuid()) {
             this.deleteScenarioAction({
                 scenarioId: this.selectedScenario.id,
+                scenarioName: this.selectedScenario.name,
             }).then(() => {
-                this.selectedScenario = clone(emptyScenario);
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.selectedScenario = clone(emptyScenario);              
+                this.onScenariosPagination();
             });
         }
     }
@@ -1439,10 +1460,7 @@ export default class Scenarios extends Vue {
                 scenario: scenario,
                 networkId: scenario.networkId,
             }).then(() => {
-                if(this.tab == 0)
-                    this.onUserScenariosPagination();
-                else
-                    this.onSharedScenariosPagination();
+                this.onScenariosPagination();
             });
         }
     }
@@ -1687,8 +1705,9 @@ export default class Scenarios extends Vue {
   border-bottom: 2px solid black;
 }
 
-.v-tabs__item--active .icon-selected-tab{
-    fill:#777777
+.v-tabs__item--active{
+    fill:#002E6C !important;
+    color: #002E6C !important;
 }
 .icon-selected-tab{
     fill:#2A578D

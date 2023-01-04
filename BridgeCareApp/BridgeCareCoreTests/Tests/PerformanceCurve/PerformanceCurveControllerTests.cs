@@ -212,7 +212,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact(Skip = "GetPerformanceCurveLibraries no longer gets child performance curves, may want to delete")]
-        public async Task ShouldGetAllPerformanceCurveLibrariesWithPerformanceCurves()
+        public async Task ShouldGetAllPerformanceCurveLibrariesWithoutPerformanceCurves()
         {
             Setup();
             var libraryId = Guid.NewGuid();
@@ -233,9 +233,7 @@ namespace BridgeCareCoreTests.Tests
                 typeof(List<PerformanceCurveLibraryDTO>));
             var dto = dtos.Single(pc => pc.Id == libraryId);
 
-            Assert.Single(dto.PerformanceCurves);
-
-            Assert.Equal(curveId, dto.PerformanceCurves[0].Id);
+            Assert.Empty(dto.PerformanceCurves);
         }
 
         [Fact]

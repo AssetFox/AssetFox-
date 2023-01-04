@@ -7,7 +7,6 @@ using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,7 +35,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 var t = e.InnerException;
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::GetAnnouncements - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::GetAnnouncements - {e.Message}");
                 throw new Exception(e.Message);
             }
         }
@@ -61,7 +60,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::UpsertAnnouncement - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::UpsertAnnouncement - {e.Message}");
                 throw new Exception(e.Message);
             }
         }
@@ -85,7 +84,7 @@ namespace BridgeCareCore.Controllers
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{AnnouncementError}::DeleteAnnouncement - {e.Message}");
                 throw new Exception(e.Message);
             }
         }

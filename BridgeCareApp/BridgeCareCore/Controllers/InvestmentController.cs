@@ -18,8 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using BridgeCareCore.Models;
 using BridgeCareCore.Utils.Interfaces;
-
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Controllers
 {
@@ -55,7 +55,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioInvestmentPage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetScenarioInvestmentPage - {e.Message}");
                 throw;
             }
         }
@@ -72,7 +72,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetLibraryInvestmentPage - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{DeteriorationModelError}::GetLibraryInvestmentPage - {e.Message}");
                 throw;
             }
         }
@@ -93,14 +93,16 @@ namespace BridgeCareCore.Controllers
 
                 return Ok(result);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestment - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestment for {simulationName} - {HubService.errorList["Unauthorized"]}");
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestment - {HubService.errorList["Exception"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestment for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -130,16 +132,18 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment for {simulationName} - {HubService.errorList["Unauthorized"]}");
+                throw;
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment - {HubService.errorList["Exception"]}");
+                var simulationName = UnitOfWork.SimulationRepo.GetSimulationNameOrId(simulationId);
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertInvestment for {simulationName} - {e.Message}");
                 throw;
             }
         }
@@ -165,7 +169,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetBudgetLibraries - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetBudgetLibraries - {e.Message}");
                 throw;
             }
         }
@@ -183,11 +187,18 @@ namespace BridgeCareCore.Controllers
                     _claimHelper.OldWayCheckUserLibraryModifyAuthorization(upsertRequest.Library.Owner, UserId);
 
                     var budgets = new List<BudgetDTO>();
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
+                    if (upsertRequest.ScenarioId != null)
+                        budgets = _investmentBudgetsService.GetSyncedInvestmentDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                    else if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
                         budgets = _investmentBudgetsService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    if (upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != upsertRequest.Library.Id)
+                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
+                    {
+                        budgets = _investmentBudgetsService.GetNewLibraryDataset(upsertRequest.PagingSync);
+                    }
+
+                    if (upsertRequest.IsNewLibrary)
                         budgets.ForEach(budget =>
                         {
                             budget.Id = Guid.NewGuid();
@@ -203,20 +214,20 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (RowNotInTableException e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["RowNotInTable"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {e.Message}");
                 throw;
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::UpsertBudgetLibrary - {e.Message}");
                 throw;
             }
         }
@@ -243,15 +254,15 @@ namespace BridgeCareCore.Controllers
 
                 return Ok();
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DeleteBudgetLibrary - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
                 UnitOfWork.Rollback();
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DeleteBudgetLibrary - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DeleteBudgetLibrary - {e.Message}");
                 throw;
             }
         }
@@ -271,7 +282,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetScenarioSimpleBudgetDetails - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetScenarioSimpleBudgetDetails - {e.Message}");
                 throw;
             }
         }
@@ -291,7 +302,7 @@ namespace BridgeCareCore.Controllers
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestmentPlan - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetInvestmentPlan - {e.Message}");
                 throw;
             }
         }
@@ -357,14 +368,14 @@ namespace BridgeCareCore.Controllers
                 }
                 return Ok(result.BudgetLibrary);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportLibraryInvestmentBudgetsExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportLibraryInvestmentBudgetsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportLibraryInvestmentBudgetsExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -425,14 +436,14 @@ namespace BridgeCareCore.Controllers
                 }
                 return Ok(result.Budgets);
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportScenarioInvestmentBudgetsExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Ok();
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportScenarioInvestmentBudgetsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ImportScenarioInvestmentBudgetsExcelFile - { e.Message }");
                 throw;
             }
         }
@@ -452,11 +463,11 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportScenarioInvestmentBudgetsExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportScenarioInvestmentBudgetsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportScenarioInvestmentBudgetsExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -476,11 +487,11 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportLibraryInvestmentBudgetsExcelFile - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportLibraryInvestmentBudgetsExcelFile - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::ExportLibraryInvestmentBudgetsExcelFile - {e.Message}");
                 throw;
             }
         }
@@ -506,11 +517,11 @@ namespace BridgeCareCore.Controllers
             catch (UnauthorizedAccessException)
             {
                 HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DownloadInvestmentBudgetsTemplate - {HubService.errorList["Unauthorized"]}");
-                return Unauthorized();
+                throw;
             }
             catch (Exception e)
             {
-                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DownloadInvestmentBudgetsTemplate - {HubService.errorList["Exception"]}");
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::DownloadInvestmentBudgetsTemplate - {e.Message}");
                 throw;
             }
         }
@@ -522,6 +533,26 @@ namespace BridgeCareCore.Controllers
         public async Task<IActionResult> GetHasPermittedAccess()
         {
             return Ok(true);
+        }
+
+        [HttpGet]
+        [Route("GetScenarioBudgetYears/{simulationId}")]
+        [Authorize(Policy = Policy.ViewInvestmentFromScenario)]
+        public async Task<IActionResult> GetScenarioBudgetYears(Guid simulationId)
+        {
+            try
+            {
+                var result = await Task.Factory.StartNew(() => {
+                    _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
+                    return UnitOfWork.BudgetRepo.GetBudgetYearsBySimulationId(simulationId);
+                });
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                HubService.SendRealTimeMessage(UserInfo.Name, HubConstant.BroadcastError, $"{InvestmentError}::GetScenarioBudgetYears - {e.Message}");
+                throw;
+            }
         }
 
         private InvestmentDTO GetForScenario(Guid scenarioId)

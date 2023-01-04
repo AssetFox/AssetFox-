@@ -1,26 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using System.IO;
-using Microsoft.Extensions.Logging;
 using OfficeOpenXml;
 
 using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
-
 using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
-using AppliedResearchAssociates.iAM.Hubs.Services;
-
 using AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport;
-
-using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Parameters;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.ShortNameGlossary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeData;
@@ -29,10 +21,10 @@ using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unfunde
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummary;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.BridgeWorkSummaryByBudget;
 using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.GraphTabs;
-using System.Reflection;
 using AppliedResearchAssociates.iAM.ExcelHelpers;
-using AppliedResearchAssociates.iAM.Reporting.Logging;
 using BridgeCareCore.Services;
+using AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.FundedTreatment;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace AppliedResearchAssociates.iAM.Reporting
 {
@@ -41,6 +33,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
         protected readonly IHubService _hubService;
         private readonly UnitOfDataPersistenceWork _unitOfWork;
         private readonly IBridgeDataForSummaryReport _bridgeDataForSummaryReport;
+        private readonly IFundedTreatmentList _fundedTreatmentList;
         private readonly IUnfundedTreatmentFinalList _unfundedTreatmentFinalList;
         private readonly IUnfundedTreatmentTime _unfundedTreatmentTime;
         private readonly IBridgeWorkSummary _bridgeWorkSummary;
@@ -82,6 +75,9 @@ namespace AppliedResearchAssociates.iAM.Reporting
             //create summary report objects
             _bridgeDataForSummaryReport = new BridgeDataForSummaryReport();
             if (_bridgeDataForSummaryReport == null) { throw new ArgumentNullException(nameof(_bridgeDataForSummaryReport)); }
+
+            _fundedTreatmentList = new FundedTreatmentList();
+            if (_fundedTreatmentList == null) { throw new ArgumentNullException(nameof(_fundedTreatmentList)); }
 
             _unfundedTreatmentFinalList = new UnfundedTreatmentFinalList();
             if (_unfundedTreatmentFinalList == null) { throw new ArgumentNullException(nameof(_unfundedTreatmentFinalList)); }
@@ -251,14 +247,16 @@ namespace AppliedResearchAssociates.iAM.Reporting
             var simulationYearsCount = simulationYears.Count;
 
             var explorer = _unitOfWork.AttributeRepo.GetExplorer();
-            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer, false);
+            var network = _unitOfWork.NetworkRepo.GetSimulationAnalysisNetwork(networkId, explorer);
             _unitOfWork.SimulationRepo.GetSimulationInNetwork(simulationId, network);
 
             var simulation = network.Simulations.First();
             _unitOfWork.InvestmentPlanRepo.GetSimulationInvestmentPlan(simulation);
             _unitOfWork.AnalysisMethodRepo.GetSimulationAnalysisMethod(simulation, null);
-            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation);
+            var attributeNameLookup = _unitOfWork.AttributeRepo.GetAttributeNameLookupDictionary();
+            _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulation, attributeNameLookup);
             _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulation);
+            _unitOfWork.CommittedProjectRepo.GetSimulationCommittedProjects(simulation);
 
             var yearlyBudgetAmount = new Dictionary<string, Budget>();
             foreach (var budget in simulation.InvestmentPlan.Budgets)
@@ -273,21 +271,59 @@ namespace AppliedResearchAssociates.iAM.Reporting
                 }
             }
 
+            //get treatment category lookup
+            var treatmentCategoryLookup = new Dictionary<string, string>();
+            var treatmentList = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
+            if (treatmentList?.Any() == true)
+            {
+                foreach (var treatmentObject in treatmentList)
+                {
+                    if (!treatmentCategoryLookup.ContainsKey(treatmentObject.Name))
+                    {
+                        treatmentCategoryLookup.Add(treatmentObject.Name, treatmentObject.Category.ToString());
+                    }
+                }
+            }
+
+            // Pull best guess on committed project treatment categories here
+            var committedProjectList = _unitOfWork.CommittedProjectRepo.GetCommittedProjectsForExport(simulationId);
+            var treatmentsToAdd = committedProjectList.Select(_ => _.Treatment).Where(_ => !treatmentCategoryLookup.ContainsKey(_));
+            foreach (var newTreatment in treatmentsToAdd)
+            {
+                var bestTreatmentEntry = committedProjectList.Where(_ => _.Treatment == newTreatment)
+                    .GroupBy(_ => _.Category)
+                    .Select(_ => new { Category = _.Key, Count = _.Count() })
+                    .OrderByDescending(_ => _.Count)
+                    .Select(_ => _.Category)
+                    .FirstOrDefault();
+                if (!treatmentCategoryLookup.ContainsKey(newTreatment))
+                {
+                    treatmentCategoryLookup.Add(newTreatment, bestTreatmentEntry.ToString());
+                }
+            }
+
             using var excelPackage = new ExcelPackage(new FileInfo("SummaryReportTestData.xlsx"));
 
-            // Simulation parameters TAB
-            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            // Bridge Data TAB
             reportDetailDto.Status = $"Creating Bridge Data TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
-            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
-
-            // Bridge Data TAB
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);            
             var worksheet = excelPackage.Workbook.Worksheets.Add(SummaryReportTabNames.BridgeData);
-            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData);
-
-            // Filling up parameters tab
+            var workSummaryModel = _bridgeDataForSummaryReport.Fill(worksheet, reportOutputData, treatmentCategoryLookup);
+                        
+            // Simulation parameters TAB
+            var parametersWorksheet = excelPackage.Workbook.Worksheets.Add("Parameters");
+            reportDetailDto.Status = $"Creating Parameters TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
             _summaryReportParameters.Fill(parametersWorksheet, simulationYearsCount, workSummaryModel.ParametersModel, simulation, reportOutputData);
 
+            // Funded Treatment List TAB
+            reportDetailDto.Status = $"Creating Funded Treatment List TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            var fundedTreatmentWorksheet = excelPackage.Workbook.Worksheets.Add("Funded Treatment List");
+            _fundedTreatmentList.Fill(fundedTreatmentWorksheet, reportOutputData);
 
             // unfunded tab will be uncommented and redone in a future release
 
@@ -311,7 +347,7 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary TAB
             var bridgeWorkSummaryWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary");
             var chartRowModel = _bridgeWorkSummary.Fill(bridgeWorkSummaryWorksheet, reportOutputData,
-                simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
+                                                        simulationYears, workSummaryModel, yearlyBudgetAmount, simulation.Treatments);
 
             reportDetailDto.Status = $"Creating Bridge Work Summary by Budget TAB";
             UpdateSimulationAnalysisDetail(reportDetailDto);
@@ -319,8 +355,13 @@ namespace AppliedResearchAssociates.iAM.Reporting
             // Bridge work summary by Budget TAB
             var summaryByBudgetWorksheet = excelPackage.Workbook.Worksheets.Add("Bridge Work Summary By Budget");
             _bridgeWorkSummaryByBudget.Fill(summaryByBudgetWorksheet, reportOutputData, simulationYears, yearlyBudgetAmount, simulation.Treatments);
-            var districtTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
-            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtTotalsModel);
+
+            reportDetailDto.Status = $"Creating District County Totals TAB";
+            UpdateSimulationAnalysisDetail(reportDetailDto);
+            _hubService.SendRealTimeMessage(_unitOfWork.CurrentUser?.Username, HubConstant.BroadcastReportGenerationStatus, reportDetailDto, simulationId);
+            // District County Totals TAB
+            var districtCountyTotalsModel = DistrictTotalsModels.DistrictTotals(reportOutputData);
+            ExcelWorksheetAdder.AddWorksheet(excelPackage.Workbook, districtCountyTotalsModel);
 
             reportDetailDto.Status = $"Creating Graph TABs";
             UpdateSimulationAnalysisDetail(reportDetailDto);

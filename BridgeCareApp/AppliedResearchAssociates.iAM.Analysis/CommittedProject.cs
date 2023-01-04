@@ -43,6 +43,8 @@ namespace AppliedResearchAssociates.iAM.Analysis
 
         public int Year { get; }
 
+        public DateTime LastModifiedDate { get; set; }
+
         public override ValidationResultBag GetDirectValidationResults()
         {
             var results = base.GetDirectValidationResults();

@@ -12,6 +12,7 @@ using AppliedResearchAssociates.iAM.Analysis;
 using AppliedResearchAssociates.iAM.DTOs;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
+using static AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums.TreatmentEnum;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -141,7 +142,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.ScenarioSelectableTreatmentScenarioBudgetJoins)
                 .ThenInclude(_ => _.ScenarioBudget)
                 .ThenInclude(_ => _.ScenarioBudgetAmounts)
-                .Include(_ => _.ScenarioTreatmentConsequences)
+                .Include(_ => _.ScenarioTreatmentConsequences.OrderBy(__ => __.Attribute.Name))
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
@@ -240,7 +241,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Include(_ => _.Treatments)
-                .ThenInclude(_ => _.TreatmentConsequences)
+                .ThenInclude(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.Treatments)
                 .ThenInclude(_ => _.TreatmentConsequences)
@@ -398,7 +399,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.ScenarioTreatmentConsequences)
+                .Include(_ => _.ScenarioTreatmentConsequences.OrderBy(__ => __.Attribute.Name))
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
@@ -682,7 +683,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.ScenarioTreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryScenarioTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.ScenarioTreatmentConsequences)
+                .Include(_ => _.ScenarioTreatmentConsequences.OrderBy(__ => __.Attribute.Name))
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.ScenarioTreatmentConsequences)
                 .ThenInclude(_ => _.ScenarioConditionalTreatmentConsequenceEquationJoin)
@@ -706,7 +707,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.TreatmentCosts)
                 .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
-                .Include(_ => _.TreatmentConsequences)
+                .Include(_ => _.TreatmentConsequences.OrderBy(__ => __.Attribute.Name))
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.TreatmentConsequences)
                 .ThenInclude(_ => _.ConditionalTreatmentConsequenceEquationJoin)
@@ -717,6 +718,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .Include(_ => _.CriterionLibrarySelectableTreatmentJoin)
                 .ThenInclude(_ => _.CriterionLibrary)
                 .Single(_ => _.Id == id).ToDto();
+        }
+
+        public ScenarioSelectableTreatmentEntity GetDefaultTreatment(Guid simulationId)
+        {
+            try
+            {
+                var scenarioSelectableTreatments = GetScenarioSelectableTreatments(simulationId);
+                var defaultTreatment = scenarioSelectableTreatments.Single(_ => _.CriterionLibrary == null || string.IsNullOrEmpty(_.CriterionLibrary.MergedCriteriaExpression));
+                return _unitOfWork.Context.ScenarioSelectableTreatment.FirstOrDefault(_ => _.Id == defaultTreatment.Id);
+            }
+            catch (InvalidOperationException)
+            {
+                var simulationName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
+                throw new InvalidOperationException("More than one default treatments found in scenario" + simulationName);
+            }
         }
     }
 }

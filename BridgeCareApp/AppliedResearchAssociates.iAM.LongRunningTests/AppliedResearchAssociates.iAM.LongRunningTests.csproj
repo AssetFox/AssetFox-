@@ -47,6 +47,9 @@
 		<None Update="GitIgnored\SimulationOutput.json">
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="GitIgnored\SimulationOutput221.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="xunit.runner.json">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

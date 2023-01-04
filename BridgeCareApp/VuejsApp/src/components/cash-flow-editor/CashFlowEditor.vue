@@ -449,6 +449,7 @@ export default class CashFlowEditor extends Vue {
     showRuleEditorDialog: boolean = false;
     showAddCashFlowRuleDialog: boolean = false;
     importLibraryDisabled: boolean = true;
+    scenarioHasCreatedNew: boolean = false;
 
     beforeRouteEnter(to: any, from: any, next: any) {
         next((vm: any) => {
@@ -504,11 +505,21 @@ export default class CashFlowEditor extends Vue {
         this.librarySelectItemValueAllowedChanged = true;
     }
     onLibrarySelectItemValueChanged() {
-        this.trueLibrarySelectItemValue = this.librarySelectItemValue
+        this.trueLibrarySelectItemValue = this.librarySelectItemValue;
+        
         if(!this.hasScenario || isNil(this.librarySelectItemValue))
+        {    
             this.selectCashFlowRuleLibraryAction(this.librarySelectItemValue);
-        else if(!isNil(this.librarySelectItemValue))
-            this.importLibraryDisabled = false;
+        }
+        else
+        {
+            if(!isNil(this.librarySelectItemValue) && !this.scenarioHasCreatedNew)
+            {
+                this.importLibraryDisabled = false;
+            }
+
+            this.scenarioHasCreatedNew = false;
+        }
     }
 
     importLibrary() {
@@ -533,25 +544,6 @@ export default class CashFlowEditor extends Vue {
             this.checkLibraryEditPermission();
             this.hasCreatedLibrary = false;
         }
-
-        // if (this.hasScenario) {
-        //     this.cashFlowRuleGridData = this.selectedCashFlowRuleLibrary.cashFlowRules.map(
-        //         (cashFlowRule: CashFlowRule) => ({
-        //             ...cashFlowRule,
-        //             id: getNewGuid(),
-        //             cashFlowDistributionRules: cashFlowRule.cashFlowDistributionRules.map(
-        //                 (distributionRule: CashFlowDistributionRule) => ({
-        //                     ...distributionRule,
-        //                     id: getNewGuid(),
-        //                 }),
-        //             ),
-        //         }),
-        //     );
-        // } else {
-        //     this.cashFlowRuleGridData = clone(
-        //         this.selectedCashFlowRuleLibrary.cashFlowRules,
-        //     );
-        // }
         this.initializing = false;
         if(this.hasSelectedLibrary)
             this.onPaginationChanged();
@@ -662,11 +654,12 @@ export default class CashFlowEditor extends Vue {
                 library: cashFlowRuleLibrary,    
                 isNewLibrary: true,           
                  pagingSync: {
-                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 ? null : this.selectedCashFlowRuleLibrary.id,
+                    libraryId: cashFlowRuleLibrary.cashFlowRules.length == 0 || !this.hasSelectedLibrary ? null : this.selectedCashFlowRuleLibrary.id,
                     rowsForDeletion: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.deletionIds,
                     updateRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                     addedRows: cashFlowRuleLibrary.cashFlowRules === [] ? [] : this.addedRows,
-                 }
+                 },
+                 scenarioId: this.hasScenario ? this.selectedScenarioId : null
             }
             CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
                 if (hasValue(response, 'status') && http2XX.test(response.status.toString())){
@@ -675,6 +668,11 @@ export default class CashFlowEditor extends Vue {
                     
                     if(cashFlowRuleLibrary.cashFlowRules === []){
                         this.clearChanges();
+                    }
+
+                    if(this.hasScenario){
+                        this.scenarioHasCreatedNew = true;
+                        this.importLibraryDisabled = true;
                     }
 
                     this.cashFlowRuleLibraryMutator(cashFlowRuleLibrary);
@@ -880,7 +878,8 @@ export default class CashFlowEditor extends Vue {
                 rowsForDeletion: this.deletionIds,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 addedRows: this.addedRows
-                }
+                },
+                scenarioId: null
         }
         CashFlowService.upsertCashFlowRuleLibrary(upsertRequest).then((response: AxiosResponse) => {
             if (hasValue(response, 'status') && http2XX.test(response.status.toString())){

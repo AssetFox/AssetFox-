@@ -11,5 +11,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories
         public void UpsertUserCriteria(UserCriteriaDTO dto);
         public void DeleteUser(Guid userId);
         public void RevokeUserAccess(Guid userCriteriaId);
+
+        public string GetUserCriteria(Guid userId);
     }
 }

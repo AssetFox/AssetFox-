@@ -1,6 +1,7 @@
-﻿using AppliedResearchAssociates.iAM.Analysis.Engine;
+﻿using System.Diagnostics.Eventing.Reader;
+using AppliedResearchAssociates.iAM.Analysis.Engine;
 
-namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictTotals
+namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.DistrictCountyTotals
 {
     public static class DistrictTotalsSectionDetailPredicates
     {
@@ -32,6 +33,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Dis
             return district && committed;
         }
 
+        public static bool IsCounty(AssetDetail section, string county)
+        {
+            var actualCounty = section.ValuePerTextAttribute["COUNTY"];
+            var returnValue = actualCounty.ToUpper() == county.ToUpper();
+            return returnValue;
+        }
 
         public static bool IsNumberedDistrictBamsTable(AssetDetail section, int districtNumber)
         {

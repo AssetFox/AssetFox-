@@ -61,3 +61,18 @@ export const emptyCommittedProjectConsequence ={
     attribute: '',
     changeValue: ''
 }
+
+export interface CommittedProjectFillTreatmentReturnValues {
+    validTreatmentConsequences: CommittedProjectConsequence[];
+    treatmentCost: number;
+    treatmentCategory: TreatmentCategory;
+}
+
+export interface CommittedProjectFillTreatmentValues {
+    committedProjectId: string;
+    treatmentLibraryId: string;
+    treatmentName: string;
+    brkey_Value: string; 
+    networkId: string;
+}
+

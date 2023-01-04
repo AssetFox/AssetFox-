@@ -5,7 +5,6 @@ using System.Text;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
-using AppliedResearchAssociates.iAM.Hubs;
 using AppliedResearchAssociates.iAM.Hubs.Interfaces;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models.Validation;
@@ -14,9 +13,7 @@ using MoreLinq;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
 using BridgeCareCore.Models;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using System.Data;
-using Newtonsoft.Json;
 
 namespace BridgeCareCore.Services
 {
@@ -204,9 +201,21 @@ namespace BridgeCareCore.Services
 
         public List<PerformanceCurveDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<PerformanceCurveDTO> request)
         {
-            var curves = request.LibraryId == null ?
-                    _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId) :
-                    _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.LibraryId.Value);
+            var curves = new List<PerformanceCurveDTO>();
+            if (request.LibraryId == null)
+            {
+                curves = _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurves(simulationId);
+            }
+            else
+            {
+                curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibrary(request.LibraryId.Value);
+                // Create new performance curves based on provided library
+                foreach (var curve in curves)
+                {
+                    curve.Id = Guid.NewGuid();
+                }
+            }
+
             return SyncedDataset(curves, request);
         }
 
@@ -237,11 +246,12 @@ namespace BridgeCareCore.Services
 
         private List<PerformanceCurveDTO> SearchCurves(List<PerformanceCurveDTO> curves, string search)
         {
+            var lowerCaseSearch = search.ToLower();
             return curves
-                .Where(_ => _.Name.ToLower().Contains(search) ||
-                    _.Attribute.ToLower().Contains(search) ||
-                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(search)) ||
-                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(search))).ToList();
+                .Where(_ => _.Name.ToLower().Contains(lowerCaseSearch) ||
+                    _.Attribute.ToLower().Contains(lowerCaseSearch) ||
+                    (_.Equation.Expression != null && _.Equation.Expression.ToLower().Contains(lowerCaseSearch)) ||
+                    (_.CriterionLibrary.MergedCriteriaExpression != null && _.CriterionLibrary.MergedCriteriaExpression.ToLower().Contains(lowerCaseSearch))).ToList();
         }
 
         private List<PerformanceCurveDTO> SyncedDataset(List<PerformanceCurveDTO> curves, PagingSyncModel<PerformanceCurveDTO> request)
@@ -392,6 +402,12 @@ namespace BridgeCareCore.Services
                 FileData = Convert.ToBase64String(excelPackage.GetAsByteArray()),
                 MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             };
+        }
+
+        public List<PerformanceCurveDTO> GetNewLibraryDataset(PagingSyncModel<PerformanceCurveDTO> request)
+        {
+            var curves = new List<PerformanceCurveDTO>();
+            return SyncedDataset(curves, request);
         }
     }
 }

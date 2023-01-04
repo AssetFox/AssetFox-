@@ -73,10 +73,6 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                             .Except(treatedSections.Select(_ => Convert.ToInt32(_summaryReportHelper.checkAndGetValue<double>(_.ValuePerNumericAttribute, "BRKEY_"))))
                     );
                     firstYear = false;
-                    if(simulationOutput.Years.Count > 1)
-                    {
-                        continue;
-                    }
                 }
                 else
                 {

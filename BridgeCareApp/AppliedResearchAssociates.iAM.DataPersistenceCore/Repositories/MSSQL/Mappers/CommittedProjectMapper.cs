@@ -65,6 +65,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
                         LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
+                        // Add and assign NetworkKeyAttribute and use that in VerifyLocation()
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -99,9 +100,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             if (dto is SectionCommittedProjectDTO)
             {
                 // TODO:  Switch to looking up key field in network object
-                string keyField = "BRKEY_";
+                // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
+                string keyField = "BRKEY_"; // TODO this will be newly added property NetworkKeyAttribute
 
-                if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID"))
+                if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID")) // TODO should we call VerifyLocation() here??
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
                         Guid.Parse(dto.LocationKeys["ID"]),
@@ -140,7 +142,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
         {
             // TODO:  Switch to looking up key field in datasource object
-            string keyField = "BRKEY_";
+            // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
+            string keyField = "BRKEY_"; // TODO this will be newly added property NetworkKeyAttribute
 
             switch (entity.Discriminator)
             {

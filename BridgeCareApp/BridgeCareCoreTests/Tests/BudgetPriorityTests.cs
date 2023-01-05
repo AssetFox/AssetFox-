@@ -19,6 +19,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -62,13 +63,7 @@ namespace BridgeCareCoreTests.Tests
         }
         private BudgetPriorityController CreateTestController(List<string> uClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in uClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(uClaims);
             var hubService = HubServiceMocks.Default();
             var accessor = HttpContextAccessorMocks.Default();
             var controller = new BudgetPriorityController(

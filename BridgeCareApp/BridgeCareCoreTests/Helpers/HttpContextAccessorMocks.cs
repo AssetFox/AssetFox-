@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Http;
 using Moq;
 
@@ -35,8 +36,7 @@ namespace BridgeCareCoreTests
             var context = new DefaultHttpContext();
             HttpContextSetup.AddAuthorizationHeader(context);
 
-            var identity = new ClaimsIdentity(claims);
-            var claimsPrincipal = new ClaimsPrincipal(identity);
+            var claimsPrincipal = ClaimsPrincipals.WithClaims(claims);
             context.User = claimsPrincipal;
 
             mock.Setup(_ => _.HttpContext).Returns(context);

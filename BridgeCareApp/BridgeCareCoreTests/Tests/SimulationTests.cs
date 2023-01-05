@@ -24,6 +24,7 @@ using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
+using BridgeCareCoreTests.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -99,15 +100,9 @@ namespace BridgeCareCoreTests.Tests
 
         private SimulationController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var service = Setup();
             var controller = new SimulationController(service,
                 new SimulationService(TestHelper.UnitOfWork, new SimulationRepository(TestHelper.UnitOfWork)),

@@ -62,15 +62,9 @@ namespace BridgeCareCoreTests.Tests
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in userClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new CommittedProjectController(
                 _mockService.Object,
                 EsecSecurityMocks.AdminMock.Object,

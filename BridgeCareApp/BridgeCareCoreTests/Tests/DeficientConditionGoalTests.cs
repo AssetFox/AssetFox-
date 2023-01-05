@@ -28,6 +28,7 @@ using Xunit;
 using Microsoft.EntityFrameworkCore;
 
 using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
+using BridgeCareCoreTests.Helpers;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -50,15 +51,9 @@ namespace BridgeCareCoreTests.Tests
         }
         private DeficientConditionGoalController CreateTestController(List<string> uClaims)
         {
-            List<Claim> claims = new List<Claim>();
-            foreach (string claimName in uClaims)
-            {
-                Claim claim = new Claim(ClaimTypes.Name, claimName);
-                claims.Add(claim);
-            }
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var testUser = ClaimsPrincipals.WithNameClaims(uClaims);
             var controller = new DeficientConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService,
                 accessor, _mockClaimHelper.Object,

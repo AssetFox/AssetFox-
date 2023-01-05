@@ -568,18 +568,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 _.TreatmentLibraryId == libraryId && entityId == _.Id);
                       
             _unitOfWork.Context.DeleteAll<EquationEntity>(_ =>
-                _.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
+                (_.TreatmentCostEquationJoin.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId ||
                     _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment
-                    .TreatmentLibraryId == libraryId);
+                    .TreatmentLibraryId == libraryId) && _.ConditionalTreatmentConsequenceEquationJoin.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibrarySelectableTreatmentEntity>(_ =>
-                _.SelectableTreatment.TreatmentLibraryId == libraryId);
+                _.SelectableTreatment.TreatmentLibraryId == libraryId && _.SelectableTreatment.Id == treatment.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryTreatmentCostEntity>(_ =>
-                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId);
+                _.TreatmentCost.SelectableTreatment.TreatmentLibraryId == libraryId && _.TreatmentCost.SelectableTreatment.Id == treatment.Id);
 
             _unitOfWork.Context.DeleteAll<CriterionLibraryConditionalTreatmentConsequenceEntity>(_ =>
-                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId);
+                _.ConditionalTreatmentConsequence.SelectableTreatment.TreatmentLibraryId == libraryId && _.ConditionalTreatmentConsequence.SelectableTreatment.Id == treatment.Id);
         }
 
         public void DeleteScenarioSelectableTreatment(TreatmentDTO scenarioSelectableTreatment,

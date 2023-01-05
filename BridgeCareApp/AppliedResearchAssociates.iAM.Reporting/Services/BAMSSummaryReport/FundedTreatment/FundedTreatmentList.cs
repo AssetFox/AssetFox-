@@ -176,8 +176,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Fun
 
             currentCell.Column = columnNo;
 
-            // "Prior GCR" (GCR for Analysis Year(s)/Start) 
-            FillGCRData(worksheet, currentCell, section);
+            // "Prior GCR" (GCR for the year previous to Analysis Year(s)/Start)
+            IEnumerable<AssetSummaryDetail> priorYearAssets = simulationOutput.Years.FirstOrDefault(y => y.Year == year - 1)?.Assets;
+            priorYearAssets ??= simulationOutput.InitialAssetSummaries;
+            var priorSection = priorYearAssets.First(asset => asset.ValuePerNumericAttribute["BRKEY_"] == section.ValuePerNumericAttribute["BRKEY_"]);
+
+            FillGCRData(worksheet, currentCell, priorSection);
 
             // "Resulting GCR" (GCR for Analysis Year(s)/End)
             AssetSummaryDetail resultSection = null;

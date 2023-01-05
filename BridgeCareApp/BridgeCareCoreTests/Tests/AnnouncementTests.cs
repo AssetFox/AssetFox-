@@ -6,6 +6,8 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
+using AppliedResearchAssociates.iAM.UnitTestsCore;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Announcement;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
@@ -23,30 +25,6 @@ namespace BridgeCareCoreTests.Tests
 {
     public class AnnouncementTests
     {
-
-        public AnnouncementEntity TestAnnouncement(Guid? id = null)
-        {
-            var resolvedId = id ?? Guid.NewGuid();
-            var returnValue = new AnnouncementEntity
-            {
-                Id = resolvedId,
-                Title = "Test Title",
-                Content = "Test Content"
-            };
-            return returnValue;
-        }
-
-        private AnnouncementDTO TestAnnouncementDto(Guid? id = null)
-        {
-            var resolveId = id ?? Guid.NewGuid();
-            var dto = new AnnouncementDTO
-            {
-                Content = "Test content",
-                Id = resolveId,
-                Title = "Test title",
-            };
-            return dto;
-        }
         public AnnouncementController CreateTestController(List<string> userClaims)
         {
             var accessor = HttpContextAccessorMocks.Default();
@@ -91,7 +69,7 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldReturnOkResultOnPost()
         {
             // Act
-            var dto = TestAnnouncementDto();
+            var dto = AnnouncementDtos.Dto();
             var unitOfWork = UnitOfWorkMocks.New();
             var announcementRepository = AnnouncementRepositoryMocks.New(unitOfWork);
             var userRepo = UserRepositoryMocks.EveryoneExists(unitOfWork);
@@ -126,7 +104,7 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             var announcementId = Guid.NewGuid();
-            var announcement = TestAnnouncementDto(announcementId);
+            var announcement = AnnouncementDtos.Dto(announcementId);
             var announcements = new List<AnnouncementDTO> { announcement };
             var unitOfWork = UnitOfWorkMocks.New();
             var users = UserRepositoryMocks.EveryoneExists(unitOfWork);

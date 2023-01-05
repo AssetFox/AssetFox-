@@ -28,9 +28,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Announcement
             return returnValue;
         }
         [Fact]
-        public void ShouldReturnOkResultOnGet()
+        public void Announcements_DoesNotThrow()
         {
-            // Please just don't throw
             TestHelper.UnitOfWork.AnnouncementRepo.Announcements();
         }
 
@@ -73,7 +72,7 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.Announcement
         }
 
         [Fact]
-        public async Task ShouldModifyAnnouncementData()
+        public void UpsertAnnouncement_AlreadyInDb_Updates()
         {
             // Arrange
             var announcement = TestAnnouncement();

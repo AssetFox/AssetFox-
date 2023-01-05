@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity)
+        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string NetworkKeyAttribute)
         {
             TreatmentCategory convertedCategory = default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
@@ -60,8 +60,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(),
-                        NetworkKeyAttribute = "" // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(NetworkKeyAttribute),
+                        NetworkKeyAttribute = NetworkKeyAttribute
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -131,17 +131,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
-        {            
-            string keyField = ""; // TODO add common method to get Attribute name from id i.e. entity.CommittedProject.Simulation.Network.KeyAttributeId
+        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity,, string NetworkKeyAttribute)
+        {
             const string idKey = "ID";
             switch (entity.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
-                    var result = new Dictionary<string, string>();
-                    result.Add(idKey, entity.Id.ToString());
-                    result.Add(keyField, entity.LocationIdentifier);
-                    return result;
+                var result = new Dictionary<string, string>
+                {
+                    { idKey, entity.Id.ToString() },
+                    { NetworkKeyAttribute, entity.LocationIdentifier }
+                };
+                return result;
                 default:
                     throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
             }

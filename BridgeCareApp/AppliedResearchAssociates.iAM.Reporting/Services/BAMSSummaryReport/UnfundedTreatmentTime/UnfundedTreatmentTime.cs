@@ -77,14 +77,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                     {
                         var newTuple = new Tuple<SimulationYearDetail, AssetDetail, TreatmentOptionDetail>(year, section, chosenTreatment);
 
-                        if (!validFacilityIds.Contains(facilityId))
-                        {
-                            if (treatmentsPerSection.ContainsKey(facilityId))
-                            {
-                                treatmentsPerSection.Remove(facilityId);
-                            }
-                        }
-                        else
+                        if (validFacilityIds.Contains(facilityId))
                         {
                             if (!treatmentsPerSection.ContainsKey(facilityId))
                             {

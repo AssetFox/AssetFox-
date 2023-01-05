@@ -10,7 +10,8 @@ namespace AppliedResearchAssociates.iAM.Reporting.Interfaces.BAMSSummaryReport
     {
         void FillDataInWorkSheet(ExcelWorksheet worksheet, CurrentCell currentCell, AssetDetail section, int Year, TreatmentOptionDetail treatment);
         public CurrentCell AddHeadersCells(ExcelWorksheet worksheet);
-        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail);
+        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail);
+        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail);
         public void PerformPostAutofitAdjustments(ExcelWorksheet worksheet);
     }
 }

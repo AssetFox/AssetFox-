@@ -131,7 +131,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity,, string NetworkKeyAttribute)
+        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string NetworkKeyAttribute)
         {
             const string idKey = "ID";
             switch (entity.Discriminator)

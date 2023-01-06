@@ -8,38 +8,38 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class RemainingLifeLimitService : IRemainingLifeLimitService
+    public class TargetConditionGoalPagingService : ITargetConditionGoalPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public RemainingLifeLimitService(IUnitOfWork unitOfWork)
+        public TargetConditionGoalPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request)
+        public PagingPageModel<TargetConditionGoalDTO> GetTargetConditionGoalPage(Guid simulationId, PagingRequestModel<TargetConditionGoalDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
-                _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId) :
+                _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(request.PagingSync.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
-        public PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request)
+        public PagingPageModel<TargetConditionGoalDTO> GetLibraryTargetConditionGoalPage(Guid libraryId, PagingRequestModel<TargetConditionGoalDTO> request)
         {
-            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
+            var rows = _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(libraryId);
 
             return HandlePaging(rows, request);
         }
-        public List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<RemainingLifeLimitDTO> request)
+        public List<TargetConditionGoalDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<TargetConditionGoalDTO> request)
         {
-            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
+            var rows = _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(libraryId);
             return SyncedDataset(rows, request);
         }
-        public List<RemainingLifeLimitDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> request)
+        public List<TargetConditionGoalDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<TargetConditionGoalDTO> request)
         {
             var rows = request.LibraryId == null ?
-                    _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
-                    _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.LibraryId.Value);
+                    _unitOfWork.TargetConditionGoalRepo.GetScenarioTargetConditionGoals(simulationId) :
+                    _unitOfWork.TargetConditionGoalRepo.GetTargetConditionGoalsByLibraryId(request.LibraryId.Value);
             rows = SyncedDataset(rows, request);
 
             if (request.LibraryId != null)
@@ -51,11 +51,11 @@ namespace BridgeCareCore.Services
             return rows;
         }
 
-        private PagingPageModel<RemainingLifeLimitDTO> HandlePaging(List<RemainingLifeLimitDTO> rows, PagingRequestModel<RemainingLifeLimitDTO> request)
+        private PagingPageModel<TargetConditionGoalDTO> HandlePaging(List<TargetConditionGoalDTO> rows, PagingRequestModel<TargetConditionGoalDTO> request)
         {
             var skip = 0;
             var take = 0;
-            var items = new List<RemainingLifeLimitDTO>();
+            var items = new List<TargetConditionGoalDTO>();
 
             rows = SyncedDataset(rows, request.PagingSync);
 
@@ -68,21 +68,21 @@ namespace BridgeCareCore.Services
             else
             {
                 items = rows;
-                return new PagingPageModel<RemainingLifeLimitDTO>()
+                return new PagingPageModel<TargetConditionGoalDTO>()
                 {
                     Items = items,
                     TotalItems = items.Count
                 };
             }
 
-            return new PagingPageModel<RemainingLifeLimitDTO>()
+            return new PagingPageModel<TargetConditionGoalDTO>()
             {
                 Items = items,
                 TotalItems = rows.Count()
             };
         }
 
-        private List<RemainingLifeLimitDTO> SyncedDataset(List<RemainingLifeLimitDTO> rows, PagingSyncModel<RemainingLifeLimitDTO> request)
+        private List<TargetConditionGoalDTO> SyncedDataset(List<TargetConditionGoalDTO> rows, PagingSyncModel<TargetConditionGoalDTO> request)
         {
             rows = rows.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 

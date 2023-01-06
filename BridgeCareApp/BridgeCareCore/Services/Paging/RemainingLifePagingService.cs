@@ -8,38 +8,38 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Services
 {
-    public class CashFlowService : ICashFlowService
+    public class RemainingLifeLimitPagingService : IRemainingLifeLimitPagingService
     {
         private static IUnitOfWork _unitOfWork;
 
-        public CashFlowService(IUnitOfWork unitOfWork)
+        public RemainingLifeLimitPagingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<CashFlowRuleDTO> GetCashFlowPage(Guid simulationId, PagingRequestModel<CashFlowRuleDTO> request)
+        public PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
-                _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
+                _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.PagingSync.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
-        public PagingPageModel<CashFlowRuleDTO> GetLibraryCashFlowPage(Guid libraryId, PagingRequestModel<CashFlowRuleDTO> request)
+        public PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request)
         {
-            var rows = _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(libraryId);
+            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
 
             return HandlePaging(rows, request);
         }
-        public List<CashFlowRuleDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<CashFlowRuleDTO> request)
+        public List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<RemainingLifeLimitDTO> request)
         {
-            var rows = _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(libraryId);
+            var rows = _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(libraryId);
             return SyncedDataset(rows, request);
         }
-        public List<CashFlowRuleDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<CashFlowRuleDTO> request)
+        public List<RemainingLifeLimitDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> request)
         {
             var rows = request.LibraryId == null ?
-                    _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
-                    _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.LibraryId.Value);
+                    _unitOfWork.RemainingLifeLimitRepo.GetScenarioRemainingLifeLimits(simulationId) :
+                    _unitOfWork.RemainingLifeLimitRepo.GetRemainingLifeLimitsByLibraryId(request.LibraryId.Value);
             rows = SyncedDataset(rows, request);
 
             if (request.LibraryId != null)
@@ -47,22 +47,15 @@ namespace BridgeCareCore.Services
                 {
                     _.Id = Guid.NewGuid();
                     _.CriterionLibrary.Id = Guid.NewGuid();
-                    _.CashFlowDistributionRules.ForEach(__ => __.Id = Guid.NewGuid());
                 });
             return rows;
         }
 
-        public List<CashFlowRuleDTO> GetNewLibraryDataset(PagingSyncModel<CashFlowRuleDTO> pagingSync)
-        {
-            var rows = new List<CashFlowRuleDTO>();
-            return SyncedDataset(rows, pagingSync);
-        }
-
-        private PagingPageModel<CashFlowRuleDTO> HandlePaging(List<CashFlowRuleDTO> rows, PagingRequestModel<CashFlowRuleDTO> request)
+        private PagingPageModel<RemainingLifeLimitDTO> HandlePaging(List<RemainingLifeLimitDTO> rows, PagingRequestModel<RemainingLifeLimitDTO> request)
         {
             var skip = 0;
             var take = 0;
-            var items = new List<CashFlowRuleDTO>();
+            var items = new List<RemainingLifeLimitDTO>();
 
             rows = SyncedDataset(rows, request.PagingSync);
 
@@ -75,21 +68,21 @@ namespace BridgeCareCore.Services
             else
             {
                 items = rows;
-                return new PagingPageModel<CashFlowRuleDTO>()
+                return new PagingPageModel<RemainingLifeLimitDTO>()
                 {
                     Items = items,
                     TotalItems = items.Count
                 };
             }
 
-            return new PagingPageModel<CashFlowRuleDTO>()
+            return new PagingPageModel<RemainingLifeLimitDTO>()
             {
                 Items = items,
                 TotalItems = rows.Count()
             };
         }
 
-        private List<CashFlowRuleDTO> SyncedDataset(List<CashFlowRuleDTO> rows, PagingSyncModel<CashFlowRuleDTO> request)
+        private List<RemainingLifeLimitDTO> SyncedDataset(List<RemainingLifeLimitDTO> rows, PagingSyncModel<RemainingLifeLimitDTO> request)
         {
             rows = rows.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 

@@ -6,8 +6,8 @@ namespace AppliedResearchAssociates.iAM.DTOs
     {
         public override bool VerifyLocation()
         {            
-            const string idKey = "ID";
-            return LocationKeys.ContainsKey(NetworkKeyAttribute) && LocationKeys.ContainsKey(idKey);
+            const string IdKey = "ID";
+            return LocationKeys.ContainsKey(NetworkKeyAttribute) && LocationKeys.ContainsKey(IdKey);
         }
 
     }

@@ -138,13 +138,13 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
 
         public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
-            const string idKey = "ID";
+            const string IdKey = "ID";
             switch (entity.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
                 var result = new Dictionary<string, string>
                 {
-                    { idKey, entity.Id.ToString() },
+                    { IdKey, entity.Id.ToString() },
                     { networkKeyAttribute, entity.LocationIdentifier }
                 };
                 return result;

@@ -64,7 +64,8 @@ namespace AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils
               Network = new NetworkEntity()
               {
                   Id = NetworkId,
-                  Name = "Primary"
+                  Name = "Primary",
+                  KeyAttributeId = Guid.Parse("c31ea5bb-3d48-45bb-a68f-01ee75f17f0c")
               },
               CashFlowRules = new List<DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.CashFlow.ScenarioCashFlowRuleEntity>()
           };

@@ -49,6 +49,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             switch (entity.CommittedProjectLocation.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
+                    if(entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
+                    {
+                        throw new InvalidOperationException($"Scenario budget is not present in committed project.");
+                    }
+
                     var commit = new SectionCommittedProjectDTO()
                     {
                         Id = entity.Id,

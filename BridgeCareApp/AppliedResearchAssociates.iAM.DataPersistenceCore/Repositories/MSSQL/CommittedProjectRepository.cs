@@ -112,17 +112,20 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
+            
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
 
             var allProjectsInScenario = _unitOfWork.Context.CommittedProject.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.CommittedProjectLocation);
+                .Include(_ => _.CommittedProjectLocation)
+                .Include(_=>_.Simulation.Network);
 
             return allProjectsInScenario
                 .Where(_ => _.CommittedProjectLocation.Discriminator == DataPersistenceConstants.SectionLocation)
-                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO(GetNetworkKeyAttribute(_.Simulation.Network.KeyAttributeId)))
+                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO(networkKeyAttribute))
                 .ToList();
         }               
 
@@ -133,13 +136,16 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
+
             return _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
-                .Select(_ => _.ToDTO(GetNetworkKeyAttribute(_.Simulation.Network.KeyAttributeId)))
+                .Include(_ => _.Simulation.Network)
+                .Select(_ => _.ToDTO(networkKeyAttribute))
                 .ToList();
         }
 
@@ -298,9 +304,10 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 .ForEach(n => n.Id = Guid.NewGuid());
         }
 
-        private string GetNetworkKeyAttribute(Guid keyAttributeId)
+        public string GetNetworkKeyAttribute(Guid simulationId)
         {
-            return _unitOfWork.AttributeRepo.GetAttributeName(keyAttributeId);
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().Include(_ => _.Network).FirstOrDefault(_ => _.Id == simulationId);
+            return _unitOfWork.AttributeRepo.GetAttributeName(simulation.Network.KeyAttributeId);
         }
     }
 }

@@ -38,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string NetworkKeyAttribute)
+        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
             TreatmentCategory convertedCategory = default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
@@ -65,8 +65,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(NetworkKeyAttribute),
-                        NetworkKeyAttribute = NetworkKeyAttribute
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute),
+                        NetworkKeyAttribute = networkKeyAttribute
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -136,7 +136,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string NetworkKeyAttribute)
+        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
             const string idKey = "ID";
             switch (entity.Discriminator)
@@ -145,7 +145,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                 var result = new Dictionary<string, string>
                 {
                     { idKey, entity.Id.ToString() },
-                    { NetworkKeyAttribute, entity.LocationIdentifier }
+                    { networkKeyAttribute, entity.LocationIdentifier }
                 };
                 return result;
                 default:

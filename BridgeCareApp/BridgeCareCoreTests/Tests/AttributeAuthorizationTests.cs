@@ -86,7 +86,7 @@ namespace BridgeCareCoreTests.Tests
             var claims = roleClaimsMapper.GetClaims(BridgeCareCore.Security.SecurityConstants.SecurityTypes.B2C, new List<string> { BridgeCareCore.Security.SecurityConstants.Role.Administrator });
             var user = ClaimsPrincipals.WithNameClaims(claims);
             // Act
-            var allowed = await authorizationService.AuthorizeAsync(controller.User, "ViewAttributesClaim");
+            var allowed = await authorizationService.AuthorizeAsync(user, "ViewAttributesClaim");
             // Assert
             Assert.True(allowed.Succeeded);
         }

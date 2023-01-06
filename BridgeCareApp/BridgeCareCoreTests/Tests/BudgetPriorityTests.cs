@@ -10,16 +10,19 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entit
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
+using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
+using BridgeCareCoreTests.Tests.BudgetPriority;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -77,20 +80,6 @@ namespace BridgeCareCoreTests.Tests
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
             };
-            return controller;
-        }
-
-        private BudgetPriorityController CreateUnauthorizedController()
-        {
-            var accessor = HttpContextAccessorMocks.Default();
-            var hubService = HubServiceMocks.Default();
-            var controller = new BudgetPriorityController(
-                EsecSecurityMocks.DbeMock.Object,
-                TestHelper.UnitOfWork,
-                hubService,
-                accessor,
-                _mockClaimHelper.Object,
-                new BudgetPriortyService(TestHelper.UnitOfWork));
             return controller;
         }
 
@@ -159,6 +148,51 @@ namespace BridgeCareCoreTests.Tests
                 Percentage = 100
             };
             TestHelper.UnitOfWork.Context.AddEntity(_testBudgetPercentagePair);
+        }
+
+        private BudgetPriorityController CreateController(Mock<IUnitOfWork> unitOfWork)
+        {
+            var service = new BudgetPriortyService(unitOfWork.Object);
+            var security = EsecSecurityMocks.AdminMock;
+            var hubService = HubServiceMocks.DefaultMock();
+            var accessor = HttpContextAccessorMocks.DefaultMock();
+            var claimHelper = ClaimHelperMocks.New();
+            var controller = new BudgetPriorityController(
+                security.Object,
+                unitOfWork.Object,
+                hubService.Object,
+                accessor.Object,
+                claimHelper.Object,
+                service
+                );
+            return controller;
+        }
+
+        [Fact]
+        public async Task GetBudgetPriorityLibraries_RepoReturns_UserIsAdmin_ReturnsLibraries()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+
+            var result = await controller.GetBudgetPriorityLibraries();
+
+            ActionResultAssertions.OkObject(result);
+        }
+
+        [Fact]
+        public async Task GetSimulationBudgetPriorities_RepoReturns_UserIsAdmin_ReturnsLibraries()
+        {
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
+
+            var result = await controller.GetScenarioBudgetPriorities(simulationId);
+
+            ActionResultAssertions.OkObject(result);
         }
 
         [Fact]

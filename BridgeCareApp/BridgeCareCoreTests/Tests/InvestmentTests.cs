@@ -682,7 +682,6 @@ namespace BridgeCareCoreTests.Tests
             budgetAmount.Year = year;
             budgetAmount.Value = 4000000;
             TestHelper.UnitOfWork.Context.UpdateEntity(budgetAmount, budgetAmount.Id);
-            TestHelper.UnitOfWork.Context.SaveChanges();
 
             // Act
             await controller.ImportLibraryInvestmentBudgetsExcelFile();

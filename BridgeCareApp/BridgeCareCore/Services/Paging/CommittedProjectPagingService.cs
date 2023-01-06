@@ -139,6 +139,14 @@ namespace BridgeCareCore.Services
 
         private List<SectionCommittedProjectDTO> SyncedDataset(List<SectionCommittedProjectDTO> committedProjects, PagingSyncModel<SectionCommittedProjectDTO> request)
         {
+            foreach (var sectionCommittedProjectDTO in request.AddedRows)
+            {
+                if (string.IsNullOrEmpty(sectionCommittedProjectDTO.NetworkKeyAttribute))
+                {
+                    sectionCommittedProjectDTO.NetworkKeyAttribute = _unitOfWork.CommittedProjectRepo.GetNetworkKeyAttribute(sectionCommittedProjectDTO.SimulationId);
+                }
+            }
+
             committedProjects = committedProjects.Concat(request.AddedRows).Where(_ => !request.RowsForDeletion.Contains(_.Id)).ToList();
 
             for (var i = 0; i < committedProjects.Count; i++)

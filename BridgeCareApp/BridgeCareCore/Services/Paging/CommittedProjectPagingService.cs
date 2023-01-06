@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services
 
 
 
-            committedProjects = SyncedDataset(committedProjects, request.PagingSync);
+            committedProjects = SyncedDataset(committedProjects, request.SyncModel);
             committedProjects = committedProjects.OrderBy(_ => _.Id).ToList();
             totalItems = committedProjects.Count;
 

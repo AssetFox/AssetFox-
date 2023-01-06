@@ -36,7 +36,7 @@ namespace BridgeCareCore.Services
             var items = new List<PerformanceCurveDTO>();
             var curves = _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(libraryId);
 
-            curves = SyncedDataset(curves, request.PagingSync);
+            curves = SyncedDataset(curves, request.SyncModel);
 
             if (request.search.Trim() != "")
                 curves = SearchCurves(curves, request.search);
@@ -71,10 +71,10 @@ namespace BridgeCareCore.Services
             var skip = 0;
             var take = 0;
             var items = new List<PerformanceCurveDTO>();
-            var curves = request.PagingSync.LibraryId == null ? _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurvesOrderedById(simulationId) :
-                _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(request.PagingSync.LibraryId.Value);
+            var curves = request.SyncModel.LibraryId == null ? _unitOfWork.PerformanceCurveRepo.GetScenarioPerformanceCurvesOrderedById(simulationId) :
+                _unitOfWork.PerformanceCurveRepo.GetPerformanceCurvesForLibraryOrderedById(request.SyncModel.LibraryId.Value);
 
-            curves = SyncedDataset(curves, request.PagingSync);
+            curves = SyncedDataset(curves, request.SyncModel);
 
             if (request.search != null && request.search.Trim() != "")
                 curves = SearchCurves(curves, request.search);

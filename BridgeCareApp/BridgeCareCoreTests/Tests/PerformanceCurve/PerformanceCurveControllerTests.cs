@@ -175,7 +175,7 @@ namespace BridgeCareCoreTests.Tests
                 isDescending = false,
                 Page = 1,
                 RowsPerPage = 5,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -301,7 +301,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 isDescending = false,
                 Page = 1,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),

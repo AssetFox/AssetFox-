@@ -48,7 +48,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
-                    result = _remainingLIfeLimitService.GetRemainingLifeLimitPage(simulationId, pageRequest);
+                    result = _remainingLIfeLimitService.GetScenarioPage(simulationId, pageRequest);
                 });
 
                 return Ok(result);
@@ -77,7 +77,7 @@ namespace BridgeCareCore.Controllers
                 var result = new PagingPageModel<RemainingLifeLimitDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = _remainingLIfeLimitService.GetLibraryRemainingLifeLimitPage(libraryId, pageRequest);
+                    result = _remainingLIfeLimitService.GetLibraryPage(libraryId, pageRequest);
                 });
 
                 return Ok(result);
@@ -157,7 +157,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     var items = new List<RemainingLifeLimitDTO>();
                     if (upsertRequest.ScenarioId != null)
-                        items = _remainingLIfeLimitService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                        items = _remainingLIfeLimitService.GetSyncedScenarioDataSet(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
                     else if (upsertRequest.PagingSync.LibraryId != null)
                         items = _remainingLIfeLimitService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
                     else if (!upsertRequest.IsNewLibrary)
@@ -206,7 +206,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dtos = _remainingLIfeLimitService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _remainingLIfeLimitService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.RemainingLifeLimitRepo.UpsertOrDeleteScenarioRemainingLifeLimits(dtos, simulationId);
                     UnitOfWork.Commit();

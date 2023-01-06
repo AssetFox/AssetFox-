@@ -21,8 +21,8 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<BudgetPriorityDTO> GetBudgetPriortyPage(Guid simulationId, PagingRequestModel<BudgetPriorityDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
-                _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.SyncModel.LibraryId == null ? _unitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulationId) :
+                _unitOfWork.BudgetPriorityRepo.GetBudgetPrioritiesByLibraryId(request.SyncModel.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
@@ -83,7 +83,7 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<BudgetPriorityDTO>();
 
-            rows = SyncedDataset(rows, request.PagingSync);
+            rows = SyncedDataset(rows, request.SyncModel);
 
             if (request.search.Trim() != "")
                 rows = SearchRows(rows, request.search);

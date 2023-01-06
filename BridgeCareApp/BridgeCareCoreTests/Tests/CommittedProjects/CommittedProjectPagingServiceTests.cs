@@ -84,7 +84,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 1,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "",
                 sortColumn = ""
             };
@@ -107,7 +107,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "",
                 sortColumn = "treatment"
             };
@@ -131,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "Simple",
                 sortColumn = ""
             };
@@ -185,7 +185,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 4,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>()
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
                     AddedRows = new List<SectionCommittedProjectDTO> { addrow}
                 },
@@ -214,7 +214,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>()
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
                     UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
                 },

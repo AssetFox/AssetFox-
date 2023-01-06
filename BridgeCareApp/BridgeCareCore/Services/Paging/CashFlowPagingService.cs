@@ -19,8 +19,8 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<CashFlowRuleDTO> GetCashFlowPage(Guid simulationId, PagingRequestModel<CashFlowRuleDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
-                _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.SyncModel.LibraryId == null ? _unitOfWork.CashFlowRuleRepo.GetScenarioCashFlowRules(simulationId) :
+                _unitOfWork.CashFlowRuleRepo.GetCashFlowRulesByLibraryId(request.SyncModel.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
@@ -64,7 +64,7 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<CashFlowRuleDTO>();
 
-            rows = SyncedDataset(rows, request.PagingSync);
+            rows = SyncedDataset(rows, request.SyncModel);
 
             if (request.RowsPerPage > 0)
             {

@@ -32,7 +32,7 @@ namespace BridgeCareCore.Services.Paging
             var budgets = _unitOfWork.BudgetRepo.GetBudgetLibrary(libraryId).Budgets;
 
 
-            budgets = SyncedDataset(budgets, request.PagingSync);
+            budgets = SyncedDataset(budgets, request.SyncModel);
 
 
 
@@ -78,7 +78,7 @@ namespace BridgeCareCore.Services.Paging
             var total = 0;
             var lastYear = 0;
             var firstYear = 0;
-            var investmentPlan = request.PagingSync.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.PagingSync.Investment;
+            var investmentPlan = request.SyncModel.Investment == null ? _unitOfWork.InvestmentPlanRepo.GetInvestmentPlan(simulationId) : request.SyncModel.Investment;
             if (investmentPlan.Id == Guid.Empty)
             {
                 var investmentDefaultData = _investmentDefaultDataService.GetInvestmentDefaultData().Result;
@@ -91,10 +91,10 @@ namespace BridgeCareCore.Services.Paging
 
             investmentPlan.NumberOfYearsInAnalysisPeriod = investmentPlan.NumberOfYearsInAnalysisPeriod == 0 ? 1 : investmentPlan.NumberOfYearsInAnalysisPeriod;
 
-            var budgets = request.PagingSync.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
-                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.PagingSync.LibraryId.Value).Budgets;
+            var budgets = request.SyncModel.LibraryId == null ? _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
+                _unitOfWork.BudgetRepo.GetBudgetLibrary(request.SyncModel.LibraryId.Value).Budgets;
 
-            budgets = SyncedDataset(budgets, request.PagingSync);
+            budgets = SyncedDataset(budgets, request.SyncModel);
 
             if (request.sortColumn.Trim() != "")
                 budgets = OrderByColumn(budgets, request.sortColumn, request.isDescending);
@@ -205,11 +205,11 @@ namespace BridgeCareCore.Services.Paging
 
         private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
         {
-            budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
+            budgets = budgets.Concat(syncModel.AddedRows).Where(_ => !syncModel.RowsForDeletion.Contains(_.Id)).ToList();
             for (var i = 0; i < budgets.Count; i++)
             {
                 var budget = budgets[i];
-                var item = syncModel.UpdatedBudgets.FirstOrDefault(row => row.Id == budget.Id);
+                var item = syncModel.UpdateRows.FirstOrDefault(row => row.Id == budget.Id);
                 if (item != null)
                 {
                     budget.Name = item.Name;

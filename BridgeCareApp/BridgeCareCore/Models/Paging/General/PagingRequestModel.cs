@@ -7,8 +7,8 @@ namespace BridgeCareCore.Models
     {
         public PagingRequestModel() :base()
         {
-            PagingSync = new PagingSyncModel<T>();
+            SyncModel = new PagingSyncModel<T>();
         }
-        public PagingSyncModel<T> PagingSync {get;set;}
+        public PagingSyncModel<T> SyncModel {get;set;}
     }
 }

@@ -19,8 +19,8 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<DeficientConditionGoalDTO> GetScenarioDeficientConditionGoalPage(Guid simulationId, PagingRequestModel<DeficientConditionGoalDTO> request)
         {
-            var rows = request.PagingSync.LibraryId == null ? _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId) :
-                _unitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalsByLibraryId(request.PagingSync.LibraryId.Value);
+            var rows = request.SyncModel.LibraryId == null ? _unitOfWork.DeficientConditionGoalRepo.GetScenarioDeficientConditionGoals(simulationId) :
+                _unitOfWork.DeficientConditionGoalRepo.GetDeficientConditionGoalsByLibraryId(request.SyncModel.LibraryId.Value);
 
             return HandlePaging(rows, request);
         }
@@ -57,7 +57,7 @@ namespace BridgeCareCore.Services
             var take = 0;
             var items = new List<DeficientConditionGoalDTO>();
 
-            rows = SyncedDataset(rows, request.PagingSync);
+            rows = SyncedDataset(rows, request.SyncModel);
 
             if (request.RowsPerPage > 0)
             {

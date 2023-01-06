@@ -2,14 +2,11 @@
 using BridgeCareCore.Models;
 using System.Collections.Generic;
 using System;
+using BridgeCareCore.Services.Paging.Generics;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IRemainingLifeLimitPagingService
+    public interface IRemainingLifeLimitPagingService : IPagingService<RemainingLifeLimitDTO, RemainingLifeLimitLibraryDTO>
     {
-        PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request);
-        PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request);
-        List<RemainingLifeLimitDTO> GetSyncedScenarioDataset(Guid simulationId, PagingSyncModel<RemainingLifeLimitDTO> request);
-        List<RemainingLifeLimitDTO> GetSyncedLibraryDataset(Guid libraryId, PagingSyncModel<RemainingLifeLimitDTO> request);
     }
 }

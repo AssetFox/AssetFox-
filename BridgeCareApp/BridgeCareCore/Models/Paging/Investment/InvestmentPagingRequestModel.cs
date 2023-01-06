@@ -1,7 +1,9 @@
-﻿namespace BridgeCareCore.Models
+﻿using AppliedResearchAssociates.iAM.DTOs;
+
+namespace BridgeCareCore.Models
 {
-    public class InvestmentPagingRequestModel : BasePagingRequest
+    public class InvestmentPagingRequestModel : PagingRequestModel<BudgetDTO>
     {
-        public InvestmentPagingSyncModel PagingSync { get; set; }
+        public new InvestmentPagingSyncModel SyncModel { get; set; }
     }
 }

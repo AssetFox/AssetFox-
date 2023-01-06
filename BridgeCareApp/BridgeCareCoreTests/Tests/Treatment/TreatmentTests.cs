@@ -58,14 +58,11 @@ namespace BridgeCareCoreTests.Tests
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
-<<<<<<<
-
-=======
         private TreatmentController CreateAuthorizedControllerWithTreatmService()
         {
             var accessor = HttpContextAccessorMocks.Default();
@@ -82,23 +79,17 @@ namespace BridgeCareCoreTests.Tests
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
->>>>>>>
         private TreatmentController CreateTestController(List<string> userClaims)
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-<<<<<<<
             var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
-=======
-            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object,  EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
->>>>>>>
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentPagingServiceMocks.EmptyMock.Object,  EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -270,6 +261,7 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentService = TreatmentServiceMocks.EmptyMock;
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -282,7 +274,7 @@ namespace BridgeCareCoreTests.Tests
                 IsNewLibrary = true,
                 Library = dto,
             };
-            treatmentService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(dto);
+            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(dto);
             var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -300,6 +292,7 @@ namespace BridgeCareCoreTests.Tests
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentService = TreatmentServiceMocks.EmptyMock;
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;
             var dto = new TreatmentLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -317,7 +310,7 @@ namespace BridgeCareCoreTests.Tests
             var simulation = new SimulationDTO { Id = simulationId };
 
             var pageSync = new PagingSyncModel<TreatmentDTO>();
-            treatmentService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, pageSync)).Returns(dtos);
+            pagingService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, pageSync)).Returns(dtos);
 
             // Act
             var result = await controller.UpsertScenarioSelectedTreatments(simulationId, pageSync);
@@ -399,7 +392,8 @@ namespace BridgeCareCoreTests.Tests
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
             var treatmentService = TreatmentServiceMocks.EmptyMock;
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             var libraryId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
             var treatmentBefore = new TreatmentDTO
@@ -436,7 +430,7 @@ namespace BridgeCareCoreTests.Tests
                 Library = libraryBefore,
                 PagingSync = sync
             };
-            treatmentService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(libraryAfter);
+            pagingService.Setup(ts => ts.GetSyncedLibraryDataset(libraryRequest)).Returns(libraryAfter);
 
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
@@ -456,7 +450,8 @@ namespace BridgeCareCoreTests.Tests
             var _ = UserRepositoryMocks.EveryoneExists(unitOfWork);
             var treatmentRepo = SelectableTreatmentRepositoryMocks.New(unitOfWork);
             var treatmentService = TreatmentServiceMocks.EmptyMock;
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var pagingService = TreatmentPagingServiceMocks.EmptyMock;
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             var libraryId = Guid.NewGuid();
             var simulationId = Guid.NewGuid();
             var treatmentId = Guid.NewGuid();
@@ -487,11 +482,11 @@ namespace BridgeCareCoreTests.Tests
                 UpdateRows = new List<TreatmentDTO>() { treatmentAfter },
                 LibraryId = libraryId,
             };
-            treatmentService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, sync)).Returns(treatmentsAfter);
+            pagingService.Setup(ts => ts.GetSyncedScenarioDataset(simulationId, sync)).Returns(treatmentsAfter);
 
             var result = await controller.UpsertScenarioSelectedTreatments(simulationId, sync);
             ActionResultAssertions.Ok(result);
-            var call = treatmentService.SingleInvocationWithName(nameof(ITreatmentService.GetSyncedScenarioDataset));
+            var call = pagingService.SingleInvocationWithName(nameof(ITreatmentPagingService.GetSyncedScenarioDataset));
             Assert.Equal(simulationId, call.Arguments[0]);
             Assert.Equal(sync, call.Arguments[1]);
         }

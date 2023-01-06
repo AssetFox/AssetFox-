@@ -285,7 +285,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
         public string GetAttributeName(Guid attributeId)
         {
-            return _unitOfWork.Context.Attribute.SingleOrDefault(a => a.Id == attributeId)?.Name;
+            return _unitOfWork.Context.Attribute.AsNoTracking().SingleOrDefault(a => a.Id == attributeId)?.Name;
         }
     }
 }

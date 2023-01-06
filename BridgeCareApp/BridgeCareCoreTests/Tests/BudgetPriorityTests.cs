@@ -61,7 +61,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriortyService(TestHelper.UnitOfWork));
+                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
             return controller;
         }
         private BudgetPriorityController CreateTestController(List<string> uClaims)
@@ -75,7 +75,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriortyService(TestHelper.UnitOfWork));
+                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }

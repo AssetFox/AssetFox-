@@ -31,11 +31,11 @@ namespace BridgeCareCore.Controllers
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        private IBudgetPriortyService _budgetPriortyService;
+        private IBudgetPriortyPagingService _budgetPriortyService;
 
         public BudgetPriorityController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IBudgetPriortyService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IBudgetPriortyPagingService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _budgetPriortyService = budgetPriortyService;

@@ -21,11 +21,9 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         public void GetLibrarySyncedDataSet_NoCurvesInLibrary_ReturnsEmptyListOfCurves()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var hubService = HubServiceMocks.Default();
-            var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var request = new PagingSyncModel<PerformanceCurveDTO>
             {
@@ -42,11 +40,9 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
         public void GetLibrarySyncedDataSet_OneCurveInLibrary_ReturnsTheCurve()
         {
             var unitOfWork = UnitOfWorkMocks.New();
-            var hubService = HubServiceMocks.Default();
-            var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var request = new PagingSyncModel<PerformanceCurveDTO>
             {

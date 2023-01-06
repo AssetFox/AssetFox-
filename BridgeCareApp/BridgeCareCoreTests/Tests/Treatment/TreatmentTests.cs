@@ -58,17 +58,47 @@ namespace BridgeCareCoreTests.Tests
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object);
             return controller;
         }
 
+<<<<<<<
+
+=======
+        private TreatmentController CreateAuthorizedControllerWithTreatmService()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var treatmentService = new TreatmentService(TestHelper.UnitOfWork, new ExcelTreatmentLoader(new Mock<IExpressionValidationService>().Object));
+            var treatmentPagingService = new TreatmentPagingService(TestHelper.UnitOfWork);
+            var controller = new TreatmentController(treatmentService, treatmentPagingService, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
+            return controller;
+        }
+
+
+        private TreatmentController CreateUnauthorizedController()
+        {
+            var accessor = HttpContextAccessorMocks.Default();
+            var hubService = HubServiceMocks.Default();
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+                hubService, accessor, _mockClaimHelper.Object);
+            return controller;
+        }
+
+>>>>>>>
         private TreatmentController CreateTestController(List<string> userClaims)
         {
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
+<<<<<<<
             var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+=======
+            var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var controller = new TreatmentController(TreatmentServiceMocks.EmptyMock.Object, TreatmentServiceMocks.EmptyPagingMock.Object,  EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
+>>>>>>>
                 hubService, accessor, _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {

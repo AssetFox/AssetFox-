@@ -5,7 +5,7 @@ using System;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface IRemainingLifeLimitService
+    public interface IRemainingLifeLimitPagingService
     {
         PagingPageModel<RemainingLifeLimitDTO> GetRemainingLifeLimitPage(Guid simulationId, PagingRequestModel<RemainingLifeLimitDTO> request);
         PagingPageModel<RemainingLifeLimitDTO> GetLibraryRemainingLifeLimitPage(Guid libraryId, PagingRequestModel<RemainingLifeLimitDTO> request);

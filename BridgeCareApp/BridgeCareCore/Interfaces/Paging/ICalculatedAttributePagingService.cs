@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface ICalculatedAttributeService
+    public interface ICalculatedAttributePagingService
     {
         PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetLibraryCalculatedAttributePage(Guid libraryId, CalculatedAttributePagingRequestModel request);
         PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetScenarioCalculatedAttributePage(Guid simulationId, CalculatedAttributePagingRequestModel request);

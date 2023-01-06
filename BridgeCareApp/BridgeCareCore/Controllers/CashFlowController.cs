@@ -26,11 +26,11 @@ namespace BridgeCareCore.Controllers
         public const string CashFlowError = "Cash Flow Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly ICashFlowService _cashFlowService;
+        private readonly ICashFlowPagingService _cashFlowService;
 
         public CashFlowController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            ICashFlowService cashFlowService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            ICashFlowPagingService cashFlowService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _cashFlowService = cashFlowService ?? throw new ArgumentNullException(nameof(cashFlowService));

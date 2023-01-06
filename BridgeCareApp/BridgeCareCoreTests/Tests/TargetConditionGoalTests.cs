@@ -43,7 +43,7 @@ namespace BridgeCareCoreTests.Tests
             NetworkTestSetup.CreateNetwork(TestHelper.UnitOfWork);
             var controller = new TargetConditionGoalController(EsecSecurityMocks.Admin, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object,
-                new TargetConditionGoalService(TestHelper.UnitOfWork));
+                new TargetConditionGoalPagingService(TestHelper.UnitOfWork));
             return controller;
         }
         private TargetConditionGoalController CreateTestController(List<string> userClaims)
@@ -53,7 +53,7 @@ namespace BridgeCareCoreTests.Tests
             var testUser = ClaimsPrincipals.WithNameClaims(userClaims);
             var controller = new TargetConditionGoalController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object,
-                new TargetConditionGoalService(TestHelper.UnitOfWork));
+                new TargetConditionGoalPagingService(TestHelper.UnitOfWork));
 
             controller.ControllerContext = new ControllerContext()
             {

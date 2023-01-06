@@ -178,7 +178,7 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
             return currentCell;
         }
 
-        public List<AssetDetail> GetUntreatedSections(SimulationYearDetail simulationYearDetail)
+        public List<AssetDetail> GetSectionsWithUnfundedTreatments(SimulationYearDetail simulationYearDetail)
         {
             var untreatedSections =
                     simulationYearDetail.Assets.Where(
@@ -189,6 +189,12 @@ namespace AppliedResearchAssociates.iAM.Reporting.Services.BAMSSummaryReport.Unf
                         _summaryReportHelper.checkAndGetValue<double>(section.ValuePerNumericAttribute, "DECK_AREA") > 28500
                         )).ToList();
             return untreatedSections;
+        }
+
+        public List<AssetDetail> GetSectionsWithFundedTreatments(SimulationYearDetail simulationYearDetail)
+        {
+            var treatedSections = simulationYearDetail.Assets.Where(section => section.TreatmentCause is not TreatmentCause.NoSelection);
+            return treatedSections.ToList();
         }
 
         private const string BRIDGE_FUNDING = "Bridge Funding";

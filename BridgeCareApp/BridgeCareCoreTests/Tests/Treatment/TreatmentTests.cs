@@ -275,7 +275,7 @@ namespace BridgeCareCoreTests.Tests
                 Library = dto,
             };
             pagingService.Setup(ts => ts.GetSyncedLibraryDataset(It.IsAny<LibraryUpsertPagingRequestModel<TreatmentLibraryDTO, TreatmentDTO>>())).Returns(dto);
-            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService);
+            var controller = TestTreatmentControllerSetup.Create(unitOfWork, treatmentService, pagingService);
             // Act
             var result = await controller.UpsertTreatmentLibrary(libraryRequest);
 

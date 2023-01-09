@@ -25,6 +25,7 @@ using BridgeCareCore.Services;
 using BridgeCareCore.Interfaces.DefaultData;
 using BridgeCareCore.Utils.Interfaces;
 using AppliedResearchAssociates.iAM.Analysis;
+using BridgeCareCoreTests.Tests.Investment;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -177,7 +178,10 @@ namespace BridgeCareCoreTests.Tests
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
+            var pagingService = InvestmentPagingServiceMocks.DefaultMock();
+            var controller = new InvestmentController(service,
+                pagingService.Object,
+                EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,

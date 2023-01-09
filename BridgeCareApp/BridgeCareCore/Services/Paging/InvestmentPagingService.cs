@@ -12,10 +12,10 @@ namespace BridgeCareCore.Services.Paging
 {
     public class InvestmentPagingService : IInvestmentPagingService
     {
-        private static UnitOfDataPersistenceWork _unitOfWork;
+        private static IUnitOfWork _unitOfWork;
         public readonly IInvestmentDefaultDataService _investmentDefaultDataService;
 
-        public InvestmentPagingService(UnitOfDataPersistenceWork unitOfWork,
+        public InvestmentPagingService(IUnitOfWork unitOfWork,
             IInvestmentDefaultDataService investmentDefaultDataService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));

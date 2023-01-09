@@ -68,7 +68,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var curve = new PerformanceCurveDTO
@@ -95,7 +95,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var expressionValidationService = ExpressionValidationServiceMocks.New();
             var repository = new Mock<IPerformanceCurveRepository>();
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repository.Object);
-            var service = new PerformanceCurvesService(unitOfWork.Object, hubService, expressionValidationService.Object);
+            var service = new PerformanceCurvesPagingService(unitOfWork.Object);
             var libraryId = Guid.NewGuid();
             var curveId = Guid.NewGuid();
             var curve = new PerformanceCurveDTO

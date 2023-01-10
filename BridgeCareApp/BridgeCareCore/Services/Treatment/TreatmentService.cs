@@ -77,31 +77,30 @@ namespace BridgeCareCore.Services
                 validationMessages.AddRange(loadTreatment.ValidationMessages);
             }
             var combinedValidationMessage = "";
-            if (validationMessages.Any())
-            {
-                var combinedValidationMessageBuilder = new StringBuilder();
-                foreach (var message in validationMessages) {
-                    combinedValidationMessageBuilder.AppendLine(message);
-                }
-                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
+            if (validationMessages.Any())
+            {
+                var combinedValidationMessageBuilder = new StringBuilder();
+                foreach (var message in validationMessages) {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
             }
             var returnValue = new TreatmentImportResultDTO
             {
                 TreatmentLibrary = library,
                 WarningMessage = combinedValidationMessage,
             };
-            if (combinedValidationMessage.Length == 0)
-            {
-                SaveToDatabase(returnValue);
+            if (combinedValidationMessage.Length == 0)
+            {
+                SaveToDatabase(returnValue);
             }
             return returnValue;
         }
 
-        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage)
-        {
-            var validationMessages = new List<string>();
-            var scenarioTreatments = new List<TreatmentDTO>();
-
+        public ScenarioTreatmentImportResultDTO ImportScenarioTreatmentsFile(Guid simulationId, ExcelPackage excelPackage)
+        {
+            var validationMessages = new List<string>();
+            var scenarioTreatments = new List<TreatmentDTO>();
             var scenarioBudgets = _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId);
             foreach (var worksheet in excelPackage.Workbook.Worksheets)
             {                
@@ -109,34 +108,31 @@ namespace BridgeCareCore.Services
                 scenarioTreatments.Add(treatmentLoadResult.Treatment);
                 validationMessages.AddRange(treatmentLoadResult.ValidationMessages);
             }
-
             var combinedValidationMessage = string.Empty;
-            if (validationMessages.Any())
-            {
+            if (validationMessages.Any())
+            {
                 var combinedValidationMessageBuilder = new StringBuilder();
-                foreach (var message in validationMessages)
-                {
-                    combinedValidationMessageBuilder.AppendLine(message);
-                }
-                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
-            }
+                foreach (var message in validationMessages)
+                {
+                    combinedValidationMessageBuilder.AppendLine(message);
+                }
+                combinedValidationMessage = combinedValidationMessageBuilder.ToString();
+            }
 
             var scenarioTreatmentImportResult = new ScenarioTreatmentImportResultDTO
-            {
+            {
                 Treatments = scenarioTreatments,
                 WarningMessage = combinedValidationMessage,
             };
-
-            if (combinedValidationMessage.Length == 0)
-            {
-                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
+            if (combinedValidationMessage.Length == 0)
+            {
+                _unitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(scenarioTreatmentImportResult.Treatments, simulationId);
             }
-
-            return scenarioTreatmentImportResult;
+            return scenarioTreatmentImportResult;
         }
 
-        public FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId)
-        {
+        public FileInfoDTO ExportScenarioTreatmentsExcelFile(Guid simulationId)
+        {
             var fileInfoResult = new FileInfoDTO();
             var scenarioName = _unitOfWork.SimulationRepo.GetSimulationName(simulationId);
             var scenarioTreatments = _unitOfWork.SelectableTreatmentRepo.GetScenarioSelectableTreatments(simulationId);
@@ -155,9 +151,9 @@ namespace BridgeCareCore.Services
                     FileData = fileData,
                     FileName = filename,
                     MimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                };
-            }
-            return fileInfoResult;
+                };
+            }
+            return fileInfoResult;
         }
 
         private void SaveToDatabase(
@@ -166,8 +162,6 @@ namespace BridgeCareCore.Services
             var libraryId = importResult.TreatmentLibrary.Id;
             var importedTreatments = importResult.TreatmentLibrary.Treatments;
             _unitOfWork.SelectableTreatmentRepo.ReplaceTreatmentLibrary(libraryId, importedTreatments);
-        }
-
-        
+        }       
     }
 }

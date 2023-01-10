@@ -263,13 +263,6 @@ namespace BridgeCareCoreTests.Tests
             {
                 LibraryId = libraryId,
             };
-            pagingService.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
-            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
-            var controller = PerformanceCurveControllerTestSetup.Create(
-                esecSecurity,
-                unitOfWork.Object,
-                service.Object,
-                pagingService.Object);
             var library = new PerformanceCurveLibraryDTO
             {
                 Id = libraryId,
@@ -279,6 +272,14 @@ namespace BridgeCareCoreTests.Tests
                 PagingSync = pagingSync,
                 Library = library,
             };
+            pagingService.Setup(s => s.GetSyncedLibraryDataset(pagingRequest)).Returns(performanceCurves);
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
+            var controller = PerformanceCurveControllerTestSetup.Create(
+                esecSecurity,
+                unitOfWork.Object,
+                service.Object,
+                pagingService.Object);
+            
 
             await controller.UpsertPerformanceCurveLibrary(pagingRequest);
 

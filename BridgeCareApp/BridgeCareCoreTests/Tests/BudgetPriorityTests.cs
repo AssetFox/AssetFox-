@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.Analysis;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
@@ -12,6 +13,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
@@ -61,7 +63,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
+                new BudgetPriorityPagingService(TestHelper.UnitOfWork));
             return controller;
         }
         private BudgetPriorityController CreateTestController(List<string> uClaims)
@@ -75,7 +77,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 _mockClaimHelper.Object,
-                new BudgetPriortyPagingService(TestHelper.UnitOfWork));
+                new BudgetPriorityPagingService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -152,7 +154,7 @@ namespace BridgeCareCoreTests.Tests
 
         private BudgetPriorityController CreateController(Mock<IUnitOfWork> unitOfWork)
         {
-            var service = new BudgetPriortyPagingService(unitOfWork.Object);
+            var service = new BudgetPriorityPagingService(unitOfWork.Object);
             var security = EsecSecurityMocks.AdminMock;
             var hubService = HubServiceMocks.DefaultMock();
             var accessor = HttpContextAccessorMocks.DefaultMock();
@@ -179,6 +181,7 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetBudgetPriorityLibraries();
 
             ActionResultAssertions.OkObject(result);
+            var invocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.GetBudgetPriortyLibrariesNoChildren));
         }
 
         [Fact]
@@ -193,43 +196,17 @@ namespace BridgeCareCoreTests.Tests
             var result = await controller.GetScenarioBudgetPriorities(simulationId);
 
             ActionResultAssertions.OkObject(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnLibraryGet()
-        {
-            // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-
-            // Act
-            var result = await controller.GetBudgetPriorityLibraries();
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
-        }
-
-        [Fact]
-        public async Task ShouldReturnOkResultOnScenarioGet()
-        {
-            // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
-
-            // Act
-            var result = await controller.GetScenarioBudgetPriorities(simulation.Id);
-
-            // Assert
-            Assert.IsType<OkObjectResult>(result);
+            var invocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.GetScenarioBudgetPriorities));
         }
 
         [Fact]
         public async Task ShouldReturnOkResultOnLibraryPost()
         {
             // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
             var dto = new BudgetPriorityLibraryDTO
             {
                 Id = Guid.NewGuid(),
@@ -248,7 +225,9 @@ namespace BridgeCareCoreTests.Tests
                 .UpsertBudgetPriorityLibrary(request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var libraryInvocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.UpsertBudgetPriorityLibrary));
+            var budgetPriorityInvocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.UpsertOrDeleteBudgetPriorities));
         }
 
         [Fact]
@@ -256,17 +235,22 @@ namespace BridgeCareCoreTests.Tests
         {
             // Arrange
             Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).Returns(new List<BudgetPriorityDTO>());
+            var controller = CreateController(unitOfWork);
             var dtos = new List<BudgetPriorityDTO>();
             var request = new PagingSyncModel<BudgetPriorityDTO>();
 
             // Act
             var result = await controller
-                .UpsertScenarioBudgetPriorities(simulation.Id, request);
+                .UpsertScenarioBudgetPriorities(simulationId, request);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
         }
 
         [Fact]

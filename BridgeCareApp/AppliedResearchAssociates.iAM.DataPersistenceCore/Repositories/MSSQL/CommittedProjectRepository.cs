@@ -112,19 +112,21 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
-
+            
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
             var allProjectsInScenario = _unitOfWork.Context.CommittedProject.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
-                .Include(_ => _.CommittedProjectLocation);
+                .Include(_ => _.CommittedProjectLocation)
+                .Include(_=>_.Simulation.Network);
 
             return allProjectsInScenario
                 .Where(_ => _.CommittedProjectLocation.Discriminator == DataPersistenceConstants.SectionLocation)
-                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO())
+                .Select(_ => (SectionCommittedProjectDTO)_.ToDTO(networkKeyAttribute))
                 .ToList();
-        }
+        }               
 
         public List<BaseCommittedProjectDTO> GetCommittedProjectsForExport(Guid simulationId)
         {
@@ -133,33 +135,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
 
-            //var entity = _unitOfWork.Context.CommittedProject.Where(_ => _.SimulationId == simulationId)
-            //    .Select(project => new CommittedProjectEntity
-            //    {
-            //        Name = project.Name,
-            //        Year = project.Year,
-            //        ShadowForAnyTreatment = project.ShadowForAnyTreatment,
-            //        ShadowForSameTreatment = project.ShadowForSameTreatment,
-            //        Cost = project.Cost,
-            //        ScenarioBudget = new ScenarioBudgetEntity { Name = project.ScenarioBudget.Name },
-            //        CommittedProjectConsequences = project.CommittedProjectConsequences.Select(consequence =>
-            //            new CommittedProjectConsequenceEntity
-            //            {
-            //                Attribute = new AttributeEntity { Name = consequence.Attribute.Name },
-            //                ChangeValue = consequence.ChangeValue
-            //            }).ToList(),
-            //        CommittedProjectLocation = project.CommittedProjectLocation
-            //    })
-            //    .Select(_ => _.ToDTO()) // TODO:  Just create the DTO directly?
-            //    .ToList();
-
+            var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
             return _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
                 .Include(_ => _.CommittedProjectConsequences)
                 .ThenInclude(_ => _.Attribute)
                 .Include(_ => _.CommittedProjectLocation)
-                .Select(_ => _.ToDTO())
+                .Include(_ => _.Simulation.Network)
+                .Select(_ => _.ToDTO(networkKeyAttribute))
                 .ToList();
         }
 
@@ -191,17 +175,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
-
+            
             // Create entities and assign IDs
             var committedProjectEntities = projects.Select(p =>
                 {
                     AssignIdWhenNull(p);
-                    return p.ToEntity(attributes);
+                    return p.ToEntity(attributes, GetNetworkKeyAttribute(p.SimulationId));
                 }).ToList();
+
             var committedProjectConsequenceEntities = committedProjectEntities
                     .Where(_ => _.CommittedProjectConsequences.Any())
                     .SelectMany(_ => _.CommittedProjectConsequences)
                     .ToList();
+
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist
@@ -316,6 +302,12 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             if (dto.Id == Guid.Empty) dto.Id = Guid.NewGuid();
             dto.Consequences.Where(c => c.Id == Guid.Empty)
                 .ForEach(n => n.Id = Guid.NewGuid());
+        }
+
+        public string GetNetworkKeyAttribute(Guid simulationId)
+        {
+            var simulation = _unitOfWork.Context.Simulation.AsNoTracking().Include(_ => _.Network).FirstOrDefault(_ => _.Id == simulationId);
+            return _unitOfWork.AttributeRepo.GetAttributeName(simulation.Network.KeyAttributeId);
         }
     }
 }

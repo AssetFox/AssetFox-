@@ -65,8 +65,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute),
-                        NetworkKeyAttribute = networkKeyAttribute
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -78,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute)
         {
             var result = new CommittedProjectEntity
             {
@@ -97,15 +96,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
             }
-
+                        
             if (dto is SectionCommittedProjectDTO)
             {                
-                if (dto.VerifyLocation())
+                if (dto.VerifyLocation(networkKeyAttribute))
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
                         Guid.Parse(dto.LocationKeys["ID"]),
                         DataPersistenceConstants.SectionLocation,
-                        dto.LocationKeys[dto.NetworkKeyAttribute]
+                        dto.LocationKeys[networkKeyAttribute]
                         )
                     {
                         CommittedProjectId = result.Id,

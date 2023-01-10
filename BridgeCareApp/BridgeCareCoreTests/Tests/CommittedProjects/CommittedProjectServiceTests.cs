@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Xunit;
+﻿using Xunit;
 using Moq;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using BridgeCareCore.Services;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using System.Data;
 using OfficeOpenXml;
-using System.IO;
 using AppliedResearchAssociates.iAM.DTOs;
-using System.Threading.Tasks;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 
 namespace BridgeCareCoreTests.Tests
@@ -145,7 +137,7 @@ namespace BridgeCareCoreTests.Tests
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
-
+            const string networkKeyAttribute = "BRKEY_";
             // Act - The result is delivered through the callback
             service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFile", false);
 
@@ -153,7 +145,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(testInput.Count == 2, "Number of comitted projects is wrong");
             Assert.Equal("f286b7cf-445d-4291-9167-0f225b170cae", testInput[0].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[0] is SectionCommittedProjectDTO, "Provided value is not a Section type");
-            Assert.True(((SectionCommittedProjectDTO)testInput[0]).VerifyLocation(), "Could not verify location");
+            Assert.True(testInput[0].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(8, testInput[0].Consequences.Count);
             Assert.Equal(2023, testInput[1].Year);
         }
@@ -168,7 +160,7 @@ namespace BridgeCareCoreTests.Tests
                     testInput = _;
                 });
             var service = new CommittedProjectService(_testUOW);
-
+            const string networkKeyAttribute = "BRKEY_";
             // Act - The result is delivered through the callback
             service.ImportCommittedProjectFiles(TestDataForCommittedProjects.SimulationId, _excelData, "GoodFileWithNoTreatment", true);
 
@@ -176,7 +168,7 @@ namespace BridgeCareCoreTests.Tests
             Assert.True(testInput.Count == 3, "Number of comitted projects is wrong");
             Assert.Equal("cf28e62e-0a02-4195-8d28-5cdb9646dd58", testInput[1].LocationKeys.Single(_ => _.Key == "ID").Value);
             Assert.True(testInput[1] is SectionCommittedProjectDTO, "Provided value is not a Section type");
-            Assert.True(((SectionCommittedProjectDTO)testInput[1]).VerifyLocation(), "Could not verify location");
+            Assert.True(testInput[1].VerifyLocation(networkKeyAttribute), "Could not verify location");
             Assert.Equal(8, testInput[1].Consequences.Count);
             Assert.Equal(2023, testInput[1].Year);
             Assert.Equal(TreatmentCategory.CapacityAdding, testInput[1].Category);

@@ -4,11 +4,10 @@ namespace AppliedResearchAssociates.iAM.DTOs
 {
     public class SectionCommittedProjectDTO : BaseCommittedProjectDTO
     {
-        public override bool VerifyLocation()
-        {            
+        public override bool VerifyLocation(string networkKeyAttribute)
+        {
             const string IdKey = "ID";
-            return LocationKeys.ContainsKey(NetworkKeyAttribute) && LocationKeys.ContainsKey(IdKey);
+            return LocationKeys.ContainsKey(networkKeyAttribute) && LocationKeys.ContainsKey(IdKey);
         }
-
     }
 }

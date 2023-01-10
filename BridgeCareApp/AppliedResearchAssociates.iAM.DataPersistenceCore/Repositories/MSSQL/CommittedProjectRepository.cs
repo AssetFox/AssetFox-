@@ -114,7 +114,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
             
             var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
-
             var allProjectsInScenario = _unitOfWork.Context.CommittedProject.AsNoTracking()
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
@@ -137,7 +136,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var networkKeyAttribute = GetNetworkKeyAttribute(simulationId);
-
             return _unitOfWork.Context.CommittedProject
                 .Where(_ => _.SimulationId == simulationId)
                 .Include(_ => _.ScenarioBudget)
@@ -177,17 +175,19 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             }
 
             var attributes = _unitOfWork.Context.Attribute.AsNoTracking().ToList();
-
+            
             // Create entities and assign IDs
             var committedProjectEntities = projects.Select(p =>
                 {
                     AssignIdWhenNull(p);
-                    return p.ToEntity(attributes);
+                    return p.ToEntity(attributes, GetNetworkKeyAttribute(p.SimulationId));
                 }).ToList();
+
             var committedProjectConsequenceEntities = committedProjectEntities
                     .Where(_ => _.CommittedProjectConsequences.Any())
                     .SelectMany(_ => _.CommittedProjectConsequences)
                     .ToList();
+
             var locations = committedProjectEntities.Select(_ => _.CommittedProjectLocation).ToList();
 
             // Determine the committed projects that exist

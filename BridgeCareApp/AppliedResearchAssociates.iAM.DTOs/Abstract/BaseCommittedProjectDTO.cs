@@ -70,14 +70,13 @@ namespace AppliedResearchAssociates.iAM.DTOs.Abstract
         /// </summary>
         public int ShadowForSameTreatment { get; set; }
 
-        public string NetworkKeyAttribute { get; set; }
-
         /// <summary>
         /// Verifies the LocationsKeys provided result in a valid location for the network type
         /// </summary>
+        /// <param name="networkKeyAttribute"></param>
         /// <returns>
         /// An indication if the LocationKeys are valid
         /// </returns>
-        public abstract bool VerifyLocation();
+        public abstract bool VerifyLocation(string networkKeyAttribute);
     }
 }

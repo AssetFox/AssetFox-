@@ -13,6 +13,7 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Exten
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
+using AppliedResearchAssociates.iAM.TestHelpers;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Extensions;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
@@ -43,7 +44,6 @@ namespace BridgeCareCoreTests.Tests
         private BudgetPercentagePairEntity _testBudgetPercentagePair;
         private BudgetPriorityLibraryEntity _testBudgetPriorityLibrary;
         private BudgetPriorityEntity _testBudgetPriority;
-        private const string BudgetPriorityLibraryEntityName = "BudgetPriorityLibraryEntity";
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
 
         private void Setup()
@@ -87,7 +87,7 @@ namespace BridgeCareCoreTests.Tests
 
         private void CreateLibraryTestData()
         {
-            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = BudgetPriorityLibraryEntityName };
+            _testBudgetPriorityLibrary = new BudgetPriorityLibraryEntity { Id = Guid.NewGuid(), Name = BudgetPriorityLibraryDtos.BudgetPriorityLibraryEntityName };
             TestHelper.UnitOfWork.Context.AddEntity(_testBudgetPriorityLibrary);
 
 
@@ -241,6 +241,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetRepo = BudgetRepositoryMocks.New(unitOfWork);
             var simulationId = Guid.NewGuid();
             budgetPriorityRepo.Setup(b => b.GetScenarioBudgetPriorities(simulationId)).Returns(new List<BudgetPriorityDTO>());
+            budgetRepo.Setup(br => br.GetScenarioSimpleBudgetDetails(simulationId)).Returns(new List<SimpleBudgetDetailDTO>());
             var controller = CreateController(unitOfWork);
             var dtos = new List<BudgetPriorityDTO>();
             var request = new PagingSyncModel<BudgetPriorityDTO>();
@@ -257,33 +258,39 @@ namespace BridgeCareCoreTests.Tests
         public async Task ShouldReturnOkResultOnDelete()
         {
             // Act
-            Setup();
-            var controller = CreateAuthorizedController();
-            var result = await controller.DeleteBudgetPriorityLibrary(Guid.Empty);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var controller = CreateController(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var result = await controller.DeleteBudgetPriorityLibrary(simulationId);
 
             // Assert
-            Assert.IsType<OkResult>(result);
+            ActionResultAssertions.Ok(result);
+            var invocation = budgetPriorityRepo.SingleInvocationWithName(nameof(IBudgetPriorityRepository.DeleteBudgetPriorityLibrary));
+            Assert.Equal(simulationId, invocation.Arguments.First());
         }
 
         [Fact]
         public async Task ShouldGetLibraryNoData()
         {
             // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-            CreateLibraryTestData();
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var dto = BudgetPriorityLibraryDtos.New();
+            var dtos = new List<BudgetPriorityLibraryDTO> { dto };
+            budgetPriorityRepo.Setup(b => b.GetBudgetPriortyLibrariesNoChildren()).Returns(dtos.ToList());
+            var controller = CreateController(unitOfWork);
 
             // Act
             var result = await controller.GetBudgetPriorityLibraries();
 
             // Assert
             var okObjResult = result as OkObjectResult;
-            Assert.NotNull(okObjResult.Value);
-
-            var dtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
+            var returnedDtos = (List<BudgetPriorityLibraryDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(List<BudgetPriorityLibraryDTO>));
-            Assert.Contains(dtos, b => b.Name == BudgetPriorityLibraryEntityName);
-            var budgetPriorityLibraryDTO = dtos.FirstOrDefault(b => b.Name == BudgetPriorityLibraryEntityName && b.Id == _testBudgetPriorityLibrary.Id);
+            ObjectAssertions.Equivalent(dtos, returnedDtos);
         }
 
         [Fact]
@@ -396,8 +403,9 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>()
             {
                 Library = dto,
-                PagingSync =new PagingSyncModel<BudgetPriorityDTO>(){
-                    UpdateRows = new List<BudgetPriorityDTO>() { updatedPriority}
+                PagingSync = new PagingSyncModel<BudgetPriorityDTO>()
+                {
+                    UpdateRows = new List<BudgetPriorityDTO>() { updatedPriority }
                 }
             };
 
@@ -478,7 +486,7 @@ namespace BridgeCareCoreTests.Tests
                 services.AddAuthorization(options =>
                 {
                     options.AddPolicy(Policy.ViewBudgetPriorityFromLibrary,
-                        policy => policy.RequireClaim(ClaimTypes.Name,BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess));
+                        policy => policy.RequireClaim(ClaimTypes.Name, BridgeCareCore.Security.SecurityConstants.Claim.BudgetPriorityViewAnyFromLibraryAccess));
                 });
             });
             var roleClaimsMapper = new RoleClaimsMapper();

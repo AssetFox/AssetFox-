@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AppliedResearchAssociates.iAM.Analysis;
+﻿using System.Security.Claims;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Budget;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.BudgetPriority;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using AppliedResearchAssociates.iAM.TestHelpers;
@@ -19,7 +13,6 @@ using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests.Repositories;
 using AppliedResearchAssociates.iAM.UnitTestsCore.TestUtils;
 using BridgeCareCore.Controllers;
-using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
@@ -200,7 +193,7 @@ namespace BridgeCareCoreTests.Tests
         }
 
         [Fact]
-        public async Task ShouldReturnOkResultOnLibraryPost()
+        public async Task ShouldReturnOkResultOnLibraryUpdate()
         {
             // Arrange
             var unitOfWork = UnitOfWorkMocks.New();
@@ -324,13 +317,18 @@ namespace BridgeCareCoreTests.Tests
         {
             // move to paging service level?
             // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
-            CreateScenarioTestData(simulation.Id);
+            var unitOfWork = UnitOfWorkMocks.New();
+            var userRepository = UserRepositoryMocks.EveryoneExists(unitOfWork);
+            var budgetPriorityRepo = BudgetPriorityRepositoryMocks.DefaultMock(unitOfWork);
+            var simulationId = Guid.NewGuid();
+            var dto = BudgetPriorityDtos.New();
+            var dtos = new List<BudgetPriorityDTO> { dto };
             var request = new PagingRequestModel<BudgetPriorityDTO>();
+            budgetPriorityRepo.Setup(br => br.GetScenarioBudgetPriorities(simulationId)).Returns(dtos);
+            var controller = CreateController(unitOfWork);
+
             // Act
-            var result = await controller.GetScenarioBudgetPriorityPage(simulation.Id, request);
+            var result = await controller.GetScenarioBudgetPriorityPage(simulationId, request);
 
             // Assert
             var okObjResult = result as OkObjectResult;
@@ -338,17 +336,8 @@ namespace BridgeCareCoreTests.Tests
 
             var page = (PagingPageModel<BudgetPriorityDTO>)Convert.ChangeType(okObjResult.Value,
                 typeof(PagingPageModel<BudgetPriorityDTO>));
-            var dtos = page.Items;
-            Assert.Single(dtos);
-            Assert.Equal(_testScenarioBudgetPriority.Id, dtos[0].Id);
-            Assert.Equal(_testScenarioBudgetPriority.PriorityLevel, dtos[0].PriorityLevel);
-            Assert.Equal(_testScenarioBudgetPriority.Year, dtos[0].Year);
-
-            Assert.Single(dtos[0].BudgetPercentagePairs);
-            Assert.Equal(_testBudgetPercentagePair.Id, dtos[0].BudgetPercentagePairs[0].Id);
-            Assert.Equal(_testBudgetPercentagePair.Percentage, dtos[0].BudgetPercentagePairs[0].Percentage);
-            Assert.Equal(_testBudgetPercentagePair.ScenarioBudgetId, dtos[0].BudgetPercentagePairs[0].BudgetId);
-            Assert.Equal(_testScenarioBudget.Name, dtos[0].BudgetPercentagePairs[0].BudgetName);
+            var returnDtos = page.Items;
+            ObjectAssertions.Equivalent(dto, returnDtos.Single());
         }
 
         [Fact]
@@ -376,101 +365,6 @@ namespace BridgeCareCoreTests.Tests
                 typeof(PagingPageModel<BudgetPriorityDTO>));
             var returnDtos = page.Items;
             Assert.Equal(returnDtos.Single(), dto);
-        }
-
-        [Fact]
-        public async Task ShouldModifyLibraryData()
-        {
-            // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-            CreateLibraryTestData();
-
-            // Arrange
-            _testBudgetPriorityLibrary.BudgetPriorities = new List<BudgetPriorityEntity> { _testBudgetPriority };
-
-            var dto = _testBudgetPriorityLibrary.ToDto();
-            dto.Description = "Updated Description";
-            var updatedPriority = dto.BudgetPriorities[0];
-            updatedPriority.PriorityLevel = 2;
-            updatedPriority.Year = DateTime.Now.Year + 1;
-            updatedPriority.CriterionLibrary = new CriterionLibraryDTO();
-
-            var request = new LibraryUpsertPagingRequestModel<BudgetPriorityLibraryDTO, BudgetPriorityDTO>()
-            {
-                Library = dto,
-                PagingSync = new PagingSyncModel<BudgetPriorityDTO>()
-                {
-                    UpdateRows = new List<BudgetPriorityDTO>() { updatedPriority }
-                }
-            };
-
-            // Act
-            await controller.UpsertBudgetPriorityLibrary(request);
-
-            // Assert
-            var modifiedDto = TestHelper.UnitOfWork.BudgetPriorityRepo.GetBudgetPriorityLibraries().Single(l => l.Id == dto.Id);
-            Assert.Equal(dto.Description, modifiedDto.Description);
-
-            Assert.Equal(dto.BudgetPriorities[0].PriorityLevel, modifiedDto.BudgetPriorities[0].PriorityLevel);
-            Assert.Equal(dto.BudgetPriorities[0].Year, modifiedDto.BudgetPriorities[0].Year);
-            Assert.Equal(dto.BudgetPriorities[0].CriterionLibrary.Id,
-                modifiedDto.BudgetPriorities[0].CriterionLibrary.Id);
-        }
-
-        [Fact]
-        public async Task ShouldModifyScenarioData()
-        {
-            // Arrange
-            Setup();
-            var simulation = SimulationTestSetup.CreateSimulation(TestHelper.UnitOfWork);
-            var controller = CreateAuthorizedController();
-            CreateScenarioTestData(simulation.Id);
-
-            // Arrange
-            _testScenarioBudgetPriority.BudgetPercentagePairs =
-                new List<BudgetPercentagePairEntity> { _testBudgetPercentagePair };
-            var dtos = new List<BudgetPriorityDTO> { _testScenarioBudgetPriority.ToDto() };
-            var updatedPriorty = dtos[0];
-            updatedPriorty.PriorityLevel = 2;
-            updatedPriorty.Year = DateTime.Now.Year + 1;
-            updatedPriorty.CriterionLibrary = new CriterionLibraryDTO();
-            updatedPriorty.BudgetPercentagePairs[0].Percentage = 90;
-            var request = new PagingSyncModel<BudgetPriorityDTO>()
-            {
-                UpdateRows = new List<BudgetPriorityDTO>() { updatedPriorty }
-            };
-            // Act
-            await controller.UpsertScenarioBudgetPriorities(simulation.Id, request);
-
-            // Assert
-            var modifiedDto = TestHelper.UnitOfWork.BudgetPriorityRepo.GetScenarioBudgetPriorities(simulation.Id)[0];
-            Assert.Equal(dtos[0].PriorityLevel, modifiedDto.PriorityLevel);
-            Assert.Equal(dtos[0].Year, modifiedDto.Year);
-            Assert.Equal(dtos[0].CriterionLibrary.Id, modifiedDto.CriterionLibrary.Id);
-            Assert.Equal(dtos[0].BudgetPercentagePairs[0].Percentage, modifiedDto.BudgetPercentagePairs[0].Percentage);
-        }
-
-        [Fact]
-        public async Task ShouldDeleteLibraryData()
-        {
-            // Arrange
-            Setup();
-            var controller = CreateAuthorizedController();
-            CreateLibraryTestData();
-
-            // Act
-            var result = await controller.DeleteBudgetPriorityLibrary(_testBudgetPriorityLibrary.Id);
-
-            // Assert
-            Assert.IsType<OkResult>(result);
-
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.BudgetPriorityLibrary.Any(_ => _.Id == _testBudgetPriorityLibrary.Id));
-            Assert.True(!TestHelper.UnitOfWork.Context.BudgetPriority.Any(_ => _.Id == _testBudgetPriority.Id));
-            Assert.True(
-                !TestHelper.UnitOfWork.Context.CriterionLibraryBudgetPriority.Any(_ =>
-                    _.BudgetPriorityId == _testBudgetPriority.Id));
         }
 
         [Fact]

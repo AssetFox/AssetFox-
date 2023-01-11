@@ -137,7 +137,8 @@ namespace BridgeCareCoreTests.Tests
                     {
                         Id = Guid.NewGuid(),
                         MergedCriteriaExpression = "expression",
-                        Name = "Criterion"
+                        Name = "Criterion",
+                        IsSingleUse = true,
                     }
                 }
             };
@@ -665,10 +666,11 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact(Skip ="Fails. WJ needs front end working to investigate.")]
+        [Fact]
         public async Task ShouldOverwriteExistingLibraryBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange
+            // Currently based on a spreadsheet that hard codes the year 2023. Will therefore start failing in 2024.
             var year = DateTime.Now.Year;
             var service = Setup();
             CreateLibraryTestData();
@@ -873,7 +875,7 @@ namespace BridgeCareCoreTests.Tests
             var budgetNames = budgets.Where(_ => _.Name.Contains("Sample Budget")).Select(_ => _.Name).ToList();
         }
 
-        [Fact(Skip = "Fails. WJ needs front end working to investigate.")]
+        [Fact]
         public async Task ShouldOverwriteExistingScenarioBudgetWithBudgetFromImportedInvestmentBudgetsFile()
         {
             // Arrange

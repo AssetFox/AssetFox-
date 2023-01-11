@@ -69,7 +69,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.i
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppliedResearchAssociates.iAM.LongRunningTests", "AppliedResearchAssociates.iAM.LongRunningTests\AppliedResearchAssociates.iAM.LongRunningTests.csproj", "{216F7548-5270-4471-AA74-638725FCAFB1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeCareCoreTests", "BridgeCareCoreTests\BridgeCareCoreTests.csproj", "{BBE71A37-982A-42F9-870C-02C08A8482B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BridgeCareCoreTests", "BridgeCareCoreTests\BridgeCareCoreTests.csproj", "{BBE71A37-982A-42F9-870C-02C08A8482B8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

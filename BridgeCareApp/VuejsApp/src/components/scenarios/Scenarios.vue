@@ -1210,7 +1210,7 @@ export default class Scenarios extends Vue {
         scenario.name = name;
         if (hasValue(scenario.name)) {
             this.updateScenarioAction({ scenario: scenario }).then(() => {
-                if(this.tab == 0)
+                if(this.tab == '0')
                     this.onUserScenariosPagination();
                 else
                     this.onSharedScenariosPagination();
@@ -1337,7 +1337,7 @@ export default class Scenarios extends Vue {
                 scenarioId: this.selectedScenario.id,
             }).then(() => {
                 this.selectedScenario = clone(emptyScenario)
-                if(this.tab == 0)
+                if(this.tab == '0')
                     this.onUserScenariosPagination();
                 else
                     this.onSharedScenariosPagination();

@@ -378,7 +378,7 @@ export default class EditScenario extends Vue {
         this.alertDataForDeletingCommittedProjects = { ...emptyAlertData };
 
         if (doDelete) {
-            CommittedProjectsService.deleteCommittedProjects(
+            CommittedProjectsService.deleteSimulationCommittedProjects(
                 this.selectedScenarioId,
             ).then((response: AxiosResponse) => {
                 if (

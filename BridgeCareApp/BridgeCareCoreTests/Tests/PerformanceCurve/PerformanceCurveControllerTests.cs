@@ -104,7 +104,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -131,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -269,7 +269,7 @@ namespace BridgeCareCoreTests.Tests
             };
             var pagingRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                PagingSync = pagingSync,
+                SyncModel = pagingSync,
                 Library = library,
             };
             pagingService.Setup(s => s.GetSyncedLibraryDataset(pagingRequest)).Returns(performanceCurves);

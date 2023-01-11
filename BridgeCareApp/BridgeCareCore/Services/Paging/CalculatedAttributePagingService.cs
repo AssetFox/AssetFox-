@@ -23,7 +23,7 @@ namespace BridgeCareCore.Services
         {
             var calcAttribute = new CalculatedAttributeDTO();
             var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
-            var addedCalc = request.SyncModel.AddedRows.FirstOrDefault(_ => _.Attribute == attribute.Name);
+            var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
             if (addedCalc != null)
                 calcAttribute = addedCalc;
             else
@@ -35,7 +35,7 @@ namespace BridgeCareCore.Services
         {
             var calcAttribute = new CalculatedAttributeDTO();
             var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
-            var addedCalc = request.SyncModel.AddedRows.FirstOrDefault(_ => _.Attribute == attribute.Name);
+            var addedCalc = request.SyncModel.AddedCalculatedAttributes.FirstOrDefault(_ => _.Attribute == attribute.Name);
             if (addedCalc != null)
                 calcAttribute = addedCalc;
             else
@@ -50,7 +50,7 @@ namespace BridgeCareCore.Services
             var attributes = request.LibraryId == null ?
                     _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationId).ToList() :
                     _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(request.LibraryId.Value).CalculatedAttributes.ToList();
-            attributes = attributes.Concat(request.AddedRows).ToList();
+            attributes = attributes.Concat(request.AddedCalculatedAttributes).ToList();
             attributes = SyncedDataset(attributes, request);
             if (request.LibraryId != null)
             {
@@ -74,7 +74,7 @@ namespace BridgeCareCore.Services
         public List<CalculatedAttributeDTO> GetSyncedLibraryDataset(Guid libraryId, CalculatedAttributePagingSyncModel request)
         {
             var library = _unitOfWork.CalculatedAttributeRepo.GetCalculatedAttributeLibraryByID(libraryId);
-            library.CalculatedAttributes = library.CalculatedAttributes.Concat(request.AddedRows).ToList(); 
+            library.CalculatedAttributes = library.CalculatedAttributes.Concat(request.AddedCalculatedAttributes).ToList(); 
             return SyncedDataset(library.CalculatedAttributes.ToList(), request);
         }
 
@@ -111,7 +111,7 @@ namespace BridgeCareCore.Services
             for (var i = 0; i < attributes.Count; i++)
             {
                 var attribute = attributes[i];
-                var item = syncModel.UpdateRows.FirstOrDefault(row => row.Id == attribute.Id);
+                var item = syncModel.UpdatedCalculatedAttributes.FirstOrDefault(row => row.Id == attribute.Id);
                 if (item != null)
                 {
                     attribute.CalculationTiming = item.CalculationTiming;

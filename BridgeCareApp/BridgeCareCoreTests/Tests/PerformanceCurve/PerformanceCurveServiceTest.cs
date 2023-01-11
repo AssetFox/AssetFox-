@@ -28,13 +28,13 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var libraryId = Guid.NewGuid();
             var libraryRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>
                 {
                     LibraryId = libraryId,
                 }
             };
             var curves = new List<PerformanceCurveDTO>();
-            repository.Setup(r => r.GetScenarioPerformanceCurvesOrderedById(libraryId)).Returns(curves);
+            repository.Setup(r => r.GetPerformanceCurvesForLibraryOrderedById(libraryId)).Returns(curves);
 
             var dataset = service.GetSyncedLibraryDataset(libraryRequest);
             Assert.Empty(dataset);
@@ -51,7 +51,7 @@ namespace BridgeCareCoreTests.Tests.PerformanceCurve
             var libraryId = Guid.NewGuid();
             var libraryRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>
                 {
                     LibraryId = libraryId,
                 }

@@ -47,17 +47,17 @@ namespace BridgeCareCore.Services.Paging.Generics
 
             var rows = new List<T>();
             if (upsertRequest.ScenarioId != null)
-                rows = GetSyncedScenarioDataSet(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
+                rows = GetSyncedScenarioDataSet(upsertRequest.ScenarioId.Value, upsertRequest.SyncModel);
             else
             {
-                if (upsertRequest.PagingSync.LibraryId != null)
-                    libraryId = upsertRequest.PagingSync.LibraryId.Value;
+                if (upsertRequest.SyncModel.LibraryId != null)
+                    libraryId = upsertRequest.SyncModel.LibraryId.Value;
                 else if (!upsertRequest.IsNewLibrary)
                     libraryId = upsertRequest.Library.Id;
 
                 if (libraryId != null)
                     rows = GetLibraryRows(libraryId.Value);
-                rows = SyncDataset(rows, upsertRequest.PagingSync);
+                rows = SyncDataset(rows, upsertRequest.SyncModel);
             }
 
             if (upsertRequest.IsNewLibrary)

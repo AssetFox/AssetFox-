@@ -21,7 +21,7 @@ namespace BridgeCareCore.Services.Paging
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _investmentDefaultDataService = investmentDefaultDataService ?? throw new ArgumentNullException(nameof(investmentDefaultDataService));
         }
-        public InvestmentPagingPageModel GetLibraryInvestmentPage(Guid libraryId, InvestmentPagingRequestModel request)
+        public InvestmentPagingPageModel GetLibraryPage(Guid libraryId, InvestmentPagingRequestModel request)
         {
             var skip = 0;
             var take = 0;
@@ -70,7 +70,7 @@ namespace BridgeCareCore.Services.Paging
             };
         }
 
-        public InvestmentPagingPageModel GetScenarioInvestmentPage(Guid simulationId, InvestmentPagingRequestModel request)
+        public InvestmentPagingPageModel GetScenarioPage(Guid simulationId, InvestmentPagingRequestModel request)
         {
             var skip = 0;
             var take = 0;
@@ -136,7 +136,7 @@ namespace BridgeCareCore.Services.Paging
             };
         }
 
-        public List<BudgetDTO> GetSyncedInvestmentDataset(Guid simulationId, InvestmentPagingSyncModel request)
+        public List<BudgetDTO> GetSyncedScenarioDataSet(Guid simulationId, InvestmentPagingSyncModel request)
         {
             var budgets = request.LibraryId == null ?
                     _unitOfWork.BudgetRepo.GetScenarioBudgets(simulationId) :
@@ -205,11 +205,11 @@ namespace BridgeCareCore.Services.Paging
 
         private List<BudgetDTO> SyncedDataset(List<BudgetDTO> budgets, InvestmentPagingSyncModel syncModel)
         {
-            budgets = budgets.Concat(syncModel.AddedRows).Where(_ => !syncModel.RowsForDeletion.Contains(_.Id)).ToList();
+            budgets = budgets.Concat(syncModel.AddedBudgets).Where(_ => !syncModel.BudgetsForDeletion.Contains(_.Id)).ToList();
             for (var i = 0; i < budgets.Count; i++)
             {
                 var budget = budgets[i];
-                var item = syncModel.UpdateRows.FirstOrDefault(row => row.Id == budget.Id);
+                var item = syncModel.UpdatedBudgets.FirstOrDefault(row => row.Id == budget.Id);
                 if (item != null)
                 {
                     budget.Name = item.Name;

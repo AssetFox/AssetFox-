@@ -914,7 +914,7 @@ export default class Scenarios extends Vue {
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
@@ -936,7 +936,7 @@ export default class Scenarios extends Vue {
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
@@ -959,7 +959,7 @@ export default class Scenarios extends Vue {
         const request: PagingRequest<Scenario>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
@@ -988,7 +988,7 @@ export default class Scenarios extends Vue {
         const simulationQueueRequest: PagingRequest<QueuedSimulation>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
@@ -1111,7 +1111,7 @@ export default class Scenarios extends Vue {
         const request: PagingRequest<Scenario> = {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],
@@ -1124,7 +1124,7 @@ export default class Scenarios extends Vue {
         const simulationQueueRequest: PagingRequest<QueuedSimulation> = {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

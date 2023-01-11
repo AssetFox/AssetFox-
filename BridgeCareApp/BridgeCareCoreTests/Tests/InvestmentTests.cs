@@ -461,7 +461,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentLibraryUpsertPagingRequestModel();
 
             request.Library = dto;
-            request.PagingSync.UpdateRows.Add(dto.Budgets[0]);
+            request.SyncModel.UpdatedBudgets.Add(dto.Budgets[0]);
 
             // Act
             await controller.UpsertBudgetLibrary(request);
@@ -501,7 +501,7 @@ namespace BridgeCareCoreTests.Tests
 
             var request = new InvestmentPagingSyncModel();
             request.Investment = dto.InvestmentPlan;
-            request.UpdateRows.Add(dto.ScenarioBudgets[0]);
+            request.UpdatedBudgets.Add(dto.ScenarioBudgets[0]);
             request.UpdatedBudgetAmounts[dto.ScenarioBudgets[0].Name] = new List<BudgetAmountDTO>() { dto.ScenarioBudgets[0].BudgetAmounts[0]};
 
             // Act

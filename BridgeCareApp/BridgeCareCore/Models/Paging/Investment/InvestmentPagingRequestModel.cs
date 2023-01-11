@@ -2,8 +2,8 @@
 
 namespace BridgeCareCore.Models
 {
-    public class InvestmentPagingRequestModel : PagingRequestModel<BudgetDTO>
+    public class InvestmentPagingRequestModel : BasePagingRequest
     {
-        public new InvestmentPagingSyncModel SyncModel { get; set; }
+        public InvestmentPagingSyncModel SyncModel { get; set; }
     }
 }

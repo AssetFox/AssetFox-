@@ -73,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new CalculatedAttributePagingRequestModel()
             {
                 AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id,
-                SyncModel = new CalculatedAttributePagingSyncModel { AddedRows = new List<CalculatedAttributeDTO>() }
+                SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
             var result = service.GetScenarioPage(libraryId, request) as CalculcatedAttributePagingPageModel;
@@ -93,7 +93,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new CalculatedAttributePagingRequestModel()
             {
                 AttributeId = TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Id,
-                SyncModel = new CalculatedAttributePagingSyncModel { AddedRows = new List<CalculatedAttributeDTO>() }
+                SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
             var result = service.GetLibraryPage(simulationId, request) as CalculcatedAttributePagingPageModel;
@@ -110,7 +110,7 @@ namespace BridgeCareCoreTests.Tests
 
             var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
 
-            var SyncModel = new CalculatedAttributePagingSyncModel { AddedRows = new List<CalculatedAttributeDTO>() };
+            var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
             var result = service.GetSyncedScenarioDataSet(simulationId, SyncModel);
             var calcAttrIds = _testScenarionCalcAttributes.Select(_ => _.Id);
@@ -124,7 +124,7 @@ namespace BridgeCareCoreTests.Tests
 
             var libraryId = TestDataForCalculatedAttributesRepository.GetLibraryRepo().First(_ => _.Name == "First").Id;
 
-            var SyncModel = new CalculatedAttributePagingSyncModel { AddedRows = new List<CalculatedAttributeDTO>() };
+            var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
             var result = service.GetSyncedLibraryDataset(libraryId, SyncModel);
             var calcAttrIds = _testLIbraryCalcAttributes.Select(_ => _.Id);

@@ -5,7 +5,7 @@ using BridgeCareCore.Models;
 
 namespace BridgeCareCore.Interfaces
 {
-    public interface ISimulationService
+    public interface ISimulationPagingService
     {
         PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request);
 

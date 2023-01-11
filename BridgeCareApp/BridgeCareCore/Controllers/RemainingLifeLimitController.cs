@@ -26,11 +26,11 @@ namespace BridgeCareCore.Controllers
         public const string RemainingLifeLimitError = "Remaining Life Limit Error";
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
         private readonly IClaimHelper _claimHelper;
-        private readonly IRemainingLifeLimitService _remainingLIfeLimitService;
+        private readonly IRemainingLifeLimitPagingService _remainingLIfeLimitService;
 
         public RemainingLifeLimitController(IEsecSecurity esecSecurity, IUnitOfWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IRemainingLifeLimitService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IRemainingLifeLimitPagingService remainingLifeService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _remainingLIfeLimitService = remainingLifeService ?? throw new ArgumentNullException(nameof(remainingLifeService));

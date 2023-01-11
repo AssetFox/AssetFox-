@@ -21,12 +21,12 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
 
 namespace BridgeCareCore.Services
 {
-    public class SimulationService : ISimulationService
+    public class SimulationPagingService : ISimulationPagingService
     {
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
 
-        public SimulationService(IUnitOfWork unitOfWork, ISimulationRepository simulationRepository)
+        public SimulationPagingService(IUnitOfWork unitOfWork, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));

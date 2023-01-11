@@ -17,6 +17,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
@@ -68,6 +69,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                new PerformanceCurvesPagingService(TestHelper.UnitOfWork),
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -252,6 +254,7 @@ namespace BridgeCareCoreTests.Tests
             var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
             unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);
             var esecSecurity = EsecSecurityMocks.Admin;
+            var pagingService = new Mock<IPerformanceCurvesPagingService>();
             var service = new Mock<IPerformanceCurvesService>();
 
             var performanceCurves = new List<PerformanceCurveDTO>();
@@ -260,12 +263,13 @@ namespace BridgeCareCoreTests.Tests
             {
                 LibraryId = libraryId,
             };
-            service.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
+            pagingService.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
             unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
             var controller = PerformanceCurveControllerTestSetup.Create(
                 esecSecurity,
                 unitOfWork.Object,
-                service.Object);
+                service.Object,
+                pagingService.Object);
             var library = new PerformanceCurveLibraryDTO
             {
                 Id = libraryId,

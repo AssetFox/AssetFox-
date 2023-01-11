@@ -8,11 +8,7 @@ using AppliedResearchAssociates.iAM.DTOs.Abstract;
 using MoreLinq;
 using AppliedResearchAssociates.iAM.DTOs.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.LibraryEntities.Treatment;
-using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.Abstract;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities.ScenarioEntities.Treatment;
-using AppliedResearchAssociates.iAM.Data.Attributes;
-using OfficeOpenXml.FormulaParsing.Utilities;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers
 {
@@ -42,7 +38,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             return entity;
         }
 
-        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity)
+        public static BaseCommittedProjectDTO ToDTO(this CommittedProjectEntity entity, string networkKeyAttribute)
         {
             TreatmentCategory convertedCategory = default(TreatmentCategory);
             if (Enum.TryParse(typeof(TreatmentCategory), entity.Category, true, out var convertedCategoryOut))
@@ -53,6 +49,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             switch (entity.CommittedProjectLocation.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
+                    if(entity.ScenarioBudgetId != null && entity.ScenarioBudget == null)
+                    {
+                        throw new InvalidOperationException($"Scenario budget is not present in committed project.");
+                    }
+
                     var commit = new SectionCommittedProjectDTO()
                     {
                         Id = entity.Id,
@@ -64,7 +65,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
                         ShadowForAnyTreatment= entity.ShadowForAnyTreatment,
                         ShadowForSameTreatment= entity.ShadowForSameTreatment,
                         Category = convertedCategory,
-                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys()
+                        LocationKeys = entity.CommittedProjectLocation.ToLocationKeys(networkKeyAttribute)
                     };
                     foreach (var consequence in entity.CommittedProjectConsequences)
                     {
@@ -76,7 +77,7 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             }
         }
 
-        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes)
+        public static CommittedProjectEntity ToEntity(this BaseCommittedProjectDTO dto, IList<AttributeEntity> attributes, string networkKeyAttribute)
         {
             var result = new CommittedProjectEntity
             {
@@ -95,18 +96,15 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             {
                 result.CommittedProjectConsequences.Add(consequence.ToEntity(attributes));
             }
-
+                        
             if (dto is SectionCommittedProjectDTO)
-            {
-                // TODO:  Switch to looking up key field in network object
-                string keyField = "BRKEY_";
-
-                if (dto.LocationKeys.ContainsKey(keyField) && dto.LocationKeys.ContainsKey("ID"))
+            {                
+                if (dto.VerifyLocation(networkKeyAttribute))
                 {
                     result.CommittedProjectLocation = new CommittedProjectLocationEntity(
                         Guid.Parse(dto.LocationKeys["ID"]),
                         DataPersistenceConstants.SectionLocation,
-                        dto.LocationKeys[keyField]
+                        dto.LocationKeys[networkKeyAttribute]
                         )
                     {
                         CommittedProjectId = result.Id,
@@ -137,18 +135,18 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.M
             };
         }
 
-        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity)
+        public static Dictionary<string, string> ToLocationKeys(this CommittedProjectLocationEntity entity, string networkKeyAttribute)
         {
-            // TODO:  Switch to looking up key field in datasource object
-            string keyField = "BRKEY_";
-
+            const string IdKey = "ID";
             switch (entity.Discriminator)
             {
                 case DataPersistenceConstants.SectionLocation:
-                    var result = new Dictionary<string, string>();
-                    result.Add("ID", entity.Id.ToString());
-                    result.Add(keyField, entity.LocationIdentifier);
-                    return result;
+                var result = new Dictionary<string, string>
+                {
+                    { IdKey, entity.Id.ToString() },
+                    { networkKeyAttribute, entity.LocationIdentifier }
+                };
+                return result;
                 default:
                     throw new ArgumentException($"Location type of {entity.Discriminator} is not supported.");
             }

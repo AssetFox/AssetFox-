@@ -282,5 +282,11 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         }
 
         public string GetEncryptionKey() => _unitOfWork.EncryptionKey;
+
+        public string GetAttributeName(Guid attributeId)
+        {
+            var attributeName = _unitOfWork.Context.Attribute.AsNoTracking().FirstOrDefault(a => a.Id == attributeId)?.Name;
+            return attributeName ?? throw new InvalidOperationException("Cannot find attribute for the given id.");
+        }
     }
 }

@@ -186,7 +186,8 @@ namespace BridgeCareCoreTests.Tests
                     {
                         Id = Guid.NewGuid(),
                         MergedCriteriaExpression = "expression",
-                        Name = "Criterion"
+                        Name = "Criterion",
+                        IsSingleUse = true,
                     }
                 }
             };

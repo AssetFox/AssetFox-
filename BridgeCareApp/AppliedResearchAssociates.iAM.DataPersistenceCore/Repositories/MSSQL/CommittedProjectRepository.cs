@@ -33,42 +33,17 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public void GetSimulationCommittedProjects(Simulation simulation)
         {
             double noTreatmentDefaultCost = 0.0;
+            var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
             var simulationEntity = _unitOfWork.Context.Simulation.FirstOrDefault(_ => _.Id == simulation.Id);
             if (simulationEntity == null)
             {
                 throw new RowNotInTableException("No simulation was found for the given scenario.");
             }
             var noTreatment = simulationEntity.NoTreatmentBeforeCommittedProjects;
-            TreatmentDTO singleSelectableTreatment = null;
             ScenarioSelectableTreatmentEntity noTreatmentEntity = null;
             if (noTreatment)
-            {
-
-                var selectableTreatmentRepository = _unitOfWork.SelectableTreatmentRepo;
                 noTreatmentEntity = selectableTreatmentRepository.GetDefaultTreatment(simulation.Id);
 
-                singleSelectableTreatment = selectableTreatmentRepository.GetScenarioSelectableTreatmentById(simulation.Id);
-
-                var treatmentLibraries = selectableTreatmentRepository.GetAllTreatmentLibraries();
-                var treatmentLibrary = treatmentLibraries.FirstOrDefault(_ => _.Name == noTreatmentEntity.Name);
-                var defaultTreatmentLibrary = new List<TreatmentLibraryDTO>();
-                treatmentLibraries.ForEach(element =>
-                {
-                    element.Treatments.ForEach(_ =>
-                    {
-                        if (_.Name == noTreatmentEntity.Name)
-                        {
-                            defaultTreatmentLibrary.Add(element);
-                        }
-                    });
-                });
-                var t = defaultTreatmentLibrary.First()?.Treatments.Find(_ => _.Name == singleSelectableTreatment.Name);
-                var compiler = new CalculateEvaluateCompiler();
-                var calculator = compiler.GetCalculator(t.Costs.First().Equation.Expression/*cost.TreatmentCostEquationJoin.Equation.Expression*/);
-                var scope = new CalculateEvaluateScope();
-                var currentCost = calculator.Delegate(scope);
-                noTreatmentDefaultCost = currentCost;
-            }
             var assets = _unitOfWork.Context.MaintainableAsset
                 .Where(_ => _.NetworkId == simulation.Network.Id)
                 .Include(_ => _.MaintainableAssetLocation)
@@ -120,115 +95,60 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             //            Attribute = new AttributeEntity {Name = consequence.Attribute.Name}
             //        }).ToList(),
             //}).AsNoTracking().ToList();
-
             if (projects.Any())
             {
                 projects.ForEach(_ => {
                     var asset = assets.FirstOrDefault(a => _.CommittedProjectLocation.ToDomain().MatchOn(a.MaintainableAssetLocation.ToDomain()));
                     if (asset != null)
                     {
-                        //if (noTreatment)
-                        //    noTreatmentDefaultCost = GetNoTreatmentDefaultCost(noTreatmentEntity.Id, simulation.Network.Id, noTreatmentEntity.Name, asset.Id);
+                        if (noTreatment)
+                        {
+                            var defaultNoTreatment = selectableTreatmentRepository.GetDefaultNoTreatment(simulation.Id);
+                            noTreatmentDefaultCost = GetDefaultNoTreatmentCost(defaultNoTreatment, asset.Id);
+                        }
                         _.CreateCommittedProject(simulation, asset.Id, noTreatment, noTreatmentDefaultCost, noTreatmentEntity);
                     }
                 });
             }
-
         }
-        //public double GetNoTreatmentDefaultCost(Guid treatmentLibraryId, Guid networkId, string treatment, Guid assetId)
-        //{
-        //    //var asset = _unitOfWork.MaintainableAssetRepo.GetMaintainableAssetByKeyAttribute(networkId, assetKeyData);
+        public double GetDefaultNoTreatmentCost(TreatmentDTO treatment, Guid assetId)
+        {
+            double totalCost = 0.0;
+            treatment.Costs.ForEach(c =>
+            {
+                var compiler = new CalculateEvaluateCompiler();
+                var attributes = InstantiateCompilerAndGetExpressionAttributes(c.Equation.Expression, compiler);
+                var calculator = compiler.GetCalculator(c.Equation.Expression);
+                var scope = new CalculateEvaluateScope();
 
-        //    if (assetId == Guid.Empty)
-        //        return 0;
-
-        //    var treatmentTests = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
-        //        .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId);
-
-        //    var treatmentCosts = _unitOfWork.Context.SelectableTreatment.AsNoTracking()
-        //        .Include(_ => _.TreatmentCosts)
-        //        .ThenInclude(_ => _.TreatmentCostEquationJoin)
-        //        .ThenInclude(_ => _.Equation)
-        //        .Include(_ => _.TreatmentCosts)
-        //        .ThenInclude(_ => _.CriterionLibraryTreatmentCostJoin)
-        //        .ThenInclude(_ => _.CriterionLibrary)
-        //        .FirstOrDefault(_ => _.Name == treatment && _.TreatmentLibraryId == treatmentLibraryId)?.TreatmentCosts
-        //        .Where(_ => _.TreatmentCostEquationJoin != null);
-
-        //    double totalCost = 0;
-        //    if (treatmentCosts == null)
-        //        return totalCost;
-        //    foreach (var cost in treatmentCosts)
-        //    {
-        //        var compiler = new CalculateEvaluateCompiler();
-
-        //        if (cost.CriterionLibraryTreatmentCostJoin != null && !IsCriteriaValid(compiler, cost.CriterionLibraryTreatmentCostJoin.CriterionLibrary.MergedCriteriaExpression, assetId))
-        //            continue;
-
-        //        compiler = new CalculateEvaluateCompiler();
-        //        var attributes = InstantiateCompilerAndGetExpressionAttributes(cost.TreatmentCostEquationJoin.Equation.Expression, compiler);
-
-        //        var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-        //            .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-        //        var latestAggResults = new List<AggregatedResultEntity>();
-        //        foreach (var attr in attributes)
-        //        {
-        //            var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
-        //            if (attrs.Count == 0)
-        //                continue;
-        //            var latestYear = attrs.Max(_ => _.Year);
-        //            var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
-        //            latestAggResults.Add(latestAggResult);
-        //        }
-        //        var calculator = compiler.GetCalculator(cost.TreatmentCostEquationJoin.Equation.Expression);
-        //        var scope = new CalculateEvaluateScope();
-        //        if (latestAggResults.Count != attributes.Count)
-        //            continue;
-        //        InstantiateScope(latestAggResults, scope);
-        //        var currentCost = calculator.Delegate(scope);
-        //        totalCost += currentCost;
-        //    }
-        //    return totalCost;
-        //}
-        //private bool IsCriteriaValid(CalculateEvaluateCompiler compiler, string expression, Guid assetId)
-        //{
-        //    var attributes = InstantiateCompilerAndGetExpressionAttributes(expression, compiler);
-
-        //    var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
-        //            .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
-        //    var latestAggResults = new List<AggregatedResultEntity>();
-        //    foreach (var attr in attributes)
-        //    {
-        //        var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
-        //        if (attrs.Count == 0)
-        //            continue;
-        //        var latestYear = attrs.Max(_ => _.Year);
-        //        var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
-        //        latestAggResults.Add(latestAggResult);
-        //    }
-        //    if (latestAggResults.Count != attributes.Count)
-        //        return false;
-        //    var evaluator = compiler.GetEvaluator(expression);
-        //    var scope = new CalculateEvaluateScope();
-        //    InstantiateScope(latestAggResults, scope);
-        //    return evaluator.Delegate(scope);
-        //}
-
-        //private void InstantiateScope(List<AggregatedResultEntity> results, CalculateEvaluateScope scope)
-        //{
-        //    results.ForEach(_ =>
-        //    {
-        //        if (_.Attribute.DataType == "NUMBER")
-        //        {
-        //            scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
-        //        }
-        //        else
-        //        {
-        //            scope.SetText(_.Attribute.Name, _.TextValue);
-        //        }
-        //    });
-        //}
-
+                var aggResults = _unitOfWork.Context.AggregatedResult.AsNoTracking().Include(_ => _.Attribute)
+                    .Where(_ => _.MaintainableAssetId == assetId).ToList().Where(_ => attributes.Any(a => a.Id == _.AttributeId)).ToList();
+                var latestAggResults = new List<AggregatedResultEntity>();
+                foreach (var attr in attributes)
+                {
+                    var attrs = aggResults.Where(_ => _.AttributeId == attr.Id).ToList();
+                    if (attrs.Count == 0)
+                        continue;
+                    var latestYear = attrs.Max(_ => _.Year);
+                    var latestAggResult = attrs.FirstOrDefault(_ => _.Year == latestYear);
+                    latestAggResults.Add(latestAggResult);
+                }
+                latestAggResults.ForEach(_ =>
+                {
+                    if (_.Attribute.DataType == "NUMBER")
+                    {
+                        scope.SetNumber(_.Attribute.Name, _.NumericValue.Value);
+                    }
+                    else
+                    {
+                        scope.SetText(_.Attribute.Name, _.TextValue);
+                    }
+                });
+                var currentCost = calculator.Delegate(scope);
+                totalCost += currentCost;
+            });
+            return totalCost;
+        }
         private List<AttributeEntity> InstantiateCompilerAndGetExpressionAttributes(string mergedCriteriaExpression, CalculateEvaluateCompiler compiler)
         {
             var modifiedExpression = mergedCriteriaExpression
@@ -265,7 +185,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 
             return attributes;
         }
-
         public List<SectionCommittedProjectDTO> GetSectionCommittedProjectDTOs(Guid simulationId)
         {
             if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))

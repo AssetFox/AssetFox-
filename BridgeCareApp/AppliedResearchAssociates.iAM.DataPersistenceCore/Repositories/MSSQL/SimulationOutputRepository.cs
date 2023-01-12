@@ -8,6 +8,7 @@ using AppliedResearchAssociates.iAM.Analysis.Engine;
 using AppliedResearchAssociates.iAM.Common;
 using AppliedResearchAssociates.iAM.Common.PerformanceMeasurement;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Entities;
+using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Enums;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Extensions;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappers;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
@@ -15,6 +16,7 @@ using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
 {
@@ -30,8 +32,8 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
         public const string AssetDetailSaveOverrideBatchSizeKey = "AssetDetailBatchSizeOverrideForValueSave";
 
         public SimulationOutputRepository(UnitOfDataPersistenceWork unitOfWork) => _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-
-        public void CreateSimulationOutput(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
+        //
+        public void CreateSimulationOutputViaRelational(Guid simulationId, SimulationOutput simulationOutput, ILog loggerForUserInfo = null, ILog loggerForTechnicalInfo = null)
         {
             loggerForTechnicalInfo ??= new DoNotLog();
             loggerForUserInfo ??= new DoNotLog();
@@ -136,6 +138,71 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
                 loggerForTechnicalInfo.Error(error);
                 _unitOfWork.Rollback();
                 throw;
+            }
+        }
+
+        public void CreateSimulationOutputViaJson(Guid simulationId, SimulationOutput simulationOutput)
+        {
+            if (!_unitOfWork.Context.Simulation.Any(_ => _.Id == simulationId))
+            {
+                throw new RowNotInTableException("No simulation found for given scenario.");
+            }
+
+            var simulationEntity = _unitOfWork.Context.Simulation.AsNoTracking()
+                .Single(_ => _.Id == simulationId);
+
+            if (simulationOutput == null)
+            {
+                throw new InvalidOperationException($"No results found for simulation {simulationEntity.Name}. Please ensure that the simulation analysis has been run.");
+            }
+
+            var settings = new StringEnumConverter();
+
+            try
+            {
+                _unitOfWork.Context.DeleteAll<SimulationOutputEntity>(_ =>
+                _.SimulationId == simulationId);
+
+                var outputInitialConditionNetwork = JsonConvert.SerializeObject(simulationOutput.InitialConditionOfNetwork, settings);
+
+                _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = outputInitialConditionNetwork,
+                            OutputType = SimulationOutputEnum.InitialConditionNetwork
+                        });
+
+                var outputInitialSummary = JsonConvert.SerializeObject(simulationOutput.InitialAssetSummaries, settings);
+
+                _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = outputInitialSummary,
+                            OutputType = SimulationOutputEnum.InitialSummary
+                        });
+
+                foreach (var item in simulationOutput.Years)
+                {
+                    var simulationOutputYearData = JsonConvert.SerializeObject(item, settings);
+
+                    _unitOfWork.Context.Add(
+                        new SimulationOutputJsonEntity
+                        {
+                            Id = Guid.NewGuid(),
+                            SimulationId = simulationId,
+                            Output = simulationOutputYearData,
+                            OutputType = SimulationOutputEnum.YearlySection
+                        });
+                }
+                _unitOfWork.Context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 

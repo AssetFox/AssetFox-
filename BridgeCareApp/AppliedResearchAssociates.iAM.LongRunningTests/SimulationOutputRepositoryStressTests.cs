@@ -44,7 +44,7 @@ namespace AppliedResearchAssociates.iAM.StressTesting
             var numericAttributeNames = assetSummary.ValuePerNumericAttribute.Keys.Except(attributeNamesToIgnore).ToList();
             var textAttributeNames = assetSummary.ValuePerTextAttribute.Keys.ToList();
             var context = SimulationOutputCreationContextTestSetup.ContextWithObjectsInDatabase(TestHelper.UnitOfWork, assetNameIdPairs, numericAttributeNames, textAttributeNames, yearCount);
-            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutput(context.SimulationId, simulationOutput);
+            TestHelper.UnitOfWork.SimulationOutputRepo.CreateSimulationOutputViaRelational(context.SimulationId, simulationOutput);
             var loadedOutput = TestHelper.UnitOfWork.SimulationOutputRepo.GetSimulationOutput(context.SimulationId);
             SimulationOutputAssertions.SameSimulationOutput(loadedOutput, simulationOutput);
         }

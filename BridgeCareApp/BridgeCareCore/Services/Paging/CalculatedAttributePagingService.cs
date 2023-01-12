@@ -5,20 +5,21 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.UnitOfWork;
 using AppliedResearchAssociates.iAM.DTOs;
 using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
+using BridgeCareCore.Services.Paging.Generics;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace BridgeCareCore.Services
 {
-    public class CalculatedAttributeService : ICalculatedAttributeService
+    public class CalculatedAttributePagingService : ICalculatedAttributePagingService
     {
         private readonly UnitOfDataPersistenceWork _unitOfWork;
-        public CalculatedAttributeService(UnitOfDataPersistenceWork unitOfWork)
+        public CalculatedAttributePagingService(UnitOfDataPersistenceWork unitOfWork)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         }
 
-        public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetLibraryCalculatedAttributePage(Guid libraryId, CalculatedAttributePagingRequestModel request)
+        public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetScenarioPage(Guid libraryId, CalculatedAttributePagingRequestModel request)
         {
             var calcAttribute = new CalculatedAttributeDTO();
             var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
@@ -30,7 +31,7 @@ namespace BridgeCareCore.Services
             return HandlePaging(calcAttribute, request);
         }
 
-        public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetScenarioCalculatedAttributePage(Guid simulationId, CalculatedAttributePagingRequestModel request)
+        public PagingPageModel<CalculatedAttributeEquationCriteriaPairDTO> GetLibraryPage(Guid simulationId, CalculatedAttributePagingRequestModel request)
         {
             var calcAttribute = new CalculatedAttributeDTO();
             var attribute = _unitOfWork.Context.Attribute.First(_ => _.Id == request.AttributeId);
@@ -44,7 +45,7 @@ namespace BridgeCareCore.Services
             return HandlePaging(calcAttribute, request);
         }
 
-        public List<CalculatedAttributeDTO> GetSyncedScenarioDataset(Guid simulationId, CalculatedAttributePagingSyncModel request)
+        public List<CalculatedAttributeDTO> GetSyncedScenarioDataSet(Guid simulationId, CalculatedAttributePagingSyncModel request)
         {
             var attributes = request.LibraryId == null ?
                     _unitOfWork.CalculatedAttributeRepo.GetScenarioCalculatedAttributes(simulationId).ToList() :

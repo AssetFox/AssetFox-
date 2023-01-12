@@ -31,11 +31,11 @@ namespace BridgeCareCore.Controllers
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        private IBudgetPriortyService _budgetPriortyService;
+        private IBudgetPriortyPagingService _budgetPriortyService;
 
         public BudgetPriorityController(IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService,
             IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper,
-            IBudgetPriortyService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+            IBudgetPriortyPagingService budgetPriortyService) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
             _budgetPriortyService = budgetPriortyService;
@@ -48,7 +48,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetBudgetPriortyPage(simulationId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetScenarioPage(simulationId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -66,7 +66,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetLibraryBudgetPriortyPage(libraryId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _budgetPriortyService.GetLibraryPage(libraryId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -112,23 +112,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var items = new List<BudgetPriorityDTO>();
-                    if (upsertRequest.ScenarioId != null)
-                        items = _budgetPriortyService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
-                    else if(upsertRequest.PagingSync.LibraryId != null && upsertRequest.PagingSync.LibraryId != Guid.Empty)
-                        items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
-                    else if (!upsertRequest.IsNewLibrary)
-                        items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    else if (upsertRequest.IsNewLibrary && upsertRequest.PagingSync.LibraryId == Guid.Empty)
-                    {
-                        items = _budgetPriortyService.GetNewLibraryDataset(upsertRequest.PagingSync);
-                    }
-
-                    if (upsertRequest.IsNewLibrary)
-                        items.ForEach(item => {
-                            item.Id = Guid.NewGuid();
-                            item.CriterionLibrary.Id = Guid.NewGuid();
-                        });
+                    var items = _budgetPriortyService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
@@ -229,7 +213,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dtos = _budgetPriortyService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _budgetPriortyService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
                     UnitOfWork.BudgetPriorityRepo.UpsertOrDeleteScenarioBudgetPriorities(dtos, simulationId);
                     UnitOfWork.Commit();

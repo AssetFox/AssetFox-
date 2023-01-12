@@ -26,11 +26,11 @@ namespace BridgeCareCore.Controllers
     {
         public const string CalculatedAttributeError = "Calculated Attribute Error";
         private readonly ICalculatedAttributesRepository calculatedAttributesRepo;
-        private readonly ICalculatedAttributeService _calulatedAttributeService;
+        private readonly ICalculatedAttributePagingService _calulatedAttributeService;
         private readonly IAttributeRepository attributeRepo;
 
         public CalculatedAttributesController(IEsecSecurity esec, IUnitOfWork unitOfWork, IHubService hubService,
-            IHttpContextAccessor httpContextAccessor, ICalculatedAttributeService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor, ICalculatedAttributePagingService calulatedAttributeService) : base(esec, unitOfWork, hubService, httpContextAccessor)
         {
             attributeRepo = unitOfWork.AttributeRepo;
             calculatedAttributesRepo = unitOfWork.CalculatedAttributeRepo;
@@ -105,7 +105,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _calulatedAttributeService.GetScenarioCalculatedAttributePage(simulationId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _calulatedAttributeService.GetLibraryPage(simulationId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -122,7 +122,7 @@ namespace BridgeCareCore.Controllers
         {
             try
             {
-                var result = await Task.Factory.StartNew(() => _calulatedAttributeService.GetLibraryCalculatedAttributePage(libraryId, pageRequest));
+                var result = await Task.Factory.StartNew(() => _calulatedAttributeService.GetScenarioPage(libraryId, pageRequest));
                 return Ok(result);
             }
             catch (Exception e)
@@ -144,7 +144,7 @@ namespace BridgeCareCore.Controllers
                     UnitOfWork.BeginTransaction();
                     var attributes = new List<CalculatedAttributeDTO>();
                     if (upsertRequest.ScenarioId != null)
-                        attributes = _calulatedAttributeService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.SyncModel);
+                        attributes = _calulatedAttributeService.GetSyncedScenarioDataSet(upsertRequest.ScenarioId.Value, upsertRequest.SyncModel);
                     else if (upsertRequest.SyncModel.LibraryId != null)
                         attributes = _calulatedAttributeService.GetSyncedLibraryDataset(upsertRequest.SyncModel.LibraryId.Value, upsertRequest.SyncModel);
                     else if (!upsertRequest.IsNewLibrary)
@@ -208,7 +208,7 @@ namespace BridgeCareCore.Controllers
             {
                 await Task.Factory.StartNew(() =>
                 {
-                    var dto = _calulatedAttributeService.GetSyncedScenarioDataset(simulationId, syncModel);
+                    var dto = _calulatedAttributeService.GetSyncedScenarioDataSet(simulationId, syncModel);
                     UnitOfWork.BeginTransaction();
                     
                     calculatedAttributesRepo.UpsertScenarioCalculatedAttributes(dto, simulationId);

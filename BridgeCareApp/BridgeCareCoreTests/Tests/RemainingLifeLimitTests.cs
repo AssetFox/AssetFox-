@@ -35,7 +35,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object,
-                new RemainingLifeLimitService(TestHelper.UnitOfWork));
+                new RemainingLifeLimitPagingService(TestHelper.UnitOfWork));
             return controller;
         }
 
@@ -52,7 +52,7 @@ namespace BridgeCareCoreTests.Tests
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new RemainingLifeLimitController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
                 hubService, accessor, _mockClaimHelper.Object,
-                new RemainingLifeLimitService(TestHelper.UnitOfWork));
+                new RemainingLifeLimitPagingService(TestHelper.UnitOfWork));
 
             controller.ControllerContext = new ControllerContext()
             {
@@ -206,7 +206,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = dto,
-                PagingSync = sync
+                SyncModel = sync
             };
             // Act
             await controller.UpsertRemainingLifeLimitLibrary(libraryRequest);

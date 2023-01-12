@@ -77,14 +77,14 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetCommittedProjectPageSizeOneSuccess()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
             {
                 Page = 1,
                 RowsPerPage = 1,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "",
                 sortColumn = ""
             };
@@ -99,7 +99,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetCommittedProjectPageSizetwoSortColumnTreatmentIsDescendingFalse()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
@@ -107,7 +107,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "",
                 sortColumn = "treatment"
             };
@@ -123,7 +123,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetCommittedProjectPageSizetwoSearchItemsCountOne()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
 
             var request = new PagingRequestModel<SectionCommittedProjectDTO>()
@@ -131,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>(),
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>(),
                 search = "Simple",
                 sortColumn = ""
             };
@@ -146,7 +146,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetCommittedProjectPageSizeThreeAddRow()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
             var addrow = new SectionCommittedProjectDTO()
             {
@@ -185,7 +185,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 4,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>()
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
                     AddedRows = new List<SectionCommittedProjectDTO> { addrow}
                 },
@@ -203,7 +203,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetCommittedProjectPageSizetwoUpdateRow()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
             var updateRow = TestDataForCommittedProjects.ValidCommittedProjects[0];
             var newTreament = "updated treatment";
@@ -214,7 +214,7 @@ namespace BridgeCareCoreTests.Tests
                 Page = 1,
                 RowsPerPage = 2,
                 isDescending = false,
-                PagingSync = new PagingSyncModel<SectionCommittedProjectDTO>()
+                SyncModel = new PagingSyncModel<SectionCommittedProjectDTO>()
                 {
                     UpdateRows = new List<SectionCommittedProjectDTO> { updateRow }
                 },
@@ -232,7 +232,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetSyncedDataNoChanges()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
 
             var dataSet = service.GetSyncedDataset(TestDataForCommittedProjects.Simulations.Single(_ => _.Name == "Test").Id, new PagingSyncModel<SectionCommittedProjectDTO>());
@@ -246,7 +246,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetSyncedDataUpdateRow()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
             var updateRow = TestDataForCommittedProjects.ValidCommittedProjects[0];
 
@@ -268,7 +268,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetSyncedDataAddRow()
         {
-            var service = new CommittedProjectService(_testUOW);
+            var service = new CommittedProjectPagingService(_testUOW);
 
             var addrow = new SectionCommittedProjectDTO()
             {

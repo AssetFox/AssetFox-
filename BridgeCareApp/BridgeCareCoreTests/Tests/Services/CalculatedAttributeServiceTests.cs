@@ -66,7 +66,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetLibraryCalculatedAttributePageTest()
         {
-            var service = new CalculatedAttributeService(_testRepo);
+            var service = new CalculatedAttributePagingService(_testRepo);
 
             var libraryId = TestDataForCalculatedAttributesRepository.GetLibraryRepo().First(_ => _.Name == "First").Id;
 
@@ -76,7 +76,7 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
-            var result = service.GetLibraryCalculatedAttributePage(libraryId, request) as CalculcatedAttributePagingPageModel;
+            var result = service.GetScenarioPage(libraryId, request) as CalculcatedAttributePagingPageModel;
             var pairIds = _testLIbraryCalcAttributes.First(_ => _.Attribute ==
             TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
 
@@ -86,7 +86,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetScenarioCalculatedAttributePageTest()
         {
-            var service = new CalculatedAttributeService(_testRepo);
+            var service = new CalculatedAttributePagingService(_testRepo);
 
             var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
 
@@ -96,7 +96,7 @@ namespace BridgeCareCoreTests.Tests
                 SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() }
             };
 
-            var result = service.GetScenarioCalculatedAttributePage(simulationId, request) as CalculcatedAttributePagingPageModel;
+            var result = service.GetLibraryPage(simulationId, request) as CalculcatedAttributePagingPageModel;
             var pairIds = _testScenarionCalcAttributes.First(_ => _.Attribute ==
             TestDataForCalculatedAttributesRepository.GetAttributeRepo().First().Name).Equations.Select(_ => _.Id).ToList();
 
@@ -106,13 +106,13 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetSyncedScenarioDatasetTest()
         {
-            var service = new CalculatedAttributeService(_testRepo);
+            var service = new CalculatedAttributePagingService(_testRepo);
 
             var simulationId = TestDataForCalculatedAttributesRepository.GetSimulations().First(_ => _.Name == "First").Id;
 
             var SyncModel = new CalculatedAttributePagingSyncModel { AddedCalculatedAttributes = new List<CalculatedAttributeDTO>() };
 
-            var result = service.GetSyncedScenarioDataset(simulationId, SyncModel);
+            var result = service.GetSyncedScenarioDataSet(simulationId, SyncModel);
             var calcAttrIds = _testScenarionCalcAttributes.Select(_ => _.Id);
             Assert.True(result.Where(_ => calcAttrIds.Contains(_.Id)).Count() == calcAttrIds.Count());
         }
@@ -120,7 +120,7 @@ namespace BridgeCareCoreTests.Tests
         [Fact]
         public void GetSyncedLibraryDatasetTest()
         {
-            var service = new CalculatedAttributeService(_testRepo);
+            var service = new CalculatedAttributePagingService(_testRepo);
 
             var libraryId = TestDataForCalculatedAttributesRepository.GetLibraryRepo().First(_ => _.Name == "First").Id;
 

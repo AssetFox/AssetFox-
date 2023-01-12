@@ -702,7 +702,7 @@ export default class PerformanceCurveEditor extends Vue {
         const request: PagingRequest<PerformanceCurve>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -880,7 +880,7 @@ export default class PerformanceCurveEditor extends Vue {
             const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: performanceCurveLibrary,    
                 isNewLibrary: true,           
-                 pagingSync: {
+                 syncModel: {
                     libraryId: performanceCurveLibrary.performanceCurves.length == 0 || !this.hasSelectedLibrary ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: performanceCurveLibrary.performanceCurves === [] ? [] : this.deletionIds,
                     updateRows: performanceCurveLibrary.performanceCurves === [] ? [] : Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -1033,7 +1033,7 @@ export default class PerformanceCurveEditor extends Vue {
         const upsertRequest: LibraryUpsertPagingRequest<PerformanceCurveLibrary, PerformanceCurve> = {
                 library: this.selectedPerformanceCurveLibrary,
                 isNewLibrary: false,
-                 pagingSync: {
+                 syncModel: {
                     libraryId: this.selectedPerformanceCurveLibrary.id === this.uuidNIL ? null : this.selectedPerformanceCurveLibrary.id,
                     rowsForDeletion: this.deletionIds,
                     updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
@@ -1230,7 +1230,7 @@ export default class PerformanceCurveEditor extends Vue {
         const request: PagingRequest<PerformanceCurve>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

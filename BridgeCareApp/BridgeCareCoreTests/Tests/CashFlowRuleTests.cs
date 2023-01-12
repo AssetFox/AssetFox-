@@ -58,7 +58,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
             controller.ControllerContext = new ControllerContext()
             {
                 HttpContext = new DefaultHttpContext() { User = testUser }
@@ -70,7 +70,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.AdminMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
         }
 
         private void CreateUnauthorizedController()
@@ -78,7 +78,7 @@ namespace BridgeCareCoreTests.Tests
             var accessor = HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
             _controller = new CashFlowController(EsecSecurityMocks.DbeMock.Object, TestHelper.UnitOfWork,
-                hubService, accessor, _mockClaimHelper.Object, new CashFlowService(TestHelper.UnitOfWork));
+                hubService, accessor, _mockClaimHelper.Object, new CashFlowPagingService(TestHelper.UnitOfWork));
         }
 
         private void CreateLibraryTestData()
@@ -367,7 +367,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 IsNewLibrary = false,
                 Library = dto,
-                PagingSync = sync
+                SyncModel = sync
             };
 
             // Act

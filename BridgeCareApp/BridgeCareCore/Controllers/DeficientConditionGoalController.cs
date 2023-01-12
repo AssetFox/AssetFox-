@@ -103,7 +103,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     _claimHelper.CheckUserSimulationReadAuthorization(simulationId, UserId);
-                    result = _deficientConditionGoalService.GetScenarioDeficientConditionGoalPage(simulationId, pageRequest);
+                    result = _deficientConditionGoalService.GetScenarioPage(simulationId, pageRequest);
                 });
 
                 return Ok(result);
@@ -132,7 +132,7 @@ namespace BridgeCareCore.Controllers
                 var result = new PagingPageModel<DeficientConditionGoalDTO>();
                 await Task.Factory.StartNew(() =>
                 {
-                    result = _deficientConditionGoalService.GetLibraryDeficientConditionGoalPage(libraryId, pageRequest);
+                    result = _deficientConditionGoalService.GetLibraryPage(libraryId, pageRequest);
                 });
 
                 return Ok(result);
@@ -159,23 +159,7 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var items = new List<DeficientConditionGoalDTO>();
-                    if (upsertRequest.ScenarioId != null)
-                        items = _deficientConditionGoalService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
-                    else if (upsertRequest.ScenarioId != null)
-                        items = _deficientConditionGoalService.GetSyncedScenarioDataset(upsertRequest.ScenarioId.Value, upsertRequest.PagingSync);
-                    else if (upsertRequest.PagingSync.LibraryId != null)
-                        items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest.PagingSync.LibraryId.Value, upsertRequest.PagingSync);
-                    else if (!upsertRequest.IsNewLibrary)
-                        items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest.Library.Id, upsertRequest.PagingSync);
-                    if (upsertRequest.IsNewLibrary)
-                    {
-                        items.ForEach(item =>
-                        {
-                            item.Id = Guid.NewGuid();
-                            item.CriterionLibrary.Id = Guid.NewGuid();
-                        });
-                    }
+                    var items = _deficientConditionGoalService.GetSyncedLibraryDataset(upsertRequest);
                     var dto = upsertRequest.Library;
                     if (dto != null)
                     {
@@ -214,7 +198,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    var dtos = _deficientConditionGoalService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _deficientConditionGoalService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     UnitOfWork.DeficientConditionGoalRepo.UpsertOrDeleteScenarioDeficientConditionGoals(dtos, simulationId);
                     UnitOfWork.Commit();
                 });

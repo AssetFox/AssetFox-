@@ -18,15 +18,18 @@ using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL.Mappe
 using System.Data;
 using AppliedResearchAssociates.iAM.DataPersistenceCore;
 using AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+using BridgeCareCore.Services.Paging.Generics;
+using System.Configuration;
 
 namespace BridgeCareCore.Services
 {
-    public class SimulationService : ISimulationService
+    public class SimulationPagingService : BasePagingService<SimulationDTO>,  ISimulationPagingService
     {
         private static IUnitOfWork _unitOfWork;
         private static ISimulationRepository _simulationRepository;
 
-        public SimulationService(IUnitOfWork unitOfWork, ISimulationRepository simulationRepository)
+        public SimulationPagingService(IUnitOfWork unitOfWork, ISimulationRepository simulationRepository)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _simulationRepository = simulationRepository ?? throw new ArgumentNullException(nameof(simulationRepository));
@@ -34,77 +37,19 @@ namespace BridgeCareCore.Services
 
         public PagingPageModel<SimulationDTO> GetUserScenarioPage(PagingRequestModel<SimulationDTO> request)
         {
-            var skip = 0;
-            var take = 0;
-            var items = new List<SimulationDTO>();
+            var rows = _simulationRepository.GetUserScenarios();
 
-            var simulations = _simulationRepository.GetUserScenarios();
-              
-            if (request.search.Trim() != "")
-                simulations = SearchSimulations(simulations, request.search);
-            if (request.sortColumn.Trim() != "")
-                simulations = OrderByColumn(simulations, request.sortColumn, request.isDescending);
-
-            if (request.RowsPerPage > 0)
-            {
-                take = request.RowsPerPage;
-                skip = request.RowsPerPage * (request.Page - 1);
-                items = simulations.Skip(skip).Take(take).ToList();
-            }
-            else
-            {
-                items = simulations.ToList();
-                return new PagingPageModel<SimulationDTO>()
-                {
-                    Items = items,
-                    TotalItems = items.Count
-                };
-            }
-
-            return new PagingPageModel<SimulationDTO>()
-            {
-                Items = items,
-                TotalItems = simulations.Count()
-            };
+            return HandlePaging(rows, request);
         }
 
         public PagingPageModel<SimulationDTO> GetSharedScenarioPage(PagingRequestModel<SimulationDTO> request, bool hasAdminAccess, bool hasSimulationAccess)
         {
-            var skip = 0;
-            var take = 0;
-            var items = new List<SimulationDTO>();
+            var rows = _simulationRepository.GetSharedScenarios(hasAdminAccess, hasSimulationAccess);
 
-            var simulations = _simulationRepository.GetSharedScenarios(hasAdminAccess, hasSimulationAccess);
-
-            if (request.search.Trim() != "")
-                simulations = SearchSimulations(simulations, request.search);
-            if (request.sortColumn.Trim() != "")
-                simulations = OrderByColumn(simulations, request.sortColumn, request.isDescending);
-
-            if (request.RowsPerPage > 0)
-            {
-                take = request.RowsPerPage;
-                skip = request.RowsPerPage * (request.Page - 1);
-                items = simulations.Skip(skip).Take(take).ToList();
-            }
-            else
-            {
-                items = simulations;
-                return new PagingPageModel<SimulationDTO>()
-                {
-                    Items = items,
-                    TotalItems = items.Count
-                };
-            }
-
-            return new PagingPageModel<SimulationDTO>()
-            {
-                Items = items,
-                TotalItems = simulations.Count()
-            };
+            return HandlePaging(rows, request, false);
         }
 
-        private List<SimulationDTO> SearchSimulations(List<SimulationDTO> simulations, string search)
+        protected override List<SimulationDTO> SearchRows(List<SimulationDTO> simulations, string search)
         {
             return simulations
                 .Where(_ =>
@@ -119,8 +64,7 @@ namespace BridgeCareCore.Services
                 _.LastModifiedDate.ToString().Contains(search.Trim())).ToList();
         }
 
-
-        private List<SimulationDTO> OrderByColumn(List<SimulationDTO> simulations, string sortColumn, bool isDescending)
+        protected override List<SimulationDTO> OrderByColumn(List<SimulationDTO> simulations, string sortColumn, bool isDescending)
         {
             sortColumn = sortColumn?.ToLower();
             switch (sortColumn)

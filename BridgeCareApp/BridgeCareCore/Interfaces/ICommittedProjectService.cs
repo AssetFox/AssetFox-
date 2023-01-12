@@ -17,9 +17,5 @@ namespace BridgeCareCore.Interfaces
         double GetTreatmentCost(Guid simulationId, string assetKeyData, string treatment, Guid networkId);
 
         List<CommittedProjectConsequenceDTO> GetValidConsequences(Guid committedProjectId, Guid simulationId, string assetKeyData, string treatment, Guid networkId);
-
-        PagingPageModel<SectionCommittedProjectDTO> GetCommittedProjectPage(List<SectionCommittedProjectDTO> committedProjects, PagingRequestModel<SectionCommittedProjectDTO> request);
-
-        List<SectionCommittedProjectDTO> GetSyncedDataset(Guid simulationId, PagingSyncModel<SectionCommittedProjectDTO> request);
     }
 }

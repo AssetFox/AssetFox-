@@ -18,11 +18,11 @@ export abstract class BasePagingRequest{
 
 //General
 export interface LibraryUpsertPagingRequest<T,Y> extends BaseLibraryUpsertPagingRequest<T>{
-    pagingSync: PaginSync<Y>; 
+    syncModel: PaginSync<Y>; 
 }
 
 export interface PagingRequest<T> extends BasePagingRequest{
-    pagingSync: PaginSync<T>;
+    syncModel: PaginSync<T>;
 }
 
 export interface PagingPage<T>{
@@ -39,7 +39,7 @@ export interface PaginSync<T>{
 
 //Investment
 export interface InvestmentLibraryUpsertPagingRequestModel extends BaseLibraryUpsertPagingRequest<BudgetLibrary>{
-    pagingSync: InvestmentPagingSyncModel;    
+    syncModel: InvestmentPagingSyncModel;    
 }
 
 export interface InvestmentPagingPage extends PagingPage<Budget>{
@@ -49,7 +49,7 @@ export interface InvestmentPagingPage extends PagingPage<Budget>{
 }
 
 export interface InvestmentPagingRequestModel extends BasePagingRequest{
-    pagingSync: InvestmentPagingSyncModel;
+    syncModel: InvestmentPagingSyncModel;
 }
 
 export interface InvestmentPagingSyncModel{

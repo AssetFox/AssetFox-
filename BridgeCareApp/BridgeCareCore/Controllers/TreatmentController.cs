@@ -30,12 +30,19 @@ namespace BridgeCareCore.Controllers
         public const string TreatmentError = "Treatment Error";
 
         private readonly ITreatmentService _treatmentService;
+        private readonly ITreatmentPagingService _treatmentPagingService;
         private readonly IClaimHelper _claimHelper;
 
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
-        public TreatmentController(ITreatmentService treatmentService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork, IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
+        public TreatmentController(ITreatmentService treatmentService, ITreatmentPagingService treatmentPagingService,
+            IEsecSecurity esecSecurity,
+            UnitOfDataPersistenceWork unitOfWork,
+            IHubService hubService,
+            IHttpContextAccessor httpContextAccessor,
+            IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _treatmentService = treatmentService;
+            _treatmentPagingService = treatmentPagingService;
             _claimHelper = claimHelper ?? throw new ArgumentNullException(nameof(claimHelper));
         }
 
@@ -267,7 +274,9 @@ namespace BridgeCareCore.Controllers
                 await Task.Factory.StartNew(() =>
                 {
                     UnitOfWork.BeginTransaction();
-                    var dto = _treatmentService.GetSyncedLibraryDataset(upsertRequest);
+                    var treatments = _treatmentPagingService.GetSyncedLibraryDataset(upsertRequest);
+                    var dto = upsertRequest.Library;
+                    dto.Treatments = treatments;
                     if (dto != null)
                     {
                         _claimHelper.CheckUserLibraryModifyAuthorization(dto.Owner, UserId);
@@ -327,7 +336,7 @@ namespace BridgeCareCore.Controllers
                 {
                     UnitOfWork.BeginTransaction();
                     _claimHelper.CheckUserSimulationModifyAuthorization(simulationId, UserId);
-                    var dtos = _treatmentService.GetSyncedScenarioDataset(simulationId, pagingSync);
+                    var dtos = _treatmentPagingService.GetSyncedScenarioDataSet(simulationId, pagingSync);
                     UnitOfWork.SelectableTreatmentRepo.UpsertOrDeleteScenarioSelectableTreatment(dtos, simulationId);
                     UnitOfWork.Commit();
                 });

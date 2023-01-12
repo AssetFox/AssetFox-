@@ -17,6 +17,7 @@ using BridgeCareCore.Interfaces;
 using BridgeCareCore.Models;
 using BridgeCareCore.Security;
 using BridgeCareCore.Security.Interfaces;
+using BridgeCareCore.Services;
 using BridgeCareCore.Utils;
 using BridgeCareCore.Utils.Interfaces;
 using BridgeCareCoreTests.Helpers;
@@ -68,6 +69,7 @@ namespace BridgeCareCoreTests.Tests
                 hubService,
                 accessor,
                 TestServices.PerformanceCurves(TestHelper.UnitOfWork, hubService),
+                new PerformanceCurvesPagingService(TestHelper.UnitOfWork),
                 _mockClaimHelper.Object);
             controller.ControllerContext = new ControllerContext()
             {
@@ -102,7 +104,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -129,7 +131,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
                 Library = library,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -173,7 +175,7 @@ namespace BridgeCareCoreTests.Tests
                 isDescending = false,
                 Page = 1,
                 RowsPerPage = 5,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),
@@ -252,6 +254,7 @@ namespace BridgeCareCoreTests.Tests
             var userRepositoryMock = UserRepositoryMocks.EveryoneExists();
             unitOfWork.Setup(u => u.UserRepo).Returns(userRepositoryMock.Object);
             var esecSecurity = EsecSecurityMocks.Admin;
+            var pagingService = new Mock<IPerformanceCurvesPagingService>();
             var service = new Mock<IPerformanceCurvesService>();
 
             var performanceCurves = new List<PerformanceCurveDTO>();
@@ -260,21 +263,23 @@ namespace BridgeCareCoreTests.Tests
             {
                 LibraryId = libraryId,
             };
-            service.Setup(s => s.GetSyncedLibraryDataset(libraryId, pagingSync)).Returns(performanceCurves);
-            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
-            var controller = PerformanceCurveControllerTestSetup.Create(
-                esecSecurity,
-                unitOfWork.Object,
-                service.Object);
             var library = new PerformanceCurveLibraryDTO
             {
                 Id = libraryId,
             };
             var pagingRequest = new LibraryUpsertPagingRequestModel<PerformanceCurveLibraryDTO, PerformanceCurveDTO>()
             {
-                PagingSync = pagingSync,
+                SyncModel = pagingSync,
                 Library = library,
             };
+            pagingService.Setup(s => s.GetSyncedLibraryDataset(pagingRequest)).Returns(performanceCurves);
+            unitOfWork.Setup(u => u.PerformanceCurveRepo).Returns(repositoryMock.Object);
+            var controller = PerformanceCurveControllerTestSetup.Create(
+                esecSecurity,
+                unitOfWork.Object,
+                service.Object,
+                pagingService.Object);
+            
 
             await controller.UpsertPerformanceCurveLibrary(pagingRequest);
 
@@ -297,7 +302,7 @@ namespace BridgeCareCoreTests.Tests
             {
                 isDescending = false,
                 Page = 1,
-                PagingSync = new PagingSyncModel<PerformanceCurveDTO>()
+                SyncModel = new PagingSyncModel<PerformanceCurveDTO>()
                 {
                     AddedRows = new List<PerformanceCurveDTO>(),
                     RowsForDeletion = new List<Guid>(),

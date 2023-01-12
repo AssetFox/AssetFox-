@@ -33,6 +33,7 @@ namespace BridgeCareCoreTests.Tests
     {
         private Mock<IUnitOfWork> _mockUOW;
         private Mock<ICommittedProjectService> _mockService;
+        private Mock<ICommittedProjectPagingService> _mockPagingService;
         private Mock<ICommittedProjectRepository> _mockCommittedProjectRepo;
         private Guid _badScenario = Guid.Parse("0c66674c-8fcb-462b-8765-69d6815e0958");
         private readonly Mock<IClaimHelper> _mockClaimHelper = new();
@@ -60,6 +61,7 @@ namespace BridgeCareCoreTests.Tests
             _mockService = new Mock<ICommittedProjectService>();
             _mockService.Setup(_ => _.ExportCommittedProjectsFile(It.IsAny<Guid>()))
                 .Returns(TestDataForCommittedProjects.GoodFile());
+            _mockPagingService = new Mock<ICommittedProjectPagingService>();
         }
         public CommittedProjectController CreateTestController(List<string> userClaims)
         {
@@ -74,6 +76,7 @@ namespace BridgeCareCoreTests.Tests
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.AdminMock.Object,
                 _mockUOW.Object,
                 hubService,
@@ -94,6 +97,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -119,6 +123,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -141,6 +146,7 @@ namespace BridgeCareCoreTests.Tests
                 .Returns(CreateLoadedContextForSimulation(TestDataForCommittedProjects.SimulationId));
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -165,6 +171,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -188,6 +195,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -208,6 +216,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -228,6 +237,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
@@ -249,6 +259,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -270,6 +281,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -292,6 +304,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -312,6 +325,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -333,6 +347,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -362,6 +377,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -388,6 +404,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -414,6 +431,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -438,6 +456,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -460,6 +479,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -479,6 +499,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,
@@ -510,6 +531,7 @@ namespace BridgeCareCoreTests.Tests
 
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Dbe,
                 _mockUOW.Object,
                 hubService,
@@ -522,7 +544,7 @@ namespace BridgeCareCoreTests.Tests
                 UpdateRows = new List<SectionCommittedProjectDTO>(),
                 RowsForDeletion = new List<Guid>()
             };
-            _mockService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
+            _mockPagingService.Setup(_ => _.GetSyncedDataset(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync)).Returns(TestDataForCommittedProjects.ValidCommittedProjects);
 
             // Act
             var result = await controller.UpsertCommittedProjects(TestDataForCommittedProjects.ValidCommittedProjects[0].SimulationId, sync);
@@ -540,6 +562,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var controller = new CommittedProjectController(
                 _mockService.Object,
+                _mockPagingService.Object,
                 EsecSecurityMocks.Admin,
                 _mockUOW.Object,
                 hubService,

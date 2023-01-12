@@ -667,7 +667,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const request: PagingRequest<SectionCommittedProject>= {
             page: page,
             rowsPerPage: rowsPerPage,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: Array.from(this.updatedRowsMap.values()).map(r => r[1]),
                 rowsForDeletion: this.deletionIds,
@@ -1232,7 +1232,7 @@ export default class CommittedProjectsEditor extends Vue  {
         const request: PagingRequest<SectionCommittedProject>= {
             page: 1,
             rowsPerPage: 5,
-            pagingSync: {
+            syncModel: {
                 libraryId: null,
                 updateRows: [],
                 rowsForDeletion: [],

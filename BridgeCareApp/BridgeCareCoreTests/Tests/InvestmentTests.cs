@@ -39,6 +39,8 @@ using Policy = BridgeCareCore.Security.SecurityConstants.Policy;
 using BridgeCareCore.Utils;
 using Microsoft.AspNetCore.Authorization;
 using AppliedResearchAssociates.iAM.UnitTestsCore.Tests;
+using BridgeCareCore.Interfaces;
+using BridgeCareCore.Services.Paging;
 
 namespace BridgeCareCoreTests.Tests
 {
@@ -71,7 +73,7 @@ namespace BridgeCareCoreTests.Tests
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
+            var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,
@@ -85,7 +87,7 @@ namespace BridgeCareCoreTests.Tests
             _mockInvestmentDefaultDataService.Setup(m => m.GetInvestmentDefaultData()).ReturnsAsync(new InvestmentDefaultData());
             accessor ??= HttpContextAccessorMocks.Default();
             var hubService = HubServiceMocks.Default();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Admin,
+            var controller = new InvestmentController(service, new InvestmentPagingService(TestHelper.UnitOfWork, new InvestmentDefaultDataService()), EsecSecurityMocks.Admin,
                 TestHelper.UnitOfWork,
                 hubService,
                 accessor,
@@ -106,7 +108,7 @@ namespace BridgeCareCoreTests.Tests
             var hubService = HubServiceMocks.Default();
             var testUser = new ClaimsPrincipal(new ClaimsIdentity(claims));
             var service = Setup();
-            var controller = new InvestmentController(service, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
+            var controller = new InvestmentController(service, new Mock<IInvestmentPagingService>().Object, EsecSecurityMocks.Admin, TestHelper.UnitOfWork, hubService, accessor, _mockInvestmentDefaultDataService.Object, _mockClaimHelper.Object);
 
             controller.ControllerContext = new ControllerContext()
             {
@@ -459,7 +461,7 @@ namespace BridgeCareCoreTests.Tests
             var request = new InvestmentLibraryUpsertPagingRequestModel();
 
             request.Library = dto;
-            request.PagingSync.UpdatedBudgets.Add(dto.Budgets[0]);
+            request.SyncModel.UpdatedBudgets.Add(dto.Budgets[0]);
 
             // Act
             await controller.UpsertBudgetLibrary(request);

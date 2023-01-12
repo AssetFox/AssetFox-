@@ -26,12 +26,12 @@ namespace BridgeCareCore.Controllers
         public const string SimulationError = "Scenario Error";
 
         private readonly ISimulationAnalysis _simulationAnalysis;
-        private readonly ISimulationService _simulationService;
+        private readonly ISimulationPagingService _simulationService;
         private readonly ISimulationQueueService _simulationQueueService;
         private readonly IClaimHelper _claimHelper;
         private Guid UserId => UnitOfWork.CurrentUser?.Id ?? Guid.Empty;
 
-        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
+        public SimulationController(ISimulationAnalysis simulationAnalysis, ISimulationPagingService simulationService, ISimulationQueueService simulationQueueService, IEsecSecurity esecSecurity, UnitOfDataPersistenceWork unitOfWork,
             IHubService hubService, IHttpContextAccessor httpContextAccessor, IClaimHelper claimHelper) : base(esecSecurity, unitOfWork, hubService, httpContextAccessor)
         {
             _simulationAnalysis = simulationAnalysis ?? throw new ArgumentNullException(nameof(simulationAnalysis));

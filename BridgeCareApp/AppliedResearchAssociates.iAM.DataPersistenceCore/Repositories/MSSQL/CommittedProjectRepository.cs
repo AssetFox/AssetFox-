@@ -204,7 +204,6 @@ namespace AppliedResearchAssociates.iAM.DataPersistenceCore.Repositories.MSSQL
             _unitOfWork.BeginTransaction();
             try
             {
-                // TODO if works then make calls for committedProjectConsequenceEntities, locations
                 // Upsert(update/insert) all
                 _unitOfWork.Context.UpsertAll(committedProjectEntities, _unitOfWork.UserEntity?.Id);                             
 
